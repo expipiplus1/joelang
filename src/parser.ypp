@@ -3,6 +3,7 @@
 // C/C++ Declarations
 //
 
+#include <memory>
 #include <string>
 #include <expression.hpp>
 
@@ -93,7 +94,7 @@
 %type <expression>  constant_expression
 %type <expression>  add_expression
 
-//%destructor { delete $$; } INTEGER
+//%destructor { delete $$; } start
 %destructor { delete $$; } expression
 %destructor { delete $$; } constant_expression
 %destructor { delete $$; } add_expression
@@ -126,6 +127,7 @@ start :
         expression
         {
             $$ = $1;
+            driver.GetParsingContext().SetExpression( $$ );
         };
 
 expression :

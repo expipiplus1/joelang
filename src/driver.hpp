@@ -29,6 +29,7 @@
 #pragma once
 
 #include <string>
+#include "parsingcontext.hpp"
 
 namespace JoeLang
 {
@@ -37,10 +38,11 @@ namespace JoeLang
     class Driver
     {
     public:
-        Driver();
+        explicit Driver( ParsingContext& parsing_context );
 
         Scanner* GetLexer() const;
-        void SetLexer( Scanner* lexer );
+
+        ParsingContext& GetParsingContext() const;
 
         std::string& GetStreamName();
 
@@ -65,6 +67,7 @@ namespace JoeLang
         void error( const std::string&    m );
 
     private:
+        ParsingContext& m_parsingContext;
         Scanner* m_lexer;
 
         bool        m_traceScanning;

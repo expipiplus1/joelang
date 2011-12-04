@@ -36,8 +36,9 @@
 
 namespace JoeLang
 {
-    Driver::Driver()
-        : m_traceScanning( false )
+    Driver::Driver( ParsingContext& parsing_context )
+        : m_parsingContext( parsing_context )
+        , m_traceScanning( false )
         , m_traceParsing( false )
     {
     }
@@ -47,9 +48,9 @@ namespace JoeLang
         return m_lexer;
     }
 
-    void Driver::SetLexer( Scanner* lexer )
+    ParsingContext& Driver::GetParsingContext() const
     {
-        m_lexer = lexer;
+        return m_parsingContext;
     }
 
     std::string& Driver::GetStreamName()

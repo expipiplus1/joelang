@@ -51,6 +51,7 @@ namespace JoeLang
     {
     public:
         explicit ConstantExpression( int value );
+        virtual ~ConstantExpression();
 
         int Evaluate () const;
 
