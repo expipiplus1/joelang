@@ -5,10 +5,10 @@ project( joelang )
 find_package( BISON REQUIRED )
 find_package( FLEX REQUIRED )
 
-BISON_TARGET( JoeLangParser src/parser.ypp
+BISON_TARGET( JoeLangParser src/parser.yy
               ${CMAKE_CURRENT_BINARY_DIR}/parser.cpp
               COMPILE_FLAGS "--defines=${CMAKE_CURRENT_BINARY_DIR}/parser.hpp" )
-FLEX_TARGET( JoeLangScanner src/scanner.lpp
+FLEX_TARGET( JoeLangScanner src/scanner.ll
              ${CMAKE_CURRENT_BINARY_DIR}/scanner.cpp )
 ADD_FLEX_BISON_DEPENDENCY( JoeLangScanner JoeLangParser )
 
