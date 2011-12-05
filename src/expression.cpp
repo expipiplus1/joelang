@@ -40,7 +40,6 @@ namespace JoeLang
 
     Expression::~Expression()
     {
-        std::cout << "hahah";
     }
 
     std::string Expression::Indent( unsigned int l )
@@ -53,12 +52,10 @@ namespace JoeLang
         : Expression()
         , m_value( value )
     {
-        std::cout << "Creating constant expression" << std::endl;
     }
 
     ConstantExpression::~ConstantExpression()
     {
-        std::cout << "Destroying constant expression" << std::endl;
     }
 
     int ConstantExpression::Evaluate() const
@@ -76,12 +73,10 @@ namespace JoeLang
         , m_lhs( lhs )
         , m_rhs( rhs )
     {
-        std::cout << "creating add expression" << std::endl;
     }
 
     AddExpression::~AddExpression()
     {
-        std::cout << "destroying add expression" << std::endl;
         delete m_lhs;
         delete m_rhs;
     }

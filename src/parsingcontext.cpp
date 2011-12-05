@@ -28,18 +28,16 @@
 
 #include "parsingcontext.hpp"
 
-#include <iostream>
+#include "expression.hpp"
 
 namespace JoeLang
 {
     ParsingContext::ParsingContext()
     {
-        std::cout << "creating parsing context" << std::endl;
     }
 
     ParsingContext::~ParsingContext()
     {
-        std::cout << "destroying parsing context" << std::endl;
         delete m_expression;
     }
 

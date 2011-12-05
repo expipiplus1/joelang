@@ -94,6 +94,10 @@
 %type <expression>  constant_expression
 %type <expression>  add_expression
 
+//
+// Do not delete start, because we pass it to the parsingcontext where it is
+// dealt with
+//
 //%destructor { delete $$; } start
 %destructor { delete $$; } expression
 %destructor { delete $$; } constant_expression
