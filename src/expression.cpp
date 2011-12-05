@@ -68,6 +68,57 @@ namespace JoeLang
         out << Indent( depth ) << m_value << std::endl;
     }
 
+    UnaryExpression::UnaryExpression( Expression* expression, UnaryOperator unary_operator )
+        : Expression()
+        , m_expression( expression )
+        , m_unaryOperator( unary_operator )
+    {
+    }
+
+    UnaryExpression::~UnaryExpression()
+    {
+        delete m_expression;
+    }
+
+    int UnaryExpression::Evaluate() const
+    {
+        switch( m_unaryOperator )
+        {
+            case UnaryOperator::Plus:
+                return m_expression->Evaluate();
+            case UnaryOperator::Minus:
+                return -m_expression->Evaluate();
+            case UnaryOperator::LogicalNegation:
+                return !m_expression->Evaluate();
+            case UnaryOperator::BitwiseNegation:
+                return ~m_expression->Evaluate();
+            default:
+                std::cerr << "ERROR: Unhandled binary operator." << std::endl;
+                return 0;
+        }
+    }
+
+    void    UnaryExpression::Print(std::ostream &out, unsigned int depth) const
+    {
+        switch( m_unaryOperator )
+        {
+            case UnaryOperator::Plus:
+                out << Indent( depth ) << "+ plus\n";
+                break;
+            case UnaryOperator::Minus:
+                out << Indent( depth ) << "- minus\n";
+                break;
+            case UnaryOperator::LogicalNegation:
+                out << Indent( depth ) << "! logical negation\n";
+                break;
+            case UnaryOperator::BitwiseNegation:
+                out << Indent( depth ) << "/ bitwise negation\n";
+                break;
+        }
+
+        m_expression->Print( out, depth + 1 );
+    }
+
     BinaryExpression::BinaryExpression( Expression* lhs, Expression* rhs, BinaryOperator binary_operator )
         : Expression()
         , m_lhs( lhs )

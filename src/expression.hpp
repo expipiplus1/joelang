@@ -42,6 +42,14 @@ namespace JoeLang
         MODULO
     };
 
+    enum class UnaryOperator
+    {
+        Plus,
+        Minus,
+        LogicalNegation,
+        BitwiseNegation
+    };
+
     class Expression
     {
     public:
@@ -80,12 +88,28 @@ namespace JoeLang
 
         int Evaluate () const;
 
-        virtual void Print(std::ostream &out, unsigned int depth) const;
+        virtual void Print(std::ostream& out, unsigned int depth) const;
 
     private:
         Expression* m_lhs;
         Expression* m_rhs;
         BinaryOperator m_binaryOperator;
+    };
+
+    class UnaryExpression : public Expression
+    {
+    public:
+        explicit UnaryExpression( Expression* expression,
+                                  UnaryOperator unary_operator );
+        virtual ~UnaryExpression();
+
+        int Evaluate () const;
+
+        virtual void Print( std::ostream& out, unsigned int depth ) const;
+
+    private:
+        Expression* m_expression;
+        UnaryOperator m_unaryOperator;
     };
 
 } // namespace JoeLang

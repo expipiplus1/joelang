@@ -76,6 +76,7 @@
     class Expression*   expression;
     std::string*        literal;
     int                 integer_literal;
+    UnaryOperator       unary_operator;
 }
 
 //
@@ -92,8 +93,10 @@
 %type <expression>  start
 %type <expression>  expression
 %type <expression>  constant_expression
+%type <expression>  unary_expression
 %type <expression>  additive_expression
 %type <expression>  multiplicative_expression
+%type <unary_operator>  unary_operator
 
 //
 // Do not delete start, because we pass it to the parsingcontext where it is
@@ -102,6 +105,7 @@
 //%destructor { delete $$; } start
 %destructor { delete $$; } expression
 %destructor { delete $$; } constant_expression
+%destructor { delete $$; } unary_expression
 %destructor { delete $$; } additive_expression
 %destructor { delete $$; } multiplicative_expression
 
@@ -148,20 +152,49 @@ constant_expression :
             $$ = new ConstantExpression( $1 );
         }
 
-multiplicative_expression :
+unary_operator :
+        '+'
+        {
+            $$ = UnaryOperator::Plus;
+        }
+    |
+        '-'
+        {
+            $$ = UnaryOperator::Minus;
+        }
+    |
+        '!'
+        {
+            $$ = UnaryOperator::LogicalNegation;
+        }
+    |
+        '~'
+        {
+            $$ = UnaryOperator::BitwiseNegation
+        };
+
+unary_expression :
         constant_expression
     |
-        multiplicative_expression '*' constant_expression
+        unary_operator unary_expression
+        {
+            $$ = new UnaryExpression( $2, $1 );
+        };
+
+multiplicative_expression :
+        unary_expression
+    |
+        multiplicative_expression '*' unary_expression
         {
             $$ = new BinaryExpression( $1, $3, BinaryOperator::MULTIPLICATION );
         }
     |
-        multiplicative_expression '/' constant_expression
+        multiplicative_expression '/' unary_expression
         {
             $$ = new BinaryExpression( $1, $3, BinaryOperator::DIVISION );
         }
     |
-        multiplicative_expression '%' constant_expression
+        multiplicative_expression '%' unary_expression
         {
             $$ = new BinaryExpression( $1, $3, BinaryOperator::MODULO );
         };
