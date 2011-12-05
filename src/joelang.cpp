@@ -13,4 +13,5 @@ int main( int argc, char** argv )
         return 1;
 
     parsing_context.GetExpression()->Print( std::cout );
+    std::cout << parsing_context.GetExpression()->Evaluate() << std::endl;
 }
