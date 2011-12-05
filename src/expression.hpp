@@ -33,6 +33,15 @@
 
 namespace JoeLang
 {
+    enum class BinaryOperator
+    {
+        ADDITION,
+        SUBTRACTION,
+        MULTIPLICATION,
+        DIVISION,
+        MODULO
+    };
+
     class Expression
     {
     public:
@@ -61,11 +70,13 @@ namespace JoeLang
         int m_value;
     };
 
-    class AddExpression : public Expression
+    class BinaryExpression : public Expression
     {
     public:
-        explicit AddExpression( Expression* lhs, Expression* rhs );
-        virtual ~AddExpression();
+        explicit BinaryExpression( Expression* lhs,
+                                   Expression* rhs,
+                                   BinaryOperator binary_operator );
+        virtual ~BinaryExpression();
 
         int Evaluate () const;
 
@@ -74,6 +85,7 @@ namespace JoeLang
     private:
         Expression* m_lhs;
         Expression* m_rhs;
+        BinaryOperator m_binaryOperator;
     };
 
 } // namespace JoeLang

@@ -92,7 +92,8 @@
 %type <expression>  start
 %type <expression>  expression
 %type <expression>  constant_expression
-%type <expression>  add_expression
+%type <expression>  additive_expression
+%type <expression>  multiplicative_expression
 
 //
 // Do not delete start, because we pass it to the parsingcontext where it is
@@ -101,7 +102,8 @@
 //%destructor { delete $$; } start
 %destructor { delete $$; } expression
 %destructor { delete $$; } constant_expression
-%destructor { delete $$; } add_expression
+%destructor { delete $$; } additive_expression
+%destructor { delete $$; } multiplicative_expression
 
 //
 //
@@ -135,7 +137,7 @@ start :
         };
 
 expression :
-        add_expression
+        additive_expression
         {
             $$ = $1;
         };
@@ -146,16 +148,37 @@ constant_expression :
             $$ = new ConstantExpression( $1 );
         }
 
-add_expression :
+multiplicative_expression :
         constant_expression
+    |
+        multiplicative_expression '*' constant_expression
         {
-            $$ = $1;
+            $$ = new BinaryExpression( $1, $3, BinaryOperator::MULTIPLICATION );
         }
     |
-        add_expression '+' constant_expression
+        multiplicative_expression '/' constant_expression
         {
-            $$ = new AddExpression( $1, $3 );
+            $$ = new BinaryExpression( $1, $3, BinaryOperator::DIVISION );
+        }
+    |
+        multiplicative_expression '%' constant_expression
+        {
+            $$ = new BinaryExpression( $1, $3, BinaryOperator::MODULO );
         };
+
+additive_expression :
+        multiplicative_expression
+    |
+        additive_expression '+' multiplicative_expression
+        {
+            $$ = new BinaryExpression( $1, $3, BinaryOperator::ADDITION );
+        }
+    |
+        additive_expression '-' multiplicative_expression
+        {
+            $$ = new BinaryExpression( $1, $3, BinaryOperator::SUBTRACTION );
+        };
+
 %%
 //
 // Additional code

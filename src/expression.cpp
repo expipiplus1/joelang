@@ -68,27 +68,61 @@ namespace JoeLang
         out << Indent( depth ) << m_value << std::endl;
     }
 
-    AddExpression::AddExpression( Expression* lhs, Expression* rhs )
+    BinaryExpression::BinaryExpression( Expression* lhs, Expression* rhs, BinaryOperator binary_operator )
         : Expression()
         , m_lhs( lhs )
         , m_rhs( rhs )
+        , m_binaryOperator( binary_operator )
     {
     }
 
-    AddExpression::~AddExpression()
+    BinaryExpression::~BinaryExpression()
     {
         delete m_lhs;
         delete m_rhs;
     }
 
-    int AddExpression::Evaluate() const
+    int BinaryExpression::Evaluate() const
     {
-        return m_lhs->Evaluate() + m_rhs->Evaluate();
+        switch( m_binaryOperator )
+        {
+            case BinaryOperator::ADDITION:
+                return m_lhs->Evaluate() + m_rhs->Evaluate();
+            case BinaryOperator::SUBTRACTION:
+                return m_lhs->Evaluate() - m_rhs->Evaluate();
+            case BinaryOperator::MULTIPLICATION:
+                return m_lhs->Evaluate() * m_rhs->Evaluate();
+            case BinaryOperator::DIVISION:
+                return m_lhs->Evaluate() / m_rhs->Evaluate();
+            case BinaryOperator::MODULO:
+                return m_lhs->Evaluate() % m_rhs->Evaluate();
+            default:
+                std::cerr << "ERROR: Unhandled binary operator." << std::endl;
+                return 0;
+        }
     }
 
-    void    AddExpression::Print(std::ostream &out, unsigned int depth) const
+    void    BinaryExpression::Print(std::ostream &out, unsigned int depth) const
     {
-        out << Indent( depth ) << "+ add\n";
+        switch( m_binaryOperator )
+        {
+            case BinaryOperator::ADDITION:
+                out << Indent( depth ) << "+ add\n";
+                break;
+            case BinaryOperator::SUBTRACTION:
+                out << Indent( depth ) << "- subtract\n";
+                break;
+            case BinaryOperator::MULTIPLICATION:
+                out << Indent( depth ) << "* multiply\n";
+                break;
+            case BinaryOperator::DIVISION:
+                out << Indent( depth ) << "/ divide\n";
+                break;
+            case BinaryOperator::MODULO:
+                out << Indent( depth ) << "% modulo\n";
+                break;
+        }
+
         m_lhs->Print( out, depth + 1 );
         m_rhs->Print( out, depth + 1 );
     }
