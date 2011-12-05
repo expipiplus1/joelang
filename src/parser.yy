@@ -73,9 +73,9 @@
 // All the types of node
 //
 %union {
-    class Expression*     expression;
-    std::string*    literal;
-    int             integer_literal;
+    class Expression*   expression;
+    std::string*        literal;
+    int                 integer_literal;
 }
 
 //
