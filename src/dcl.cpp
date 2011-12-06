@@ -26,29 +26,52 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "dcl.hpp"
+
+#include <iostream>
+#include <ostream>
+#include <string>
+#include <utility>
 
 namespace JoeLang
 {
     namespace Dcl
     {
-        class DeclarationSeq;
+        DeclarationSeq::DeclarationSeq()
+        {
+        }
+
+        DeclarationSeq::DeclarationSeq( DeclarationSeq&& other )
+        {
+            m_declarations = std::move( other.m_declarations );
+        }
+
+        DeclarationSeq& DeclarationSeq::operator = ( DeclarationSeq&& other )
+        {
+            if( this != &other )
+            {
+                for( auto p : m_declarations )
+                    delete p;
+                m_declarations = std::move( other.m_declarations );
+            }
+            return *this;
+        }
+
+        DeclarationSeq::~DeclarationSeq()
+        {
+            for( auto p : m_declarations )
+                delete p;
+        }
+
+        const std::vector<Declaration*>& DeclarationSeq::GetDeclarations() const
+        {
+            return m_declarations;
+        }
+
+        void DeclarationSeq::AppendDeclaration( Declaration* declaration )
+        {
+            m_declarations.push_back( declaration );
+        }
     }
 
-    class ParsingContext
-    {
-    public:
-        ParsingContext();
-        ~ParsingContext();
-        ParsingContext( const ParsingContext& other ) = delete;
-        ParsingContext& operator = ( const ParsingContext& other ) = delete;
-
-        void SetDeclarationSeq( Dcl::DeclarationSeq* expression );
-        Dcl::DeclarationSeq* GetDeclarationSeq() const;
-
-    private:
-        Dcl::DeclarationSeq* m_declarationSeq;
-    };
-
 } // namespace JoeLang
-

@@ -31,10 +31,10 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall")
 add_executable( joelang src/joelang.cpp
                         ${BISON_JoeLangParser_OUTPUTS}
                         ${FLEX_JoeLangScanner_OUTPUTS}
+                        src/dcl.cpp
+                        src/dcl.hpp
                         src/driver.cpp
                         src/driver.hpp
-                        src/expression.cpp
-                        src/expression.hpp
                         src/parsingcontext.cpp
                         src/parsingcontext.hpp
                         src/scanner.hpp )

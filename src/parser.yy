@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <string>
-#include <expression.hpp>
+#include <dcl.hpp>
 
 %}
 
@@ -72,11 +72,11 @@
 //
 // All the types of node
 //
-%union {
-    class Expression*   expression;
-    std::string*        literal;
-    int                 integer_literal;
-    UnaryOperator       unary_operator;
+%union
+{
+    class Dcl::DeclarationSeq*  declaration_seq;
+    class Dcl::Declaration*     declaration;
+    int                         integer_literal;
 }
 
 //
@@ -90,24 +90,17 @@
 // Define the compound types
 //
 
-%type <expression>  start
-%type <expression>  expression
-%type <expression>  constant_expression
-%type <expression>  unary_expression
-%type <expression>  additive_expression
-%type <expression>  multiplicative_expression
-%type <unary_operator>  unary_operator
+%type <declaration_seq> translation_unit
+%type <declaration_seq> declaration_seq
+%type <declaration>     declaration
 
 //
-// Do not delete start, because we pass it to the parsingcontext where it is
-// dealt with
+// Do not delete the translation unit, because we pass it to the parsingcontext
+// where it is dealt with
 //
-//%destructor { delete $$; } start
-%destructor { delete $$; } expression
-%destructor { delete $$; } constant_expression
-%destructor { delete $$; } unary_expression
-%destructor { delete $$; } additive_expression
-%destructor { delete $$; } multiplicative_expression
+//%destructor { delete $$; } translation_unit
+%destructor { delete $$; } declaration_seq
+%destructor { delete $$; } declaration
 
 //
 //
@@ -126,13 +119,45 @@
 
 %}
 
-%start start
+%start translation_unit
 
 //
 // Grammar rules
 //
 %%
 
+translation_unit :
+        // Empty
+        {
+            $$ = nullptr;
+            driver.GetParsingContext().SetDeclarationSeq( $$ );
+        }
+    |
+        declaration_seq
+        {
+            $$ = $1;
+            driver.GetParsingContext().SetDeclarationSeq( $$ );
+        };
+
+declaration_seq :
+        declaration
+        {
+            $$ = new Dcl::DeclarationSeq();
+            $$->AppendDeclaration( $1 );
+        }
+    |
+        declaration_seq declaration
+        {
+            $1->AppendDeclaration( $2 );
+        };
+
+declaration :
+        '+'
+        {
+            $$ = new Dcl::Declaration;
+        };
+
+/*
 start :
         expression
         {
@@ -211,6 +236,7 @@ additive_expression :
         {
             $$ = new BinaryExpression( $1, $3, BinaryOperator::SUBTRACTION );
         };
+        */
 
 %%
 //

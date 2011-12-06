@@ -28,27 +28,32 @@
 
 #pragma once
 
+#include <vector>
+
 namespace JoeLang
 {
     namespace Dcl
     {
-        class DeclarationSeq;
+        class Declaration
+        {
+        };
+
+        class DeclarationSeq
+        {
+        public:
+            DeclarationSeq();
+            DeclarationSeq( const DeclarationSeq& other ) = delete;
+            DeclarationSeq( DeclarationSeq&& other );
+            DeclarationSeq& operator = ( const DeclarationSeq& other ) = delete;
+            DeclarationSeq& operator = ( DeclarationSeq&& other );
+
+            ~DeclarationSeq();
+
+            const std::vector<Declaration*>& GetDeclarations() const;
+            void AppendDeclaration( Declaration* declaration );
+
+        private:
+            std::vector<Declaration*> m_declarations;
+        };
     }
-
-    class ParsingContext
-    {
-    public:
-        ParsingContext();
-        ~ParsingContext();
-        ParsingContext( const ParsingContext& other ) = delete;
-        ParsingContext& operator = ( const ParsingContext& other ) = delete;
-
-        void SetDeclarationSeq( Dcl::DeclarationSeq* expression );
-        Dcl::DeclarationSeq* GetDeclarationSeq() const;
-
-    private:
-        Dcl::DeclarationSeq* m_declarationSeq;
-    };
-
 } // namespace JoeLang
-
