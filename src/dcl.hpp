@@ -32,9 +32,15 @@
 
 namespace JoeLang
 {
+    class Declaration;
+    class DeclarationSeq;
     namespace Dcl
     {
         class Declaration
+        {
+        };
+
+        class TechniqueDeclaration : public Declaration
         {
         };
 

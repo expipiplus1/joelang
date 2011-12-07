@@ -32,7 +32,6 @@
 // Flex expects the signature of yylex to be defined in the macro YY_DECL, and
 // the C++ parser expects it to be declared. We can factor both as follows.
 //
-
 #ifndef YY_DECL
 
 #define	YY_DECL                                 \
@@ -48,6 +47,8 @@
 #include <FlexLexer.h>
 #undef yyFlexLexer
 #endif
+
+#include "dcl.hpp"
 
 #include "parser.hpp"
 

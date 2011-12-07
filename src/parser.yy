@@ -74,17 +74,23 @@
 //
 %union
 {
-    class Dcl::DeclarationSeq*  declaration_seq;
-    class Dcl::Declaration*     declaration;
-    int                         integer_literal;
+    JoeLang::Dcl::DeclarationSeq*  declaration_seq;
+    JoeLang::Dcl::Declaration*     declaration;
+    int              integer_literal;
 }
 
 //
 // Define the tokens as used in scanner.lpp
 //
 
-%token      	            END	     0	"end of file"
-%token <integer_literal>    INTEGER     "integer"
+%token                      END	     0	"end of file"
+
+// keywords
+%token                      TECHNIQUE  "technique"
+
+// punctuation
+%token                      OPEN_BRACE  "{"
+%token                      CLOSE_BRACE "}"
 
 //
 // Define the compound types
@@ -93,6 +99,7 @@
 %type <declaration_seq> translation_unit
 %type <declaration_seq> declaration_seq
 %type <declaration>     declaration
+%type <declaration>     technique_declaration
 
 //
 // Do not delete the translation unit, because we pass it to the parsingcontext
@@ -148,95 +155,19 @@ declaration_seq :
     |
         declaration_seq declaration
         {
+            $$ = $1;
             $1->AppendDeclaration( $2 );
         };
 
 declaration :
-        '+'
+        technique_declaration;
+
+technique_declaration :
+        TECHNIQUE OPEN_BRACE CLOSE_BRACE
         {
-            $$ = new Dcl::Declaration;
+            $$ = new Dcl::TechniqueDeclaration();
         };
 
-/*
-start :
-        expression
-        {
-            $$ = $1;
-            driver.GetParsingContext().SetExpression( $$ );
-        };
-
-expression :
-        additive_expression
-        {
-            $$ = $1;
-        };
-
-constant_expression :
-        INTEGER
-        {
-            $$ = new ConstantExpression( $1 );
-        }
-
-unary_operator :
-        '+'
-        {
-            $$ = UnaryOperator::Plus;
-        }
-    |
-        '-'
-        {
-            $$ = UnaryOperator::Minus;
-        }
-    |
-        '!'
-        {
-            $$ = UnaryOperator::LogicalNegation;
-        }
-    |
-        '~'
-        {
-            $$ = UnaryOperator::BitwiseNegation
-        };
-
-unary_expression :
-        constant_expression
-    |
-        unary_operator unary_expression
-        {
-            $$ = new UnaryExpression( $2, $1 );
-        };
-
-multiplicative_expression :
-        unary_expression
-    |
-        multiplicative_expression '*' unary_expression
-        {
-            $$ = new BinaryExpression( $1, $3, BinaryOperator::MULTIPLICATION );
-        }
-    |
-        multiplicative_expression '/' unary_expression
-        {
-            $$ = new BinaryExpression( $1, $3, BinaryOperator::DIVISION );
-        }
-    |
-        multiplicative_expression '%' unary_expression
-        {
-            $$ = new BinaryExpression( $1, $3, BinaryOperator::MODULO );
-        };
-
-additive_expression :
-        multiplicative_expression
-    |
-        additive_expression '+' multiplicative_expression
-        {
-            $$ = new BinaryExpression( $1, $3, BinaryOperator::ADDITION );
-        }
-    |
-        additive_expression '-' multiplicative_expression
-        {
-            $$ = new BinaryExpression( $1, $3, BinaryOperator::SUBTRACTION );
-        };
-        */
 
 %%
 //

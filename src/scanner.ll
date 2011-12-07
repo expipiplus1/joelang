@@ -34,7 +34,7 @@ typedef JoeLang::Parser::token_type token_type;
 %option c++
 
 /*
-// change the name of the scanner class. results in "ExampleFlexLexer"
+// change the name of the scanner class. results in "JoeLangFlexLexer"
 */
 %option prefix="JoeLang"
 
@@ -80,9 +80,22 @@ typedef JoeLang::Parser::token_type token_type;
     yylloc->step();
 %}
 
-[0-9]+ {
-    yylval->integer_literal = atoi(yytext);
-    return token::INTEGER;
+ /*
+ // keywords
+ */
+"technique" {
+    return token::TECHNIQUE;
+}
+
+ /*
+ // punctuation
+ */
+"{" {
+    return token::OPEN_BRACE;
+}
+
+"}" {
+    return token::CLOSE_BRACE;
 }
 
  /*
@@ -93,10 +106,11 @@ typedef JoeLang::Parser::token_type token_type;
 }
 
  /*
- // pass all other characters up to bison
+ // fail on all other characters
  */
 . {
-    return static_cast<token_type>(*yytext);
+    std::cerr << "ERROR: Unknown token \"" << yytext << "\"" << std::endl;
+    yyterminate();
 }
 
  /*
