@@ -5,7 +5,7 @@
 
 #include <memory>
 #include <string>
-#include <dcl.hpp>
+#include <declarations.hpp>
 
 %}
 
@@ -74,8 +74,8 @@
 //
 %union
 {
-    JoeLang::Dcl::DeclarationSeq*  declaration_seq;
-    JoeLang::Dcl::Declaration*     declaration;
+    JoeLang::Declarations::DeclarationSeq*  declaration_seq;
+    JoeLang::Declarations::Declaration*     declaration;
     int              integer_literal;
 }
 
@@ -149,7 +149,7 @@ translation_unit :
 declaration_seq :
         declaration
         {
-            $$ = new Dcl::DeclarationSeq();
+            $$ = new Declarations::DeclarationSeq();
             $$->AppendDeclaration( $1 );
         }
     |
@@ -165,7 +165,7 @@ declaration :
 technique_declaration :
         TECHNIQUE OPEN_BRACE CLOSE_BRACE
         {
-            $$ = new Dcl::TechniqueDeclaration();
+            $$ = new Declarations::TechniqueDeclaration();
         };
 
 

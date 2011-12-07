@@ -30,7 +30,7 @@
 
 namespace JoeLang
 {
-    namespace Dcl
+    namespace Declarations
     {
         class DeclarationSeq;
     }
@@ -43,11 +43,11 @@ namespace JoeLang
         ParsingContext( const ParsingContext& other ) = delete;
         ParsingContext& operator = ( const ParsingContext& other ) = delete;
 
-        void SetDeclarationSeq( Dcl::DeclarationSeq* expression );
-        Dcl::DeclarationSeq* GetDeclarationSeq() const;
+        void SetDeclarationSeq( Declarations::DeclarationSeq* expression );
+        Declarations::DeclarationSeq* GetDeclarationSeq() const;
 
     private:
-        Dcl::DeclarationSeq* m_declarationSeq;
+        Declarations::DeclarationSeq* m_declarationSeq;
     };
 
 } // namespace JoeLang

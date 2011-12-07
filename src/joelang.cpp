@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "dcl.hpp"
+#include "declarations.hpp"
 #include "driver.hpp"
 #include "parsingcontext.hpp"
 

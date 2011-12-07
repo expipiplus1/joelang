@@ -34,7 +34,7 @@ namespace JoeLang
 {
     class Declaration;
     class DeclarationSeq;
-    namespace Dcl
+    namespace Declarations
     {
         class Declaration
         {

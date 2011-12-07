@@ -26,7 +26,7 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "dcl.hpp"
+#include "declarations.hpp"
 
 #include <iostream>
 #include <ostream>
@@ -35,7 +35,7 @@
 
 namespace JoeLang
 {
-    namespace Dcl
+    namespace Declarations
     {
         DeclarationSeq::DeclarationSeq()
         {

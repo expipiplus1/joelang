@@ -28,7 +28,7 @@
 
 #include "parsingcontext.hpp"
 
-#include "dcl.hpp"
+#include "declarations.hpp"
 
 namespace JoeLang
 {
@@ -41,12 +41,12 @@ namespace JoeLang
         delete m_declarationSeq;
     }
 
-    void ParsingContext::SetDeclarationSeq( Dcl::DeclarationSeq* declaration_seq )
+    void ParsingContext::SetDeclarationSeq( Declarations::DeclarationSeq* declaration_seq )
     {
         m_declarationSeq = declaration_seq;
     }
 
-    Dcl::DeclarationSeq* ParsingContext::GetDeclarationSeq() const
+    Declarations::DeclarationSeq* ParsingContext::GetDeclarationSeq() const
     {
         return m_declarationSeq;
     }

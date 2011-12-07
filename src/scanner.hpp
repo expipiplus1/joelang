@@ -48,7 +48,7 @@
 #undef yyFlexLexer
 #endif
 
-#include "dcl.hpp"
+#include "declarations.hpp"
 
 #include "parser.hpp"
 
