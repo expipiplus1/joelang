@@ -99,6 +99,14 @@ typedef JoeLang::Parser::token_type token_type;
 }
 
  /*
+ // operators
+ */
+"=" {
+    return token::EQUALS;
+}
+
+
+ /*
  // ignore white-space
  */
 [ \n\t\r]+ {

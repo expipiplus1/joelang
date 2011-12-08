@@ -49,6 +49,7 @@
 #endif
 
 #include "declarations.hpp"
+#include "expressions.hpp"
 
 #include "parser.hpp"
 

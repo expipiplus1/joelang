@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <declarations.hpp>
+#include <expressions.hpp>
 
 %}
 
@@ -76,6 +77,8 @@
 {
     JoeLang::Declarations::DeclarationSeq*  declaration_seq;
     JoeLang::Declarations::Declaration*     declaration;
+    JoeLang::Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq;
+    JoeLang::Expressions::StateAssignmentExpression*  state_assignment_expression;
     int              integer_literal;
 }
 
@@ -83,14 +86,17 @@
 // Define the tokens as used in scanner.lpp
 //
 
-%token                      END	     0	"end of file"
+%token  END	     0	"end of file"
 
 // keywords
-%token                      TECHNIQUE  "technique"
+%token  TECHNIQUE  "technique"
 
 // punctuation
-%token                      OPEN_BRACE  "{"
-%token                      CLOSE_BRACE "}"
+%token  OPEN_BRACE  "{"
+%token  CLOSE_BRACE "}"
+
+// operators
+%token  EQUALS      "="
 
 //
 // Define the compound types
@@ -100,6 +106,8 @@
 %type <declaration_seq> declaration_seq
 %type <declaration>     declaration
 %type <declaration>     technique_declaration
+%type <state_assignment_expression_seq> state_assignment_expression_seq
+%type <state_assignment_expression> state_assignment_expression
 
 //
 // Do not delete the translation unit, because we pass it to the parsingcontext
@@ -108,6 +116,8 @@
 //%destructor { delete $$; } translation_unit
 %destructor { delete $$; } declaration_seq
 %destructor { delete $$; } declaration
+%destructor { delete $$; } state_assignment_expression_seq
+%destructor { delete $$; } state_assignment_expression
 
 //
 //
@@ -165,9 +175,32 @@ declaration :
 technique_declaration :
         TECHNIQUE OPEN_BRACE CLOSE_BRACE
         {
-            $$ = new Declarations::TechniqueDeclaration();
+            $$ = new Declarations::TechniqueDeclaration( nullptr );
+        }
+    |
+        TECHNIQUE OPEN_BRACE state_assignment_expression_seq CLOSE_BRACE
+        {
+            $$ = new Declarations::TechniqueDeclaration( $3 );
         };
 
+state_assignment_expression_seq :
+        state_assignment_expression
+        {
+            $$ = new Expressions::StateAssignmentExpressionSeq();
+            $$->AppendStateAssignmentExpression( $1 );
+        }
+    |
+        state_assignment_expression_seq state_assignment_expression
+        {
+            $$ = $1;
+            $1->AppendStateAssignmentExpression( $2 );
+        };
+
+state_assignment_expression :
+        EQUALS
+        {
+            $$ = new Expressions::StateAssignmentExpression( "hah", nullptr );
+        };
 
 %%
 //

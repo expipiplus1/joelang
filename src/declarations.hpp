@@ -29,11 +29,15 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 
 namespace JoeLang
 {
-    class Declaration;
-    class DeclarationSeq;
+    namespace Expressions
+    {
+        class StateAssignmentExpressionSeq;
+    } // namespace Expressions
+
     namespace Declarations
     {
         class Declaration
@@ -42,15 +46,27 @@ namespace JoeLang
 
         class TechniqueDeclaration : public Declaration
         {
+        public:
+            explicit TechniqueDeclaration( Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq );
+            TechniqueDeclaration() = delete;
+            TechniqueDeclaration( const TechniqueDeclaration& other ) = delete;
+            TechniqueDeclaration& operator = ( const TechniqueDeclaration& other ) = delete;
+            TechniqueDeclaration( TechniqueDeclaration&& other );
+            TechniqueDeclaration& operator = ( TechniqueDeclaration&& other );
+
+            ~TechniqueDeclaration();
+
+        private:
+            Expressions::StateAssignmentExpressionSeq* m_stateAssignmentExpressionSeq;
         };
 
         class DeclarationSeq
         {
         public:
-            DeclarationSeq();
+            DeclarationSeq() = default;
             DeclarationSeq( const DeclarationSeq& other ) = delete;
-            DeclarationSeq( DeclarationSeq&& other );
             DeclarationSeq& operator = ( const DeclarationSeq& other ) = delete;
+            DeclarationSeq( DeclarationSeq&& other );
             DeclarationSeq& operator = ( DeclarationSeq&& other );
 
             ~DeclarationSeq();
