@@ -35,6 +35,8 @@ add_executable( joelang src/joelang.cpp
                         src/declarations.hpp
                         src/driver.cpp
                         src/driver.hpp
+                        src/expressions.cpp
+                        src/expressions.hpp
                         src/parsingcontext.cpp
                         src/parsingcontext.hpp
                         src/scanner.hpp )
