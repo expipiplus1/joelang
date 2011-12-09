@@ -105,6 +105,14 @@ typedef JoeLang::Parser::token_type token_type;
     return token::EQUALS;
 }
 
+ /*
+ // misc
+ */
+[a-zA-Z_][a-zA-Z0-9_]* {
+        yylval->identifier_string = new std::string( yytext, yyleng );
+        return token::IDENTIFIER;
+}
+
 
  /*
  // ignore white-space
@@ -135,7 +143,7 @@ namespace JoeLang
     {
     }
 
-    Scanner::~Scanner()
+    Scanner::~Scanner() noexcept
     {
     }
 

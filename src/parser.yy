@@ -79,6 +79,7 @@
     JoeLang::Declarations::Declaration*     declaration;
     JoeLang::Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq;
     JoeLang::Expressions::StateAssignmentExpression*  state_assignment_expression;
+    std::string*     identifier_string;
     int              integer_literal;
 }
 
@@ -87,6 +88,8 @@
 //
 
 %token  END	     0	"end of file"
+
+%token<identifier_string> IDENTIFIER "identifier"
 
 // keywords
 %token  TECHNIQUE  "technique"
@@ -116,8 +119,10 @@
 //%destructor { delete $$; } translation_unit
 %destructor { delete $$; } declaration_seq
 %destructor { delete $$; } declaration
+%destructor { delete $$; } technique_declaration
 %destructor { delete $$; } state_assignment_expression_seq
 %destructor { delete $$; } state_assignment_expression
+%destructor { delete $$; } IDENTIFIER
 
 //
 //
@@ -197,9 +202,14 @@ state_assignment_expression_seq :
         };
 
 state_assignment_expression :
-        EQUALS
+        IDENTIFIER EQUALS
         {
-            $$ = new Expressions::StateAssignmentExpression( "hah", nullptr );
+            //
+            // TODO the identifier here should probably give an index into a
+            // table of states
+            //
+            $$ = new Expressions::StateAssignmentExpression( *$1, nullptr );
+            delete $1;
         };
 
 %%
