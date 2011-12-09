@@ -42,6 +42,9 @@ namespace JoeLang
     {
         class Declaration
         {
+        public:
+            Declaration() = default;
+            virtual ~Declaration() = default;
         };
 
         class TechniqueDeclaration : public Declaration
@@ -54,7 +57,7 @@ namespace JoeLang
             TechniqueDeclaration( TechniqueDeclaration&& other );
             TechniqueDeclaration& operator = ( TechniqueDeclaration&& other );
 
-            ~TechniqueDeclaration();
+            virtual ~TechniqueDeclaration() noexcept;
 
         private:
             Expressions::StateAssignmentExpressionSeq* m_stateAssignmentExpressionSeq;
@@ -69,7 +72,7 @@ namespace JoeLang
             DeclarationSeq( DeclarationSeq&& other );
             DeclarationSeq& operator = ( DeclarationSeq&& other );
 
-            ~DeclarationSeq();
+            ~DeclarationSeq() noexcept;
 
             const std::vector<Declaration*>& GetDeclarations() const;
             void AppendDeclaration( Declaration* declaration );

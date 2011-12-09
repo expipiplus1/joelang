@@ -57,7 +57,7 @@ namespace JoeLang
             return *this;
         }
 
-        TechniqueDeclaration::~TechniqueDeclaration()
+        TechniqueDeclaration::~TechniqueDeclaration() noexcept
         {
             delete m_stateAssignmentExpressionSeq;
         }
@@ -76,7 +76,7 @@ namespace JoeLang
             return *this;
         }
 
-        DeclarationSeq::~DeclarationSeq()
+        DeclarationSeq::~DeclarationSeq() noexcept
         {
             for( auto p : m_declarations )
                 delete p;

@@ -39,7 +39,7 @@ namespace JoeLang
     {
     public:
         ParsingContext();
-        ~ParsingContext();
+        ~ParsingContext() noexcept;
         ParsingContext( const ParsingContext& other ) = delete;
         ParsingContext& operator = ( const ParsingContext& other ) = delete;
 

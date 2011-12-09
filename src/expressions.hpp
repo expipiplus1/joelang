@@ -39,27 +39,27 @@ namespace JoeLang
         {
         public:
             Expression() = default;
-            virtual ~Expression();
+            virtual ~Expression() = default;
         };
 
         class AssignmentExpression : public Expression
         {
         public:
             AssignmentExpression() = default;
-            virtual ~AssignmentExpression();
+            virtual ~AssignmentExpression() noexcept = default;
         };
 
         class StateAssignmentExpression : public AssignmentExpression
         {
         public:
-            StateAssignmentExpression( std::string state_name,
+            StateAssignmentExpression( std::string& state_name,
                                        Expression* assigned_expression );
             StateAssignmentExpression( const StateAssignmentExpression& other ) = delete;
             StateAssignmentExpression& operator = ( const StateAssignmentExpression& other ) = delete;
             StateAssignmentExpression( StateAssignmentExpression&& other );
             StateAssignmentExpression& operator = ( StateAssignmentExpression&& other );
 
-            virtual ~StateAssignmentExpression();
+            virtual ~StateAssignmentExpression() noexcept;
 
         private:
             std::string m_stateName;
@@ -75,7 +75,7 @@ namespace JoeLang
             StateAssignmentExpressionSeq( StateAssignmentExpressionSeq&& other );
             StateAssignmentExpressionSeq& operator = ( StateAssignmentExpressionSeq&& other );
 
-            ~StateAssignmentExpressionSeq();
+            ~StateAssignmentExpressionSeq() noexcept;
 
             const std::vector<StateAssignmentExpression*>& GetStateAssignmentExpressions() const;
             void AppendStateAssignmentExpression( StateAssignmentExpression* state_assignment_expression );

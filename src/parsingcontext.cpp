@@ -36,7 +36,7 @@ namespace JoeLang
     {
     }
 
-    ParsingContext::~ParsingContext()
+    ParsingContext::~ParsingContext() noexcept
     {
         delete m_declarationSeq;
     }

@@ -34,11 +34,7 @@ namespace JoeLang
 {
     namespace Expressions
     {
-        Expression::~Expression() = default;
-
-        AssignmentExpression::~AssignmentExpression() = default;
-
-        StateAssignmentExpression::StateAssignmentExpression( std::string state_name,
+        StateAssignmentExpression::StateAssignmentExpression( std::string& state_name,
                                                               Expression* assigned_expression )
             :AssignmentExpression()
             ,m_stateName( state_name )
@@ -65,7 +61,7 @@ namespace JoeLang
             return *this;
         }
 
-        StateAssignmentExpression::~StateAssignmentExpression()
+        StateAssignmentExpression::~StateAssignmentExpression() noexcept
         {
             if( m_assignedExpression != nullptr )
                 delete m_assignedExpression;
@@ -85,7 +81,7 @@ namespace JoeLang
             return *this;
         }
 
-        StateAssignmentExpressionSeq::~StateAssignmentExpressionSeq()
+        StateAssignmentExpressionSeq::~StateAssignmentExpressionSeq() noexcept
         {
             for( auto p : m_stateAssignmentExpressions )
                 delete p;
