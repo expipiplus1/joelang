@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 namespace JoeLang
@@ -65,7 +66,7 @@ namespace JoeLang
             virtual ~SingleStateAssignmentStatement() noexcept;
 
         private:
-            Expressions::StateAssignmentExpression* m_stateAssignmentExpression;
+            std::unique_ptr<Expressions::StateAssignmentExpression> m_stateAssignmentExpression;
         };
 
         class CompoundStateAssignmentStatement : public StateAssignmentStatement
@@ -78,7 +79,7 @@ namespace JoeLang
             virtual ~CompoundStateAssignmentStatement() noexcept;
 
         private:
-            StateAssignmentStatementSeq* m_stateAssignmentStatementSeq;
+            std::unique_ptr<StateAssignmentStatementSeq> m_stateAssignmentStatementSeq;
         };
 
         class StateAssignmentStatementSeq
@@ -90,11 +91,11 @@ namespace JoeLang
 
             ~StateAssignmentStatementSeq() noexcept;
 
-            const std::vector<StateAssignmentStatement*>& GetStateAssignmentStatements() const;
+            const std::vector<std::unique_ptr<StateAssignmentStatement>>& GetStateAssignmentStatements() const;
             void AppendStateAssignmentStatement( StateAssignmentStatement* state_assignment_statement );
 
         private:
-            std::vector<StateAssignmentStatement*> m_stateAssignmentStatements;
+            std::vector<std::unique_ptr<StateAssignmentStatement>> m_stateAssignmentStatements;
         };
     } // namespace Statements
 } // namespace JoeLang

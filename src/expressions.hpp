@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -61,7 +62,7 @@ namespace JoeLang
 
         private:
             std::string m_stateName;
-            Expression* m_assignedExpression;
+            std::unique_ptr<Expression> m_assignedExpression;
         };
     }
 } // namespace JoeLang

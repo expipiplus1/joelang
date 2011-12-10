@@ -41,7 +41,6 @@ namespace JoeLang
 
         SingleStateAssignmentStatement::~SingleStateAssignmentStatement() noexcept
         {
-            delete m_stateAssignmentExpression;
         }
 
         CompoundStateAssignmentStatement::CompoundStateAssignmentStatement( StateAssignmentStatementSeq* state_assignment_statement_seq )
@@ -51,19 +50,16 @@ namespace JoeLang
 
         CompoundStateAssignmentStatement::~CompoundStateAssignmentStatement() noexcept
         {
-            delete m_stateAssignmentStatementSeq;
         }
 
 
         StateAssignmentStatementSeq::~StateAssignmentStatementSeq() noexcept
         {
-            for( auto p : m_stateAssignmentStatements )
-                delete p;
         }
 
         void StateAssignmentStatementSeq::AppendStateAssignmentStatement( StateAssignmentStatement* state_assignment_statement )
         {
-            m_stateAssignmentStatements.push_back( state_assignment_statement );
+            m_stateAssignmentStatements.push_back( std::unique_ptr<StateAssignmentStatement>( state_assignment_statement ) );
         }
     } // namespace Statements
 } // namespace JoeLang

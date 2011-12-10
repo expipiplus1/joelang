@@ -28,37 +28,35 @@
 
 #include "declarations.hpp"
 
+#include <memory>
 #include "statements.hpp"
 
 namespace JoeLang
 {
     namespace Declarations
     {
-        TechniqueDeclaration::TechniqueDeclaration( Statements::CompoundStateAssignmentStatement *compound_state_assignment_statement )
+        TechniqueDeclaration::TechniqueDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement )
             :m_compoundStateAssignmentStatement( compound_state_assignment_statement )
         {
         }
 
         TechniqueDeclaration::~TechniqueDeclaration() noexcept
         {
-            delete m_compoundStateAssignmentStatement;
         }
 
 
         DeclarationSeq::~DeclarationSeq() noexcept
         {
-            for( auto p : m_declarations )
-                delete p;
         }
 
-        const std::vector<Declaration*>& DeclarationSeq::GetDeclarations() const
+        const std::vector<std::unique_ptr<Declaration>>& DeclarationSeq::GetDeclarations() const
         {
             return m_declarations;
         }
 
         void DeclarationSeq::AppendDeclaration( Declaration* declaration )
         {
-            m_declarations.push_back( declaration );
+            m_declarations.push_back( std::unique_ptr<Declaration>(declaration) );
         }
     } // namespace Declarations
 } // namespace JoeLang

@@ -28,6 +28,8 @@
 
 #include "expressions.hpp"
 
+#include <memory>
+
 namespace JoeLang
 {
     namespace Expressions
@@ -41,8 +43,6 @@ namespace JoeLang
 
         StateAssignmentExpression::~StateAssignmentExpression() noexcept
         {
-            if( m_assignedExpression != nullptr )
-                delete m_assignedExpression;
         }
     } // namespace Expressions
 } // namespace JoeLang

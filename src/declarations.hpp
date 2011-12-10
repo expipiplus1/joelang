@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <memory>
 #include <vector>
 
 namespace JoeLang
@@ -56,7 +57,7 @@ namespace JoeLang
             virtual ~TechniqueDeclaration() noexcept;
 
         private:
-            Statements::CompoundStateAssignmentStatement* m_compoundStateAssignmentStatement;
+            std::unique_ptr<Statements::CompoundStateAssignmentStatement> m_compoundStateAssignmentStatement;
         };
 
         class DeclarationSeq
@@ -68,11 +69,11 @@ namespace JoeLang
 
             ~DeclarationSeq() noexcept;
 
-            const std::vector<Declaration*>& GetDeclarations() const;
+            const std::vector<std::unique_ptr<Declaration>>& GetDeclarations() const;
             void AppendDeclaration( Declaration* declaration );
 
         private:
-            std::vector<Declaration*> m_declarations;
+            std::vector<std::unique_ptr<Declaration>> m_declarations;
         };
     }
 } // namespace JoeLang

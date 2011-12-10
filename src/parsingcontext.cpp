@@ -28,6 +28,7 @@
 
 #include "parsingcontext.hpp"
 
+#include <memory>
 #include "declarations.hpp"
 
 namespace JoeLang
@@ -38,15 +39,14 @@ namespace JoeLang
 
     ParsingContext::~ParsingContext() noexcept
     {
-        delete m_declarationSeq;
     }
 
     void ParsingContext::SetDeclarationSeq( Declarations::DeclarationSeq* declaration_seq )
     {
-        m_declarationSeq = declaration_seq;
+        m_declarationSeq.reset( declaration_seq );
     }
 
-    Declarations::DeclarationSeq* ParsingContext::GetDeclarationSeq() const
+    const std::unique_ptr<Declarations::DeclarationSeq>& ParsingContext::GetDeclarationSeq() const
     {
         return m_declarationSeq;
     }

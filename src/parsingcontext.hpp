@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <memory>
+
 namespace JoeLang
 {
     namespace Declarations
@@ -44,10 +46,10 @@ namespace JoeLang
         ParsingContext& operator = ( const ParsingContext& other ) = delete;
 
         void SetDeclarationSeq( Declarations::DeclarationSeq* expression );
-        Declarations::DeclarationSeq* GetDeclarationSeq() const;
+        const std::unique_ptr<Declarations::DeclarationSeq>& GetDeclarationSeq() const;
 
     private:
-        Declarations::DeclarationSeq* m_declarationSeq;
+        std::unique_ptr<Declarations::DeclarationSeq> m_declarationSeq;
     };
 
 } // namespace JoeLang
