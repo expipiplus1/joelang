@@ -40,4 +40,6 @@ add_executable( joelang src/joelang.cpp
                         src/expressions.hpp
                         src/parsingcontext.cpp
                         src/parsingcontext.hpp
-                        src/scanner.hpp )
+                        src/scanner.hpp
+                        src/statements.cpp
+                        src/statements.hpp )

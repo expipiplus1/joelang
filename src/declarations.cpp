@@ -32,14 +32,14 @@
 #include <ostream>
 #include <string>
 #include <utility>
-#include "expressions.hpp"
+#include "statements.hpp"
 
 namespace JoeLang
 {
     namespace Declarations
     {
-        TechniqueDeclaration::TechniqueDeclaration( Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq )
-            :m_stateAssignmentExpressionSeq( state_assignment_expression_seq )
+        TechniqueDeclaration::TechniqueDeclaration(Statements::CompoundStateAssignmentStatement *compound_state_assignment_statement )
+            :m_compoundStateAssignmentStatement( compound_state_assignment_statement )
         {
         }
 
@@ -52,15 +52,16 @@ namespace JoeLang
         {
             if( this != &other )
             {
-                std::swap( m_stateAssignmentExpressionSeq, other.m_stateAssignmentExpressionSeq );
+                std::swap( m_compoundStateAssignmentStatement, other.m_compoundStateAssignmentStatement );
             }
             return *this;
         }
 
         TechniqueDeclaration::~TechniqueDeclaration() noexcept
         {
-            delete m_stateAssignmentExpressionSeq;
+            delete m_compoundStateAssignmentStatement;
         }
+
 
         DeclarationSeq::DeclarationSeq( DeclarationSeq&& other )
         {

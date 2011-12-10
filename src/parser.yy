@@ -7,6 +7,7 @@
 #include <string>
 #include <declarations.hpp>
 #include <expressions.hpp>
+#include <statements.hpp>
 
 %}
 
@@ -75,10 +76,14 @@
 //
 %union
 {
-    JoeLang::Declarations::DeclarationSeq*  declaration_seq;
     JoeLang::Declarations::Declaration*     declaration;
-    JoeLang::Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq;
+    JoeLang::Declarations::DeclarationSeq*  declaration_seq;
+
     JoeLang::Expressions::StateAssignmentExpression*  state_assignment_expression;
+
+    JoeLang::Statements::StateAssignmentStatement* state_assignment_statement;
+    JoeLang::Statements::StateAssignmentStatementSeq* state_assignment_statement_seq;
+
     std::string*     identifier_string;
     int              integer_literal;
 }
@@ -97,6 +102,7 @@
 // punctuation
 %token  OPEN_BRACE  "{"
 %token  CLOSE_BRACE "}"
+%token  SEMICOLON   ";"
 
 // operators
 %token  EQUALS      "="
@@ -106,22 +112,31 @@
 //
 
 %type <declaration_seq> translation_unit
-%type <declaration_seq> declaration_seq
 %type <declaration>     declaration
 %type <declaration>     technique_declaration
-%type <state_assignment_expression_seq> state_assignment_expression_seq
+%type <declaration_seq> declaration_seq
+
 %type <state_assignment_expression> state_assignment_expression
+
+%type <state_assignment_statement> state_assignment_statement
+%type <state_assignment_statement> compound_state_assignment_statement
+%type <state_assignment_statement_seq> state_assignment_statement_seq
 
 //
 // Do not delete the translation unit, because we pass it to the parsingcontext
 // where it is dealt with
 //
 //%destructor { delete $$; } translation_unit
-%destructor { delete $$; } declaration_seq
 %destructor { delete $$; } declaration
 %destructor { delete $$; } technique_declaration
-%destructor { delete $$; } state_assignment_expression_seq
+%destructor { delete $$; } declaration_seq
+
 %destructor { delete $$; } state_assignment_expression
+
+%destructor { delete $$; } state_assignment_statement
+%destructor { delete $$; } compound_state_assignment_statement
+%destructor { delete $$; } state_assignment_statement_seq
+
 %destructor { delete $$; } IDENTIFIER
 
 //
@@ -178,31 +193,48 @@ declaration :
         technique_declaration;
 
 technique_declaration :
-        TECHNIQUE OPEN_BRACE CLOSE_BRACE
+        TECHNIQUE compound_state_assignment_statement
         {
-            $$ = new Declarations::TechniqueDeclaration( nullptr );
-        }
-    |
-        TECHNIQUE OPEN_BRACE state_assignment_expression_seq CLOSE_BRACE
-        {
-            $$ = new Declarations::TechniqueDeclaration( $3 );
+            $$ = new Declarations::TechniqueDeclaration( dynamic_cast<Statements::CompoundStateAssignmentStatement*>( $2 ) );
         };
 
-state_assignment_expression_seq :
-        state_assignment_expression
+compound_state_assignment_statement :
+        OPEN_BRACE CLOSE_BRACE
         {
-            $$ = new Expressions::StateAssignmentExpressionSeq();
-            $$->AppendStateAssignmentExpression( $1 );
+            //
+            // Return a compound statement with an empty sequence in
+            //
+            $$ = new Statements::CompoundStateAssignmentStatement( new Statements::StateAssignmentStatementSeq() );
         }
     |
-        state_assignment_expression_seq state_assignment_expression
+        OPEN_BRACE state_assignment_statement_seq CLOSE_BRACE
+        {
+            $$ = new Statements::CompoundStateAssignmentStatement( $2 );
+        };
+
+state_assignment_statement_seq :
+        state_assignment_statement
+        {
+            $$ = new Statements::StateAssignmentStatementSeq();
+            $$->AppendStateAssignmentStatement( $1 );
+        }
+    |
+        state_assignment_statement_seq state_assignment_statement
         {
             $$ = $1;
-            $1->AppendStateAssignmentExpression( $2 );
+            $1->AppendStateAssignmentStatement( $2 );
         };
 
+state_assignment_statement :
+        state_assignment_expression SEMICOLON
+        {
+            $$ = new Statements::SingleStateAssignmentStatement( $1 );
+        }
+    |
+        compound_state_assignment_statement;
+
 state_assignment_expression :
-        IDENTIFIER EQUALS
+        IDENTIFIER EQUALS IDENTIFIER
         {
             //
             // TODO the identifier here should probably give an index into a
@@ -210,6 +242,7 @@ state_assignment_expression :
             //
             $$ = new Expressions::StateAssignmentExpression( *$1, nullptr );
             delete $1;
+            delete $3;
         };
 
 %%

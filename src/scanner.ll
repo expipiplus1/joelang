@@ -98,6 +98,10 @@ typedef JoeLang::Parser::token_type token_type;
     return token::CLOSE_BRACE;
 }
 
+";" {
+    return token::SEMICOLON;
+}
+
  /*
  // operators
  */

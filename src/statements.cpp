@@ -26,40 +26,58 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "expressions.hpp"
+#include "statements.hpp"
 
 #include <utility>
+#include "expressions.hpp"
 
 namespace JoeLang
 {
-    namespace Expressions
+    namespace Statements
     {
-        StateAssignmentExpression::StateAssignmentExpression( std::string& state_name,
-                                                              Expression* assigned_expression )
-            :m_stateName( state_name )
-            ,m_assignedExpression( assigned_expression )
+        SingleStateAssignmentStatement::SingleStateAssignmentStatement(Expressions::StateAssignmentExpression *state_assignment_expression)
+            :m_stateAssignmentExpression( state_assignment_expression )
         {
         }
 
-        StateAssignmentExpression::StateAssignmentExpression( StateAssignmentExpression&& other )
+        SingleStateAssignmentStatement::~SingleStateAssignmentStatement() noexcept
+        {
+            delete m_stateAssignmentExpression;
+        }
+
+        CompoundStateAssignmentStatement::CompoundStateAssignmentStatement( StateAssignmentStatementSeq* state_assignment_statement_seq )
+            :m_stateAssignmentStatementSeq( state_assignment_statement_seq )
+        {
+        }
+
+        CompoundStateAssignmentStatement::~CompoundStateAssignmentStatement() noexcept
+        {
+            delete m_stateAssignmentStatementSeq;
+        }
+
+        StateAssignmentStatementSeq::StateAssignmentStatementSeq( StateAssignmentStatementSeq&& other )
         {
             *this = std::move( other );
         }
 
-        StateAssignmentExpression& StateAssignmentExpression::operator = ( StateAssignmentExpression&& other )
+        StateAssignmentStatementSeq& StateAssignmentStatementSeq::operator = ( StateAssignmentStatementSeq&& other )
         {
             if( this != &other )
             {
-                std::swap( m_stateName, other.m_stateName );
-                std::swap( m_assignedExpression, other.m_assignedExpression );
+                std::swap( m_stateAssignmentStatements, other.m_stateAssignmentStatements );
             }
             return *this;
         }
 
-        StateAssignmentExpression::~StateAssignmentExpression() noexcept
+        StateAssignmentStatementSeq::~StateAssignmentStatementSeq() noexcept
         {
-            if( m_assignedExpression != nullptr )
-                delete m_assignedExpression;
+            for( auto p : m_stateAssignmentStatements )
+                delete p;
         }
-    } // namespace Expressions
+
+        void StateAssignmentStatementSeq::AppendStateAssignmentStatement( StateAssignmentStatement* state_assignment_statement )
+        {
+            m_stateAssignmentStatements.push_back( state_assignment_statement );
+        }
+    } // namespace Statements
 } // namespace JoeLang

@@ -33,10 +33,10 @@
 
 namespace JoeLang
 {
-    namespace Expressions
+    namespace Statements
     {
-        class StateAssignmentExpressionSeq;
-    } // namespace Expressions
+        class CompoundStateAssignmentStatement;
+    } // namespace Statements
 
     namespace Declarations
     {
@@ -50,8 +50,7 @@ namespace JoeLang
         class TechniqueDeclaration : public Declaration
         {
         public:
-            explicit TechniqueDeclaration( Expressions::StateAssignmentExpressionSeq* state_assignment_expression_seq );
-            TechniqueDeclaration() = delete;
+            explicit TechniqueDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement );
             TechniqueDeclaration( const TechniqueDeclaration& other ) = delete;
             TechniqueDeclaration& operator = ( const TechniqueDeclaration& other ) = delete;
             TechniqueDeclaration( TechniqueDeclaration&& other );
@@ -60,7 +59,7 @@ namespace JoeLang
             virtual ~TechniqueDeclaration() noexcept;
 
         private:
-            Expressions::StateAssignmentExpressionSeq* m_stateAssignmentExpressionSeq;
+            Statements::CompoundStateAssignmentStatement* m_compoundStateAssignmentStatement;
         };
 
         class DeclarationSeq
