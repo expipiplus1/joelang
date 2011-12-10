@@ -41,21 +41,6 @@ namespace JoeLang
         {
         }
 
-        StateAssignmentExpression::StateAssignmentExpression( StateAssignmentExpression&& other )
-        {
-            *this = std::move( other );
-        }
-
-        StateAssignmentExpression& StateAssignmentExpression::operator = ( StateAssignmentExpression&& other )
-        {
-            if( this != &other )
-            {
-                std::swap( m_stateName, other.m_stateName );
-                std::swap( m_assignedExpression, other.m_assignedExpression );
-            }
-            return *this;
-        }
-
         StateAssignmentExpression::~StateAssignmentExpression() noexcept
         {
             if( m_assignedExpression != nullptr )

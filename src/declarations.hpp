@@ -30,6 +30,7 @@
 
 #include <vector>
 #include <memory>
+#include "statements.hpp"
 
 namespace JoeLang
 {
@@ -53,8 +54,6 @@ namespace JoeLang
             explicit TechniqueDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement );
             TechniqueDeclaration( const TechniqueDeclaration& other ) = delete;
             TechniqueDeclaration& operator = ( const TechniqueDeclaration& other ) = delete;
-            TechniqueDeclaration( TechniqueDeclaration&& other );
-            TechniqueDeclaration& operator = ( TechniqueDeclaration&& other );
 
             virtual ~TechniqueDeclaration() noexcept;
 
@@ -68,8 +67,6 @@ namespace JoeLang
             DeclarationSeq() = default;
             DeclarationSeq( const DeclarationSeq& other ) = delete;
             DeclarationSeq& operator = ( const DeclarationSeq& other ) = delete;
-            DeclarationSeq( DeclarationSeq&& other );
-            DeclarationSeq& operator = ( DeclarationSeq&& other );
 
             ~DeclarationSeq() noexcept;
 

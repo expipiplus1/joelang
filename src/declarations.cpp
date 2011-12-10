@@ -43,39 +43,11 @@ namespace JoeLang
         {
         }
 
-        TechniqueDeclaration::TechniqueDeclaration( TechniqueDeclaration&& other )
-        {
-            *this = std::move( other );
-        }
-
-        TechniqueDeclaration& TechniqueDeclaration::operator = ( TechniqueDeclaration&& other )
-        {
-            if( this != &other )
-            {
-                std::swap( m_compoundStateAssignmentStatement, other.m_compoundStateAssignmentStatement );
-            }
-            return *this;
-        }
-
         TechniqueDeclaration::~TechniqueDeclaration() noexcept
         {
             delete m_compoundStateAssignmentStatement;
         }
 
-
-        DeclarationSeq::DeclarationSeq( DeclarationSeq&& other )
-        {
-            m_declarations = std::move( other.m_declarations );
-        }
-
-        DeclarationSeq& DeclarationSeq::operator = ( DeclarationSeq&& other )
-        {
-            if( this != &other )
-            {
-                std::swap( m_declarations, other.m_declarations );
-            }
-            return *this;
-        }
 
         DeclarationSeq::~DeclarationSeq() noexcept
         {

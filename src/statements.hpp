@@ -87,8 +87,6 @@ namespace JoeLang
             StateAssignmentStatementSeq() = default;
             StateAssignmentStatementSeq( const StateAssignmentStatementSeq& other ) = delete;
             StateAssignmentStatementSeq& operator = ( const StateAssignmentStatementSeq& other ) = delete;
-            StateAssignmentStatementSeq( StateAssignmentStatementSeq&& other );
-            StateAssignmentStatementSeq& operator = ( StateAssignmentStatementSeq&& other );
 
             ~StateAssignmentStatementSeq() noexcept;
 

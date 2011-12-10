@@ -55,19 +55,6 @@ namespace JoeLang
             delete m_stateAssignmentStatementSeq;
         }
 
-        StateAssignmentStatementSeq::StateAssignmentStatementSeq( StateAssignmentStatementSeq&& other )
-        {
-            *this = std::move( other );
-        }
-
-        StateAssignmentStatementSeq& StateAssignmentStatementSeq::operator = ( StateAssignmentStatementSeq&& other )
-        {
-            if( this != &other )
-            {
-                std::swap( m_stateAssignmentStatements, other.m_stateAssignmentStatements );
-            }
-            return *this;
-        }
 
         StateAssignmentStatementSeq::~StateAssignmentStatementSeq() noexcept
         {

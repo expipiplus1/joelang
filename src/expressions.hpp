@@ -56,8 +56,6 @@ namespace JoeLang
                                        Expression* assigned_expression );
             StateAssignmentExpression( const StateAssignmentExpression& other ) = delete;
             StateAssignmentExpression& operator = ( const StateAssignmentExpression& other ) = delete;
-            StateAssignmentExpression( StateAssignmentExpression&& other );
-            StateAssignmentExpression& operator = ( StateAssignmentExpression&& other );
 
             virtual ~StateAssignmentExpression() noexcept;
 
