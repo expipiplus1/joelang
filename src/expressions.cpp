@@ -28,8 +28,6 @@
 
 #include "expressions.hpp"
 
-#include <utility>
-
 namespace JoeLang
 {
     namespace Expressions

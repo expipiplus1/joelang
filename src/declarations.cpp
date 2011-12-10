@@ -28,17 +28,13 @@
 
 #include "declarations.hpp"
 
-#include <iostream>
-#include <ostream>
-#include <string>
-#include <utility>
 #include "statements.hpp"
 
 namespace JoeLang
 {
     namespace Declarations
     {
-        TechniqueDeclaration::TechniqueDeclaration(Statements::CompoundStateAssignmentStatement *compound_state_assignment_statement )
+        TechniqueDeclaration::TechniqueDeclaration( Statements::CompoundStateAssignmentStatement *compound_state_assignment_statement )
             :m_compoundStateAssignmentStatement( compound_state_assignment_statement )
         {
         }

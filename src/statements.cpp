@@ -28,14 +28,13 @@
 
 #include "statements.hpp"
 
-#include <utility>
 #include "expressions.hpp"
 
 namespace JoeLang
 {
     namespace Statements
     {
-        SingleStateAssignmentStatement::SingleStateAssignmentStatement(Expressions::StateAssignmentExpression *state_assignment_expression)
+        SingleStateAssignmentStatement::SingleStateAssignmentStatement( Expressions::StateAssignmentExpression *state_assignment_expression )
             :m_stateAssignmentExpression( state_assignment_expression )
         {
         }
