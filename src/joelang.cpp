@@ -12,6 +12,6 @@ int main( int argc, char** argv )
 
     if( !driver.parse_string( std::string( "technique{pass{a=b;b=c;}pass{{}}}\n" ) ) )
         std::cout << "Couldn't parse\n";
-
-    std::cout << parsing_context.GetDeclarationSeq()->GetDeclarations().size() << std::endl;
+    else
+        std::cout << parsing_context.GetDeclarationSeq()->GetDeclarations().size() << std::endl;
 }
