@@ -48,6 +48,11 @@ namespace JoeLang
         void SetDeclarationSeq( Declarations::DeclarationSeq* expression );
         const std::unique_ptr<Declarations::DeclarationSeq>& GetDeclarationSeq() const;
 
+        //
+        // These should probably be somewhere else
+        //
+
+
     private:
         std::unique_ptr<Declarations::DeclarationSeq> m_declarationSeq;
     };

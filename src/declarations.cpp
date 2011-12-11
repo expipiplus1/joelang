@@ -35,23 +35,29 @@ namespace JoeLang
 {
     namespace Declarations
     {
-        TechniqueDeclaration::TechniqueDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement )
+        PassDeclaration::PassDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement )
             :m_compoundStateAssignmentStatement( compound_state_assignment_statement )
         {
         }
 
-        TechniqueDeclaration::~TechniqueDeclaration() noexcept
+        const std::vector<std::unique_ptr<PassDeclaration>>& PassDeclarationSeq::GetPassDeclarations() const
         {
+            return m_passDeclarations;
         }
 
-
-        DeclarationSeq::~DeclarationSeq() noexcept
+        void PassDeclarationSeq::AppendPassDeclaration( PassDeclaration* pass_declaration )
         {
+            m_passDeclarations.push_back( std::unique_ptr<PassDeclaration>( pass_declaration ) );
         }
 
         const std::vector<std::unique_ptr<Declaration>>& DeclarationSeq::GetDeclarations() const
         {
             return m_declarations;
+        }
+
+        TechniqueDeclaration::TechniqueDeclaration( PassDeclarationSeq* pass_declaration_seq )
+            :m_passDeclarationSeq( pass_declaration_seq )
+        {
         }
 
         void DeclarationSeq::AppendDeclaration( Declaration* declaration )

@@ -87,6 +87,10 @@ typedef JoeLang::Parser::token_type token_type;
     return token::TECHNIQUE;
 }
 
+"pass" {
+    return token::PASS;
+}
+
  /*
  // punctuation
  */

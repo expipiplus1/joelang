@@ -79,6 +79,9 @@
     JoeLang::Declarations::Declaration*     declaration;
     JoeLang::Declarations::DeclarationSeq*  declaration_seq;
 
+    JoeLang::Declarations::PassDeclaration* pass_declaration;
+    JoeLang::Declarations::PassDeclarationSeq* pass_declaration_seq;
+
     JoeLang::Expressions::StateAssignmentExpression*  state_assignment_expression;
 
     JoeLang::Statements::StateAssignmentStatement* state_assignment_statement;
@@ -98,6 +101,7 @@
 
 // keywords
 %token  TECHNIQUE  "technique"
+%token  PASS       "pass"
 
 // punctuation
 %token  OPEN_BRACE  "{"
@@ -116,6 +120,9 @@
 %type <declaration>     technique_declaration
 %type <declaration_seq> declaration_seq
 
+%type <pass_declaration> pass_declaration
+%type <pass_declaration_seq> pass_declaration_seq
+
 %type <state_assignment_expression> state_assignment_expression
 
 %type <state_assignment_statement> state_assignment_statement
@@ -130,6 +137,9 @@
 %destructor { delete $$; } declaration
 %destructor { delete $$; } technique_declaration
 %destructor { delete $$; } declaration_seq
+
+%destructor { delete $$; } pass_declaration
+%destructor { delete $$; } pass_declaration_seq
 
 %destructor { delete $$; } state_assignment_expression
 
@@ -193,9 +203,33 @@ declaration :
         technique_declaration;
 
 technique_declaration :
-        TECHNIQUE compound_state_assignment_statement
+        TECHNIQUE OPEN_BRACE CLOSE_BRACE
         {
-            $$ = new Declarations::TechniqueDeclaration( dynamic_cast<Statements::CompoundStateAssignmentStatement*>( $2 ) );
+            $$ = new Declarations::TechniqueDeclaration( new Declarations::PassDeclarationSeq() );
+        }
+    |
+        TECHNIQUE OPEN_BRACE pass_declaration_seq CLOSE_BRACE
+        {
+            $$ = new Declarations::TechniqueDeclaration( $3 );
+        };
+
+pass_declaration_seq :
+        pass_declaration
+        {
+            $$ = new Declarations::PassDeclarationSeq();
+            $$->AppendPassDeclaration( $1 );
+        }
+    |
+        pass_declaration_seq pass_declaration
+        {
+            $$ = $1;
+            $$->AppendPassDeclaration( $2 );
+        };
+
+pass_declaration :
+        PASS compound_state_assignment_statement
+        {
+            $$ = new Declarations::PassDeclaration( dynamic_cast<Statements::CompoundStateAssignmentStatement*>( $2 ) );
         };
 
 compound_state_assignment_statement :

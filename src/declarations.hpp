@@ -47,17 +47,46 @@ namespace JoeLang
             virtual ~Declaration() = default;
         };
 
-        class TechniqueDeclaration : public Declaration
+        class PassDeclaration : public Declaration
         {
         public:
-            explicit TechniqueDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement );
-            TechniqueDeclaration( const TechniqueDeclaration& other ) = delete;
-            TechniqueDeclaration& operator = ( const TechniqueDeclaration& other ) = delete;
+            explicit PassDeclaration( Statements::CompoundStateAssignmentStatement* compound_state_assignment_statement );
+            PassDeclaration( const PassDeclaration& other ) = delete;
+            PassDeclaration& operator = ( const PassDeclaration& other ) = delete;
 
-            virtual ~TechniqueDeclaration() noexcept;
+            virtual ~PassDeclaration() noexcept = default;
 
         private:
             std::unique_ptr<Statements::CompoundStateAssignmentStatement> m_compoundStateAssignmentStatement;
+        };
+
+        class PassDeclarationSeq
+        {
+        public:
+            PassDeclarationSeq() = default;
+            PassDeclarationSeq( const PassDeclarationSeq& other ) = delete;
+            PassDeclarationSeq& operator = ( const PassDeclarationSeq& other ) = delete;
+
+            ~PassDeclarationSeq() noexcept = default;
+
+            const std::vector<std::unique_ptr<PassDeclaration>>& GetPassDeclarations() const;
+            void AppendPassDeclaration(PassDeclaration* pass_declaration );
+
+        private:
+            std::vector<std::unique_ptr<PassDeclaration>> m_passDeclarations;
+        };
+
+        class TechniqueDeclaration : public Declaration
+        {
+        public:
+            explicit TechniqueDeclaration( PassDeclarationSeq* pass_declaration_seq );
+            TechniqueDeclaration( const TechniqueDeclaration& other ) = delete;
+            TechniqueDeclaration& operator = ( const TechniqueDeclaration& other ) = delete;
+
+            virtual ~TechniqueDeclaration() noexcept = default;
+
+        private:
+            std::unique_ptr<PassDeclarationSeq> m_passDeclarationSeq;
         };
 
         class DeclarationSeq
@@ -67,7 +96,7 @@ namespace JoeLang
             DeclarationSeq( const DeclarationSeq& other ) = delete;
             DeclarationSeq& operator = ( const DeclarationSeq& other ) = delete;
 
-            ~DeclarationSeq() noexcept;
+            ~DeclarationSeq() noexcept = default;
 
             const std::vector<std::unique_ptr<Declaration>>& GetDeclarations() const;
             void AppendDeclaration( Declaration* declaration );
