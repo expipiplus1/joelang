@@ -26,11 +26,17 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <iostream>
 #include "parser.hpp"
 
-int main( int argc, char** argv )
+#include <string>
+
+namespace JoeLang
 {
-    JoeLang::Parser::Parser parser();
-    std::cout << "Hello, World!" << std::endl;
+namespace Parser
+{
+bool Parser::Parse ( const std::string& string )
+{
+    return true;
 }
+} // namespace Parser
+} // namespace JoeLang
