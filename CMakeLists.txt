@@ -13,8 +13,14 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O0 -g -Wall")
 
 add_executable( joelang src/joelang.cpp
+                        src/declaration.cpp
+                        src/declaration.hpp
+                        src/lexer.cpp
+                        src/lexer.hpp
                         src/parser.cpp
-                        src/parser.hpp )
+                        src/parser.hpp
+                        src/terminal.cpp
+                        src/terminal.hpp )
 
 target_link_libraries( joelang ${joelang_libraries} )
 include_directories( ${joelang_include_directories} )

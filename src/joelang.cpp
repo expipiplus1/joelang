@@ -26,11 +26,20 @@
     or implied, of Joe Hermaszewski.
 */
 
+#include <regex>
+
 #include <iostream>
 #include "parser.hpp"
 
 int main( int argc, char** argv )
 {
-    JoeLang::Parser::Parser parser();
-    std::cout << "Hello, World!" << std::endl;
+    JoeLang::Parser::Parser parser;
+    if( parser.Parse( "technique" ) )
+    {
+        std::cout << "success\n";
+    }
+    else
+    {
+        std::cout << "fail\n";
+    }
 }

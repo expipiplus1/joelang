@@ -26,34 +26,25 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "parser.hpp"
-
-#include <algorithm>
-#include <memory>
-#include <string>
 #include "lexer.hpp"
+
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace JoeLang
 {
 namespace Parser
 {
+    bool Lexer::Lex( const std::string& string )
+    {
+        return true;
+    }
 
-bool Parser::Parse ( const std::string& string )
-{
-    Lexer lexer;
-    if( !lexer.Lex( string ) )
-        return false;
-
-    TokenStream::const_iterator stream_begin = lexer.GetTokenStream().begin();
-    TokenStream::const_iterator stream_end = lexer.GetTokenStream().end();
-    m_translationUnit = TranslationUnit::Parse( stream_begin, stream_end );
-    return m_translationUnit != nullptr;
-}
-
-std::unique_ptr<TranslationUnit> TranslationUnit::Parse( TokenStream::const_iterator& stream_begin, TokenStream::const_iterator stream_end )
-{
-    return std::unique_ptr<TranslationUnit>( new TranslationUnit );
-}
+    const std::vector< std::pair< TerminalType, std::string > >& Lexer::GetTokenStream() const
+    {
+        return m_tokenStream;
+    }
 
 } // namespace Parser
 } // namespace JoeLang
