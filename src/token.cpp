@@ -26,13 +26,12 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "lexer.hpp"
+#include "token.hpp"
 
 namespace JoeLang
 {
 namespace Parser
 {
-
 
 } // namespace Parser
 } // namespace JoeLang

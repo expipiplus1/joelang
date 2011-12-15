@@ -28,15 +28,33 @@
 
 #pragma once
 
+#include <memory>
+#include "declaration.hpp"
+#include "token.hpp"
+
 namespace JoeLang
 {
+
+namespace Lexer
+{
+    class Lexer;
+} // namespace Lexer
+
 namespace Parser
 {
 
 class TranslationUnit : public JoeLang::Parser::Token
 {
 public:
-    TranslationUnit();
+    virtual ~TranslationUnit();
+
+    static std::unique_ptr<TranslationUnit> Parse( Lexer::Lexer& lexer );
+
+protected:
+    TranslationUnit( std::unique_ptr<Declaration::DeclarationSeq>&& declarations);
+
+private:
+    std::unique_ptr<Parser::Declaration::DeclarationSeq> m_declarations;
 };
 
 } // namespace Parser

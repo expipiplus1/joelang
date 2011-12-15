@@ -30,14 +30,12 @@
 
 #include <memory>
 #include <string>
-#include "lexer.hpp"
+#include "translation_unit.hpp"
 
 namespace JoeLang
 {
 namespace Parser
 {
-
-class TranslationUnit;
 
 class Parser
 {
@@ -48,23 +46,6 @@ public:
     bool Parse( const std::string& string );
 private:
     std::unique_ptr<TranslationUnit> m_translationUnit;
-};
-
-class Token
-{
-public:
-    Token() = default;
-    virtual ~Token() = default;
-};
-
-class TranslationUnit : public JoeLang::Parser::Token
-{
-public:
-    TranslationUnit() = default;
-    virtual ~TranslationUnit() = default;
-
-    static std::unique_ptr<TranslationUnit> Parse( TokenStream::const_iterator& stream_begin, TokenStream::const_iterator stream_end );
-private:
 };
 
 } // namespace Parser

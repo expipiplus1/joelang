@@ -28,10 +28,38 @@
 
 #include "translation_unit.hpp"
 
+#include <memory>
+#include "lexer.hpp"
+#include "token.hpp"
+
 namespace JoeLang
 {
 namespace Parser
 {
+
+TranslationUnit::TranslationUnit( std::unique_ptr<Declaration::DeclarationSeq>&& declarations )
+    :m_declarations( std::move( declarations ) )
+{
+}
+
+TranslationUnit::~TranslationUnit()
+{
+}
+
+std::unique_ptr<TranslationUnit> TranslationUnit::Parse( Lexer::Lexer& lexer )
+{
+    lexer.PushRestorePoint();
+
+    std::unique_ptr<Declaration::DeclarationSeq> declarations( Declaration::DeclarationSeq::Parse( lexer ) );
+    if( !declarations )
+    {
+        lexer.Restore();
+        return nullptr;
+    }
+
+    lexer.PopRestorePoint();
+    return std::unique_ptr<TranslationUnit>( new TranslationUnit( std::move( declarations ) ) );
+}
 
 } // namespace Parser
 } // namespace JoeLang

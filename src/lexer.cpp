@@ -28,23 +28,115 @@
 
 #include "lexer.hpp"
 
+#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace JoeLang
 {
-namespace Parser
+namespace Lexer
 {
-    bool Lexer::Lex( const std::string& string )
+
+std::vector< std::unique_ptr< TokenMatcher > > Lexer::s_terminals;
+
+Lexer::Lexer()
+    :m_currentIndex( 0 )
+{
+    if( s_terminals.empty() )
     {
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new RegexTokenMatcher( TokenType::WHITESPACE, "[ \\n\\r\\t]+", "whitespace", false ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new KeywordTokenMatcher( TokenType::TECHNIQUE, "technique" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new RegexTokenMatcher( TokenType::IDENTIFIER, "[a-zA-Z_][a-zA-Z0-9_]*", "identifier" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::OPEN_BRACE, "{" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
+    }
+}
+
+bool Lexer::Lex( const std::string& string )
+{
+    std::string::const_iterator curr_position = string.begin();
+    std::string::const_iterator end_position = string.end();
+    while( curr_position != end_position )
+    {
+        std::string match_string;
+        bool match = false;
+        for( const auto& token_type : s_terminals )
+        {
+            match_string = token_type->Match( curr_position, end_position );
+            if( match_string.size() != 0 )
+            {
+                if( token_type->IsSignificant() )
+                    m_tokenStream.push_back( std::make_pair( token_type->GetTokenType(), match_string ) );
+                curr_position += match_string.size();
+                match = true;
+                break;
+            }
+        }
+        if( !match )
+        {
+            m_tokenStream.clear();
+            return false;
+        }
+    }
+    m_tokenStream.push_back( std::make_pair( TokenType::END_OF_FILE, std::string() ) );
+    m_currentIndex = 0;
+    return true;
+}
+
+bool Lexer::ConsumeToken(TokenType token_type)
+{
+    if( m_tokenStream[m_currentIndex].first == token_type )
+    {
+        ConsumeNext();
         return true;
     }
-
-    const std::vector< std::pair< TerminalType, std::string > >& Lexer::GetTokenStream() const
+    else
     {
-        return m_tokenStream;
+        Restore();
+        return false;
     }
+}
 
-} // namespace Parser
+TokenType Lexer::PeekToken() const
+{
+    return m_tokenStream[m_currentIndex].first;
+}
+
+const std::string &Lexer::PeekString() const
+{
+    return m_tokenStream[m_currentIndex].second;
+}
+
+void Lexer::ConsumeNext()
+{
+    //
+    // Never advance over the end
+    //
+    if( m_currentIndex < m_tokenStream.size() - 1 )
+        ++m_currentIndex;
+}
+
+void Lexer::PushRestorePoint()
+{
+    m_restorePoints.push( m_currentIndex );
+}
+
+void Lexer::PopRestorePoint()
+{
+    m_restorePoints.pop();
+}
+
+void Lexer::Restore()
+{
+    m_currentIndex = m_restorePoints.top();
+    PopRestorePoint();
+}
+
+} // namespace Lexer
 } // namespace JoeLang

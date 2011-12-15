@@ -28,9 +28,100 @@
 
 #include "declaration.hpp"
 
-namespace JoeLang {
-namespace Parser {
-namespace Declaration {
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+#include "lexer.hpp"
+#include "parser.hpp"
+
+namespace JoeLang
+{
+namespace Parser
+{
+namespace Declaration
+{
+
+std::unique_ptr< DeclarationBase > DeclarationBase::Parse( Lexer::Lexer& lexer )
+{
+    std::unique_ptr< DeclarationBase > declaration;
+    lexer.PushRestorePoint();
+
+    declaration = TechniqueDeclaration::Parse( lexer );
+    if( declaration )
+    {
+        lexer.PopRestorePoint();
+        return declaration;
+    }
+
+    lexer.Restore();
+    return nullptr;
+}
+
+TechniqueDeclaration::~TechniqueDeclaration()
+{
+}
+
+TechniqueDeclaration::TechniqueDeclaration( std::string name )
+    :m_name( name )
+{
+}
+
+std::unique_ptr< TechniqueDeclaration > TechniqueDeclaration::Parse( Lexer::Lexer& lexer )
+{
+    lexer.PushRestorePoint();
+    std::string name;
+
+    if( !lexer.ConsumeToken( Lexer::TECHNIQUE ) )
+        return nullptr;
+
+    if( lexer.PeekToken() == Lexer::IDENTIFIER )
+    {
+        name = lexer.PeekString();
+        lexer.ConsumeNext();
+    }
+
+    if( !lexer.ConsumeToken( Lexer::OPEN_BRACE ) )
+        return nullptr;
+
+    if( !lexer.ConsumeToken( Lexer::CLOSE_BRACE ) )
+        return nullptr;
+
+    lexer.PopRestorePoint();
+    return std::unique_ptr<TechniqueDeclaration>( new TechniqueDeclaration( name ) );
+}
+
+DeclarationSeq::~DeclarationSeq()
+{
+}
+
+DeclarationSeq::DeclarationSeq( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
+    :m_declarations( std::move( declarations ) )
+{
+}
+
+std::unique_ptr<DeclarationSeq> DeclarationSeq::Parse(Lexer::Lexer &lexer)
+{
+    lexer.PushRestorePoint();
+    std::vector< std::unique_ptr<DeclarationBase> > declarations;
+
+    std::unique_ptr<DeclarationBase> declaration( DeclarationBase::Parse( lexer ) );
+    if( !declaration )
+    {
+        lexer.Restore();
+        return nullptr;
+    }
+
+    declarations.push_back( std::move(declaration) );
+
+    while( ( declaration = DeclarationBase::Parse( lexer ) ) )
+    {
+        declarations.push_back( std::move( declaration ) );
+    }
+
+    lexer.PopRestorePoint();
+    return std::unique_ptr<DeclarationSeq>( new DeclarationSeq( std::move( declarations ) ) );
+}
 
 } // namespace Declaration
 } // namespace Parser

@@ -28,31 +28,44 @@
 
 #pragma once
 
+#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
-#include "terminal.hpp"
+#include "token_matcher.hpp"
 
 namespace JoeLang
 {
-namespace Parser
+namespace Lexer
 {
 
-typedef std::vector< std::pair< JoeLang::Parser::TerminalType, std::string > > TokenStream;
+typedef std::vector< std::pair< JoeLang::Lexer::TokenType, std::string > > TokenStream;
 
 class Lexer
 {
 public:
-    Lexer() = default;
+    Lexer();
     ~Lexer() = default;
 
     bool Lex( const std::string& string );
 
-    const std::vector< std::pair< TerminalType, std::string > >& GetTokenStream() const;
+    bool ConsumeToken( TokenType token_type );
+
+    TokenType PeekToken() const;
+    const std::string& PeekString() const;
+    void ConsumeNext();
+
+    void PushRestorePoint();
+    void PopRestorePoint();
+    void Restore();
+
+    static std::vector< std::unique_ptr< TokenMatcher > > s_terminals;
 
 private:
     TokenStream m_tokenStream;
+    std::size_t m_currentIndex;
+    std::stack< std::size_t > m_restorePoints;
 };
 
-} // namespace Parser
+} // namespace Lexer
 } // namespace JoeLang

@@ -30,15 +30,19 @@
 
 namespace JoeLang
 {
+
 namespace Parser
 {
 
-enum class TerminalType
+class Token
 {
-    TECHNIQUE
+public:
+    virtual ~Token() = default;
+
+protected:
+    Token() = default;
 };
-
-
 
 } // namespace Parser
 } // namespace JoeLang
+
