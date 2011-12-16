@@ -19,6 +19,8 @@ add_executable( joelang src/joelang.cpp
                         src/lexer.hpp
                         src/parser.cpp
                         src/parser.hpp
+                        src/terminal.cpp
+                        src/terminal.hpp
                         src/token.cpp
                         src/token.hpp
                         src/token_matcher.cpp
