@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include "token.hpp"
 #include "token_matcher.hpp"
 
@@ -45,11 +46,13 @@ class Terminal : public JoeLang::Parser::Token
 public:
     virtual ~Terminal();
 
+    const std::string& GetString() const;
+
     static bool Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token );
     static bool Parse( Parser& parser );
 
 protected:
-    Terminal();
+    Terminal( const std::pair<Lexer::TokenType, std::string>& terminal );
 
 private:
     std::string m_string;

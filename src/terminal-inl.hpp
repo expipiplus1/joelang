@@ -31,6 +31,7 @@
 #include "terminal.hpp"
 
 #include <memory>
+#include <string>
 #include "token.hpp"
 #include "parser.hpp"
 #include "token_matcher.hpp"
@@ -41,21 +42,29 @@ namespace Parser
 {
 
 template< Lexer::TokenType token_type >
+Terminal<token_type>::Terminal( const std::pair< Lexer::TokenType, std::string >& terminal )
+    :m_string( terminal.second )
+{
+}
+
+template< Lexer::TokenType token_type >
 Terminal<token_type>::~Terminal()
 {
 }
 
 template< Lexer::TokenType token_type >
-Terminal<token_type>::Terminal()
+const std::string& Terminal<token_type>::GetString() const
 {
+    return m_string;
 }
 
 template< Lexer::TokenType token_type >
 bool Terminal<token_type>::Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token )
 {
-    if( !Parse( parser ) )
+    std::pair< Lexer::TokenType, std::string > terminal;
+    if( !parser.ExpectTerminal( token_type, terminal ) )
         return false;
-    token.reset( new Terminal< token_type >() );
+    token.reset( new Terminal< token_type >( terminal ) );
     return true;
 }
 
