@@ -28,7 +28,6 @@
 
 #include "lexer.hpp"
 
-#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
@@ -89,28 +88,14 @@ bool Lexer::Lex( const std::string& string )
     return true;
 }
 
-bool Lexer::ConsumeToken(TokenType token_type)
+bool Lexer::TryConsume( TokenType token_type )
 {
     if( m_tokenStream[m_currentIndex].first == token_type )
     {
         ConsumeNext();
         return true;
     }
-    else
-    {
-        Restore();
-        return false;
-    }
-}
-
-TokenType Lexer::PeekToken() const
-{
-    return m_tokenStream[m_currentIndex].first;
-}
-
-const std::string &Lexer::PeekString() const
-{
-    return m_tokenStream[m_currentIndex].second;
+    return false;
 }
 
 void Lexer::ConsumeNext()
@@ -120,22 +105,6 @@ void Lexer::ConsumeNext()
     //
     if( m_currentIndex < m_tokenStream.size() - 1 )
         ++m_currentIndex;
-}
-
-void Lexer::PushRestorePoint()
-{
-    m_restorePoints.push( m_currentIndex );
-}
-
-void Lexer::PopRestorePoint()
-{
-    m_restorePoints.pop();
-}
-
-void Lexer::Restore()
-{
-    m_currentIndex = m_restorePoints.top();
-    PopRestorePoint();
 }
 
 } // namespace Lexer

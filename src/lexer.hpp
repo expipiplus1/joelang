@@ -28,7 +28,6 @@
 
 #pragma once
 
-#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
@@ -49,22 +48,15 @@ public:
 
     bool Lex( const std::string& string );
 
-    bool ConsumeToken( TokenType token_type );
+    bool TryConsume( TokenType token_type );
 
-    TokenType PeekToken() const;
-    const std::string& PeekString() const;
     void ConsumeNext();
 
-    void PushRestorePoint();
-    void PopRestorePoint();
-    void Restore();
-
+private:
     static std::vector< std::unique_ptr< TokenMatcher > > s_terminals;
 
-private:
     TokenStream m_tokenStream;
     std::size_t m_currentIndex;
-    std::stack< std::size_t > m_restorePoints;
 };
 
 } // namespace Lexer
