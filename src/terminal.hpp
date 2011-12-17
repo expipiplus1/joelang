@@ -40,15 +40,15 @@ namespace Parser
 class Parser;
 
 template< Lexer::TokenType token_type >
-class TerminalToken : public JoeLang::Parser::Token
+class Terminal : public JoeLang::Parser::Token
 {
 public:
-    virtual ~TerminalToken();
+    virtual ~Terminal();
 
-    static bool Parse( Parser& parser, std::unique_ptr< TerminalToken<token_type> >& token );
+    static bool Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token );
 
 protected:
-    TerminalToken();
+    Terminal();
 
 private:
     std::string m_string;
@@ -57,3 +57,4 @@ private:
 } // namespace Parser
 } // namespace JoeLang
 
+#include "terminal-inl.hpp"
