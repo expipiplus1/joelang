@@ -64,6 +64,7 @@ public:
     template<typename T, typename T1, typename... Rest>
     bool ExpectAnyOf();
 
+    bool ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal );
     bool ExpectTerminal( Lexer::TokenType token_type );
 
 private:

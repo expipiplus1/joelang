@@ -46,6 +46,11 @@ bool Parser::Parse ( const std::string& string )
     return Expect<TranslationUnit>( m_translationUnit );
 }
 
+bool Parser::ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal )
+{
+    return m_lexer.TryConsume( token_type, terminal );
+}
+
 bool Parser::ExpectTerminal( Lexer::TokenType token_type )
 {
     return m_lexer.TryConsume( token_type );
