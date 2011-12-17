@@ -66,8 +66,7 @@ TechniqueDeclaration::~TechniqueDeclaration()
 
 bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
-    std::unique_ptr< Terminal<Lexer::TECHNIQUE> > remove_me;
-    if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >( remove_me ) )
+    if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >() )
         return false;
 
     std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
@@ -76,12 +75,10 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
         //extract name from name_terminal
     }
 
-    std::unique_ptr< Terminal<Lexer::OPEN_BRACE> > remove_me_too;
-    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >( remove_me_too ) )
+    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
         return false;
 
-    std::unique_ptr< Terminal<Lexer::CLOSE_BRACE> > remove_me_three;
-    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >( remove_me_three ) )
+    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
     token.reset( new TechniqueDeclaration( "fill me in" ) );

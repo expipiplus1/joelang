@@ -49,14 +49,20 @@ public:
     template< typename T >
     bool Expect( std::unique_ptr<T>& token );
 
-    //template<>
-    //bool ExpectAnyOf( std::unique_ptr<Token>& token );
+    template< typename T >
+    bool Expect();
 
     template<typename T>
     bool ExpectAnyOf( std::unique_ptr<Token>& token );
 
     template<typename T, typename T1, typename... Rest>
     bool ExpectAnyOf( std::unique_ptr<Token>& token );
+
+    template<typename T>
+    bool ExpectAnyOf();
+
+    template<typename T, typename T1, typename... Rest>
+    bool ExpectAnyOf();
 
     bool ExpectTerminal( Lexer::TokenType token_type );
 

@@ -53,11 +53,18 @@ Terminal<token_type>::Terminal()
 template< Lexer::TokenType token_type >
 bool Terminal<token_type>::Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token )
 {
-    if( !parser.ExpectTerminal( token_type ) )
+    if( !Parse( parser ) )
         return false;
     token.reset( new Terminal< token_type >() );
     return true;
 }
+
+template< Lexer::TokenType token_type >
+bool Terminal<token_type>::Parse( Parser& parser )
+{
+    return parser.ExpectTerminal( token_type );
+}
+
 
 } // namespace Parser
 } // namespace JoeLang

@@ -46,6 +46,7 @@ public:
     virtual ~Terminal();
 
     static bool Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token );
+    static bool Parse( Parser& parser );
 
 protected:
     Terminal();

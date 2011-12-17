@@ -44,6 +44,12 @@ bool Parser::Expect( std::unique_ptr<T>& token )
 }
 
 template< typename T >
+bool Parser::Expect()
+{
+    return T::Parse( *this );
+}
+
+template< typename T >
 bool Parser::ExpectAnyOf( std::unique_ptr<Token>& token )
 {
     std::unique_ptr<T> t( dynamic_cast<T*>( token.release() ) );
@@ -65,17 +71,19 @@ bool Parser::ExpectAnyOf( std::unique_ptr<Token>& token )
     return true;
 }
 
-/*
-template< typename T, typename... Rest >
-std::unique_ptr<Token> Parser::ExpectAnyOf()
+template< typename T >
+bool Parser::ExpectAnyOf()
 {
-    std::unique_ptr<T> ret = Expect<T>();
-    if( ret )
-        return ret;
-    else
-        return ExpectAnyOf<Rest>();
+    return Expect<T>();
 }
-*/
+
+template<typename T, typename T1, typename... Rest>
+bool Parser::ExpectAnyOf()
+{
+    if( !Expect<T>() )
+        return ExpectAnyOf<T1, Rest...>();
+    return true;
+}
 
 } // namespace Parser
 } // namespace JoeLang
