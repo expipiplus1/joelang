@@ -26,9 +26,12 @@
     or implied, of Joe Hermaszewski.
 */
 
+#pragma once
+
 #include "terminal.hpp"
 
 #include <memory>
+#include "token.hpp"
 #include "parser.hpp"
 #include "token_matcher.hpp"
 
@@ -38,22 +41,22 @@ namespace Parser
 {
 
 template< Lexer::TokenType token_type >
-TerminalToken<token_type>::~TerminalToken()
+Terminal<token_type>::~Terminal()
 {
 }
 
 template< Lexer::TokenType token_type >
-TerminalToken<token_type>::TerminalToken()
+Terminal<token_type>::Terminal()
 {
 }
 
 template< Lexer::TokenType token_type >
-bool TerminalToken<token_type>::Parse( Parser& parser, std::unique_ptr< TerminalToken<token_type> >& token )
+bool Terminal<token_type>::Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token )
 {
-    if( parser.ExpectToken( token_type ) )
-        token.reset( new TerminalToken< token_type >() );
-        return true;
-    return false;
+    if( !parser.ExpectTerminal( token_type ) )
+        return false;
+    token.reset( new Terminal< token_type >() );
+    return true;
 }
 
 } // namespace Parser
