@@ -88,6 +88,17 @@ bool Lexer::Lex( const std::string& string )
     return true;
 }
 
+bool Lexer::TryConsume( TokenType token_type, std::pair< TokenType, std::string >& terminal )
+{
+    if( m_tokenStream[m_currentIndex].first == token_type )
+    {
+        terminal = m_tokenStream[m_currentIndex];
+        ConsumeNext();
+        return true;
+    }
+    return false;
+}
+
 bool Lexer::TryConsume( TokenType token_type )
 {
     if( m_tokenStream[m_currentIndex].first == token_type )

@@ -48,6 +48,7 @@ public:
 
     bool Lex( const std::string& string );
 
+    bool TryConsume( TokenType token_type, std::pair< TokenType, std::string >& terminal );
     bool TryConsume( TokenType token_type );
 
     void ConsumeNext();
