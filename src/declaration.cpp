@@ -69,11 +69,11 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >() )
         return false;
 
+    //Oh what I'd give for some lambdas here
     std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
+    std::string name;
     if( parser.Expect< Terminal<Lexer::IDENTIFIER> >( name_terminal ) )
-    {
-        //extract name from name_terminal
-    }
+        name = name_terminal->GetString();
 
     if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
         return false;
@@ -81,7 +81,7 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
-    token.reset( new TechniqueDeclaration( "fill me in" ) );
+    token.reset( new TechniqueDeclaration( name ) );
     return true;
 }
 
