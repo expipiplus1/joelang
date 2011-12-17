@@ -43,18 +43,20 @@ namespace Lexer
 namespace Parser
 {
 
+class Parser;
+
 class TranslationUnit : public JoeLang::Parser::Token
 {
 public:
     virtual ~TranslationUnit();
 
-    static std::unique_ptr<TranslationUnit> Parse( Lexer::Lexer& lexer );
+    static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
 
 protected:
     TranslationUnit( std::unique_ptr<Declaration::DeclarationSeq>&& declarations);
 
 private:
-    std::unique_ptr<Parser::Declaration::DeclarationSeq> m_declarations;
+    std::unique_ptr<Declaration::DeclarationSeq> m_declarations;
 };
 
 } // namespace Parser

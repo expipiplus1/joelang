@@ -34,6 +34,8 @@
 #include <vector>
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "terminal.hpp"
+#include "token.hpp"
 
 namespace JoeLang
 {
@@ -42,85 +44,74 @@ namespace Parser
 namespace Declaration
 {
 
-std::unique_ptr< DeclarationBase > DeclarationBase::Parse( Lexer::Lexer& lexer )
+bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
-    std::unique_ptr< DeclarationBase > declaration;
-    lexer.PushRestorePoint();
-
-    declaration = TechniqueDeclaration::Parse( lexer );
-    if( declaration )
-    {
-        lexer.PopRestorePoint();
-        return declaration;
-    }
-
-    lexer.Restore();
-    return nullptr;
+    std::unique_ptr<Token> t;
+    if( !parser.ExpectAnyOf<TechniqueDeclaration>( t ) )
+        return false;
+    token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
+    return true;
 }
 
-TechniqueDeclaration::~TechniqueDeclaration()
-{
-}
 
 TechniqueDeclaration::TechniqueDeclaration( std::string name )
     :m_name( name )
 {
 }
 
-std::unique_ptr< TechniqueDeclaration > TechniqueDeclaration::Parse( Lexer::Lexer& lexer )
+TechniqueDeclaration::~TechniqueDeclaration()
 {
-    lexer.PushRestorePoint();
-    std::string name;
+}
 
-    if( !lexer.ConsumeToken( Lexer::TECHNIQUE ) )
-        return nullptr;
 
-    if( lexer.PeekToken() == Lexer::IDENTIFIER )
+bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
+{
+    std::unique_ptr< Terminal<Lexer::TECHNIQUE> > remove_me;
+    if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >( remove_me ) )
+        return false;
+
+    std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
+    if( parser.Expect< Terminal<Lexer::IDENTIFIER> >( name_terminal ) )
     {
-        name = lexer.PeekString();
-        lexer.ConsumeNext();
+        //extract name from name_terminal
     }
 
-    if( !lexer.ConsumeToken( Lexer::OPEN_BRACE ) )
-        return nullptr;
+    std::unique_ptr< Terminal<Lexer::OPEN_BRACE> > remove_me_too;
+    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >( remove_me_too ) )
+        return false;
 
-    if( !lexer.ConsumeToken( Lexer::CLOSE_BRACE ) )
-        return nullptr;
+    std::unique_ptr< Terminal<Lexer::CLOSE_BRACE> > remove_me_three;
+    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >( remove_me_three ) )
+        return false;
 
-    lexer.PopRestorePoint();
-    return std::unique_ptr<TechniqueDeclaration>( new TechniqueDeclaration( name ) );
+    token.reset( new TechniqueDeclaration( "fill me in" ) );
+    return true;
 }
 
-DeclarationSeq::~DeclarationSeq()
-{
-}
 
 DeclarationSeq::DeclarationSeq( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
     :m_declarations( std::move( declarations ) )
 {
 }
 
-std::unique_ptr<DeclarationSeq> DeclarationSeq::Parse(Lexer::Lexer &lexer)
+DeclarationSeq::~DeclarationSeq()
 {
-    lexer.PushRestorePoint();
+}
+
+bool DeclarationSeq::Parse( Parser& parser, std::unique_ptr<DeclarationSeq>& token )
+{
+    std::unique_ptr<DeclarationBase> declaration;
+    if( !parser.Expect<DeclarationBase>( declaration ) )
+        return false;
+
     std::vector< std::unique_ptr<DeclarationBase> > declarations;
+    declarations.push_back( std::move( declaration ) );
 
-    std::unique_ptr<DeclarationBase> declaration( DeclarationBase::Parse( lexer ) );
-    if( !declaration )
-    {
-        lexer.Restore();
-        return nullptr;
-    }
-
-    declarations.push_back( std::move(declaration) );
-
-    while( ( declaration = DeclarationBase::Parse( lexer ) ) )
-    {
+    while( parser.Expect<DeclarationBase>( declaration ) )
         declarations.push_back( std::move( declaration ) );
-    }
 
-    lexer.PopRestorePoint();
-    return std::unique_ptr<DeclarationSeq>( new DeclarationSeq( std::move( declarations ) ) );
+    token.reset( new DeclarationSeq( std::move( declarations ) ) );
+    return true;
 }
 
 } // namespace Declaration

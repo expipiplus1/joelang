@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include "lexer.hpp"
 #include "translation_unit.hpp"
 
 namespace JoeLang
@@ -44,10 +45,28 @@ public:
     ~Parser() = default;
 
     bool Parse( const std::string& string );
+
+    template< typename T >
+    bool Expect( std::unique_ptr<T>& token );
+
+    //template<>
+    //bool ExpectAnyOf( std::unique_ptr<Token>& token );
+
+    template<typename T>
+    bool ExpectAnyOf( std::unique_ptr<Token>& token );
+
+    template<typename T, typename T1, typename... Rest>
+    bool ExpectAnyOf( std::unique_ptr<Token>& token );
+
+    bool ExpectTerminal( Lexer::TokenType token_type );
+
 private:
+    Lexer::Lexer m_lexer;
+
     std::unique_ptr<TranslationUnit> m_translationUnit;
 };
 
 } // namespace Parser
 } // namespace JoeLang
 
+#include "parser-inl.hpp"

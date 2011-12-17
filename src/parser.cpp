@@ -40,12 +40,15 @@ namespace Parser
 
 bool Parser::Parse ( const std::string& string )
 {
-    Lexer::Lexer lexer;
-    if( !lexer.Lex( string ) )
+    if( !m_lexer.Lex( string ) )
         return false;
 
-    m_translationUnit = TranslationUnit::Parse( lexer );
-    return m_translationUnit != nullptr;
+    return Expect<TranslationUnit>( m_translationUnit );
+}
+
+bool Parser::ExpectTerminal( Lexer::TokenType token_type )
+{
+    return m_lexer.TryConsume( token_type );
 }
 
 } // namespace Parser

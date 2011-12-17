@@ -44,6 +44,8 @@ namespace Lexer
 namespace Parser
 {
 
+class Parser;
+
 namespace Declaration
 {
 
@@ -52,7 +54,7 @@ class DeclarationBase : public JoeLang::Parser::Token
 public:
     virtual ~DeclarationBase() = default;
 
-    static std::unique_ptr< DeclarationBase > Parse( Lexer::Lexer& lexer );
+    static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
 
 protected:
     DeclarationBase() = default;
@@ -63,7 +65,7 @@ class TechniqueDeclaration : public JoeLang::Parser::Declaration::DeclarationBas
 public:
     virtual ~TechniqueDeclaration();
 
-    static std::unique_ptr<TechniqueDeclaration> Parse( Lexer::Lexer& lexer );
+    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
 
 protected:
     TechniqueDeclaration( std::string name );
@@ -77,7 +79,7 @@ class DeclarationSeq : public JoeLang::Parser::Token
 public:
     virtual ~DeclarationSeq();
 
-    static std::unique_ptr<DeclarationSeq> Parse( Lexer::Lexer& lexer );
+    static bool Parse( Parser& parser, std::unique_ptr<DeclarationSeq>& token );
 
 protected:
     DeclarationSeq( std::vector< std::unique_ptr<DeclarationBase> >&& declarations );

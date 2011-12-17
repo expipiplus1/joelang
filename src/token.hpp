@@ -30,7 +30,6 @@
 
 namespace JoeLang
 {
-
 namespace Parser
 {
 
