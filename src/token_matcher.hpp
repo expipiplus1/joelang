@@ -28,7 +28,6 @@
 
 #pragma once
 
-#include <regex>
 #include <string>
 
 namespace JoeLang
@@ -99,18 +98,28 @@ private:
     std::string m_name;
 };
 
-class RegexTokenMatcher : public JoeLang::Lexer::TokenMatcher
+class IdentifierTokenMatcher : public JoeLang::Lexer::TokenMatcher
 {
 public:
-    RegexTokenMatcher( TokenType token_type, std::regex regex, std::string name, bool is_significant = true );
-    RegexTokenMatcher( TokenType token_type, std::string regex_string, std::string name, bool is_significant = true );
-    virtual ~RegexTokenMatcher() = default;
+    IdentifierTokenMatcher( TokenType token_type = TokenType::IDENTIFIER, bool is_significant = true );
+    virtual ~IdentifierTokenMatcher();
 
     virtual std::string Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const;
 
 private:
-    std::regex m_regex;
-    std::string m_name;
+    static bool IsNonDigit( char c );
+    static bool IsDigitOrNonDigit( char c );
+};
+
+class WhitespaceTokenMatcher : public JoeLang::Lexer::TokenMatcher
+{
+public:
+    WhitespaceTokenMatcher( TokenType token_type = TokenType::WHITESPACE, bool is_significant = false );
+    virtual ~WhitespaceTokenMatcher();
+
+    virtual std::string Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const;
+private:
+    static bool IsWhitespace( char c );
 };
 
 } // namespace Lexer

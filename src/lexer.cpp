@@ -45,11 +45,11 @@ Lexer::Lexer()
     if( s_terminals.empty() )
     {
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new RegexTokenMatcher( TokenType::WHITESPACE, "[ \\n\\r\\t]+", "whitespace", false ) ) );
+            ( new WhitespaceTokenMatcher() ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new KeywordTokenMatcher( TokenType::TECHNIQUE, "technique" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new RegexTokenMatcher( TokenType::IDENTIFIER, "[a-zA-Z_][a-zA-Z0-9_]*", "identifier" ) ) );
+            ( new IdentifierTokenMatcher() ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::OPEN_BRACE, "{" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >

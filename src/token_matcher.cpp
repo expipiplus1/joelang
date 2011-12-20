@@ -29,7 +29,6 @@
 #include "token_matcher.hpp"
 
 #include <algorithm>
-#include <regex>
 #include <string>
 
 namespace JoeLang
@@ -108,28 +107,76 @@ std::string KeywordTokenMatcher::Match( std::string::const_iterator string_begin
     return std::string();
 }
 
-RegexTokenMatcher::RegexTokenMatcher( TokenType token_type, std::regex regex, std::string name, bool is_significant )
+IdentifierTokenMatcher::IdentifierTokenMatcher( TokenType token_type, bool is_significant )
     :TokenMatcher( token_type, is_significant )
-    ,m_regex( regex )
-    ,m_name( name )
 {
 }
 
-RegexTokenMatcher::RegexTokenMatcher(TokenType token_type, std::string regex_string, std::string name, bool is_significant)
-    :RegexTokenMatcher( token_type, std::regex( regex_string ), name, is_significant )
+IdentifierTokenMatcher::~IdentifierTokenMatcher()
 {
 }
 
-std::string RegexTokenMatcher::Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const
+std::string IdentifierTokenMatcher::Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const
 {
-    std::smatch match;
-    if( std::regex_search( string_begin, string_end, match, m_regex, std::regex_constants::match_continuous ) )
+    std::string ret;
+
+    if( !IsNonDigit( *string_begin ) )
+        return ret;
+
+    while( string_begin != string_end &&
+           IsDigitOrNonDigit( *string_begin ) )
     {
-        return match[0];
+        ret.push_back( *string_begin );
+        ++string_begin;
     }
-    return std::string();;
+
+    return ret;
 }
 
+bool IdentifierTokenMatcher::IsNonDigit( char c )
+{
+    return ( c >= 'a' && c <= 'z' ) ||
+           ( c >= 'A' && c <= 'Z' ) ||
+           ( c == '_' );
+}
+
+bool IdentifierTokenMatcher::IsDigitOrNonDigit( char c )
+{
+    return IsNonDigit( c ) ||
+           ( c >= '0' && c <= '9' );
+
+}
+
+WhitespaceTokenMatcher::WhitespaceTokenMatcher( TokenType token_type, bool is_significant )
+    :TokenMatcher( token_type, is_significant )
+{
+}
+
+WhitespaceTokenMatcher::~WhitespaceTokenMatcher()
+{
+}
+
+std::string WhitespaceTokenMatcher::Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const
+{
+    std::string ret;
+
+    while( string_begin != string_end &&
+           IsWhitespace( *string_begin ) )
+    {
+        ret.push_back( *string_begin );
+        ++string_begin;
+    }
+
+    return ret;
+}
+
+bool WhitespaceTokenMatcher::IsWhitespace( char c )
+{
+    return c == ' ' ||
+           c == '\t' ||
+           c == '\n' ||
+           c == '\r';
+}
 
 } // namespace Lexer
 } // namespace JoeLang
