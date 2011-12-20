@@ -3,10 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 project( joelang )
 
 if( CMAKE_COMPILER_IS_GNUCXX )
-    set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -nostdinc++" )
-    set( joelang_libraries c++ )
-    set( joelang_include_directories /usr/include/c++/v1 )
-else()
+else() #clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 endif()
 
