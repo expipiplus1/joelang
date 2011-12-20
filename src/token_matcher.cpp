@@ -42,6 +42,10 @@ TokenMatcher::TokenMatcher( TokenType token_type, bool is_significant )
 {
 }
 
+TokenMatcher::~TokenMatcher()
+{
+}
+
 bool TokenMatcher::IsSignificant() const
 {
     return m_isSignificant;
@@ -64,6 +68,10 @@ LiteralTokenMatcher::LiteralTokenMatcher(TokenType token_type, std::string liter
 {
 }
 
+LiteralTokenMatcher::~LiteralTokenMatcher()
+{
+}
+
 std::string LiteralTokenMatcher::Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const
 {
     std::size_t string_size = string_end - string_begin;
@@ -82,6 +90,10 @@ KeywordTokenMatcher::KeywordTokenMatcher(TokenType token_type, std::string liter
     :TokenMatcher( token_type, is_significant )
     ,m_literal( literal )
     ,m_name( name )
+{
+}
+
+KeywordTokenMatcher::~KeywordTokenMatcher()
 {
 }
 

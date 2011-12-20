@@ -33,5 +33,9 @@ namespace JoeLang
 namespace Parser
 {
 
+Token::~Token()
+{
+}
+
 } // namespace Parser
 } // namespace JoeLang

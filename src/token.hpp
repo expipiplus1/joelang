@@ -36,7 +36,7 @@ namespace Parser
 class Token
 {
 public:
-    virtual ~Token() = default;
+    virtual ~Token();
 
 protected:
     Token() = default;

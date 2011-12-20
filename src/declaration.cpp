@@ -44,6 +44,10 @@ namespace Parser
 namespace Declaration
 {
 
+DeclarationBase::~DeclarationBase()
+{
+}
+
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;

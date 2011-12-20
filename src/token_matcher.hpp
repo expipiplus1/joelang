@@ -56,7 +56,7 @@ class TokenMatcher
 {
 public:
     TokenMatcher( TokenType terminal_type, bool is_significant = true );
-    virtual ~TokenMatcher() = default;
+    virtual ~TokenMatcher();
 
     TokenType GetTokenType() const;
     bool      IsSignificant() const;
@@ -72,7 +72,7 @@ class LiteralTokenMatcher : public JoeLang::Lexer::TokenMatcher
 public:
     LiteralTokenMatcher( TokenType token_type, std::string literal, bool is_significant = true );
     LiteralTokenMatcher( TokenType token_type, std::string literal, std::string name, bool is_significant = true );
-    virtual ~LiteralTokenMatcher() = default;
+    virtual ~LiteralTokenMatcher();
 
     virtual std::string Match( std::string::const_iterator string_begin, std::string::const_iterator string_end ) const;
 
@@ -86,7 +86,7 @@ class KeywordTokenMatcher : public JoeLang::Lexer::TokenMatcher
 public:
     KeywordTokenMatcher( TokenType token_type, std::string literal, bool is_significant = true );
     KeywordTokenMatcher( TokenType token_type, std::string literal, std::string name, bool is_significant = true );
-    virtual ~KeywordTokenMatcher() = default;
+    virtual ~KeywordTokenMatcher();
 
     //
     // Match if the input matches m_literal, and the next character isn't in [a-zA-Z0-9_]

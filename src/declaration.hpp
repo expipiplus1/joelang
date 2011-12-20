@@ -52,7 +52,7 @@ namespace Declaration
 class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
-    virtual ~DeclarationBase() = default;
+    virtual ~DeclarationBase();
 
     static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
 
