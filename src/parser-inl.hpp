@@ -31,6 +31,8 @@
 #include "parser.hpp"
 
 #include <memory>
+#include <utility>
+#include <vector>
 
 namespace JoeLang
 {
@@ -47,6 +49,22 @@ template< typename T >
 bool Parser::Expect()
 {
     return T::Parse( *this );
+}
+
+template<typename T>
+bool Parser::ExpectSequenceOf( std::vector< std::unique_ptr<T> >& token_sequence )
+{
+    std::unique_ptr<T> token;
+    if( !T::Parse( *this, token ) )
+        return false;
+
+    do
+    {
+        token_sequence.push_back( std::move( token ) );
+    }
+    while( T::Parse( *this, token ) );
+
+    return true;
 }
 
 template< typename T >

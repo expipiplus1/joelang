@@ -30,6 +30,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include "lexer.hpp"
 #include "translation_unit.hpp"
 
@@ -52,6 +53,11 @@ public:
     template< typename T >
     bool Expect();
 
+
+    template<typename T>
+    bool ExpectSequenceOf( std::vector< std::unique_ptr<T> >& token_sequence );
+
+
     template<typename T>
     bool ExpectAnyOf( std::unique_ptr<Token>& token );
 
@@ -63,8 +69,10 @@ public:
 
     template<typename T, typename T1, typename... Rest>
     bool ExpectAnyOf();
+
 
     bool ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal );
+
     bool ExpectTerminal( Lexer::TokenType token_type );
 
 private:
