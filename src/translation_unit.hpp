@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "declaration.hpp"
 #include "token.hpp"
 
@@ -53,10 +54,10 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
 
 protected:
-    TranslationUnit( std::unique_ptr<DeclarationSeq>&& declarations);
+    TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations);
 
 private:
-    std::unique_ptr<DeclarationSeq> m_declarations;
+    std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
 };
 
 } // namespace Parser

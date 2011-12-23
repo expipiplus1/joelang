@@ -90,10 +90,11 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
 
 protected:
-    TechniqueDeclaration( std::string name );
+    TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > m_passes );
 
 private:
     std::string m_name;
+    std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 
 class DeclarationSeq : public JoeLang::Parser::Token

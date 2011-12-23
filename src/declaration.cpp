@@ -104,8 +104,9 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
 }
 
 
-TechniqueDeclaration::TechniqueDeclaration( std::string name )
-    :m_name( name )
+TechniqueDeclaration::TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > passes )
+    :m_name( std::move( name ) )
+    ,m_passes( std::move( passes ) )
 {
 }
 
@@ -128,10 +129,13 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
         return false;
 
+    std::vector< std::unique_ptr<PassDeclaration> > passes;
+    parser.ExpectSequenceOf<PassDeclaration>( passes );
+
     if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
-    token.reset( new TechniqueDeclaration( name ) );
+    token.reset( new TechniqueDeclaration( name, std::move( passes ) ) );
     return true;
 }
 

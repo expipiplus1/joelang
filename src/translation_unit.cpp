@@ -29,6 +29,7 @@
 #include "translation_unit.hpp"
 
 #include <memory>
+#include <vector>
 #include "declaration.hpp"
 #include "parser.hpp"
 #include "terminal.hpp"
@@ -39,7 +40,7 @@ namespace JoeLang
 namespace Parser
 {
 
-TranslationUnit::TranslationUnit( std::unique_ptr<DeclarationSeq>&& declarations )
+TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
     :m_declarations( std::move( declarations ) )
 {
 }
@@ -50,8 +51,8 @@ TranslationUnit::~TranslationUnit()
 
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
-    std::unique_ptr<DeclarationSeq> declarations;
-    if( !parser.Expect<DeclarationSeq>( declarations ) )
+    std::vector< std::unique_ptr<DeclarationBase> > declarations;
+    if( !parser.ExpectSequenceOf<DeclarationBase>( declarations ) )
         return false;
 
     if( !parser.Expect< Terminal<Lexer::END_OF_FILE> >( ) )
