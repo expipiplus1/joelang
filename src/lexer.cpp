@@ -62,6 +62,8 @@ Lexer::Lexer()
             ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::SEMICOLON, ";" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::EQUALS, "=" ) ) );
     }
 }
 

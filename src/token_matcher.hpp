@@ -48,6 +48,7 @@ enum TokenType
     OPEN_BRACE,
     CLOSE_BRACE,
     SEMICOLON,
+    EQUALS,
 
     // Keywords
     PASS,
