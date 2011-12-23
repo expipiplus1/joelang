@@ -46,6 +46,7 @@ namespace Parser
 
 class Parser;
 
+
 class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
@@ -56,6 +57,7 @@ public:
 protected:
     DeclarationBase() = default;
 };
+
 
 class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
 {
@@ -68,33 +70,35 @@ protected:
     EmptyDeclaration();
 };
 
-class PassDeclaration : public JoeLang::Parser::DeclarationBase
+
+class PassDefinition : public JoeLang::Parser::DeclarationBase
 {
 public:
-    virtual ~PassDeclaration();
+    virtual ~PassDefinition();
 
-    static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
 
 protected:
-    PassDeclaration( std::string name );
+    PassDefinition( std::string name );
 
 private:
     std::string m_name;
 };
 
-class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
+
+class TechniqueDefinition : public JoeLang::Parser::DeclarationBase
 {
 public:
-    virtual ~TechniqueDeclaration();
+    virtual ~TechniqueDefinition();
 
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
 
 protected:
-    TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > m_passes );
+    TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > m_passes );
 
 private:
     std::string m_name;
-    std::vector< std::unique_ptr<PassDeclaration> > m_passes;
+    std::vector< std::unique_ptr<PassDefinition> > m_passes;
 };
 
 } // namespace Parser

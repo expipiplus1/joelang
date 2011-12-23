@@ -49,8 +49,7 @@ DeclarationBase::~DeclarationBase()
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf<TechniqueDeclaration,
-                            PassDeclaration,
+    if( !parser.ExpectAnyOf<TechniqueDefinition,
                             EmptyDeclaration>( t ) )
         return false;
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
@@ -73,17 +72,17 @@ bool EmptyDeclaration::Parse(Parser& parser , std::unique_ptr<EmptyDeclaration>&
     return true;
 }
 
-PassDeclaration::PassDeclaration( std::string name )
+PassDefinition::PassDefinition( std::string name )
     :m_name( name )
 {
 }
 
-PassDeclaration::~PassDeclaration()
+PassDefinition::~PassDefinition()
 {
 }
 
 
-bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
+bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
 {
     if( !parser.Expect< Terminal<Lexer::PASS> >() )
         return false;
@@ -99,23 +98,23 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
-    token.reset( new PassDeclaration( name ) );
+    token.reset( new PassDefinition( name ) );
     return true;
 }
 
 
-TechniqueDeclaration::TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > passes )
+TechniqueDefinition::TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > passes )
     :m_name( std::move( name ) )
     ,m_passes( std::move( passes ) )
 {
 }
 
-TechniqueDeclaration::~TechniqueDeclaration()
+TechniqueDefinition::~TechniqueDefinition()
 {
 }
 
 
-bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
+bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
 {
     if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >() )
         return false;
@@ -129,13 +128,13 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
         return false;
 
-    std::vector< std::unique_ptr<PassDeclaration> > passes;
-    parser.ExpectSequenceOf<PassDeclaration>( passes );
+    std::vector< std::unique_ptr<PassDefinition> > passes;
+    parser.ExpectSequenceOf<PassDefinition>( passes );
 
     if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
-    token.reset( new TechniqueDeclaration( name, std::move( passes ) ) );
+    token.reset( new TechniqueDefinition( name, std::move( passes ) ) );
     return true;
 }
 
