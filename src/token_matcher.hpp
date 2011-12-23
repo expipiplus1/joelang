@@ -47,9 +47,11 @@ enum TokenType
     // Punctuation
     OPEN_BRACE,
     CLOSE_BRACE,
+    SEMICOLON,
 
     // Keywords
-    TECHNIQUE
+    PASS,
+    TECHNIQUE,
 };
 
 class TokenMatcher

@@ -57,6 +57,31 @@ protected:
     DeclarationBase() = default;
 };
 
+class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
+{
+public:
+    virtual ~EmptyDeclaration();
+
+    static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
+
+protected:
+    EmptyDeclaration();
+};
+
+class PassDeclaration : public JoeLang::Parser::DeclarationBase
+{
+public:
+    virtual ~PassDeclaration();
+
+    static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
+
+protected:
+    PassDeclaration( std::string name );
+
+private:
+    std::string m_name;
+};
+
 class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
 {
 public:

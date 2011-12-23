@@ -49,9 +49,57 @@ DeclarationBase::~DeclarationBase()
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf<TechniqueDeclaration>( t ) )
+    if( !parser.ExpectAnyOf<TechniqueDeclaration,
+                            PassDeclaration,
+                            EmptyDeclaration>( t ) )
         return false;
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
+    return true;
+}
+
+EmptyDeclaration::EmptyDeclaration()
+{
+}
+
+EmptyDeclaration::~EmptyDeclaration()
+{
+}
+
+bool EmptyDeclaration::Parse(Parser& parser , std::unique_ptr<EmptyDeclaration>& token )
+{
+    if( !parser.Expect< Terminal<Lexer::SEMICOLON> >() )
+        return false;
+    token.reset( new EmptyDeclaration );
+    return true;
+}
+
+PassDeclaration::PassDeclaration( std::string name )
+    :m_name( name )
+{
+}
+
+PassDeclaration::~PassDeclaration()
+{
+}
+
+
+bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
+{
+    if( !parser.Expect< Terminal<Lexer::PASS> >() )
+        return false;
+
+    std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
+    std::string name;
+    if( parser.Expect< Terminal<Lexer::IDENTIFIER> >( name_terminal ) )
+        name = name_terminal->GetString();
+
+    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
+        return false;
+
+    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
+        return false;
+
+    token.reset( new PassDeclaration( name ) );
     return true;
 }
 

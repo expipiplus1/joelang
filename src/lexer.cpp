@@ -47,14 +47,21 @@ Lexer::Lexer()
     {
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new WhitespaceTokenMatcher() ) );
+
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new KeywordTokenMatcher( TokenType::PASS, "pass" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new KeywordTokenMatcher( TokenType::TECHNIQUE, "technique" ) ) );
+
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new IdentifierTokenMatcher() ) );
+
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::OPEN_BRACE, "{" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::SEMICOLON, ";" ) ) );
     }
 }
 
