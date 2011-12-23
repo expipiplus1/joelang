@@ -54,8 +54,7 @@ bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& t
     if( !parser.Expect<Declaration::DeclarationSeq>( declarations ) )
         return false;
 
-    std::unique_ptr< Terminal<Lexer::END_OF_FILE> > remove_me;
-    if( !parser.Expect< Terminal<Lexer::END_OF_FILE> >( remove_me ) )
+    if( !parser.Expect< Terminal<Lexer::END_OF_FILE> >( ) )
         return false;
 
     token.reset( new TranslationUnit( std::move( declarations ) ) );
