@@ -39,7 +39,7 @@ namespace JoeLang
 namespace Parser
 {
 
-TranslationUnit::TranslationUnit( std::unique_ptr<Declaration::DeclarationSeq>&& declarations )
+TranslationUnit::TranslationUnit( std::unique_ptr<DeclarationSeq>&& declarations )
     :m_declarations( std::move( declarations ) )
 {
 }
@@ -50,8 +50,8 @@ TranslationUnit::~TranslationUnit()
 
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
-    std::unique_ptr<Declaration::DeclarationSeq> declarations;
-    if( !parser.Expect<Declaration::DeclarationSeq>( declarations ) )
+    std::unique_ptr<DeclarationSeq> declarations;
+    if( !parser.Expect<DeclarationSeq>( declarations ) )
         return false;
 
     if( !parser.Expect< Terminal<Lexer::END_OF_FILE> >( ) )

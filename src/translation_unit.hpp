@@ -53,10 +53,10 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
 
 protected:
-    TranslationUnit( std::unique_ptr<Declaration::DeclarationSeq>&& declarations);
+    TranslationUnit( std::unique_ptr<DeclarationSeq>&& declarations);
 
 private:
-    std::unique_ptr<Declaration::DeclarationSeq> m_declarations;
+    std::unique_ptr<DeclarationSeq> m_declarations;
 };
 
 } // namespace Parser

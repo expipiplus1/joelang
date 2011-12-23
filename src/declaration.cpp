@@ -41,8 +41,6 @@ namespace JoeLang
 {
 namespace Parser
 {
-namespace Declaration
-{
 
 DeclarationBase::~DeclarationBase()
 {
@@ -115,6 +113,5 @@ bool DeclarationSeq::Parse( Parser& parser, std::unique_ptr<DeclarationSeq>& tok
     return true;
 }
 
-} // namespace Declaration
 } // namespace Parser
 } // namespace JoeLang

@@ -46,9 +46,6 @@ namespace Parser
 
 class Parser;
 
-namespace Declaration
-{
-
 class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
@@ -60,7 +57,7 @@ protected:
     DeclarationBase() = default;
 };
 
-class TechniqueDeclaration : public JoeLang::Parser::Declaration::DeclarationBase
+class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
 {
 public:
     virtual ~TechniqueDeclaration();
@@ -88,6 +85,5 @@ private:
     std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
 };
 
-} // namespace Declaration
 } // namespace Parser
 } // namespace JoeLang
