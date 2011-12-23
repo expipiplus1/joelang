@@ -34,6 +34,7 @@
 #include <vector>
 #include "lexer.hpp"
 #include "parser.hpp"
+#include "state_assignment.hpp"
 #include "terminal.hpp"
 #include "token.hpp"
 
@@ -72,8 +73,9 @@ bool EmptyDeclaration::Parse(Parser& parser , std::unique_ptr<EmptyDeclaration>&
     return true;
 }
 
-PassDefinition::PassDefinition( std::string name )
-    :m_name( name )
+PassDefinition::PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments )
+    :m_name( std::move( name ) )
+    ,m_stateAssignments( std::move( state_assignments ) )
 {
 }
 
@@ -95,10 +97,13 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
     if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
         return false;
 
+    std::vector< std::unique_ptr<StateAssignment> > state_assignments;
+    parser.ExpectSequenceOf<StateAssignment>( state_assignments );
+
     if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
         return false;
 
-    token.reset( new PassDefinition( name ) );
+    token.reset( new PassDefinition( name, std::move( state_assignments ) ) );
     return true;
 }
 

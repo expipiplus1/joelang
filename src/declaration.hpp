@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include "state_assignment.hpp"
 #include "token.hpp"
 
 namespace JoeLang
@@ -79,10 +80,11 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
 
 protected:
-    PassDefinition( std::string name );
+    PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments );
 
 private:
     std::string m_name;
+    std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
 };
 
 
