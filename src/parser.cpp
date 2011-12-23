@@ -28,8 +28,10 @@
 
 #include "parser.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 #include "lexer.hpp"
 #include "translation_unit.hpp"
 
@@ -43,17 +45,42 @@ bool Parser::Parse ( const std::string& string )
     if( !m_lexer.Lex( string ) )
         return false;
 
-    return Expect<TranslationUnit>( m_translationUnit );
+    if( !Expect<TranslationUnit>( m_translationUnit ) )
+    {
+        std::cout << "Parse Error: Found xxx Expected: ";
+        for( auto i : m_expectedTerminals )
+            std::cout << i << " ";
+        return false;
+    }
+    return true;
 }
 
 bool Parser::ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal )
 {
-    return m_lexer.TryConsume( token_type, terminal );
+    if( m_lexer.TryConsume( token_type, terminal ) )
+    {
+        m_expectedTerminals.clear();
+        return true;
+    }
+    else
+    {
+        m_expectedTerminals.push_back( token_type );
+        return false;
+    }
 }
 
 bool Parser::ExpectTerminal( Lexer::TokenType token_type )
 {
-    return m_lexer.TryConsume( token_type );
+    if( m_lexer.TryConsume( token_type ) )
+    {
+        m_expectedTerminals.clear();
+        return true;
+    }
+    else
+    {
+        m_expectedTerminals.push_back( token_type );
+        return false;
+    }
 }
 
 } // namespace Parser

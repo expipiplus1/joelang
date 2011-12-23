@@ -79,6 +79,7 @@ private:
     Lexer::Lexer m_lexer;
 
     std::unique_ptr<TranslationUnit> m_translationUnit;
+    std::vector< Lexer::TokenType > m_expectedTerminals;
 };
 
 } // namespace Parser
