@@ -97,19 +97,5 @@ private:
     std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 
-class DeclarationSeq : public JoeLang::Parser::Token
-{
-public:
-    virtual ~DeclarationSeq();
-
-    static bool Parse( Parser& parser, std::unique_ptr<DeclarationSeq>& token );
-
-protected:
-    DeclarationSeq( std::vector< std::unique_ptr<DeclarationBase> >&& declarations );
-
-private:
-    std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
-};
-
 } // namespace Parser
 } // namespace JoeLang
