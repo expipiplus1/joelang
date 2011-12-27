@@ -26,9 +26,8 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "terminal.hpp"
 
-#include <memory>
 #include <string>
 #include <utility>
 #include "lexer.hpp"
@@ -39,38 +38,25 @@ namespace JoeLang
 namespace Parser
 {
 
-class Parser;
-
-class TerminalBase : public JoeLang::Parser::Token
+TerminalBase::TerminalBase( const std::pair< Lexer::TokenType, std::string >& terminal )
+    :m_tokenType( terminal.first )
+    ,m_string( terminal.second )
 {
-public:
-    virtual ~TerminalBase();
+}
 
-    const std::string& GetString() const;
-    Lexer::TokenType   GetTokenType() const;
-
-protected:
-    TerminalBase( const std::pair<Lexer::TokenType, std::string>& terminal );
-
-private:
-    Lexer::TokenType m_tokenType;
-    std::string m_string;
-};
-
-template< Lexer::TokenType token_type >
-class Terminal : public JoeLang::Parser::TerminalBase
+TerminalBase::~TerminalBase()
 {
-public:
-    virtual ~Terminal();
+}
 
-    static bool Parse( Parser& parser, std::unique_ptr< Terminal<token_type> >& token );
-    static bool Parse( Parser& parser );
+const std::string& TerminalBase::GetString() const
+{
+    return m_string;
+}
 
-protected:
-    Terminal( const std::pair<Lexer::TokenType, std::string>& terminal );
-};
+Lexer::TokenType TerminalBase::GetTokenType() const
+{
+    return m_tokenType;
+}
 
 } // namespace Parser
 } // namespace JoeLang
-
-#include "terminal-inl.hpp"

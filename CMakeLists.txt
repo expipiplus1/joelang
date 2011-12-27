@@ -21,6 +21,7 @@ add_executable( joelang src/joelang.cpp
                         src/parser-inl.hpp
                         src/state_assignment.cpp
                         src/state_assignment.hpp
+                        src/terminal.cpp
                         src/terminal.hpp
                         src/terminal-inl.hpp
                         src/token.cpp

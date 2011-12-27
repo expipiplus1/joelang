@@ -32,9 +32,10 @@
 
 #include <memory>
 #include <string>
-#include "token.hpp"
+#include <utility>
+#include "lexer.hpp"
 #include "parser.hpp"
-#include "token_matcher.hpp"
+#include "token.hpp"
 
 namespace JoeLang
 {
@@ -43,19 +44,13 @@ namespace Parser
 
 template< Lexer::TokenType token_type >
 Terminal<token_type>::Terminal( const std::pair< Lexer::TokenType, std::string >& terminal )
-    :m_string( terminal.second )
+    :TerminalBase( terminal )
 {
 }
 
 template< Lexer::TokenType token_type >
 Terminal<token_type>::~Terminal()
 {
-}
-
-template< Lexer::TokenType token_type >
-const std::string& Terminal<token_type>::GetString() const
-{
-    return m_string;
 }
 
 template< Lexer::TokenType token_type >
