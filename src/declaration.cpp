@@ -54,6 +54,8 @@ bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& t
                             EmptyDeclaration>( t ) )
         return false;
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
+    if( !token )
+        return false;
     return true;
 }
 
