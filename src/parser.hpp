@@ -47,8 +47,8 @@ public:
 
     bool Parse( const std::string& string );
 
-    template< typename T >
-    bool Expect( std::unique_ptr<T>& token );
+    template< typename T, typename U = T>
+    bool Expect( std::unique_ptr<U>& token );
 
     template< typename T >
     bool Expect();

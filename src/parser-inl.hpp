@@ -39,10 +39,15 @@ namespace JoeLang
 namespace Parser
 {
 
-template< typename T >
-bool Parser::Expect( std::unique_ptr<T>& token )
+template< typename T, typename U >
+bool Parser::Expect( std::unique_ptr<U>& token )
 {
     return T::Parse( *this, token );
+    //std::unique_ptr<U> t;
+    //if( !T::Parse( *this, t ) )
+        //return false;
+    //token.reset( dynamic_cast<T*>( t.release() ) );
+    //return true;
 }
 
 template< typename T >
