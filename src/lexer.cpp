@@ -62,8 +62,30 @@ Lexer::Lexer()
             ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::SEMICOLON, ";" ) ) );
+
+        // Assignment
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::EQUALS, "=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::MULTIPLY_EQUALS, "*=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::DIVIDE_EQUALS, "/=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::MODULUS_EQUALS, "%=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::ADD_EQUALS, "+=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::SUBTRACT_EQUALS, "-=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::LSHIFT_EQUALS, "<<=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::RSHIFT_EQUALS, ">>=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::AND_EQUALS, "&=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::XOR_EQUALS, "^=" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::OR_EQUALS, "|=" ) ) );
     }
 }
 

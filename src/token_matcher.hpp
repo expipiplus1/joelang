@@ -48,7 +48,18 @@ enum TokenType
     OPEN_BRACE,
     CLOSE_BRACE,
     SEMICOLON,
+    // Assignment
     EQUALS,
+    MULTIPLY_EQUALS,
+    DIVIDE_EQUALS,
+    MODULUS_EQUALS,
+    ADD_EQUALS,
+    SUBTRACT_EQUALS,
+    LSHIFT_EQUALS,
+    RSHIFT_EQUALS,
+    AND_EQUALS,
+    XOR_EQUALS,
+    OR_EQUALS,
 
     // Keywords
     PASS,
