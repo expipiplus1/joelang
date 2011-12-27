@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include "lexer.hpp"
 #include "token.hpp"
 
 namespace JoeLang
@@ -37,6 +38,13 @@ namespace Parser
 {
 
 class Parser;
+
+class UnaryExpression;
+class AssignmentOperator;
+
+//------------------------------------------------------------------------------
+// Expression
+//------------------------------------------------------------------------------
 
 class Expression : public JoeLang::Parser::Token
 {
@@ -47,6 +55,76 @@ public:
 
 protected:
     Expression( );
+};
+
+//------------------------------------------------------------------------------
+// Assignment Expression
+//------------------------------------------------------------------------------
+
+class AssignmentExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~AssignmentExpression();
+
+    static bool Parse(Parser& parser, std::unique_ptr<Expression> &token );
+
+protected:
+    AssignmentExpression( std::unique_ptr<Expression> unary_expression,
+                          std::unique_ptr<AssignmentOperator> assignment_operator,
+                          std::unique_ptr<Expression> assignment_expression );
+
+private:
+    std::unique_ptr<Expression> m_unaryExpression;
+    std::unique_ptr<AssignmentOperator> m_assignmentOperator;
+    std::unique_ptr<Expression> m_assignmentExpression;
+};
+
+//------------------------------------------------------------------------------
+// Assignment Operator
+//------------------------------------------------------------------------------
+
+class AssignmentOperator : public JoeLang::Parser::Token
+{
+public:
+    virtual ~AssignmentOperator();
+
+    static bool Parse(Parser& parser, std::unique_ptr<AssignmentOperator> &token );
+
+protected:
+    AssignmentOperator( Lexer::TokenType token_type );
+
+private:
+    Lexer::TokenType m_tokenType;
+};
+
+//------------------------------------------------------------------------------
+// Conditional Expression
+//------------------------------------------------------------------------------
+
+class ConditionalExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~ConditionalExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    ConditionalExpression( );
+};
+
+//------------------------------------------------------------------------------
+// Unary Expression
+//------------------------------------------------------------------------------
+
+class UnaryExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~UnaryExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    UnaryExpression( );
 };
 
 } // namespace Parser
