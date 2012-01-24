@@ -139,31 +139,5 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     return true;
 }
 
-
-DeclarationSeq::DeclarationSeq( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
-    :m_declarations( std::move( declarations ) )
-{
-}
-
-DeclarationSeq::~DeclarationSeq()
-{
-}
-
-bool DeclarationSeq::Parse( Parser& parser, std::unique_ptr<DeclarationSeq>& token )
-{
-    std::unique_ptr<DeclarationBase> declaration;
-    if( !parser.Expect<DeclarationBase>( declaration ) )
-        return false;
-
-    std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    declarations.push_back( std::move( declaration ) );
-
-    while( parser.Expect<DeclarationBase>( declaration ) )
-        declarations.push_back( std::move( declaration ) );
-
-    token.reset( new DeclarationSeq( std::move( declarations ) ) );
-    return true;
-}
-
 } // namespace Parser
 } // namespace JoeLang
