@@ -46,6 +46,11 @@ namespace Parser
 
 class Parser;
 
+//------------------------------------------------------------------------------
+// DeclarationBase
+// Parse Matches for any kind of declaration
+//------------------------------------------------------------------------------
+
 class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
@@ -57,6 +62,11 @@ protected:
     DeclarationBase() = default;
 };
 
+//------------------------------------------------------------------------------
+// EmptyDeclaration
+// Matches ';'
+//------------------------------------------------------------------------------
+
 class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
 {
 public:
@@ -67,6 +77,10 @@ public:
 protected:
     EmptyDeclaration();
 };
+
+//------------------------------------------------------------------------------
+// PassDeclaration
+//------------------------------------------------------------------------------
 
 class PassDeclaration : public JoeLang::Parser::DeclarationBase
 {
@@ -81,6 +95,10 @@ protected:
 private:
     std::string m_name;
 };
+
+//------------------------------------------------------------------------------
+// TechniqueDeclaration
+//------------------------------------------------------------------------------
 
 class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
 {

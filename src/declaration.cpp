@@ -42,6 +42,10 @@ namespace JoeLang
 namespace Parser
 {
 
+//------------------------------------------------------------------------------
+// DeclarationBase
+//------------------------------------------------------------------------------
+
 DeclarationBase::~DeclarationBase()
 {
 }
@@ -56,6 +60,11 @@ bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& t
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
     return true;
 }
+
+//------------------------------------------------------------------------------
+// EmptyDeclaration
+//------------------------------------------------------------------------------
+
 
 EmptyDeclaration::EmptyDeclaration()
 {
@@ -72,6 +81,10 @@ bool EmptyDeclaration::Parse(Parser& parser , std::unique_ptr<EmptyDeclaration>&
     token.reset( new EmptyDeclaration );
     return true;
 }
+
+//------------------------------------------------------------------------------
+// PassDeclaration
+//------------------------------------------------------------------------------
 
 PassDeclaration::PassDeclaration( std::string name )
     :m_name( name )
@@ -103,6 +116,9 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     return true;
 }
 
+//------------------------------------------------------------------------------
+// TechniqueDeclaration
+//------------------------------------------------------------------------------
 
 TechniqueDeclaration::TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > passes )
     :m_name( std::move( name ) )
