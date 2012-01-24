@@ -43,25 +43,53 @@ std::vector< std::unique_ptr< TokenMatcher > > Lexer::s_terminals;
 Lexer::Lexer()
     :m_currentIndex( 0 )
 {
+    //
+    // Populate the different kinds of tokens
+    //
     if( s_terminals.empty() )
     {
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new WhitespaceTokenMatcher() ) );
 
+        //
+        // Keywords
+        //
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new KeywordTokenMatcher( TokenType::PASS, "pass" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new KeywordTokenMatcher( TokenType::TECHNIQUE, "technique" ) ) );
 
+        //
+        // Built in types
+        //
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new KeywordTokenMatcher( TokenType::TYPE_INT, "int" ) ) );
+
+        //
+        // Identifier
+        //
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new IdentifierTokenMatcher() ) );
 
+        //
+        // Punctuation
+        //
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::OPEN_BRACE, "{" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
         s_terminals.push_back( std::unique_ptr< TokenMatcher >
             ( new LiteralTokenMatcher( TokenType::SEMICOLON, ";" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::PLUS, "+" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::MINUS, "-" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::DIVIDE, "/" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::MULTIPLY, "*" ) ) );
+        s_terminals.push_back( std::unique_ptr< TokenMatcher >
+            ( new LiteralTokenMatcher( TokenType::MODULO, "%" ) ) );
     }
 }
 

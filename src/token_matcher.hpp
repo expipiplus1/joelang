@@ -48,10 +48,18 @@ enum TokenType
     OPEN_BRACE,
     CLOSE_BRACE,
     SEMICOLON,
+    PLUS,
+    MINUS,
+    MULTIPLY,
+    DIVIDE,
+    MODULO,
 
     // Keywords
     PASS,
     TECHNIQUE,
+
+    // Types
+    TYPE_INT
 };
 
 class TokenMatcher
