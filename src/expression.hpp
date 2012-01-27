@@ -44,7 +44,7 @@ class AssignmentOperator;
 
 //------------------------------------------------------------------------------
 // Expression
-// All Classes deriving from Experession will fill a pointer to Expression when
+// All Classes deriving from Expression will fill a pointer to Expression when
 // Parse is called, because they're used in a polymorphic way.
 //------------------------------------------------------------------------------
 
