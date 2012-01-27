@@ -46,7 +46,9 @@ enum TerminalType
     END_OF_INPUT,
 
     // Ignored sequence
-    IGNORED_CHARACTERS,
+    WHITESPACE,
+    LINE_COMMENT,
+    BLOCK_COMMENT,
 
     // Funny characters
     UNHANDLED_CHARACTER,
@@ -65,6 +67,24 @@ enum TerminalType
 
     // Assignment
     EQUALS,
+    PLUS_EQUALS,
+    MINUS_EQUALS,
+    MULTIPLY_EQUALS,
+    DIVIDE_EQUALS,
+    MODULO_EQUALS,
+    LEFT_SHIFT_EQUALS,
+    RIGHT_SHIFT_EQUALS,
+    AND_EQUALS,
+    OR_EQUALS,
+    XOR_EQUALS,
+
+    // Comparison
+    EQUALITY,
+    NOT_EQUAL,
+    LESS_THAN_EQUALS,
+    GREATER_THAN_EQUALS,
+    LESS_THAN,
+    GREATER_THAN,
 
     // Logic
     LOGICAL_AND,
@@ -78,6 +98,11 @@ enum TerminalType
     MULTIPLY,
     DIVIDE,
     MODULO,
+    AND,
+    OR,
+    XOR,
+    LEFT_SHIFT,
+    RIGHT_SHIFT,
 
     // Misc
     SEMICOLON,

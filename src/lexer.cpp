@@ -50,9 +50,9 @@ namespace Lexer
 
 static const FunctionalTerminal g_ignoredTerminals[] =
 {
-    { ReadWhitespace,   IGNORED_CHARACTERS, "whitespace"    },
-    { ReadLineComment,  IGNORED_CHARACTERS, "line comment"  },
-    { ReadBlockComment, IGNORED_CHARACTERS, "block comment" }
+    { ReadWhitespace,   WHITESPACE,    "whitespace"    },
+    { ReadLineComment,  LINE_COMMENT,  "line comment"  },
+    { ReadBlockComment, BLOCK_COMMENT, "block comment" }
 };
 
 //
@@ -67,6 +67,26 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "<",  OPEN_ANGLED,    "" },
     { ">",  CLOSE_ANGLED,   "" },
 
+    { "==", EQUALITY,       "" },
+    { "!=", NOT_EQUAL,      "" },
+    { "<=", LESS_THAN_EQUALS,    "" },
+    { ">=", GREATER_THAN_EQUALS, "" },
+    { ">",  LESS_THAN,      "" },
+    { ">",  GREATER_THAN,   "" },
+    // TODO:
+
+    { "=",  EQUALS,          "" },
+    { "+=", PLUS_EQUALS,     "" },
+    { "-=", MINUS_EQUALS,    "" },
+    { "*=", MULTIPLY_EQUALS, "" },
+    { "/=", DIVIDE_EQUALS,   "" },
+    { "%=", MODULO_EQUALS,   "" },
+    { "&=", AND_EQUALS,      "" },
+    { "|=", OR_EQUALS,       "" },
+    { "^=", XOR_EQUALS,      "" },
+    { "<<=", LEFT_SHIFT_EQUALS,  "" },
+    { ">>=", RIGHT_SHIFT_EQUALS, "" },
+
     { "&&", LOGICAL_AND,    "" },
     { "||", LOGICAL_OR,     "" },
 
@@ -77,8 +97,12 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "*",  MULTIPLY,       "" },
     { "/",  DIVIDE,         "" },
     { "%",  MODULO,         "" },
+    { "&",  AND,            "" },
+    { "|",  OR,             "" },
+    { "^",  XOR,            "" },
+    { "<<", LEFT_SHIFT,     "" },
+    { ">>", RIGHT_SHIFT,    "" },
 
-    { "=",  EQUALS,         "" },
     { ";",  SEMICOLON,      "" }
 };
 
