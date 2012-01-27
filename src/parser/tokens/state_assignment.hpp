@@ -26,56 +26,37 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "translation_unit.hpp"
+#pragma once
 
-#include <iostream>
 #include <memory>
-#include <vector>
+#include <string>
 
-#include "declaration.hpp"
-#include "parser.hpp"
-#include "terminal_types.hpp"
-#include "token.hpp"
+#include <parser/tokens/expression.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-//------------------------------------------------------------------------------
-// TranslationUnit
-//------------------------------------------------------------------------------
+class Parser;
 
-TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
-    :m_declarations( std::move( declarations ) )
+class StateAssignment : public JoeLang::Parser::Token
 {
-}
+public:
+    virtual ~StateAssignment();
 
-TranslationUnit::~TranslationUnit()
-{
-}
+    virtual void Print( int depth ) const;
 
-void TranslationUnit::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i)
-        std::cout << " ";
-    std::cout << "TranslationUnit\n";
-    for( const auto& declaration : m_declarations )
-        declaration->Print( depth + 1 );
-}
+    static bool Parse( Parser& parser, std::unique_ptr<StateAssignment>& token );
 
-bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
-{
-    std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
-        return false;
+protected:
+    StateAssignment( std::string state_name, std::unique_ptr<Expression> expression );
 
-    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
-        return false;
-
-    token.reset( new TranslationUnit( std::move( declarations ) ) );
-    return true;
-}
+private:
+    std::string m_stateName;
+    std::unique_ptr<Expression> m_expression;
+};
 
 } // namespace Parser
 } // namespace JoeLang

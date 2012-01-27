@@ -26,62 +26,60 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "state_assignment.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
-#include <vector>
-#include "lexer.hpp"
-#include "terminal_types.hpp"
-#include "translation_unit.hpp"
+#include <utility>
+
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
+#include <parser/tokens/expression.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-class Parser
+StateAssignment::StateAssignment( std::string state_name, std::unique_ptr< Expression > expression )
+    :m_stateName( std::move( state_name ) )
+    ,m_expression( std::move( expression ) )
 {
-public:
-    Parser() = default;
-    ~Parser() = default;
+}
 
-    void Print() const;
+StateAssignment::~StateAssignment()
+{
+}
 
-    bool Parse( const std::string& string );
+void StateAssignment::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "State Assignment to " << m_stateName << "\n";
+    m_expression->Print( depth + 1 );
+}
 
-    bool ExpectTerminal( Lexer::TerminalType terminal_type );
-    bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
+bool StateAssignment::Parse( Parser& parser, std::unique_ptr<StateAssignment>& token )
+{
+    std::string state_name;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
+        return false;
 
-private:
-    std::unique_ptr<Lexer::Lexer> m_lexer;
+    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
+        return false;
 
-    std::unique_ptr<TranslationUnit> m_translationUnit;
-};
+    std::unique_ptr< Expression > expression;
+    if( !Expect< Expression >( parser, expression ) )
+        return false;
 
-template< typename T, typename U >
-bool Expect( Parser& parser, std::unique_ptr<U>& token );
+    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
+        return false;
 
-template< typename T >
-bool Expect( Parser& parser );
-
-template<typename T>
-bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence );
-
-template<typename T>
-bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
-
-template<typename T, typename T1, typename... Rest>
-bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
-
-template<typename T>
-bool ExpectAnyOf( Parser& parser );
-
-template<typename T, typename T1, typename... Rest>
-bool ExpectAnyOf( Parser& parser );
-
+    token.reset( new StateAssignment( std::move( state_name ),
+                                      std::move( expression ) ) );
+    return true;
+}
 
 } // namespace Parser
 } // namespace JoeLang
-
-#include "parser-inl.hpp"

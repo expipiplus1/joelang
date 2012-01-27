@@ -29,8 +29,9 @@
 #pragma once
 
 #include <memory>
-#include "terminal_types.hpp"
-#include "token.hpp"
+
+#include <parser/terminal_types.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {

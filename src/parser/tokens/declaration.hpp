@@ -28,68 +28,96 @@
 
 #pragma once
 
-#include <stack>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include "terminal_types.hpp"
+#include <parser/tokens/state_assignment.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
-namespace Lexer
+namespace Parser
 {
 
-//------------------------------------------------------------------------------
-// Terminal
-//------------------------------------------------------------------------------
-
-struct Terminal
-{
-    Terminal( TerminalType terminal_type,
-              std::string::const_iterator begin,
-              std::string::const_iterator end );
-
-    TerminalType terminal_type;
-    std::string::const_iterator begin;
-    std::string::const_iterator end;
-};
+class Parser;
 
 //------------------------------------------------------------------------------
-// Lexer
+// DeclarationBase
+// Parse Matches for any kind of declaration
 //------------------------------------------------------------------------------
 
-class Lexer
+class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
-    Lexer() = delete;
-    Lexer( std::string string );
-    ~Lexer() = default;
+    virtual ~DeclarationBase();
 
-    //
-    // Expect return true and moves the position forward if the next terminal
-    // matches terminal_type. It optionally returns the matched string
-    //
-    bool Expect( TerminalType terminal_type );
-    bool Expect( TerminalType terminal_type, std::string& string );
+    static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
 
-    //
-    // One can optionally store the position in the stream for looking ahead
-    // more than one token
-    //
-    void PushState();
-    void PopState();
-    void RestoreState();
-
-private:
-    void ConsumeIgnoredTerminals();
-
-    std::size_t m_numTokensRead;
-    std::vector<Terminal> m_readTerminals;
-
-    const std::string m_string;
-    std::string::const_iterator m_position;
-    std::stack<std::string::iterator> m_savedPositions;
+protected:
+    DeclarationBase() = default;
 };
 
-} // namespace Lexer
+//------------------------------------------------------------------------------
+// EmptyDeclaration
+// Matches ';'
+//------------------------------------------------------------------------------
+
+class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
+{
+public:
+    virtual ~EmptyDeclaration();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
+
+protected:
+    EmptyDeclaration();
+};
+
+
+//------------------------------------------------------------------------------
+// PassDefinition
+//------------------------------------------------------------------------------
+
+class PassDefinition : public JoeLang::Parser::DeclarationBase
+{
+public:
+    virtual ~PassDefinition();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
+
+protected:
+    PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments  );
+
+private:
+    std::string m_name;
+    std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
+};
+
+//------------------------------------------------------------------------------
+// TechniqueDefinition
+//------------------------------------------------------------------------------
+
+class TechniqueDefinition : public JoeLang::Parser::DeclarationBase
+{
+public:
+    virtual ~TechniqueDefinition();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
+
+protected:
+    TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > m_passes );
+
+private:
+    std::string m_name;
+    std::vector< std::unique_ptr<PassDefinition> > m_passes;
+};
+
+} // namespace Parser
 } // namespace JoeLang

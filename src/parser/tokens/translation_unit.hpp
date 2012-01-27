@@ -31,8 +31,8 @@
 #include <memory>
 #include <vector>
 
-#include "declaration.hpp"
-#include "token.hpp"
+#include <parser/tokens/declaration.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {

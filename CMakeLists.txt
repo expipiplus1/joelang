@@ -10,24 +10,25 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O0 -g -Wall")
 
 add_executable( joelang src/joelang.cpp
-                        src/declaration.cpp
-                        src/declaration.hpp
-                        src/expression.cpp
-                        src/expression.hpp
-                        src/lexer.cpp
-                        src/lexer.hpp
-                        src/parser.cpp
-                        src/parser.hpp
-                        src/parser-inl.hpp
-                        src/terminal_types.cpp
-                        src/terminal_types.hpp
-                        src/state_assignment.cpp
-                        src/state_assignment.hpp
-                        src/token.cpp
-                        src/token.hpp
-                        src/translation_unit.cpp
-                        src/translation_unit.hpp )
+                        src/parser/lexer.cpp
+                        src/parser/lexer.hpp
+                        src/parser/parser.cpp
+                        src/parser/parser.hpp
+                        src/parser/parser-inl.hpp
+                        src/parser/terminal_types.cpp
+                        src/parser/terminal_types.hpp
+                        src/parser/tokens/declaration.cpp
+                        src/parser/tokens/declaration.hpp
+                        src/parser/tokens/expression.cpp
+                        src/parser/tokens/expression.hpp
+                        src/parser/tokens/state_assignment.cpp
+                        src/parser/tokens/state_assignment.hpp
+                        src/parser/tokens/token.cpp
+                        src/parser/tokens/token.hpp
+                        src/parser/tokens/translation_unit.cpp
+                        src/parser/tokens/translation_unit.hpp )
 
+set( joelang_include_directories ${joelang_SOURCE_DIR}/src )
 target_link_libraries( joelang ${joelang_libraries} )
 include_directories( ${joelang_include_directories} )
 

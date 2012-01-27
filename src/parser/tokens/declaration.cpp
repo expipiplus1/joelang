@@ -34,10 +34,10 @@
 #include <utility>
 #include <vector>
 
-#include "parser.hpp"
-#include "state_assignment.hpp"
-#include "terminal_types.hpp"
-#include "token.hpp"
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
+#include <parser/tokens/state_assignment.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {

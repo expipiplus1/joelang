@@ -28,7 +28,8 @@
 
 #include <iostream>
 #include <string>
-#include "parser.hpp"
+
+#include <parser/parser.hpp>
 
 int main( int argc, char** argv )
 {

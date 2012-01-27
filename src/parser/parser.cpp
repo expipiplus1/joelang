@@ -29,8 +29,9 @@
 #include "parser.hpp"
 
 #include <string>
-#include "lexer.hpp"
-#include "translation_unit.hpp"
+
+#include <parser/lexer.hpp>
+#include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {

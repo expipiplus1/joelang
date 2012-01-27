@@ -26,58 +26,54 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "state_assignment.hpp"
+#include "translation_unit.hpp"
 
 #include <iostream>
 #include <memory>
-#include <string>
-#include <utility>
+#include <vector>
 
-#include "expression.hpp"
-#include "parser.hpp"
-#include "terminal_types.hpp"
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
+#include <parser/tokens/declaration.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-StateAssignment::StateAssignment( std::string state_name, std::unique_ptr< Expression > expression )
-    :m_stateName( std::move( state_name ) )
-    ,m_expression( std::move( expression ) )
+//------------------------------------------------------------------------------
+// TranslationUnit
+//------------------------------------------------------------------------------
+
+TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
+    :m_declarations( std::move( declarations ) )
 {
 }
 
-StateAssignment::~StateAssignment()
+TranslationUnit::~TranslationUnit()
 {
 }
 
-void StateAssignment::Print( int depth ) const
+void TranslationUnit::Print( int depth ) const
 {
-    for( int i = 0; i < depth * 4; ++i )
+    for( int i = 0; i < depth * 4; ++i)
         std::cout << " ";
-    std::cout << "State Assignment to " << m_stateName << "\n";
-    m_expression->Print( depth + 1 );
+    std::cout << "TranslationUnit\n";
+    for( const auto& declaration : m_declarations )
+        declaration->Print( depth + 1 );
 }
 
-bool StateAssignment::Parse( Parser& parser, std::unique_ptr<StateAssignment>& token )
+bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
-    std::string state_name;
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
+    std::vector< std::unique_ptr<DeclarationBase> > declarations;
+    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
         return false;
 
-    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
+    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
         return false;
 
-    std::unique_ptr< Expression > expression;
-    if( !Expect< Expression >( parser, expression ) )
-        return false;
-
-    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
-        return false;
-
-    token.reset( new StateAssignment( std::move( state_name ),
-                                      std::move( expression ) ) );
+    token.reset( new TranslationUnit( std::move( declarations ) ) );
     return true;
 }
 

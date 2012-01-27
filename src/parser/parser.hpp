@@ -30,33 +30,59 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include "expression.hpp"
-#include "token.hpp"
+#include <parser/lexer.hpp>
+#include <parser/terminal_types.hpp>
+#include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-class Parser;
-
-class StateAssignment : public JoeLang::Parser::Token
+class Parser
 {
 public:
-    virtual ~StateAssignment();
+    Parser() = default;
+    ~Parser() = default;
 
-    virtual void Print( int depth ) const;
+    void Print() const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<StateAssignment>& token );
+    bool Parse( const std::string& string );
 
-protected:
-    StateAssignment( std::string state_name, std::unique_ptr<Expression> expression );
+    bool ExpectTerminal( Lexer::TerminalType terminal_type );
+    bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
 private:
-    std::string m_stateName;
-    std::unique_ptr<Expression> m_expression;
+    std::unique_ptr<Lexer::Lexer> m_lexer;
+
+    std::unique_ptr<TranslationUnit> m_translationUnit;
 };
+
+template< typename T, typename U >
+bool Expect( Parser& parser, std::unique_ptr<U>& token );
+
+template< typename T >
+bool Expect( Parser& parser );
+
+template<typename T>
+bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence );
+
+template<typename T>
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
+
+template<typename T, typename T1, typename... Rest>
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
+
+template<typename T>
+bool ExpectAnyOf( Parser& parser );
+
+template<typename T, typename T1, typename... Rest>
+bool ExpectAnyOf( Parser& parser );
+
 
 } // namespace Parser
 } // namespace JoeLang
+
+#include "parser-inl.hpp"

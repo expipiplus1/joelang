@@ -32,8 +32,8 @@
 #include <memory>
 #include <utility>
 
-#include "parser.hpp"
-#include "terminal_types.hpp"
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
 
 namespace JoeLang
 {
