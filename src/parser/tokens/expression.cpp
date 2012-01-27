@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <memory>
+#include <string>
 #include <utility>
 
 #include <parser/parser.hpp>
@@ -192,10 +193,89 @@ bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& 
 }
 
 //------------------------------------------------------------------------------
+// BinaryOperatorExpression
+//------------------------------------------------------------------------------
+
+BinaryOperatorExpression::BinaryOperatorExpression( Lexer::TerminalType operator_terminal,
+                                                    std::unique_ptr<Expression> left_side,
+                                                    std::unique_ptr<Expression> right_side )
+    :m_operatorTerminal( operator_terminal )
+    ,m_leftSide( std::move( left_side ) )
+    ,m_rightSide( std::move( right_side ) )
+{
+}
+
+BinaryOperatorExpression::~BinaryOperatorExpression()
+{
+}
+
+void BinaryOperatorExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "Binary Operator Expression\n";
+    m_leftSide->Print( depth + 1 );
+    m_rightSide->Print( depth + 1 );
+}
+template< typename ExpressionType, typename SubExpressionType >
+bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
+                                  const std::vector<Lexer::TerminalType>& operator_terminals )
+{
+    std::unique_ptr<Expression> left;
+    if( !Expect<SubExpressionType>( parser, left ) )
+        return false;
+
+    std::vector< std::pair< Lexer::TerminalType,
+                            std::unique_ptr<Expression> > > rest;
+
+    while( true )
+    {
+        bool cont = false;
+        Lexer::TerminalType operator_terminal;
+        for( Lexer::TerminalType o : operator_terminals )
+        {
+            if( parser.ExpectTerminal( o ) )
+            {
+                operator_terminal = o;
+                cont = true;
+                break;
+            }
+        }
+
+        if( !cont )
+            break;
+
+        std::unique_ptr<Expression> next;
+        if( !Expect<SubExpressionType>( parser, next ) )
+            return false;
+
+        rest.push_back( std::make_pair( operator_terminal,
+                                        std::move( next ) ) );
+    }
+
+    for( auto& expression : rest )
+        left.reset( new ExpressionType( expression.first,
+                                        std::move( left ),
+                                        std::move( expression.second ) ) );
+
+    token = std::move( left );
+    return true;
+}
+
+//template< typename ExpressionType, typename SubExpressionType >
+//static bool ParseRightAssociative( Parser& parser, std::unique_ptr<Expression>& token,
+                                   //const std::vector<Lexer::TerminalType>& operator_terminals );
+
+//------------------------------------------------------------------------------
 // Logical Or Expression
 //------------------------------------------------------------------------------
 
-LogicalOrExpression::LogicalOrExpression()
+LogicalOrExpression::LogicalOrExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
 {
 }
 
@@ -203,21 +283,38 @@ LogicalOrExpression::~LogicalOrExpression()
 {
 }
 
-void LogicalOrExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "LogicalOr Expression\n";
-}
-
-//TODO
 bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER ) )
-        return false;
+    std::vector<Lexer::TerminalType> operators;
+    operators.push_back( Lexer::LOGICAL_OR );
 
-    token.reset( new LogicalOrExpression() );
-    return true;
+    return ParseLeftAssociative<LogicalOrExpression, LogicalAndExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// LogicalAndExpression
+//------------------------------------------------------------------------------
+
+LogicalAndExpression::LogicalAndExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+LogicalAndExpression::~LogicalAndExpression()
+{
+}
+
+bool LogicalAndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    std::vector<Lexer::TerminalType> operators;
+    operators.push_back( Lexer::LOGICAL_AND );
+
+    //TODO
+    return ParseLeftAssociative<LogicalAndExpression, PrimaryExpression>( parser, token, operators );
 }
 
 //------------------------------------------------------------------------------
@@ -242,13 +339,46 @@ void UnaryExpression::Print( int depth ) const
 //TODO
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    return Expect<PrimaryExpression>( parser, token );
+   /*
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER ) )
         return false;
 
     token.reset( new UnaryExpression() );
     return true;
+    */
 }
 
+//------------------------------------------------------------------------------
+// Primary Expression
+//------------------------------------------------------------------------------
+
+PrimaryExpression::PrimaryExpression( std::string identifier )
+    :m_identifier( std::move( identifier ) )
+{
+}
+
+PrimaryExpression::~PrimaryExpression()
+{
+}
+
+void PrimaryExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_identifier << "\n";
+}
+
+//TODO
+bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    std::string identifier;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, identifier ) )
+        return false;
+
+    token.reset( new PrimaryExpression( identifier ) );
+    return true;
+}
 
 } // namespace Parser
 } // namespace JoeLang

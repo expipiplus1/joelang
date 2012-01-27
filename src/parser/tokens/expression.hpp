@@ -29,6 +29,8 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/token.hpp>
@@ -129,20 +131,74 @@ private:
 };
 
 //------------------------------------------------------------------------------
+// BinaryOperatorExpression
+//------------------------------------------------------------------------------
+
+class BinaryOperatorExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~BinaryOperatorExpression();
+
+    virtual void Print( int depth ) const;
+
+    template< typename ExpressionType, typename SubExpressionType >
+    static bool ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
+                                      const std::vector<Lexer::TerminalType>& operator_terminals );
+
+    template< typename ExpressionType, typename SubExpressionType >
+    static bool ParseRightAssociative( Parser& parser, std::unique_ptr<Expression>& token,
+                                       const std::vector<Lexer::TerminalType>& operator_terminals );
+
+protected:
+    BinaryOperatorExpression( Lexer::TerminalType operator_terminal,
+                              std::unique_ptr<Expression> left_side,
+                              std::unique_ptr<Expression> right_side );
+
+    Lexer::TerminalType m_operatorTerminal;
+    std::unique_ptr<Expression> m_leftSide;
+    std::unique_ptr<Expression> m_rightSide;
+
+private:
+};
+
+
+
+//------------------------------------------------------------------------------
 // Logical Or Expression
 //------------------------------------------------------------------------------
 
-class LogicalOrExpression : public JoeLang::Parser::Expression
+class LogicalOrExpression : public JoeLang::Parser::BinaryOperatorExpression
 {
 public:
     virtual ~LogicalOrExpression();
 
-    virtual void Print( int depth ) const;
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    LogicalOrExpression( Lexer::TerminalType operator_terminal,
+                         std::unique_ptr<Expression> left_side,
+                         std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// LogicalAnd Expression
+//------------------------------------------------------------------------------
+
+class LogicalAndExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~LogicalAndExpression();
 
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    LogicalOrExpression( );
+    LogicalAndExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
 };
 
 //------------------------------------------------------------------------------
@@ -160,6 +216,26 @@ public:
 
 protected:
     UnaryExpression( );
+};
+
+//------------------------------------------------------------------------------
+// Primary Expression
+//------------------------------------------------------------------------------
+
+class PrimaryExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~PrimaryExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    PrimaryExpression( std::string identifier );
+
+private:
+    std::string m_identifier;
 };
 
 } // namespace Parser
