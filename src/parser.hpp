@@ -59,11 +59,11 @@ private:
     std::unique_ptr<TranslationUnit> m_translationUnit;
 };
 
-template< typename T >
-bool Expect( std::unique_ptr<T>& token );
+template< typename T, typename U >
+bool Expect( Parser& parser, std::unique_ptr<U>& token );
 
 template< typename T >
-bool Expect();
+bool Expect( Parser& parser );
 
 template<typename T>
 bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence );
@@ -75,10 +75,10 @@ template<typename T, typename T1, typename... Rest>
 bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
 
 template<typename T>
-bool ExpectAnyOf();
+bool ExpectAnyOf( Parser& parser );
 
 template<typename T, typename T1, typename... Rest>
-bool ExpectAnyOf();
+bool ExpectAnyOf( Parser& parser );
 
 
 } // namespace Parser

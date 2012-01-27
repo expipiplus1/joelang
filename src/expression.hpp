@@ -29,10 +29,7 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
-
-#include "state_assignment.hpp"
+#include "terminal_types.hpp"
 #include "token.hpp"
 
 namespace JoeLang
@@ -42,81 +39,102 @@ namespace Parser
 
 class Parser;
 
+class UnaryExpression;
+class AssignmentOperator;
+
 //------------------------------------------------------------------------------
-// DeclarationBase
-// Parse Matches for any kind of declaration
+// Expression
+// All Classes deriving from Experession will fill a pointer to Expression when
+// Parse is called, because they're used in a polymorphic way.
 //------------------------------------------------------------------------------
 
-class DeclarationBase : public JoeLang::Parser::Token
+class Expression : public JoeLang::Parser::Token
 {
 public:
-    virtual ~DeclarationBase();
+    virtual ~Expression();
 
-    static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    DeclarationBase() = default;
+    Expression( );
 };
 
 //------------------------------------------------------------------------------
-// EmptyDeclaration
-// Matches ';'
+// Assignment Expression
 //------------------------------------------------------------------------------
 
-class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
+class AssignmentExpression : public JoeLang::Parser::Expression
 {
 public:
-    virtual ~EmptyDeclaration();
+    virtual ~AssignmentExpression();
 
     virtual void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
+    static bool Parse(Parser& parser, std::unique_ptr<Expression> &token );
 
 protected:
-    EmptyDeclaration();
-};
-
-
-//------------------------------------------------------------------------------
-// PassDefinition
-//------------------------------------------------------------------------------
-
-class PassDefinition : public JoeLang::Parser::DeclarationBase
-{
-public:
-    virtual ~PassDefinition();
-
-    virtual void Print( int depth ) const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
-
-protected:
-    PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments  );
+    AssignmentExpression( std::unique_ptr<Expression> unary_expression,
+                          std::unique_ptr<AssignmentOperator> assignment_operator,
+                          std::unique_ptr<Expression> assignment_expression );
 
 private:
-    std::string m_name;
-    std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
+    std::unique_ptr<Expression> m_unaryExpression;
+    std::unique_ptr<AssignmentOperator> m_assignmentOperator;
+    std::unique_ptr<Expression> m_assignmentExpression;
 };
 
 //------------------------------------------------------------------------------
-// TechniqueDefinition
+// Assignment Operator
 //------------------------------------------------------------------------------
 
-class TechniqueDefinition : public JoeLang::Parser::DeclarationBase
+class AssignmentOperator : public JoeLang::Parser::Token
 {
 public:
-    virtual ~TechniqueDefinition();
+    virtual ~AssignmentOperator();
 
     virtual void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
+    static bool Parse(Parser& parser, std::unique_ptr<AssignmentOperator> &token );
 
 protected:
-    TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > m_passes );
+    AssignmentOperator( Lexer::TerminalType terminal_type );
 
 private:
-    std::string m_name;
-    std::vector< std::unique_ptr<PassDefinition> > m_passes;
+    Lexer::TerminalType m_terminalType;
+};
+
+//------------------------------------------------------------------------------
+// Conditional Expression
+//------------------------------------------------------------------------------
+
+class ConditionalExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~ConditionalExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    ConditionalExpression( );
+};
+
+//------------------------------------------------------------------------------
+// Unary Expression
+//------------------------------------------------------------------------------
+
+class UnaryExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~UnaryExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    UnaryExpression( );
 };
 
 } // namespace Parser

@@ -26,20 +26,60 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <iostream>
-#include <string>
-#include "parser.hpp"
+#include "state_assignment.hpp"
 
-int main( int argc, char** argv )
+#include <iostream>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include "expression.hpp"
+#include "parser.hpp"
+#include "terminal_types.hpp"
+
+namespace JoeLang
 {
-    JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass p1{} pass { a = b; } technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
-    {
-        parser.Print();
-        std::cout << "success\n";
-    }
-    else
-    {
-        std::cout << "fail\n";
-    }
+namespace Parser
+{
+
+StateAssignment::StateAssignment( std::string state_name, std::unique_ptr< Expression > expression )
+    :m_stateName( std::move( state_name ) )
+    ,m_expression( std::move( expression ) )
+{
 }
+
+StateAssignment::~StateAssignment()
+{
+}
+
+void StateAssignment::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "State Assignment to " << m_stateName << "\n";
+    m_expression->Print( depth + 1 );
+}
+
+bool StateAssignment::Parse( Parser& parser, std::unique_ptr<StateAssignment>& token )
+{
+    std::string state_name;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
+        return false;
+
+    std::unique_ptr< Expression > expression;
+    if( !Expect< Expression >( parser, expression ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
+        return false;
+
+    token.reset( new StateAssignment( std::move( state_name ),
+                                      std::move( expression ) ) );
+    return true;
+}
+
+} // namespace Parser
+} // namespace JoeLang

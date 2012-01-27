@@ -63,6 +63,9 @@ enum TerminalType
     OPEN_ANGLED,
     CLOSE_ANGLED,
 
+    // Assignment
+    EQUALS,
+
     // Logic
     LOGICAL_AND,
     LOGICAL_OR,

@@ -26,20 +26,37 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <iostream>
-#include <string>
-#include "parser.hpp"
+#pragma once
 
-int main( int argc, char** argv )
+#include <memory>
+#include <string>
+
+#include "expression.hpp"
+#include "token.hpp"
+
+namespace JoeLang
 {
-    JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass p1{} pass { a = b; } technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
-    {
-        parser.Print();
-        std::cout << "success\n";
-    }
-    else
-    {
-        std::cout << "fail\n";
-    }
-}
+namespace Parser
+{
+
+class Parser;
+
+class StateAssignment : public JoeLang::Parser::Token
+{
+public:
+    virtual ~StateAssignment();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<StateAssignment>& token );
+
+protected:
+    StateAssignment( std::string state_name, std::unique_ptr<Expression> expression );
+
+private:
+    std::string m_stateName;
+    std::unique_ptr<Expression> m_expression;
+};
+
+} // namespace Parser
+} // namespace JoeLang

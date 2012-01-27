@@ -26,20 +26,37 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <iostream>
-#include <string>
-#include "parser.hpp"
+#include "terminal.hpp"
 
-int main( int argc, char** argv )
+#include <string>
+#include <utility>
+#include "lexer.hpp"
+#include "token.hpp"
+
+namespace JoeLang
 {
-    JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass p1{} pass { a = b; } technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
-    {
-        parser.Print();
-        std::cout << "success\n";
-    }
-    else
-    {
-        std::cout << "fail\n";
-    }
+namespace Parser
+{
+
+TerminalBase::TerminalBase( const std::pair< Lexer::TokenType, std::string >& terminal )
+    :m_tokenType( terminal.first )
+    ,m_string( terminal.second )
+{
 }
+
+TerminalBase::~TerminalBase()
+{
+}
+
+const std::string& TerminalBase::GetString() const
+{
+    return m_string;
+}
+
+Lexer::TokenType TerminalBase::GetTokenType() const
+{
+    return m_tokenType;
+}
+
+} // namespace Parser
+} // namespace JoeLang

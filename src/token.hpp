@@ -38,6 +38,8 @@ class Token
 public:
     virtual ~Token();
 
+    virtual void Print( int depth ) const = 0;
+
 protected:
     Token() = default;
 };

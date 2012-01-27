@@ -35,6 +35,7 @@
 #include <vector>
 
 #include "parser.hpp"
+#include "state_assignment.hpp"
 #include "terminal_types.hpp"
 #include "token.hpp"
 
@@ -54,12 +55,14 @@ DeclarationBase::~DeclarationBase()
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf< TechniqueDeclaration,
-                      PassDeclaration,
+    if( !ExpectAnyOf< TechniqueDefinition,
+                      PassDefinition,
                       EmptyDeclaration>( parser, t ) )
         return false;
 
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
+    if( !token )
+        return false;
     return true;
 }
 
@@ -96,24 +99,27 @@ bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>&
 // PassDeclaration
 //------------------------------------------------------------------------------
 
-PassDeclaration::PassDeclaration( std::string name )
-    :m_name( name )
+PassDefinition::PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments )
+    :m_name( std::move( name ) )
+    ,m_stateAssignments( std::move( state_assignments ) )
 {
 }
 
-PassDeclaration::~PassDeclaration()
+PassDefinition::~PassDefinition()
 {
 }
 
-void PassDeclaration::Print( int depth ) const
+void PassDefinition::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
     std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
+    for( const auto& state_assignment : m_stateAssignments )
+        state_assignment->Print( depth + 1 );
 }
 
-bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
+bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
 {
     if( !parser.ExpectTerminal( Lexer::PASS ) )
         return false;
@@ -124,29 +130,29 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
+    std::vector< std::unique_ptr<StateAssignment> > state_assignments;
+    ExpectSequenceOf<StateAssignment>( parser, state_assignments );
+
+
     if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new PassDeclaration( name ) );
+    token.reset( new PassDefinition( name, std::move( state_assignments ) ) );
     return true;
 }
 
 
-//------------------------------------------------------------------------------
-// TechniqueDeclaration
-//------------------------------------------------------------------------------
-
-TechniqueDeclaration::TechniqueDeclaration( std::string name, std::vector< std::unique_ptr<PassDeclaration> > passes )
+TechniqueDefinition::TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > passes )
     :m_name( std::move( name ) )
     ,m_passes( std::move( passes ) )
 {
 }
 
-TechniqueDeclaration::~TechniqueDeclaration()
+TechniqueDefinition::~TechniqueDefinition()
 {
 }
 
-void TechniqueDeclaration::Print( int depth ) const
+void TechniqueDefinition::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
@@ -158,7 +164,7 @@ void TechniqueDeclaration::Print( int depth ) const
 }
 
 
-bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
+bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
 {
     if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
         return false;
@@ -169,13 +175,13 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
-    std::vector< std::unique_ptr<PassDeclaration> > passes;
-    ExpectSequenceOf<PassDeclaration>( parser, passes );
+    std::vector< std::unique_ptr<PassDefinition> > passes;
+    ExpectSequenceOf<PassDefinition>( parser, passes );
 
     if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new TechniqueDeclaration( name, std::move( passes ) ) );
+    token.reset( new TechniqueDefinition( name, std::move( passes ) ) );
     return true;
 }
 

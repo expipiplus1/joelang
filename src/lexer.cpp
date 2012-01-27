@@ -78,6 +78,7 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "/",  DIVIDE,         "" },
     { "%",  MODULO,         "" },
 
+    { "=",  EQUALS,         "" },
     { ";",  SEMICOLON,      "" }
 };
 
