@@ -28,11 +28,13 @@
 
 #include "translation_unit.hpp"
 
+#include <iostream>
 #include <memory>
 #include <vector>
+
 #include "declaration.hpp"
 #include "parser.hpp"
-#include "terminal.hpp"
+#include "terminal_types.hpp"
 #include "token.hpp"
 
 namespace JoeLang
@@ -49,13 +51,23 @@ TranslationUnit::~TranslationUnit()
 {
 }
 
+void TranslationUnit::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i)
+        std::cout << " ";
+    std::cout << "TranslationUnit\n";
+    for( const auto& declaration : m_declarations )
+        declaration->Print( depth + 1 );
+}
+
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
     std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    if( !parser.ExpectSequenceOf<DeclarationBase>( declarations ) )
+
+    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
         return false;
 
-    if( !parser.Expect< Terminal<Lexer::END_OF_FILE> >( ) )
+    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
         return false;
 
     token.reset( new TranslationUnit( std::move( declarations ) ) );

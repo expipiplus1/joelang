@@ -28,7 +28,6 @@
 
 #include "parser.hpp"
 
-#include <memory>
 #include <string>
 #include "lexer.hpp"
 #include "translation_unit.hpp"
@@ -38,22 +37,30 @@ namespace JoeLang
 namespace Parser
 {
 
+void Parser::Print() const
+{
+    if( m_translationUnit )
+        m_translationUnit->Print();
+}
+
 bool Parser::Parse ( const std::string& string )
 {
-    if( !m_lexer.Lex( string ) )
-        return false;
+    m_lexer.reset( new Lexer::Lexer( string ) );
 
-    return Expect<TranslationUnit>( m_translationUnit );
+    return TranslationUnit::Parse( *this, m_translationUnit );
 }
 
-bool Parser::ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal )
+bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type )
 {
-    return m_lexer.TryConsume( token_type, terminal );
+    // TODO: Remove dummy
+    std::string dummy;
+    return m_lexer->Expect( terminal_type, dummy );
 }
 
-bool Parser::ExpectTerminal( Lexer::TokenType token_type )
+bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string )
 {
-    return m_lexer.TryConsume( token_type );
+    // TODO: Remember what we've tried here for error messages
+    return m_lexer->Expect( terminal_type, string );
 }
 
 } // namespace Parser

@@ -28,13 +28,14 @@
 
 #include "declaration.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
-#include "lexer.hpp"
+
 #include "parser.hpp"
-#include "terminal.hpp"
+#include "terminal_types.hpp"
 #include "token.hpp"
 
 namespace JoeLang
@@ -53,10 +54,11 @@ DeclarationBase::~DeclarationBase()
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf<TechniqueDeclaration,
-                            PassDeclaration,
-                            EmptyDeclaration>( t ) )
+    if( !ExpectAnyOf< TechniqueDeclaration,
+                      PassDeclaration,
+                      EmptyDeclaration>( parser, t ) )
         return false;
+
     token.reset( dynamic_cast<DeclarationBase*>( t.release() ) );
     return true;
 }
@@ -74,10 +76,18 @@ EmptyDeclaration::~EmptyDeclaration()
 {
 }
 
-bool EmptyDeclaration::Parse(Parser& parser , std::unique_ptr<EmptyDeclaration>& token )
+void EmptyDeclaration::Print(int depth) const
 {
-    if( !parser.Expect< Terminal<Lexer::SEMICOLON> >() )
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "Empty Declaration\n";
+}
+
+bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token )
+{
+    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
         return false;
+
     token.reset( new EmptyDeclaration );
     return true;
 }
@@ -95,26 +105,32 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
+void PassDeclaration::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+
+    std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
+}
 
 bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
 {
-    if( !parser.Expect< Terminal<Lexer::PASS> >() )
+    if( !parser.ExpectTerminal( Lexer::PASS ) )
         return false;
 
-    std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
     std::string name;
-    if( parser.Expect< Terminal<Lexer::IDENTIFIER> >( name_terminal ) )
-        name = name_terminal->GetString();
+    parser.ExpectTerminal( Lexer::IDENTIFIER, name );
 
-    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
+    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
-    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
+    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
 
     token.reset( new PassDeclaration( name ) );
     return true;
 }
+
 
 //------------------------------------------------------------------------------
 // TechniqueDeclaration
@@ -130,25 +146,33 @@ TechniqueDeclaration::~TechniqueDeclaration()
 {
 }
 
+void TechniqueDeclaration::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+
+    std::cout << "Technique: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
+
+    for( const auto& pass : m_passes )
+        pass->Print( depth + 1 );
+}
+
 
 bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
-    if( !parser.Expect< Terminal<Lexer::TECHNIQUE> >() )
+    if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
         return false;
 
-    //Oh what I'd give for some lambdas here
-    std::unique_ptr< Terminal<Lexer::IDENTIFIER> > name_terminal;
     std::string name;
-    if( parser.Expect< Terminal<Lexer::IDENTIFIER> >( name_terminal ) )
-        name = name_terminal->GetString();
+    parser.ExpectTerminal( Lexer::IDENTIFIER, name );
 
-    if( !parser.Expect< Terminal<Lexer::OPEN_BRACE> >() )
+    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
     std::vector< std::unique_ptr<PassDeclaration> > passes;
-    parser.ExpectSequenceOf<PassDeclaration>( passes );
+    ExpectSequenceOf<PassDeclaration>( parser, passes );
 
-    if( !parser.Expect< Terminal<Lexer::CLOSE_BRACE> >() )
+    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
 
     token.reset( new TechniqueDeclaration( name, std::move( passes ) ) );

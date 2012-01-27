@@ -28,37 +28,67 @@
 
 #pragma once
 
-#include <memory>
+#include <stack>
 #include <string>
-#include <utility>
 #include <vector>
-#include "token_matcher.hpp"
+
+#include "terminal_types.hpp"
 
 namespace JoeLang
 {
 namespace Lexer
 {
 
-typedef std::vector< std::pair< JoeLang::Lexer::TokenType, std::string > > TokenStream;
+//------------------------------------------------------------------------------
+// Terminal
+//------------------------------------------------------------------------------
+
+struct Terminal
+{
+    Terminal( TerminalType terminal_type,
+              std::string::const_iterator begin,
+              std::string::const_iterator end );
+
+    TerminalType terminal_type;
+    std::string::const_iterator begin;
+    std::string::const_iterator end;
+};
+
+//------------------------------------------------------------------------------
+// Lexer
+//------------------------------------------------------------------------------
 
 class Lexer
 {
 public:
-    Lexer();
+    Lexer() = delete;
+    Lexer( std::string string );
     ~Lexer() = default;
 
-    bool Lex( const std::string& string );
+    //
+    // Expect return true and moves the position forward if the next terminal
+    // matches terminal_type. It optionally returns the matched string
+    //
+    bool Expect( TerminalType terminal_type );
+    bool Expect( TerminalType terminal_type, std::string& string );
 
-    bool TryConsume( TokenType token_type, std::pair< TokenType, std::string >& terminal );
-    bool TryConsume( TokenType token_type );
-
-    void ConsumeNext();
+    //
+    // One can optionally store the position in the stream for looking ahead
+    // more than one token
+    //
+    void PushState();
+    void PopState();
+    void RestoreState();
 
 private:
-    static std::vector< std::unique_ptr< TokenMatcher > > s_terminals;
+    void ConsumeIgnoredTerminals();
 
-    TokenStream m_tokenStream;
-    std::size_t m_currentIndex;
+    std::size_t m_numTokensRead;
+    std::vector<Terminal> m_readTerminals;
+
+    const std::string m_string;
+    std::string::const_iterator m_position;
+    std::stack<std::string::iterator> m_savedPositions;
 };
 
 } // namespace Lexer

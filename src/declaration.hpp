@@ -31,15 +31,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "token.hpp"
 
 namespace JoeLang
 {
-
-namespace Lexer
-{
-    class Lexer;
-} // namespace Lexer
 
 namespace Parser
 {
@@ -55,6 +51,8 @@ class DeclarationBase : public JoeLang::Parser::Token
 {
 public:
     virtual ~DeclarationBase();
+
+    virtual void Print( int depth ) const = 0;
 
     static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
 
@@ -72,11 +70,14 @@ class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
 public:
     virtual ~EmptyDeclaration();
 
+    virtual void Print( int depth ) const;
+
     static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
 
 protected:
     EmptyDeclaration();
 };
+
 
 //------------------------------------------------------------------------------
 // PassDeclaration
@@ -86,6 +87,8 @@ class PassDeclaration : public JoeLang::Parser::DeclarationBase
 {
 public:
     virtual ~PassDeclaration();
+
+    virtual void Print( int depth ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
 
@@ -104,6 +107,8 @@ class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
 {
 public:
     virtual ~TechniqueDeclaration();
+
+    virtual void Print( int depth ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
 

@@ -28,6 +28,8 @@
 
 #include "lexer.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
@@ -38,120 +40,201 @@ namespace JoeLang
 namespace Lexer
 {
 
-std::vector< std::unique_ptr< TokenMatcher > > Lexer::s_terminals;
+//------------------------------------------------------------------------------
+// Tables of terminals
+//------------------------------------------------------------------------------
 
-Lexer::Lexer()
-    :m_currentIndex( 0 )
+//
+// Ignored Sequence
+//
+
+static const FunctionalTerminal g_ignoredTerminals[] =
 {
-    //
-    // Populate the different kinds of tokens
-    //
-    if( s_terminals.empty() )
-    {
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new WhitespaceTokenMatcher() ) );
+    { ReadWhitespace,   IGNORED_CHARACTERS, "whitespace"    },
+    { ReadLineComment,  IGNORED_CHARACTERS, "line comment"  },
+    { ReadBlockComment, IGNORED_CHARACTERS, "block comment" }
+};
 
-        //
-        // Keywords
-        //
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new KeywordTokenMatcher( TokenType::PASS, "pass" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new KeywordTokenMatcher( TokenType::TECHNIQUE, "technique" ) ) );
+//
+// Punctuation
+//
+static const LiteralTerminal g_punctuationTerminals[] =
+{
+    { "{",  OPEN_BRACE,     "" },
+    { "}",  CLOSE_BRACE,    "" },
+    { "(",  OPEN_ROUND,     "" },
+    { ")",  CLOSE_ROUND,    "" },
+    { "<",  OPEN_ANGLED,    "" },
+    { ">",  CLOSE_ANGLED,   "" },
 
-        //
-        // Built in types
-        //
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new KeywordTokenMatcher( TokenType::TYPE_INT, "int" ) ) );
+    { "&&", LOGICAL_AND,    "" },
+    { "||", LOGICAL_OR,     "" },
 
-        //
-        // Identifier
-        //
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new IdentifierTokenMatcher() ) );
+    { "++", INCREMENT,      "" },
+    { "--", DECREMENT,      "" },
+    { "+",  PLUS,           "" },
+    { "-",  MINUS,          "" },
+    { "*",  MULTIPLY,       "" },
+    { "/",  DIVIDE,         "" },
+    { "%",  MODULO,         "" },
 
-        //
-        // Punctuation
-        //
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::OPEN_BRACE, "{" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::CLOSE_BRACE, "}" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::SEMICOLON, ";" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::PLUS, "+" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::MINUS, "-" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::DIVIDE, "/" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::MULTIPLY, "*" ) ) );
-        s_terminals.push_back( std::unique_ptr< TokenMatcher >
-            ( new LiteralTokenMatcher( TokenType::MODULO, "%" ) ) );
-    }
+    { ";",  SEMICOLON,      "" }
+};
+
+//
+// Literals
+//
+static const FunctionalTerminal g_literalTerminals[] =
+{
+    //{ ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
+    //{ ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
+    //{ ReadBooleanLiteral,   BOOLEAN_LITERAL,    "boolean literal"   },
+    //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
+    //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
+};
+
+//
+// Keywords
+//
+static const LiteralTerminal g_keywordTerminals[] =
+{
+    { "technique",  TECHNIQUE,  "" },
+    { "pass",       PASS,       "" },
+
+    { "int",        TYPE_INT,   "" }
+};
+
+//
+// Identifier
+//
+static const FunctionalTerminal g_identifierTerminals[] =
+{
+    //{ ReadIdentifier,   IDENTIFIER, "identifier" }
+};
+
+//------------------------------------------------------------------------------
+// Terminal
+//------------------------------------------------------------------------------
+
+Terminal::Terminal( TerminalType terminal_type,
+                    std::string::const_iterator begin,
+                    std::string::const_iterator end )
+    :terminal_type(terminal_type)
+    ,begin(begin)
+    ,end(end)
+{}
+
+//------------------------------------------------------------------------------
+// Lexer
+//------------------------------------------------------------------------------
+
+Lexer::Lexer( std::string string )
+    :m_string( std::move( string ) )
+{
+    m_position = m_string.begin();
+    ConsumeIgnoredTerminals();
 }
 
-bool Lexer::Lex( const std::string& string )
+bool Lexer::Expect( TerminalType terminal_type, std::string& string )
 {
-    std::string::const_iterator curr_position = string.begin();
-    std::string::const_iterator end_position = string.end();
-    while( curr_position != end_position )
+    if( terminal_type == END_OF_INPUT &&
+        m_position == m_string.end() )
+        return true;
+
+    std::size_t chars_read;
+
+    //
+    // Read punctuation and literals
+    //
+
+    for( const LiteralTerminal& terminal_reader : g_punctuationTerminals )
     {
-        std::string match_string;
-        bool match = false;
-        for( const auto& token_type : s_terminals )
+        chars_read = terminal_reader.Read( m_position, m_string.end() );
+        if( chars_read )
         {
-            match_string = token_type->Match( curr_position, end_position );
-            if( match_string.size() != 0 )
+            if( terminal_type == terminal_reader.terminal_type )
             {
-                if( token_type->IsSignificant() )
-                    m_tokenStream.push_back( std::make_pair( token_type->GetTokenType(), match_string ) );
-                curr_position += match_string.size();
-                match = true;
-                break;
+                string = std::string( m_position, m_position + chars_read );
+                m_position += chars_read;
+                ConsumeIgnoredTerminals();
+                return true;
             }
+            return false;
         }
-        if( !match )
+        if( terminal_type == terminal_reader.terminal_type )
+            return false;
+    }
+
+    for( const FunctionalTerminal& terminal_reader : g_literalTerminals )
+    {
+        chars_read = terminal_reader.Read( m_position, m_string.end() );
+        if( chars_read )
         {
-            m_tokenStream.clear();
+            if( terminal_type == terminal_reader.terminal_type )
+            {
+                string = std::string( m_position, m_position + chars_read );
+                m_position += chars_read;
+                ConsumeIgnoredTerminals();
+                return true;
+            }
+            return false;
+        }
+        if( terminal_type == terminal_reader.terminal_type )
+            return false;
+    }
+
+    //
+    // The remaining terminals all work on words, find the end of the next word
+    //
+
+    if( !IsNonDigit( *m_position ) )
+        return false;
+
+    std::string::const_iterator word_end = m_position + 1;
+    while( IsDigitOrNonDigit( *word_end ) )
+        ++word_end;
+
+    std::size_t word_size = word_end - m_position;
+
+    for( const LiteralTerminal& terminal_reader : g_keywordTerminals )
+    {
+        if( word_size == terminal_reader.matched_string.size() &&
+            std::equal( m_position, word_end, terminal_reader.matched_string.begin() ) )
+        {
+            if( terminal_type == terminal_reader.terminal_type )
+            {
+                string = std::string( m_position, m_position + word_size );
+                m_position += word_size;
+                ConsumeIgnoredTerminals();
+                return true;
+            }
             return false;
         }
     }
-    m_tokenStream.push_back( std::make_pair( TokenType::END_OF_FILE, std::string() ) );
-    m_currentIndex = 0;
-    return true;
-}
 
-bool Lexer::TryConsume( TokenType token_type, std::pair< TokenType, std::string >& terminal )
-{
-    if( m_tokenStream[m_currentIndex].first == token_type )
+    if( terminal_type == IDENTIFIER )
     {
-        terminal = m_tokenStream[m_currentIndex];
-        ConsumeNext();
+        string = std::string( m_position, m_position + word_size );
+        m_position += word_size;
+        ConsumeIgnoredTerminals();
         return true;
     }
     return false;
 }
 
-bool Lexer::TryConsume( TokenType token_type )
+void Lexer::ConsumeIgnoredTerminals()
 {
-    if( m_tokenStream[m_currentIndex].first == token_type )
+    int chars_read;
+    do
     {
-        ConsumeNext();
-        return true;
-    }
-    return false;
-}
-
-void Lexer::ConsumeNext()
-{
-    //
-    // Never advance over the end
-    //
-    if( m_currentIndex < m_tokenStream.size() - 1 )
-        ++m_currentIndex;
+        for( const FunctionalTerminal& terminal_reader : g_ignoredTerminals )
+        {
+            chars_read = terminal_reader.Read( m_position, m_string.end() );
+            if( chars_read )
+                break;
+        }
+        m_position += chars_read;
+    } while( chars_read );
 }
 
 } // namespace Lexer

@@ -26,16 +26,16 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <regex>
-
 #include <iostream>
+#include <string>
 #include "parser.hpp"
 
 int main( int argc, char** argv )
 {
     JoeLang::Parser::Parser parser;
-    if( parser.Parse( ";; technique foo{}; pass p1{}; technique { pass{} pass p2{}};" ) )
+    if( parser.Parse( "pass p1{} pass {} technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
     {
+        parser.Print();
         std::cout << "success\n";
     }
     else

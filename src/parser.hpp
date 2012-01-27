@@ -32,6 +32,7 @@
 #include <string>
 #include <vector>
 #include "lexer.hpp"
+#include "terminal_types.hpp"
 #include "translation_unit.hpp"
 
 namespace JoeLang
@@ -45,41 +46,40 @@ public:
     Parser() = default;
     ~Parser() = default;
 
+    void Print() const;
+
     bool Parse( const std::string& string );
 
-    template< typename T >
-    bool Expect( std::unique_ptr<T>& token );
-
-    template< typename T >
-    bool Expect();
-
-
-    template<typename T>
-    bool ExpectSequenceOf( std::vector< std::unique_ptr<T> >& token_sequence );
-
-
-    template<typename T>
-    bool ExpectAnyOf( std::unique_ptr<Token>& token );
-
-    template<typename T, typename T1, typename... Rest>
-    bool ExpectAnyOf( std::unique_ptr<Token>& token );
-
-    template<typename T>
-    bool ExpectAnyOf();
-
-    template<typename T, typename T1, typename... Rest>
-    bool ExpectAnyOf();
-
-
-    bool ExpectTerminal( Lexer::TokenType token_type, std::pair< Lexer::TokenType, std::string >& terminal );
-
-    bool ExpectTerminal( Lexer::TokenType token_type );
+    bool ExpectTerminal( Lexer::TerminalType terminal_type );
+    bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
 private:
-    Lexer::Lexer m_lexer;
+    std::unique_ptr<Lexer::Lexer> m_lexer;
 
     std::unique_ptr<TranslationUnit> m_translationUnit;
 };
+
+template< typename T >
+bool Expect( std::unique_ptr<T>& token );
+
+template< typename T >
+bool Expect();
+
+template<typename T>
+bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence );
+
+template<typename T>
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
+
+template<typename T, typename T1, typename... Rest>
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
+
+template<typename T>
+bool ExpectAnyOf();
+
+template<typename T, typename T1, typename... Rest>
+bool ExpectAnyOf();
+
 
 } // namespace Parser
 } // namespace JoeLang

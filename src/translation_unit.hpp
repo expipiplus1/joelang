@@ -30,16 +30,12 @@
 
 #include <memory>
 #include <vector>
+
 #include "declaration.hpp"
 #include "token.hpp"
 
 namespace JoeLang
 {
-
-namespace Lexer
-{
-    class Lexer;
-} // namespace Lexer
 
 namespace Parser
 {
@@ -49,7 +45,10 @@ class Parser;
 class TranslationUnit : public JoeLang::Parser::Token
 {
 public:
+    TranslationUnit() = delete;
     virtual ~TranslationUnit();
+
+    void Print( int depth = 0 ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
 

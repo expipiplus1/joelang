@@ -40,66 +40,66 @@ namespace Parser
 {
 
 template< typename T >
-bool Parser::Expect( std::unique_ptr<T>& token )
+bool Expect( Parser& parser, std::unique_ptr<T>& token )
 {
-    return T::Parse( *this, token );
+    return T::Parse( parser, token );
 }
 
 template< typename T >
-bool Parser::Expect()
+bool Expect( Parser& parser )
 {
-    return T::Parse( *this );
+    return T::Parse( parser );
 }
 
 template<typename T>
-bool Parser::ExpectSequenceOf( std::vector< std::unique_ptr<T> >& token_sequence )
+bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence )
 {
     std::unique_ptr<T> token;
-    if( !T::Parse( *this, token ) )
+    if( !T::Parse( parser, token ) )
         return false;
 
     do
     {
         token_sequence.push_back( std::move( token ) );
     }
-    while( T::Parse( *this, token ) );
+    while( T::Parse( parser, token ) );
 
     return true;
 }
 
 template< typename T >
-bool Parser::ExpectAnyOf( std::unique_ptr<Token>& token )
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token )
 {
-    std::unique_ptr<T> t( dynamic_cast<T*>( token.release() ) );
-    if( !Expect<T>( t ) )
+    std::unique_ptr<T> t;
+    if( !Expect<T>( parser, t ) )
         return false;
     token = std::move( t );
     return true;
 }
 
 template<typename T, typename T1, typename... Rest>
-bool Parser::ExpectAnyOf( std::unique_ptr<Token>& token )
+bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token )
 {
-    std::unique_ptr<T> t( dynamic_cast<T*>( token.release() ) );
-    if( !Expect<T>( t ) )
+    std::unique_ptr<T> t;
+    if( !Expect<T>( parser, t ) )
     {
-        return ExpectAnyOf<T1, Rest...>( token );
+        return ExpectAnyOf<T1, Rest...>( parser, token );
     }
     token = std::move( t );
     return true;
 }
 
 template< typename T >
-bool Parser::ExpectAnyOf()
+bool ExpectAnyOf( Parser& parser )
 {
-    return Expect<T>();
+    return Expect<T>( parser );
 }
 
 template<typename T, typename T1, typename... Rest>
-bool Parser::ExpectAnyOf()
+bool ExpectAnyOf( Parser& parser )
 {
-    if( !Expect<T>() )
-        return ExpectAnyOf<T1, Rest...>();
+    if( !Expect<T>( parser ) )
+        return ExpectAnyOf<T1, Rest...>( parser );
     return true;
 }
 

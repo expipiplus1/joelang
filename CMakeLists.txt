@@ -17,12 +17,10 @@ add_executable( joelang src/joelang.cpp
                         src/parser.cpp
                         src/parser.hpp
                         src/parser-inl.hpp
-                        src/terminal.hpp
-                        src/terminal-inl.hpp
+                        src/terminal_types.cpp
+                        src/terminal_types.hpp
                         src/token.cpp
                         src/token.hpp
-                        src/token_matcher.cpp
-                        src/token_matcher.hpp
                         src/translation_unit.cpp
                         src/translation_unit.hpp )
 
