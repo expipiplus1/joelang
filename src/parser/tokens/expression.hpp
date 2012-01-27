@@ -118,7 +118,31 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ConditionalExpression( );
+    ConditionalExpression( std::unique_ptr<Expression> condition,
+                           std::unique_ptr<Expression> true_expression,
+                           std::unique_ptr<Expression> false_expression );
+
+private:
+    std::unique_ptr<Expression> m_condition;
+    std::unique_ptr<Expression> m_trueExpression;
+    std::unique_ptr<Expression> m_falseExpression;
+};
+
+//------------------------------------------------------------------------------
+// Logical Or Expression
+//------------------------------------------------------------------------------
+
+class LogicalOrExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~LogicalOrExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    LogicalOrExpression( );
 };
 
 //------------------------------------------------------------------------------

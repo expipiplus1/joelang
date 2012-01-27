@@ -124,6 +124,7 @@ void AssignmentOperator::Print(int depth) const
     std::cout << "Assignment Operator\n";
 }
 
+//TODO
 bool AssignmentOperator::Parse( Parser& parser, std::unique_ptr<AssignmentOperator>& token )
 {
     if( !parser.ExpectTerminal( Lexer::EQUALS ) )
@@ -137,7 +138,12 @@ bool AssignmentOperator::Parse( Parser& parser, std::unique_ptr<AssignmentOperat
 // Conditional Expression
 //------------------------------------------------------------------------------
 
-ConditionalExpression::ConditionalExpression()
+ConditionalExpression::ConditionalExpression( std::unique_ptr<Expression> condition,
+                                              std::unique_ptr<Expression> true_expression,
+                                              std::unique_ptr<Expression> false_expression )
+    :m_condition( std::move( condition ) )
+    ,m_trueExpression( std::move( true_expression ) )
+    ,m_falseExpression( std::move( false_expression ) )
 {
 }
 
@@ -150,14 +156,67 @@ void ConditionalExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Conditional Expression\n";
+
+    m_condition->Print( depth + 1 );
+    m_trueExpression->Print( depth + 1 );
+    m_falseExpression->Print( depth + 1 );
 }
 
 bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    std::unique_ptr<Expression> condition;
+    if( !Expect< LogicalOrExpression >( parser, condition ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::QUERY ) )
+    {
+        token = std::move( condition );
+        return true;
+    }
+
+    std::unique_ptr<Expression> true_expression;
+    if( !Expect<Expression>( parser, true_expression ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::COLON ) )
+        return false;
+
+    std::unique_ptr<Expression> false_expression;
+    if( !Expect<ConditionalExpression>( parser, false_expression ) )
+        return false;
+
+    token.reset( new ConditionalExpression( std::move( condition ),
+                                            std::move( true_expression ),
+                                            std::move( false_expression ) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// Logical Or Expression
+//------------------------------------------------------------------------------
+
+LogicalOrExpression::LogicalOrExpression()
+{
+}
+
+LogicalOrExpression::~LogicalOrExpression()
+{
+}
+
+void LogicalOrExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "LogicalOr Expression\n";
+}
+
+//TODO
+bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER ) )
         return false;
 
-    token.reset( new ConditionalExpression() );
+    token.reset( new LogicalOrExpression() );
     return true;
 }
 
@@ -180,6 +239,7 @@ void UnaryExpression::Print( int depth ) const
     std::cout << "Unary Expression\n";
 }
 
+//TODO
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER ) )
