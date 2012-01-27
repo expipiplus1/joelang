@@ -42,6 +42,10 @@ namespace JoeLang
 namespace Parser
 {
 
+//------------------------------------------------------------------------------
+// TranslationUnit
+//------------------------------------------------------------------------------
+
 TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
     :m_declarations( std::move( declarations ) )
 {
@@ -63,7 +67,6 @@ void TranslationUnit::Print( int depth ) const
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
     std::vector< std::unique_ptr<DeclarationBase> > declarations;
-
     if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
         return false;
 
