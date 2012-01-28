@@ -285,8 +285,10 @@ LogicalOrExpression::~LogicalOrExpression()
 
 bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    std::vector<Lexer::TerminalType> operators;
-    operators.push_back( Lexer::LOGICAL_OR );
+    // Why doesn't clang support initializer lists yet!
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+        operators.push_back( Lexer::LOGICAL_OR );
 
     return ParseLeftAssociative<LogicalOrExpression, LogicalAndExpression>( parser, token, operators );
 }
@@ -310,8 +312,9 @@ LogicalAndExpression::~LogicalAndExpression()
 
 bool LogicalAndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    std::vector<Lexer::TerminalType> operators;
-    operators.push_back( Lexer::LOGICAL_AND );
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+        operators.push_back( Lexer::LOGICAL_AND );
 
     //TODO
     return ParseLeftAssociative<LogicalAndExpression, PrimaryExpression>( parser, token, operators );
