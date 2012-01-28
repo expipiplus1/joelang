@@ -63,7 +63,7 @@ protected:
 };
 
 //------------------------------------------------------------------------------
-// Assignment Expression
+// AssignmentExpression
 //------------------------------------------------------------------------------
 
 class AssignmentExpression : public JoeLang::Parser::Expression
@@ -87,7 +87,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-// Assignment Operator
+// AssignmentOperator
 //------------------------------------------------------------------------------
 
 class AssignmentOperator : public JoeLang::Parser::Token
@@ -107,7 +107,7 @@ private:
 };
 
 //------------------------------------------------------------------------------
-// Conditional Expression
+// ConditionalExpression
 //------------------------------------------------------------------------------
 
 class ConditionalExpression : public JoeLang::Parser::Expression
@@ -164,7 +164,7 @@ private:
 
 
 //------------------------------------------------------------------------------
-// Logical Or Expression
+// LogicalOrExpression
 //------------------------------------------------------------------------------
 
 class LogicalOrExpression : public JoeLang::Parser::BinaryOperatorExpression
@@ -183,7 +183,7 @@ protected:
 };
 
 //------------------------------------------------------------------------------
-// LogicalAnd Expression
+// LogicalAndExpression
 //------------------------------------------------------------------------------
 
 class LogicalAndExpression : public JoeLang::Parser::BinaryOperatorExpression
@@ -202,7 +202,7 @@ protected:
 };
 
 //------------------------------------------------------------------------------
-// Unary Expression
+// UnaryExpression
 //------------------------------------------------------------------------------
 
 class UnaryExpression : public JoeLang::Parser::Expression
@@ -219,7 +219,7 @@ protected:
 };
 
 //------------------------------------------------------------------------------
-// Primary Expression
+// PrimaryExpression
 //------------------------------------------------------------------------------
 
 class PrimaryExpression : public JoeLang::Parser::Expression
