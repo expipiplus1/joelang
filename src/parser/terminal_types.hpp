@@ -75,12 +75,12 @@ enum TerminalType
     LEFT_SHIFT_EQUALS,
     RIGHT_SHIFT_EQUALS,
     AND_EQUALS,
-    OR_EQUALS,
-    XOR_EQUALS,
+    INCLUSIVE_OR_EQUALS,
+    EXCLUSIVE_OR_EQUALS,
 
     // Comparison
     EQUALITY,
-    NOT_EQUAL,
+    NOT_EQUALITY,
     LESS_THAN_EQUALS,
     GREATER_THAN_EQUALS,
     LESS_THAN,
@@ -99,8 +99,8 @@ enum TerminalType
     DIVIDE,
     MODULO,
     AND,
-    OR,
-    XOR,
+    INCLUSIVE_OR,
+    EXCLUSIVE_OR,
     LEFT_SHIFT,
     RIGHT_SHIFT,
 

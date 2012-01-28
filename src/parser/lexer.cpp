@@ -68,10 +68,10 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { ">",  CLOSE_ANGLED,   "" },
 
     { "==", EQUALITY,       "" },
-    { "!=", NOT_EQUAL,      "" },
+    { "!=", NOT_EQUALITY,   "" },
     { "<=", LESS_THAN_EQUALS,    "" },
     { ">=", GREATER_THAN_EQUALS, "" },
-    { ">",  LESS_THAN,      "" },
+    { "<",  LESS_THAN,      "" },
     { ">",  GREATER_THAN,   "" },
     // TODO:
 
@@ -82,8 +82,8 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "/=", DIVIDE_EQUALS,   "" },
     { "%=", MODULO_EQUALS,   "" },
     { "&=", AND_EQUALS,      "" },
-    { "|=", OR_EQUALS,       "" },
-    { "^=", XOR_EQUALS,      "" },
+    { "|=", INCLUSIVE_OR_EQUALS, "" },
+    { "^=", EXCLUSIVE_OR_EQUALS, "" },
     { "<<=", LEFT_SHIFT_EQUALS,  "" },
     { ">>=", RIGHT_SHIFT_EQUALS, "" },
 
@@ -98,8 +98,8 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "/",  DIVIDE,         "" },
     { "%",  MODULO,         "" },
     { "&",  AND,            "" },
-    { "|",  OR,             "" },
-    { "^",  XOR,            "" },
+    { "|",  INCLUSIVE_OR,   "" },
+    { "^",  EXCLUSIVE_OR,   "" },
     { "<<", LEFT_SHIFT,     "" },
     { ">>", RIGHT_SHIFT,    "" },
 
