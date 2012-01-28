@@ -42,12 +42,12 @@ namespace Lexer
 
 //------------------------------------------------------------------------------
 // Tables of terminals
+// TODO: When Clang supports initializer lists put these in terminal_types.hpp
 //------------------------------------------------------------------------------
 
 //
 // Ignored Sequence
 //
-
 static const FunctionalTerminal g_ignoredTerminals[] =
 {
     { ReadWhitespace,   WHITESPACE,    "whitespace"    },
@@ -143,7 +143,7 @@ static const FunctionalTerminal g_identifierTerminals[] =
 // Terminal
 //------------------------------------------------------------------------------
 
-Terminal::Terminal( TerminalType terminal_type,
+TerminalPosition::TerminalPosition( TerminalType terminal_type,
                     std::string::const_iterator begin,
                     std::string::const_iterator end )
     :terminal_type(terminal_type)

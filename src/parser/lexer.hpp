@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <map>
 #include <stack>
 #include <string>
 #include <vector>
@@ -43,9 +44,9 @@ namespace Lexer
 // Terminal
 //------------------------------------------------------------------------------
 
-struct Terminal
+struct TerminalPosition
 {
-    Terminal( TerminalType terminal_type,
+    TerminalPosition( TerminalType terminal_type,
               std::string::const_iterator begin,
               std::string::const_iterator end );
 
@@ -84,7 +85,7 @@ private:
     void ConsumeIgnoredTerminals();
 
     std::size_t m_numTokensRead;
-    std::vector<Terminal> m_readTerminals;
+    std::vector<TerminalPosition> m_readTerminals;
 
     const std::string m_string;
     std::string::const_iterator m_position;
