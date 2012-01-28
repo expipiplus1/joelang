@@ -316,8 +316,234 @@ bool LogicalAndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     if( operators.size() == 0 )
         operators.push_back( Lexer::LOGICAL_AND );
 
+    return ParseLeftAssociative<LogicalAndExpression, InclusiveOrExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// InclusiveOrExpression
+//------------------------------------------------------------------------------
+
+InclusiveOrExpression::InclusiveOrExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+InclusiveOrExpression::~InclusiveOrExpression()
+{
+}
+
+bool InclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+        operators.push_back( Lexer::INCLUSIVE_OR );
+
+    return ParseLeftAssociative<InclusiveOrExpression, ExclusiveOrExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// ExclusiveOrExpression
+//------------------------------------------------------------------------------
+
+ExclusiveOrExpression::ExclusiveOrExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+ExclusiveOrExpression::~ExclusiveOrExpression()
+{
+}
+
+bool ExclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+        operators.push_back( Lexer::EXCLUSIVE_OR );
+
+    return ParseLeftAssociative<ExclusiveOrExpression, AndExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// AndExpression
+//------------------------------------------------------------------------------
+
+AndExpression::AndExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+AndExpression::~AndExpression()
+{
+}
+
+bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+        operators.push_back( Lexer::AND );
+
+    return ParseLeftAssociative<AndExpression, EqualityExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// EqualityExpression
+//------------------------------------------------------------------------------
+
+EqualityExpression::EqualityExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+EqualityExpression::~EqualityExpression()
+{
+}
+
+bool EqualityExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+    {
+        operators.push_back( Lexer::EQUALITY );
+        operators.push_back( Lexer::NOT_EQUALITY );
+    }
+
+    return ParseLeftAssociative<EqualityExpression, RelationalExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// RelationalExpression
+//------------------------------------------------------------------------------
+
+RelationalExpression::RelationalExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+RelationalExpression::~RelationalExpression()
+{
+}
+
+bool RelationalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+    {
+        operators.push_back( Lexer::LESS_THAN );
+        operators.push_back( Lexer::GREATER_THAN );
+        operators.push_back( Lexer::LESS_THAN_EQUALS );
+        operators.push_back( Lexer::GREATER_THAN_EQUALS );
+    }
+
+    return ParseLeftAssociative<RelationalExpression, ShiftExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// ShiftExpression
+//------------------------------------------------------------------------------
+
+ShiftExpression::ShiftExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+ShiftExpression::~ShiftExpression()
+{
+}
+
+bool ShiftExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+    {
+        operators.push_back( Lexer::LEFT_SHIFT );
+        operators.push_back( Lexer::RIGHT_SHIFT );
+    }
+
+    return ParseLeftAssociative<ShiftExpression, AdditiveExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// AdditiveExpression
+//------------------------------------------------------------------------------
+
+AdditiveExpression::AdditiveExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+AdditiveExpression::~AdditiveExpression()
+{
+}
+
+bool AdditiveExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+    {
+        operators.push_back( Lexer::PLUS );
+        operators.push_back( Lexer::MINUS );
+    }
+
+    return ParseLeftAssociative<AdditiveExpression, MultiplicativeExpression>( parser, token, operators );
+}
+
+//------------------------------------------------------------------------------
+// MultiplicativeExpression
+//------------------------------------------------------------------------------
+
+MultiplicativeExpression::MultiplicativeExpression( Lexer::TerminalType operator_terminal,
+                                          std::unique_ptr<Expression> left_side,
+                                          std::unique_ptr<Expression> right_side )
+    :BinaryOperatorExpression( operator_terminal,
+                               std::move( left_side ),
+                               std::move( right_side ) )
+{
+}
+
+MultiplicativeExpression::~MultiplicativeExpression()
+{
+}
+
+bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    static std::vector<Lexer::TerminalType> operators;
+    if( operators.size() == 0 )
+    {
+        operators.push_back( Lexer::MULTIPLY );
+        operators.push_back( Lexer::DIVIDE );
+        operators.push_back( Lexer::MODULO );
+    }
+
     //TODO
-    return ParseLeftAssociative<LogicalAndExpression, PrimaryExpression>( parser, token, operators );
+    return ParseLeftAssociative<MultiplicativeExpression, PrimaryExpression>( parser, token, operators );
 }
 
 //------------------------------------------------------------------------------

@@ -161,8 +161,6 @@ protected:
 private:
 };
 
-
-
 //------------------------------------------------------------------------------
 // LogicalOrExpression
 //------------------------------------------------------------------------------
@@ -195,6 +193,158 @@ public:
 
 protected:
     LogicalAndExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// InclusiveOrExpression
+//------------------------------------------------------------------------------
+
+class InclusiveOrExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~InclusiveOrExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    InclusiveOrExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// ExclusiveOrExpression
+//------------------------------------------------------------------------------
+
+class ExclusiveOrExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~ExclusiveOrExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    ExclusiveOrExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// AndExpression
+//------------------------------------------------------------------------------
+
+class AndExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~AndExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    AndExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// EqualityExpression
+//------------------------------------------------------------------------------
+
+class EqualityExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~EqualityExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    EqualityExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// RelationalExpression
+//------------------------------------------------------------------------------
+
+class RelationalExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~RelationalExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    RelationalExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// ShiftExpression
+//------------------------------------------------------------------------------
+
+class ShiftExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~ShiftExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    ShiftExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// AdditiveExpression
+//------------------------------------------------------------------------------
+
+class AdditiveExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~AdditiveExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    AdditiveExpression( Lexer::TerminalType operator_terminal,
+                          std::unique_ptr<Expression> left_side,
+                          std::unique_ptr<Expression> right_side );
+
+    friend class BinaryOperatorExpression;
+};
+
+//------------------------------------------------------------------------------
+// MultiplicativeExpression
+//------------------------------------------------------------------------------
+
+class MultiplicativeExpression : public JoeLang::Parser::BinaryOperatorExpression
+{
+public:
+    virtual ~MultiplicativeExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    MultiplicativeExpression( Lexer::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
