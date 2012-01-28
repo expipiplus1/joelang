@@ -84,6 +84,10 @@ public:
 private:
     void ConsumeIgnoredTerminals();
 
+    static std::map< TerminalType, const LiteralTerminal* > s_punctuationTerminalMap;
+    static std::map< TerminalType, const FunctionalTerminal* > s_literalTerminalMap;
+    static std::map< TerminalType, const LiteralTerminal* > s_keywordTerminalMap;
+
     std::size_t m_numTokensRead;
     std::vector<TerminalPosition> m_readTerminals;
 
