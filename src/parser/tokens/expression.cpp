@@ -109,6 +109,10 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     return true;
 }
 
+//------------------------------------------------------------------------------
+// AssignmentOperator
+//------------------------------------------------------------------------------
+
 AssignmentOperator::AssignmentOperator( Lexer::TerminalType terminal_type )
     :m_terminalType( terminal_type )
 {
@@ -136,7 +140,7 @@ bool AssignmentOperator::Parse( Parser& parser, std::unique_ptr<AssignmentOperat
 }
 
 //------------------------------------------------------------------------------
-// Conditional Expression
+// ConditionalExpression
 //------------------------------------------------------------------------------
 
 ConditionalExpression::ConditionalExpression( std::unique_ptr<Expression> condition,
