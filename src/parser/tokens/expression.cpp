@@ -129,14 +129,33 @@ void AssignmentOperator::Print(int depth) const
     std::cout << "Assignment Operator\n";
 }
 
-//TODO
 bool AssignmentOperator::Parse( Parser& parser, std::unique_ptr<AssignmentOperator>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
-        return false;
+    // sigh, initializer lists
+    static Lexer::TerminalType s_assignment_operator_terminals[] =
+    {
+        Lexer::EQUALS,
+        Lexer::PLUS_EQUALS,
+        Lexer::MINUS_EQUALS,
+        Lexer::MULTIPLY_EQUALS,
+        Lexer::DIVIDE_EQUALS,
+        Lexer::MODULO_EQUALS,
+        Lexer::LEFT_SHIFT_EQUALS,
+        Lexer::RIGHT_SHIFT_EQUALS,
+        Lexer::AND_EQUALS,
+        Lexer::INCLUSIVE_OR_EQUALS,
+        Lexer::EXCLUSIVE_OR_EQUALS
+    };
 
-    token.reset( new AssignmentOperator( Lexer::EQUALS ) );
-    return true;
+    for( Lexer::TerminalType assignment_operator_terminal : s_assignment_operator_terminals )
+    {
+        if( parser.ExpectTerminal( assignment_operator_terminal ) )
+        {
+            token.reset( new AssignmentOperator( assignment_operator_terminal ) );
+            return true;
+        }
+    }
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -187,7 +206,7 @@ bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& 
         return false;
 
     std::unique_ptr<Expression> false_expression;
-    if( !Expect<ConditionalExpression>( parser, false_expression ) )
+    if( !Expect<AssignmentExpression>( parser, false_expression ) )
         return false;
 
     token.reset( new ConditionalExpression( std::move( condition ),
