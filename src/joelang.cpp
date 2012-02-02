@@ -34,7 +34,7 @@
 int main( int argc, char** argv )
 {
     JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass p1{} pass { a = b?q+a<b||f^d:w; } technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
+    if( parser.Parse( "pass p1{} pass { a=b=c; } technique foo{} pass p1{} technique { pass{} pass p2{}}" ) )
     {
         parser.Print();
         std::cout << "success\n";

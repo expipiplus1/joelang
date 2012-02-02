@@ -88,22 +88,30 @@ void AssignmentExpression::Print(int depth) const
 
 bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    if( Expect< ConditionalExpression >( parser, token ) )
-        return true;
-
-    std::unique_ptr<Expression> unary_expression;
-    if( !Expect< UnaryExpression >( parser, unary_expression ) )
+    std::unique_ptr<Expression> lhs_expression;
+    if( !Expect< ConditionalExpression >( parser, lhs_expression ) )
         return false;
+
+    if( typeid( *lhs_expression ) != typeid( PrimaryExpression ) &&
+        typeid( *lhs_expression ) != typeid( UnaryExpression ) &&
+        typeid( *lhs_expression ) != typeid( PostfixExpression ) )
+    {
+        token = std::move( lhs_expression );
+        return true;
+    }
 
     std::unique_ptr<AssignmentOperator> assignment_operator;
     if( !Expect< AssignmentOperator >( parser, assignment_operator ) )
-        return false;
+    {
+        token = std::move( lhs_expression );
+        return true;
+    }
 
     std::unique_ptr<Expression> assignment_expression;
     if( !Expect< AssignmentExpression >( parser, assignment_expression ) )
         return false;
 
-    token.reset( new AssignmentExpression( std::move( unary_expression ),
+    token.reset( new AssignmentExpression( std::move( lhs_expression ),
                                            std::move( assignment_operator ),
                                            std::move( assignment_expression ) ) );
     return true;
@@ -126,7 +134,7 @@ void AssignmentOperator::Print(int depth) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << "Assignment Operator\n";
+    std::cout << GetTerminalString( m_terminalType ) << std::endl;
 }
 
 bool AssignmentOperator::Parse( Parser& parser, std::unique_ptr<AssignmentOperator>& token )
@@ -566,14 +574,42 @@ bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression
     }
 
     //TODO
-    return ParseLeftAssociative<MultiplicativeExpression, PrimaryExpression>( parser, token, operators );
+    return ParseLeftAssociative<MultiplicativeExpression, CastExpression>( parser, token, operators );
 }
 
 //------------------------------------------------------------------------------
-// Unary Expression
+// CastExpression
 //------------------------------------------------------------------------------
 
-UnaryExpression::UnaryExpression()
+CastExpression::CastExpression()
+{
+}
+
+CastExpression::~CastExpression()
+{
+}
+
+void CastExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "Cast Expression\n";
+}
+
+//TODO
+bool CastExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    return Expect<UnaryExpression>( parser, token );
+}
+
+//------------------------------------------------------------------------------
+// UnaryExpression
+//------------------------------------------------------------------------------
+
+UnaryExpression::UnaryExpression( std::unique_ptr<UnaryOperator> unary_operator,
+                                  std::unique_ptr<Expression> unary_expression )
+    :m_unaryOperator( std::move( unary_operator ) )
+    ,m_unaryExpression( std::move( unary_expression ) )
 {
 }
 
@@ -588,17 +624,88 @@ void UnaryExpression::Print( int depth ) const
     std::cout << "Unary Expression\n";
 }
 
-//TODO
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    return Expect<PrimaryExpression>( parser, token );
-   /*
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER ) )
-        return false;
+    std::unique_ptr<UnaryOperator> unary_operator;
+    if( Expect<UnaryOperator>( parser, unary_operator ) )
+    {
+        std::unique_ptr<Expression> unary_expression;
+        if( !Expect<UnaryExpression>( parser, unary_expression ) )
+            return false;
+        token.reset( new UnaryExpression( std::move( unary_operator ),
+                                          std::move( unary_expression ) ) );
+        return true;
+    }
 
-    token.reset( new UnaryExpression() );
-    return true;
-    */
+    return Expect<PostfixExpression>( parser, token );
+}
+
+//------------------------------------------------------------------------------
+// UnaryOperator
+//------------------------------------------------------------------------------
+
+UnaryOperator::UnaryOperator( Lexer::TerminalType terminal_type )
+    :m_terminalType( terminal_type )
+{
+}
+
+UnaryOperator::~UnaryOperator()
+{
+}
+
+void UnaryOperator::Print(int depth) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << GetTerminalString( m_terminalType ) << std::endl;
+}
+
+bool UnaryOperator::Parse( Parser& parser, std::unique_ptr<UnaryOperator>& token )
+{
+    static Lexer::TerminalType s_unary_operator_terminals[] =
+    {
+        Lexer::INCREMENT,
+        Lexer::DECREMENT,
+        Lexer::PLUS,
+        Lexer::MINUS,
+        Lexer::BITWISE_NOT,
+        Lexer::LOGICAL_NOT
+    };
+
+    for( Lexer::TerminalType unary_operator_terminal : s_unary_operator_terminals )
+    {
+        if( parser.ExpectTerminal( unary_operator_terminal ) )
+        {
+            token.reset( new UnaryOperator( unary_operator_terminal ) );
+            return true;
+        }
+    }
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// Postfix Expression
+//------------------------------------------------------------------------------
+
+PostfixExpression::PostfixExpression()
+{
+}
+
+PostfixExpression::~PostfixExpression()
+{
+}
+
+void PostfixExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "Postfix Expression\n";
+}
+
+//TODO
+bool PostfixExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    return Expect<PrimaryExpression>( parser, token );
 }
 
 //------------------------------------------------------------------------------

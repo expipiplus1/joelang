@@ -42,8 +42,9 @@ namespace Parser
 
 class Parser;
 
-class UnaryExpression;
+//class UnaryExpression;
 class AssignmentOperator;
+class UnaryOperator;
 
 //------------------------------------------------------------------------------
 // Expression
@@ -352,6 +353,23 @@ protected:
 };
 
 //------------------------------------------------------------------------------
+// CastExpression
+//------------------------------------------------------------------------------
+
+class CastExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~CastExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    CastExpression( );
+};
+
+//------------------------------------------------------------------------------
 // UnaryExpression
 //------------------------------------------------------------------------------
 
@@ -365,7 +383,49 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    UnaryExpression( );
+    UnaryExpression( std::unique_ptr<UnaryOperator> unary_operator,
+                     std::unique_ptr<Expression> unary_expression );
+
+private:
+    std::unique_ptr<UnaryOperator> m_unaryOperator;
+    std::unique_ptr<Expression> m_unaryExpression;
+};
+
+//------------------------------------------------------------------------------
+// UnaryOperator
+//------------------------------------------------------------------------------
+
+class UnaryOperator : public JoeLang::Parser::Token
+{
+public:
+    virtual ~UnaryOperator();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse(Parser& parser, std::unique_ptr<UnaryOperator> &token );
+
+protected:
+    UnaryOperator( Lexer::TerminalType terminal_type );
+
+private:
+    Lexer::TerminalType m_terminalType;
+};
+
+//------------------------------------------------------------------------------
+// PostfixExpression
+//------------------------------------------------------------------------------
+
+class PostfixExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~PostfixExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    PostfixExpression( );
 };
 
 //------------------------------------------------------------------------------
