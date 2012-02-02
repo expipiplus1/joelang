@@ -244,10 +244,11 @@ void BinaryOperatorExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << "Binary Operator Expression\n";
+    std::cout << GetTerminalString( m_operatorTerminal ) << std::endl;
     m_leftSide->Print( depth + 1 );
     m_rightSide->Print( depth + 1 );
 }
+
 template< typename ExpressionType, typename SubExpressionType >
 bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
                                   const std::vector<Lexer::TerminalType>& operator_terminals )
