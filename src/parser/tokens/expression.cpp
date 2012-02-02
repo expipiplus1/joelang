@@ -700,10 +700,13 @@ bool UnaryOperator::Parse( Parser& parser, std::unique_ptr<UnaryOperator>& token
 }
 
 //------------------------------------------------------------------------------
-// Postfix Expression
+// PostfixExpression
 //------------------------------------------------------------------------------
 
-PostfixExpression::PostfixExpression()
+PostfixExpression::PostfixExpression( std::unique_ptr<Expression> expression,
+                                      std::unique_ptr<PostfixOperator> postfix_operator )
+    :m_expression( std::move( expression ) )
+    ,m_postfixOperator( std::move( postfix_operator ) )
 {
 }
 
@@ -716,16 +719,100 @@ void PostfixExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Postfix Expression\n";
+    m_expression->Print( depth + 1 );
+    m_postfixOperator->Print( depth + 1 );
 }
 
-//TODO
 bool PostfixExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    return Expect<PrimaryExpression>( parser, token );
+    std::unique_ptr<Expression> primary_expression;
+    if( !Expect<PrimaryExpression>( parser, primary_expression ) )
+        return false;
+
+    std::vector< std::unique_ptr<PostfixOperator> > operators;
+    if( !ExpectSequenceOf<PostfixOperator>( parser, operators ) )
+    {
+        token = std::move( primary_expression );
+        return true;
+    }
+
+    std::unique_ptr<Expression> postfix_expression = std::move( primary_expression );
+    for( auto& postfix_operator : operators )
+    {
+        postfix_expression.reset( new PostfixExpression( std::move( postfix_expression ),
+                                                         std::move( postfix_operator ) ) );
+    }
+
+    token = std::move( postfix_expression );
+    return true;
 }
 
 //------------------------------------------------------------------------------
-// Primary Expression
+// PostfixOperator
+//------------------------------------------------------------------------------
+
+PostfixOperator::PostfixOperator()
+{
+}
+
+PostfixOperator::~PostfixOperator()
+{
+}
+
+bool PostfixOperator::Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token )
+{
+    std::unique_ptr<Token> t;
+    if( !ExpectAnyOf<SubscriptOperator>( parser, t ) )
+        return false;
+
+    Token* p = t.release();
+    token.reset( dynamic_cast<PostfixOperator*>( p ) );
+    if( !token )
+    {
+        delete p;
+        return false;
+    }
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// SubscriptOperator
+//------------------------------------------------------------------------------
+
+SubscriptOperator::SubscriptOperator( std::unique_ptr<Expression> expression )
+    :m_expression( std::move( expression ) )
+{
+}
+
+SubscriptOperator::~SubscriptOperator()
+{
+}
+
+void SubscriptOperator::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "SubscriptOperator\n";
+}
+
+bool SubscriptOperator::Parse( Parser& parser, std::unique_ptr<SubscriptOperator>& token )
+{
+    if( !parser.ExpectTerminal( Lexer::OPEN_SQUARE ) )
+        return false;
+
+    std::unique_ptr<Expression> expression;
+    if( !Expect<Expression>( parser, expression ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::CLOSE_SQUARE ) )
+        return false;
+
+    token.reset( new SubscriptOperator( std::move( expression ) ) );
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// PrimaryExpression
 //------------------------------------------------------------------------------
 
 PrimaryExpression::PrimaryExpression( std::string identifier )

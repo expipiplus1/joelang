@@ -42,9 +42,9 @@ namespace Parser
 
 class Parser;
 
-//class UnaryExpression;
 class AssignmentOperator;
 class UnaryOperator;
+class PostfixOperator;
 
 //------------------------------------------------------------------------------
 // Expression
@@ -427,7 +427,46 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    PostfixExpression( );
+    PostfixExpression( std::unique_ptr<Expression> expression,
+                       std::unique_ptr<PostfixOperator> postfix_operator );
+
+private:
+    std::unique_ptr<Expression> m_expression;
+    std::unique_ptr<PostfixOperator> m_postfixOperator;
+};
+
+//------------------------------------------------------------------------------
+// PostfixOperator
+//------------------------------------------------------------------------------
+
+class PostfixOperator : public JoeLang::Parser::Token
+{
+public:
+    virtual ~PostfixOperator();
+
+    static bool Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token );
+
+protected:
+    PostfixOperator( );
+};
+
+//------------------------------------------------------------------------------
+// SubscriptOperator
+//------------------------------------------------------------------------------
+class SubscriptOperator : public JoeLang::Parser::PostfixOperator
+{
+public:
+    virtual ~SubscriptOperator();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<SubscriptOperator>& token );
+
+protected:
+    SubscriptOperator( std::unique_ptr<Expression> expression );
+
+private:
+    std::unique_ptr<Expression> m_expression;
 };
 
 //------------------------------------------------------------------------------
