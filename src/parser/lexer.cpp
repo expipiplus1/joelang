@@ -89,6 +89,7 @@ static const LiteralTerminal g_punctuationTerminals[] =
 
     { "&&", LOGICAL_AND,    "" },
     { "||", LOGICAL_OR,     "" },
+    { "!",  LOGICAL_NOT,    "" },
 
     { "++", INCREMENT,      "" },
     { "--", DECREMENT,      "" },
@@ -100,6 +101,7 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { "&",  AND,            "" },
     { "|",  INCLUSIVE_OR,   "" },
     { "^",  EXCLUSIVE_OR,   "" },
+    { "~",  BITWISE_NOT,    "" },
     { "<<", LEFT_SHIFT,     "" },
     { ">>", RIGHT_SHIFT,    "" },
 
@@ -138,6 +140,33 @@ static const FunctionalTerminal g_identifierTerminals[] =
 {
     //{ ReadIdentifier,   IDENTIFIER, "identifier" }
 };
+
+const std::string& GetTerminalString( TerminalType terminal_type )
+{
+    for( const auto& i : g_ignoredTerminals )
+        if( i.terminal_type == terminal_type )
+            return i.readable_string;
+
+    for( const auto& i : g_punctuationTerminals )
+         if( i.terminal_type == terminal_type )
+            if( i.readable_string.empty() )
+                return i.matched_string;
+            else
+                return i.readable_string;
+
+    for( const auto& i : g_literalTerminals )
+        if( i.terminal_type == terminal_type )
+            return i.readable_string;
+
+    for( const auto& i : g_keywordTerminals )
+         if( i.terminal_type == terminal_type )
+            if( i.readable_string.empty() )
+                return i.matched_string;
+            else
+                return i.readable_string;
+
+    return "Invalid Termianal";
+}
 
 //------------------------------------------------------------------------------
 // Terminal

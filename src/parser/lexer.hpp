@@ -40,6 +40,8 @@ namespace JoeLang
 namespace Lexer
 {
 
+const std::string& GetTerminalString( TerminalType terminal_type );
+
 //------------------------------------------------------------------------------
 // Terminal
 //------------------------------------------------------------------------------
