@@ -809,7 +809,7 @@ bool SubscriptOperator::Parse( Parser& parser, std::unique_ptr<SubscriptOperator
         return false;
 
     token.reset( new SubscriptOperator( std::move( expression ) ) );
-    return false;
+    return true;
 }
 
 //------------------------------------------------------------------------------
