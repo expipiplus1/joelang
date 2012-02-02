@@ -384,11 +384,11 @@ public:
 
 protected:
     UnaryExpression( std::unique_ptr<UnaryOperator> unary_operator,
-                     std::unique_ptr<Expression> unary_expression );
+                     std::unique_ptr<Expression> expression );
 
 private:
     std::unique_ptr<UnaryOperator> m_unaryOperator;
-    std::unique_ptr<Expression> m_unaryExpression;
+    std::unique_ptr<Expression> m_expression;
 };
 
 //------------------------------------------------------------------------------
@@ -401,6 +401,8 @@ public:
     virtual ~UnaryOperator();
 
     virtual void Print( int depth ) const;
+
+    Lexer::TerminalType GetTerminalType() const;
 
     static bool Parse(Parser& parser, std::unique_ptr<UnaryOperator> &token );
 

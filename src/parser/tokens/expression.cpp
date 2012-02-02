@@ -573,7 +573,6 @@ bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression
         operators.push_back( Lexer::MODULO );
     }
 
-    //TODO
     return ParseLeftAssociative<MultiplicativeExpression, CastExpression>( parser, token, operators );
 }
 
@@ -607,9 +606,9 @@ bool CastExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 //------------------------------------------------------------------------------
 
 UnaryExpression::UnaryExpression( std::unique_ptr<UnaryOperator> unary_operator,
-                                  std::unique_ptr<Expression> unary_expression )
+                                  std::unique_ptr<Expression> expression )
     :m_unaryOperator( std::move( unary_operator ) )
-    ,m_unaryExpression( std::move( unary_expression ) )
+    ,m_expression( std::move( expression ) )
 {
 }
 
@@ -622,6 +621,8 @@ void UnaryExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Unary Expression\n";
+    m_unaryOperator->Print( depth + 1 );
+    m_expression->Print( depth + 1 );
 }
 
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -629,11 +630,21 @@ bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token 
     std::unique_ptr<UnaryOperator> unary_operator;
     if( Expect<UnaryOperator>( parser, unary_operator ) )
     {
-        std::unique_ptr<Expression> unary_expression;
-        if( !Expect<UnaryExpression>( parser, unary_expression ) )
-            return false;
+        std::unique_ptr<Expression> expression;
+        if( unary_operator->GetTerminalType() == Lexer::INCREMENT ||
+            unary_operator->GetTerminalType() == Lexer::DECREMENT )
+        {
+            if( !Expect<UnaryExpression>( parser, expression ) )
+                return false;
+        }
+        else
+        {
+            if( !Expect<CastExpression>( parser, expression ) )
+                return false;
+        }
+
         token.reset( new UnaryExpression( std::move( unary_operator ),
-                                          std::move( unary_expression ) ) );
+                                          std::move( expression ) ) );
         return true;
     }
 
@@ -658,6 +669,11 @@ void UnaryOperator::Print(int depth) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << GetTerminalString( m_terminalType ) << std::endl;
+}
+
+Lexer::TerminalType UnaryOperator::GetTerminalType() const
+{
+    return m_terminalType;
 }
 
 bool UnaryOperator::Parse( Parser& parser, std::unique_ptr<UnaryOperator>& token )
