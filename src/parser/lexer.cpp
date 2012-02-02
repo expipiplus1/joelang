@@ -66,6 +66,8 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { ")",  CLOSE_ROUND,    "" },
     { "<",  OPEN_ANGLED,    "" },
     { ">",  CLOSE_ANGLED,   "" },
+    { "[",  OPEN_SQUARE,    "" },
+    { "]",  CLOSE_SQUARE,   "" },
 
     { "==", EQUALITY,       "" },
     { "!=", NOT_EQUALITY,   "" },
@@ -149,10 +151,12 @@ const std::string& GetTerminalString( TerminalType terminal_type )
 
     for( const auto& i : g_punctuationTerminals )
          if( i.terminal_type == terminal_type )
+         {
             if( i.readable_string.empty() )
                 return i.matched_string;
             else
                 return i.readable_string;
+         }
 
     for( const auto& i : g_literalTerminals )
         if( i.terminal_type == terminal_type )
@@ -160,12 +164,15 @@ const std::string& GetTerminalString( TerminalType terminal_type )
 
     for( const auto& i : g_keywordTerminals )
          if( i.terminal_type == terminal_type )
+         {
             if( i.readable_string.empty() )
                 return i.matched_string;
             else
                 return i.readable_string;
+         }
 
-    return "Invalid Termianal";
+    const static std::string s = "Invalid Terminal";
+    return s;
 }
 
 //------------------------------------------------------------------------------

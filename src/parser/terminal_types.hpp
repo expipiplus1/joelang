@@ -64,6 +64,8 @@ enum TerminalType
     CLOSE_ROUND,
     OPEN_ANGLED,
     CLOSE_ANGLED,
+    OPEN_SQUARE,
+    CLOSE_SQUARE,
 
     // Assignment
     EQUALS,
