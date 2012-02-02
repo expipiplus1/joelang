@@ -762,7 +762,8 @@ PostfixOperator::~PostfixOperator()
 bool PostfixOperator::Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf<SubscriptOperator>( parser, t ) )
+    if( !ExpectAnyOf<SubscriptOperator,
+                     ArgumentListOperator>( parser, t ) )
         return false;
 
     Token* p = t.release();
@@ -809,6 +810,55 @@ bool SubscriptOperator::Parse( Parser& parser, std::unique_ptr<SubscriptOperator
         return false;
 
     token.reset( new SubscriptOperator( std::move( expression ) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// ArgumentListOperator
+//------------------------------------------------------------------------------
+
+ArgumentListOperator::ArgumentListOperator(
+        std::vector< std::unique_ptr<Expression> > argument_expressions )
+    :m_argumentExpressions( std::move( argument_expressions ) )
+{
+}
+
+ArgumentListOperator::~ArgumentListOperator()
+{
+}
+
+void ArgumentListOperator::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "ArgumentListOperator\n";
+    for( const auto& i : m_argumentExpressions )
+        i->Print( depth + 1 );
+}
+
+bool ArgumentListOperator::Parse( Parser& parser, std::unique_ptr<ArgumentListOperator>& token )
+{
+    if( !parser.ExpectTerminal( Lexer::OPEN_ROUND ) )
+        return false;
+
+    std::vector< std::unique_ptr<Expression> > argument_expressions;
+
+    std::unique_ptr<Expression> argument;
+    if( Expect<AssignmentExpression>( parser, argument ) )
+    {
+        argument_expressions.push_back( std::move( argument ) );
+        while( parser.ExpectTerminal( Lexer::COMMA ) )
+        {
+            if( !Expect<AssignmentExpression>( parser, argument ) )
+                return false;
+            argument_expressions.push_back( std::move( argument ) );
+        }
+    }
+
+    if( !parser.ExpectTerminal( Lexer::CLOSE_ROUND ) )
+        return false;
+
+    token.reset( new ArgumentListOperator( std::move( argument_expressions ) ) );
     return true;
 }
 

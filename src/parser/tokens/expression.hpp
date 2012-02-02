@@ -470,6 +470,25 @@ private:
 };
 
 //------------------------------------------------------------------------------
+// ArgumentListOperator
+//------------------------------------------------------------------------------
+class ArgumentListOperator : public JoeLang::Parser::PostfixOperator
+{
+public:
+    virtual ~ArgumentListOperator();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<ArgumentListOperator>& token );
+
+protected:
+    ArgumentListOperator( std::vector< std::unique_ptr<Expression> > argument_expressions );
+
+private:
+    std::vector< std::unique_ptr<Expression> > m_argumentExpressions;
+};
+
+//------------------------------------------------------------------------------
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
