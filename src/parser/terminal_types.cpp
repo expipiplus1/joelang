@@ -47,7 +47,7 @@ namespace Lexer
 int LiteralTerminal::Read( const std::string::const_iterator begin,
                            const std::string::const_iterator end ) const
 {
-    if( (end - begin) < matched_string.size() ||
+    if( std::size_t(end - begin) < matched_string.size() ||
         !std::equal( matched_string.begin(), matched_string.end(), begin ) )
         return 0;
 
