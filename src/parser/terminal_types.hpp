@@ -89,6 +89,7 @@ enum TerminalType
     // Logic
     LOGICAL_AND,
     LOGICAL_OR,
+    LOGICAL_NOT,
 
     // Arithmetic
     INCREMENT,
@@ -101,6 +102,7 @@ enum TerminalType
     AND,
     INCLUSIVE_OR,
     EXCLUSIVE_OR,
+    BITWISE_NOT,
     LEFT_SHIFT,
     RIGHT_SHIFT,
 
