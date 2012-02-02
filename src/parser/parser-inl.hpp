@@ -51,10 +51,10 @@ bool Expect( Parser& parser )
     return T::Parse( parser );
 }
 
-template<typename T>
-bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence )
+template<typename T, typename U>
+bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<U> >& token_sequence )
 {
-    std::unique_ptr<T> token;
+    std::unique_ptr<U> token;
     if( !T::Parse( parser, token ) )
         return false;
 

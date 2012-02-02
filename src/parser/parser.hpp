@@ -66,8 +66,8 @@ bool Expect( Parser& parser, std::unique_ptr<U>& token );
 template< typename T >
 bool Expect( Parser& parser );
 
-template<typename T>
-bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<T> >& token_sequence );
+template<typename T, typename U>
+bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<U> >& token_sequence );
 
 template<typename T>
 bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
