@@ -110,6 +110,8 @@ enum TerminalType
 
     // Misc
     SEMICOLON,
+    COMMA,
+    PERIOD,
     COLON,
     QUERY,
 

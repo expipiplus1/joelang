@@ -108,6 +108,8 @@ static const LiteralTerminal g_punctuationTerminals[] =
     { ">>", RIGHT_SHIFT,    "" },
 
     { ";",  SEMICOLON,      "" },
+    { ",",  COMMA,          "" },
+    { ".",  PERIOD,         "" },
     { ":",  COLON,          "" },
     { "?",  QUERY,          "" }
 };
