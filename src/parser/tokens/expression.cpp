@@ -793,6 +793,7 @@ void SubscriptOperator::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "SubscriptOperator\n";
+    m_expression->Print( depth + 1 );
 }
 
 bool SubscriptOperator::Parse( Parser& parser, std::unique_ptr<SubscriptOperator>& token )
