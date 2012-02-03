@@ -764,7 +764,9 @@ bool PostfixOperator::Parse( Parser& parser, std::unique_ptr<PostfixOperator>& t
 {
     std::unique_ptr<Token> t;
     if( !ExpectAnyOf<SubscriptOperator,
-                     ArgumentListOperator>( parser, t ) )
+                     ArgumentListOperator,
+                     MemberAccessOperator,
+                     IncrementalOperator>( parser, t ) )
         return false;
 
     Token* p = t.release();
@@ -861,6 +863,77 @@ bool ArgumentListOperator::Parse( Parser& parser, std::unique_ptr<ArgumentListOp
 
     token.reset( new ArgumentListOperator( std::move( argument_expressions ) ) );
     return true;
+}
+
+//------------------------------------------------------------------------------
+// MemberAccessOperator
+//------------------------------------------------------------------------------
+
+MemberAccessOperator::MemberAccessOperator( std::string identifier )
+    :m_identifier( std::move( identifier ) )
+{
+}
+
+MemberAccessOperator::~MemberAccessOperator()
+{
+}
+
+void MemberAccessOperator::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << ".\n";
+    for( int i = 0; i < depth * 4 + 4; ++i )
+        std::cout << " ";
+    std::cout << m_identifier << std::endl;
+}
+
+bool MemberAccessOperator::Parse( Parser& parser, std::unique_ptr<MemberAccessOperator>& token )
+{
+    if( !parser.ExpectTerminal( Lexer::PERIOD ) )
+        return false;
+
+    std::string identifier;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, identifier ) )
+        return false;
+
+    token.reset( new MemberAccessOperator( std::move( identifier ) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// IncrementalOperator
+//------------------------------------------------------------------------------
+
+IncrementalOperator::IncrementalOperator( Lexer::TerminalType terminal_type )
+    :m_terminalType( terminal_type )
+{
+}
+
+IncrementalOperator::~IncrementalOperator()
+{
+}
+
+void IncrementalOperator::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << GetTerminalString( m_terminalType ) << std::endl;
+}
+
+bool IncrementalOperator::Parse( Parser& parser, std::unique_ptr<IncrementalOperator>& token )
+{
+    if( parser.ExpectTerminal( Lexer::INCREMENT ) )
+    {
+        token.reset( new IncrementalOperator( Lexer::INCREMENT ) );
+        return true;
+    }
+    if( parser.ExpectTerminal( Lexer::DECREMENT ) )
+    {
+        token.reset( new IncrementalOperator( Lexer::DECREMENT ) );
+        return true;
+    }
+    return false;
 }
 
 //------------------------------------------------------------------------------

@@ -489,6 +489,44 @@ private:
 };
 
 //------------------------------------------------------------------------------
+// MemberAccessOperator
+//------------------------------------------------------------------------------
+class MemberAccessOperator : public JoeLang::Parser::PostfixOperator
+{
+public:
+    virtual ~MemberAccessOperator();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<MemberAccessOperator>& token );
+
+protected:
+    MemberAccessOperator( std::string identifier );
+
+private:
+    std::string m_identifier;
+};
+
+//------------------------------------------------------------------------------
+// IncrementalOperator
+//------------------------------------------------------------------------------
+class IncrementalOperator : public JoeLang::Parser::PostfixOperator
+{
+public:
+    virtual ~IncrementalOperator();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<IncrementalOperator>& token );
+
+protected:
+    IncrementalOperator( Lexer::TerminalType terminal_type );
+
+private:
+    Lexer::TerminalType m_terminalType;
+};
+
+//------------------------------------------------------------------------------
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
