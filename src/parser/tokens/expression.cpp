@@ -958,7 +958,6 @@ void PrimaryExpression::Print( int depth ) const
     std::cout << m_identifier << "\n";
 }
 
-//TODO
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     if( Expect<IdentifierExpression>( parser, token ) )
@@ -967,7 +966,17 @@ bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
     if( Expect<LiteralExpression>( parser, token ) )
         return true;
 
-    return false;
+
+    if( !parser.ExpectTerminal( Lexer::OPEN_ROUND ) )
+        return false;
+
+    if( !Expect<Expression>( parser, token ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::CLOSE_ROUND ) )
+        return false;
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -1012,6 +1021,7 @@ LiteralExpression::~LiteralExpression()
 {
 }
 
+//TODO
 bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Token> t;
