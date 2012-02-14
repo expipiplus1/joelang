@@ -136,16 +136,166 @@ int ReadBlockComment(   const std::string::const_iterator begin,
     return 0;
 }
 
-/*
+int ReadDigitSequence(      const std::string::const_iterator begin,
+                            const std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    char c = *p;
+    while( ( c >= '0' ) && ( c <= '9' ) && ( p < end ) )
+    {
+        ++p;
+        c = *p;
+    }
+    return p - begin;
+}
+
+int ReadHexDigitSequence(      const std::string::const_iterator begin,
+                            const std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    char c = *p;
+    while( ( ( ( c >= '0' ) && ( c <= '9' ) ) ||
+             ( ( c >= 'a' ) && ( c <= 'f' ) ) ||
+             ( ( c >= 'A' ) && ( c <= 'F' ) ) ) && p < end )
+    {
+        ++p;
+        c = *p;
+    }
+    return p - begin;
+}
+
+int ReadOctalDigitSequence(      const std::string::const_iterator begin,
+                            const std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    char c = *p;
+    while( ( c >= '0' ) && ( c <= '7' ) && p < end )
+    {
+        ++p;
+        c = *p;
+    }
+    return p - begin;
+}
+
 int ReadIntegerLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+                            const std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    if( *p == '0' )
+    {
+        ++p;
+        if( p >= end )
+            return 1;
+
+        if( *p == 'x' ||
+            *p == 'X' )
+        {
+            ++p;
+            int n = ReadHexDigitSequence( p, end );
+            if( n )
+                return n + 2;
+        }
+
+        return 1 + ReadOctalDigitSequence( p, end );
+    }
+    else
+    {
+        return ReadDigitSequence( begin, end );
+    }
+}
+
+int ReadExponent(           const std::string::const_iterator begin,
+                            const std::string::const_iterator end )
+{
+    if( end - begin < 2 )
+        return 0;
+
+    std::string::const_iterator p = begin;
+    char c = *p;
+    if( ( c != 'e' ) && ( c != 'E' ) )
+        return 0;
+
+    ++p;
+    c = *p;
+
+    if( ( c == '+' ) || ( c == '-' ) )
+        ++p;
+
+    int s = ReadDigitSequence( p, end );
+    if( s == 0 )
+        return 0;
+
+    p += s;
+    return p - begin;
+}
 
 int ReadFloatingLiteral(    const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+                            const std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    int s = ReadDigitSequence( p, end );
+    if( !s )
+    {
+        if( *p != '.' )
+            return 0;
+
+        ++p;
+        s = ReadDigitSequence( p, end );
+        if( !s )
+            return 0;
+
+        p += s;
+
+        p += ReadExponent( p, end );
+    }
+    else
+    {
+        p += s;
+        if( p >= end )
+            return 0;
+
+        if( *p != '.' )
+        {
+            s = ReadExponent( p, end );
+            if( !s )
+                return 0;
+        }
+        else
+        {
+            ++p;
+            p += ReadDigitSequence( p, end );
+            p += ReadExponent( p, end );
+        }
+    }
+
+    if( p >= end )
+        return p - begin;
+
+    char c = *p;
+    if( c == 'f' || c == 'F' )
+        ++p;
+
+    return p - begin;
+}
 
 int ReadBooleanLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+                            const std::string::const_iterator end )
+{
+    static const std::string true_string = "true";
+    static const std::string false_string = "false";
 
+    if( std::size_t(end - begin) > false_string.size() &&
+        std::equal( false_string.begin(), false_string.end(), begin ) )
+        return false_string.size();
+
+    if( std::size_t(end - begin) > true_string.size() &&
+        std::equal( true_string.begin(), true_string.end(), begin ) )
+        return true_string.size();
+
+    return 0;
+}
+
+/*
 int ReadCharacterLiteral(   const std::string::const_iterator begin,
                             const std::string::const_iterator end );
 
