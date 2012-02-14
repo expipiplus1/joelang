@@ -546,5 +546,60 @@ private:
     std::string m_identifier;
 };
 
+//------------------------------------------------------------------------------
+// IdentifierExpression
+//------------------------------------------------------------------------------
+
+class IdentifierExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~IdentifierExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    IdentifierExpression( std::string identifier );
+
+private:
+    std::string m_identifier;
+};
+
+//------------------------------------------------------------------------------
+// LiteralExpression
+//------------------------------------------------------------------------------
+
+class LiteralExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual ~LiteralExpression();
+
+    static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    LiteralExpression();
+};
+
+//------------------------------------------------------------------------------
+// FloatingLiteralExpression
+//------------------------------------------------------------------------------
+
+class FloatingLiteralExpression : public JoeLang::Parser::LiteralExpression
+{
+public:
+    virtual ~FloatingLiteralExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token );
+
+protected:
+    FloatingLiteralExpression( double value );
+
+private:
+    double m_value;
+};
+
 } // namespace Parser
 } // namespace JoeLang

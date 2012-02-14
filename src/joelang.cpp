@@ -34,7 +34,7 @@
 int main( int argc, char** argv )
 {
     JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass { a=b.c++.d; }" ) )
+    if( parser.Parse( "pass { a=0.0; }" ) )
     {
         parser.Print();
         std::cout << "success\n";

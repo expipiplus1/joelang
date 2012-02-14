@@ -30,6 +30,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <utility>
 
@@ -92,7 +93,8 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     if( !Expect< ConditionalExpression >( parser, lhs_expression ) )
         return false;
 
-    if( typeid( *lhs_expression ) != typeid( PrimaryExpression ) &&
+    if( typeid( *lhs_expression ) != typeid( IdentifierExpression ) &&
+        typeid( *lhs_expression ) != typeid( PrimaryExpression ) &&
         typeid( *lhs_expression ) != typeid( UnaryExpression ) &&
         typeid( *lhs_expression ) != typeid( PostfixExpression ) )
     {
@@ -959,11 +961,110 @@ void PrimaryExpression::Print( int depth ) const
 //TODO
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    if( Expect<IdentifierExpression>( parser, token ) )
+        return true;
+
+    if( Expect<LiteralExpression>( parser, token ) )
+        return true;
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// IdentifierExpression
+//------------------------------------------------------------------------------
+
+IdentifierExpression::IdentifierExpression( std::string identifier )
+    :m_identifier( std::move( identifier ) )
+{
+}
+
+IdentifierExpression::~IdentifierExpression()
+{
+}
+
+void IdentifierExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_identifier << "\n";
+}
+
+bool IdentifierExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
     std::string identifier;
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, identifier ) )
         return false;
 
-    token.reset( new PrimaryExpression( identifier ) );
+    token.reset( new IdentifierExpression( identifier ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// LiteralExpression
+//------------------------------------------------------------------------------
+
+LiteralExpression::LiteralExpression()
+{
+}
+
+LiteralExpression::~LiteralExpression()
+{
+}
+
+bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    std::unique_ptr<Token> t;
+    if( !ExpectAnyOf<FloatingLiteralExpression//,
+                     //IntegralLiteralExpression,
+                     //BooleanLiteralExpression,
+                     //CharacterLiteralExpression,
+                     //StringLiteralExpression
+        >( parser, t ) )
+        return false;
+
+    Token* p = t.release();
+    token.reset( dynamic_cast<LiteralExpression*>( p ) );
+    if( !token )
+    {
+        delete p;
+        return false;
+    }
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// FloatingLiteralExpression
+//------------------------------------------------------------------------------
+
+FloatingLiteralExpression::FloatingLiteralExpression( double value )
+    :m_value( value )
+{
+}
+
+FloatingLiteralExpression::~FloatingLiteralExpression()
+{
+}
+
+void FloatingLiteralExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_value << "\n";
+}
+
+bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token )
+{
+    std::string string;
+    if( !parser.ExpectTerminal( Lexer::FLOATING_LITERAL, string ) )
+        return false;
+
+    double value;
+    std::istringstream i( string );
+    if( !( i >> value ) )
+        return false;
+
+    token.reset( new FloatingLiteralExpression( value ) );
     return true;
 }
 
