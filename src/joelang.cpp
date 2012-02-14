@@ -34,7 +34,7 @@
 int main( int argc, char** argv )
 {
     JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass { a=0+ 8999 + 0x24FFd / 12+0777; }" ) )
+    if( parser.Parse( "pass { a= true; }" ) )
     {
         parser.Print();
         std::cout << "success\n";

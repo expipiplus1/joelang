@@ -621,5 +621,25 @@ private:
     double m_value;
 };
 
+//------------------------------------------------------------------------------
+// BooleanLiteralExpression
+//------------------------------------------------------------------------------
+
+class BooleanLiteralExpression : public JoeLang::Parser::LiteralExpression
+{
+public:
+    virtual ~BooleanLiteralExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token );
+
+protected:
+    BooleanLiteralExpression( bool value );
+
+private:
+    bool m_value;
+};
+
 } // namespace Parser
 } // namespace JoeLang

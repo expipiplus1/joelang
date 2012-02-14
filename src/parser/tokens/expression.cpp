@@ -967,7 +967,7 @@ bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
     if( Expect<LiteralExpression>( parser, token ) )
         return true;
 
-    return true;
+    return false;
 }
 
 //------------------------------------------------------------------------------
@@ -1016,8 +1016,8 @@ bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
 {
     std::unique_ptr<Token> t;
     if( !ExpectAnyOf<FloatingLiteralExpression,
-                     IntegralLiteralExpression//,
-                     //BooleanLiteralExpression,
+                     IntegralLiteralExpression,
+                     BooleanLiteralExpression//,
                      //CharacterLiteralExpression,
                      //StringLiteralExpression
         >( parser, t ) )
@@ -1120,6 +1120,43 @@ bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingL
 
     token.reset( new FloatingLiteralExpression( value ) );
     return true;
+}
+
+//------------------------------------------------------------------------------
+// BooleanLiteralExpression
+//------------------------------------------------------------------------------
+
+BooleanLiteralExpression::BooleanLiteralExpression( bool value )
+    :m_value( value )
+{
+}
+
+BooleanLiteralExpression::~BooleanLiteralExpression()
+{
+}
+
+void BooleanLiteralExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_value << "\n";
+}
+
+bool BooleanLiteralExpression::Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token )
+{
+    if( parser.ExpectTerminal( Lexer::TRUE ) )
+    {
+        token.reset( new BooleanLiteralExpression( true ) );
+        return true;
+    }
+
+    if( parser.ExpectTerminal( Lexer::FALSE ) )
+    {
+        token.reset( new BooleanLiteralExpression( false ) );
+        return true;
+    }
+
+    return false;
 }
 
 } // namespace Parser
