@@ -278,23 +278,6 @@ int ReadFloatingLiteral(    const std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadBooleanLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
-{
-    static const std::string true_string = "true";
-    static const std::string false_string = "false";
-
-    if( std::size_t(end - begin) > false_string.size() &&
-        std::equal( false_string.begin(), false_string.end(), begin ) )
-        return false_string.size();
-
-    if( std::size_t(end - begin) > true_string.size() &&
-        std::equal( true_string.begin(), true_string.end(), begin ) )
-        return true_string.size();
-
-    return 0;
-}
-
 /*
 int ReadCharacterLiteral(   const std::string::const_iterator begin,
                             const std::string::const_iterator end );

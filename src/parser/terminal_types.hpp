@@ -130,8 +130,12 @@ enum TerminalType
     TECHNIQUE,
     PASS,
 
-    //Types
+    // Types
     TYPE_INT,
+
+    // Constants
+    TRUE,
+    FALSE,
 
     //
     // Identifier

@@ -121,7 +121,6 @@ static const FunctionalTerminal g_literalTerminals[] =
 {
     { ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
     { ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
-    { ReadBooleanLiteral,   BOOLEAN_LITERAL,    "boolean literal"   },
     //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
     //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
 };
@@ -134,7 +133,10 @@ static const LiteralTerminal g_keywordTerminals[] =
     { "technique",  TECHNIQUE,  "" },
     { "pass",       PASS,       "" },
 
-    { "int",        TYPE_INT,   "" }
+    { "int",        TYPE_INT,   "" },
+
+    { "true",       TRUE,   "" },
+    { "false",      FALSE,   "" }
 };
 
 //
