@@ -582,6 +582,26 @@ protected:
 };
 
 //------------------------------------------------------------------------------
+// IntegralLiteralExpression
+//------------------------------------------------------------------------------
+
+class IntegralLiteralExpression : public JoeLang::Parser::LiteralExpression
+{
+public:
+    virtual ~IntegralLiteralExpression();
+
+    virtual void Print( int depth ) const;
+
+    static bool Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token );
+
+protected:
+    IntegralLiteralExpression( long long value );
+
+private:
+    long long m_value;
+};
+
+//------------------------------------------------------------------------------
 // FloatingLiteralExpression
 //------------------------------------------------------------------------------
 

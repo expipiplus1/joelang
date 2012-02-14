@@ -1015,8 +1015,8 @@ LiteralExpression::~LiteralExpression()
 bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf<FloatingLiteralExpression//,
-                     //IntegralLiteralExpression,
+    if( !ExpectAnyOf<FloatingLiteralExpression,
+                     IntegralLiteralExpression//,
                      //BooleanLiteralExpression,
                      //CharacterLiteralExpression,
                      //StringLiteralExpression
@@ -1030,6 +1030,60 @@ bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
         delete p;
         return false;
     }
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// IntegralLiteralExpression
+//------------------------------------------------------------------------------
+
+IntegralLiteralExpression::IntegralLiteralExpression( long long value )
+    :m_value( value )
+{
+}
+
+IntegralLiteralExpression::~IntegralLiteralExpression()
+{
+}
+
+void IntegralLiteralExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_value << "\n";
+}
+
+bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token )
+{
+    std::string string;
+    if( !parser.ExpectTerminal( Lexer::INTEGER_LITERAL, string ) )
+        return false;
+
+    long long value;
+    if( string[0] == '0' )
+    {
+        if( string.size() > 2 &&
+            ( string[1] == 'x' || string[1] == 'X' ) )
+        {
+            std::istringstream i( string.substr(2) );
+            if( !( i >> std::hex >> value ) )
+                return false;
+        }
+        else
+        {
+            std::istringstream i( string );
+            if( !( i >> std::oct >> value ) )
+                return false;
+        }
+    }
+    else
+    {
+        std::istringstream i( string );
+        if( !( i >> value ) )
+            return false;
+    }
+
+    token.reset( new IntegralLiteralExpression( value ) );
     return true;
 }
 
