@@ -119,9 +119,9 @@ static const LiteralTerminal g_punctuationTerminals[] =
 //
 static const FunctionalTerminal g_literalTerminals[] =
 {
-    //{ ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
-    //{ ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
-    //{ ReadBooleanLiteral,   BOOLEAN_LITERAL,    "boolean literal"   },
+    { ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
+    { ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
+    { ReadBooleanLiteral,   BOOLEAN_LITERAL,    "boolean literal"   },
     //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
     //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
 };
