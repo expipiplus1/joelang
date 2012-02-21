@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -56,6 +57,8 @@ public:
 
 private:
     std::unique_ptr<Lexer::Lexer> m_lexer;
+
+    std::set<Lexer::TerminalType> m_expectedTerminals;
 
     std::unique_ptr<TranslationUnit> m_translationUnit;
 };

@@ -34,7 +34,7 @@
 int main( int argc, char** argv )
 {
     JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass { a= (1+2)/8; }" ) )
+    if( parser.Parse( "pass { a= (; }" ) )
     {
         parser.Print();
         std::cout << "success\n";

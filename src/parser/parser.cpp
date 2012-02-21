@@ -28,6 +28,7 @@
 
 #include "parser.hpp"
 
+#include <iostream>
 #include <string>
 
 #include <parser/lexer.hpp>
@@ -48,20 +49,35 @@ bool Parser::Parse ( const std::string& string )
 {
     m_lexer.reset( new Lexer::Lexer( string ) );
 
-    return TranslationUnit::Parse( *this, m_translationUnit );
+    if( TranslationUnit::Parse( *this, m_translationUnit ) )
+        return true;
+
+    std::cout << "Error parsing: expected one of: ";
+    for( Lexer::TerminalType expected_terminal : m_expectedTerminals )
+    {
+        std::cout << "\"" << Lexer::GetTerminalString( expected_terminal ) << "\", ";
+    }
+    std::cout << "\n";
+    return false;
 }
 
 bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type )
 {
     // TODO: Remove dummy
     std::string dummy;
-    return m_lexer->Expect( terminal_type, dummy );
+    return ExpectTerminal( terminal_type, dummy );
 }
 
 bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string )
 {
-    // TODO: Remember what we've tried here for error messages
-    return m_lexer->Expect( terminal_type, string );
+    if( m_lexer->Expect( terminal_type, string ) )
+    {
+        m_expectedTerminals.clear();
+        return true;
+    }
+
+    m_expectedTerminals.insert( terminal_type );
+    return false;
 }
 
 } // namespace Parser

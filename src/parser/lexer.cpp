@@ -176,6 +176,14 @@ const std::string& GetTerminalString( TerminalType terminal_type )
          }
 
     const static std::string s = "Invalid Terminal";
+    const static std::string i = "identifier";
+    const static std::string e = "EOF";
+
+    if( terminal_type == IDENTIFIER )
+        return i;
+    else if ( terminal_type == END_OF_INPUT )
+        return e;
+
     return s;
 }
 
