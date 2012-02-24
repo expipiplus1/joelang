@@ -105,6 +105,8 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     std::unique_ptr<AssignmentOperator> assignment_operator;
     if( !Expect< AssignmentOperator >( parser, assignment_operator ) )
     {
+        CHECK_PARSER;
+
         token = std::move( lhs_expression );
         return true;
     }
@@ -204,6 +206,8 @@ bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& 
 
     if( !parser.ExpectTerminal( Lexer::QUERY ) )
     {
+        CHECK_PARSER;
+
         token = std::move( condition );
         return true;
     }
@@ -298,7 +302,7 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique
 
 //template< typename ExpressionType, typename SubExpressionType >
 //static bool ParseRightAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                   //const std::vector<Lexer::TerminalType>& operator_terminals );
+//                                   const std::vector<Lexer::TerminalType>& operator_terminals );
 
 //------------------------------------------------------------------------------
 // Logical Or Expression
@@ -319,7 +323,7 @@ LogicalOrExpression::~LogicalOrExpression()
 
 bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    // Why doesn't clang support initializer lists yet!
+    // Why doesn't clang support initializer lists!
     static std::vector<Lexer::TerminalType> operators;
     if( operators.size() == 0 )
         operators.push_back( Lexer::LOGICAL_OR );
@@ -651,6 +655,8 @@ bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token 
         return true;
     }
 
+    CHECK_PARSER;
+
     return Expect<PostfixExpression>( parser, token );
 }
 
@@ -735,6 +741,8 @@ bool PostfixExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
     std::vector< std::unique_ptr<PostfixOperator> > operators;
     if( !ExpectSequenceOf<PostfixOperator>( parser, operators ) )
     {
+        CHECK_PARSER;
+
         token = std::move( primary_expression );
         return true;
     }
@@ -860,6 +868,8 @@ bool ArgumentListOperator::Parse( Parser& parser, std::unique_ptr<ArgumentListOp
         }
     }
 
+    CHECK_PARSER;
+
     if( !parser.ExpectTerminal( Lexer::CLOSE_ROUND ) )
         return false;
 
@@ -962,10 +972,11 @@ bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
 {
     if( Expect<IdentifierExpression>( parser, token ) )
         return true;
+    CHECK_PARSER;
 
     if( Expect<LiteralExpression>( parser, token ) )
         return true;
-
+    CHECK_PARSER;
 
     if( !parser.ExpectTerminal( Lexer::OPEN_ROUND ) )
         return false;

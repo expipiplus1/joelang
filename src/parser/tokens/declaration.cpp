@@ -131,12 +131,14 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
     std::string name;
     parser.ExpectTerminal( Lexer::IDENTIFIER, name );
 
+    CHECK_PARSER;
+
     if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
     std::vector< std::unique_ptr<StateAssignment> > state_assignments;
     ExpectSequenceOf<StateAssignment>( parser, state_assignments );
-
+    CHECK_PARSER;
 
     if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
@@ -176,11 +178,14 @@ bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefini
     std::string name;
     parser.ExpectTerminal( Lexer::IDENTIFIER, name );
 
+    CHECK_PARSER;
+
     if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
     std::vector< std::unique_ptr<PassDefinition> > passes;
     ExpectSequenceOf<PassDefinition>( parser, passes );
+    CHECK_PARSER;
 
     if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
         return false;
