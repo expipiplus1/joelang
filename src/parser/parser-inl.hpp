@@ -42,13 +42,43 @@ namespace Parser
 template< typename T, typename U >
 bool Expect( Parser& parser, std::unique_ptr<U>& token )
 {
-    return T::Parse( parser, token );
+    if( !parser.Good() )
+        return false;
+
+    std::size_t p = parser.GetLexerPosition();
+
+    if( T::Parse( parser, token ) )
+    {
+        return true;
+    }
+    else
+    {
+        if( parser.GetLexerPosition() != p )
+            parser.Error();
+
+        return false;
+    }
 }
 
 template< typename T >
 bool Expect( Parser& parser )
 {
-    return T::Parse( parser );
+    if( !parser.Good() )
+        return false;
+
+    std::size_t p = parser.GetLexerPosition();
+
+    if( T::Parse( parser ) )
+    {
+        return true;
+    }
+    else
+    {
+        if( parser.GetLexerPosition() != p )
+            parser.Error();
+
+        return false;
+    }
 }
 
 template<typename T, typename U>
@@ -62,7 +92,10 @@ bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<U> >& token_
     {
         token_sequence.push_back( std::move( token ) );
     }
-    while( T::Parse( parser, token ) );
+    while( Expect<T>( parser, token ) );
+
+    if( !parser.Good() )
+        return false;
 
     return true;
 }
@@ -83,6 +116,9 @@ bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token )
     std::unique_ptr<T> t;
     if( !Expect<T>( parser, t ) )
     {
+        if( !parser.Good() )
+            return false;
+
         return ExpectAnyOf<T1, Rest...>( parser, token );
     }
     token = std::move( t );
@@ -99,7 +135,12 @@ template<typename T, typename T1, typename... Rest>
 bool ExpectAnyOf( Parser& parser )
 {
     if( !Expect<T>( parser ) )
+    {
+        if( !parser.Good() )
+            return false;
+
         return ExpectAnyOf<T1, Rest...>( parser );
+    }
     return true;
 }
 
