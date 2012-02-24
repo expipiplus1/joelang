@@ -252,7 +252,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
                 return false;
 
         string = std::string( m_position, m_position + chars_read );
-        m_position += chars_read;
+        ReadChars( chars_read );
         ConsumeIgnoredTerminals();
         return true;
     }
@@ -274,7 +274,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
                 return false;
 
         string = std::string( m_position, m_position + chars_read );
-        m_position += chars_read;
+        ReadChars( chars_read );
         ConsumeIgnoredTerminals();
         return true;
     }
@@ -295,7 +295,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
                 return false;
 
         string = std::string( m_position, m_position + chars_read );
-        m_position += chars_read;
+        ReadChars( chars_read );
         ConsumeIgnoredTerminals();
         return true;
     }
@@ -316,7 +316,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
                 return false;
 
         string = std::string( m_position, word_end );
-        m_position = word_end;
+        ReadChars( word_end - m_position );
         ConsumeIgnoredTerminals();
         return true;
     }
@@ -330,6 +330,16 @@ std::size_t Lexer::GetPosition() const
     return m_position - m_string.begin();
 }
 
+std::size_t Lexer::GetColumnNumber() const
+{
+    return m_columnNumber;
+}
+
+std::size_t Lexer::GetLineNumber() const
+{
+    return m_lineNumber;
+}
+
 void Lexer::ConsumeIgnoredTerminals()
 {
     int chars_read;
@@ -341,8 +351,23 @@ void Lexer::ConsumeIgnoredTerminals()
             if( chars_read )
                 break;
         }
-        m_position += chars_read;
+        ReadChars( chars_read );
     } while( chars_read );
+}
+
+void Lexer::ReadChars( std::size_t num_chars )
+{
+    std::string::const_iterator end = m_position + num_chars;
+    while( m_position < end )
+    {
+        if( *m_position == '\n' )
+        {
+            ++m_lineNumber;
+            m_columnNumber = 0;
+        }
+        ++m_columnNumber;
+        ++m_position;
+    }
 }
 
 } // namespace Lexer

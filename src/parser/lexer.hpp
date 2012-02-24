@@ -76,6 +76,8 @@ public:
     bool Expect( TerminalType terminal_type, std::string& string );
 
     std::size_t GetPosition() const;
+    std::size_t GetLineNumber() const;
+    std::size_t GetColumnNumber() const;
 
     //
     // One can optionally store the position in the stream for looking ahead
@@ -87,6 +89,7 @@ public:
 
 private:
     void ConsumeIgnoredTerminals();
+    void ReadChars( std::size_t num_chars );
 
     static std::map< TerminalType, const LiteralTerminal* > s_punctuationTerminalMap;
     static std::map< TerminalType, const FunctionalTerminal* > s_literalTerminalMap;
@@ -97,6 +100,8 @@ private:
 
     const std::string m_string;
     std::string::const_iterator m_position;
+    std::size_t m_lineNumber = 1;
+    std::size_t m_columnNumber = 1;
     std::stack<std::string::iterator> m_savedPositions;
 };
 
