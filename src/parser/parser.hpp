@@ -55,7 +55,14 @@ public:
     bool ExpectTerminal( Lexer::TerminalType terminal_type );
     bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
+    std::size_t GetLexerPosition() const;
+
+    void Error();
+    bool Good() const;
+
 private:
+    bool m_good = true;
+
     std::unique_ptr<Lexer::Lexer> m_lexer;
 
     std::set<Lexer::TerminalType> m_expectedTerminals;

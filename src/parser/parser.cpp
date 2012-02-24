@@ -80,5 +80,20 @@ bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& str
     return false;
 }
 
+std::size_t Parser::GetLexerPosition() const
+{
+    return m_lexer->GetPosition();
+}
+
+void Parser::Error()
+{
+    m_good = false;
+}
+
+bool Parser::Good() const
+{
+    return m_good;
+}
+
 } // namespace Parser
 } // namespace JoeLang
