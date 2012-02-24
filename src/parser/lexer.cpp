@@ -325,6 +325,11 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
     return false;
 }
 
+std::size_t Lexer::GetPosition() const
+{
+    return m_position - m_string.begin();
+}
+
 void Lexer::ConsumeIgnoredTerminals()
 {
     int chars_read;

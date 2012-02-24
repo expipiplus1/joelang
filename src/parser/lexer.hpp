@@ -75,6 +75,8 @@ public:
     bool Expect( TerminalType terminal_type );
     bool Expect( TerminalType terminal_type, std::string& string );
 
+    std::size_t GetPosition() const;
+
     //
     // One can optionally store the position in the stream for looking ahead
     // more than one token
