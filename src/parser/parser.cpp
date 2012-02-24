@@ -57,6 +57,7 @@ bool Parser::Parse ( const std::string& string )
     {
         std::cout << "\"" << Lexer::GetTerminalString( expected_terminal ) << "\", ";
     }
+    std::cout << "at line " << m_lexer->GetLineNumber() << ":" << m_lexer->GetColumnNumber();
     std::cout << "\n";
     return false;
 }
