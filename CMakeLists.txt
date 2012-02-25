@@ -14,6 +14,8 @@ add_executable( joelang src/joelang.cpp
                         src/engine/effect.hpp
                         src/engine/pass.cpp
                         src/engine/pass.hpp
+                        src/engine/state_assignment.cpp
+                        src/engine/state_assignment.hpp
                         src/engine/technique.cpp
                         src/engine/technique.hpp
                         src/parser/lexer.cpp
