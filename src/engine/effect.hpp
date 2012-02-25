@@ -26,21 +26,19 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include <iostream>
-#include <string>
+#pragma once
 
-#include <parser/parser.hpp>
-
-int main( int argc, char** argv )
+namespace JoeLang
 {
-    JoeLang::Parser::Parser parser;
-    if( parser.Parse( "pass pass1{ a= (12+1)/add(9.0, 10); }" ) )
-    {
-        parser.Print();
-        std::cout << "success\n";
-    }
-    else
-    {
-        std::cout << "fail\n";
-    }
-}
+
+class Effect
+{
+public:
+    Effect() = default;
+    ~Effect() = default;
+
+private:
+    //std::vector< std::unique_ptr<Technique> > m_techniques;
+};
+
+} // namespace JoeLang
