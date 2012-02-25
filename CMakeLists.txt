@@ -12,6 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O0 -g -Wall")
 add_executable( joelang src/joelang.cpp
                         src/engine/effect.cpp
                         src/engine/effect.hpp
+                        src/engine/pass.cpp
+                        src/engine/pass.hpp
                         src/parser/lexer.cpp
                         src/parser/lexer.hpp
                         src/parser/parser.cpp
