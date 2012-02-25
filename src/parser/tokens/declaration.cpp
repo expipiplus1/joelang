@@ -147,6 +147,9 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
     return true;
 }
 
+//------------------------------------------------------------------------------
+// TechniqueDefinition
+//------------------------------------------------------------------------------
 
 TechniqueDefinition::TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > passes )
     :m_name( std::move( name ) )
