@@ -31,17 +31,14 @@
 namespace JoeLang
 {
 
-class Effect
+class StateAssignment
 {
 public:
-    Effect() = default;
-    ~Effect() = default;
+    StateAssignment() = default;
+    ~StateAssignment() = default;
 
 private:
-    //std::vector< std::unique_ptr<Technique> > m_techniques;
-
-    //some kind of structure for various other things in the effect file
-    //some kind of structure containing llvm code for the functions
+    //some kind of structure for holding llvm code for the expression
 };
 
 } // namespace JoeLang

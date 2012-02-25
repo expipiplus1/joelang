@@ -26,22 +26,8 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "state_assignment.hpp"
 
 namespace JoeLang
 {
-
-class Effect
-{
-public:
-    Effect() = default;
-    ~Effect() = default;
-
-private:
-    //std::vector< std::unique_ptr<Technique> > m_techniques;
-
-    //some kind of structure for various other things in the effect file
-    //some kind of structure containing llvm code for the functions
-};
-
 } // namespace JoeLang

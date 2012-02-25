@@ -38,7 +38,7 @@ public:
     ~Pass() = default;
 
 private:
-    //std::vector< std::unique_ptr<StateAssignment> > m_techniques;
+    //std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
 };
 
 } // namespace JoeLang

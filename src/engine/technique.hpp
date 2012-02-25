@@ -38,7 +38,7 @@ public:
     ~Technique() = default;
 
 private:
-    //std::vector< std::unique_ptr<Pass> > m_techniques;
+    //std::vector< std::shared_ptr<Pass> > m_passes;
 };
 
 } // namespace JoeLang
