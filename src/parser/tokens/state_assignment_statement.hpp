@@ -26,60 +26,37 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "state_assignment.hpp"
+#pragma once
 
-#include <iostream>
 #include <memory>
 #include <string>
-#include <utility>
 
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
 #include <parser/tokens/expression.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-StateAssignment::StateAssignment( std::string state_name, std::unique_ptr< Expression > expression )
-    :m_stateName( std::move( state_name ) )
-    ,m_expression( std::move( expression ) )
+class Parser;
+
+class StateAssignmentStatement : public JoeLang::Parser::Token
 {
-}
+public:
+    virtual ~StateAssignmentStatement();
 
-StateAssignment::~StateAssignment()
-{
-}
+    virtual void Print( int depth ) const;
 
-void StateAssignment::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "State Assignment to " << m_stateName << "\n";
-    m_expression->Print( depth + 1 );
-}
+    static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
 
-bool StateAssignment::Parse( Parser& parser, std::unique_ptr<StateAssignment>& token )
-{
-    std::string state_name;
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
-        return false;
+protected:
+    StateAssignmentStatement( std::string state_name, std::unique_ptr<Expression> expression );
 
-    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
-        return false;
-
-    std::unique_ptr< Expression > expression;
-    if( !Expect< Expression >( parser, expression ) )
-        return false;
-
-    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
-        return false;
-
-    token.reset( new StateAssignment( std::move( state_name ),
-                                      std::move( expression ) ) );
-    return true;
-}
+private:
+    std::string m_stateName;
+    std::unique_ptr<Expression> m_expression;
+};
 
 } // namespace Parser
 } // namespace JoeLang

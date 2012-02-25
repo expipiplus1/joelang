@@ -27,8 +27,8 @@ add_executable( joelang src/joelang.cpp
                         src/parser/tokens/declaration.hpp
                         src/parser/tokens/expression.cpp
                         src/parser/tokens/expression.hpp
-                        src/parser/tokens/state_assignment.cpp
-                        src/parser/tokens/state_assignment.hpp
+                        src/parser/tokens/state_assignment_statement.cpp
+                        src/parser/tokens/state_assignment_statement.hpp
                         src/parser/tokens/token.cpp
                         src/parser/tokens/token.hpp
                         src/parser/tokens/translation_unit.cpp

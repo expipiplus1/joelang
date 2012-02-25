@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include <parser/tokens/state_assignment.hpp>
+#include <parser/tokens/state_assignment_statement.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -91,11 +91,11 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
 
 protected:
-    PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments  );
+    PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments  );
 
 private:
     std::string m_name;
-    std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
+    std::vector< std::unique_ptr<StateAssignmentStatement> > m_stateAssignments;
 };
 
 //------------------------------------------------------------------------------

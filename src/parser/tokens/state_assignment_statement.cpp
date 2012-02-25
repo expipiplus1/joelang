@@ -26,37 +26,60 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "state_assignment_statement.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
 #include <parser/tokens/expression.hpp>
-#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-class Parser;
-
-class StateAssignment : public JoeLang::Parser::Token
+StateAssignmentStatement::StateAssignmentStatement( std::string state_name, std::unique_ptr< Expression > expression )
+    :m_stateName( std::move( state_name ) )
+    ,m_expression( std::move( expression ) )
 {
-public:
-    virtual ~StateAssignment();
+}
 
-    virtual void Print( int depth ) const;
+StateAssignmentStatement::~StateAssignmentStatement()
+{
+}
 
-    static bool Parse( Parser& parser, std::unique_ptr<StateAssignment>& token );
+void StateAssignmentStatement::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << "State Assignment to " << m_stateName << "\n";
+    m_expression->Print( depth + 1 );
+}
 
-protected:
-    StateAssignment( std::string state_name, std::unique_ptr<Expression> expression );
+bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token )
+{
+    std::string state_name;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
+        return false;
 
-private:
-    std::string m_stateName;
-    std::unique_ptr<Expression> m_expression;
-};
+    if( !parser.ExpectTerminal( Lexer::EQUALS ) )
+        return false;
+
+    std::unique_ptr< Expression > expression;
+    if( !Expect< Expression >( parser, expression ) )
+        return false;
+
+    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
+        return false;
+
+    token.reset( new StateAssignmentStatement( std::move( state_name ),
+                                      std::move( expression ) ) );
+    return true;
+}
 
 } // namespace Parser
 } // namespace JoeLang

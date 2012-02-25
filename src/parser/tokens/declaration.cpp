@@ -36,7 +36,7 @@
 
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
-#include <parser/tokens/state_assignment.hpp>
+#include <parser/tokens/state_assignment_statement.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -103,7 +103,7 @@ bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>&
 // PassDeclaration
 //------------------------------------------------------------------------------
 
-PassDefinition::PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignment> > state_assignments )
+PassDefinition::PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments )
     :m_name( std::move( name ) )
     ,m_stateAssignments( std::move( state_assignments ) )
 {
@@ -130,14 +130,13 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
 
     std::string name;
     parser.ExpectTerminal( Lexer::IDENTIFIER, name );
-
     CHECK_PARSER;
 
     if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
         return false;
 
-    std::vector< std::unique_ptr<StateAssignment> > state_assignments;
-    ExpectSequenceOf<StateAssignment>( parser, state_assignments );
+    std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
+    ExpectSequenceOf<StateAssignmentStatement>( parser, state_assignments );
     CHECK_PARSER;
 
     if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
