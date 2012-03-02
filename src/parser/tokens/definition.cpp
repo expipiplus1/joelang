@@ -26,12 +26,16 @@
     or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "definition.hpp"
 
+#include <iostream>
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
+#include <parser/parser.hpp>
+#include <parser/terminal_types.hpp>
 #include <parser/tokens/definition.hpp>
 #include <parser/tokens/token.hpp>
 
@@ -40,86 +44,76 @@ namespace JoeLang
 namespace Parser
 {
 
-class Parser;
-class PassDefinition;
-class TechniqueDefinition;
-
 //------------------------------------------------------------------------------
-// DeclarationBase
-// Parse Matches for any kind of declaration
+// PassDefinition
 //------------------------------------------------------------------------------
 
-class DeclarationBase : public JoeLang::Parser::Token
+PassDefinition::PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments )
+    :m_stateAssignments( std::move( state_assignments ) )
 {
-public:
-    virtual ~DeclarationBase();
+}
 
-    static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
-
-protected:
-    DeclarationBase() = default;
-};
-
-//------------------------------------------------------------------------------
-// EmptyDeclaration
-// Matches ';'
-//------------------------------------------------------------------------------
-
-class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
+PassDefinition::~PassDefinition()
 {
-public:
-    virtual ~EmptyDeclaration();
+}
 
-    virtual void Print( int depth ) const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
-
-protected:
-    EmptyDeclaration();
-};
-
-
-//------------------------------------------------------------------------------
-// PassDeclaration
-//------------------------------------------------------------------------------
-
-class PassDeclaration : public JoeLang::Parser::DeclarationBase
+void PassDefinition::Print( int depth ) const
 {
-public:
-    virtual ~PassDeclaration();
+    for( const auto& state_assignment : m_stateAssignments )
+        state_assignment->Print( depth );
+}
 
-    virtual void Print( int depth ) const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
-
-protected:
-    PassDeclaration( std::string name, std::shared_ptr<PassDefinition> definition );
-
-private:
-    std::string m_name;
-    std::shared_ptr<PassDefinition> m_definition;
-};
-
-//------------------------------------------------------------------------------
-// TechniqueDeclaration
-//------------------------------------------------------------------------------
-
-class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
+bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
 {
-public:
-    virtual ~TechniqueDeclaration();
+    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+        return false;
 
-    virtual void Print( int depth ) const;
+    std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
+    ExpectSequenceOf<StateAssignmentStatement>( parser, state_assignments );
+    CHECK_PARSER;
 
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
+    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+        return false;
 
-protected:
-    TechniqueDeclaration( std::string name, std::shared_ptr<TechniqueDefinition> definition );
+    token.reset( new PassDefinition( std::move( state_assignments ) ) );
+    return true;
+}
 
-private:
-    std::string m_name;
-    std::shared_ptr<TechniqueDefinition> m_definition;
-};
+//------------------------------------------------------------------------------
+// TechniqueDefinition
+//------------------------------------------------------------------------------
+
+TechniqueDefinition::TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > passes )
+    :m_passes( std::move( passes ) )
+{
+}
+
+TechniqueDefinition::~TechniqueDefinition()
+{
+}
+
+void TechniqueDefinition::Print( int depth ) const
+{
+    for( const auto& pass : m_passes )
+        pass->Print( depth );
+}
+
+
+bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
+{
+    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+        return false;
+
+    std::vector< std::unique_ptr<PassDeclaration> > passes;
+    ExpectSequenceOf<PassDeclaration>( parser, passes );
+    CHECK_PARSER;
+
+    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+        return false;
+
+    token.reset( new TechniqueDefinition( std::move( passes ) ) );
+    return true;
+}
 
 } // namespace Parser
 } // namespace JoeLang

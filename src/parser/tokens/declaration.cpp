@@ -36,7 +36,7 @@
 
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
-#include <parser/tokens/state_assignment_statement.hpp>
+#include <parser/tokens/definition.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -55,8 +55,8 @@ DeclarationBase::~DeclarationBase()
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf< TechniqueDefinition,
-                      PassDefinition,
+    if( !ExpectAnyOf< TechniqueDeclaration,
+                      PassDeclaration,
                       EmptyDeclaration>( parser, t ) )
         return false;
 
@@ -103,96 +103,112 @@ bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>&
 // PassDeclaration
 //------------------------------------------------------------------------------
 
-PassDefinition::PassDefinition( std::string name, std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments )
+PassDeclaration::PassDeclaration( std::string name, std::shared_ptr<PassDefinition> definition )
     :m_name( std::move( name ) )
-    ,m_stateAssignments( std::move( state_assignments ) )
+    ,m_definition( std::move( definition ) )
 {
 }
 
-PassDefinition::~PassDefinition()
+PassDeclaration::~PassDeclaration()
 {
 }
 
-void PassDefinition::Print( int depth ) const
+void PassDeclaration::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
     std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-    for( const auto& state_assignment : m_stateAssignments )
-        state_assignment->Print( depth + 1 );
+    m_definition->Print( depth + 1);
 }
 
-bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
+bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
 {
     if( !parser.ExpectTerminal( Lexer::PASS ) )
         return false;
 
     std::string name;
-    parser.ExpectTerminal( Lexer::IDENTIFIER, name );
-    CHECK_PARSER;
-
-    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
         return false;
 
-    std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
-    ExpectSequenceOf<StateAssignmentStatement>( parser, state_assignments );
+    if( parser.ExpectTerminal( Lexer::SEMICOLON ) )
+    {
+        //
+        // This is a regular declaration
+        // TODO: Look up the name in a table and create links and things
+        //
+        token.reset( new PassDeclaration( name, nullptr ) );
+        return true;
+    }
     CHECK_PARSER;
 
-    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+    //
+    // This declaration is also has a definition
+    //
+    std::unique_ptr< PassDefinition > definition;
+
+    if( !Expect<PassDefinition>( parser, definition ) )
         return false;
 
-    token.reset( new PassDefinition( name, std::move( state_assignments ) ) );
+    token.reset( new PassDeclaration( std::move(name),
+                                      std::move(definition) ) );
     return true;
 }
 
 //------------------------------------------------------------------------------
-// TechniqueDefinition
+// TechniqueDeclaration
 //------------------------------------------------------------------------------
 
-TechniqueDefinition::TechniqueDefinition( std::string name, std::vector< std::unique_ptr<PassDefinition> > passes )
+TechniqueDeclaration::TechniqueDeclaration( std::string name, std::shared_ptr<TechniqueDefinition> definition )
     :m_name( std::move( name ) )
-    ,m_passes( std::move( passes ) )
+    ,m_definition( std::move( definition ) )
 {
 }
 
-TechniqueDefinition::~TechniqueDefinition()
+TechniqueDeclaration::~TechniqueDeclaration()
 {
 }
 
-void TechniqueDefinition::Print( int depth ) const
+void TechniqueDeclaration::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
     std::cout << "Technique: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-
-    for( const auto& pass : m_passes )
-        pass->Print( depth + 1 );
+    m_definition->Print( depth + 1 );
 }
 
 
-bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
+bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
     if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
         return false;
 
     std::string name;
-    parser.ExpectTerminal( Lexer::IDENTIFIER, name );
-
-    CHECK_PARSER;
-
-    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
         return false;
 
-    std::vector< std::unique_ptr<PassDefinition> > passes;
-    ExpectSequenceOf<PassDefinition>( parser, passes );
+    if( parser.ExpectTerminal( Lexer::SEMICOLON ) )
+    {
+        //
+        // This is a regular declaration
+        // TODO: Look up the name in a table and create links and things
+        //
+        token.reset( new TechniqueDeclaration( name, nullptr ) );
+        return true;
+    }
     CHECK_PARSER;
 
-    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+    //
+    // This declaration is also a definition
+    //
+    std::unique_ptr< TechniqueDefinition > definition;
+
+    if( !Expect<TechniqueDefinition>( parser, definition ) )
         return false;
 
-    token.reset( new TechniqueDefinition( name, std::move( passes ) ) );
+    token.reset( new TechniqueDeclaration( std::move(name),
+                                           std::move(definition) ) );
     return true;
 }
 
