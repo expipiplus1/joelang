@@ -28,6 +28,17 @@
 
 #include "pass.hpp"
 
+#include <utility>
+#include <vector>
+
+#include <engine/state_assignment.hpp>
+
 namespace JoeLang
 {
+
+Pass::Pass( std::vector<StateAssignment> state_assignments )
+    :m_stateAssignments( std::move( state_assignments ) )
+{
+}
+
 } // namespace JoeLang

@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+#include <engine/pass.hpp>
 #include <engine/technique.hpp>
 #include <parser/tokens/declaration.hpp>
 #include <parser/tokens/state_assignment_statement.hpp>
@@ -53,6 +54,8 @@ class PassDefinition : public JoeLang::Parser::Token
 public:
     virtual
     ~PassDefinition();
+
+    Pass GetPass() const;
 
     virtual
     void Print( int depth ) const;

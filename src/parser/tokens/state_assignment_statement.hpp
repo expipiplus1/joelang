@@ -31,6 +31,7 @@
 #include <memory>
 #include <string>
 
+#include <engine/state_assignment.hpp>
 #include <parser/tokens/expression.hpp>
 #include <parser/tokens/token.hpp>
 
@@ -45,6 +46,8 @@ class StateAssignmentStatement : public JoeLang::Parser::Token
 {
 public:
     virtual ~StateAssignmentStatement();
+
+    StateAssignment GetStateAssignment() const;
 
     virtual void Print( int depth ) const;
 

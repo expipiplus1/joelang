@@ -34,6 +34,8 @@
 #include <utility>
 #include <vector>
 
+#include <engine/pass.hpp>
+#include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
@@ -56,6 +58,16 @@ PassDefinition::PassDefinition( std::vector< std::unique_ptr<StateAssignmentStat
 
 PassDefinition::~PassDefinition()
 {
+}
+
+Pass PassDefinition::GetPass() const
+{
+    //TODO
+    std::vector<StateAssignment> state_assignments;
+    for( const auto& state_assignment : m_stateAssignments )
+        state_assignments.push_back( state_assignment->GetStateAssignment() );
+    return Pass( std::move( state_assignments ) );
+
 }
 
 void PassDefinition::Print( int depth ) const
@@ -97,6 +109,13 @@ Technique TechniqueDefinition::GetTechnique() const
 {
     //TODO
     std::vector<Pass> passes;
+    for( const auto& pass : m_passes )
+    {
+        const std::shared_ptr<PassDefinition>& definition = pass->GetDefinition();
+        // assert on null?
+        if( definition )
+            passes.push_back( definition->GetPass() );
+    }
     return Technique( std::move( passes ) );
 }
 

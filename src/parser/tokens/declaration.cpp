@@ -118,6 +118,11 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
+const std::shared_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
+{
+    return m_definition;
+}
+
 void PassDeclaration::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )

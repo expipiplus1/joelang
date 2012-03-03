@@ -28,6 +28,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include <engine/state_assignment.hpp>
+
 namespace JoeLang
 {
 
@@ -36,9 +40,10 @@ class Pass
 public:
     Pass() = default;
     ~Pass() = default;
+    Pass( std::vector<StateAssignment> state_assignments );
 
 private:
-    //std::vector< std::unique_ptr<StateAssignment> > m_stateAssignments;
+    std::vector<StateAssignment> m_stateAssignments;
 };
 
 } // namespace JoeLang

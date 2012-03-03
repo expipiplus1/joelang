@@ -33,6 +33,7 @@
 #include <string>
 #include <utility>
 
+#include <engine/state_assignment.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/expression.hpp>
@@ -50,6 +51,12 @@ StateAssignmentStatement::StateAssignmentStatement( std::string state_name, std:
 
 StateAssignmentStatement::~StateAssignmentStatement()
 {
+}
+
+StateAssignment StateAssignmentStatement::GetStateAssignment() const
+{
+    //TODO
+    return StateAssignment();
 }
 
 void StateAssignmentStatement::Print( int depth ) const
