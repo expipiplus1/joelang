@@ -26,60 +26,38 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "translation_unit.hpp"
+#include "effect_factory.hpp"
 
 #include <iostream>
-#include <memory>
-#include <vector>
 
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/token.hpp>
+#include <engine/effect.hpp>
+#include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-//------------------------------------------------------------------------------
-// TranslationUnit
-//------------------------------------------------------------------------------
-
-TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
-    :m_declarations( std::move( declarations ) )
+Effect EffectFactory::CreateEffect( const std::unique_ptr<TranslationUnit>& t )
 {
+    for( const auto& declaration : t->GetDeclarations() )
+        declaration->Accept( *this );
+
+    return Effect( std::move( m_techniques ) );
 }
 
-TranslationUnit::~TranslationUnit()
+void EffectFactory::Visit( DeclarationBase& d )
 {
+    std::cout << "DeclarationBase\n";
 }
 
-void TranslationUnit::Print( int depth ) const
+void EffectFactory::Visit( TechniqueDeclaration& t )
 {
-    for( int i = 0; i < depth * 4; ++i)
-        std::cout << " ";
-    std::cout << "TranslationUnit\n";
-    for( const auto& declaration : m_declarations )
-        declaration->Print( depth + 1 );
-}
-
-const std::vector< std::unique_ptr<DeclarationBase> >& TranslationUnit::GetDeclarations() const
-{
-    return m_declarations;
-}
-
-bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
-{
-    std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
-        return false;
-
-    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
-        return false;
-
-    token.reset( new TranslationUnit( std::move( declarations ) ) );
-    return true;
+    //TODO Assert on GetDefinition?
+    const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
+    if( definition )
+        m_techniques.push_back( definition->GetTechnique() );
+    std::cout << "technique\n";
 }
 
 } // namespace Parser

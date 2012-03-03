@@ -56,6 +56,7 @@ public:
     bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
     std::size_t GetLexerPosition() const;
+    const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
 
     void Error();
     bool Good() const;

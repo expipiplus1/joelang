@@ -28,6 +28,17 @@
 
 #include "technique.hpp"
 
+#include <vector>
+#include <utility>
+
+#include <engine/pass.hpp>
+
 namespace JoeLang
 {
+
+Technique::Technique(std::vector<Pass> passes)
+    :m_passes( std::move( passes ) )
+{
+}
+
 } // namespace JoeLang

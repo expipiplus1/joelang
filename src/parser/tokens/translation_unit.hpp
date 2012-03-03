@@ -50,6 +50,8 @@ public:
 
     void Print( int depth = 0 ) const;
 
+    const std::vector< std::unique_ptr<DeclarationBase> >& GetDeclarations() const;
+
     static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
 
 protected:

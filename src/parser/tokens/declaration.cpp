@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include <parser/effect_factory.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/definition.hpp>
@@ -49,6 +50,10 @@ namespace Parser
 //------------------------------------------------------------------------------
 
 DeclarationBase::~DeclarationBase()
+{
+}
+
+void DeclarationBase::Accept( EffectFactory& e )
 {
 }
 
@@ -176,6 +181,16 @@ TechniqueDeclaration::TechniqueDeclaration( std::string name, std::shared_ptr<Te
 
 TechniqueDeclaration::~TechniqueDeclaration()
 {
+}
+
+void TechniqueDeclaration::Accept( EffectFactory& e )
+{
+    e.Visit( *this );
+}
+
+const std::shared_ptr<TechniqueDefinition>& TechniqueDeclaration::GetDefinition() const
+{
+    return m_definition;
 }
 
 void TechniqueDeclaration::Print( int depth ) const

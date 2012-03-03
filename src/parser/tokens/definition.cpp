@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include <engine/technique.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/definition.hpp>
@@ -90,6 +91,13 @@ TechniqueDefinition::TechniqueDefinition( std::vector< std::unique_ptr<PassDecla
 
 TechniqueDefinition::~TechniqueDefinition()
 {
+}
+
+Technique TechniqueDefinition::GetTechnique() const
+{
+    //TODO
+    std::vector<Pass> passes;
+    return Technique( std::move( passes ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const

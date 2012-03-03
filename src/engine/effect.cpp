@@ -28,6 +28,17 @@
 
 #include "effect.hpp"
 
+#include <utility>
+#include <vector>
+
+#include <engine/technique.hpp>
+
 namespace JoeLang
 {
+
+Effect::Effect( std::vector<Technique> techniques )
+    :m_techniques( std::move( techniques ) )
+{
+}
+
 } // namespace JoeLang

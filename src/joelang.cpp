@@ -29,7 +29,9 @@
 #include <iostream>
 #include <string>
 
+#include <engine/effect.hpp>
 #include <parser/parser.hpp>
+#include <parser/effect_factory.hpp>
 
 int main( int argc, char** argv )
 {
@@ -37,6 +39,8 @@ int main( int argc, char** argv )
     if( parser.Parse( "technique t; pass pass1{ a= (12+1)/add(9.0, 10); }" ) )
     {
         parser.Print();
+        JoeLang::Parser::EffectFactory ef;
+        JoeLang::Effect e = ef.CreateEffect( parser.GetTranslationUnit() );
         std::cout << "success\n";
     }
     else

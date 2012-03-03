@@ -86,6 +86,11 @@ std::size_t Parser::GetLexerPosition() const
     return m_lexer->GetPosition();
 }
 
+const std::unique_ptr<TranslationUnit>& Parser::GetTranslationUnit() const
+{
+    return m_translationUnit;
+}
+
 void Parser::Error()
 {
     m_good = false;

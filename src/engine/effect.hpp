@@ -28,6 +28,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include <engine/technique.hpp>
+
 namespace JoeLang
 {
 
@@ -36,9 +40,10 @@ class Effect
 public:
     Effect() = default;
     ~Effect() = default;
+    Effect( std::vector<Technique> techniques );
 
 private:
-    //std::vector< std::unique_ptr<Technique> > m_techniques;
+    std::vector<Technique> m_techniques;
 
     //some kind of structure for various other things in the effect file
     //some kind of structure containing llvm code for the functions

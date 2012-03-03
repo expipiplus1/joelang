@@ -28,6 +28,10 @@
 
 #pragma once
 
+#include <vector>
+
+#include <engine/pass.hpp>
+
 namespace JoeLang
 {
 
@@ -36,9 +40,10 @@ class Technique
 public:
     Technique() = default;
     ~Technique() = default;
+    Technique( std::vector<Pass> passes );
 
 private:
-    //std::vector< std::shared_ptr<Pass> > m_passes;
+    std::vector<Pass> m_passes;
 };
 
 } // namespace JoeLang

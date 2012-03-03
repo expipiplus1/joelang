@@ -26,61 +26,36 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "translation_unit.hpp"
+#pragma once
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/token.hpp>
+#include <engine/effect.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-//------------------------------------------------------------------------------
-// TranslationUnit
-//------------------------------------------------------------------------------
+class DeclarationBase;
+class TechniqueDeclaration;
+class TranslationUnit;
 
-TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
-    :m_declarations( std::move( declarations ) )
+class EffectFactory
 {
-}
+public:
+    EffectFactory() = default;
+    ~EffectFactory() = default;
 
-TranslationUnit::~TranslationUnit()
-{
-}
+    void Visit( DeclarationBase& p );
+    void Visit( TechniqueDeclaration& t );
 
-void TranslationUnit::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i)
-        std::cout << " ";
-    std::cout << "TranslationUnit\n";
-    for( const auto& declaration : m_declarations )
-        declaration->Print( depth + 1 );
-}
+    Effect CreateEffect( const std::unique_ptr<TranslationUnit>& t );
 
-const std::vector< std::unique_ptr<DeclarationBase> >& TranslationUnit::GetDeclarations() const
-{
-    return m_declarations;
-}
-
-bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
-{
-    std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
-        return false;
-
-    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
-        return false;
-
-    token.reset( new TranslationUnit( std::move( declarations ) ) );
-    return true;
-}
+private:
+    std::vector<Technique> m_techniques;
+};
 
 } // namespace Parser
 } // namespace JoeLang

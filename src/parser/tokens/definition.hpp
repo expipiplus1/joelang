@@ -31,6 +31,7 @@
 #include <memory>
 #include <vector>
 
+#include <engine/technique.hpp>
 #include <parser/tokens/declaration.hpp>
 #include <parser/tokens/state_assignment_statement.hpp>
 #include <parser/tokens/token.hpp>
@@ -73,6 +74,8 @@ class TechniqueDefinition : public JoeLang::Parser::Token
 {
 public:
     virtual ~TechniqueDefinition();
+
+    Technique GetTechnique() const;
 
     virtual void Print( int depth ) const;
 
