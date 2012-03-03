@@ -119,7 +119,16 @@ void PassDeclaration::Print( int depth ) const
         std::cout << " ";
 
     std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-    m_definition->Print( depth + 1);
+    if( m_definition )
+    {
+        m_definition->Print( depth + 1);
+    }
+    else
+    {
+        for( int i = 0; i < depth * 4; ++i )
+            std::cout << " ";
+        std::cout << "No definition\n";
+    }
 }
 
 bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
@@ -175,7 +184,16 @@ void TechniqueDeclaration::Print( int depth ) const
         std::cout << " ";
 
     std::cout << "Technique: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-    m_definition->Print( depth + 1 );
+    if( m_definition )
+    {
+        m_definition->Print( depth + 1);
+    }
+    else
+    {
+        for( int i = 0; i < depth * 4 + 4; ++i )
+            std::cout << " ";
+        std::cout << "No definition\n";
+    }
 }
 
 
