@@ -85,7 +85,7 @@ template<typename T, typename U>
 bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<U> >& token_sequence )
 {
     std::unique_ptr<U> token;
-    if( !T::Parse( parser, token ) )
+    if( !Expect<T>( parser, token ) )
         return false;
 
     do
