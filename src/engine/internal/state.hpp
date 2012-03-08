@@ -28,11 +28,24 @@
 
 #pragma once
 
+#include <string>
+
 namespace JoeLang
 {
 
+enum Type : int;
+
 class State
 {
+public:
+    State() = delete;
+    State( std::string name, Type type );
+    ~State() = default;
+
+    const std::string& GetName() const;
+private:
+    std::string m_name;
+    Type m_type;
 };
 
 } // namespace JoeLang

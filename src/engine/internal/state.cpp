@@ -28,7 +28,21 @@
 
 #include "state.hpp"
 
+#include <string>
+#include <utility>
+
 namespace JoeLang
 {
+
+State::State( std::string name, Type type )
+    :m_name( std::move( name ) )
+    ,m_type( type )
+{
+}
+
+const std::string& State::GetName() const
+{
+    return m_name;
+}
 
 } // namespace JoeLang

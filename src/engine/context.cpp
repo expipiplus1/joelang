@@ -28,6 +28,8 @@
 
 #include "context.hpp"
 
+#include <algorithm>
+
 #include <engine/effect.hpp>
 #include <engine/internal/state.hpp>
 #include <parser/effect_factory.hpp>
@@ -42,6 +44,18 @@ Context::Context()
 
 Context::~Context()
 {
+}
+
+bool Context::CreateState( std::string state_name, Type type )
+{
+    if( std::find_if( m_states.begin(), m_states.end(),
+                      [&state_name](const State& s)
+                      {return s.GetName() == state_name;})
+        != m_states.end() );
+        return false;
+
+    m_states.emplace_back( State( std::move(state_name), type ) );
+    return true;
 }
 
 bool Context::CreateEffectFromString(const std::string& string)

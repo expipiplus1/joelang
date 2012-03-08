@@ -36,13 +36,21 @@ namespace JoeLang
 
 class State;
 
+enum Type : int
+{
+    INT
+};
+
 class Context
 {
 public:
     Context();
     ~Context();
 
+    // Returns false if there is already a state with that name
+    bool CreateState( std::string state_name, Type type );
     bool CreateEffectFromString( const std::string& string );
+
 private:
     std::vector<State> m_states;
 };
