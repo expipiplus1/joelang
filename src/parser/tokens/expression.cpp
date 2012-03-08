@@ -57,7 +57,7 @@ Expression::~Expression()
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    return AssignmentExpression::Parse( parser, token );
+    return Expect<AssignmentExpression>( parser, token );
 }
 
 //------------------------------------------------------------------------------
