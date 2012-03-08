@@ -10,6 +10,8 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -O0 -g -Wall")
 
 add_executable( joelang src/joelang.cpp
+                        src/engine/context.cpp
+                        src/engine/context.hpp
                         src/engine/effect.cpp
                         src/engine/effect.hpp
                         src/engine/pass.cpp
@@ -18,6 +20,8 @@ add_executable( joelang src/joelang.cpp
                         src/engine/state_assignment.hpp
                         src/engine/technique.cpp
                         src/engine/technique.hpp
+                        src/engine/internal/state.cpp
+                        src/engine/internal/state.hpp
                         src/parser/effect_factory.cpp
                         src/parser/effect_factory.hpp
                         src/parser/lexer.cpp
