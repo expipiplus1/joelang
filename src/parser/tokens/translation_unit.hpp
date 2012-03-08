@@ -31,7 +31,6 @@
 #include <memory>
 #include <vector>
 
-#include <parser/tokens/declaration.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -40,6 +39,7 @@ namespace JoeLang
 namespace Parser
 {
 
+class DeclarationBase;
 class Parser;
 
 class TranslationUnit : public JoeLang::Parser::Token

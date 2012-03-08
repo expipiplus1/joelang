@@ -32,7 +32,6 @@
 #include <string>
 
 #include <engine/state_assignment.hpp>
-#include <parser/tokens/expression.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -40,6 +39,7 @@ namespace JoeLang
 namespace Parser
 {
 
+class Expression;
 class Parser;
 
 class StateAssignmentStatement : public JoeLang::Parser::Token

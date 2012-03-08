@@ -31,6 +31,8 @@
 #include <iostream>
 
 #include <engine/effect.hpp>
+#include <parser/tokens/declaration.hpp>
+#include <parser/tokens/definition.hpp>
 #include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang

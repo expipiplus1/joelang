@@ -32,11 +32,16 @@
 #include <string>
 #include <vector>
 
-#include <parser/terminal_types.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
+
+namespace Lexer
+{
+enum TerminalType : int;
+}
+
 namespace Parser
 {
 

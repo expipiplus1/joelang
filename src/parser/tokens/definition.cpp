@@ -39,8 +39,9 @@
 #include <engine/technique.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
-#include <parser/tokens/definition.hpp>
+#include <parser/tokens/declaration.hpp>
 #include <parser/tokens/token.hpp>
+#include <parser/tokens/state_assignment_statement.hpp>
 
 namespace JoeLang
 {

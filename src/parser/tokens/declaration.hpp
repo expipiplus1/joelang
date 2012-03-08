@@ -32,7 +32,6 @@
 #include <string>
 #include <vector>
 
-#include <parser/tokens/definition.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang

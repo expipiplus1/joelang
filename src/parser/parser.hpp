@@ -29,24 +29,32 @@
 #pragma once
 
 #include <memory>
+//TODO stop using set
 #include <set>
 #include <string>
 #include <vector>
 
-#include <parser/lexer.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/translation_unit.hpp>
-
 namespace JoeLang
 {
+
+namespace Lexer
+{
+class Lexer;
+
+enum TerminalType : int;
+}
+
 namespace Parser
 {
+
+class Token;
+class TranslationUnit;
 
 class Parser
 {
 public:
-    Parser() = default;
-    ~Parser() = default;
+    Parser();
+    ~Parser();
 
     void Print() const;
 

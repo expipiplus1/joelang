@@ -33,8 +33,7 @@
 
 #include <engine/pass.hpp>
 #include <engine/technique.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/state_assignment_statement.hpp>
+
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
@@ -44,6 +43,7 @@ namespace Parser
 
 class Parser;
 class PassDeclaration;
+class StateAssignmentStatement;
 
 //------------------------------------------------------------------------------
 // PassDefinition

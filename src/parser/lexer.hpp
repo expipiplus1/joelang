@@ -33,29 +33,13 @@
 #include <string>
 #include <vector>
 
+//TODO remove this when using map instead of vector
 #include <parser/terminal_types.hpp>
 
 namespace JoeLang
 {
 namespace Lexer
 {
-
-const std::string& GetTerminalString( TerminalType terminal_type );
-
-//------------------------------------------------------------------------------
-// Terminal
-//------------------------------------------------------------------------------
-
-struct TerminalPosition
-{
-    TerminalPosition( TerminalType terminal_type,
-              std::string::const_iterator begin,
-              std::string::const_iterator end );
-
-    TerminalType terminal_type;
-    std::string::const_iterator begin;
-    std::string::const_iterator end;
-};
 
 //------------------------------------------------------------------------------
 // Lexer
@@ -79,14 +63,6 @@ public:
     std::size_t GetLineNumber() const;
     std::size_t GetColumnNumber() const;
 
-    //
-    // One can optionally store the position in the stream for looking ahead
-    // more than one token
-    //
-    void PushState();
-    void PopState();
-    void RestoreState();
-
 private:
     void ConsumeIgnoredTerminals();
     void ReadChars( std::size_t num_chars );
@@ -96,13 +72,11 @@ private:
     static std::map< TerminalType, const LiteralTerminal* > s_keywordTerminalMap;
 
     std::size_t m_numTokensRead;
-    std::vector<TerminalPosition> m_readTerminals;
 
     const std::string m_string;
     std::string::const_iterator m_position;
     std::size_t m_lineNumber = 1;
     std::size_t m_columnNumber = 1;
-    std::stack<std::string::iterator> m_savedPositions;
 };
 
 } // namespace Lexer

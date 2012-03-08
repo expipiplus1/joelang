@@ -27,7 +27,6 @@
 */
 
 #include <iostream>
-#include <string>
 
 #include <engine/effect.hpp>
 #include <parser/parser.hpp>

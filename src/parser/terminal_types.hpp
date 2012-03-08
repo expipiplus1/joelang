@@ -30,13 +30,14 @@
 
 #include <functional>
 #include <string>
+#include <vector>
 
 namespace JoeLang
 {
 namespace Lexer
 {
 
-enum TerminalType
+enum TerminalType : int
 {
     //
     // Special Terminals
@@ -143,6 +144,8 @@ enum TerminalType
     IDENTIFIER
 };
 
+const std::string& GetTerminalString( TerminalType terminal_type );
+
 //------------------------------------------------------------------------------
 // LiteralTerminal
 //------------------------------------------------------------------------------
@@ -163,44 +166,53 @@ struct LiteralTerminal
 
 struct FunctionalTerminal
 {
-    int Read( const std::string::const_iterator begin,
-              const std::string::const_iterator end ) const;
+    int Read( std::string::const_iterator begin,
+              std::string::const_iterator end ) const;
 
-    std::function< int( const std::string::const_iterator,
-                        const std::string::const_iterator ) > function;
+    std::function< int( std::string::const_iterator,
+                        std::string::const_iterator ) > function;
     TerminalType terminal_type;
     std::string readable_string;
 };
 
 //------------------------------------------------------------------------------
+// The terminals
+//------------------------------------------------------------------------------
+
+//TODO make these maps insead of vector
+extern const std::vector<FunctionalTerminal> g_ignoredTerminals;
+extern const std::vector<LiteralTerminal>    g_punctuationTerminals;
+extern const std::vector<FunctionalTerminal> g_literalTerminals;
+extern const std::vector<LiteralTerminal>    g_keywordTerminals;
+
+//------------------------------------------------------------------------------
 // Reading Functions
 //------------------------------------------------------------------------------
 
-int ReadWhitespace(     const std::string::const_iterator begin,
-                        const std::string::const_iterator end );
-int ReadLineComment(    const std::string::const_iterator begin,
-                        const std::string::const_iterator end );
-int ReadBlockComment(   const std::string::const_iterator begin,
-                        const std::string::const_iterator end );
+int ReadWhitespace(  std::string::const_iterator begin,
+                     std::string::const_iterator end );
+int ReadLineComment( std::string::const_iterator begin,
+                     std::string::const_iterator end );
+int ReadBlockComment( std::string::const_iterator begin,
+                      std::string::const_iterator end );
 
-int ReadIntegerLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
-int ReadFloatingLiteral(    const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
-int ReadBooleanLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
-int ReadCharacterLiteral(   const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
-int ReadStringLiteral(      const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+int ReadIntegerLiteral(  std::string::const_iterator begin,
+                         std::string::const_iterator end );
+int ReadFloatingLiteral( std::string::const_iterator begin,
+                         std::string::const_iterator end );
+int ReadBooleanLiteral(  std::string::const_iterator begin,
+                         std::string::const_iterator end );
+int ReadCharacterLiteral( std::string::const_iterator begin,
+                          std::string::const_iterator end );
+int ReadStringLiteral(   std::string::const_iterator begin,
+                         std::string::const_iterator end );
 
-int ReadIdentifier( const std::string::const_iterator begin,
-                    const std::string::const_iterator end );
-
+//matches [0-9a-fA-F]
+bool IsHexDigit( char c );
 //matches [a-zA-Z_]
-bool IsNonDigit( const char c );
+bool IsNonDigit( char c );
 //matches [a-zA-Z0-9_]
-bool IsDigitOrNonDigit( const char c );
+bool IsDigitOrNonDigit( char c );
 
 } // namespace Lexer
 } // namespace JoeLang

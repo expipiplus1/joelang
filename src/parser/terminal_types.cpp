@@ -30,9 +30,7 @@
 
 #include <algorithm>
 #include <functional>
-#include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 namespace JoeLang
@@ -41,11 +39,148 @@ namespace Lexer
 {
 
 //------------------------------------------------------------------------------
+// Tables of terminals
+//------------------------------------------------------------------------------
+
+//
+// Ignored Sequence
+//
+const std::vector<FunctionalTerminal> g_ignoredTerminals =
+{
+    { ReadWhitespace,   WHITESPACE,    "whitespace"    },
+    { ReadLineComment,  LINE_COMMENT,  "line comment"  },
+    { ReadBlockComment, BLOCK_COMMENT, "block comment" }
+};
+
+//
+// Punctuation
+//
+const std::vector<LiteralTerminal> g_punctuationTerminals =
+{
+    { "{",  OPEN_BRACE,     "" },
+    { "}",  CLOSE_BRACE,    "" },
+    { "(",  OPEN_ROUND,     "" },
+    { ")",  CLOSE_ROUND,    "" },
+    { "<",  OPEN_ANGLED,    "" },
+    { ">",  CLOSE_ANGLED,   "" },
+    { "[",  OPEN_SQUARE,    "" },
+    { "]",  CLOSE_SQUARE,   "" },
+
+    { "==", EQUALITY,       "" },
+    { "!=", NOT_EQUALITY,   "" },
+    { "<=", LESS_THAN_EQUALS,    "" },
+    { ">=", GREATER_THAN_EQUALS, "" },
+    { "<",  LESS_THAN,      "" },
+    { ">",  GREATER_THAN,   "" },
+
+    { "=",  EQUALS,          "" },
+    { "+=", PLUS_EQUALS,     "" },
+    { "-=", MINUS_EQUALS,    "" },
+    { "*=", MULTIPLY_EQUALS, "" },
+    { "/=", DIVIDE_EQUALS,   "" },
+    { "%=", MODULO_EQUALS,   "" },
+    { "&=", AND_EQUALS,      "" },
+    { "|=", INCLUSIVE_OR_EQUALS, "" },
+    { "^=", EXCLUSIVE_OR_EQUALS, "" },
+    { "<<=", LEFT_SHIFT_EQUALS,  "" },
+    { ">>=", RIGHT_SHIFT_EQUALS, "" },
+
+    { "&&", LOGICAL_AND,    "" },
+    { "||", LOGICAL_OR,     "" },
+    { "!",  LOGICAL_NOT,    "" },
+
+    { "++", INCREMENT,      "" },
+    { "--", DECREMENT,      "" },
+    { "+",  PLUS,           "" },
+    { "-",  MINUS,          "" },
+    { "*",  MULTIPLY,       "" },
+    { "/",  DIVIDE,         "" },
+    { "%",  MODULO,         "" },
+    { "&",  AND,            "" },
+    { "|",  INCLUSIVE_OR,   "" },
+    { "^",  EXCLUSIVE_OR,   "" },
+    { "~",  BITWISE_NOT,    "" },
+    { "<<", LEFT_SHIFT,     "" },
+    { ">>", RIGHT_SHIFT,    "" },
+
+    { ";",  SEMICOLON,      "" },
+    { ",",  COMMA,          "" },
+    { ".",  PERIOD,         "" },
+    { ":",  COLON,          "" },
+    { "?",  QUERY,          "" }
+};
+
+//
+// Literals
+//
+const std::vector<FunctionalTerminal> g_literalTerminals =
+{
+    { ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
+    { ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
+    //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
+    //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
+};
+
+//
+// Keywords
+//
+const std::vector<LiteralTerminal> g_keywordTerminals =
+{
+    { "technique",  TECHNIQUE,  "" },
+    { "pass",       PASS,       "" },
+
+    { "int",        TYPE_INT,   "" },
+
+    { "true",       TRUE,   "" },
+    { "false",      FALSE,   "" }
+};
+
+const std::string& GetTerminalString( TerminalType terminal_type )
+{
+    for( const auto& i : g_ignoredTerminals )
+        if( i.terminal_type == terminal_type )
+            return i.readable_string;
+
+    for( const auto& i : g_punctuationTerminals )
+         if( i.terminal_type == terminal_type )
+         {
+            if( i.readable_string.empty() )
+                return i.matched_string;
+            else
+                return i.readable_string;
+         }
+
+    for( const auto& i : g_literalTerminals )
+        if( i.terminal_type == terminal_type )
+            return i.readable_string;
+
+    for( const auto& i : g_keywordTerminals )
+         if( i.terminal_type == terminal_type )
+         {
+            if( i.readable_string.empty() )
+                return i.matched_string;
+            else
+                return i.readable_string;
+         }
+
+    const static std::string s = "Invalid Terminal";
+    const static std::string i = "identifier";
+    const static std::string e = "EOF";
+
+    if( terminal_type == IDENTIFIER )
+        return i;
+    else if ( terminal_type == END_OF_INPUT )
+        return e;
+
+    return s;
+}
+
+//------------------------------------------------------------------------------
 // LiteralTerminal
 //------------------------------------------------------------------------------
 
-int LiteralTerminal::Read( const std::string::const_iterator begin,
-                           const std::string::const_iterator end ) const
+int LiteralTerminal::Read( std::string::const_iterator begin,
+                           std::string::const_iterator end ) const
 {
     if( std::size_t(end - begin) < matched_string.size() ||
         !std::equal( matched_string.begin(), matched_string.end(), begin ) )
@@ -58,8 +193,8 @@ int LiteralTerminal::Read( const std::string::const_iterator begin,
 // FunctionalTerminal
 //------------------------------------------------------------------------------
 
-int FunctionalTerminal::Read( const std::string::const_iterator begin,
-                              const std::string::const_iterator end ) const
+int FunctionalTerminal::Read( std::string::const_iterator begin,
+                              std::string::const_iterator end ) const
 {
     return function( begin, end );
 }
@@ -87,8 +222,8 @@ int ReadWhitespace( std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadLineComment( const std::string::const_iterator begin,
-                     const std::string::const_iterator end )
+int ReadLineComment( std::string::const_iterator begin,
+                     std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( end - begin < 2 )
@@ -110,8 +245,8 @@ int ReadLineComment( const std::string::const_iterator begin,
     return 0;
 }
 
-int ReadBlockComment(   const std::string::const_iterator begin,
-                        const std::string::const_iterator end )
+int ReadBlockComment(   std::string::const_iterator begin,
+                        std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( end - begin < 4 )
@@ -136,8 +271,8 @@ int ReadBlockComment(   const std::string::const_iterator begin,
     return 0;
 }
 
-int ReadDigitSequence(      const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadDigitSequence(      std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
@@ -149,14 +284,12 @@ int ReadDigitSequence(      const std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadHexDigitSequence(      const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadHexDigitSequence(      std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
-    while( ( ( ( c >= '0' ) && ( c <= '9' ) ) ||
-             ( ( c >= 'a' ) && ( c <= 'f' ) ) ||
-             ( ( c >= 'A' ) && ( c <= 'F' ) ) ) && p < end )
+    while( IsHexDigit( c ) && p < end )
     {
         ++p;
         c = *p;
@@ -164,8 +297,8 @@ int ReadHexDigitSequence(      const std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadOctalDigitSequence(      const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadOctalDigitSequence(      std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
@@ -177,8 +310,8 @@ int ReadOctalDigitSequence(      const std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadIntegerLiteral(     const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadIntegerLiteral(     std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( *p == '0' )
@@ -204,8 +337,8 @@ int ReadIntegerLiteral(     const std::string::const_iterator begin,
     }
 }
 
-int ReadExponent(           const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadExponent(           std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     if( end - begin < 2 )
         return 0;
@@ -229,8 +362,8 @@ int ReadExponent(           const std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadFloatingLiteral(    const std::string::const_iterator begin,
-                            const std::string::const_iterator end )
+int ReadFloatingLiteral(    std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     int s = ReadDigitSequence( p, end );
@@ -279,25 +412,32 @@ int ReadFloatingLiteral(    const std::string::const_iterator begin,
 }
 
 /*
-int ReadCharacterLiteral(   const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+int ReadCharacterLiteral(   std::string::const_iterator begin,
+                            std::string::const_iterator end );
 
-int ReadStringLiteral(      const std::string::const_iterator begin,
-                            const std::string::const_iterator end );
+int ReadStringLiteral(      std::string::const_iterator begin,
+                            std::string::const_iterator end );
 
-int ReadIdentifier( const std::string::const_iterator begin,
-                    const std::string::const_iterator end );
+int ReadIdentifier( std::string::const_iterator begin,
+                    std::string::const_iterator end );
 
 */
 
-bool IsNonDigit( const char c )
+bool IsHexDigit( char c )
+{
+    return ( c >= '0' && c <= '9' ) ||
+           ( c >= 'a' && c <= 'f' ) ||
+           ( c >= 'A' && c <= 'F' );
+}
+
+bool IsNonDigit( char c )
 {
     return ( c >= 'a' && c <= 'z' ) ||
            ( c >= 'A' && c <= 'Z' ) ||
            ( c == '_' );
 }
 
-bool IsDigitOrNonDigit( const char c )
+bool IsDigitOrNonDigit( char c )
 {
     return IsNonDigit( c ) ||
            ( c >= '0' && c <= '9' );

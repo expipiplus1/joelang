@@ -36,6 +36,7 @@
 
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
+#include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
