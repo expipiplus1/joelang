@@ -56,7 +56,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 StateAssignment StateAssignmentStatement::GetStateAssignment() const
 {
     //TODO
-    return StateAssignment();
+    return StateAssignment( m_stateName );
 }
 
 void StateAssignmentStatement::Print( int depth ) const
