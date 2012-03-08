@@ -84,7 +84,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         return false;
 
     token.reset( new StateAssignmentStatement( std::move( state_name ),
-                                      std::move( expression ) ) );
+                                               std::move( expression ) ) );
     return true;
 }
 
