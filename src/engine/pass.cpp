@@ -46,9 +46,7 @@ Pass::Pass( std::string name, std::vector<StateAssignment> state_assignments )
 void Pass::SetState() const
 {
     for( const auto& sa : m_stateAssignments )
-    {
         sa.SetState();
-    }
 }
 
 const std::string& Pass::GetName() const
