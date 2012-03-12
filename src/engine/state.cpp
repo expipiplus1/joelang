@@ -28,7 +28,21 @@
 
 #include "state.hpp"
 
+#include <map>
+#include <string>
+
 namespace JoeLang
 {
+
+State::State( std::string name, std::map< std::string, int > enumerations )
+    :m_name( std::move(name) )
+    ,m_enumerations( std::move(enumerations) )
+{
+}
+
+const std::string& State::GetName() const
+{
+    return m_name;
+}
 
 } // namespace JoeLang

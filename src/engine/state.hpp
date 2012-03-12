@@ -28,11 +28,23 @@
 
 #pragma once
 
+#include <map>
+#include <string>
+
 namespace JoeLang
 {
 
 class State
 {
+public:
+    State() = delete;
+    State( std::string name, std::map< std::string, int > enumerations = {} );
+
+    const std::string& GetName() const;
+
+private:
+    std::string m_name;
+    std::map< std::string, int > m_enumerations;
 };
 
 } // namespace JoeLang
