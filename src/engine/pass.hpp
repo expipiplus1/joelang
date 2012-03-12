@@ -40,9 +40,12 @@ class Pass
 public:
     Pass() = default;
     ~Pass() = default;
-    Pass( std::vector<StateAssignment> state_assignments );
+    Pass( std::string name, std::vector<StateAssignment> state_assignments );
+
+    void SetPassState() const;
 
 private:
+    std::string m_name;
     std::vector<StateAssignment> m_stateAssignments;
 };
 

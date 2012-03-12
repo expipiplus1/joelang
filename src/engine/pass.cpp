@@ -36,9 +36,18 @@
 namespace JoeLang
 {
 
-Pass::Pass( std::vector<StateAssignment> state_assignments )
-    :m_stateAssignments( std::move( state_assignments ) )
+Pass::Pass( std::string name, std::vector<StateAssignment> state_assignments )
+    :m_name( std::move(name) )
+    ,m_stateAssignments( std::move( state_assignments ) )
 {
+}
+
+void Pass::SetPassState() const
+{
+    for( const auto& sa : m_stateAssignments )
+    {
+        sa.SetState();
+    }
 }
 
 } // namespace JoeLang
