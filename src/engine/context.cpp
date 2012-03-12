@@ -28,6 +28,9 @@
 
 #include "context.hpp"
 
+#include <algorithm>
+#include <string>
+
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
 #include <parser/effect_factory.hpp>
@@ -44,9 +47,16 @@ Context::~Context()
 {
 }
 
+bool Context::AddState( State state )
+{
+    //TODO
+    m_states.push_back( std::move(state) );
+    return true;
+}
+
 bool Context::CreateEffectFromString(const std::string& string)
 {
-    Parser::Parser parser;
+    Parser::Parser parser( *this );
     if( parser.Parse( string ) )
     {
         parser.Print();
@@ -58,6 +68,13 @@ bool Context::CreateEffectFromString(const std::string& string)
     {
         return false;
     }
+}
+
+bool Context::IsStateName(const std::string& name) const
+{
+    return std::find_if( m_states.begin(), m_states.end(),
+                         [&name](const State& p){return name == p.GetName();} ) !=
+           m_states.end();
 }
 
 } // namespace JoeLang

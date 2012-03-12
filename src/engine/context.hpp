@@ -42,7 +42,11 @@ public:
     Context();
     ~Context();
 
+    bool AddState( State state );
+
     bool CreateEffectFromString( const std::string& string );
+
+    bool IsStateName( const std::string& name ) const;
 private:
     std::vector<State> m_states;
 };
