@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <functional>
 #include <map>
 #include <string>
 
@@ -40,11 +41,20 @@ public:
     State() = delete;
     State( std::string name, std::map< std::string, int > enumerations = {} );
 
+    void SetCallbacks( std::function<void(int)> set_callback,
+                       std::function<void()> reset_callback,
+                       std::function<bool()> validate_callback );
+
+    void SetState( int value ) const;
+
     const std::string& GetName() const;
 
 private:
     std::string m_name;
     std::map< std::string, int > m_enumerations;
+    std::function<void(int)> m_setCallback;
+    std::function<void()> m_resetCallback;
+    std::function<bool()> m_validateCallback;
 };
 
 } // namespace JoeLang

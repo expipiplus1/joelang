@@ -28,16 +28,47 @@
 
 #include "state.hpp"
 
+#include <functional>
 #include <map>
 #include <string>
 
 namespace JoeLang
 {
 
+void DefaultStateSetCallback( int value )
+{
+}
+
+void DefaultStateResetCallback()
+{
+}
+
+bool DefaultStateValidateCallback()
+{
+    return true;
+}
+
 State::State( std::string name, std::map< std::string, int > enumerations )
     :m_name( std::move(name) )
     ,m_enumerations( std::move(enumerations) )
+    ,m_setCallback( DefaultStateSetCallback )
+    ,m_resetCallback( DefaultStateResetCallback )
+    ,m_validateCallback( DefaultStateValidateCallback )
 {
+}
+
+void State::SetCallbacks( std::function<void(int)> set_callback,
+                          std::function<void()> reset_callback,
+                          std::function<bool()> validate_callback )
+{
+    m_setCallback   = set_callback ? set_callback : DefaultStateSetCallback;
+    m_resetCallback = reset_callback ? reset_callback : DefaultStateResetCallback;
+    m_validateCallback   = validate_callback ? validate_callback : DefaultStateValidateCallback;
+}
+
+void State::SetState( int value ) const
+{
+    m_setCallback( value );
 }
 
 const std::string& State::GetName() const
