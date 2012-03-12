@@ -36,9 +36,15 @@
 namespace JoeLang
 {
 
-Technique::Technique(std::vector<Pass> passes)
-    :m_passes( std::move( passes ) )
+Technique::Technique( std::string name, std::vector<Pass> passes )
+    :m_name( std::move(name) )
+    ,m_passes( std::move( passes ) )
 {
+}
+
+const std::vector<Pass>& Technique::GetPasses() const
+{
+    return m_passes;
 }
 
 } // namespace JoeLang

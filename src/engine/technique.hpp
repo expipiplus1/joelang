@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <engine/pass.hpp>
@@ -40,9 +41,12 @@ class Technique
 public:
     Technique() = default;
     ~Technique() = default;
-    Technique( std::vector<Pass> passes );
+    Technique( std::string name, std::vector<Pass> passes );
+
+    const std::vector<Pass>& GetPasses() const;
 
 private:
+    std::string m_name;
     std::vector<Pass> m_passes;
 };
 
