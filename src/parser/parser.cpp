@@ -102,9 +102,9 @@ bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& str
     return false;
 }
 
-bool Parser::IsStateName( const std::string& name ) const
+const State* Parser::GetNamedState( const std::string& name ) const
 {
-    return m_context.IsStateName( name );
+    return m_context.GetNamedState( name );
 }
 
 std::size_t Parser::GetLexerPosition() const
