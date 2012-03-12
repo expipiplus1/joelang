@@ -73,6 +73,13 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
         return false;
 
+    //Check if the state name is a valid state name
+    if( !parser.IsStateName( state_name ) )
+    {
+        parser.Error( "\'" + state_name + "\' is not a valid state name" );
+        return false;
+    }
+
     if( !parser.ExpectTerminal( Lexer::EQUALS ) )
         return false;
 
