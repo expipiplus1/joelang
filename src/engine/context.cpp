@@ -29,7 +29,7 @@
 #include "context.hpp"
 
 #include <engine/effect.hpp>
-#include <engine/internal/state.hpp>
+#include <engine/state.hpp>
 #include <parser/effect_factory.hpp>
 #include <parser/parser.hpp>
 
