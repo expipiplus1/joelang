@@ -72,7 +72,7 @@ bool Parser::Parse ( const std::string& string )
         std::cout << "Expected one of: ";
         for( Lexer::TerminalType expected_terminal : m_expectedTerminals )
         {
-            std::cout << "\"" << Lexer::GetTerminalString( expected_terminal ) << "\", ";
+            std::cout << "\'" << Lexer::GetTerminalString( expected_terminal ) << "\', ";
         }
     }
     else
