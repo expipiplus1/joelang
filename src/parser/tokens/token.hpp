@@ -30,13 +30,13 @@
 
 namespace JoeLang
 {
+
 namespace Parser
 {
 
 #define CHECK_PARSER \
     if( !parser.Good() ) return false; \
     else (void)0
-
 
 class Token
 {
