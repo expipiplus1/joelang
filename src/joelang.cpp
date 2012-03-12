@@ -35,7 +35,12 @@
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
-    context.AddState( JoeLang::State( "my_state", {{"one", 1}, {"two", 2}} ) );
+    JoeLang::State my_state( "my_state", {{"one", 1}, {"two", 2}} );
+    my_state.SetCallbacks( [](int v)
+                             {std::cout << "setting my_state to " << v << std::endl;},
+                           nullptr, nullptr );
+
+    context.AddState( my_state );
 
     JoeLang::Effect* e;
 
