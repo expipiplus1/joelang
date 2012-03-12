@@ -42,7 +42,11 @@ int main( int argc, char** argv )
     if( context.CreateEffectFromString( "technique t{ pass p{ my_state=1; } }", e ) )
     {
         const JoeLang::Technique* t = e->GetNamedTechnique( "t" );
-        std::cout << "success\n";
+        for( const auto& pass : t->GetPasses() )
+        {
+            std::cout << "Setting Pass: \'" << pass.GetName() << "\' state\n";
+            pass.SetState();
+        }
     }
     else
         std::cout << "fail\n";
