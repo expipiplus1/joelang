@@ -29,13 +29,15 @@
 #pragma once
 
 #include <memory>
-#include <string>
 
 #include <engine/state_assignment.hpp>
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
+
+class State;
+
 namespace Parser
 {
 
@@ -54,10 +56,10 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
 
 protected:
-    StateAssignmentStatement( std::string state_name, std::unique_ptr<Expression> expression );
+    StateAssignmentStatement( const State& state, std::unique_ptr<Expression> expression );
 
 private:
-    std::string m_stateName;
+    const State& m_state;
     std::unique_ptr<Expression> m_expression;
 };
 

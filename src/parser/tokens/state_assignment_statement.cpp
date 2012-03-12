@@ -33,6 +33,7 @@
 #include <string>
 #include <utility>
 
+#include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
@@ -43,8 +44,8 @@ namespace JoeLang
 namespace Parser
 {
 
-StateAssignmentStatement::StateAssignmentStatement( std::string state_name, std::unique_ptr< Expression > expression )
-    :m_stateName( std::move( state_name ) )
+StateAssignmentStatement::StateAssignmentStatement( const State& state, std::unique_ptr< Expression > expression )
+    :m_state( state )
     ,m_expression( std::move( expression ) )
 {
 }
@@ -56,14 +57,14 @@ StateAssignmentStatement::~StateAssignmentStatement()
 StateAssignment StateAssignmentStatement::GetStateAssignment() const
 {
     //TODO
-    return StateAssignment( m_stateName );
+    return StateAssignment( m_state );
 }
 
 void StateAssignmentStatement::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << "State Assignment to " << m_stateName << "\n";
+    std::cout << "State Assignment to " << m_state.GetName() << "\n";
     m_expression->Print( depth + 1 );
 }
 
@@ -74,7 +75,8 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         return false;
 
     //Check if the state name is a valid state name
-    if( !parser.IsStateName( state_name ) )
+    const State* state = parser.GetNamedState( state_name );
+    if( !state )
     {
         parser.Error( "\'" + state_name + "\' is not a valid state name" );
         return false;
@@ -90,7 +92,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
     if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
         return false;
 
-    token.reset( new StateAssignmentStatement( std::move( state_name ),
+    token.reset( new StateAssignmentStatement( *state,
                                                std::move( expression ) ) );
     return true;
 }
