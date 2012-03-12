@@ -30,6 +30,8 @@
 
 #include <string>
 
+#include <engine/state.hpp>
+
 namespace JoeLang
 {
 
@@ -40,6 +42,9 @@ StateAssignment::StateAssignment( const State& state )
 
 void StateAssignment::SetState() const
 {
+    //TODO
+    int calculated_value = 1;
+    m_state.SetState( calculated_value );
 }
 
 } // namespace JoeLang
