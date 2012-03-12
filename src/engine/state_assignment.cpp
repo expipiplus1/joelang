@@ -32,7 +32,9 @@
 
 namespace JoeLang
 {
-StateAssignment::StateAssignment( const std::string& state_name )
+
+StateAssignment::StateAssignment( const State& state )
+    :m_state(state)
 {
 }
 

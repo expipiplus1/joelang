@@ -28,21 +28,23 @@
 
 #pragma once
 
-#include <string>
-
 namespace JoeLang
 {
+
+class State;
 
 class StateAssignment
 {
 public:
     StateAssignment() = delete;
-    explicit StateAssignment( const std::string& state_name );
+    //TODO take expression
+    explicit StateAssignment( const State& state );
     ~StateAssignment() = default;
 
     void SetState() const;
 
 private:
+    const State& m_state;
     // functor for setting variable
     // some kind of structure for holding llvm code for the expression
 };
