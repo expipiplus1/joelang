@@ -41,4 +41,9 @@ Effect::Effect( std::vector<Technique> techniques )
 {
 }
 
+const std::vector<Technique>& Effect::GetTechniques() const
+{
+    return m_techniques;
+}
+
 } // namespace JoeLang
