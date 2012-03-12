@@ -247,6 +247,8 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !Expect<TechniqueDefinition>( parser, definition ) )
         return false;
 
+    definition->SetName( name );
+
     token.reset( new TechniqueDeclaration( std::move(name),
                                            std::move(definition) ) );
     return true;
