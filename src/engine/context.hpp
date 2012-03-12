@@ -28,12 +28,14 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace JoeLang
 {
 
+class Effect;
 class State;
 
 class Context
@@ -44,11 +46,12 @@ public:
 
     bool AddState( State state );
 
-    bool CreateEffectFromString( const std::string& string );
+    bool CreateEffectFromString( const std::string& string, Effect*& effect );
 
     bool IsStateName( const std::string& name ) const;
 private:
     std::vector<State> m_states;
+    std::vector< std::unique_ptr<Effect> > m_effects;
 };
 
 } // namespace JoeLang

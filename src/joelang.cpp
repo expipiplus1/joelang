@@ -29,6 +29,7 @@
 #include <iostream>
 
 #include <engine/context.hpp>
+#include <engine/effect.hpp>
 #include <engine/state.hpp>
 
 int main( int argc, char** argv )
@@ -36,7 +37,9 @@ int main( int argc, char** argv )
     JoeLang::Context context;
     context.AddState( JoeLang::State( "my_state", {{"one", 1}, {"two", 2}} ) );
 
-    if( context.CreateEffectFromString( "technique t{ pass p{ a=1; } }" ) )
+    JoeLang::Effect* e;
+
+    if( context.CreateEffectFromString( "technique t{ pass p{ my_state=1; } }", e ) )
     {
         std::cout << "success\n";
     }

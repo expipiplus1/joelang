@@ -29,7 +29,10 @@
 #include "context.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <string>
+#include <utility>
+#include <vector>
 
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
@@ -54,14 +57,15 @@ bool Context::AddState( State state )
     return true;
 }
 
-bool Context::CreateEffectFromString(const std::string& string)
+bool Context::CreateEffectFromString( const std::string& string, Effect*& effect )
 {
     Parser::Parser parser( *this );
     if( parser.Parse( string ) )
     {
         parser.Print();
         JoeLang::Parser::EffectFactory ef;
-        JoeLang::Effect e = ef.CreateEffect( parser.GetTranslationUnit() );
+        effect = new Effect( ef.CreateEffect( parser.GetTranslationUnit() ) );
+        m_effects.push_back( std::unique_ptr<Effect>(effect)  );
         return true;
     }
     else
