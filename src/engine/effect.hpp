@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <engine/technique.hpp>
@@ -43,6 +44,7 @@ public:
     explicit Effect( std::vector<Technique> techniques );
 
     const std::vector<Technique>& GetTechniques() const;
+    const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
     std::vector<Technique> m_techniques;

@@ -28,6 +28,7 @@
 
 #include "effect.hpp"
 
+#include <algorithm>
 #include <utility>
 #include <vector>
 
@@ -44,6 +45,14 @@ Effect::Effect( std::vector<Technique> techniques )
 const std::vector<Technique>& Effect::GetTechniques() const
 {
     return m_techniques;
+}
+
+const Technique* Effect::GetNamedTechnique( const std::string& name ) const
+{
+    const auto& technique = std::find_if( m_techniques.begin(), m_techniques.end(),
+                                          [&name](const Technique& t)
+                                            {return t.GetName() == name;} );
+    return technique == m_techniques.end() ? nullptr :  &*technique;
 }
 
 } // namespace JoeLang
