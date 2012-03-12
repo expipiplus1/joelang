@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <engine/pass.hpp>
@@ -57,6 +58,8 @@ public:
 
     Pass GetPass() const;
 
+    void SetName( std::string name );
+
     virtual
     void Print( int depth ) const;
 
@@ -66,6 +69,7 @@ protected:
     PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments  );
 
 private:
+    std::string m_name;
     std::vector< std::unique_ptr<StateAssignmentStatement> > m_stateAssignments;
 };
 
@@ -80,6 +84,8 @@ public:
 
     Technique GetTechnique() const;
 
+    void SetName( std::string name );
+
     virtual void Print( int depth ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
@@ -88,6 +94,7 @@ protected:
     TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > m_passes );
 
 private:
+    std::string m_name;
     std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 

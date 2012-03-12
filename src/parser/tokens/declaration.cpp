@@ -169,6 +169,8 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     if( !Expect<PassDefinition>( parser, definition ) )
         return false;
 
+    definition->SetName( name );
+
     token.reset( new PassDeclaration( std::move(name),
                                       std::move(definition) ) );
     return true;

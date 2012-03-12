@@ -67,8 +67,12 @@ Pass PassDefinition::GetPass() const
     std::vector<StateAssignment> state_assignments;
     for( const auto& state_assignment : m_stateAssignments )
         state_assignments.push_back( state_assignment->GetStateAssignment() );
-    return Pass( std::move( state_assignments ) );
+    return Pass( m_name, std::move( state_assignments ) );
+}
 
+void PassDefinition::SetName(std::string name)
+{
+    m_name = std::move(name);
 }
 
 void PassDefinition::Print( int depth ) const
@@ -106,6 +110,11 @@ TechniqueDefinition::~TechniqueDefinition()
 {
 }
 
+void TechniqueDefinition::SetName( std::string name )
+{
+    m_name = std::move( name );
+}
+
 Technique TechniqueDefinition::GetTechnique() const
 {
     //TODO
@@ -117,7 +126,7 @@ Technique TechniqueDefinition::GetTechnique() const
         if( definition )
             passes.push_back( definition->GetPass() );
     }
-    return Technique( std::move( passes ) );
+    return Technique( m_name, std::move( passes ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const
