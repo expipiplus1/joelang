@@ -28,6 +28,7 @@
 
 #include "pass.hpp"
 
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -48,6 +49,11 @@ void Pass::SetPassState() const
     {
         sa.SetState();
     }
+}
+
+const std::string& Pass::GetName() const
+{
+    return m_name;
 }
 
 } // namespace JoeLang

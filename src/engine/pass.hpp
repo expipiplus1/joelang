@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <engine/state_assignment.hpp>
@@ -43,6 +44,8 @@ public:
     Pass( std::string name, std::vector<StateAssignment> state_assignments );
 
     void SetPassState() const;
+
+    const std::string& GetName() const;
 
 private:
     std::string m_name;
