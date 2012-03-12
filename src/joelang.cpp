@@ -37,8 +37,10 @@
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
-    if( context.CreateEffectFromString( "technique t; pass pass1{ a= (12+1)/add(9.0, 10); }" ) )
+    if( context.CreateEffectFromString( "technique t{ pass p{ a=1; } }" ) )
+    {
         std::cout << "success\n";
+    }
     else
         std::cout << "fail\n";
 }
