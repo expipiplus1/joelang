@@ -43,7 +43,7 @@ public:
     ~Pass() = default;
     Pass( std::string name, std::vector<StateAssignment> state_assignments );
 
-    void SetPassState() const;
+    void SetState() const;
 
     const std::string& GetName() const;
 
