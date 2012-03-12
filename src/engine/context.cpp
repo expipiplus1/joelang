@@ -74,11 +74,15 @@ bool Context::CreateEffectFromString( const std::string& string, Effect*& effect
     }
 }
 
-bool Context::IsStateName(const std::string& name) const
+const State* Context::GetNamedState(const std::string& name) const
 {
-    return std::find_if( m_states.begin(), m_states.end(),
-                         [&name](const State& p){return name == p.GetName();} ) !=
-           m_states.end();
+    auto s = std::find_if( m_states.begin(), m_states.end(),
+                           [&name](const State& p)
+                             {return name == p.GetName();} );
+    if( s == m_states.end() )
+        return nullptr;
+
+    return &*s;
 }
 
 } // namespace JoeLang

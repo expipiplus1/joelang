@@ -48,7 +48,7 @@ public:
 
     bool CreateEffectFromString( const std::string& string, Effect*& effect );
 
-    bool IsStateName( const std::string& name ) const;
+    const State* GetNamedState( const std::string& name ) const;
 private:
     std::vector<State> m_states;
     std::vector< std::unique_ptr<Effect> > m_effects;
