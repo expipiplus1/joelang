@@ -32,7 +32,12 @@
 
 namespace JoeLang
 {
-    StateAssignment::StateAssignment( const std::string& state_name )
-    {
-    }
+StateAssignment::StateAssignment( const std::string& state_name )
+{
+}
+
+void StateAssignment::SetState() const
+{
+}
+
 } // namespace JoeLang

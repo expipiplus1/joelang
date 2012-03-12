@@ -36,8 +36,11 @@ namespace JoeLang
 class StateAssignment
 {
 public:
+    StateAssignment() = delete;
     explicit StateAssignment( const std::string& state_name );
     ~StateAssignment() = default;
+
+    void SetState() const;
 
 private:
     // functor for setting variable
