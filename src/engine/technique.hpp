@@ -45,6 +45,8 @@ public:
 
     const std::vector<Pass>& GetPasses() const;
 
+    const std::string& GetName() const;
+
 private:
     std::string m_name;
     std::vector<Pass> m_passes;

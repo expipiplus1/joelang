@@ -47,4 +47,9 @@ const std::vector<Pass>& Technique::GetPasses() const
     return m_passes;
 }
 
+const std::string& Technique::GetName() const
+{
+    return m_name;
+}
+
 } // namespace JoeLang
