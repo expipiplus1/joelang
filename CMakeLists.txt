@@ -9,6 +9,8 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O0 -g -Wall")
 
+find_package( LLVM REQUIRED )
+
 add_executable( joelang src/joelang.cpp
                         src/engine/context.cpp
                         src/engine/context.hpp
@@ -43,6 +45,12 @@ add_executable( joelang src/joelang.cpp
                         src/parser/tokens/token.hpp
                         src/parser/tokens/translation_unit.cpp
                         src/parser/tokens/translation_unit.hpp )
+
+include_directories( ${LLVM_INCLUDE_DIRS} )
+link_directories( ${LLVM_LIBRARY_DIRS} )
+llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native )
+set( joelang_libraries ${REQ_LLVM_LIBRARIES} )
+add_definitions( ${LLVM_DEFINITIONS} )
 
 set( joelang_include_directories ${joelang_SOURCE_DIR}/src )
 target_link_libraries( joelang ${joelang_libraries} )
