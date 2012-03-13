@@ -342,9 +342,10 @@ LogicalOrExpression::~LogicalOrExpression()
 bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // Why doesn't clang support initializer lists!
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::LOGICAL_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::LOGICAL_OR
+    };
 
     return ParseLeftAssociative<LogicalOrExpression, LogicalAndExpression>( parser, token, operators );
 }
@@ -368,9 +369,10 @@ LogicalAndExpression::~LogicalAndExpression()
 
 bool LogicalAndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::LOGICAL_AND );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::LOGICAL_AND
+    };
 
     return ParseLeftAssociative<LogicalAndExpression, InclusiveOrExpression>( parser, token, operators );
 }
@@ -394,9 +396,10 @@ InclusiveOrExpression::~InclusiveOrExpression()
 
 bool InclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::INCLUSIVE_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::INCLUSIVE_OR
+    };
 
     return ParseLeftAssociative<InclusiveOrExpression, ExclusiveOrExpression>( parser, token, operators );
 }
@@ -420,9 +423,10 @@ ExclusiveOrExpression::~ExclusiveOrExpression()
 
 bool ExclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::EXCLUSIVE_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::EXCLUSIVE_OR
+    };
 
     return ParseLeftAssociative<ExclusiveOrExpression, AndExpression>( parser, token, operators );
 }
@@ -446,9 +450,10 @@ AndExpression::~AndExpression()
 
 bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::AND );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::AND
+    };
 
     return ParseLeftAssociative<AndExpression, EqualityExpression>( parser, token, operators );
 }
@@ -472,12 +477,11 @@ EqualityExpression::~EqualityExpression()
 
 bool EqualityExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::EQUALITY );
-        operators.push_back( Lexer::NOT_EQUALITY );
-    }
+        Lexer::EQUALITY,
+        Lexer::NOT_EQUALITY
+    };
 
     return ParseLeftAssociative<EqualityExpression, RelationalExpression>( parser, token, operators );
 }
@@ -501,14 +505,13 @@ RelationalExpression::~RelationalExpression()
 
 bool RelationalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::LESS_THAN );
-        operators.push_back( Lexer::GREATER_THAN );
-        operators.push_back( Lexer::LESS_THAN_EQUALS );
-        operators.push_back( Lexer::GREATER_THAN_EQUALS );
-    }
+        Lexer::LESS_THAN,
+        Lexer::GREATER_THAN,
+        Lexer::LESS_THAN_EQUALS,
+        Lexer::GREATER_THAN_EQUALS
+    };
 
     return ParseLeftAssociative<RelationalExpression, ShiftExpression>( parser, token, operators );
 }
@@ -532,12 +535,11 @@ ShiftExpression::~ShiftExpression()
 
 bool ShiftExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::LEFT_SHIFT );
-        operators.push_back( Lexer::RIGHT_SHIFT );
-    }
+        Lexer::LEFT_SHIFT,
+        Lexer::RIGHT_SHIFT
+    };
 
     return ParseLeftAssociative<ShiftExpression, AdditiveExpression>( parser, token, operators );
 }
@@ -561,12 +563,11 @@ AdditiveExpression::~AdditiveExpression()
 
 bool AdditiveExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::PLUS );
-        operators.push_back( Lexer::MINUS );
-    }
+        Lexer::PLUS,
+        Lexer::MINUS
+    };
 
     return ParseLeftAssociative<AdditiveExpression, MultiplicativeExpression>( parser, token, operators );
 }
@@ -590,13 +591,12 @@ MultiplicativeExpression::~MultiplicativeExpression()
 
 bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::MULTIPLY );
-        operators.push_back( Lexer::DIVIDE );
-        operators.push_back( Lexer::MODULO );
-    }
+        Lexer::MULTIPLY,
+        Lexer::DIVIDE,
+        Lexer::MODULO
+    };
 
     return ParseLeftAssociative<MultiplicativeExpression, CastExpression>( parser, token, operators );
 }
@@ -998,10 +998,8 @@ bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
 
     if( !parser.ExpectTerminal( Lexer::OPEN_ROUND ) )
         return false;
-
     if( !Expect<Expression>( parser, token ) )
         return false;
-
     if( !parser.ExpectTerminal( Lexer::CLOSE_ROUND ) )
         return false;
 
