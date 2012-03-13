@@ -650,6 +650,11 @@ void UnaryExpression::Print( int depth ) const
     m_expression->Print( depth + 1 );
 }
 
+llvm::Value* UnaryExpression::CodeGen()
+{
+    return nullptr;
+}
+
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<UnaryOperator> unary_operator;
