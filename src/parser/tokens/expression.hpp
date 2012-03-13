@@ -34,12 +34,17 @@
 
 #include <parser/tokens/token.hpp>
 
-namespace JoeLang
-{
-
 //------------------------------------------------------------------------------
 // Forward Declarations
 //------------------------------------------------------------------------------
+
+namespace llvm
+{
+class Value;
+}
+
+namespace JoeLang
+{
 
 namespace Lexer
 {
@@ -65,6 +70,9 @@ class Expression : public JoeLang::Parser::Token
 {
 public:
     virtual ~Expression();
+
+    virtual
+    llvm::Value* CodeGen();
 
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
@@ -150,6 +158,9 @@ public:
     virtual ~BinaryOperatorExpression();
 
     virtual void Print( int depth ) const;
+
+    virtual
+    llvm::Value* CodeGen();
 
     template< typename ExpressionType, typename SubExpressionType >
     static bool ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
@@ -601,6 +612,9 @@ public:
 
     virtual void Print( int depth ) const;
 
+    virtual
+    llvm::Value* CodeGen();
+
     static bool Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token );
 
 protected:
@@ -621,6 +635,9 @@ public:
 
     virtual void Print( int depth ) const;
 
+    virtual
+    llvm::Value* CodeGen();
+
     static bool Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token );
 
 protected:
@@ -640,6 +657,9 @@ public:
     virtual ~BooleanLiteralExpression();
 
     virtual void Print( int depth ) const;
+
+    virtual
+    llvm::Value* CodeGen();
 
     static bool Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token );
 

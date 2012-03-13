@@ -34,6 +34,12 @@
 #include <string>
 #include <utility>
 
+#include <llvm/DerivedTypes.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Support/IRBuilder.h>
+
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/token.hpp>
@@ -53,6 +59,11 @@ Expression::Expression()
 
 Expression::~Expression()
 {
+}
+
+llvm::Value* Expression::CodeGen()
+{
+    return nullptr;
 }
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -254,6 +265,12 @@ void BinaryOperatorExpression::Print( int depth ) const
     std::cout << GetTerminalString( m_operatorTerminal ) << std::endl;
     m_leftSide->Print( depth + 1 );
     m_rightSide->Print( depth + 1 );
+}
+
+llvm::Value* BinaryOperatorExpression::CodeGen()
+{
+    //TODO
+    return nullptr;
 }
 
 template< typename ExpressionType, typename SubExpressionType >
@@ -1075,6 +1092,14 @@ void IntegralLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
+llvm::Value* IntegralLiteralExpression::CodeGen()
+{
+    //TODO different sizes of int?
+    return llvm::ConstantInt::get( llvm::getGlobalContext(), llvm::APInt( 32,
+                                                                          m_value,
+                                                                          true ) );
+}
+
 bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token )
 {
     std::string string;
@@ -1129,6 +1154,12 @@ void FloatingLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
+llvm::Value* FloatingLiteralExpression::CodeGen()
+{
+    return llvm::ConstantFP::get( llvm::getGlobalContext(),
+                                  llvm::APFloat(m_value) );
+}
+
 bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token )
 {
     std::string string;
@@ -1162,6 +1193,14 @@ void BooleanLiteralExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << m_value << "\n";
+}
+
+llvm::Value* BooleanLiteralExpression::CodeGen()
+{
+    if( m_value )
+        return llvm::ConstantInt::getTrue( llvm::getGlobalContext() );
+    else
+        return llvm::ConstantInt::getFalse( llvm::getGlobalContext() );
 }
 
 bool BooleanLiteralExpression::Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token )
