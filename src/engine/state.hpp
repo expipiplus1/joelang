@@ -52,6 +52,7 @@ public:
 private:
     std::string m_name;
     std::map< std::string, int > m_enumerations;
+
     std::function<void(int)> m_setCallback;
     std::function<void()> m_resetCallback;
     std::function<bool()> m_validateCallback;
