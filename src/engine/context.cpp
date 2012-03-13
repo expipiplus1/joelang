@@ -37,7 +37,6 @@
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
 #include <parser/effect_factory.hpp>
-#include <parser/parser.hpp>
 
 namespace JoeLang
 {
@@ -57,21 +56,17 @@ bool Context::AddState( State state )
     return true;
 }
 
-bool Context::CreateEffectFromString( const std::string& string, Effect*& effect )
+Effect* Context::CreateEffectFromString( const std::string& string )
 {
-    Parser::Parser parser( *this );
-    if( parser.Parse( string ) )
+    JoeLang::Parser::EffectFactory ef( *this );
+    std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
+    if( e )
     {
-        parser.Print();
-        JoeLang::Parser::EffectFactory ef;
-        effect = new Effect( ef.CreateEffect( parser.GetTranslationUnit() ) );
-        m_effects.push_back( std::unique_ptr<Effect>(effect)  );
-        return true;
+        Effect* ep = e.release();
+        m_effects.emplace_back( ep );
+        return ep;
     }
-    else
-    {
-        return false;
-    }
+    return nullptr;
 }
 
 const State* Context::GetNamedState(const std::string& name) const

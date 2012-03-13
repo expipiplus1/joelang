@@ -46,7 +46,7 @@ public:
 
     bool AddState( State state );
 
-    bool CreateEffectFromString( const std::string& string, Effect*& effect );
+    Effect* CreateEffectFromString( const std::string& string );
 
     const State* GetNamedState( const std::string& name ) const;
 private:

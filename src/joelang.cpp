@@ -42,9 +42,10 @@ int main( int argc, char** argv )
 
     context.AddState( my_state );
 
-    JoeLang::Effect* e;
+    JoeLang::Effect* e = context.CreateEffectFromString(
+                             "technique t{ pass p{ my_state=1; } }" );
 
-    if( context.CreateEffectFromString( "technique t{ pass p{ my_state=1; } }", e ) )
+    if( e )
     {
         const JoeLang::Technique* t = e->GetNamedTechnique( "t" );
         for( const auto& pass : t->GetPasses() )

@@ -30,7 +30,9 @@
 
 #include <iostream>
 
+#include <engine/context.hpp>
 #include <engine/effect.hpp>
+#include <parser/parser.hpp>
 #include <parser/tokens/declaration.hpp>
 #include <parser/tokens/definition.hpp>
 #include <parser/tokens/translation_unit.hpp>
@@ -40,12 +42,20 @@ namespace JoeLang
 namespace Parser
 {
 
-Effect EffectFactory::CreateEffect( const std::unique_ptr<TranslationUnit>& t )
+EffectFactory::EffectFactory( const Context& context )
+    :m_context( context )
 {
-    for( const auto& declaration : t->GetDeclarations() )
-        declaration->Accept( *this );
+}
 
-    return Effect( std::move( m_techniques ) );
+std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string& string )
+{
+    Parser parser( m_context );
+    if( !parser.Parse( string ) )
+        return nullptr;
+
+    for( const auto& declaration : parser.GetTranslationUnit()->GetDeclarations() )
+        declaration->Accept( *this );
+    return std::unique_ptr<Effect>( new Effect( std::move( m_techniques ) ) );
 }
 
 void EffectFactory::Visit( DeclarationBase& d )
