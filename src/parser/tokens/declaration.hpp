@@ -93,6 +93,8 @@ public:
 
     virtual void Print( int depth ) const;
 
+    const std::string& GetName() const;
+
     const std::shared_ptr<PassDefinition>& GetDefinition() const;
 
     static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );

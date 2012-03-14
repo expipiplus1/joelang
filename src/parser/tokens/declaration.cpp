@@ -118,6 +118,11 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
+const std::string& PassDeclaration::GetName() const
+{
+    return m_name;
+}
+
 const std::shared_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
     return m_definition;
