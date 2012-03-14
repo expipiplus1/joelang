@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <string>
 #include <memory>
 #include <vector>
 
@@ -59,10 +60,14 @@ public:
                        std::vector<Technique>& techniques,
                        llvm::Module*& llvm_module );
 
+    void Error( const std::string& message );
+
     void Visit( DeclarationBase& p );
     void Visit( TechniqueDeclaration& t );
 
 private:
+    bool m_good = true;
+
     std::vector<Technique>& m_techniques;
     llvm::Module* m_module;
 };

@@ -28,7 +28,9 @@
 
 #include "code_generator.hpp"
 
+#include <iostream>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -60,7 +62,14 @@ bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
 
     //techniques = std::move(m_techniques);
     llvm_module = nullptr;
-    return true;
+
+    return m_good;
+}
+
+void CodeGenerator::Error( const std::string& message )
+{
+    m_good = false;
+    std::cout << "Code Generation Error: " << message << std::endl;
 }
 
 void CodeGenerator::Visit( DeclarationBase& d )
