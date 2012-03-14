@@ -28,6 +28,7 @@
 
 #include "code_generator.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -37,6 +38,7 @@
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 
+#include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <parser/tokens/translation_unit.hpp>
 #include <parser/tokens/declaration.hpp>
@@ -78,10 +80,17 @@ void CodeGenerator::Visit( DeclarationBase& d )
 
 void CodeGenerator::Visit( TechniqueDeclaration& t )
 {
-    //TODO Assert on GetDefinition?
+    //TODO Techniques shouldn't be declared without a definition
     const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
-    if( definition )
-        m_techniques.push_back( definition->GetTechnique( *this ) );
+    assert( definition && "TODO get rid of this" );
+    m_techniques.push_back( definition->GetTechnique( *this ) );
+}
+
+StateAssignment CodeGenerator::GenerateStateAssignment(
+        const State& state,
+        const std::unique_ptr<Expression>& expression ) const
+{
+    return StateAssignment( state );
 }
 
 } // namespace Parser

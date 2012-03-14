@@ -40,12 +40,15 @@ namespace llvm
 namespace JoeLang
 {
 
+class State;
+class StateAssignment;
 class Technique;
 
 namespace Parser
 {
 
 class DeclarationBase;
+class Expression;
 class TechniqueDeclaration;
 class TranslationUnit;
 
@@ -64,6 +67,9 @@ public:
 
     void Visit( DeclarationBase& p );
     void Visit( TechniqueDeclaration& t );
+
+    StateAssignment GenerateStateAssignment( const State& state,
+                                             const std::unique_ptr<Expression>& expression ) const;
 
 private:
     bool m_good = true;
