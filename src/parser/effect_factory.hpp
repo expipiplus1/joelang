@@ -31,8 +31,6 @@
 #include <memory>
 #include <vector>
 
-#include <engine/technique.hpp>
-
 namespace JoeLang
 {
 
@@ -41,10 +39,6 @@ class Effect;
 
 namespace Parser
 {
-
-class DeclarationBase;
-class TechniqueDeclaration;
-class TranslationUnit;
 
 class EffectFactory
 {
@@ -55,13 +49,8 @@ public:
 
     std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
 
-    void Visit( DeclarationBase& p );
-    void Visit( TechniqueDeclaration& t );
-
 private:
     const Context& m_context;
-
-    std::vector<Technique> m_techniques;
 };
 
 } // namespace Parser

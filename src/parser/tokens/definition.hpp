@@ -42,6 +42,7 @@ namespace JoeLang
 namespace Parser
 {
 
+class CodeGenerator;
 class Parser;
 class PassDeclaration;
 class StateAssignmentStatement;
@@ -82,7 +83,7 @@ class TechniqueDefinition : public JoeLang::Parser::Token
 public:
     virtual ~TechniqueDefinition();
 
-    Technique GetTechnique() const;
+    Technique GetTechnique( CodeGenerator& code_generator ) const;
 
     void SetName( std::string name );
 

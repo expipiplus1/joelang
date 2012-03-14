@@ -115,7 +115,7 @@ void TechniqueDefinition::SetName( std::string name )
     m_name = std::move( name );
 }
 
-Technique TechniqueDefinition::GetTechnique() const
+Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
 {
     //TODO
     std::vector<Pass> passes;

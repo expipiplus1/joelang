@@ -28,8 +28,14 @@
 
 #include "code_generator.hpp"
 
+#include <memory>
+#include <vector>
+
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
+
+#include <parser/tokens/declaration.hpp>
+#include <parser/tokens/definition.hpp>
 
 namespace JoeLang
 {
@@ -39,6 +45,25 @@ namespace Parser
 CodeGenerator::CodeGenerator()
 {
     m_module = new llvm::Module( "main", llvm::getGlobalContext() );
+}
+
+bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
+                                  std::vector<Technique>& techniques,
+                                  llvm::Module*& llvm_module )
+{
+    return false;
+}
+
+void CodeGenerator::Visit( DeclarationBase& d )
+{
+}
+
+void CodeGenerator::Visit( TechniqueDeclaration& t )
+{
+    //TODO Assert on GetDefinition?
+    //const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
+    //if( definition )
+        //m_techniques.push_back( definition->GetTechnique( *this ) );
 }
 
 } // namespace Parser

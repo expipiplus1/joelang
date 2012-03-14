@@ -28,6 +28,9 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 namespace llvm
 {
     class Module;
@@ -35,14 +38,28 @@ namespace llvm
 
 namespace JoeLang
 {
+
+class Technique;
+
 namespace Parser
 {
+
+class DeclarationBase;
+class TechniqueDeclaration;
+class TranslationUnit;
 
 class CodeGenerator
 {
 public:
     CodeGenerator();
     ~CodeGenerator() = default;
+
+    bool GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
+                       std::vector<Technique>& techniques,
+                       llvm::Module*& llvm_module );
+
+    void Visit( DeclarationBase& p );
+    void Visit( TechniqueDeclaration& t );
 
 private:
     llvm::Module* m_module;
