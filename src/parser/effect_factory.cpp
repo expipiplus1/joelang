@@ -28,8 +28,6 @@
 
 #include "effect_factory.hpp"
 
-#include <iostream>
-
 #include <engine/context.hpp>
 #include <engine/effect.hpp>
 #include <parser/parser.hpp>
@@ -60,7 +58,6 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
 
 void EffectFactory::Visit( DeclarationBase& d )
 {
-    std::cout << "DeclarationBase\n";
 }
 
 void EffectFactory::Visit( TechniqueDeclaration& t )
@@ -69,7 +66,6 @@ void EffectFactory::Visit( TechniqueDeclaration& t )
     const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
     if( definition )
         m_techniques.push_back( definition->GetTechnique() );
-    std::cout << "technique\n";
 }
 
 } // namespace Parser
