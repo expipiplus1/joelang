@@ -37,6 +37,7 @@
 #include <engine/pass.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/declaration.hpp>
@@ -122,8 +123,12 @@ Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) con
     for( const auto& pass : m_passes )
     {
         const std::shared_ptr<PassDefinition>& definition = pass->GetDefinition();
-        // assert on null?
-        if( definition )
+        if( !definition )
+            code_generator.Error( "Undefined Pass " +
+                                  pass->GetName() +
+                                  " in Technique " +
+                                  m_name );
+        else
             passes.push_back( definition->GetPass() );
     }
     return Technique( m_name, std::move( passes ) );

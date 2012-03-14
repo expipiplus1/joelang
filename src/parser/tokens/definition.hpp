@@ -83,6 +83,7 @@ class TechniqueDefinition : public JoeLang::Parser::Token
 public:
     virtual ~TechniqueDefinition();
 
+    //TODO return a pointer
     Technique GetTechnique( CodeGenerator& code_generator ) const;
 
     void SetName( std::string name );
