@@ -35,6 +35,7 @@
 
 #include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/expression.hpp>
@@ -54,10 +55,10 @@ StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-StateAssignment StateAssignmentStatement::GetStateAssignment() const
+StateAssignment StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
 {
     //TODO
-    return StateAssignment( m_state );
+    return code_generator.GenerateStateAssignment( m_state, m_expression );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

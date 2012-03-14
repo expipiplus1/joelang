@@ -57,7 +57,7 @@ public:
     virtual
     ~PassDefinition();
 
-    Pass GetPass() const;
+    Pass GetPass( CodeGenerator& code_generator ) const;
 
     void SetName( std::string name );
 

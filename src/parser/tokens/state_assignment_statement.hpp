@@ -41,6 +41,7 @@ class State;
 namespace Parser
 {
 
+class CodeGenerator;
 class Expression;
 class Parser;
 
@@ -49,7 +50,7 @@ class StateAssignmentStatement : public JoeLang::Parser::Token
 public:
     virtual ~StateAssignmentStatement();
 
-    StateAssignment GetStateAssignment() const;
+    StateAssignment GetStateAssignment( CodeGenerator& code_generator ) const;
 
     virtual void Print( int depth ) const;
 

@@ -62,12 +62,13 @@ PassDefinition::~PassDefinition()
 {
 }
 
-Pass PassDefinition::GetPass() const
+Pass PassDefinition::GetPass( CodeGenerator& code_generator ) const
 {
     //TODO
     std::vector<StateAssignment> state_assignments;
     for( const auto& state_assignment : m_stateAssignments )
-        state_assignments.push_back( state_assignment->GetStateAssignment() );
+        state_assignments.push_back(
+                    state_assignment->GetStateAssignment( code_generator ) );
     return Pass( m_name, std::move( state_assignments ) );
 }
 
@@ -129,7 +130,7 @@ Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) con
                                   " in Technique " +
                                   m_name );
         else
-            passes.push_back( definition->GetPass() );
+            passes.push_back( definition->GetPass( code_generator ) );
     }
     return Technique( m_name, std::move( passes ) );
 }
