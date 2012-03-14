@@ -51,7 +51,8 @@ class TranslationUnit;
 class CodeGenerator
 {
 public:
-    CodeGenerator();
+    // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52591
+    explicit CodeGenerator( std::vector<Technique>& techniques );
     ~CodeGenerator() = default;
 
     bool GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
@@ -62,6 +63,7 @@ public:
     void Visit( TechniqueDeclaration& t );
 
 private:
+    std::vector<Technique>& m_techniques;
     llvm::Module* m_module;
 };
 

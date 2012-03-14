@@ -57,15 +57,11 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     std::vector<Technique> techniques;
     llvm::Module* llvm_module;
 
-    CodeGenerator code_generator;
+    CodeGenerator code_generator( techniques );
     if( !code_generator.GenerateCode( ast, techniques, llvm_module ) )
         return nullptr;
 
     return std::unique_ptr<Effect>( new Effect( std::move(techniques), llvm_module ) );
-
-    //for( const auto& declaration : parser.GetTranslationUnit()->GetDeclarations() )
-        //declaration->Accept( *this );
-    //return std::unique_ptr<Effect>( new Effect( std::move( m_techniques ) ) );
 }
 
 } // namespace Parser

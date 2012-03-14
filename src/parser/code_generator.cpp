@@ -29,11 +29,14 @@
 #include "code_generator.hpp"
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 
+#include <engine/technique.hpp>
+#include <parser/tokens/translation_unit.hpp>
 #include <parser/tokens/declaration.hpp>
 #include <parser/tokens/definition.hpp>
 
@@ -42,7 +45,8 @@ namespace JoeLang
 namespace Parser
 {
 
-CodeGenerator::CodeGenerator()
+CodeGenerator::CodeGenerator( std::vector<Technique>& techniques )
+    :m_techniques( techniques )
 {
     m_module = new llvm::Module( "main", llvm::getGlobalContext() );
 }
@@ -51,7 +55,12 @@ bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
                                   std::vector<Technique>& techniques,
                                   llvm::Module*& llvm_module )
 {
-    return false;
+    for( const auto& declaration : ast->GetDeclarations() )
+        declaration->Accept( *this );
+
+    //techniques = std::move(m_techniques);
+    llvm_module = nullptr;
+    return true;
 }
 
 void CodeGenerator::Visit( DeclarationBase& d )
@@ -61,9 +70,9 @@ void CodeGenerator::Visit( DeclarationBase& d )
 void CodeGenerator::Visit( TechniqueDeclaration& t )
 {
     //TODO Assert on GetDefinition?
-    //const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
-    //if( definition )
-        //m_techniques.push_back( definition->GetTechnique( *this ) );
+    const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
+    if( definition )
+        m_techniques.push_back( definition->GetTechnique( *this ) );
 }
 
 } // namespace Parser
