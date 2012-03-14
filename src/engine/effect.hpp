@@ -33,6 +33,11 @@
 
 #include <engine/technique.hpp>
 
+namespace llvm
+{
+    class Module;
+};
+
 namespace JoeLang
 {
 
@@ -41,13 +46,14 @@ class Effect
 public:
     Effect() = default;
     ~Effect() = default;
-    explicit Effect( std::vector<Technique> techniques );
+    explicit Effect( std::vector<Technique> techniques, llvm::Module* llvm_module );
 
     const std::vector<Technique>& GetTechniques() const;
     const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
     std::vector<Technique> m_techniques;
+    llvm::Module* m_llvmModule;
 
     //some kind of structure for various other things in the effect file
     //some kind of structure containing llvm code for the functions

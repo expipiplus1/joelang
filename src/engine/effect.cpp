@@ -37,8 +37,9 @@
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques )
+Effect::Effect( std::vector<Technique> techniques, llvm::Module* llvm_module )
     :m_techniques( std::move( techniques ) )
+    ,m_llvmModule( llvm_module )
 {
 }
 
