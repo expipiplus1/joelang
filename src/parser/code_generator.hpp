@@ -101,6 +101,11 @@ public:
     llvm::Value* CreateDiv(  const Expression& l, const Expression& r );
     llvm::Value* CreateMod(  const Expression& l, const Expression& r );
 
+    //Ternary Operators
+    llvm::Value* CreateSelect( const Expression& condition,
+                               const Expression& true_expression,
+                               const Expression& false_expression );
+
     llvm::LLVMContext& GetLLVMContext() const;
 
 private:

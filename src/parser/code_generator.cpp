@@ -278,6 +278,19 @@ llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r 
 }
 
 //
+// Ternary Operators
+//
+
+llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
+                                          const Expression& true_expression,
+                                          const Expression& false_expression )
+{
+    return m_llvmBuilder.CreateSelect( condition.CodeGen( *this ),
+                                       true_expression.CodeGen( *this ),
+                                       false_expression.CodeGen( *this ) );
+}
+
+//
 // Getters
 //
 
