@@ -61,7 +61,7 @@ Expression::~Expression()
 {
 }
 
-llvm::Value* Expression::CodeGen() const
+llvm::Value* Expression::CodeGen( CodeGenerator& code_generator ) const
 {
     return nullptr;
 }
@@ -267,7 +267,7 @@ void BinaryOperatorExpression::Print( int depth ) const
     m_rightSide->Print( depth + 1 );
 }
 
-llvm::Value* BinaryOperatorExpression::CodeGen() const
+llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     //TODO
     return nullptr;
@@ -650,12 +650,12 @@ void UnaryExpression::Print( int depth ) const
     m_expression->Print( depth + 1 );
 }
 
-llvm::Value* UnaryExpression::CodeGen() const
+llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     switch( m_unaryOperator->GetTerminalType() )
     {
         case Lexer::PLUS:
-            return m_expression->CodeGen();
+            return m_expression->CodeGen( code_generator );
         default:
             return nullptr;
     }
@@ -1097,7 +1097,7 @@ void IntegralLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* IntegralLiteralExpression::CodeGen() const
+llvm::Value* IntegralLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     //TODO different sizes of int?
     return llvm::ConstantInt::get( llvm::Type::getInt64Ty( llvm::getGlobalContext() ), m_value );
@@ -1157,7 +1157,7 @@ void FloatingLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* FloatingLiteralExpression::CodeGen() const
+llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     return llvm::ConstantFP::get( llvm::getGlobalContext(),
                                   llvm::APFloat(m_value) );
@@ -1198,7 +1198,7 @@ void BooleanLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* BooleanLiteralExpression::CodeGen() const
+llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     if( m_value )
         return llvm::ConstantInt::getTrue( llvm::getGlobalContext() );

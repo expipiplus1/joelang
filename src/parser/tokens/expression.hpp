@@ -54,6 +54,7 @@ enum TerminalType : int;
 namespace Parser
 {
 
+class CodeGenerator;
 class Parser;
 
 class AssignmentOperator;
@@ -72,7 +73,7 @@ public:
     virtual ~Expression();
 
     virtual
-    llvm::Value* CodeGen() const;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
@@ -160,7 +161,7 @@ public:
     virtual void Print( int depth ) const;
 
     virtual
-    llvm::Value* CodeGen() const override;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
 
     template< typename ExpressionType, typename SubExpressionType >
     static bool ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
@@ -401,7 +402,7 @@ public:
     virtual void Print( int depth ) const;
 
     virtual
-    llvm::Value* CodeGen() const override;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
 
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
@@ -615,7 +616,7 @@ public:
     virtual void Print( int depth ) const;
 
     virtual
-    llvm::Value* CodeGen() const override;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
 
     static bool Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token );
 
@@ -638,7 +639,7 @@ public:
     virtual void Print( int depth ) const;
 
     virtual
-    llvm::Value* CodeGen() const override;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
 
     static bool Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token );
 
@@ -661,7 +662,7 @@ public:
     virtual void Print( int depth ) const;
 
     virtual
-    llvm::Value* CodeGen() const override;
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
 
     static bool Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token );
 

@@ -129,7 +129,7 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
                                                        function );
     m_llvmBuilder.SetInsertPoint( body );
 
-    llvm::Value* v = expression->CodeGen();
+    llvm::Value* v = expression->CodeGen( *this );
     assert( v && "Invalid expression llvm::Value*" );
 
     m_llvmBuilder.CreateRet( v );
