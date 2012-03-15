@@ -29,17 +29,24 @@
 #include "effect.hpp"
 
 #include <algorithm>
+#include <memory>
 #include <utility>
 #include <vector>
+
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 
 #include <engine/technique.hpp>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques, llvm::Module* llvm_module )
+Effect::Effect( std::vector<Technique> techniques, std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine )
     :m_techniques( std::move( techniques ) )
-    ,m_llvmModule( llvm_module )
+    ,m_llvmExecutionEngine( std::move( llvm_execution_engine ) )
+{
+}
+
+Effect::~Effect()
 {
 }
 
