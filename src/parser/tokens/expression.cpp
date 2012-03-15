@@ -35,11 +35,13 @@
 #include <utility>
 
 #include <llvm/DerivedTypes.h>
+#include <llvm/Instructions.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Support/IRBuilder.h>
 
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/token.hpp>
@@ -269,8 +271,11 @@ void BinaryOperatorExpression::Print( int depth ) const
 
 llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) const
 {
-    //TODO
-    return nullptr;
+    switch( m_operatorTerminal )
+    {
+        default:
+            return nullptr;
+    }
 }
 
 template< typename ExpressionType, typename SubExpressionType >
@@ -652,10 +657,17 @@ void UnaryExpression::Print( int depth ) const
 
 llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
 {
+    //TODO
     switch( m_unaryOperator->GetTerminalType() )
     {
         case Lexer::PLUS:
             return m_expression->CodeGen( code_generator );
+        case Lexer::MINUS:
+            return code_generator.CreateNeg( m_expression->CodeGen( code_generator ) );
+        case Lexer::BITWISE_NOT:
+            return code_generator.CreateNot( m_expression->CodeGen( code_generator ) );
+        case Lexer::LOGICAL_NOT:
+            return code_generator.CreateLNot( m_expression->CodeGen( code_generator ) );
         default:
             return nullptr;
     }

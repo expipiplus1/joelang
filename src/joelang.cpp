@@ -43,7 +43,7 @@ int main( int argc, char** argv )
     context.AddState( my_state );
 
     JoeLang::Effect* e = context.CreateEffectFromString(
-                             "technique t{ pass p{ my_state=+1; } }" );
+                             "technique t{ pass p{ my_state=-1; } }" );
 
     if( e )
     {
