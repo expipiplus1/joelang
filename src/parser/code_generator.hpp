@@ -74,32 +74,32 @@ public:
     void Visit( TechniqueDeclaration& t );
 
     StateAssignment GenerateStateAssignment( const State& state,
-                                             const std::unique_ptr<Expression>& expression ) ;
+                                             const Expression& expression ) ;
 
     //Unary Operators
-    llvm::Value* CreateNeg(  llvm::Value* v );
-    llvm::Value* CreateNot(  llvm::Value* v );
-    llvm::Value* CreateLogicalNot( llvm::Value* v );
+    llvm::Value* CreateNeg(  const Expression& e );
+    llvm::Value* CreateNot(  const Expression& e );
+    llvm::Value* CreateLNot( const Expression& e );
 
     //Binary Operators
-    llvm::Value* CreateLOr( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateLAnd( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateOr( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateXor( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateAnd( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateEq( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateNeq( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateLT( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateGT( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateLTE( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateGTE( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateShl( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateShr( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateAdd( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateSub( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateMul( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateDiv( llvm::Value* l, llvm::Value* r );
-    llvm::Value* CreateMod( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateLOr(  const Expression& l, const Expression& r );
+    llvm::Value* CreateLAnd( const Expression& l, const Expression& r );
+    llvm::Value* CreateOr(   const Expression& l, const Expression& r );
+    llvm::Value* CreateXor(  const Expression& l, const Expression& r );
+    llvm::Value* CreateAnd(  const Expression& l, const Expression& r );
+    llvm::Value* CreateEq(   const Expression& l, const Expression& r );
+    llvm::Value* CreateNeq(  const Expression& l, const Expression& r );
+    llvm::Value* CreateLT(   const Expression& l, const Expression& r );
+    llvm::Value* CreateGT(   const Expression& l, const Expression& r );
+    llvm::Value* CreateLTE(  const Expression& l, const Expression& r );
+    llvm::Value* CreateGTE(  const Expression& l, const Expression& r );
+    llvm::Value* CreateShl(  const Expression& l, const Expression& r );
+    llvm::Value* CreateShr(  const Expression& l, const Expression& r );
+    llvm::Value* CreateAdd(  const Expression& l, const Expression& r );
+    llvm::Value* CreateSub(  const Expression& l, const Expression& r );
+    llvm::Value* CreateMul(  const Expression& l, const Expression& r );
+    llvm::Value* CreateDiv(  const Expression& l, const Expression& r );
+    llvm::Value* CreateMod(  const Expression& l, const Expression& r );
 
     llvm::LLVMContext& GetLLVMContext() const;
 

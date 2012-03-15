@@ -718,11 +718,11 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
         case Lexer::PLUS:
             return m_expression->CodeGen( code_generator );
         case Lexer::MINUS:
-            return code_generator.CreateNeg( m_expression->CodeGen( code_generator ) );
+            return code_generator.CreateNeg( *m_expression );
         case Lexer::BITWISE_NOT:
-            return code_generator.CreateNot( m_expression->CodeGen( code_generator ) );
+            return code_generator.CreateNot( *m_expression );
         case Lexer::LOGICAL_NOT:
-            return code_generator.CreateLogicalNot( m_expression->CodeGen( code_generator ) );
+            return code_generator.CreateLNot( *m_expression );
         default:
             return nullptr;
     }

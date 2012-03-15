@@ -58,7 +58,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 StateAssignment StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
 {
     //TODO
-    return code_generator.GenerateStateAssignment( m_state, m_expression );
+    return code_generator.GenerateStateAssignment( m_state, *m_expression );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

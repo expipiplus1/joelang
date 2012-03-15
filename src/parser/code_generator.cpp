@@ -107,7 +107,7 @@ void CodeGenerator::Visit( TechniqueDeclaration& t )
 
 StateAssignment CodeGenerator::GenerateStateAssignment(
         const State& state,
-        const std::unique_ptr<Expression>& expression )
+        const Expression& expression )
 {
     std::vector<llvm::Type*> no_arguments;
 
@@ -129,7 +129,7 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
                                                        function );
     m_llvmBuilder.SetInsertPoint( body );
 
-    llvm::Value* v = expression->CodeGen( *this );
+    llvm::Value* v = expression.CodeGen( *this );
     assert( v && "Invalid expression llvm::Value*" );
 
     m_llvmBuilder.CreateRet( v );
@@ -148,20 +148,20 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
 // Unary Operators
 //
 
-llvm::Value* CodeGenerator::CreateNeg( llvm::Value* v )
+llvm::Value* CodeGenerator::CreateNeg( const Expression& e )
 {
-    return m_llvmBuilder.CreateNeg( v );
+    return m_llvmBuilder.CreateNeg( e.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateNot( llvm::Value* v )
+llvm::Value* CodeGenerator::CreateNot( const Expression& e )
 {
-    return m_llvmBuilder.CreateNot( v );
+    return m_llvmBuilder.CreateNot( e.CodeGen( *this ) );
 }
 
 //TODO type check
-llvm::Value* CodeGenerator::CreateLogicalNot( llvm::Value* v )
+llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 {
-    return m_llvmBuilder.CreateIsNotNull( v );
+    return m_llvmBuilder.CreateIsNotNull( e.CodeGen( *this ) );
 }
 
 //
