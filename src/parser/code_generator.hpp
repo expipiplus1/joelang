@@ -76,6 +76,12 @@ public:
     StateAssignment GenerateStateAssignment( const State& state,
                                              const std::unique_ptr<Expression>& expression ) ;
 
+    llvm::Value* CreateNeg(  llvm::Value* v );
+    llvm::Value* CreateNot(  llvm::Value* v );
+    llvm::Value* CreateLNot( llvm::Value* v );
+
+    llvm::LLVMContext& GetLLVMContext() const;
+
 private:
     const Context& m_context;
 

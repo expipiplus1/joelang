@@ -134,12 +134,35 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
 
     m_llvmBuilder.CreateRet( v );
 
+    function->dump();
+
     //TODO handle this a bit better than aborting
     llvm::verifyFunction( *function, llvm::AbortProcessAction );
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
     return StateAssignment( state, (long long(*)())function_ptr );
+}
+
+llvm::Value* CodeGenerator::CreateNeg( llvm::Value* v )
+{
+    return m_llvmBuilder.CreateNeg( v );
+}
+
+llvm::Value* CodeGenerator::CreateNot( llvm::Value* v )
+{
+    return m_llvmBuilder.CreateNot( v );
+}
+
+//TODO type check
+llvm::Value* CodeGenerator::CreateLNot( llvm::Value* v )
+{
+    return m_llvmBuilder.CreateIsNotNull( v );
+}
+
+llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
+{
+    return m_llvmContext;
 }
 
 } // namespace Parser
