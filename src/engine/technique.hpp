@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 #include <engine/pass.hpp>
 
@@ -41,6 +42,8 @@ class Technique
 public:
     Technique() = default;
     ~Technique() = default;
+    Technique( const Technique& ) = delete;
+    Technique( Technique&& ) = default;
     Technique( std::string name, std::vector<Pass> passes );
 
     const std::vector<Pass>& GetPasses() const;

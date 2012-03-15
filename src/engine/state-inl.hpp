@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -26,35 +26,75 @@
     or implied, of Joe Hermaszewski.
 */
 
+#pragma once
+
 #include "state.hpp"
 
+#include <functional>
+#include <map>
 #include <string>
 #include <utility>
+
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
 
-void DefaultStateResetCallback()
+template<typename T>
+void DefaultStateSetCallback( T value )
 {
 }
 
-bool DefaultStateValidateCallback()
+template<typename T>
+State<T>::State( std::string name, std::map< std::string, T > enumerations )
+    :StateBase( std::move(name) )
+    ,m_enumerations( std::move(enumerations) )
+    ,m_setCallback( DefaultStateSetCallback<T> )
+    ,m_resetCallback( DefaultStateResetCallback )
+    ,m_validateCallback( DefaultStateValidateCallback )
 {
-    return true;
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a state with an unhandled type" );
+    //TODO check enumerations
 }
 
-StateBase::StateBase( std::string name )
-    :m_name( std::move(name) )
+template<typename T>
+State<T>::~State()
 {
 }
 
-StateBase::~StateBase()
+template<typename T>
+void State<T>::SetCallbacks( std::function<void(T)> set_callback,
+                             std::function<void()> reset_callback,
+                             std::function<bool()> validate_callback )
 {
+    m_setCallback   = set_callback ? set_callback : DefaultStateSetCallback<T>;
+    m_resetCallback = reset_callback ? reset_callback : DefaultStateResetCallback;
+    m_validateCallback   = validate_callback ? validate_callback : DefaultStateValidateCallback;
 }
 
-const std::string& StateBase::GetName() const
+template<typename T>
+void State<T>::SetState( T value ) const
 {
-    return m_name;
+    m_setCallback( value );
+}
+
+template<typename T>
+void State<T>::ResetState() const
+{
+    m_resetCallback();
+}
+
+template<typename T>
+bool State<T>::ValidateState() const
+{
+    return m_validateCallback();
+}
+
+template<typename T>
+Type State<T>::GetType() const
+{
+    return JoeLangType<T>::value;
 }
 
 } // namespace JoeLang

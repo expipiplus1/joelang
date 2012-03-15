@@ -33,20 +33,37 @@
 namespace JoeLang
 {
 
+template<typename T>
 class State;
 
-class StateAssignment
+class StateAssignmentBase
+{
+public:
+    StateAssignmentBase();
+    virtual
+    ~StateAssignmentBase();
+
+    virtual
+    void SetState() const = 0;
+};
+
+template<typename T>
+class StateAssignment : public StateAssignmentBase
 {
 public:
     StateAssignment() = delete;
-    StateAssignment( const State& state, std::function<long long()> getter );
-    ~StateAssignment() = default;
+    StateAssignment( const State<T>& state, std::function<T()> getter );
+    virtual
+    ~StateAssignment();
 
-    void SetState() const;
+    virtual
+    void SetState() const override;
 
 private:
-    const State& m_state;
-    std::function<long long()> m_getter;
+    const State<T>& m_state;
+    std::function<T()> m_getter;
 };
 
 } // namespace JoeLang
+
+#include "state_assignment-inl.hpp"

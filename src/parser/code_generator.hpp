@@ -45,8 +45,8 @@ namespace JoeLang
 {
 
 class Context;
-class State;
-class StateAssignment;
+class StateBase;
+class StateAssignmentBase;
 class Technique;
 
 namespace Parser
@@ -73,8 +73,8 @@ public:
     void Visit( DeclarationBase& p );
     void Visit( TechniqueDeclaration& t );
 
-    StateAssignment GenerateStateAssignment( const State& state,
-                                             const Expression& expression ) ;
+    std::unique_ptr<StateAssignmentBase> GenerateStateAssignment( const StateBase& state,
+                                                                  const Expression& expression ) ;
 
     //Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );

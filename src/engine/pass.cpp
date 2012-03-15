@@ -28,6 +28,7 @@
 
 #include "pass.hpp"
 
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -37,7 +38,16 @@
 namespace JoeLang
 {
 
-Pass::Pass( std::string name, std::vector<StateAssignment> state_assignments )
+Pass::Pass()
+{
+}
+
+Pass::~Pass()
+{
+}
+
+Pass::Pass( std::string name,
+            std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
     :m_name( std::move(name) )
     ,m_stateAssignments( std::move( state_assignments ) )
 {
@@ -46,7 +56,7 @@ Pass::Pass( std::string name, std::vector<StateAssignment> state_assignments )
 void Pass::SetState() const
 {
     for( const auto& sa : m_stateAssignments )
-        sa.SetState();
+        sa->SetState();
 }
 
 const std::string& Pass::GetName() const

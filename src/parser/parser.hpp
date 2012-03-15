@@ -42,7 +42,7 @@ namespace JoeLang
 //------------------------------------------------------------------------------
 
 class Context;
-class State;
+class StateBase;
 
 namespace Lexer
 {
@@ -75,7 +75,7 @@ public:
     bool ExpectTerminal( Lexer::TerminalType terminal_type );
     bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
-    const State* GetNamedState( const std::string& name ) const;
+    const StateBase* GetNamedState( const std::string& name ) const;
 
     std::size_t GetLexerPosition() const;
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;

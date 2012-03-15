@@ -46,6 +46,7 @@
 #include <llvm/Support/IRBuilder.h>
 
 #include <engine/context.hpp>
+#include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <parser/tokens/expression.hpp>
@@ -67,6 +68,14 @@ CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& te
     ,m_llvmExecutionEngine( llvm::ExecutionEngine::createJIT( m_llvmModule ) )
 {
     assert( m_llvmExecutionEngine );
+
+    volatile TypeOfJoeLangType<Type::BOOL>::type b;
+    volatile TypeOfJoeLangType<Type::U32>::type t;
+    volatile TypeOfJoeLangType<Type::DOUBLE>::type e;
+    volatile TypeOfJoeLangType<Type::I8>::type w;
+
+    b = true;
+    assert(true);
 }
 
 CodeGenerator::~CodeGenerator()
@@ -101,11 +110,11 @@ void CodeGenerator::Visit( TechniqueDeclaration& t )
     //TODO Techniques shouldn't be declared without a definition
     const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
     assert( definition && "TODO get rid of this" );
-    m_techniques.push_back( definition->GetTechnique( *this ) );
+    m_techniques.push_back( std::move( definition->GetTechnique( *this ) ) );
 }
 
-StateAssignment CodeGenerator::GenerateStateAssignment(
-        const State& state,
+std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
+        const StateBase& state,
         const Expression& expression )
 {
     std::vector<llvm::Type*> no_arguments;
@@ -140,7 +149,11 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
-    return StateAssignment( state, (long long(*)())function_ptr );
+    //TODO
+    //assert(false && "fix casts here");
+    return std::unique_ptr<StateAssignmentBase>(
+        new StateAssignment<long long>( dynamic_cast<const State<long long>&>(state),
+                                        (long long(*)())function_ptr ) );
 }
 
 //

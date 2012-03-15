@@ -102,7 +102,7 @@ bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& str
     return false;
 }
 
-const State* Parser::GetNamedState( const std::string& name ) const
+const StateBase* Parser::GetNamedState( const std::string& name ) const
 {
     return m_context.GetNamedState( name );
 }

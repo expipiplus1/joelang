@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -26,17 +26,34 @@
     or implied, of Joe Hermaszewski.
 */
 
+#pragma once
+
 #include "state_assignment.hpp"
+
+#include <functional>
+
+#include <engine/state.hpp>
 
 namespace JoeLang
 {
 
-StateAssignmentBase::StateAssignmentBase()
+template<typename T>
+StateAssignment<T>::StateAssignment( const State<T>& state,
+                                     std::function<T()> getter )
+    :m_state(state)
+    ,m_getter(std::move(getter))
 {
 }
 
-StateAssignmentBase::~StateAssignmentBase()
+template<typename T>
+StateAssignment<T>::~StateAssignment()
 {
+}
+
+template<typename T>
+void StateAssignment<T>::SetState() const
+{
+    m_state.SetState( m_getter() );
 }
 
 } // namespace JoeLang

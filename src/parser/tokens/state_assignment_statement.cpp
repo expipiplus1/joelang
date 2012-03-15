@@ -45,7 +45,8 @@ namespace JoeLang
 namespace Parser
 {
 
-StateAssignmentStatement::StateAssignmentStatement( const State& state, std::unique_ptr< Expression > expression )
+StateAssignmentStatement::StateAssignmentStatement( const StateBase& state,
+                                                    std::unique_ptr< Expression > expression )
     :m_state( state )
     ,m_expression( std::move( expression ) )
 {
@@ -55,7 +56,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-StateAssignment StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
+std::unique_ptr<StateAssignmentBase> StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
 {
     //TODO
     return code_generator.GenerateStateAssignment( m_state, *m_expression );
@@ -76,7 +77,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         return false;
 
     //Check if the state name is a valid state name
-    const State* state = parser.GetNamedState( state_name );
+    const StateBase* state = parser.GetNamedState( state_name );
     if( !state )
     {
         parser.Error( "\'" + state_name + "\' is not a valid state name" );

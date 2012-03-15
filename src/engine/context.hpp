@@ -36,7 +36,7 @@ namespace JoeLang
 {
 
 class Effect;
-class State;
+class StateBase;
 
 class Context
 {
@@ -44,13 +44,13 @@ public:
     Context();
     ~Context();
 
-    bool AddState( State state );
+    bool AddState( StateBase* state );
 
     Effect* CreateEffectFromString( const std::string& string );
 
-    const State* GetNamedState( const std::string& name ) const;
+    const StateBase* GetNamedState( const std::string& name ) const;
 private:
-    std::vector<State> m_states;
+    std::vector<StateBase*> m_states;
     std::vector< std::unique_ptr<Effect> > m_effects;
 };
 

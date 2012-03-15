@@ -65,11 +65,11 @@ PassDefinition::~PassDefinition()
 Pass PassDefinition::GetPass( CodeGenerator& code_generator ) const
 {
     //TODO
-    std::vector<StateAssignment> state_assignments;
+    std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& state_assignment : m_stateAssignments )
         state_assignments.push_back(
                     state_assignment->GetStateAssignment( code_generator ) );
-    return Pass( m_name, std::move( state_assignments ) );
+    return std::move( Pass( m_name, std::move( state_assignments ) ) );
 }
 
 void PassDefinition::SetName(std::string name)
@@ -130,9 +130,9 @@ Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) con
                                   " in Technique " +
                                   m_name );
         else
-            passes.push_back( definition->GetPass( code_generator ) );
+            passes.emplace_back( std::move( definition->GetPass( code_generator ) ) );
     }
-    return Technique( m_name, std::move( passes ) );
+    return std::move( Technique( m_name, std::move( passes ) ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const

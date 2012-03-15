@@ -36,7 +36,7 @@
 namespace JoeLang
 {
 
-class State;
+class StateBase;
 
 namespace Parser
 {
@@ -50,17 +50,17 @@ class StateAssignmentStatement : public JoeLang::Parser::Token
 public:
     virtual ~StateAssignmentStatement();
 
-    StateAssignment GetStateAssignment( CodeGenerator& code_generator ) const;
+    std::unique_ptr<StateAssignmentBase> GetStateAssignment( CodeGenerator& code_generator ) const;
 
     virtual void Print( int depth ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
 
 protected:
-    StateAssignmentStatement( const State& state, std::unique_ptr<Expression> expression );
+    StateAssignmentStatement( const StateBase& state, std::unique_ptr<Expression> expression );
 
 private:
-    const State& m_state;
+    const StateBase& m_state;
     std::unique_ptr<Expression> m_expression;
 };
 

@@ -52,10 +52,10 @@ Context::~Context()
 {
 }
 
-bool Context::AddState( State state )
+bool Context::AddState( StateBase* state )
 {
     //TODO
-    m_states.push_back( std::move(state) );
+    m_states.push_back( state );
     return true;
 }
 
@@ -71,15 +71,15 @@ Effect* Context::CreateEffectFromString( const std::string& string )
     return nullptr;
 }
 
-const State* Context::GetNamedState(const std::string& name) const
+const StateBase* Context::GetNamedState(const std::string& name) const
 {
     auto s = std::find_if( m_states.begin(), m_states.end(),
-                           [&name](const State& p)
-                             {return name == p.GetName();} );
+                           [&name](StateBase* p)
+                             {return name == p->GetName();} );
     if( s == m_states.end() )
         return nullptr;
 
-    return &*s;
+    return *s;
 }
 
 } // namespace JoeLang
