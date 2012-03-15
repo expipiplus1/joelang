@@ -34,6 +34,8 @@
 #include <utility>
 #include <vector>
 
+#include <llvm/Support/TargetSelect.h>
+
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
 #include <parser/effect_factory.hpp>
@@ -43,6 +45,7 @@ namespace JoeLang
 
 Context::Context()
 {
+    llvm::InitializeNativeTarget();
 }
 
 Context::~Context()
@@ -62,9 +65,8 @@ Effect* Context::CreateEffectFromString( const std::string& string )
     std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
     if( e )
     {
-        Effect* ep = e.release();
-        m_effects.emplace_back( ep );
-        return ep;
+        m_effects.push_back( std::move(e) );
+        return m_effects.rbegin()->get();
     }
     return nullptr;
 }
