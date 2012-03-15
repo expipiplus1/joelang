@@ -563,10 +563,9 @@ public:
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    PrimaryExpression( std::string identifier );
+    PrimaryExpression( );
 
 private:
-    std::string m_identifier;
 };
 
 //------------------------------------------------------------------------------

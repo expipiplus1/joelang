@@ -975,8 +975,7 @@ bool IncrementalOperator::Parse( Parser& parser, std::unique_ptr<IncrementalOper
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
-PrimaryExpression::PrimaryExpression( std::string identifier )
-    :m_identifier( std::move( identifier ) )
+PrimaryExpression::PrimaryExpression()
 {
 }
 
@@ -986,9 +985,6 @@ PrimaryExpression::~PrimaryExpression()
 
 void PrimaryExpression::Print( int depth ) const
 {
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_identifier << "\n";
 }
 
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
