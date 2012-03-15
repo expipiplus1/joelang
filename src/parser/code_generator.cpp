@@ -166,27 +166,116 @@ llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 
 //
 // Binary Operators
+// Todo typing for all of these
 //
 
-/*
-llvm::Value* CodeGenerator::CreateLOr( llvm::Value* l, llvm::Value* r )
+llvm::Value* CodeGenerator::CreateLOr( const Expression& l, const Expression& r )
 {
     // TODO cast to bool
     return nullptr;
 }
 
-llvm::Value* CodeGenerator::CreateLAnd( llvm::Value* l, llvm::Value* r )
+llvm::Value* CodeGenerator::CreateLAnd( const Expression& l, const Expression& r )
 {
     // TODO cast to bool
     return nullptr;
 }
 
-llvm::Value* CodeGenerator::CreateOr( llvm::Value* l, llvm::Value* r )
+llvm::Value* CodeGenerator::CreateOr( const Expression& l, const Expression& r )
 {
-
-    return nullptr;
+    return m_llvmBuilder.CreateOr( l.CodeGen( *this ),
+                                   r.CodeGen( *this ) );
 }
-*/
+
+llvm::Value* CodeGenerator::CreateXor( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateXor( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateAnd( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateAnd( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateEq( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpEQ( l.CodeGen( *this ),
+                                       r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateNeq( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpNE( l.CodeGen( *this ),
+                                       r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateLT( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpSLT( l.CodeGen( *this ),
+                                        r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateGT( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpSGT( l.CodeGen( *this ),
+                                        r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateLTE( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpSLE( l.CodeGen( *this ),
+                                        r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateGTE( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateICmpSGE( l.CodeGen( *this ),
+                                        r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateShl( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateShl( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateShr( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateAShr( l.CodeGen( *this ),
+                                     r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateAdd( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateAdd( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateSub( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateSub( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateMul( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateMul( l.CodeGen( *this ),
+                                    r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateDiv( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateSDiv( l.CodeGen( *this ),
+                                     r.CodeGen( *this ) );
+}
+
+llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r )
+{
+    return m_llvmBuilder.CreateSRem( l.CodeGen( *this ),
+                                     r.CodeGen( *this ) );
+}
 
 //
 // Getters

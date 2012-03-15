@@ -273,61 +273,60 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) 
 {
     switch( m_operatorTerminal )
     {
-        /*case Lexer::LOGICAL_OR:
-            return code_generator.CreateLOr( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::LOGICAL_OR:
+            return code_generator.CreateLOr( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::LOGICAL_AND:
-            return code_generator.CreateLAnd( m_leftSide->CodeGen( code_generator ),
-                                              m_rightSide->CodeGen( code_generator ) );
-        case Lexer::INCLUSISVE_OR:
-            return code_generator.CreateOr( m_leftSide->CodeGen( code_generator ),
-                                            m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateLAnd( *m_leftSide,
+                                              *m_rightSide );
+        case Lexer::INCLUSIVE_OR:
+            return code_generator.CreateOr( *m_leftSide,
+                                            *m_rightSide );
         case Lexer::EXCLUSIVE_OR:
-            return code_generator.CreateXor( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateXor( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::AND:
-            return code_generator.CreateAnd( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateAnd( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::EQUALITY:
-            return code_generator.CreateEq( m_leftSide->CodeGen( code_generator ),
-                                            m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateEq( *m_leftSide,
+                                            *m_rightSide );
         case Lexer::NOT_EQUALITY:
-            return code_generator.CreateNeq( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateNeq( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::LESS_THAN:
-            return code_generator.CreateLT( m_leftSide->CodeGen( code_generator ),
-                                            m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateLT( *m_leftSide,
+                                            *m_rightSide );
         case Lexer::GREATER_THAN:
-            return code_generator.CreateGT( m_leftSide->CodeGen( code_generator ),
-                                            m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateGT( *m_leftSide,
+                                            *m_rightSide );
         case Lexer::LESS_THAN_EQUALS:
-            return code_generator.CreateLTE( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateLTE( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::GREATER_THAN_EQUALS:
-            return code_generator.CreateGTE( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateGTE( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::LEFT_SHIFT:
-            return code_generator.CreateShl( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateShl( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::RIGHT_SHIFT:
-            return code_generator.CreateShr( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateShr( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::PLUS:
-            return code_generator.CreateAdd( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateAdd( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::MINUS:
-            return code_generator.CreateSub( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateSub( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::MULTIPLY:
-            return code_generator.CreateMul( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateMul( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::DIVIDE:
-            return code_generator.CreateDiv( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
+            return code_generator.CreateDiv( *m_leftSide,
+                                             *m_rightSide );
         case Lexer::MODULO:
-            return code_generator.CreateMod( m_leftSide->CodeGen( code_generator ),
-                                             m_rightSide->CodeGen( code_generator ) );
-                                             */
+            return code_generator.CreateMod( *m_leftSide,
+                                             *m_rightSide );
         default:
             return nullptr;
     }
