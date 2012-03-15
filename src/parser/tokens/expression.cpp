@@ -1167,7 +1167,8 @@ void IntegralLiteralExpression::Print( int depth ) const
 llvm::Value* IntegralLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     //TODO different sizes of int?
-    return llvm::ConstantInt::get( llvm::Type::getInt64Ty( llvm::getGlobalContext() ), m_value );
+    return llvm::ConstantInt::get( llvm::Type::getInt64Ty( code_generator.GetLLVMContext() ),
+                                   m_value );
 }
 
 bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token )
@@ -1226,7 +1227,7 @@ void FloatingLiteralExpression::Print( int depth ) const
 
 llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
-    return llvm::ConstantFP::get( llvm::getGlobalContext(),
+    return llvm::ConstantFP::get( code_generator.GetLLVMContext(),
                                   llvm::APFloat(m_value) );
 }
 
@@ -1268,9 +1269,9 @@ void BooleanLiteralExpression::Print( int depth ) const
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
     if( m_value )
-        return llvm::ConstantInt::getTrue( llvm::getGlobalContext() );
+        return llvm::ConstantInt::getTrue( code_generator.GetLLVMContext() );
     else
-        return llvm::ConstantInt::getFalse( llvm::getGlobalContext() );
+        return llvm::ConstantInt::getFalse( code_generator.GetLLVMContext() );
 }
 
 bool BooleanLiteralExpression::Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token )
