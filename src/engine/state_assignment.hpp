@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <functional>
+
 namespace JoeLang
 {
 
@@ -37,16 +39,14 @@ class StateAssignment
 {
 public:
     StateAssignment() = delete;
-    //TODO take expression
-    explicit StateAssignment( const State& state );
+    StateAssignment( const State& state, std::function<long long()> getter );
     ~StateAssignment() = default;
 
     void SetState() const;
 
 private:
     const State& m_state;
-    // functor for setting variable
-    // some kind of structure for holding llvm code for the expression
+    std::function<long long()> m_getter;
 };
 
 } // namespace JoeLang

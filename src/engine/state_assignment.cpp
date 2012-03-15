@@ -28,23 +28,23 @@
 
 #include "state_assignment.hpp"
 
-#include <string>
+#include <functional>
 
 #include <engine/state.hpp>
 
 namespace JoeLang
 {
 
-StateAssignment::StateAssignment( const State& state )
+StateAssignment::StateAssignment( const State& state,
+                                  std::function<long long()> getter )
     :m_state(state)
+    ,m_getter(std::move(getter))
 {
 }
 
 void StateAssignment::SetState() const
 {
-    //TODO
-    int calculated_value = 1;
-    m_state.SetState( calculated_value );
+    m_state.SetState( m_getter() );
 }
 
 } // namespace JoeLang
