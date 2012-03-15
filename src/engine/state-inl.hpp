@@ -53,8 +53,6 @@ State<T>::State( std::string name, std::map< std::string, T > enumerations )
     ,m_resetCallback( DefaultStateResetCallback )
     ,m_validateCallback( DefaultStateValidateCallback )
 {
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
-                   "Can't create a state with an unhandled type" );
     //TODO check enumerations
 }
 

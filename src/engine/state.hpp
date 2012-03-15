@@ -32,10 +32,10 @@
 #include <map>
 #include <string>
 
+#include <engine/types.hpp>
+
 namespace JoeLang
 {
-
-enum class Type;
 
 void DefaultStateResetCallback();
 
@@ -61,6 +61,8 @@ private:
 template<typename T>
 class State : public StateBase
 {
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a state with an unhandled type" );
 public:
     State() = delete;
     State( std::string name, std::map< std::string, T > enumerations = {} );

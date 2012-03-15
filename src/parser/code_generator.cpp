@@ -68,14 +68,6 @@ CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& te
     ,m_llvmExecutionEngine( llvm::ExecutionEngine::createJIT( m_llvmModule ) )
 {
     assert( m_llvmExecutionEngine );
-
-    volatile TypeOfJoeLangType<Type::BOOL>::type b;
-    volatile TypeOfJoeLangType<Type::U32>::type t;
-    volatile TypeOfJoeLangType<Type::DOUBLE>::type e;
-    volatile TypeOfJoeLangType<Type::I8>::type w;
-
-    b = true;
-    assert(true);
 }
 
 CodeGenerator::~CodeGenerator()
@@ -150,7 +142,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
     //TODO
-    //assert(false && "fix casts here");
+    assert(false && "fix casts here");
     return std::unique_ptr<StateAssignmentBase>(
         new StateAssignment<long long>( dynamic_cast<const State<long long>&>(state),
                                         (long long(*)())function_ptr ) );

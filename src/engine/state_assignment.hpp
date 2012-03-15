@@ -30,6 +30,8 @@
 
 #include <functional>
 
+#include <engine/types.hpp>
+
 namespace JoeLang
 {
 
@@ -50,6 +52,8 @@ public:
 template<typename T>
 class StateAssignment : public StateAssignmentBase
 {
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a StateAssignment with an unhandled type" );
 public:
     StateAssignment() = delete;
     StateAssignment( const State<T>& state, std::function<T()> getter );
