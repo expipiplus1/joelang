@@ -79,8 +79,7 @@ template<typename T>
 struct JoeLangType
 {
 private:
-    static
-    constexpr
+    static constexpr
     Type GetFloatingPointType()
     {
         return sizeof(T) == 4
@@ -90,8 +89,7 @@ private:
                 : Type::UNKNOWN_TYPE;
     }
 
-    static
-    constexpr
+    static constexpr
     Type GetUnsignedIntegralType()
     {
         return sizeof(T) == 1
@@ -105,8 +103,7 @@ private:
                         : Type::UNKNOWN_TYPE;
     }
 
-    static
-    constexpr
+    static constexpr
     Type GetSignedIntegralType()
     {
         return sizeof(T) == 1
@@ -120,8 +117,7 @@ private:
                         : Type::UNKNOWN_TYPE;
     }
 
-    static
-    constexpr
+    static constexpr
     Type GetIntegralType()
     {
         return std::is_signed<T>::value
@@ -129,8 +125,7 @@ private:
             : GetUnsignedIntegralType();
     }
 
-    static
-    constexpr
+    static constexpr
     Type GetType()
     {
         return std::is_floating_point<T>::value
@@ -143,8 +138,7 @@ private:
     }
 
 public:
-    const
-    static
+    const static
     Type value = GetType();
 };
 
