@@ -652,7 +652,13 @@ void UnaryExpression::Print( int depth ) const
 
 llvm::Value* UnaryExpression::CodeGen() const
 {
-    return nullptr;
+    switch( m_unaryOperator->GetTerminalType() )
+    {
+        case Lexer::PLUS:
+            return m_expression->CodeGen();
+        default:
+            return nullptr;
+    }
 }
 
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
