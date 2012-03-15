@@ -273,6 +273,61 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) 
 {
     switch( m_operatorTerminal )
     {
+        /*case Lexer::LOGICAL_OR:
+            return code_generator.CreateLOr( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::LOGICAL_AND:
+            return code_generator.CreateLAnd( m_leftSide->CodeGen( code_generator ),
+                                              m_rightSide->CodeGen( code_generator ) );
+        case Lexer::INCLUSISVE_OR:
+            return code_generator.CreateOr( m_leftSide->CodeGen( code_generator ),
+                                            m_rightSide->CodeGen( code_generator ) );
+        case Lexer::EXCLUSIVE_OR:
+            return code_generator.CreateXor( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::AND:
+            return code_generator.CreateAnd( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::EQUALITY:
+            return code_generator.CreateEq( m_leftSide->CodeGen( code_generator ),
+                                            m_rightSide->CodeGen( code_generator ) );
+        case Lexer::NOT_EQUALITY:
+            return code_generator.CreateNeq( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::LESS_THAN:
+            return code_generator.CreateLT( m_leftSide->CodeGen( code_generator ),
+                                            m_rightSide->CodeGen( code_generator ) );
+        case Lexer::GREATER_THAN:
+            return code_generator.CreateGT( m_leftSide->CodeGen( code_generator ),
+                                            m_rightSide->CodeGen( code_generator ) );
+        case Lexer::LESS_THAN_EQUALS:
+            return code_generator.CreateLTE( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::GREATER_THAN_EQUALS:
+            return code_generator.CreateGTE( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::LEFT_SHIFT:
+            return code_generator.CreateShl( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::RIGHT_SHIFT:
+            return code_generator.CreateShr( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::PLUS:
+            return code_generator.CreateAdd( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::MINUS:
+            return code_generator.CreateSub( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::MULTIPLY:
+            return code_generator.CreateMul( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::DIVIDE:
+            return code_generator.CreateDiv( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+        case Lexer::MODULO:
+            return code_generator.CreateMod( m_leftSide->CodeGen( code_generator ),
+                                             m_rightSide->CodeGen( code_generator ) );
+                                             */
         default:
             return nullptr;
     }
@@ -667,7 +722,7 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
         case Lexer::BITWISE_NOT:
             return code_generator.CreateNot( m_expression->CodeGen( code_generator ) );
         case Lexer::LOGICAL_NOT:
-            return code_generator.CreateLNot( m_expression->CodeGen( code_generator ) );
+            return code_generator.CreateLogicalNot( m_expression->CodeGen( code_generator ) );
         default:
             return nullptr;
     }

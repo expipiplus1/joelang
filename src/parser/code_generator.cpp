@@ -144,6 +144,10 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
     return StateAssignment( state, (long long(*)())function_ptr );
 }
 
+//
+// Unary Operators
+//
+
 llvm::Value* CodeGenerator::CreateNeg( llvm::Value* v )
 {
     return m_llvmBuilder.CreateNeg( v );
@@ -155,10 +159,38 @@ llvm::Value* CodeGenerator::CreateNot( llvm::Value* v )
 }
 
 //TODO type check
-llvm::Value* CodeGenerator::CreateLNot( llvm::Value* v )
+llvm::Value* CodeGenerator::CreateLogicalNot( llvm::Value* v )
 {
     return m_llvmBuilder.CreateIsNotNull( v );
 }
+
+//
+// Binary Operators
+//
+
+/*
+llvm::Value* CodeGenerator::CreateLOr( llvm::Value* l, llvm::Value* r )
+{
+    // TODO cast to bool
+    return nullptr;
+}
+
+llvm::Value* CodeGenerator::CreateLAnd( llvm::Value* l, llvm::Value* r )
+{
+    // TODO cast to bool
+    return nullptr;
+}
+
+llvm::Value* CodeGenerator::CreateOr( llvm::Value* l, llvm::Value* r )
+{
+
+    return nullptr;
+}
+*/
+
+//
+// Getters
+//
 
 llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
 {

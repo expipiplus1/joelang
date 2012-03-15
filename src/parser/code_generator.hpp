@@ -76,9 +76,30 @@ public:
     StateAssignment GenerateStateAssignment( const State& state,
                                              const std::unique_ptr<Expression>& expression ) ;
 
+    //Unary Operators
     llvm::Value* CreateNeg(  llvm::Value* v );
     llvm::Value* CreateNot(  llvm::Value* v );
-    llvm::Value* CreateLNot( llvm::Value* v );
+    llvm::Value* CreateLogicalNot( llvm::Value* v );
+
+    //Binary Operators
+    llvm::Value* CreateLOr( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateLAnd( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateOr( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateXor( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateAnd( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateEq( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateNeq( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateLT( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateGT( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateLTE( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateGTE( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateShl( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateShr( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateAdd( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateSub( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateMul( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateDiv( llvm::Value* l, llvm::Value* r );
+    llvm::Value* CreateMod( llvm::Value* l, llvm::Value* r );
 
     llvm::LLVMContext& GetLLVMContext() const;
 
