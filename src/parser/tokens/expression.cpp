@@ -61,7 +61,7 @@ Expression::~Expression()
 {
 }
 
-llvm::Value* Expression::CodeGen()
+llvm::Value* Expression::CodeGen() const
 {
     return nullptr;
 }
@@ -267,7 +267,7 @@ void BinaryOperatorExpression::Print( int depth ) const
     m_rightSide->Print( depth + 1 );
 }
 
-llvm::Value* BinaryOperatorExpression::CodeGen()
+llvm::Value* BinaryOperatorExpression::CodeGen() const
 {
     //TODO
     return nullptr;
@@ -650,7 +650,7 @@ void UnaryExpression::Print( int depth ) const
     m_expression->Print( depth + 1 );
 }
 
-llvm::Value* UnaryExpression::CodeGen()
+llvm::Value* UnaryExpression::CodeGen() const
 {
     return nullptr;
 }
@@ -1095,12 +1095,10 @@ void IntegralLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* IntegralLiteralExpression::CodeGen()
+llvm::Value* IntegralLiteralExpression::CodeGen() const
 {
     //TODO different sizes of int?
-    return llvm::ConstantInt::get( llvm::getGlobalContext(), llvm::APInt( 32,
-                                                                          m_value,
-                                                                          true ) );
+    return llvm::ConstantInt::get( llvm::Type::getInt64Ty( llvm::getGlobalContext() ), m_value );
 }
 
 bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token )
@@ -1157,7 +1155,7 @@ void FloatingLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* FloatingLiteralExpression::CodeGen()
+llvm::Value* FloatingLiteralExpression::CodeGen() const
 {
     return llvm::ConstantFP::get( llvm::getGlobalContext(),
                                   llvm::APFloat(m_value) );
@@ -1198,7 +1196,7 @@ void BooleanLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
-llvm::Value* BooleanLiteralExpression::CodeGen()
+llvm::Value* BooleanLiteralExpression::CodeGen() const
 {
     if( m_value )
         return llvm::ConstantInt::getTrue( llvm::getGlobalContext() );
