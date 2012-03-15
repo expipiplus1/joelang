@@ -139,8 +139,6 @@ StateAssignment CodeGenerator::GenerateStateAssignment(
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
-    long long (*casted_ptr)() = (long long(*)())function_ptr;
-
     return StateAssignment( state, (long long(*)())function_ptr );
 }
 
