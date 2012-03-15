@@ -136,6 +136,9 @@ public:
 
     virtual void Print( int depth ) const;
 
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
+
     static bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:

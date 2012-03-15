@@ -212,6 +212,13 @@ void ConditionalExpression::Print( int depth ) const
     m_falseExpression->Print( depth + 1 );
 }
 
+llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    return code_generator.CreateSelect( *m_condition,
+                                        *m_trueExpression,
+                                        *m_falseExpression );
+}
+
 bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Expression> condition;
