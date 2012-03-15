@@ -32,14 +32,19 @@
 #include <memory>
 #include <vector>
 
+#include <llvm/Support/IRBuilder.h>
+
 namespace llvm
 {
+    class ExecutionEngine;
+    class LLVMContext;
     class Module;
 }
 
 namespace JoeLang
 {
 
+class Context;
 class State;
 class StateAssignment;
 class Technique;
@@ -56,12 +61,12 @@ class CodeGenerator
 {
 public:
     // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52591
-    explicit CodeGenerator( std::vector<Technique>& techniques );
-    ~CodeGenerator() = default;
+    CodeGenerator( const Context& context, std::vector<Technique>& techniques );
+    ~CodeGenerator();
 
     bool GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
                        std::vector<Technique>& techniques,
-                       llvm::Module*& llvm_module );
+                       std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
 
     void Error( const std::string& message );
 
@@ -69,13 +74,19 @@ public:
     void Visit( TechniqueDeclaration& t );
 
     StateAssignment GenerateStateAssignment( const State& state,
-                                             const std::unique_ptr<Expression>& expression ) const;
+                                             const std::unique_ptr<Expression>& expression ) ;
 
 private:
+    const Context& m_context;
+
     bool m_good = true;
 
     std::vector<Technique>& m_techniques;
-    llvm::Module* m_module;
+
+    llvm::LLVMContext&              m_llvmContext;
+    llvm::Module*                   m_llvmModule;
+    llvm::IRBuilder<>               m_llvmBuilder;
+    std::unique_ptr<llvm::ExecutionEngine> m_llvmExecutionEngine;
 };
 
 } // namespace Parser

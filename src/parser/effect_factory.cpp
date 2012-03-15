@@ -28,13 +28,11 @@
 
 #include "effect_factory.hpp"
 
-//#include <engine/context.hpp>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+
 #include <engine/effect.hpp>
 #include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
-//#include <parser/tokens/declaration.hpp>
-//#include <parser/tokens/definition.hpp>
-//#include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {
@@ -55,13 +53,14 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
 
     std::vector<Technique> techniques;
-    llvm::Module* llvm_module;
+    std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 
-    CodeGenerator code_generator( techniques );
-    if( !code_generator.GenerateCode( ast, techniques, llvm_module ) )
+    CodeGenerator code_generator( m_context, techniques );
+    if( !code_generator.GenerateCode( ast, techniques, llvm_execution_engine ) )
         return nullptr;
 
-    return std::unique_ptr<Effect>( new Effect( std::move(techniques), llvm_module ) );
+    return std::unique_ptr<Effect>( new Effect( std::move(techniques),
+                                                std::move( llvm_execution_engine ) ) );
 }
 
 } // namespace Parser

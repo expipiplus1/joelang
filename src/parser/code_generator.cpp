@@ -35,35 +35,54 @@
 #include <utility>
 #include <vector>
 
+
+#include <llvm/BasicBlock.h>
+#include <llvm/Function.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
+#include <llvm/Type.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/Support/IRBuilder.h>
 
+#include <engine/context.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
-#include <parser/tokens/translation_unit.hpp>
+#include <parser/tokens/expression.hpp>
 #include <parser/tokens/declaration.hpp>
 #include <parser/tokens/definition.hpp>
+#include <parser/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-CodeGenerator::CodeGenerator( std::vector<Technique>& techniques )
-    :m_techniques( techniques )
+CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& techniques )
+    :m_context( context )
+    ,m_techniques( techniques )
+    ,m_llvmContext( llvm::getGlobalContext() )
+    ,m_llvmModule( new llvm::Module( "", m_llvmContext ) )
+    ,m_llvmBuilder( m_llvmContext )
+    ,m_llvmExecutionEngine( llvm::ExecutionEngine::createJIT( m_llvmModule ) )
 {
-    m_module = new llvm::Module( "main", llvm::getGlobalContext() );
+    assert( m_llvmExecutionEngine );
+}
+
+CodeGenerator::~CodeGenerator()
+{
 }
 
 bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
                                   std::vector<Technique>& techniques,
-                                  llvm::Module*& llvm_module )
+                                  std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
 {
     for( const auto& declaration : ast->GetDeclarations() )
         declaration->Accept( *this );
 
     //techniques = std::move(m_techniques);
-    llvm_module = nullptr;
+    llvm_execution_engine = std::move( m_llvmExecutionEngine );
 
     return m_good;
 }
@@ -88,9 +107,41 @@ void CodeGenerator::Visit( TechniqueDeclaration& t )
 
 StateAssignment CodeGenerator::GenerateStateAssignment(
         const State& state,
-        const std::unique_ptr<Expression>& expression ) const
+        const std::unique_ptr<Expression>& expression )
 {
-    return StateAssignment( state );
+    std::vector<llvm::Type*> no_arguments;
+
+    //TODO correct return type
+    llvm::FunctionType* prototype = llvm::FunctionType::get(
+                                        llvm::Type::getInt64Ty( m_llvmContext ),
+                                        no_arguments,
+                                        false );
+    assert( prototype && "Error generating empty function prototype" );
+
+    llvm::Function* function = llvm::Function::Create( prototype,
+                                                       llvm::Function::ExternalLinkage,
+                                                       "",
+                                                       m_llvmModule );
+    assert( prototype && "Error generating llvm function" );
+
+    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_llvmContext,
+                                                       "",
+                                                       function );
+    m_llvmBuilder.SetInsertPoint( body );
+
+    llvm::Value* v = expression->CodeGen();
+    assert( v && "Invalid expression llvm::Value*" );
+
+    m_llvmBuilder.CreateRet( v );
+
+    //TODO handle this a bit better than aborting
+    llvm::verifyFunction( *function, llvm::AbortProcessAction );
+
+    void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
+
+    long long (*casted_ptr)() = (long long(*)())function_ptr;
+
+    return StateAssignment( state, (long long(*)())function_ptr );
 }
 
 } // namespace Parser
