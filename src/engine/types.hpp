@@ -31,6 +31,12 @@
 #include <cstdint>
 #include <type_traits>
 
+namespace llvm
+{
+    class Type;
+    class LLVMContext;
+}
+
 namespace JoeLang
 {
 
@@ -60,7 +66,20 @@ enum class Type
     DOUBLE,
 };
 
+//TODO this stuff probably doesn't have to be public
+
 Type GetCommonType( Type t1, Type t2 );
+
+bool IsFloatingPoint( Type t );
+
+bool IsIntegral( Type t );
+
+bool IsSigned( Type t );
+
+std::size_t SizeOf( Type t );
+
+llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
+
 
 template<Type t> struct TypeOfJoeLangType
 { static_assert(t!=Type::UNKNOWN_TYPE,
@@ -132,10 +151,10 @@ private:
     {
         return std::is_floating_point<T>::value
                 ? GetFloatingPointType()
-                : std::is_integral<T>::value
-                    ? GetIntegralType()
-                    : std::is_same<bool,T>::value
-                        ? Type::BOOL
+                : std::is_same<bool,T>::value
+                    ? Type::BOOL
+                    : std::is_integral<T>::value
+                        ? GetIntegralType()
                         : Type::UNKNOWN_TYPE;
     }
 

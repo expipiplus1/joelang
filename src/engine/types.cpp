@@ -30,6 +30,9 @@
 
 #include <vector>
 
+#include <llvm/Type.h>
+#include <llvm/DerivedTypes.h>
+
 namespace JoeLang
 {
 
@@ -56,6 +59,64 @@ Type GetCommonType( Type t1, Type t2 )
             return t;
 
     return Type::UNKNOWN_TYPE;
+}
+
+bool IsIntegral( Type t )
+{
+    return t != Type::UNKNOWN_TYPE &&
+           t != Type::DOUBLE &&
+           t != Type::FLOAT;
+}
+
+bool IsFloatingPoint( Type t )
+{
+    return t == Type::DOUBLE ||
+           t == Type::FLOAT;
+}
+
+bool IsSigned( Type t )
+{
+    return t == Type::I64 ||
+           t == Type::I32 ||
+           t == Type::I16 ||
+           t == Type::I8;
+}
+
+std::size_t SizeOf( Type t )
+{
+    if( t == Type::DOUBLE ||
+        t == Type::U64 ||
+        t == Type::I64 )
+        return 8;
+
+    if( t == Type::FLOAT ||
+        t == Type::U32 ||
+        t == Type::I32 )
+        return 4;
+
+    if( t == Type::U16 ||
+        t == Type::I16 )
+        return 2;
+
+    if( t == Type::U8 ||
+        t == Type::I8 ||
+        t == Type::BOOL )
+        return 1;
+
+    return 0;
+}
+
+llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
+{
+    if( t == Type::DOUBLE )
+        return llvm::Type::getDoubleTy( c );
+    if( t == Type::FLOAT )
+        return llvm::Type::getFloatTy( c );
+    if( t == Type::BOOL )
+        return llvm::Type::getInt1Ty( c );
+    if( IsIntegral( t ) )
+        return llvm::Type::getIntNTy( c, SizeOf(t)*8 );
+    return nullptr;
 }
 
 } // namespace JoeLang
