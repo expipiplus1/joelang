@@ -113,7 +113,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     //TODO correct return type
     llvm::FunctionType* prototype = llvm::FunctionType::get(
-                                        llvm::Type::getInt64Ty( m_llvmContext ),
+                                        GetLLVMType( state.GetType(), m_llvmContext ),
                                         no_arguments,
                                         false );
     assert( prototype && "Error generating empty function prototype" );
@@ -129,7 +129,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                                        function );
     m_llvmBuilder.SetInsertPoint( body );
 
-    llvm::Value* v = expression.CodeGen( *this );
+    llvm::Value* v = CreateCast( expression, state.GetType() );
     assert( v && "Invalid expression llvm::Value*" );
 
     m_llvmBuilder.CreateRet( v );
@@ -141,11 +141,127 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
-    //TODO
-    assert(false && "fix casts here");
-    return std::unique_ptr<StateAssignmentBase>(
-        new StateAssignment<long long>( dynamic_cast<const State<long long>&>(state),
-                                        (long long(*)())function_ptr ) );
+    //TODO clean this up
+    StateAssignmentBase* sa;
+    switch( state.GetType() )
+    {
+        case Type::BOOL:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::BOOL>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::BOOL>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::BOOL>::type(*)()>(function_ptr) );
+            break;
+        case Type::FLOAT:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::FLOAT>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::FLOAT>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::FLOAT>::type(*)()>(function_ptr) );
+            break;
+        case Type::DOUBLE:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::DOUBLE>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::DOUBLE>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::DOUBLE>::type(*)()>(function_ptr) );
+            break;
+        case Type::I8:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::I8>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::I8>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::I8>::type(*)()>(function_ptr) );
+            break;
+        case Type::I16:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::I16>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::I16>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::I16>::type(*)()>(function_ptr) );
+            break;
+        case Type::I32:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::I32>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::I32>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::I32>::type(*)()>(function_ptr) );
+            break;
+        case Type::I64:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::I64>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::I64>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::I64>::type(*)()>(function_ptr) );
+            break;
+        case Type::U8:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::U8>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::U8>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::U8>::type(*)()>(function_ptr) );
+            break;
+        case Type::U16:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::U16>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::U16>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::U16>::type(*)()>(function_ptr) );
+            break;
+        case Type::U32:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::U32>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::U32>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::U32>::type(*)()>(function_ptr) );
+            break;
+        case Type::U64:
+            sa = new StateAssignment<TypeOfJoeLangType<Type::U64>::type>
+             ( static_cast<const State<TypeOfJoeLangType<Type::U64>::type>&>(state),
+               reinterpret_cast<TypeOfJoeLangType<Type::U64>::type(*)()>(function_ptr) );
+            break;
+        default:
+            sa = nullptr;
+    }
+    return std::unique_ptr<StateAssignmentBase>( sa );
+}
+
+//
+// Cast Operators
+//
+
+llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
+{
+    Type         e_type = e.GetReturnType();
+    llvm::Value* e_code = e.CodeGen( *this );
+
+    //TODO does this happen often enough to be worth checking?
+    if( !e_code )
+        return nullptr;
+
+    // If they are the same type, or same size integral types there's no need
+    // for a cast
+    if( type == e_type ||
+        ( IsIntegral( e_type ) && IsIntegral( type ) &&
+          SizeOf( e_type ) == SizeOf( type ) ) )
+        return e_code;
+
+    if( type == Type::BOOL )
+    {
+        if( IsFloatingPoint( e_type ) )
+            return m_llvmBuilder.CreateFCmpOEQ(
+                        e_code,
+                        llvm::ConstantFP::getNullValue( e_code->getType() ) );
+        return m_llvmBuilder.CreateIsNotNull( e_code );
+    }
+
+    if( IsFloatingPoint( type ) )
+    {
+        if( IsFloatingPoint( e_type ) )
+            return m_llvmBuilder.CreateFPCast( e_code,
+                                               GetLLVMType( type, m_llvmContext ) );
+        if( IsSigned( e_type ) )
+            return m_llvmBuilder.CreateSIToFP( e_code,
+                                               GetLLVMType( type, m_llvmContext ) );
+        return m_llvmBuilder.CreateUIToFP( e_code,
+                                           GetLLVMType( type, m_llvmContext ) );
+    }
+
+    assert( IsIntegral( type ) && "Type should be integral" );
+    if( IsIntegral( e_type ) )
+    {
+        return m_llvmBuilder.CreateIntCast( e_code,
+                                            GetLLVMType( type, m_llvmContext ),
+                                            IsSigned( e_type ) );
+    }
+
+    assert( IsFloatingPoint( e_type ) && "e_type should be floating point" );
+    if( IsSigned( type ) )
+        return m_llvmBuilder.CreateFPToSI( e_code,
+                                           GetLLVMType( type, m_llvmContext ) );
+    else
+        return m_llvmBuilder.CreateFPToUI( e_code,
+                                           GetLLVMType( type, m_llvmContext ) );
 }
 
 //

@@ -49,6 +49,8 @@ class StateBase;
 class StateAssignmentBase;
 class Technique;
 
+enum class Type;
+
 namespace Parser
 {
 
@@ -76,6 +78,9 @@ public:
                                                                   const Expression& expression ) ;
 
     void Error( const std::string& message );
+
+    // Cast Operators
+    llvm::Value* CreateCast( const Expression& e, Type type );
 
     // Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );
