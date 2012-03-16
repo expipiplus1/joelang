@@ -35,15 +35,23 @@
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
-    JoeLang::State<long long> my_state( "my_state" );//, {{"one", 1}, {"two", 2}} );
+    JoeLang::State<long long> my_state( "my_state", {{"one", 1}, {"two", 2}} );
     my_state.SetCallbacks( [](long long v)
                              {std::cout << "setting my_state to " << v << std::endl;},
-                           nullptr, nullptr );
+                           nullptr,
+                           nullptr );
+
+    JoeLang::State<bool> my_boolean_state( "my_boolean_state", {{"yes", true}, {"no", false}} );
+    my_boolean_state.SetCallbacks( [](bool v)
+                                     {std::cout << "setting my_boolean_state to " << v << std::endl;},
+                                   nullptr,
+                                   nullptr );
 
     context.AddState( &my_state );
+    context.AddState( &my_boolean_state );
 
     JoeLang::Effect* e = context.CreateEffectFromString(
-                             "technique t{ pass p{ my_state= true?10:9; } }" );
+                             "technique t{ pass p{my_state = 3.14; my_boolean_state = false; } }" );
 
     if( e )
     {
