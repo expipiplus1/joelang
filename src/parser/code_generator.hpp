@@ -68,7 +68,6 @@ public:
                        std::vector<Technique>& techniques,
                        std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
 
-    void Error( const std::string& message );
 
     void Visit( DeclarationBase& p );
     void Visit( TechniqueDeclaration& t );
@@ -76,12 +75,14 @@ public:
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment( const StateBase& state,
                                                                   const Expression& expression ) ;
 
-    //Unary Operators
+    void Error( const std::string& message );
+
+    // Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );
     llvm::Value* CreateNot(  const Expression& e );
     llvm::Value* CreateLNot( const Expression& e );
 
-    //Binary Operators
+    // Binary Operators
     llvm::Value* CreateLOr(  const Expression& l, const Expression& r );
     llvm::Value* CreateLAnd( const Expression& l, const Expression& r );
     llvm::Value* CreateOr(   const Expression& l, const Expression& r );
@@ -101,11 +102,13 @@ public:
     llvm::Value* CreateDiv(  const Expression& l, const Expression& r );
     llvm::Value* CreateMod(  const Expression& l, const Expression& r );
 
-    //Ternary Operators
+    // Ternary Operators
     llvm::Value* CreateSelect( const Expression& condition,
                                const Expression& true_expression,
                                const Expression& false_expression );
 
+    // Getters
+    bool Good() const;
     llvm::LLVMContext& GetLLVMContext() const;
 
 private:

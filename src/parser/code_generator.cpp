@@ -298,6 +298,11 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 // Getters
 //
 
+bool CodeGenerator::Good() const
+{
+    return m_good;
+}
+
 llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
 {
     return m_llvmContext;
