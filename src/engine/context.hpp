@@ -42,7 +42,6 @@ class Context
 {
 public:
     Context();
-    ~Context();
 
     bool AddState( StateBase* state );
 

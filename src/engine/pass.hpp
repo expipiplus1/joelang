@@ -42,11 +42,11 @@ class StateAssignmentBase;
 class Pass
 {
 public:
-    Pass();
-    ~Pass();
-    Pass( const Pass& ) = delete;
-    Pass( Pass&& ) = default;
-    Pass( std::string name, std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
+    Pass() = default;
+    explicit
+    Pass( std::string name );
+    Pass( std::string name,
+          std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
 
     void SetState() const;
 

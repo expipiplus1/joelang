@@ -38,11 +38,8 @@
 namespace JoeLang
 {
 
-Pass::Pass()
-{
-}
-
-Pass::~Pass()
+Pass::Pass( std::string name )
+    :m_name( std::move(name) )
 {
 }
 

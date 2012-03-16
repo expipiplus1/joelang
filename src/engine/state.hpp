@@ -44,8 +44,8 @@ bool DefaultStateValidateCallback();
 class StateBase
 {
 public:
-    StateBase() = delete;
-    explicit StateBase( std::string name );
+    explicit
+    StateBase( std::string name );
     virtual
     ~StateBase();
 
@@ -65,7 +65,9 @@ class State : public StateBase
                    "Can't create a state with an unhandled type" );
 public:
     State() = delete;
-    State( std::string name, std::map< std::string, T > enumerations = {} );
+    //TODO consider containing the map elsewhere
+    //because it's only used for parsing
+    State( std::string name, std::map<std::string, T> enumerations = {} );
     virtual
     ~State();
 
@@ -73,6 +75,7 @@ public:
                        std::function<void()>  reset_callback,
                        std::function<bool()>  validate_callback );
 
+    //TODO enable passing by reference for large Ts
     void SetState( T value ) const;
     void ResetState() const;
     bool ValidateState() const;

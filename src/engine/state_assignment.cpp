@@ -31,10 +31,6 @@
 namespace JoeLang
 {
 
-StateAssignmentBase::StateAssignmentBase()
-{
-}
-
 StateAssignmentBase::~StateAssignmentBase()
 {
 }

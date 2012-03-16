@@ -47,8 +47,8 @@ class Effect
 public:
     Effect() = default;
     ~Effect();
-    explicit Effect( std::vector<Technique> techniques,
-                     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
+    Effect( std::vector<Technique> techniques,
+            std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
 
     const std::vector<Technique>& GetTechniques() const;
     const Technique* GetNamedTechnique( const std::string& name ) const;

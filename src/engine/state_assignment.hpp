@@ -41,7 +41,6 @@ class State;
 class StateAssignmentBase
 {
 public:
-    StateAssignmentBase();
     virtual
     ~StateAssignmentBase();
 
@@ -55,7 +54,6 @@ class StateAssignment : public StateAssignmentBase
     static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
                    "Can't create a StateAssignment with an unhandled type" );
 public:
-    StateAssignment() = delete;
     StateAssignment( const State<T>& state, std::function<T()> getter );
     virtual
     ~StateAssignment();

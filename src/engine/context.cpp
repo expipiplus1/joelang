@@ -48,10 +48,6 @@ Context::Context()
     llvm::InitializeNativeTarget();
 }
 
-Context::~Context()
-{
-}
-
 bool Context::AddState( StateBase* state )
 {
     //TODO
