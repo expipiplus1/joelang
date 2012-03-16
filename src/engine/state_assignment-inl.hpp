@@ -56,4 +56,16 @@ void StateAssignment<T>::SetState() const
     m_state.SetState( m_getter() );
 }
 
+template<typename T>
+void StateAssignment<T>::ResetState() const
+{
+    m_state.ResetState();
+}
+
+template<typename T>
+bool StateAssignment<T>::ValidateState() const
+{
+    return m_state.ValidateState();
+}
+
 } // namespace JoeLang

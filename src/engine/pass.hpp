@@ -49,6 +49,8 @@ public:
           std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
 
     void SetState() const;
+    void ResetState() const;
+    bool Validate() const;
 
     const std::string& GetName() const;
 

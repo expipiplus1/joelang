@@ -61,6 +61,7 @@ int main( int argc, char** argv )
             {
                 std::cout << "Setting Pass: \'" << pass.GetName() << "\' state\n";
                 pass.SetState();
+                pass.ResetState();
             }
     }
     else

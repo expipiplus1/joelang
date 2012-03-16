@@ -56,6 +56,20 @@ void Pass::SetState() const
         sa->SetState();
 }
 
+void Pass::ResetState() const
+{
+    for( const auto& sa : m_stateAssignments )
+        sa->ResetState();
+}
+
+bool Pass::Validate() const
+{
+    for( const auto& sa : m_stateAssignments )
+        if( !sa->ValidateState() )
+            return false;
+    return true;
+}
+
 const std::string& Pass::GetName() const
 {
     return m_name;

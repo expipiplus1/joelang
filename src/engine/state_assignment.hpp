@@ -46,6 +46,12 @@ public:
 
     virtual
     void SetState() const = 0;
+
+    virtual
+    void ResetState() const = 0;
+
+    virtual
+    bool ValidateState() const = 0;
 };
 
 template<typename T>
@@ -60,6 +66,12 @@ public:
 
     virtual
     void SetState() const override;
+
+    virtual
+    void ResetState() const override;
+
+    virtual
+    bool ValidateState() const override;
 
 private:
     const State<T>& m_state;
