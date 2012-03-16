@@ -23,6 +23,7 @@ add_executable( joelang src/joelang.cpp
                         src/engine/state_assignment-inl.hpp
                         src/engine/technique.cpp
                         src/engine/technique.hpp
+                        src/engine/types.cpp
                         src/engine/types.hpp
                         src/engine/state.cpp
                         src/engine/state.hpp

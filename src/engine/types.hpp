@@ -34,6 +34,7 @@
 namespace JoeLang
 {
 
+// This may need to be a full class to handle modifiers and things
 enum class Type
 {
     // Unknown type
@@ -59,6 +60,8 @@ enum class Type
     DOUBLE,
 };
 
+Type GetCommonType( Type t1, Type t2 );
+
 template<Type t> struct TypeOfJoeLangType
 { static_assert(t!=Type::UNKNOWN_TYPE,
                 "Trying to get the type of an unknown JoeLang::Type"); };
@@ -73,7 +76,6 @@ template<>struct TypeOfJoeLangType<Type::U32>   { typedef std::uint32_t type; };
 template<>struct TypeOfJoeLangType<Type::U64>   { typedef std::uint64_t type; };
 template<>struct TypeOfJoeLangType<Type::FLOAT> { typedef float         type; };
 template<>struct TypeOfJoeLangType<Type::DOUBLE>{ typedef double        type; };
-
 
 template<typename T>
 struct JoeLangType
