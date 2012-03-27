@@ -37,6 +37,7 @@
 #include <engine/pass.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/declaration.hpp>
@@ -61,14 +62,19 @@ PassDefinition::~PassDefinition()
 {
 }
 
-Pass PassDefinition::GetPass() const
+Pass PassDefinition::GetPass( CodeGenerator& code_generator ) const
 {
     //TODO
-    std::vector<StateAssignment> state_assignments;
+    std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& state_assignment : m_stateAssignments )
-        state_assignments.push_back( state_assignment->GetStateAssignment() );
-    return Pass( std::move( state_assignments ) );
+        state_assignments.push_back(
+                    state_assignment->GetStateAssignment( code_generator ) );
+    return std::move( Pass( m_name, std::move( state_assignments ) ) );
+}
 
+void PassDefinition::SetName(std::string name)
+{
+    m_name = std::move(name);
 }
 
 void PassDefinition::Print( int depth ) const
@@ -106,18 +112,27 @@ TechniqueDefinition::~TechniqueDefinition()
 {
 }
 
-Technique TechniqueDefinition::GetTechnique() const
+void TechniqueDefinition::SetName( std::string name )
+{
+    m_name = std::move( name );
+}
+
+Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
 {
     //TODO
     std::vector<Pass> passes;
     for( const auto& pass : m_passes )
     {
         const std::shared_ptr<PassDefinition>& definition = pass->GetDefinition();
-        // assert on null?
-        if( definition )
-            passes.push_back( definition->GetPass() );
+        if( !definition )
+            code_generator.Error( "Undefined Pass " +
+                                  pass->GetName() +
+                                  " in Technique " +
+                                  m_name );
+        else
+            passes.emplace_back( std::move( definition->GetPass( code_generator ) ) );
     }
-    return Technique( std::move( passes ) );
+    return std::move( Technique( m_name, std::move( passes ) ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const

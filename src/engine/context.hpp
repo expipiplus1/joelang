@@ -28,31 +28,29 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace JoeLang
 {
 
-class State;
-
-enum Type : int
-{
-    INT
-};
+class Effect;
+class StateBase;
 
 class Context
 {
 public:
     Context();
-    ~Context();
 
-    // Returns false if there is already a state with that name
-    bool CreateState( std::string state_name, Type type );
-    bool CreateEffectFromString( const std::string& string );
+    bool AddState( StateBase* state );
 
+    Effect* CreateEffectFromString( const std::string& string );
+
+    const StateBase* GetNamedState( const std::string& name ) const;
 private:
-    std::vector<State> m_states;
+    std::vector<StateBase*> m_states;
+    std::vector< std::unique_ptr<Effect> > m_effects;
 };
 
 } // namespace JoeLang

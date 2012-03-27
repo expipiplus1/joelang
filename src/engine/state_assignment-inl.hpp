@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -26,53 +26,46 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "pass.hpp"
+#pragma once
 
-#include <memory>
-#include <string>
-#include <utility>
-#include <vector>
+#include "state_assignment.hpp"
 
-#include <engine/state_assignment.hpp>
+#include <functional>
+
+#include <engine/state.hpp>
 
 namespace JoeLang
 {
 
-Pass::Pass( std::string name )
-    :m_name( std::move(name) )
+template<typename T>
+StateAssignment<T>::StateAssignment( const State<T>& state,
+                                     std::function<T()> getter )
+    :m_state(state)
+    ,m_getter(std::move(getter))
 {
 }
 
-Pass::Pass( std::string name,
-            std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
-    :m_name( std::move(name) )
-    ,m_stateAssignments( std::move( state_assignments ) )
+template<typename T>
+StateAssignment<T>::~StateAssignment()
 {
 }
 
-void Pass::SetState() const
+template<typename T>
+void StateAssignment<T>::SetState() const
 {
-    for( const auto& sa : m_stateAssignments )
-        sa->SetState();
+    m_state.SetState( m_getter() );
 }
 
-void Pass::ResetState() const
+template<typename T>
+void StateAssignment<T>::ResetState() const
 {
-    for( const auto& sa : m_stateAssignments )
-        sa->ResetState();
+    m_state.ResetState();
 }
 
-bool Pass::Validate() const
+template<typename T>
+bool StateAssignment<T>::ValidateState() const
 {
-    for( const auto& sa : m_stateAssignments )
-        if( !sa->ValidateState() )
-            return false;
-    return true;
-}
-
-const std::string& Pass::GetName() const
-{
-    return m_name;
+    return m_state.ValidateState();
 }
 
 } // namespace JoeLang

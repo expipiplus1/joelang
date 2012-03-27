@@ -34,7 +34,7 @@
 #include <utility>
 #include <vector>
 
-#include <parser/effect_factory.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/definition.hpp>
@@ -53,7 +53,7 @@ DeclarationBase::~DeclarationBase()
 {
 }
 
-void DeclarationBase::Accept( EffectFactory& e )
+void DeclarationBase::Accept( CodeGenerator& c )
 {
 }
 
@@ -118,6 +118,11 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
+const std::string& PassDeclaration::GetName() const
+{
+    return m_name;
+}
+
 const std::shared_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
     return m_definition;
@@ -169,6 +174,8 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     if( !Expect<PassDefinition>( parser, definition ) )
         return false;
 
+    definition->SetName( name );
+
     token.reset( new PassDeclaration( std::move(name),
                                       std::move(definition) ) );
     return true;
@@ -188,9 +195,9 @@ TechniqueDeclaration::~TechniqueDeclaration()
 {
 }
 
-void TechniqueDeclaration::Accept( EffectFactory& e )
+void TechniqueDeclaration::Accept( CodeGenerator& c )
 {
-    e.Visit( *this );
+    c.Visit( *this );
 }
 
 const std::shared_ptr<TechniqueDefinition>& TechniqueDeclaration::GetDefinition() const
@@ -244,6 +251,8 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
 
     if( !Expect<TechniqueDefinition>( parser, definition ) )
         return false;
+
+    definition->SetName( name );
 
     token.reset( new TechniqueDeclaration( std::move(name),
                                            std::move(definition) ) );

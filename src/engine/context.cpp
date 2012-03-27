@@ -29,49 +29,54 @@
 #include "context.hpp"
 
 #include <algorithm>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <llvm/Support/TargetSelect.h>
 
 #include <engine/effect.hpp>
-#include <engine/internal/state.hpp>
+#include <engine/state.hpp>
 #include <parser/effect_factory.hpp>
-#include <parser/parser.hpp>
 
 namespace JoeLang
 {
 
 Context::Context()
 {
+    llvm::InitializeNativeTarget();
 }
 
-Context::~Context()
+bool Context::AddState( StateBase* state )
 {
-}
-
-bool Context::CreateState( std::string state_name, Type type )
-{
-    if( std::find_if( m_states.begin(), m_states.end(),
-                      [&state_name](const State& s)
-                      {return s.GetName() == state_name;})
-        != m_states.end() );
-        return false;
-
-    m_states.emplace_back( State( std::move(state_name), type ) );
+    //TODO
+    m_states.push_back( state );
     return true;
 }
 
-bool Context::CreateEffectFromString(const std::string& string)
+Effect* Context::CreateEffectFromString( const std::string& string )
 {
-    Parser::Parser parser;
-    if( parser.Parse( string ) )
+    JoeLang::Parser::EffectFactory ef( *this );
+    std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
+    if( e )
     {
-        parser.Print();
-        JoeLang::Parser::EffectFactory ef;
-        JoeLang::Effect e = ef.CreateEffect( parser.GetTranslationUnit() );
-        return true;
+        auto ret = e.get();
+        m_effects.push_back( std::move(e) );
+        return m_effects.rbegin()->get();
     }
-    else
-    {
-        return false;
-    }
+    return nullptr;
+}
+
+const StateBase* Context::GetNamedState(const std::string& name) const
+{
+    auto s = std::find_if( m_states.begin(), m_states.end(),
+                           [&name](StateBase* p)
+                             {return name == p->GetName();} );
+    if( s == m_states.end() )
+        return nullptr;
+
+    return *s;
 }
 
 } // namespace JoeLang

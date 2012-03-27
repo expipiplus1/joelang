@@ -28,9 +28,16 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
 #include <vector>
 
 #include <engine/technique.hpp>
+
+namespace llvm
+{
+    class ExecutionEngine;
+};
 
 namespace JoeLang
 {
@@ -39,14 +46,16 @@ class Effect
 {
 public:
     Effect() = default;
-    ~Effect() = default;
-    Effect( std::vector<Technique> techniques );
+    ~Effect();
+    Effect( std::vector<Technique> techniques,
+            std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
+
+    const std::vector<Technique>& GetTechniques() const;
+    const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
     std::vector<Technique> m_techniques;
-
-    //some kind of structure for various other things in the effect file
-    //some kind of structure containing llvm code for the functions
+    std::unique_ptr<llvm::ExecutionEngine> m_llvmExecutionEngine;
 };
 
 } // namespace JoeLang

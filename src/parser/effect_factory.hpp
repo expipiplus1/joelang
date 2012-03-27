@@ -31,30 +31,26 @@
 #include <memory>
 #include <vector>
 
-#include <engine/effect.hpp>
-
 namespace JoeLang
 {
+
+class Context;
+class Effect;
+
 namespace Parser
 {
-
-class DeclarationBase;
-class TechniqueDeclaration;
-class TranslationUnit;
 
 class EffectFactory
 {
 public:
-    EffectFactory() = default;
+    EffectFactory() = delete;
+    EffectFactory( const Context& context );
     ~EffectFactory() = default;
 
-    void Visit( DeclarationBase& p );
-    void Visit( TechniqueDeclaration& t );
-
-    Effect CreateEffect( const std::unique_ptr<TranslationUnit>& t );
+    std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
 
 private:
-    std::vector<Technique> m_techniques;
+    const Context& m_context;
 };
 
 } // namespace Parser

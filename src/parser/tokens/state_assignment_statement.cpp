@@ -33,7 +33,9 @@
 #include <string>
 #include <utility>
 
+#include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/expression.hpp>
@@ -43,8 +45,9 @@ namespace JoeLang
 namespace Parser
 {
 
-StateAssignmentStatement::StateAssignmentStatement( std::string state_name, std::unique_ptr< Expression > expression )
-    :m_stateName( std::move( state_name ) )
+StateAssignmentStatement::StateAssignmentStatement( const StateBase& state,
+                                                    std::unique_ptr< Expression > expression )
+    :m_state( state )
     ,m_expression( std::move( expression ) )
 {
 }
@@ -53,17 +56,17 @@ StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-StateAssignment StateAssignmentStatement::GetStateAssignment() const
+std::unique_ptr<StateAssignmentBase> StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
 {
     //TODO
-    return StateAssignment( m_stateName );
+    return code_generator.GenerateStateAssignment( m_state, *m_expression );
 }
 
 void StateAssignmentStatement::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << "State Assignment to " << m_stateName << "\n";
+    std::cout << "State Assignment to " << m_state.GetName() << "\n";
     m_expression->Print( depth + 1 );
 }
 
@@ -72,6 +75,14 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
     std::string state_name;
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, state_name ) )
         return false;
+
+    //Check if the state name is a valid state name
+    const StateBase* state = parser.GetNamedState( state_name );
+    if( !state )
+    {
+        parser.Error( "\'" + state_name + "\' is not a valid state name" );
+        return false;
+    }
 
     if( !parser.ExpectTerminal( Lexer::EQUALS ) )
         return false;
@@ -83,7 +94,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
     if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
         return false;
 
-    token.reset( new StateAssignmentStatement( std::move( state_name ),
+    token.reset( new StateAssignmentStatement( *state,
                                                std::move( expression ) ) );
     return true;
 }

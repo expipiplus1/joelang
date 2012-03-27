@@ -34,6 +34,15 @@
 #include <string>
 #include <utility>
 
+#include <llvm/DerivedTypes.h>
+#include <llvm/Instructions.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Support/IRBuilder.h>
+
+#include <engine/types.hpp>
+#include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/token.hpp>
@@ -53,6 +62,16 @@ Expression::Expression()
 
 Expression::~Expression()
 {
+}
+
+llvm::Value* Expression::CodeGen( CodeGenerator& code_generator ) const
+{
+    return nullptr;
+}
+
+Type Expression::GetReturnType() const
+{
+    return Type::UNKNOWN_TYPE;
 }
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -86,6 +105,11 @@ void AssignmentExpression::Print(int depth) const
     m_unaryExpression->Print( depth + 1 );
     m_assignmentOperator->Print( depth + 1 );
     m_assignmentExpression->Print( depth + 1 );
+}
+
+Type AssignmentExpression::GetReturnType() const
+{
+    return m_unaryExpression->GetReturnType();
 }
 
 bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -199,6 +223,19 @@ void ConditionalExpression::Print( int depth ) const
     m_falseExpression->Print( depth + 1 );
 }
 
+llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    return code_generator.CreateSelect( *m_condition,
+                                        *m_trueExpression,
+                                        *m_falseExpression );
+}
+
+Type ConditionalExpression::GetReturnType() const
+{
+    return GetCommonType( m_trueExpression->GetReturnType(),
+                          m_falseExpression->GetReturnType() );
+}
+
 bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Expression> condition;
@@ -254,6 +291,76 @@ void BinaryOperatorExpression::Print( int depth ) const
     std::cout << GetTerminalString( m_operatorTerminal ) << std::endl;
     m_leftSide->Print( depth + 1 );
     m_rightSide->Print( depth + 1 );
+}
+
+llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    CHECK_CODE_GENERATOR;
+    switch( m_operatorTerminal )
+    {
+        case Lexer::LOGICAL_OR:
+            return code_generator.CreateLOr( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::LOGICAL_AND:
+            return code_generator.CreateLAnd( *m_leftSide,
+                                              *m_rightSide );
+        case Lexer::INCLUSIVE_OR:
+            return code_generator.CreateOr( *m_leftSide,
+                                            *m_rightSide );
+        case Lexer::EXCLUSIVE_OR:
+            return code_generator.CreateXor( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::AND:
+            return code_generator.CreateAnd( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::EQUALITY:
+            return code_generator.CreateEq( *m_leftSide,
+                                            *m_rightSide );
+        case Lexer::NOT_EQUALITY:
+            return code_generator.CreateNeq( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::LESS_THAN:
+            return code_generator.CreateLT( *m_leftSide,
+                                            *m_rightSide );
+        case Lexer::GREATER_THAN:
+            return code_generator.CreateGT( *m_leftSide,
+                                            *m_rightSide );
+        case Lexer::LESS_THAN_EQUALS:
+            return code_generator.CreateLTE( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::GREATER_THAN_EQUALS:
+            return code_generator.CreateGTE( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::LEFT_SHIFT:
+            return code_generator.CreateShl( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::RIGHT_SHIFT:
+            return code_generator.CreateShr( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::PLUS:
+            return code_generator.CreateAdd( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::MINUS:
+            return code_generator.CreateSub( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::MULTIPLY:
+            return code_generator.CreateMul( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::DIVIDE:
+            return code_generator.CreateDiv( *m_leftSide,
+                                             *m_rightSide );
+        case Lexer::MODULO:
+            return code_generator.CreateMod( *m_leftSide,
+                                             *m_rightSide );
+        default:
+            return nullptr;
+    }
+}
+
+Type BinaryOperatorExpression::GetReturnType() const
+{
+    return GetCommonType( m_leftSide->GetReturnType(),
+                          m_rightSide->GetReturnType() );
 }
 
 template< typename ExpressionType, typename SubExpressionType >
@@ -322,12 +429,18 @@ LogicalOrExpression::~LogicalOrExpression()
 {
 }
 
+Type LogicalOrExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // Why doesn't clang support initializer lists!
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::LOGICAL_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::LOGICAL_OR
+    };
 
     return ParseLeftAssociative<LogicalOrExpression, LogicalAndExpression>( parser, token, operators );
 }
@@ -349,11 +462,17 @@ LogicalAndExpression::~LogicalAndExpression()
 {
 }
 
+Type LogicalAndExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool LogicalAndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::LOGICAL_AND );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::LOGICAL_AND
+    };
 
     return ParseLeftAssociative<LogicalAndExpression, InclusiveOrExpression>( parser, token, operators );
 }
@@ -377,9 +496,10 @@ InclusiveOrExpression::~InclusiveOrExpression()
 
 bool InclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::INCLUSIVE_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::INCLUSIVE_OR
+    };
 
     return ParseLeftAssociative<InclusiveOrExpression, ExclusiveOrExpression>( parser, token, operators );
 }
@@ -403,9 +523,10 @@ ExclusiveOrExpression::~ExclusiveOrExpression()
 
 bool ExclusiveOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::EXCLUSIVE_OR );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::EXCLUSIVE_OR
+    };
 
     return ParseLeftAssociative<ExclusiveOrExpression, AndExpression>( parser, token, operators );
 }
@@ -429,9 +550,10 @@ AndExpression::~AndExpression()
 
 bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
-        operators.push_back( Lexer::AND );
+    const static std::vector<Lexer::TerminalType> operators =
+    {
+        Lexer::AND
+    };
 
     return ParseLeftAssociative<AndExpression, EqualityExpression>( parser, token, operators );
 }
@@ -453,14 +575,18 @@ EqualityExpression::~EqualityExpression()
 {
 }
 
+Type EqualityExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool EqualityExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::EQUALITY );
-        operators.push_back( Lexer::NOT_EQUALITY );
-    }
+        Lexer::EQUALITY,
+        Lexer::NOT_EQUALITY
+    };
 
     return ParseLeftAssociative<EqualityExpression, RelationalExpression>( parser, token, operators );
 }
@@ -482,16 +608,20 @@ RelationalExpression::~RelationalExpression()
 {
 }
 
+Type RelationalExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool RelationalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::LESS_THAN );
-        operators.push_back( Lexer::GREATER_THAN );
-        operators.push_back( Lexer::LESS_THAN_EQUALS );
-        operators.push_back( Lexer::GREATER_THAN_EQUALS );
-    }
+        Lexer::LESS_THAN,
+        Lexer::GREATER_THAN,
+        Lexer::LESS_THAN_EQUALS,
+        Lexer::GREATER_THAN_EQUALS
+    };
 
     return ParseLeftAssociative<RelationalExpression, ShiftExpression>( parser, token, operators );
 }
@@ -515,12 +645,11 @@ ShiftExpression::~ShiftExpression()
 
 bool ShiftExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::LEFT_SHIFT );
-        operators.push_back( Lexer::RIGHT_SHIFT );
-    }
+        Lexer::LEFT_SHIFT,
+        Lexer::RIGHT_SHIFT
+    };
 
     return ParseLeftAssociative<ShiftExpression, AdditiveExpression>( parser, token, operators );
 }
@@ -544,12 +673,11 @@ AdditiveExpression::~AdditiveExpression()
 
 bool AdditiveExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::PLUS );
-        operators.push_back( Lexer::MINUS );
-    }
+        Lexer::PLUS,
+        Lexer::MINUS
+    };
 
     return ParseLeftAssociative<AdditiveExpression, MultiplicativeExpression>( parser, token, operators );
 }
@@ -573,13 +701,12 @@ MultiplicativeExpression::~MultiplicativeExpression()
 
 bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    static std::vector<Lexer::TerminalType> operators;
-    if( operators.size() == 0 )
+    const static std::vector<Lexer::TerminalType> operators =
     {
-        operators.push_back( Lexer::MULTIPLY );
-        operators.push_back( Lexer::DIVIDE );
-        operators.push_back( Lexer::MODULO );
-    }
+        Lexer::MULTIPLY,
+        Lexer::DIVIDE,
+        Lexer::MODULO
+    };
 
     return ParseLeftAssociative<MultiplicativeExpression, CastExpression>( parser, token, operators );
 }
@@ -588,7 +715,8 @@ bool MultiplicativeExpression::Parse( Parser& parser, std::unique_ptr<Expression
 // CastExpression
 //------------------------------------------------------------------------------
 
-CastExpression::CastExpression()
+CastExpression::CastExpression( Type cast_type )
+    :m_castType( cast_type )
 {
 }
 
@@ -601,6 +729,12 @@ void CastExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Cast Expression\n";
+}
+
+//TODO
+Type CastExpression::GetReturnType() const
+{
+    return m_castType;
 }
 
 //TODO
@@ -631,6 +765,31 @@ void UnaryExpression::Print( int depth ) const
     std::cout << "Unary Expression\n";
     m_unaryOperator->Print( depth + 1 );
     m_expression->Print( depth + 1 );
+}
+
+Type UnaryExpression::GetReturnType() const
+{
+    if( m_unaryOperator->GetTerminalType() == Lexer::LOGICAL_NOT )
+        return Type::BOOL;
+    return m_expression->GetReturnType();
+}
+
+llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    //TODO
+    switch( m_unaryOperator->GetTerminalType() )
+    {
+        case Lexer::PLUS:
+            return m_expression->CodeGen( code_generator );
+        case Lexer::MINUS:
+            return code_generator.CreateNeg( *m_expression );
+        case Lexer::BITWISE_NOT:
+            return code_generator.CreateNot( *m_expression );
+        case Lexer::LOGICAL_NOT:
+            return code_generator.CreateLNot( *m_expression );
+        default:
+            return nullptr;
+    }
 }
 
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -731,6 +890,13 @@ void PostfixExpression::Print( int depth ) const
     std::cout << "Postfix Expression\n";
     m_expression->Print( depth + 1 );
     m_postfixOperator->Print( depth + 1 );
+}
+
+Type PostfixExpression::GetReturnType() const
+{
+    //TODO
+    assert(false && "complete me");
+    return Type::UNKNOWN_TYPE;
 }
 
 bool PostfixExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -953,8 +1119,7 @@ bool IncrementalOperator::Parse( Parser& parser, std::unique_ptr<IncrementalOper
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
-PrimaryExpression::PrimaryExpression( std::string identifier )
-    :m_identifier( std::move( identifier ) )
+PrimaryExpression::PrimaryExpression()
 {
 }
 
@@ -964,9 +1129,6 @@ PrimaryExpression::~PrimaryExpression()
 
 void PrimaryExpression::Print( int depth ) const
 {
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_identifier << "\n";
 }
 
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -981,10 +1143,8 @@ bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
 
     if( !parser.ExpectTerminal( Lexer::OPEN_ROUND ) )
         return false;
-
     if( !Expect<Expression>( parser, token ) )
         return false;
-
     if( !parser.ExpectTerminal( Lexer::CLOSE_ROUND ) )
         return false;
 
@@ -1009,6 +1169,12 @@ void IdentifierExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << m_identifier << "\n";
+}
+
+Type IdentifierExpression::GetReturnType() const
+{
+    assert( false && "complete me" );
+    return Type::UNKNOWN_TYPE;
 }
 
 bool IdentifierExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -1075,6 +1241,19 @@ void IntegralLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
+llvm::Value* IntegralLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    //TODO different sizes of int?
+    return llvm::ConstantInt::get( llvm::Type::getInt64Ty( code_generator.GetLLVMContext() ),
+                                   m_value );
+}
+
+Type IntegralLiteralExpression::GetReturnType() const
+{
+    //TODO
+    return Type::I64;
+}
+
 bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token )
 {
     std::string string;
@@ -1129,6 +1308,18 @@ void FloatingLiteralExpression::Print( int depth ) const
     std::cout << m_value << "\n";
 }
 
+llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    return llvm::ConstantFP::get( llvm::Type::getDoubleTy( code_generator.GetLLVMContext() ),
+                                  m_value );
+}
+
+Type FloatingLiteralExpression::GetReturnType() const
+{
+    //TODO
+    return Type::DOUBLE;
+}
+
 bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token )
 {
     std::string string;
@@ -1162,6 +1353,19 @@ void BooleanLiteralExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << m_value << "\n";
+}
+
+llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    if( m_value )
+        return llvm::ConstantInt::getTrue( code_generator.GetLLVMContext() );
+    else
+        return llvm::ConstantInt::getFalse( code_generator.GetLLVMContext() );
+}
+
+Type BooleanLiteralExpression::GetReturnType() const
+{
+    return Type::BOOL;
 }
 
 bool BooleanLiteralExpression::Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token )

@@ -28,11 +28,11 @@
 
 #include "state_assignment.hpp"
 
-#include <string>
-
 namespace JoeLang
 {
-    StateAssignment::StateAssignment( const std::string& state_name )
-    {
-    }
+
+StateAssignmentBase::~StateAssignmentBase()
+{
+}
+
 } // namespace JoeLang

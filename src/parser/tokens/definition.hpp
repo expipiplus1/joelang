@@ -29,6 +29,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <engine/pass.hpp>
@@ -41,6 +42,7 @@ namespace JoeLang
 namespace Parser
 {
 
+class CodeGenerator;
 class Parser;
 class PassDeclaration;
 class StateAssignmentStatement;
@@ -55,7 +57,9 @@ public:
     virtual
     ~PassDefinition();
 
-    Pass GetPass() const;
+    Pass GetPass( CodeGenerator& code_generator ) const;
+
+    void SetName( std::string name );
 
     virtual
     void Print( int depth ) const;
@@ -66,6 +70,7 @@ protected:
     PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments  );
 
 private:
+    std::string m_name;
     std::vector< std::unique_ptr<StateAssignmentStatement> > m_stateAssignments;
 };
 
@@ -78,7 +83,10 @@ class TechniqueDefinition : public JoeLang::Parser::Token
 public:
     virtual ~TechniqueDefinition();
 
-    Technique GetTechnique() const;
+    //TODO return a pointer
+    Technique GetTechnique( CodeGenerator& code_generator ) const;
+
+    void SetName( std::string name );
 
     virtual void Print( int depth ) const;
 
@@ -88,6 +96,7 @@ protected:
     TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > m_passes );
 
 private:
+    std::string m_name;
     std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 

@@ -29,16 +29,41 @@
 #include <iostream>
 
 #include <engine/context.hpp>
-
-//#include <engine/effect.hpp>
-//#include <parser/parser.hpp>
-//#include <parser/effect_factory.hpp>
+#include <engine/effect.hpp>
+#include <engine/state.hpp>
 
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
-    if( context.CreateEffectFromString( "technique t; pass pass1{ a= (12+1)/add(9.0, 10); }" ) )
-        std::cout << "success\n";
+    JoeLang::State<long long> my_state( "my_state", std::map<std::string,long long>({{"one", 1}, {"two", 2}}) );
+    my_state.SetCallbacks( [](long long v)
+                             {std::cout << "setting my_state to " << v << std::endl;},
+                           nullptr,
+                           nullptr );
+
+    JoeLang::State<bool> my_boolean_state( "my_boolean_state" );
+    my_boolean_state.SetCallbacks( [](bool v)
+                                     {std::cout << "setting my_boolean_state to " << v << std::endl;},
+                                   nullptr,
+                                   nullptr );
+
+    context.AddState( &my_state );
+    context.AddState( &my_boolean_state );
+
+    JoeLang::Effect* e = context.CreateEffectFromString(
+                             "technique t{ pass p{my_state = 3.14; my_boolean_state = false; } }" );
+
+    if( e )
+    {
+        const JoeLang::Technique* t = e->GetNamedTechnique( "t" );
+        if( t )
+            for( const auto& pass : t->GetPasses() )
+            {
+                std::cout << "Setting Pass: \'" << pass.GetName() << "\' state\n";
+                pass.SetState();
+                pass.ResetState();
+            }
+    }
     else
         std::cout << "fail\n";
 }

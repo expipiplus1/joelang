@@ -34,13 +34,25 @@
 namespace JoeLang
 {
 
-State::State( std::string name, Type type )
-    :m_name( std::move( name ) )
-    ,m_type( type )
+void DefaultStateResetCallback()
 {
 }
 
-const std::string& State::GetName() const
+bool DefaultStateValidateCallback()
+{
+    return true;
+}
+
+StateBase::StateBase( std::string name )
+    :m_name( std::move(name) )
+{
+}
+
+StateBase::~StateBase()
+{
+}
+
+const std::string& StateBase::GetName() const
 {
     return m_name;
 }

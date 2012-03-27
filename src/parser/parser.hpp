@@ -37,12 +37,23 @@
 namespace JoeLang
 {
 
+//------------------------------------------------------------------------------
+// Forward Declarations
+//------------------------------------------------------------------------------
+
+class Context;
+class StateBase;
+
 namespace Lexer
 {
 class Lexer;
 
 enum TerminalType : int;
 }
+
+//------------------------------------------------------------------------------
+// Parser
+//------------------------------------------------------------------------------
 
 namespace Parser
 {
@@ -53,7 +64,8 @@ class TranslationUnit;
 class Parser
 {
 public:
-    Parser();
+    Parser() = delete;
+    explicit Parser( const Context& c );
     ~Parser();
 
     void Print() const;
@@ -63,20 +75,25 @@ public:
     bool ExpectTerminal( Lexer::TerminalType terminal_type );
     bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
+    const StateBase* GetNamedState( const std::string& name ) const;
+
     std::size_t GetLexerPosition() const;
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
 
     void Error();
+    void Error( std::string error_message );
     bool Good() const;
 
 private:
     bool m_good = true;
 
-    std::unique_ptr<Lexer::Lexer> m_lexer;
-
-    std::set<Lexer::TerminalType> m_expectedTerminals;
-
     std::unique_ptr<TranslationUnit> m_translationUnit;
+
+    std::unique_ptr<Lexer::Lexer> m_lexer;
+    std::set<Lexer::TerminalType> m_expectedTerminals;
+    std::string m_errorMessage;
+
+    const Context& m_context;
 };
 
 template< typename T, typename U >

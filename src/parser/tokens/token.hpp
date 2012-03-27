@@ -30,6 +30,7 @@
 
 namespace JoeLang
 {
+
 namespace Parser
 {
 
@@ -37,6 +38,9 @@ namespace Parser
     if( !parser.Good() ) return false; \
     else (void)0
 
+#define CHECK_CODE_GENERATOR \
+    if( !code_generator.Good() ) return nullptr; \
+    else (void)0
 
 class Token
 {

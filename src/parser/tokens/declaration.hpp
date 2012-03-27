@@ -39,7 +39,7 @@ namespace JoeLang
 namespace Parser
 {
 
-class EffectFactory;
+class CodeGenerator;
 class Parser;
 class PassDefinition;
 class TechniqueDefinition;
@@ -55,7 +55,7 @@ public:
     virtual ~DeclarationBase();
 
     virtual
-    void Accept( EffectFactory& e );
+    void Accept( CodeGenerator& c );
 
     static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
 
@@ -93,6 +93,8 @@ public:
 
     virtual void Print( int depth ) const;
 
+    const std::string& GetName() const;
+
     const std::shared_ptr<PassDefinition>& GetDefinition() const;
 
     static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
@@ -115,7 +117,7 @@ public:
     virtual ~TechniqueDeclaration();
 
     virtual
-    void Accept( EffectFactory& e ) override;
+    void Accept( CodeGenerator& c ) override;
 
     const std::shared_ptr<TechniqueDefinition>& GetDefinition() const;
 

@@ -28,38 +28,39 @@
 
 #include "effect_factory.hpp"
 
-#include <iostream>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 
 #include <engine/effect.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/definition.hpp>
-#include <parser/tokens/translation_unit.hpp>
+#include <parser/code_generator.hpp>
+#include <parser/parser.hpp>
 
 namespace JoeLang
 {
 namespace Parser
 {
 
-Effect EffectFactory::CreateEffect( const std::unique_ptr<TranslationUnit>& t )
+EffectFactory::EffectFactory( const Context& context )
+    :m_context( context )
 {
-    for( const auto& declaration : t->GetDeclarations() )
-        declaration->Accept( *this );
-
-    return Effect( std::move( m_techniques ) );
 }
 
-void EffectFactory::Visit( DeclarationBase& d )
+std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string& string )
 {
-    std::cout << "DeclarationBase\n";
-}
+    Parser parser( m_context );
+    if( !parser.Parse( string ) )
+        return nullptr;
 
-void EffectFactory::Visit( TechniqueDeclaration& t )
-{
-    //TODO Assert on GetDefinition?
-    const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
-    if( definition )
-        m_techniques.push_back( definition->GetTechnique() );
-    std::cout << "technique\n";
+    const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
+
+    std::vector<Technique> techniques;
+    std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
+
+    CodeGenerator code_generator( m_context, techniques );
+    if( !code_generator.GenerateCode( ast, techniques, llvm_execution_engine ) )
+        return nullptr;
+
+    return std::unique_ptr<Effect>( new Effect( std::move(techniques),
+                                                std::move( llvm_execution_engine ) ) );
 }
 
 } // namespace Parser

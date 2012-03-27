@@ -28,20 +28,56 @@
 
 #pragma once
 
-#include <string>
+#include <functional>
+
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
 
-class StateAssignment
+template<typename T>
+class State;
+
+class StateAssignmentBase
 {
 public:
-    explicit StateAssignment( const std::string& state_name );
-    ~StateAssignment() = default;
+    virtual
+    ~StateAssignmentBase();
+
+    virtual
+    void SetState() const = 0;
+
+    virtual
+    void ResetState() const = 0;
+
+    virtual
+    bool ValidateState() const = 0;
+};
+
+template<typename T>
+class StateAssignment : public StateAssignmentBase
+{
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a StateAssignment with an unhandled type" );
+public:
+    StateAssignment( const State<T>& state, std::function<T()> getter );
+    virtual
+    ~StateAssignment();
+
+    virtual
+    void SetState() const override;
+
+    virtual
+    void ResetState() const override;
+
+    virtual
+    bool ValidateState() const override;
 
 private:
-    // functor for setting variable
-    // some kind of structure for holding llvm code for the expression
+    const State<T>& m_state;
+    std::function<T()> m_getter;
 };
 
 } // namespace JoeLang
+
+#include "state_assignment-inl.hpp"

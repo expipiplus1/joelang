@@ -28,24 +28,70 @@
 
 #pragma once
 
+#include <functional>
+#include <map>
 #include <string>
+
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
 
-enum Type : int;
+void DefaultStateResetCallback();
 
-class State
+bool DefaultStateValidateCallback();
+
+class StateBase
 {
 public:
-    State() = delete;
-    State( std::string name, Type type );
-    ~State() = default;
+    explicit
+    StateBase( std::string name );
+    virtual
+    ~StateBase();
 
     const std::string& GetName() const;
+
+    virtual
+    Type GetType() const = 0;
+
 private:
     std::string m_name;
-    Type m_type;
+};
+
+template<typename T>
+class State : public StateBase
+{
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a state with an unhandled type" );
+public:
+    State() = delete;
+    //TODO consider containing the map elsewhere
+    //because it's only used for parsing
+    State( std::string name, std::map<std::string, T> enumerations = {} );
+    virtual
+    ~State();
+
+    void SetCallbacks( std::function<void(T)> set_callback,
+                       std::function<void()>  reset_callback,
+                       std::function<bool()>  validate_callback );
+
+    //TODO enable passing by reference for large Ts
+    void SetState( T value ) const;
+    void ResetState() const;
+    bool ValidateState() const;
+
+    const std::string& GetName() const;
+    virtual
+    Type GetType() const override;
+
+private:
+    std::map< std::string, T > m_enumerations;
+
+    std::function<void(T)> m_setCallback;
+    std::function<void()> m_resetCallback;
+    std::function<bool()> m_validateCallback;
 };
 
 } // namespace JoeLang
+
+#include "state-inl.hpp"

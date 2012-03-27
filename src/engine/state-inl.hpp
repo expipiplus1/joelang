@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -26,53 +26,73 @@
     or implied, of Joe Hermaszewski.
 */
 
-#include "pass.hpp"
+#pragma once
 
-#include <memory>
+#include "state.hpp"
+
+#include <functional>
+#include <map>
 #include <string>
 #include <utility>
-#include <vector>
 
-#include <engine/state_assignment.hpp>
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
 
-Pass::Pass( std::string name )
-    :m_name( std::move(name) )
+template<typename T>
+void DefaultStateSetCallback( T value )
 {
 }
 
-Pass::Pass( std::string name,
-            std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
-    :m_name( std::move(name) )
-    ,m_stateAssignments( std::move( state_assignments ) )
+template<typename T>
+State<T>::State( std::string name, std::map< std::string, T > enumerations )
+    :StateBase( std::move(name) )
+    ,m_enumerations( std::move(enumerations) )
+    ,m_setCallback( DefaultStateSetCallback<T> )
+    ,m_resetCallback( DefaultStateResetCallback )
+    ,m_validateCallback( DefaultStateValidateCallback )
+{
+    //TODO check enumerations
+}
+
+template<typename T>
+State<T>::~State()
 {
 }
 
-void Pass::SetState() const
+template<typename T>
+void State<T>::SetCallbacks( std::function<void(T)> set_callback,
+                             std::function<void()> reset_callback,
+                             std::function<bool()> validate_callback )
 {
-    for( const auto& sa : m_stateAssignments )
-        sa->SetState();
+    m_setCallback   = set_callback ? set_callback : DefaultStateSetCallback<T>;
+    m_resetCallback = reset_callback ? reset_callback : DefaultStateResetCallback;
+    m_validateCallback   = validate_callback ? validate_callback : DefaultStateValidateCallback;
 }
 
-void Pass::ResetState() const
+template<typename T>
+void State<T>::SetState( T value ) const
 {
-    for( const auto& sa : m_stateAssignments )
-        sa->ResetState();
+    m_setCallback( value );
 }
 
-bool Pass::Validate() const
+template<typename T>
+void State<T>::ResetState() const
 {
-    for( const auto& sa : m_stateAssignments )
-        if( !sa->ValidateState() )
-            return false;
-    return true;
+    m_resetCallback();
 }
 
-const std::string& Pass::GetName() const
+template<typename T>
+bool State<T>::ValidateState() const
 {
-    return m_name;
+    return m_validateCallback();
+}
+
+template<typename T>
+Type State<T>::GetType() const
+{
+    return JoeLangType<T>::value;
 }
 
 } // namespace JoeLang

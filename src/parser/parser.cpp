@@ -33,6 +33,7 @@
 #include <set>
 #include <string>
 
+#include <engine/context.hpp>
 #include <parser/lexer.hpp>
 #include <parser/terminal_types.hpp>
 #include <parser/tokens/translation_unit.hpp>
@@ -42,7 +43,8 @@ namespace JoeLang
 namespace Parser
 {
 
-Parser::Parser()
+Parser::Parser( const Context& context )
+    :m_context( context )
 {
 }
 
@@ -63,13 +65,21 @@ bool Parser::Parse ( const std::string& string )
     if( TranslationUnit::Parse( *this, m_translationUnit ) )
         return true;
 
-    std::cout << "Error parsing: expected one of: ";
-    for( Lexer::TerminalType expected_terminal : m_expectedTerminals )
+    std::cout << "Error parsing at " << m_lexer->GetLineNumber() << ":"
+                                     << m_lexer->GetColumnNumber() << "\n";
+    if( m_errorMessage.size() == 0 )
     {
-        std::cout << "\"" << Lexer::GetTerminalString( expected_terminal ) << "\", ";
+        std::cout << "Expected one of: ";
+        for( Lexer::TerminalType expected_terminal : m_expectedTerminals )
+        {
+            std::cout << "\'" << Lexer::GetTerminalString( expected_terminal ) << "\', ";
+        }
     }
-    std::cout << "at line " << m_lexer->GetLineNumber() << ":" << m_lexer->GetColumnNumber();
-    std::cout << "\n";
+    else
+    {
+        std::cout << m_errorMessage;
+    }
+    std::cout << std::endl;
     return false;
 }
 
@@ -92,6 +102,11 @@ bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& str
     return false;
 }
 
+const StateBase* Parser::GetNamedState( const std::string& name ) const
+{
+    return m_context.GetNamedState( name );
+}
+
 std::size_t Parser::GetLexerPosition() const
 {
     return m_lexer->GetPosition();
@@ -105,6 +120,12 @@ const std::unique_ptr<TranslationUnit>& Parser::GetTranslationUnit() const
 void Parser::Error()
 {
     m_good = false;
+}
+
+void Parser::Error( std::string error_message )
+{
+    m_errorMessage = std::move( error_message );
+    Error();
 }
 
 bool Parser::Good() const

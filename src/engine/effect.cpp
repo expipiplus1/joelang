@@ -28,17 +28,39 @@
 
 #include "effect.hpp"
 
+#include <algorithm>
+#include <memory>
 #include <utility>
 #include <vector>
+
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 
 #include <engine/technique.hpp>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques )
+Effect::Effect( std::vector<Technique> techniques, std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine )
     :m_techniques( std::move( techniques ) )
+    ,m_llvmExecutionEngine( std::move( llvm_execution_engine ) )
 {
+}
+
+Effect::~Effect()
+{
+}
+
+const std::vector<Technique>& Effect::GetTechniques() const
+{
+    return m_techniques;
+}
+
+const Technique* Effect::GetNamedTechnique( const std::string& name ) const
+{
+    const auto& technique = std::find_if( m_techniques.begin(), m_techniques.end(),
+                                          [&name](const Technique& t)
+                                            {return t.GetName() == name;} );
+    return technique == m_techniques.end() ? nullptr :  &*technique;
 }
 
 } // namespace JoeLang

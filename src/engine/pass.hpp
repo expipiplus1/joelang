@@ -28,6 +28,8 @@
 
 #pragma once
 
+#include <memory>
+#include <string>
 #include <vector>
 
 #include <engine/state_assignment.hpp>
@@ -35,15 +37,26 @@
 namespace JoeLang
 {
 
+class StateAssignmentBase;
+
 class Pass
 {
 public:
     Pass() = default;
-    ~Pass() = default;
-    Pass( std::vector<StateAssignment> state_assignments );
+    explicit
+    Pass( std::string name );
+    Pass( std::string name,
+          std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
+
+    void SetState() const;
+    void ResetState() const;
+    bool Validate() const;
+
+    const std::string& GetName() const;
 
 private:
-    std::vector<StateAssignment> m_stateAssignments;
+    std::string m_name;
+    std::vector< std::unique_ptr<StateAssignmentBase> > m_stateAssignments;
 };
 
 } // namespace JoeLang
