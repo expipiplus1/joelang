@@ -369,32 +369,65 @@ llvm::Value* CodeGenerator::CreateShr( const Expression& l, const Expression& r 
 
 llvm::Value* CodeGenerator::CreateAdd( const Expression& l, const Expression& r )
 {
-    return m_llvmBuilder.CreateAdd( l.CodeGen( *this ),
-                                    r.CodeGen( *this ) );
+    Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
+    llvm::Value* l_casted = CreateCast( l, common_type );
+    llvm::Value* r_casted = CreateCast( r, common_type );
+
+    if( IsFloatingPoint( common_type ) )
+        return m_llvmBuilder.CreateFAdd( l_casted, r_casted );
+    else
+        return m_llvmBuilder.CreateAdd( l_casted, r_casted );
 }
 
 llvm::Value* CodeGenerator::CreateSub( const Expression& l, const Expression& r )
 {
-    return m_llvmBuilder.CreateSub( l.CodeGen( *this ),
-                                    r.CodeGen( *this ) );
+    Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
+    llvm::Value* l_casted = CreateCast( l, common_type );
+    llvm::Value* r_casted = CreateCast( r, common_type );
+
+    if( IsFloatingPoint( common_type ) )
+        return m_llvmBuilder.CreateFSub( l_casted, r_casted );
+    else
+        return m_llvmBuilder.CreateSub( l_casted, r_casted );
 }
 
 llvm::Value* CodeGenerator::CreateMul( const Expression& l, const Expression& r )
 {
-    return m_llvmBuilder.CreateMul( l.CodeGen( *this ),
-                                    r.CodeGen( *this ) );
+    Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
+    llvm::Value* l_casted = CreateCast( l, common_type );
+    llvm::Value* r_casted = CreateCast( r, common_type );
+
+    if( IsFloatingPoint( common_type ) )
+        return m_llvmBuilder.CreateFMul( l_casted, r_casted );
+    else
+        return m_llvmBuilder.CreateMul( l_casted, r_casted );
 }
 
 llvm::Value* CodeGenerator::CreateDiv( const Expression& l, const Expression& r )
 {
-    return m_llvmBuilder.CreateSDiv( l.CodeGen( *this ),
-                                     r.CodeGen( *this ) );
+    Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
+    llvm::Value* l_casted = CreateCast( l, common_type );
+    llvm::Value* r_casted = CreateCast( r, common_type );
+
+    if( IsFloatingPoint( common_type ) )
+        return m_llvmBuilder.CreateFDiv( l_casted, r_casted );
+    else
+        if( IsSigned( common_type ) )
+            return m_llvmBuilder.CreateSDiv( l_casted, r_casted );
+        else
+            return m_llvmBuilder.CreateUDiv( l_casted, r_casted );
 }
 
 llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r )
 {
-    return m_llvmBuilder.CreateSRem( l.CodeGen( *this ),
-                                     r.CodeGen( *this ) );
+    Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
+    llvm::Value* l_casted = CreateCast( l, common_type );
+    llvm::Value* r_casted = CreateCast( r, common_type );
+
+    if( IsSigned( common_type ) )
+        return m_llvmBuilder.CreateSRem( l_casted, r_casted );
+    else
+        return m_llvmBuilder.CreateURem( l_casted, r_casted );
 }
 
 //

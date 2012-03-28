@@ -51,7 +51,7 @@ int main( int argc, char** argv )
     context.AddState( &my_boolean_state );
 
     JoeLang::Effect* e = context.CreateEffectFromString(
-                             "technique t{ pass p{my_state = 3.14; my_boolean_state = false; } }" );
+                             "technique t{ pass p{my_state = 0.14 + 3; my_boolean_state = false; } }" );
 
     if( e )
     {
