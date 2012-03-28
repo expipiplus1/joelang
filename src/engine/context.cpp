@@ -61,9 +61,9 @@ Effect* Context::CreateEffectFromString( const std::string& string )
     std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
     if( e )
     {
-        auto ret = e.get();
+        Effect* ret = e.get();
         m_effects.push_back( std::move(e) );
-        return m_effects.rbegin()->get();
+        return ret;
     }
     return nullptr;
 }
