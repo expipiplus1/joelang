@@ -113,10 +113,9 @@ protected:
                           std::unique_ptr<Expression> assignment_expression );
 
 private:
-    //TODO rename these
-    std::unique_ptr<Expression> m_unaryExpression;
+    std::unique_ptr<Expression> m_assignee;
     std::unique_ptr<AssignmentOperator> m_assignmentOperator;
-    std::unique_ptr<Expression> m_assignmentExpression;
+    std::unique_ptr<Expression> m_assignment;
 };
 
 //------------------------------------------------------------------------------

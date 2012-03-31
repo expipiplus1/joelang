@@ -86,9 +86,9 @@ bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 AssignmentExpression::AssignmentExpression( std::unique_ptr<Expression> unary_expression,
                                             std::unique_ptr<AssignmentOperator> assignment_operator,
                                             std::unique_ptr<Expression> assignment_expression )
-    :m_unaryExpression( std::move( unary_expression ) )
+    :m_assignee( std::move( unary_expression ) )
     ,m_assignmentOperator( std::move( assignment_operator ) )
-    ,m_assignmentExpression( std::move( assignment_expression ) )
+    ,m_assignment( std::move( assignment_expression ) )
 {
 }
 
@@ -102,14 +102,14 @@ void AssignmentExpression::Print(int depth) const
         std::cout << " ";
     std::cout << "Assignment Expression\n";
 
-    m_unaryExpression->Print( depth + 1 );
+    m_assignee->Print( depth + 1 );
     m_assignmentOperator->Print( depth + 1 );
-    m_assignmentExpression->Print( depth + 1 );
+    m_assignment->Print( depth + 1 );
 }
 
 Type AssignmentExpression::GetReturnType() const
 {
-    return m_unaryExpression->GetReturnType();
+    return m_assignee->GetReturnType();
 }
 
 bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
