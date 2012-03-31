@@ -35,6 +35,12 @@
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
+    JoeLang::State<int> my_int_state( "my_int_state" );
+    my_int_state.SetCallbacks( [](int v)
+                             {std::cout << "setting my_int_state to " << v << std::endl;},
+                           nullptr,
+                           nullptr );
+
     JoeLang::State<long long> my_state( "my_state", std::map<std::string,long long>({{"one", 1}, {"two", 2}}) );
     my_state.SetCallbacks( [](long long v)
                              {std::cout << "setting my_state to " << v << std::endl;},
@@ -48,10 +54,11 @@ int main( int argc, char** argv )
                                    nullptr );
 
     context.AddState( &my_state );
+    context.AddState( &my_int_state );
     context.AddState( &my_boolean_state );
 
     JoeLang::Effect* e = context.CreateEffectFromString(
-                             "technique t{ pass p{my_state = 0.14 + 3; my_boolean_state = false; } }" );
+                             "technique t{ pass p{ my_int_state = 5%2.0;my_state = 0.14 + 3;} pass p2{ my_boolean_state = false; } }" );
 
     if( e )
     {

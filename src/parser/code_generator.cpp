@@ -109,6 +109,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression )
 {
+
     std::vector<llvm::Type*> no_arguments;
 
     //TODO correct return type
@@ -130,6 +131,10 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     m_llvmBuilder.SetInsertPoint( body );
 
     llvm::Value* v = CreateCast( expression, state.GetType() );
+
+    if( !m_good )
+        return nullptr;
+
     assert( v && "Invalid expression llvm::Value*" );
 
     m_llvmBuilder.CreateRet( v );
@@ -292,12 +297,14 @@ llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 llvm::Value* CodeGenerator::CreateLOr( const Expression& l, const Expression& r )
 {
     // TODO cast to bool
+    Error( "LOR not implemented" );
     return nullptr;
 }
 
 llvm::Value* CodeGenerator::CreateLAnd( const Expression& l, const Expression& r )
 {
     // TODO cast to bool
+    Error( "LAND not implemented" );
     return nullptr;
 }
 
@@ -420,6 +427,13 @@ llvm::Value* CodeGenerator::CreateDiv( const Expression& l, const Expression& r 
 
 llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r )
 {
+    if( IsFloatingPoint( l.GetReturnType() ) ||
+        IsFloatingPoint( r.GetReturnType() ) )
+    {
+        //TODO argument type names
+        Error( "Invalid Arguments to % operator" );
+        return nullptr;
+    }
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
     llvm::Value* l_casted = CreateCast( l, common_type );
     llvm::Value* r_casted = CreateCast( r, common_type );
