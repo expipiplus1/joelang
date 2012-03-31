@@ -99,10 +99,8 @@ void CodeGenerator::Visit( DeclarationBase& d )
 
 void CodeGenerator::Visit( TechniqueDeclaration& t )
 {
-    //TODO Techniques shouldn't be declared without a definition
-    const std::shared_ptr<TechniqueDefinition>& definition = t.GetDefinition();
-    assert( definition && "TODO get rid of this" );
-    m_techniques.push_back( std::move( definition->GetTechnique( *this ) ) );
+    const TechniqueDefinition& definition = t.GetDefinition();
+    m_techniques.push_back( std::move( definition.GetTechnique( *this ) ) );
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(

@@ -47,6 +47,7 @@ class TechniqueDefinition;
 //------------------------------------------------------------------------------
 // DeclarationBase
 // Parse Matches for any kind of declaration
+// Including function and technique definitions
 //------------------------------------------------------------------------------
 
 class DeclarationBase : public JoeLang::Parser::Token
@@ -119,18 +120,18 @@ public:
     virtual
     void Accept( CodeGenerator& c ) override;
 
-    const std::shared_ptr<TechniqueDefinition>& GetDefinition() const;
+    const TechniqueDefinition& GetDefinition() const;
 
     virtual void Print( int depth ) const;
 
     static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
 
 protected:
-    TechniqueDeclaration( std::string name, std::shared_ptr<TechniqueDefinition> definition );
+    TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition );
 
 private:
     std::string m_name;
-    std::shared_ptr<TechniqueDefinition> m_definition;
+    std::unique_ptr<TechniqueDefinition> m_definition;
 };
 
 } // namespace Parser

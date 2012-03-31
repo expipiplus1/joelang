@@ -28,6 +28,7 @@
 
 #include "declaration.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -185,10 +186,11 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
 // TechniqueDeclaration
 //------------------------------------------------------------------------------
 
-TechniqueDeclaration::TechniqueDeclaration( std::string name, std::shared_ptr<TechniqueDefinition> definition )
+TechniqueDeclaration::TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition )
     :m_name( std::move( name ) )
     ,m_definition( std::move( definition ) )
 {
+    assert( m_definition );
 }
 
 TechniqueDeclaration::~TechniqueDeclaration()
@@ -200,9 +202,9 @@ void TechniqueDeclaration::Accept( CodeGenerator& c )
     c.Visit( *this );
 }
 
-const std::shared_ptr<TechniqueDefinition>& TechniqueDeclaration::GetDefinition() const
+const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
 {
-    return m_definition;
+    return *m_definition;
 }
 
 void TechniqueDeclaration::Print( int depth ) const
@@ -229,26 +231,15 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
         return false;
 
+    // TODO check name uniqueness in table
     std::string name;
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
         return false;
 
-    if( parser.ExpectTerminal( Lexer::SEMICOLON ) )
-    {
-        //
-        // This is a regular declaration
-        // TODO: Look up the name in a table and create links and things
-        //
-        token.reset( new TechniqueDeclaration( name, nullptr ) );
-        return true;
-    }
-    CHECK_PARSER;
-
     //
-    // This declaration is also a definition
+    // Technique Declarations always have a definition
     //
-    std::unique_ptr< TechniqueDefinition > definition;
-
+    std::unique_ptr<TechniqueDefinition> definition;
     if( !Expect<TechniqueDefinition>( parser, definition ) )
         return false;
 
