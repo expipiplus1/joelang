@@ -62,6 +62,7 @@ class TranslationUnit;
 class CodeGenerator
 {
 public:
+    // Passing techniques in here because of this bug
     // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52591
     CodeGenerator( const Context& context, std::vector<Technique>& techniques );
     ~CodeGenerator();
