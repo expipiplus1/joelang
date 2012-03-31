@@ -112,7 +112,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     std::vector<llvm::Type*> no_arguments;
 
-    //TODO correct return type
     llvm::FunctionType* prototype = llvm::FunctionType::get(
                                         GetLLVMType( state.GetType(), m_llvmContext ),
                                         no_arguments,
@@ -142,7 +141,11 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     function->dump();
 
     //TODO handle this a bit better than aborting
-    llvm::verifyFunction( *function, llvm::AbortProcessAction );
+    if( llvm::verifyFunction( *function, llvm::PrintMessageAction ) )
+    {
+        Error( "Unknown problem generating llvm function" );
+        return nullptr;
+    }
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
