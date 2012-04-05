@@ -74,16 +74,16 @@ Effect* Context::CreateEffectFromString( const std::string& string )
 
 Effect* Context::CreateEffectFromFile( const std::string& file_name )
 {
-   std::ifstream t( file_name );
-   assert( t && "File error" );
+   std::ifstream file( file_name );
+   assert( file && "File error" );
 
    std::string string;
 
-   t.seekg( 0, std::ios::end );
-   string.reserve( t.tellg() );
-   t.seekg( 0, std::ios::beg );
+   file.seekg( 0, std::ios::end );
+   string.reserve( file.tellg() );
+   file.seekg( 0, std::ios::beg );
 
-   string.assign((std::istreambuf_iterator<char>(t)),
+   string.assign((std::istreambuf_iterator<char>(file)),
                   std::istreambuf_iterator<char>());
 
    return CreateEffectFromString( string );
