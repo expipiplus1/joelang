@@ -37,32 +37,31 @@ int main( int argc, char** argv )
     JoeLang::Context context;
     JoeLang::State<int> my_int_state( "my_int_state" );
     my_int_state.SetCallbacks( [](int v) -> void
-                             {std::cout << "setting my_int_state to " << v << std::endl;},
+                                 {std::cout << "setting my_int_state to " << v << std::endl;},
+                               nullptr,
+                               nullptr );
+
+    JoeLang::State<float> my_state( "my_floating_state", std::map<std::string,float>({{"one", 1}, {"two", 2}}) );
+    my_state.SetCallbacks( [](float v) -> void
+                             {std::cout << "setting my_floating_state to " << v << std::endl;},
                            nullptr,
                            nullptr );
 
-    JoeLang::State<long long> my_state( "my_state", std::map<std::string,long long>({{"one", 1}, {"two", 2}}) );
-    my_state.SetCallbacks( [](long long v) -> void
-                             {std::cout << "setting my_state to " << v << std::endl;},
-                           nullptr,
-                           nullptr );
-
-    JoeLang::State<bool> my_boolean_state( "my_boolean_state" );
-    my_boolean_state.SetCallbacks( [](bool v) -> void
-                                     {std::cout << "setting my_boolean_state to " << v << std::endl;},
-                                   nullptr,
-                                   nullptr );
+    JoeLang::State<bool> my_bool_state( "my_bool_state" );
+    my_bool_state.SetCallbacks( [](bool v) -> void
+                                  {std::cout << "setting my_bool_state to " << v << std::endl;},
+                                nullptr,
+                                nullptr );
 
     context.AddState( &my_state );
     context.AddState( &my_int_state );
-    context.AddState( &my_boolean_state );
+    context.AddState( &my_bool_state );
 
-    JoeLang::Effect* e = context.CreateEffectFromString(
-                             "technique t{ pass p{ my_int_state = 5%2;my_state = 0.14 + 3;} pass p2{ my_boolean_state = false; } }" );
+    JoeLang::Effect* e = context.CreateEffectFromFile( "test.jfx" );
 
     if( e )
     {
-        const JoeLang::Technique* t = e->GetNamedTechnique( "t" );
+        const JoeLang::Technique* t = e->GetNamedTechnique( "t1" );
         if( t )
             for( const auto& pass : t->GetPasses() )
             {
