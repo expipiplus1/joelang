@@ -47,6 +47,7 @@ public:
     bool AddState( StateBase* state );
 
     Effect* CreateEffectFromString( const std::string& string );
+    Effect* CreateEffectFromFile(   const std::string& file_name );
 
     const StateBase* GetNamedState( const std::string& name ) const;
 private:

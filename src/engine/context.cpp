@@ -29,7 +29,10 @@
 #include "context.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <fstream>
 #include <memory>
+#include <streambuf>
 #include <string>
 #include <utility>
 #include <vector>
@@ -66,6 +69,23 @@ Effect* Context::CreateEffectFromString( const std::string& string )
         return ret;
     }
     return nullptr;
+}
+
+Effect* Context::CreateEffectFromFile( const std::string& file_name )
+{
+   std::ifstream t( file_name );
+   assert( t && "File error" );
+
+   std::string string;
+
+   t.seekg( 0, std::ios::end );
+   string.reserve( t.tellg() );
+   t.seekg( 0, std::ios::beg );
+
+   string.assign((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+
+   return CreateEffectFromString( string );
 }
 
 const StateBase* Context::GetNamedState(const std::string& name) const
