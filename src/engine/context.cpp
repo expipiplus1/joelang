@@ -53,7 +53,8 @@ Context::Context()
 
 bool Context::AddState( StateBase* state )
 {
-    //TODO
+    //TODO Check for duplicate state names
+    //TODO Check for invalid state enumerants
     m_states.push_back( state );
     return true;
 }
