@@ -31,12 +31,6 @@
 #include <cstdint>
 #include <type_traits>
 
-namespace llvm
-{
-    class Type;
-    class LLVMContext;
-}
-
 namespace JoeLang
 {
 
@@ -65,21 +59,6 @@ enum class Type
     FLOAT,
     DOUBLE,
 };
-
-//TODO this stuff probably doesn't have to be public
-
-Type GetCommonType( Type t1, Type t2 );
-
-bool IsFloatingPoint( Type t );
-
-bool IsIntegral( Type t );
-
-bool IsSigned( Type t );
-
-std::size_t SizeOf( Type t );
-
-llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
-
 
 template<Type t> struct TypeOfJoeLangType
 { static_assert(t!=Type::UNKNOWN_TYPE,

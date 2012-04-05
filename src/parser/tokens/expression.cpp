@@ -42,6 +42,7 @@
 #include <llvm/Support/IRBuilder.h>
 
 #include <engine/types.hpp>
+#include <engine/internal/type_properties.hpp>
 #include <parser/code_generator.hpp>
 #include <parser/parser.hpp>
 #include <parser/terminal_types.hpp>
