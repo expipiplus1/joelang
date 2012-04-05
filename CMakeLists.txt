@@ -38,6 +38,8 @@ add_executable( joelang src/joelang.cpp
                         src/parser/parser.cpp
                         src/parser/parser.hpp
                         src/parser/parser-inl.hpp
+                        src/parser/symbol_table.cpp
+                        src/parser/symbol_table.hpp
                         src/parser/terminal_types.cpp
                         src/parser/terminal_types.hpp
                         src/parser/tokens/declaration.cpp
