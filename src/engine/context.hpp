@@ -38,6 +38,7 @@ namespace JoeLang
 class Effect;
 class StateBase;
 
+//TODO implement error collection
 class Context
 {
 public:
