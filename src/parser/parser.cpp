@@ -102,6 +102,11 @@ bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& str
     return false;
 }
 
+SymbolTable& Parser::GetSymbolTable()
+{
+    return m_symbolTable;
+}
+
 const StateBase* Parser::GetNamedState( const std::string& name ) const
 {
     return m_context.GetNamedState( name );

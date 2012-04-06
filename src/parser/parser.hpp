@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include <parser/symbol_table.hpp>
+
 namespace JoeLang
 {
 
@@ -75,6 +77,8 @@ public:
     bool ExpectTerminal( Lexer::TerminalType terminal_type );
     bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
 
+    SymbolTable& GetSymbolTable();
+
     const StateBase* GetNamedState( const std::string& name ) const;
 
     std::size_t GetLexerPosition() const;
@@ -85,12 +89,15 @@ public:
     bool Good() const;
 
 private:
-    bool m_good = true;
 
     std::unique_ptr<TranslationUnit> m_translationUnit;
 
     std::unique_ptr<Lexer::Lexer> m_lexer;
     std::set<Lexer::TerminalType> m_expectedTerminals;
+
+    SymbolTable m_symbolTable;
+
+    bool m_good = true;
     std::string m_errorMessage;
 
     const Context& m_context;
