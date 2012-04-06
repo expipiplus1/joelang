@@ -83,10 +83,10 @@ public:
     virtual
     Type GetType() const override;
 
-    const std::map< std::string, T >& GetEnumerations() const;
+    const std::map<std::string, T>& GetEnumerations() const;
 
 private:
-    std::map< std::string, T > m_enumerations;
+    std::map<std::string, T> m_enumerations;
 
     std::function<void(T)> m_setCallback;
     std::function<void()> m_resetCallback;
