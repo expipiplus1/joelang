@@ -44,15 +44,14 @@ class Context
 public:
     Context();
 
-    bool AddState( StateBase* state );
-
     Effect* CreateEffectFromString( const std::string& string );
     Effect* CreateEffectFromFile(   const std::string& file_name );
 
+    bool AddState( StateBase* state );
     const StateBase* GetNamedState( const std::string& name ) const;
 private:
-    std::vector<StateBase*> m_states;
-    std::vector< std::unique_ptr<Effect> > m_effects;
+    std::vector<StateBase*>              m_states;
+    std::vector<std::unique_ptr<Effect>> m_effects;
 };
 
 } // namespace JoeLang
