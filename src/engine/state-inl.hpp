@@ -95,4 +95,10 @@ Type State<T>::GetType() const
     return JoeLangType<T>::value;
 }
 
+template<typename T>
+const std::map<std::string, T>& State<T>::GetEnumerations() const
+{
+    return m_enumerations;
+}
+
 } // namespace JoeLang
