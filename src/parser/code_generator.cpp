@@ -121,7 +121,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                                        llvm::Function::ExternalLinkage,
                                                        "",
                                                        m_llvmModule );
-    assert( prototype && "Error generating llvm function" );
+    assert( function && "Error generating llvm function" );
 
     llvm::BasicBlock* body = llvm::BasicBlock::Create( m_llvmContext,
                                                        "",
