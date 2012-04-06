@@ -81,6 +81,7 @@ public:
     bool ValidateState() const;
 
     const std::string& GetName() const;
+
     virtual
     Type GetType() const override;
 
