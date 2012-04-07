@@ -52,6 +52,10 @@ Context::Context()
     llvm::InitializeNativeTarget();
 }
 
+Context::~Context()
+{
+}
+
 bool Context::AddState( StateBase* state )
 {
     for( const auto s : m_states )
