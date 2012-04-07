@@ -1134,6 +1134,7 @@ void PrimaryExpression::Print( int depth ) const
 
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    //TODO this may require some more logic for handling arrays, functions and structs
     if( Expect<IdentifierExpression>( parser, token ) )
         return true;
     CHECK_PARSER;
@@ -1180,11 +1181,59 @@ Type IdentifierExpression::GetReturnType() const
 
 bool IdentifierExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    if( Expect<ConstantValueExpression>( parser, token ) )
+        return true;
+    CHECK_PARSER;
+
     std::string identifier;
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, identifier ) )
         return false;
 
     token.reset( new IdentifierExpression( identifier ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// ConstantValueExpression
+//------------------------------------------------------------------------------
+
+ConstantValueExpression::ConstantValueExpression( std::shared_ptr<LiteralExpression> value )
+    :m_value( std::move( value ) )
+{
+}
+
+ConstantValueExpression::~ConstantValueExpression()
+{
+}
+
+void ConstantValueExpression::Print( int depth ) const
+{
+    m_value->Print( depth );
+}
+
+llvm::Value* ConstantValueExpression::CodeGen( CodeGenerator& code_generator ) const
+{
+    return m_value->CodeGen( code_generator );
+}
+
+Type ConstantValueExpression::GetReturnType() const
+{
+    return m_value->GetReturnType();
+}
+
+bool ConstantValueExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+{
+    std::string identifier;
+    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, identifier ) )
+        return false;
+
+    //TODO undeclared identifier error reporting somewhere here
+    //This will probably have to be folded into IdentifierExpression
+    std::shared_ptr<LiteralExpression> e;
+    if( !parser.GetSymbolTable().GetConstant( identifier, e ) )
+        return false;
+
+    token.reset( new ConstantValueExpression( e ) );
     return true;
 }
 

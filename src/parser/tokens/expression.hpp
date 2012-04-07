@@ -718,6 +718,35 @@ protected:
 };
 
 //------------------------------------------------------------------------------
+// ConstantValueExpression
+//------------------------------------------------------------------------------
+
+class ConstantValueExpression : public JoeLang::Parser::Expression
+{
+public:
+    virtual
+    ~ConstantValueExpression();
+
+    virtual
+    void Print( int depth ) const;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_generator ) const override;
+
+    virtual
+    Type GetReturnType() const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+protected:
+    ConstantValueExpression( std::shared_ptr<LiteralExpression> value );
+
+private:
+    std::shared_ptr<LiteralExpression> m_value;
+};
+
+//------------------------------------------------------------------------------
 // IntegralLiteralExpression
 //------------------------------------------------------------------------------
 
@@ -739,7 +768,7 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token );
 
-protected:
+//protected:
     IntegralLiteralExpression( long long value );
 
 private:
@@ -768,7 +797,7 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token );
 
-protected:
+//protected:
     FloatingLiteralExpression( double value );
 
 private:
@@ -797,7 +826,7 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token );
 
-protected:
+//protected:
     BooleanLiteralExpression( bool value );
 
 private:
