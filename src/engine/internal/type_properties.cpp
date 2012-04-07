@@ -62,14 +62,21 @@ Type GetCommonType( Type t1, Type t2 )
         if( t1 == t || t2 == t )
             return t;
 
+    //TODO issue warning somewhere around here?
     return Type::UNKNOWN_TYPE;
 }
 
 bool IsIntegral( Type t )
 {
-    return t != Type::UNKNOWN_TYPE &&
-           t != Type::DOUBLE &&
-           t != Type::FLOAT;
+    return t == Type::BOOL ||
+           t == Type::I8   ||
+           t == Type::I16  ||
+           t == Type::I32  ||
+           t == Type::I64  ||
+           t == Type::U8   ||
+           t == Type::U16  ||
+           t == Type::U32  ||
+           t == Type::U64;
 }
 
 bool IsFloatingPoint( Type t )
@@ -139,6 +146,7 @@ const std::string& GetTypeString( Type t )
         { Type::U8,           "u8" },
         { Type::I8,           "i8" },
         { Type::BOOL,         "bool" },
+        { Type::STRING,       "string" },
     };
 
     return string_map.at(t);

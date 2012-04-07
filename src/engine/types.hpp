@@ -29,6 +29,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 #include <type_traits>
 
 namespace JoeLang
@@ -58,6 +59,9 @@ enum class Type
     // Floating point types
     FLOAT,
     DOUBLE,
+
+    // String types
+    STRING
 };
 
 using jl_bool   = bool;
@@ -71,6 +75,7 @@ using jl_u32    = std::uint32_t;
 using jl_u64    = std::uint64_t;
 using jl_float  = float;
 using jl_double = double;
+using jl_string = std::string;
 
 template<typename T>
 struct JoeLangType
@@ -129,9 +134,11 @@ private:
                 ? GetFloatingPointType()
                 : std::is_same<bool,T>::value
                     ? Type::BOOL
-                    : std::is_integral<T>::value
-                        ? GetIntegralType()
-                        : Type::UNKNOWN_TYPE;
+                    : std::is_same<std::string,T>::value
+                        ? Type::STRING
+                        :std::is_integral<T>::value
+                            ? GetIntegralType()
+                            : Type::UNKNOWN_TYPE;
     }
 
 public:
