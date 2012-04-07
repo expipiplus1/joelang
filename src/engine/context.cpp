@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cassert>
 #include <fstream>
+#include <functional>
 #include <memory>
 #include <streambuf>
 #include <string>
@@ -101,6 +102,16 @@ const StateBase* Context::GetNamedState(const std::string& name) const
         return nullptr;
 
     return *s;
+}
+
+void Context::SetErrorCallback( std::function<void(std::string)> error_callback )
+{
+    m_errorCallback = std::move(error_callback);
+}
+
+const std::function<void(std::string)>& Context::GetErrorCallback() const
+{
+    return m_errorCallback;
 }
 
 } // namespace JoeLang

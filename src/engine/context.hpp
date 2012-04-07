@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -49,9 +50,14 @@ public:
 
     bool AddState( StateBase* state );
     const StateBase* GetNamedState( const std::string& name ) const;
+
+    void SetErrorCallback( std::function<void(std::string)> error_callback );
+    const std::function<void(std::string)>& GetErrorCallback() const;
 private:
     std::vector<StateBase*>              m_states;
     std::vector<std::unique_ptr<Effect>> m_effects;
+
+    std::function<void(std::string)>     m_errorCallback;
 };
 
 } // namespace JoeLang
