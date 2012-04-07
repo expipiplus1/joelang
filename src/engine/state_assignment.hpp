@@ -78,6 +78,30 @@ private:
     std::function<T()> m_getter;
 };
 
+template<typename T>
+class ConstStateAssignment : public StateAssignmentBase
+{
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+                   "Can't create a ConstStateAssignment with an unhandled type" );
+public:
+    ConstStateAssignment( const State<T>& state, T value );
+    virtual
+    ~ConstStateAssignment();
+
+    virtual
+    void SetState() const override;
+
+    virtual
+    void ResetState() const override;
+
+    virtual
+    bool ValidateState() const override;
+
+private:
+    const State<T>& m_state;
+    T m_value;
+};
+
 } // namespace JoeLang
 
 #include "state_assignment-inl.hpp"

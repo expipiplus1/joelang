@@ -68,4 +68,35 @@ bool StateAssignment<T>::ValidateState() const
     return m_state.ValidateState();
 }
 
+template<typename T>
+ConstStateAssignment<T>::ConstStateAssignment( const State<T>& state,
+                                               T value )
+    :m_state( state )
+    ,m_value( std::move(value) )
+{
+}
+
+template<typename T>
+ConstStateAssignment<T>::~ConstStateAssignment()
+{
+}
+
+template<typename T>
+void ConstStateAssignment<T>::SetState() const
+{
+    m_state.SetState( m_value );
+}
+
+template<typename T>
+void ConstStateAssignment<T>::ResetState() const
+{
+    m_state.ResetState();
+}
+
+template<typename T>
+bool ConstStateAssignment<T>::ValidateState() const
+{
+    return m_state.ValidateState();
+}
+
 } // namespace JoeLang
