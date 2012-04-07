@@ -67,10 +67,6 @@ private:
     void ConsumeIgnoredTerminals();
     void ReadChars( std::size_t num_chars );
 
-    static std::map< TerminalType, const LiteralTerminal* > s_punctuationTerminalMap;
-    static std::map< TerminalType, const FunctionalTerminal* > s_literalTerminalMap;
-    static std::map< TerminalType, const LiteralTerminal* > s_keywordTerminalMap;
-
     std::size_t m_numTokensRead;
 
     const std::string m_string;

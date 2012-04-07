@@ -29,8 +29,8 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <string>
-#include <vector>
 
 namespace JoeLang
 {
@@ -156,7 +156,6 @@ struct LiteralTerminal
               const std::string::const_iterator end ) const;
 
     std::string matched_string;
-    TerminalType terminal_type;
     std::string readable_string;
 };
 
@@ -171,7 +170,6 @@ struct FunctionalTerminal
 
     std::function< int( std::string::const_iterator,
                         std::string::const_iterator ) > function;
-    TerminalType terminal_type;
     std::string readable_string;
 };
 
@@ -179,11 +177,10 @@ struct FunctionalTerminal
 // The terminals
 //------------------------------------------------------------------------------
 
-//TODO make these maps insead of vector
-extern const std::vector<FunctionalTerminal> g_ignoredTerminals;
-extern const std::vector<LiteralTerminal>    g_punctuationTerminals;
-extern const std::vector<FunctionalTerminal> g_literalTerminals;
-extern const std::vector<LiteralTerminal>    g_keywordTerminals;
+extern const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals;
+extern const std::map<TerminalType, LiteralTerminal>    g_punctuationTerminals;
+extern const std::map<TerminalType, FunctionalTerminal> g_literalTerminals;
+extern const std::map<TerminalType, LiteralTerminal>    g_keywordTerminals;
 
 //------------------------------------------------------------------------------
 // Reading Functions

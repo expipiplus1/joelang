@@ -30,8 +30,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <map>
 #include <string>
-#include <vector>
 
 namespace JoeLang
 {
@@ -45,78 +45,78 @@ namespace Lexer
 //
 // Ignored Sequence
 //
-const std::vector<FunctionalTerminal> g_ignoredTerminals =
+const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals =
 {
-    { ReadWhitespace,   WHITESPACE,    "whitespace"    },
-    { ReadLineComment,  LINE_COMMENT,  "line comment"  },
-    { ReadBlockComment, BLOCK_COMMENT, "block comment" }
+    { WHITESPACE, { ReadWhitespace,   "whitespace"    } },
+    { WHITESPACE, { ReadLineComment,  "line comment"  } },
+    { WHITESPACE, { ReadBlockComment, "block comment" } }
 };
 
 //
 // Punctuation
 //
-const std::vector<LiteralTerminal> g_punctuationTerminals =
+const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
 {
-    { "{",  OPEN_BRACE,     "" },
-    { "}",  CLOSE_BRACE,    "" },
-    { "(",  OPEN_ROUND,     "" },
-    { ")",  CLOSE_ROUND,    "" },
-    { "<",  OPEN_ANGLED,    "" },
-    { ">",  CLOSE_ANGLED,   "" },
-    { "[",  OPEN_SQUARE,    "" },
-    { "]",  CLOSE_SQUARE,   "" },
+    { OPEN_BRACE,           { "{"  } },
+    { CLOSE_BRACE,          { "}"  } },
+    { OPEN_ROUND,           { "("  } },
+    { CLOSE_ROUND,          { ")"  } },
+    { OPEN_ANGLED,          { "<"  } },
+    { CLOSE_ANGLED,         { ">"  } },
+    { OPEN_SQUARE,          { "["  } },
+    { CLOSE_SQUARE,         { "]"  } },
 
-    { "==", EQUALITY,       "" },
-    { "!=", NOT_EQUALITY,   "" },
-    { "<=", LESS_THAN_EQUALS,    "" },
-    { ">=", GREATER_THAN_EQUALS, "" },
-    { "<",  LESS_THAN,      "" },
-    { ">",  GREATER_THAN,   "" },
+    { EQUALITY,             { "==" } },
+    { NOT_EQUALITY,         { "!=" } },
+    { LESS_THAN_EQUALS,     { "<=" } },
+    { GREATER_THAN_EQUALS,  { ">=" } },
+    { LESS_THAN,            { "<"  } },
+    { GREATER_THAN,         { ">"  } },
 
-    { "=",  EQUALS,          "" },
-    { "+=", PLUS_EQUALS,     "" },
-    { "-=", MINUS_EQUALS,    "" },
-    { "*=", MULTIPLY_EQUALS, "" },
-    { "/=", DIVIDE_EQUALS,   "" },
-    { "%=", MODULO_EQUALS,   "" },
-    { "&=", AND_EQUALS,      "" },
-    { "|=", INCLUSIVE_OR_EQUALS, "" },
-    { "^=", EXCLUSIVE_OR_EQUALS, "" },
-    { "<<=", LEFT_SHIFT_EQUALS,  "" },
-    { ">>=", RIGHT_SHIFT_EQUALS, "" },
+    { EQUALS,               { "="  } },
+    { PLUS_EQUALS,          { "+=" } },
+    { MINUS_EQUALS,         { "-=" } },
+    { MULTIPLY_EQUALS,      { "*=" } },
+    { DIVIDE_EQUALS,        { "/=" } },
+    { MODULO_EQUALS,        { "%=" } },
+    { AND_EQUALS,           { "&=" } },
+    { INCLUSIVE_OR_EQUALS,  { "|=" } },
+    { EXCLUSIVE_OR_EQUALS,  { "^=" } },
+    { LEFT_SHIFT_EQUALS,    { "<<="} },
+    { RIGHT_SHIFT_EQUALS,   { ">>="} },
 
-    { "&&", LOGICAL_AND,    "" },
-    { "||", LOGICAL_OR,     "" },
-    { "!",  LOGICAL_NOT,    "" },
+    { LOGICAL_AND,          { "&&" } },
+    { LOGICAL_OR,           { "||" } },
+    { LOGICAL_NOT,          { "!"  } },
 
-    { "++", INCREMENT,      "" },
-    { "--", DECREMENT,      "" },
-    { "+",  PLUS,           "" },
-    { "-",  MINUS,          "" },
-    { "*",  MULTIPLY,       "" },
-    { "/",  DIVIDE,         "" },
-    { "%",  MODULO,         "" },
-    { "&",  AND,            "" },
-    { "|",  INCLUSIVE_OR,   "" },
-    { "^",  EXCLUSIVE_OR,   "" },
-    { "~",  BITWISE_NOT,    "" },
-    { "<<", LEFT_SHIFT,     "" },
-    { ">>", RIGHT_SHIFT,    "" },
+    { INCREMENT,            { "++" } },
+    { DECREMENT,            { "--" } },
+    { PLUS,                 { "+"  } },
+    { MINUS,                { "-"  } },
+    { MULTIPLY,             { "*"  } },
+    { DIVIDE,               { "/"  } },
+    { MODULO,               { "%"  } },
+    { AND,                  { "&"  } },
+    { INCLUSIVE_OR,         { "|"  } },
+    { EXCLUSIVE_OR,         { "^"  } },
+    { BITWISE_NOT,          { "~"  } },
+    { LEFT_SHIFT,           { "<<" } },
+    { RIGHT_SHIFT,          { ">>" } },
 
-    { ";",  SEMICOLON,      "" },
-    { ",",  COMMA,          "" },
-    { ".",  PERIOD,         "" },
-    { ":",  COLON,          "" },
-    { "?",  QUERY,          "" }
+    { SEMICOLON,            { ";"  } },
+    { COMMA,                { ","  } },
+    { PERIOD,               { "."  } },
+    { COLON,                { ":"  } },
+    { QUERY,                { "?"  } }
 };
 
 //
 // Literals
 //
-const std::vector<FunctionalTerminal> g_literalTerminals =
+const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 {
-    { ReadIntegerLiteral,   INTEGER_LITERAL,    "integer literal"   },
-    { ReadFloatingLiteral,  FLOATING_LITERAL,   "floating literal"  },
+    { INTEGER_LITERAL,  { ReadIntegerLiteral,   "integer literal"   } },
+    { FLOATING_LITERAL, { ReadFloatingLiteral,  "floating literal"  } },
     //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
     //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
 };
@@ -124,43 +124,43 @@ const std::vector<FunctionalTerminal> g_literalTerminals =
 //
 // Keywords
 //
-const std::vector<LiteralTerminal> g_keywordTerminals =
+const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 {
-    { "technique",  TECHNIQUE,  "" },
-    { "pass",       PASS,       "" },
+    { TECHNIQUE,    { "technique",  "" } },
+    { PASS,         { "pass",       "" } },
 
-    { "int",        TYPE_INT,   "" },
+    { TYPE_INT,     { "int",        "" } },
 
-    { "true",       TRUE,   "" },
-    { "false",      FALSE,   "" }
+    { TRUE,         { "true",       "" } },
+    { FALSE,        { "false",      "" } }
 };
 
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
     for( const auto& i : g_ignoredTerminals )
-        if( i.terminal_type == terminal_type )
-            return i.readable_string;
+        if( i.first == terminal_type )
+            return i.second.readable_string;
 
     for( const auto& i : g_punctuationTerminals )
-         if( i.terminal_type == terminal_type )
+         if( i.first == terminal_type )
          {
-            if( i.readable_string.empty() )
-                return i.matched_string;
+            if( i.second.readable_string.empty() )
+                return i.second.matched_string;
             else
-                return i.readable_string;
+                return i.second.readable_string;
          }
 
     for( const auto& i : g_literalTerminals )
-        if( i.terminal_type == terminal_type )
-            return i.readable_string;
+        if( i.first == terminal_type )
+            return i.second.readable_string;
 
     for( const auto& i : g_keywordTerminals )
-         if( i.terminal_type == terminal_type )
+         if( i.first == terminal_type )
          {
-            if( i.readable_string.empty() )
-                return i.matched_string;
+            if( i.second.readable_string.empty() )
+                return i.second.matched_string;
             else
-                return i.readable_string;
+                return i.second.readable_string;
          }
 
     const static std::string s = "Invalid Terminal";
