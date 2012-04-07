@@ -3,10 +3,11 @@ technique t1
     pass p1
     {
         my_int_state = 5%2;
-        my_bool_state = true;
+        my_bool_state = off;
     }
+
     pass p2
     {
-        my_floating_state = 1/2;
+        my_floating_state = one;
     }
 }

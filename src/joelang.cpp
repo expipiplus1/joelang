@@ -47,7 +47,7 @@ int main( int argc, char** argv )
                            nullptr,
                            nullptr );
 
-    JoeLang::State<bool> my_bool_state( "my_bool_state" );
+    JoeLang::State<bool> my_bool_state( "my_bool_state", std::map<std::string,bool>({{"on",true}, {"off", false}}) );
     my_bool_state.SetCallbacks( [](bool v) -> void
                                   {std::cout << "setting my_bool_state to " << v << std::endl;},
                                 nullptr,
