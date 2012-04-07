@@ -115,10 +115,10 @@ const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
 //
 const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 {
-    { INTEGER_LITERAL,  { ReadIntegerLiteral,   "integer literal"   } },
-    { FLOATING_LITERAL, { ReadFloatingLiteral,  "floating literal"  } },
-    //{ ReadCharacterLiteral, CHARACTER_LITERAL,  "character literal" },
-    //{ ReadStringLiteral,    STRING_LITERAL,     "string literal"    }
+    { INTEGER_LITERAL,   { ReadIntegerLiteral,   "integer literal"   } },
+    { FLOATING_LITERAL,  { ReadFloatingLiteral,  "floating literal"  } },
+    { CHARACTER_LITERAL, { ReadCharacterLiteral, "character literal" } },
+    { STRING_LITERAL,    { ReadStringLiteral,    "string literal"    } },
 };
 
 //
@@ -411,17 +411,51 @@ int ReadFloatingLiteral(    std::string::const_iterator begin,
     return p - begin;
 }
 
-/*
+int ReadCharOrEscapedChar(  std::string::const_iterator begin,
+                            std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    if( *p == '\\' )
+        ++p;
+
+    ++p;
+    return p - begin;
+}
+
 int ReadCharacterLiteral(   std::string::const_iterator begin,
-                            std::string::const_iterator end );
+                            std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    if( *p != '\'' )
+        return 0;
+
+    p += ReadCharOrEscapedChar( p, end );
+
+    if( *p != '\'' )
+        return 0;
+
+    return p - begin;
+}
 
 int ReadStringLiteral(      std::string::const_iterator begin,
-                            std::string::const_iterator end );
+                            std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    if( *p != '\"' )
+        return 0;
 
-int ReadIdentifier( std::string::const_iterator begin,
-                    std::string::const_iterator end );
+    while( *p != '\"' &&
+           p != end )
+        p += ReadCharOrEscapedChar( p, end );
 
-*/
+    if( p == end )
+        return 0;
+
+    ++p;
+
+    return p - begin;
+}
+
 
 bool IsHexDigit( char c )
 {
