@@ -834,5 +834,33 @@ private:
     bool m_value;
 };
 
+//------------------------------------------------------------------------------
+// StringLiteralExpression
+//------------------------------------------------------------------------------
+
+class StringLiteralExpression : public JoeLang::Parser::LiteralExpression
+{
+public:
+    virtual
+    ~StringLiteralExpression();
+
+    virtual
+    void Print( int depth ) const;
+
+    virtual
+    Type GetReturnType() const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<StringLiteralExpression>& token );
+
+//protected:
+    explicit StringLiteralExpression( std::string value );
+
+private:
+    static std::string Unescape( const std::string& string );
+
+    std::string m_value;
+};
+
 } // namespace Parser
 } // namespace JoeLang

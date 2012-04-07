@@ -1445,5 +1445,101 @@ bool BooleanLiteralExpression::Parse( Parser& parser, std::unique_ptr<BooleanLit
     return false;
 }
 
+//------------------------------------------------------------------------------
+// StringLiteralExpression
+//------------------------------------------------------------------------------
+
+StringLiteralExpression::StringLiteralExpression( std::string value )
+    :m_value( std::move(value) )
+{
+}
+
+StringLiteralExpression::~StringLiteralExpression()
+{
+}
+
+void StringLiteralExpression::Print( int depth ) const
+{
+    for( int i = 0; i < depth * 4; ++i )
+        std::cout << " ";
+    std::cout << m_value << "\n";
+}
+
+Type StringLiteralExpression::GetReturnType() const
+{
+    return Type::STRING;
+}
+
+bool StringLiteralExpression::Parse( Parser& parser, std::unique_ptr<StringLiteralExpression>& token )
+{
+    std::string string;
+    if( !parser.ExpectTerminal( Lexer::STRING_LITERAL, string ) )
+        return false;
+
+    token.reset( new StringLiteralExpression( Unescape(string) ) );
+    return true;
+}
+
+std::string StringLiteralExpression::Unescape( const std::string& string )
+{
+    assert( string.size() >= 2 && "string to unescape is too short" );
+    assert( *string.begin()  == '\"' && "string doesn't start with a \"" );
+    assert( *string.rbegin() == '\"' && "string doesn't end with a \"" );
+    // We can assume that the string is well formatted
+    std::string::const_iterator p = string.begin() + 1;
+    std::string ret;
+    while( p != string.end() - 1 )
+    {
+        if( *p == '\\' )
+        {
+            char c;
+            ++p;
+            switch( *p )
+            {
+            case '\'':
+                c = '\'';
+                break;
+            case '\"':
+                c = '\"';
+                break;
+            case '\?':
+                c = '\?';
+                break;
+            case '\\':
+                c = '\\';
+                break;
+            case '\a':
+                c = '\a';
+                break;
+            case '\b':
+                c = '\b';
+                break;
+            case '\f':
+                c = '\f';
+                break;
+            case '\n':
+                c = '\n';
+                break;
+            case '\r':
+                c = '\r';
+                break;
+            case '\t':
+                c = '\t';
+                break;
+            case '\v':
+                c = '\v';
+                break;
+            default:
+                //TODO warning here
+                c = *p;
+            }
+            ret += c;
+        }
+        ret += *p;
+        ++p;
+    }
+    return ret;
+}
+
 } // namespace Parser
 } // namespace JoeLang
