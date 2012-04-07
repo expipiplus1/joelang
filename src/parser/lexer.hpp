@@ -33,13 +33,12 @@
 #include <string>
 #include <vector>
 
-//TODO remove this when using map instead of vector
-#include <parser/terminal_types.hpp>
-
 namespace JoeLang
 {
 namespace Lexer
 {
+
+enum TerminalType : int;
 
 //------------------------------------------------------------------------------
 // Lexer

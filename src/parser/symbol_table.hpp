@@ -30,6 +30,7 @@
 
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 
 #include <parser/tokens/expression.hpp>
@@ -51,11 +52,16 @@ public:
     bool GetConstant( std::string identifier, std::shared_ptr<LiteralExpression>& constant );
     bool AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant );
 
+    bool HasTechniqueName( const std::string& name ) const;
+    bool AddTechniqueName( const std::string& name );
+
 private:
     struct SymbolMaps
     {
         std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
     };
+
+    std::set<std::string> m_techniqueNames;
 
     std::vector<SymbolMaps> m_symbolStack;
 };

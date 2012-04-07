@@ -64,7 +64,6 @@ PassDefinition::~PassDefinition()
 
 std::unique_ptr<Pass> PassDefinition::GetPass( CodeGenerator& code_generator ) const
 {
-    //TODO
     std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments;
     bool good = true;
 
@@ -130,7 +129,6 @@ void TechniqueDefinition::SetName( std::string name )
 
 std::unique_ptr<Technique> TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
 {
-    //TODO
     std::vector<Pass> passes;
     bool good = true;
     for( const auto& pass : m_passes )

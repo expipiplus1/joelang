@@ -35,6 +35,8 @@
 #include <utility>
 #include <vector>
 
+#include <parser/terminal_types.hpp>
+
 namespace JoeLang
 {
 namespace Lexer

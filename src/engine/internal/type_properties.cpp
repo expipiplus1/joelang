@@ -28,6 +28,8 @@
 
 #include "type_properties.hpp"
 
+#include <map>
+#include <string>
 #include <vector>
 
 #include <llvm/Type.h>
@@ -119,6 +121,27 @@ llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
     if( IsIntegral( t ) )
         return llvm::Type::getIntNTy( c, SizeOf(t)*8 );
     return nullptr;
+}
+
+const std::string& GetTypeString( Type t )
+{
+    const static std::map<Type, std::string> string_map =
+    {
+        { Type::UNKNOWN_TYPE, "unknown type" },
+        { Type::DOUBLE,       "double" },
+        { Type::FLOAT,        "float" },
+        { Type::U64,          "u64" },
+        { Type::I64,          "i64" },
+        { Type::U32,          "u32" },
+        { Type::I32,          "i32" },
+        { Type::U16,          "u16" },
+        { Type::I16,          "i16" },
+        { Type::U8,           "u8" },
+        { Type::I8,           "i8" },
+        { Type::BOOL,         "bool" },
+    };
+
+    return string_map.at(t);
 }
 
 } // namespace JoeLang

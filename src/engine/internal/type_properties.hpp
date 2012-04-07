@@ -28,8 +28,7 @@
 
 #pragma once
 
-#include <cstdint>
-#include <type_traits>
+#include <string>
 
 #include <engine/types.hpp>
 
@@ -42,8 +41,6 @@ namespace llvm
 namespace JoeLang
 {
 
-//TODO this stuff probably doesn't have to be public
-
 Type GetCommonType( Type t1, Type t2 );
 
 bool IsFloatingPoint( Type t );
@@ -55,5 +52,7 @@ bool IsSigned( Type t );
 std::size_t SizeOf( Type t );
 
 llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
+
+const std::string& GetTypeString( Type t );
 
 } // namespace JoeLang

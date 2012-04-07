@@ -60,20 +60,17 @@ enum class Type
     DOUBLE,
 };
 
-template<Type t> struct TypeOfJoeLangType
-{ static_assert(t!=Type::UNKNOWN_TYPE,
-                "Trying to get the type of an unknown JoeLang::Type"); };
-template<>struct TypeOfJoeLangType<Type::BOOL>  { typedef bool          type; };
-template<>struct TypeOfJoeLangType<Type::I8>    { typedef std::int8_t   type; };
-template<>struct TypeOfJoeLangType<Type::I16>   { typedef std::int16_t  type; };
-template<>struct TypeOfJoeLangType<Type::I32>   { typedef std::int32_t  type; };
-template<>struct TypeOfJoeLangType<Type::I64>   { typedef std::int64_t  type; };
-template<>struct TypeOfJoeLangType<Type::U8>    { typedef std::uint8_t  type; };
-template<>struct TypeOfJoeLangType<Type::U16>   { typedef std::uint16_t type; };
-template<>struct TypeOfJoeLangType<Type::U32>   { typedef std::uint32_t type; };
-template<>struct TypeOfJoeLangType<Type::U64>   { typedef std::uint64_t type; };
-template<>struct TypeOfJoeLangType<Type::FLOAT> { typedef float         type; };
-template<>struct TypeOfJoeLangType<Type::DOUBLE>{ typedef double        type; };
+using jl_bool   = bool;
+using jl_i8     = std::int8_t;
+using jl_i16    = std::int16_t;
+using jl_i32    = std::int32_t;
+using jl_i64    = std::int64_t;
+using jl_u8     = std::uint8_t;
+using jl_u16    = std::uint16_t;
+using jl_u32    = std::uint32_t;
+using jl_u64    = std::uint64_t;
+using jl_float  = float;
+using jl_double = double;
 
 template<typename T>
 struct JoeLangType

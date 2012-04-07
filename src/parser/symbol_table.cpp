@@ -31,6 +31,7 @@
 #include <cassert>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -73,6 +74,16 @@ bool SymbolTable::GetConstant( std::string identifier, std::shared_ptr<LiteralEx
 bool SymbolTable::AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant )
 {
     return m_symbolStack.rbegin()->m_constants.insert( std::make_pair( identifier, std::move(constant) ) ).second;
+}
+
+bool SymbolTable::HasTechniqueName( const std::string& name ) const
+{
+    return m_techniqueNames.find( name ) != m_techniqueNames.end();
+}
+
+bool SymbolTable::AddTechniqueName( const std::string& name )
+{
+    return m_techniqueNames.insert( name ).second;
 }
 
 } // namespace Parser

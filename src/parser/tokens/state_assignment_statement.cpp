@@ -80,47 +80,47 @@ std::map<std::string, std::shared_ptr<LiteralExpression> >
     switch( state_base->GetType() )
     {
     case Type::BOOL:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::BOOL>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_bool>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<BooleanLiteralExpression>( e.second );
         break;
     case Type::FLOAT:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::FLOAT>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_float>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, false );
         break;
     case Type::DOUBLE:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::DOUBLE>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_double>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, true );
         break;
     case Type::I8:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::I8>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_i8>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::I16:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::I16>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_i16>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::I32:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::I32>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_i32>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::I64:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::I64>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_i64>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::U8:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::U8>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_u8>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::U16:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::U16>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_u16>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::U32:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::U32>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_u32>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     case Type::U64:
-        for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::U64>::type>*>(state_base)->GetEnumerations() )
+        for( const auto& e : reinterpret_cast<const State<jl_u64>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
     default:

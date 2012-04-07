@@ -29,7 +29,6 @@
 #pragma once
 
 #include <memory>
-//TODO stop using set
 #include <set>
 #include <string>
 #include <vector>

@@ -231,9 +231,12 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
         return false;
 
-    // TODO check name uniqueness in table
     std::string name;
     if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
+        return false;
+
+    // TODO parser soft error
+    if( parser.GetSymbolTable().HasTechniqueName( name ) )
         return false;
 
     //
@@ -244,7 +247,7 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
         return false;
 
     definition->SetName( name );
-
+    parser.GetSymbolTable().AddTechniqueName( name );
     token.reset( new TechniqueDeclaration( std::move(name),
                                            std::move(definition) ) );
     return true;

@@ -65,8 +65,6 @@ class State : public StateBase
                    "Can't create a state with an unhandled type" );
 public:
     State() = delete;
-    //TODO consider containing the map elsewhere
-    //because it's only used for parsing
     State( std::string name, std::map<std::string, T> enumerations = {} );
     virtual
     ~State();

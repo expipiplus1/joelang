@@ -149,64 +149,63 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
-    //TODO clean this up
     StateAssignmentBase* sa;
     switch( state.GetType() )
     {
         case Type::BOOL:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::BOOL>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::BOOL>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::BOOL>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_bool>
+             ( static_cast<const State<bool>&>(state),
+               reinterpret_cast<bool(*)()>(function_ptr) );
             break;
         case Type::FLOAT:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::FLOAT>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::FLOAT>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::FLOAT>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_float>
+             ( static_cast<const State<jl_float>&>(state),
+               reinterpret_cast<jl_float(*)()>(function_ptr) );
             break;
         case Type::DOUBLE:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::DOUBLE>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::DOUBLE>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::DOUBLE>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_double>
+             ( static_cast<const State<jl_double>&>(state),
+               reinterpret_cast<jl_double(*)()>(function_ptr) );
             break;
         case Type::I8:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::I8>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::I8>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::I8>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_i8>
+             ( static_cast<const State<jl_i8>&>(state),
+               reinterpret_cast<jl_i8(*)()>(function_ptr) );
             break;
         case Type::I16:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::I16>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::I16>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::I16>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_i16>
+             ( static_cast<const State<jl_i16>&>(state),
+               reinterpret_cast<jl_i16(*)()>(function_ptr) );
             break;
         case Type::I32:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::I32>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::I32>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::I32>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_i32>
+             ( static_cast<const State<jl_i32>&>(state),
+               reinterpret_cast<jl_i32(*)()>(function_ptr) );
             break;
         case Type::I64:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::I64>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::I64>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::I64>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_i64>
+             ( static_cast<const State<jl_i64>&>(state),
+               reinterpret_cast<jl_i64(*)()>(function_ptr) );
             break;
         case Type::U8:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::U8>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::U8>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::U8>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_u8>
+             ( static_cast<const State<jl_u8>&>(state),
+               reinterpret_cast<jl_u8(*)()>(function_ptr) );
             break;
         case Type::U16:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::U16>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::U16>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::U16>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_u16>
+             ( static_cast<const State<jl_u16>&>(state),
+               reinterpret_cast<jl_u16(*)()>(function_ptr) );
             break;
         case Type::U32:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::U32>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::U32>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::U32>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_u32>
+             ( static_cast<const State<jl_u32>&>(state),
+               reinterpret_cast<jl_u32(*)()>(function_ptr) );
             break;
         case Type::U64:
-            sa = new StateAssignment<TypeOfJoeLangType<Type::U64>::type>
-             ( static_cast<const State<TypeOfJoeLangType<Type::U64>::type>&>(state),
-               reinterpret_cast<TypeOfJoeLangType<Type::U64>::type(*)()>(function_ptr) );
+            sa = new StateAssignment<jl_u64>
+             ( static_cast<const State<jl_u64>&>(state),
+               reinterpret_cast<jl_u64(*)()>(function_ptr) );
             break;
         default:
             sa = nullptr;
@@ -285,10 +284,10 @@ llvm::Value* CodeGenerator::CreateNot( const Expression& e )
     return m_llvmBuilder.CreateNot( e.CodeGen( *this ) );
 }
 
-//TODO type check
 llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 {
-    return m_llvmBuilder.CreateIsNotNull( e.CodeGen( *this ) );
+    llvm::Value* bool_e = CreateCast( e, Type::BOOL );
+    return m_llvmBuilder.CreateIsNotNull( bool_e );
 }
 
 //
@@ -298,16 +297,16 @@ llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 
 llvm::Value* CodeGenerator::CreateLOr( const Expression& l, const Expression& r )
 {
-    // TODO cast to bool
-    Error( "LOR not implemented" );
-    return nullptr;
+    llvm::Value* bool_l = CreateCast( l, Type::BOOL );
+    llvm::Value* bool_r = CreateCast( r, Type::BOOL );
+    return m_llvmBuilder.CreateOr( bool_l, bool_r );
 }
 
 llvm::Value* CodeGenerator::CreateLAnd( const Expression& l, const Expression& r )
 {
-    // TODO cast to bool
-    Error( "LAND not implemented" );
-    return nullptr;
+    llvm::Value* bool_l = CreateCast( l, Type::BOOL );
+    llvm::Value* bool_r = CreateCast( r, Type::BOOL );
+    return m_llvmBuilder.CreateAnd( bool_l, bool_r );
 }
 
 llvm::Value* CodeGenerator::CreateOr( const Expression& l, const Expression& r )
@@ -433,7 +432,10 @@ llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r 
         IsFloatingPoint( r.GetReturnType() ) )
     {
         //TODO argument type names
-        Error( "Invalid Arguments to % operator" );
+        Error( "Invalid Arguments to % operator: " +
+               GetTypeString( l.GetReturnType() ) +
+               " and " +
+               GetTypeString( r.GetReturnType() ) );
         return nullptr;
     }
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
