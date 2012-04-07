@@ -28,6 +28,7 @@
 
 #include "pass.hpp"
 
+#include <cassert>
 #include <memory>
 #include <string>
 #include <utility>
@@ -48,6 +49,8 @@ Pass::Pass( std::string name,
     :m_name( std::move(name) )
     ,m_stateAssignments( std::move( state_assignments ) )
 {
+    for( const auto& sa : m_stateAssignments )
+        assert( sa && "null state assignment given to Pass" );
 }
 
 void Pass::SetState() const
