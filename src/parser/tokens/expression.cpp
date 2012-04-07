@@ -1255,9 +1255,9 @@ bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& toke
     std::unique_ptr<Token> t;
     if( !ExpectAnyOf<FloatingLiteralExpression,
                      IntegralLiteralExpression,
-                     BooleanLiteralExpression//,
+                     BooleanLiteralExpression,
                      //CharacterLiteralExpression,
-                     //StringLiteralExpression
+                     StringLiteralExpression
         >( parser, t ) )
         return false;
 
@@ -1463,6 +1463,11 @@ void StringLiteralExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << m_value << "\n";
+}
+
+const std::string& StringLiteralExpression::GetString() const
+{
+    return m_value;
 }
 
 Type StringLiteralExpression::GetReturnType() const

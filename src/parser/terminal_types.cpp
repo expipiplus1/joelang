@@ -47,9 +47,9 @@ namespace Lexer
 //
 const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals =
 {
-    { WHITESPACE, { ReadWhitespace,   "whitespace"    } },
-    { WHITESPACE, { ReadLineComment,  "line comment"  } },
-    { WHITESPACE, { ReadBlockComment, "block comment" } }
+    { WHITESPACE,    { ReadWhitespace,   "whitespace"    } },
+    { LINE_COMMENT,  { ReadLineComment,  "line comment"  } },
+    { BLOCK_COMMENT, { ReadBlockComment, "block comment" } }
 };
 
 //
@@ -443,6 +443,8 @@ int ReadStringLiteral(      std::string::const_iterator begin,
     std::string::const_iterator p = begin;
     if( *p != '\"' )
         return 0;
+
+    ++p;
 
     while( *p != '\"' &&
            p != end )

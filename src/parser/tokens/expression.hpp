@@ -847,6 +847,8 @@ public:
     virtual
     void Print( int depth ) const;
 
+    const std::string& GetString() const;
+
     virtual
     Type GetReturnType() const override;
 

@@ -123,6 +123,10 @@ std::map<std::string, std::shared_ptr<LiteralExpression> >
         for( const auto& e : reinterpret_cast<const State<jl_u64>*>(state_base)->GetEnumerations() )
             ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
         break;
+    case Type::STRING:
+        for( const auto& e : reinterpret_cast<const State<jl_string>*>(state_base)->GetEnumerations() )
+            ret[e.first] = std::make_shared<StringLiteralExpression>( e.second );
+        break;
     default:
         assert( false && "state_base is of an unhandled type" );
     }

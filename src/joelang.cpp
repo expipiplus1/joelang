@@ -27,6 +27,7 @@
 */
 
 #include <iostream>
+#include <string>
 
 #include <engine/context.hpp>
 #include <engine/effect.hpp>
@@ -53,9 +54,16 @@ int main( int argc, char** argv )
                                 nullptr,
                                 nullptr );
 
+    JoeLang::State<std::string> my_string_state( "my_string_state", std::map<std::string, std::string>({{"string_enumerant","string_enumerant"}}));
+    my_string_state.SetCallbacks( [](std::string v) -> void
+                                  {std::cout << "setting my_string_state to " << v << std::endl;},
+                                nullptr,
+                                nullptr );
+
     context.AddState( &my_state );
     context.AddState( &my_int_state );
     context.AddState( &my_bool_state );
+    context.AddState( &my_string_state );
 
     JoeLang::Effect* e = context.CreateEffectFromFile( "test.jfx" );
 

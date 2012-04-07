@@ -110,11 +110,23 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression )
 {
+    StateAssignmentBase* sa;
+
+    if( state.GetType() == Type::STRING )
+    {
+        //TODO Get the string properly without that cast
+        sa = new ConstStateAssignment<jl_string>
+             ( static_cast<const State<jl_string>&>(state),
+               static_cast<const StringLiteralExpression&>(expression).GetString() );
+        return std::unique_ptr<StateAssignmentBase>(sa);
+    }
+
+    llvm::Type* t = GetLLVMType( state.GetType(), m_llvmContext );
+    assert( t && "trying to get the type of an unhandled JoeLang::Type" );
 
     std::vector<llvm::Type*> no_arguments;
-
     llvm::FunctionType* prototype = llvm::FunctionType::get(
-                                        GetLLVMType( state.GetType(), m_llvmContext ),
+                                        t,
                                         no_arguments,
                                         false );
     assert( prototype && "Error generating empty function prototype" );
@@ -149,7 +161,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
 
-    StateAssignmentBase* sa;
     switch( state.GetType() )
     {
         case Type::BOOL:
