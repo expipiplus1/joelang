@@ -740,7 +740,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ConstantValueExpression( std::shared_ptr<LiteralExpression> value );
+    explicit ConstantValueExpression( std::shared_ptr<LiteralExpression> value );
 
 private:
     std::shared_ptr<LiteralExpression> m_value;
@@ -769,7 +769,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<IntegralLiteralExpression>& token );
 
 //protected:
-    IntegralLiteralExpression( long long value );
+    explicit IntegralLiteralExpression( long long value );
 
 private:
     long long m_value;
@@ -798,10 +798,11 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token );
 
 //protected:
-    FloatingLiteralExpression( double value );
+    FloatingLiteralExpression( double value, bool double_precision );
 
 private:
     double m_value;
+    bool   m_doublePrecision;
 };
 
 //------------------------------------------------------------------------------
@@ -827,7 +828,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<BooleanLiteralExpression>& token );
 
 //protected:
-    BooleanLiteralExpression( bool value );
+    explicit BooleanLiteralExpression( bool value );
 
 private:
     bool m_value;

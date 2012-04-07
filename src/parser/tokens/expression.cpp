@@ -296,7 +296,7 @@ void BinaryOperatorExpression::Print( int depth ) const
 
 llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_generator ) const
 {
-    CHECK_CODE_GENERATOR;
+    //CHECK_CODE_GENERATOR;
     switch( m_operatorTerminal )
     {
         case Lexer::LOGICAL_OR:
@@ -1342,8 +1342,9 @@ bool IntegralLiteralExpression::Parse( Parser& parser, std::unique_ptr<IntegralL
 // FloatingLiteralExpression
 //------------------------------------------------------------------------------
 
-FloatingLiteralExpression::FloatingLiteralExpression( double value )
+FloatingLiteralExpression::FloatingLiteralExpression( double value, bool double_precision )
     :m_value( value )
+    ,m_doublePrecision( double_precision )
 {
 }
 
@@ -1360,14 +1361,20 @@ void FloatingLiteralExpression::Print( int depth ) const
 
 llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_generator ) const
 {
-    return llvm::ConstantFP::get( llvm::Type::getDoubleTy( code_generator.GetLLVMContext() ),
-                                  m_value );
+    if( m_doublePrecision )
+        return llvm::ConstantFP::get( llvm::Type::getDoubleTy( code_generator.GetLLVMContext() ),
+                                      m_value );
+    else
+        return llvm::ConstantFP::get( llvm::Type::getFloatTy( code_generator.GetLLVMContext() ),
+                                      m_value );
 }
 
 Type FloatingLiteralExpression::GetReturnType() const
 {
-    //TODO
-    return Type::DOUBLE;
+    if( m_doublePrecision )
+        return Type::DOUBLE;
+    else
+        return Type::FLOAT;
 }
 
 bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingLiteralExpression>& token )
@@ -1381,7 +1388,10 @@ bool FloatingLiteralExpression::Parse( Parser& parser, std::unique_ptr<FloatingL
     if( !( i >> value ) )
         return false;
 
-    token.reset( new FloatingLiteralExpression( value ) );
+    bool double_precision = *string.rbegin() == 'f' ||
+                            *string.rbegin() == 'F';
+
+    token.reset( new FloatingLiteralExpression( value, double_precision ) );
     return true;
 }
 

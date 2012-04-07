@@ -2,7 +2,7 @@ technique t1
 {
     pass p1
     {
-        my_int_state = 5%2;
+        my_int_state = 5-2.0f;
         my_bool_state = off;
     }
 

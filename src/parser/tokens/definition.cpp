@@ -62,14 +62,25 @@ PassDefinition::~PassDefinition()
 {
 }
 
-Pass PassDefinition::GetPass( CodeGenerator& code_generator ) const
+std::unique_ptr<Pass> PassDefinition::GetPass( CodeGenerator& code_generator ) const
 {
     //TODO
     std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments;
+    bool good = true;
+
+    //
+    // don't early out here to generate the error messages for the other state assignments
+    //
     for( const auto& state_assignment : m_stateAssignments )
-        state_assignments.push_back(
-                    state_assignment->GetStateAssignment( code_generator ) );
-    return std::move( Pass( m_name, std::move( state_assignments ) ) );
+    {
+        std::unique_ptr<StateAssignmentBase> sa = state_assignment->GetStateAssignment( code_generator );
+        good = good && sa;
+        state_assignments.push_back( std::move( sa ) );
+    }
+
+    if( !good )
+        return nullptr;
+    return std::unique_ptr<Pass>( new Pass( m_name, std::move(state_assignments) ) );
 }
 
 void PassDefinition::SetName(std::string name)
@@ -117,10 +128,11 @@ void TechniqueDefinition::SetName( std::string name )
     m_name = std::move( name );
 }
 
-Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
+std::unique_ptr<Technique> TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
 {
     //TODO
     std::vector<Pass> passes;
+    bool good = true;
     for( const auto& pass : m_passes )
     {
         const std::shared_ptr<PassDefinition>& definition = pass->GetDefinition();
@@ -130,9 +142,16 @@ Technique TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) con
                                   " in Technique " +
                                   m_name );
         else
-            passes.emplace_back( std::move( definition->GetPass( code_generator ) ) );
+        {
+            std::unique_ptr<Pass> p = definition->GetPass( code_generator );
+            good = good && p;
+            if( p )
+                passes.emplace_back( std::move( *p ) );
+        }
     }
-    return std::move( Technique( m_name, std::move( passes ) ) );
+    if( !good )
+        return nullptr;
+    return std::unique_ptr<Technique>( new Technique( m_name, std::move(passes) ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const

@@ -32,13 +32,14 @@
 #include <string>
 #include <vector>
 
-#include <engine/pass.hpp>
-#include <engine/technique.hpp>
-
 #include <parser/tokens/token.hpp>
 
 namespace JoeLang
 {
+
+class Pass;
+class Technique;
+
 namespace Parser
 {
 
@@ -57,7 +58,7 @@ public:
     virtual
     ~PassDefinition();
 
-    Pass GetPass( CodeGenerator& code_generator ) const;
+    std::unique_ptr<Pass> GetPass( CodeGenerator& code_generator ) const;
 
     void SetName( std::string name );
 
@@ -83,8 +84,7 @@ class TechniqueDefinition : public JoeLang::Parser::Token
 public:
     virtual ~TechniqueDefinition();
 
-    //TODO return a pointer
-    Technique GetTechnique( CodeGenerator& code_generator ) const;
+    std::unique_ptr<Technique> GetTechnique( CodeGenerator& code_generator ) const;
 
     void SetName( std::string name );
 

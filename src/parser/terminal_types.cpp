@@ -401,13 +401,12 @@ int ReadFloatingLiteral(    std::string::const_iterator begin,
         }
     }
 
-    //TODO enable single precision floating point
-    //if( p >= end )
-    //    return p - begin;
+    if( p >= end )
+        return p - begin;
 
-    //char c = *p;
-    //if( c == 'f' || c == 'F' )
-    //    ++p;
+    char c = *p;
+    if( c == 'f' || c == 'F' )
+        ++p;
 
     return p - begin;
 }

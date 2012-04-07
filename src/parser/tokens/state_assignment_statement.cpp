@@ -85,11 +85,11 @@ std::map<std::string, std::shared_ptr<LiteralExpression> >
         break;
     case Type::FLOAT:
         for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::FLOAT>::type>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second );
+            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, false );
         break;
     case Type::DOUBLE:
         for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::DOUBLE>::type>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second );
+            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, true );
         break;
     case Type::I8:
         for( const auto& e : reinterpret_cast<const State<TypeOfJoeLangType<Type::I8>::type>*>(state_base)->GetEnumerations() )

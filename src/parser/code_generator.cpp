@@ -101,7 +101,9 @@ void CodeGenerator::Visit( DeclarationBase& d )
 void CodeGenerator::Visit( TechniqueDeclaration& t )
 {
     const TechniqueDefinition& definition = t.GetDefinition();
-    m_techniques.push_back( std::move( definition.GetTechnique( *this ) ) );
+    std::unique_ptr<Technique> technique = definition.GetTechnique( *this );
+    if( technique )
+        m_techniques.push_back( std::move(*technique) );
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
@@ -139,7 +141,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
     function->dump();
 
-    //TODO handle this a bit better than aborting
     if( llvm::verifyFunction( *function, llvm::PrintMessageAction ) )
     {
         Error( "Unknown problem generating llvm function" );
