@@ -222,7 +222,6 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
     Type         e_type = e.GetReturnType();
     llvm::Value* e_code = e.CodeGen( *this );
 
-    //TODO does this happen often enough to be worth checking?
     if( !e_code )
         return nullptr;
 
