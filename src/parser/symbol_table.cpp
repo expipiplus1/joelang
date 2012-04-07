@@ -28,10 +28,52 @@
 
 #include "symbol_table.hpp"
 
+#include <cassert>
+#include <map>
+#include <memory>
+#include <string>
+#include <utility>
+
+#include <parser/tokens/expression.hpp>
+
 namespace JoeLang
 {
 namespace Parser
 {
+
+SymbolTable::~SymbolTable()
+{
+    assert( m_symbolStack.size() == 0 && "The symbol table is still inside a scope" );
+}
+
+void SymbolTable::EnterScope()
+{
+    m_symbolStack.resize( m_symbolStack.size() + 1 );
+}
+
+void SymbolTable::LeaveScope()
+{
+    m_symbolStack.pop_back();
+}
+
+bool SymbolTable::GetConstant( std::string identifier, std::shared_ptr<LiteralExpression>& constant )
+{
+    for( const auto& m : m_symbolStack )
+    {
+        auto e = m.m_constants.find( identifier );
+        if( e != m.m_constants.end() )
+        {
+            constant = e->second;
+            return true;
+        }
+    }
+    return false;
+}
+
+bool SymbolTable::AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant )
+{
+    return m_symbolStack.rbegin()->m_constants.insert( std::make_pair( identifier, std::move(constant) ) ).second;
+}
 
 } // namespace Parser
 } // namespace JoeLang

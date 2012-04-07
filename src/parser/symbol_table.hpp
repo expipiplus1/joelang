@@ -29,8 +29,10 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <string>
-#include <vector>
+
+#include <parser/tokens/expression.hpp>
 
 namespace JoeLang
 {
@@ -41,10 +43,18 @@ namespace Parser
 class SymbolTable
 {
 public:
+    ~SymbolTable();
+
+    void EnterScope();
+    void LeaveScope();
+
+    bool GetConstant( std::string identifier, std::shared_ptr<LiteralExpression>& constant );
+    bool AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant );
 
 private:
     struct SymbolMaps
     {
+        std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
     };
 
     std::vector<SymbolMaps> m_symbolStack;
