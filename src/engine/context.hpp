@@ -40,6 +40,7 @@ class Effect;
 class StateBase;
 
 //TODO implement error collection
+//TODO compile joemath to bc and call that
 class Context
 {
 public:
