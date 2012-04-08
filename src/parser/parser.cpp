@@ -67,13 +67,16 @@ bool Parser::Parse ( const std::string& string )
 
     std::cout << "Error parsing at " << m_lexer->GetLineNumber() << ":"
                                      << m_lexer->GetColumnNumber() << "\n";
-    if( m_errorMessage.size() == 0 )
+    if( m_errorMessage.empty() )
     {
         std::cout << "Expected one of: ";
         for( Compiler::TerminalType expected_terminal : m_expectedTerminals )
         {
             std::cout << "\'" << Compiler::GetTerminalString( expected_terminal ) << "\', ";
         }
+        std::string next_terminal;
+        m_lexer->GetNextTerminal( next_terminal );
+        std::cout << "Got: '" << next_terminal << "'";
     }
     else
     {
