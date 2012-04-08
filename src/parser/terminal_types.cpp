@@ -120,6 +120,7 @@ const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
     { TerminalType::FLOATING_LITERAL,  { ReadFloatingLiteral,  "floating literal"  } },
     { TerminalType::CHARACTER_LITERAL, { ReadCharacterLiteral, "character literal" } },
     { TerminalType::STRING_LITERAL,    { ReadStringLiteral,    "string literal"    } },
+    { TerminalType::IDENTIFIER,        { ReadIdentifier,       "identifier"        } },
 };
 
 //
@@ -275,6 +276,25 @@ std::size_t ReadBlockComment( std::string::const_iterator begin,
     return 0;
 }
 
+std::size_t ReadIdentifier( std::string::const_iterator begin,
+                            std::string::const_iterator end )
+{
+    std::string::const_iterator p = begin;
+    if( !IsNonDigit( *p) )
+        return 0;
+
+    ++p;
+    while( IsDigitOrNonDigit( *p ) )
+        ++p;
+
+    for( const auto& terminal_reader : g_keywordTerminals )
+        if( std::size_t( p - begin ) == terminal_reader.second.matched_string.size() &&
+            std::equal( begin, p, terminal_reader.second.matched_string.begin() ) )
+            return 0;
+
+    return p - begin;
+}
+
 std::size_t ReadDigitSequence( std::string::const_iterator begin,
                                std::string::const_iterator end )
 {
@@ -329,16 +349,26 @@ std::size_t ReadIntegerLiteral( std::string::const_iterator begin,
         {
             ++p;
             int n = ReadHexDigitSequence( p, end );
-            if( n )
-                return n + 2;
+            if( !n )
+                return 0;
+            p += n;
+            if( *p == 'e' ||
+                *p == 'E' )
+                return 0;
+            return p - begin;
         }
 
-        return 1 + ReadOctalDigitSequence( p, end );
+        p += ReadOctalDigitSequence( p, end );
     }
     else
     {
-        return ReadDigitSequence( begin, end );
+        p += ReadDigitSequence( begin, end );
     }
+    if( *p == '.' ||
+        *p == 'e' ||
+        *p == 'E' )
+        return 0;
+    return p - begin;
 }
 
 std::size_t ReadExponent( std::string::const_iterator begin,

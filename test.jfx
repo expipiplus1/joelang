@@ -2,14 +2,14 @@ technique t1
 {
     pass p1
     {
-        //my_int_state = 5-2.0f;
-        //my_bool_state = off;
+        my_int_state = 5-2.0f;
+        my_bool_state = off;
         //my_string_state = string_enumerant;
     }
 
     pass p2
     {
-        //my_floating_state = one;
+        my_floating_state = one;
         my_string_state = "Hello, World!";
     }
 }

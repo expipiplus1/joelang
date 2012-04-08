@@ -49,9 +49,83 @@ namespace Compiler
 
 Lexer::Lexer( std::string string )
     :m_string( std::move( string ) )
+    ,m_position( m_string.begin() )
 {
-    m_position = m_string.begin();
     ConsumeIgnoredTerminals();
+}
+
+TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal, std::string& string )
+{
+    std::map< TerminalType, LiteralTerminal >::const_iterator literal_iterator =
+        g_punctuationTerminals.find( terminal );
+
+    if( literal_iterator == g_punctuationTerminals.end() )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    const LiteralTerminal& terminal_reader = literal_iterator->second;
+    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    if( !chars_read )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    // Check that this terminal isn't also matched by something longer
+    for( const auto& c: g_punctuationTerminals )
+        if( c.second.matched_string.size() > terminal_reader.matched_string.size() &&
+            c.second.Read( m_position, m_string.end() ) )
+            return c.first;
+
+    string = std::string( m_position, m_position + chars_read );
+    ReadChars( chars_read );
+    ConsumeIgnoredTerminals();
+    return terminal;
+}
+
+TerminalType Lexer::ReadLiteralTerminal( TerminalType terminal, std::string& string )
+{
+    std::map< TerminalType, FunctionalTerminal >::const_iterator functional_iterator =
+        g_literalTerminals.find( terminal);
+    if( functional_iterator == g_literalTerminals.end() )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    const FunctionalTerminal& terminal_reader = functional_iterator->second;
+    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    if( !chars_read )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    // if it's an integer literal, we need to check that it's not just
+    // parsing the first part of a float
+    //if( terminal_type == TerminalType::INTEGER_LITERAL )
+     //   if( g_literalTerminals.at(TerminalType::FLOATING_LITERAL).Read( m_position, m_string.end() ) )
+      //      return false;
+
+    string = std::string( m_position, m_position + chars_read );
+    ReadChars( chars_read );
+    ConsumeIgnoredTerminals();
+    return terminal;
+}
+
+TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal, std::string& string )
+{
+    std::map< TerminalType, LiteralTerminal >::const_iterator literal_iterator =
+        g_keywordTerminals.find( terminal );
+
+    if( literal_iterator == g_keywordTerminals.end() )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    const LiteralTerminal& terminal_reader = literal_iterator->second;
+    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    if( !chars_read )
+        return TerminalType::UNKNOWN_CHARACTER;
+
+    // Check that this terminal isn't also matched by something longer
+    for( const auto& c: g_keywordTerminals )
+        if( c.second.matched_string.size() > terminal_reader.matched_string.size() &&
+            c.second.Read( m_position, m_string.end() ) )
+            return c.first;
+
+    string = std::string( m_position, m_position + chars_read );
+    ReadChars( chars_read );
+    ConsumeIgnoredTerminals();
+    return terminal;
 }
 
 bool Lexer::Expect( TerminalType terminal_type, std::string& string )
@@ -60,94 +134,19 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
         m_position == m_string.end() )
         return true;
 
-    std::size_t chars_read;
-    std::map< TerminalType, LiteralTerminal >::const_iterator literal_iterator;
-    std::map< TerminalType, FunctionalTerminal >::const_iterator functional_iterator;
+    TerminalType t;
 
-    // If this is a punctuation token
-    literal_iterator = g_punctuationTerminals.find( terminal_type );
-    if( literal_iterator != g_punctuationTerminals.end() )
-    {
-        const LiteralTerminal& terminal = literal_iterator->second;
-        chars_read = terminal.Read( m_position, m_string.end() );
-        if( !chars_read )
-            return false;
+    t = ReadPunctuationTerminal( terminal_type, string );
+    if( t != TerminalType::UNKNOWN_CHARACTER )
+        return t == terminal_type;
 
-        // Check that this terminal isn't also matched by something longer
-        for( const auto& contending_terminal : g_punctuationTerminals )
-            if( contending_terminal.second.matched_string.size() > terminal.matched_string.size() &&
-                contending_terminal.second.Read( m_position, m_string.end() ) )
-                return false;
+    t = ReadLiteralTerminal( terminal_type, string );
+    if( t != TerminalType::UNKNOWN_CHARACTER )
+        return t == terminal_type;
 
-        string = std::string( m_position, m_position + chars_read );
-        ReadChars( chars_read );
-        ConsumeIgnoredTerminals();
-        return true;
-    }
-
-    // If this is a literal token
-    functional_iterator = g_literalTerminals.find( terminal_type );
-    if( functional_iterator != g_literalTerminals.end() )
-    {
-        const FunctionalTerminal& terminal = functional_iterator->second;
-        chars_read = terminal.Read( m_position, m_string.end() );
-        if( !chars_read )
-            return false;
-
-        // if it's an integer literal, we need to check that it's not just
-        // parsing the first part of a float
-
-        if( terminal_type == TerminalType::INTEGER_LITERAL )
-            if( g_literalTerminals.at(TerminalType::FLOATING_LITERAL).Read( m_position, m_string.end() ) )
-                return false;
-
-        string = std::string( m_position, m_position + chars_read );
-        ReadChars( chars_read );
-        ConsumeIgnoredTerminals();
-        return true;
-    }
-
-    // If this is a keyword
-    literal_iterator = g_keywordTerminals.find( terminal_type );
-    if( literal_iterator != g_keywordTerminals.end() )
-    {
-        const LiteralTerminal& terminal = literal_iterator->second;
-        chars_read = terminal.Read( m_position, m_string.end() );
-        if( !chars_read )
-            return false;
-
-        // Check that this terminal isn't also matched by something longer
-        for( const auto& contending_terminal : g_keywordTerminals )
-            if( contending_terminal.second.matched_string.size() > terminal.matched_string.size() &&
-                contending_terminal.second.Read( m_position, m_string.end() ) )
-                return false;
-
-        string = std::string( m_position, m_position + chars_read );
-        ReadChars( chars_read );
-        ConsumeIgnoredTerminals();
-        return true;
-    }
-
-    // If it's an identifier
-    if( terminal_type == TerminalType::IDENTIFIER )
-    {
-        if( !IsNonDigit( *m_position ) )
-            return false;
-
-        std::string::const_iterator word_end = m_position + 1;
-        while( IsDigitOrNonDigit( *word_end ) )
-            ++word_end;
-
-        for( const auto& terminal_reader : g_keywordTerminals )
-            if( std::size_t( word_end - m_position ) == terminal_reader.second.matched_string.size() &&
-                std::equal( m_position, word_end, terminal_reader.second.matched_string.begin() ) )
-                return false;
-
-        string = std::string( m_position, word_end );
-        ReadChars( word_end - m_position );
-        ConsumeIgnoredTerminals();
-        return true;
-    }
+    t = ReadKeywordTerminal( terminal_type, string );
+    if( t != TerminalType::UNKNOWN_CHARACTER )
+        return t == terminal_type;
 
     // If it's anything else
     return false;

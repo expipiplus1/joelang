@@ -52,7 +52,7 @@ enum class TerminalType
     BLOCK_COMMENT,
 
     // Funny characters
-    UNHANDLED_CHARACTER,
+    UNKNOWN_CHARACTER,
 
     //
     // Punctuation
@@ -191,6 +191,9 @@ std::size_t ReadWhitespace(   std::string::const_iterator begin,
 std::size_t ReadLineComment(  std::string::const_iterator begin,
                               std::string::const_iterator end );
 std::size_t ReadBlockComment( std::string::const_iterator begin,
+                              std::string::const_iterator end );
+
+std::size_t ReadIdentifier(   std::string::const_iterator begin,
                               std::string::const_iterator end );
 
 std::size_t ReadIntegerLiteral(   std::string::const_iterator begin,
