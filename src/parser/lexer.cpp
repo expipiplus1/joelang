@@ -97,8 +97,8 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
         // if it's an integer literal, we need to check that it's not just
         // parsing the first part of a float
 
-        if( terminal_type == INTEGER_LITERAL )
-            if( g_literalTerminals.at(FLOATING_LITERAL).Read( m_position, m_string.end() ) )
+        if( terminal_type == TerminalType::INTEGER_LITERAL )
+            if( g_literalTerminals.at(TerminalType::FLOATING_LITERAL).Read( m_position, m_string.end() ) )
                 return false;
 
         string = std::string( m_position, m_position + chars_read );
@@ -129,7 +129,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
     }
 
     // If it's an identifier
-    if( terminal_type == IDENTIFIER )
+    if( terminal_type == TerminalType::IDENTIFIER )
     {
         if( !IsNonDigit( *m_position ) )
             return false;

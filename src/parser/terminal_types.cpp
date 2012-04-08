@@ -48,9 +48,9 @@ namespace Compiler
 //
 const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals =
 {
-    { WHITESPACE,    { ReadWhitespace,   "whitespace"    } },
-    { LINE_COMMENT,  { ReadLineComment,  "line comment"  } },
-    { BLOCK_COMMENT, { ReadBlockComment, "block comment" } }
+    { TerminalType::WHITESPACE,    { ReadWhitespace,   "whitespace"    } },
+    { TerminalType::LINE_COMMENT,  { ReadLineComment,  "line comment"  } },
+    { TerminalType::BLOCK_COMMENT, { ReadBlockComment, "block comment" } }
 };
 
 //
@@ -58,57 +58,57 @@ const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals =
 //
 const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
 {
-    { OPEN_BRACE,           { "{"  } },
-    { CLOSE_BRACE,          { "}"  } },
-    { OPEN_ROUND,           { "("  } },
-    { CLOSE_ROUND,          { ")"  } },
-    { OPEN_ANGLED,          { "<"  } },
-    { CLOSE_ANGLED,         { ">"  } },
-    { OPEN_SQUARE,          { "["  } },
-    { CLOSE_SQUARE,         { "]"  } },
+    { TerminalType::OPEN_BRACE,           { "{"  } },
+    { TerminalType::CLOSE_BRACE,          { "}"  } },
+    { TerminalType::OPEN_ROUND,           { "("  } },
+    { TerminalType::CLOSE_ROUND,          { ")"  } },
+    { TerminalType::OPEN_ANGLED,          { "<"  } },
+    { TerminalType::CLOSE_ANGLED,         { ">"  } },
+    { TerminalType::OPEN_SQUARE,          { "["  } },
+    { TerminalType::CLOSE_SQUARE,         { "]"  } },
 
-    { EQUALITY,             { "==" } },
-    { NOT_EQUALITY,         { "!=" } },
-    { LESS_THAN_EQUALS,     { "<=" } },
-    { GREATER_THAN_EQUALS,  { ">=" } },
-    { LESS_THAN,            { "<"  } },
-    { GREATER_THAN,         { ">"  } },
+    { TerminalType::EQUALITY,             { "==" } },
+    { TerminalType::NOT_EQUALITY,         { "!=" } },
+    { TerminalType::LESS_THAN_EQUALS,     { "<=" } },
+    { TerminalType::GREATER_THAN_EQUALS,  { ">=" } },
+    { TerminalType::LESS_THAN,            { "<"  } },
+    { TerminalType::GREATER_THAN,         { ">"  } },
 
-    { EQUALS,               { "="  } },
-    { PLUS_EQUALS,          { "+=" } },
-    { MINUS_EQUALS,         { "-=" } },
-    { MULTIPLY_EQUALS,      { "*=" } },
-    { DIVIDE_EQUALS,        { "/=" } },
-    { MODULO_EQUALS,        { "%=" } },
-    { AND_EQUALS,           { "&=" } },
-    { INCLUSIVE_OR_EQUALS,  { "|=" } },
-    { EXCLUSIVE_OR_EQUALS,  { "^=" } },
-    { LEFT_SHIFT_EQUALS,    { "<<="} },
-    { RIGHT_SHIFT_EQUALS,   { ">>="} },
+    { TerminalType::EQUALS,               { "="  } },
+    { TerminalType::PLUS_EQUALS,          { "+=" } },
+    { TerminalType::MINUS_EQUALS,         { "-=" } },
+    { TerminalType::MULTIPLY_EQUALS,      { "*=" } },
+    { TerminalType::DIVIDE_EQUALS,        { "/=" } },
+    { TerminalType::MODULO_EQUALS,        { "%=" } },
+    { TerminalType::AND_EQUALS,           { "&=" } },
+    { TerminalType::INCLUSIVE_OR_EQUALS,  { "|=" } },
+    { TerminalType::EXCLUSIVE_OR_EQUALS,  { "^=" } },
+    { TerminalType::LEFT_SHIFT_EQUALS,    { "<<="} },
+    { TerminalType::RIGHT_SHIFT_EQUALS,   { ">>="} },
 
-    { LOGICAL_AND,          { "&&" } },
-    { LOGICAL_OR,           { "||" } },
-    { LOGICAL_NOT,          { "!"  } },
+    { TerminalType::LOGICAL_AND,          { "&&" } },
+    { TerminalType::LOGICAL_OR,           { "||" } },
+    { TerminalType::LOGICAL_NOT,          { "!"  } },
 
-    { INCREMENT,            { "++" } },
-    { DECREMENT,            { "--" } },
-    { PLUS,                 { "+"  } },
-    { MINUS,                { "-"  } },
-    { MULTIPLY,             { "*"  } },
-    { DIVIDE,               { "/"  } },
-    { MODULO,               { "%"  } },
-    { AND,                  { "&"  } },
-    { INCLUSIVE_OR,         { "|"  } },
-    { EXCLUSIVE_OR,         { "^"  } },
-    { BITWISE_NOT,          { "~"  } },
-    { LEFT_SHIFT,           { "<<" } },
-    { RIGHT_SHIFT,          { ">>" } },
+    { TerminalType::INCREMENT,            { "++" } },
+    { TerminalType::DECREMENT,            { "--" } },
+    { TerminalType::PLUS,                 { "+"  } },
+    { TerminalType::MINUS,                { "-"  } },
+    { TerminalType::MULTIPLY,             { "*"  } },
+    { TerminalType::DIVIDE,               { "/"  } },
+    { TerminalType::MODULO,               { "%"  } },
+    { TerminalType::AND,                  { "&"  } },
+    { TerminalType::INCLUSIVE_OR,         { "|"  } },
+    { TerminalType::EXCLUSIVE_OR,         { "^"  } },
+    { TerminalType::BITWISE_NOT,          { "~"  } },
+    { TerminalType::LEFT_SHIFT,           { "<<" } },
+    { TerminalType::RIGHT_SHIFT,          { ">>" } },
 
-    { SEMICOLON,            { ";"  } },
-    { COMMA,                { ","  } },
-    { PERIOD,               { "."  } },
-    { COLON,                { ":"  } },
-    { QUERY,                { "?"  } }
+    { TerminalType::SEMICOLON,            { ";"  } },
+    { TerminalType::COMMA,                { ","  } },
+    { TerminalType::PERIOD,               { "."  } },
+    { TerminalType::COLON,                { ":"  } },
+    { TerminalType::QUERY,                { "?"  } }
 };
 
 //
@@ -116,10 +116,10 @@ const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
 //
 const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 {
-    { INTEGER_LITERAL,   { ReadIntegerLiteral,   "integer literal"   } },
-    { FLOATING_LITERAL,  { ReadFloatingLiteral,  "floating literal"  } },
-    { CHARACTER_LITERAL, { ReadCharacterLiteral, "character literal" } },
-    { STRING_LITERAL,    { ReadStringLiteral,    "string literal"    } },
+    { TerminalType::INTEGER_LITERAL,   { ReadIntegerLiteral,   "integer literal"   } },
+    { TerminalType::FLOATING_LITERAL,  { ReadFloatingLiteral,  "floating literal"  } },
+    { TerminalType::CHARACTER_LITERAL, { ReadCharacterLiteral, "character literal" } },
+    { TerminalType::STRING_LITERAL,    { ReadStringLiteral,    "string literal"    } },
 };
 
 //
@@ -127,13 +127,13 @@ const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 //
 const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 {
-    { TECHNIQUE,    { "technique",  "" } },
-    { PASS,         { "pass",       "" } },
+    { TerminalType::TECHNIQUE,    { "technique",  "" } },
+    { TerminalType::PASS,         { "pass",       "" } },
 
-    { TYPE_INT,     { "int",        "" } },
+    { TerminalType::TYPE_INT,     { "int",        "" } },
 
-    { TRUE,         { "true",       "" } },
-    { FALSE,        { "false",      "" } }
+    { TerminalType::TRUE,         { "true",       "" } },
+    { TerminalType::FALSE,        { "false",      "" } }
 };
 
 //TODO use the map properly
@@ -169,9 +169,9 @@ const std::string& GetTerminalString( TerminalType terminal_type )
     const static std::string i = "identifier";
     const static std::string e = "EOF";
 
-    if( terminal_type == IDENTIFIER )
+    if( terminal_type == TerminalType::IDENTIFIER )
         return i;
-    else if ( terminal_type == END_OF_INPUT )
+    else if ( terminal_type == TerminalType::END_OF_INPUT )
         return e;
 
     return s;
@@ -418,7 +418,7 @@ std::size_t ReadFloatingLiteral( std::string::const_iterator begin,
 std::size_t ReadCharOrEscapedChar( std::string::const_iterator begin,
                                    std::string::const_iterator end )
 {
-    if( begin - end < 2 )
+    if( end - begin < 2 )
         return 0;
 
     std::string::const_iterator p = begin;

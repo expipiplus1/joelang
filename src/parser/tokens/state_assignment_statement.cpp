@@ -136,7 +136,7 @@ std::map<std::string, std::shared_ptr<LiteralExpression> >
 bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token )
 {
     std::string state_name;
-    if( !parser.ExpectTerminal( Compiler::IDENTIFIER, state_name ) )
+    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, state_name ) )
         return false;
 
     //Check if the state name is a valid state name
@@ -147,7 +147,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         return false;
     }
 
-    if( !parser.ExpectTerminal( Compiler::EQUALS ) )
+    if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
         return false;
 
     // TODO some kind of raii for the symbol table scopes
@@ -166,7 +166,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         return false;
     }
 
-    if( !parser.ExpectTerminal( Compiler::SEMICOLON ) )
+    if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
         symbol_table.LeaveScope();
         return false;

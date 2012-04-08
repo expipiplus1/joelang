@@ -35,7 +35,7 @@ namespace JoeLang
 namespace Compiler
 {
 
-enum TerminalType : int;
+enum class TerminalType;
 
 //------------------------------------------------------------------------------
 // Lexer

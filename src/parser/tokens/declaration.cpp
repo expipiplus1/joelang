@@ -98,7 +98,7 @@ void EmptyDeclaration::Print(int depth) const
 
 bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Compiler::SEMICOLON ) )
+    if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
         return false;
 
     token.reset( new EmptyDeclaration );
@@ -149,14 +149,14 @@ void PassDeclaration::Print( int depth ) const
 
 bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Compiler::PASS ) )
+    if( !parser.ExpectTerminal( TerminalType::PASS ) )
         return false;
 
     std::string name;
-    if( !parser.ExpectTerminal( Compiler::IDENTIFIER, name ) )
+    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
         return false;
 
-    if( parser.ExpectTerminal( Compiler::SEMICOLON ) )
+    if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
         //
         // This is a regular declaration
@@ -228,11 +228,11 @@ void TechniqueDeclaration::Print( int depth ) const
 
 bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Compiler::TECHNIQUE ) )
+    if( !parser.ExpectTerminal( TerminalType::TECHNIQUE ) )
         return false;
 
     std::string name;
-    if( !parser.ExpectTerminal( Compiler::IDENTIFIER, name ) )
+    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
         return false;
 
     // TODO parser soft error

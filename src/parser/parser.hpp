@@ -45,13 +45,6 @@ namespace JoeLang
 class Context;
 class StateBase;
 
-namespace Compiler
-{
-class Lexer;
-
-enum TerminalType : int;
-}
-
 //------------------------------------------------------------------------------
 // Parser
 //------------------------------------------------------------------------------
@@ -59,6 +52,9 @@ enum TerminalType : int;
 namespace Compiler
 {
 
+enum class TerminalType;
+
+class Lexer;
 class Token;
 class TranslationUnit;
 

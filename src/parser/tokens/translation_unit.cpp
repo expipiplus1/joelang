@@ -75,7 +75,7 @@ bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& t
     if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
         return false;
 
-    if( !parser.ExpectTerminal( Compiler::END_OF_INPUT ) )
+    if( !parser.ExpectTerminal( TerminalType::END_OF_INPUT ) )
         return false;
 
     token.reset( new TranslationUnit( std::move( declarations ) ) );

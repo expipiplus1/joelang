@@ -50,11 +50,8 @@ enum class Type;
 
 namespace Compiler
 {
-    enum TerminalType : int;
-}
 
-namespace Compiler
-{
+enum class TerminalType;
 
 class CodeGenerator;
 class Parser;
