@@ -36,7 +36,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 EffectFactory::EffectFactory( const Context& context )
@@ -63,5 +63,5 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
                                                 std::move( llvm_execution_engine ) ) );
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

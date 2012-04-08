@@ -36,13 +36,13 @@
 namespace JoeLang
 {
 
-namespace Parser
+namespace Compiler
 {
 
 class DeclarationBase;
 class Parser;
 
-class TranslationUnit : public JoeLang::Parser::Token
+class TranslationUnit : public JoeLang::Compiler::Token
 {
 public:
     TranslationUnit() = delete;
@@ -61,6 +61,6 @@ private:
     std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang
 

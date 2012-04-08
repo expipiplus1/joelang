@@ -38,14 +38,14 @@ namespace JoeLang
 
 class StateBase;
 
-namespace Parser
+namespace Compiler
 {
 
 class CodeGenerator;
 class Expression;
 class Parser;
 
-class StateAssignmentStatement : public JoeLang::Parser::Token
+class StateAssignmentStatement : public JoeLang::Compiler::Token
 {
 public:
     virtual ~StateAssignmentStatement();
@@ -64,5 +64,5 @@ private:
     std::unique_ptr<Expression> m_expression;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

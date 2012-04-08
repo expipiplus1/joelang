@@ -34,7 +34,7 @@
 
 namespace JoeLang
 {
-namespace Lexer
+namespace Compiler
 {
 
 enum TerminalType : int
@@ -211,5 +211,5 @@ bool IsNonDigit( char c );
 //matches [a-zA-Z0-9_]
 bool IsDigitOrNonDigit( char c );
 
-} // namespace Lexer
+} // namespace Compiler
 } // namespace JoeLang

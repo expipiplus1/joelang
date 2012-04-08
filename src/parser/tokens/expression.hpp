@@ -48,12 +48,12 @@ namespace JoeLang
 
 enum class Type;
 
-namespace Lexer
+namespace Compiler
 {
     enum TerminalType : int;
 }
 
-namespace Parser
+namespace Compiler
 {
 
 class CodeGenerator;
@@ -69,7 +69,7 @@ class PostfixOperator;
 // Parse is called, because they're used in a polymorphic way.
 //------------------------------------------------------------------------------
 
-class Expression : public JoeLang::Parser::Token
+class Expression : public JoeLang::Compiler::Token
 {
 public:
     virtual
@@ -92,7 +92,7 @@ protected:
 // AssignmentExpression
 //------------------------------------------------------------------------------
 
-class AssignmentExpression : public JoeLang::Parser::Expression
+class AssignmentExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -122,7 +122,7 @@ private:
 // AssignmentOperator
 //------------------------------------------------------------------------------
 
-class AssignmentOperator : public JoeLang::Parser::Token
+class AssignmentOperator : public JoeLang::Compiler::Token
 {
 public:
     virtual
@@ -135,17 +135,17 @@ public:
     bool Parse(Parser& parser, std::unique_ptr<AssignmentOperator> &token );
 
 protected:
-    AssignmentOperator( Lexer::TerminalType terminal_type );
+    AssignmentOperator( Compiler::TerminalType terminal_type );
 
 private:
-    Lexer::TerminalType m_terminalType;
+    Compiler::TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------
 // ConditionalExpression
 //------------------------------------------------------------------------------
 
-class ConditionalExpression : public JoeLang::Parser::Expression
+class ConditionalExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -178,7 +178,7 @@ private:
 // BinaryOperatorExpression
 //------------------------------------------------------------------------------
 
-class BinaryOperatorExpression : public JoeLang::Parser::Expression
+class BinaryOperatorExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -196,19 +196,19 @@ public:
     template< typename ExpressionType, typename SubExpressionType >
     static
     bool ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                      const std::vector<Lexer::TerminalType>& operator_terminals );
+                                      const std::vector<Compiler::TerminalType>& operator_terminals );
 
     template< typename ExpressionType, typename SubExpressionType >
     static
     bool ParseRightAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                       const std::vector<Lexer::TerminalType>& operator_terminals );
+                                       const std::vector<Compiler::TerminalType>& operator_terminals );
 
 protected:
-    BinaryOperatorExpression( Lexer::TerminalType operator_terminal,
+    BinaryOperatorExpression( Compiler::TerminalType operator_terminal,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side );
 
-    Lexer::TerminalType m_operatorTerminal;
+    Compiler::TerminalType m_operatorTerminal;
     std::unique_ptr<Expression> m_leftSide;
     std::unique_ptr<Expression> m_rightSide;
 
@@ -219,7 +219,7 @@ private:
 // LogicalOrExpression
 //------------------------------------------------------------------------------
 
-class LogicalOrExpression : public JoeLang::Parser::BinaryOperatorExpression
+class LogicalOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -232,7 +232,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    LogicalOrExpression( Lexer::TerminalType operator_terminal,
+    LogicalOrExpression( Compiler::TerminalType operator_terminal,
                          std::unique_ptr<Expression> left_side,
                          std::unique_ptr<Expression> right_side );
 
@@ -243,7 +243,7 @@ protected:
 // LogicalAndExpression
 //------------------------------------------------------------------------------
 
-class LogicalAndExpression : public JoeLang::Parser::BinaryOperatorExpression
+class LogicalAndExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -256,7 +256,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    LogicalAndExpression( Lexer::TerminalType operator_terminal,
+    LogicalAndExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -267,7 +267,7 @@ protected:
 // InclusiveOrExpression
 //------------------------------------------------------------------------------
 
-class InclusiveOrExpression : public JoeLang::Parser::BinaryOperatorExpression
+class InclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -277,7 +277,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    InclusiveOrExpression( Lexer::TerminalType operator_terminal,
+    InclusiveOrExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -288,7 +288,7 @@ protected:
 // ExclusiveOrExpression
 //------------------------------------------------------------------------------
 
-class ExclusiveOrExpression : public JoeLang::Parser::BinaryOperatorExpression
+class ExclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -298,7 +298,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ExclusiveOrExpression( Lexer::TerminalType operator_terminal,
+    ExclusiveOrExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -309,7 +309,7 @@ protected:
 // AndExpression
 //------------------------------------------------------------------------------
 
-class AndExpression : public JoeLang::Parser::BinaryOperatorExpression
+class AndExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -319,7 +319,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    AndExpression( Lexer::TerminalType operator_terminal,
+    AndExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -330,7 +330,7 @@ protected:
 // EqualityExpression
 //------------------------------------------------------------------------------
 
-class EqualityExpression : public JoeLang::Parser::BinaryOperatorExpression
+class EqualityExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -343,7 +343,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    EqualityExpression( Lexer::TerminalType operator_terminal,
+    EqualityExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -354,7 +354,7 @@ protected:
 // RelationalExpression
 //------------------------------------------------------------------------------
 
-class RelationalExpression : public JoeLang::Parser::BinaryOperatorExpression
+class RelationalExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -367,7 +367,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    RelationalExpression( Lexer::TerminalType operator_terminal,
+    RelationalExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -378,7 +378,7 @@ protected:
 // ShiftExpression
 //------------------------------------------------------------------------------
 
-class ShiftExpression : public JoeLang::Parser::BinaryOperatorExpression
+class ShiftExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -388,7 +388,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ShiftExpression( Lexer::TerminalType operator_terminal,
+    ShiftExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -399,7 +399,7 @@ protected:
 // AdditiveExpression
 //------------------------------------------------------------------------------
 
-class AdditiveExpression : public JoeLang::Parser::BinaryOperatorExpression
+class AdditiveExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -409,7 +409,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    AdditiveExpression( Lexer::TerminalType operator_terminal,
+    AdditiveExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -420,7 +420,7 @@ protected:
 // MultiplicativeExpression
 //------------------------------------------------------------------------------
 
-class MultiplicativeExpression : public JoeLang::Parser::BinaryOperatorExpression
+class MultiplicativeExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     virtual
@@ -430,7 +430,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    MultiplicativeExpression( Lexer::TerminalType operator_terminal,
+    MultiplicativeExpression( Compiler::TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -441,7 +441,7 @@ protected:
 // CastExpression
 //------------------------------------------------------------------------------
 
-class CastExpression : public JoeLang::Parser::Expression
+class CastExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -467,7 +467,7 @@ private:
 // UnaryExpression
 //------------------------------------------------------------------------------
 
-class UnaryExpression : public JoeLang::Parser::Expression
+class UnaryExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -498,7 +498,7 @@ private:
 // UnaryOperator
 //------------------------------------------------------------------------------
 
-class UnaryOperator : public JoeLang::Parser::Token
+class UnaryOperator : public JoeLang::Compiler::Token
 {
 public:
     virtual
@@ -507,23 +507,23 @@ public:
     virtual
     void Print( int depth ) const;
 
-    Lexer::TerminalType GetTerminalType() const;
+    Compiler::TerminalType GetTerminalType() const;
 
     static
     bool Parse(Parser& parser, std::unique_ptr<UnaryOperator> &token );
 
 protected:
-    UnaryOperator( Lexer::TerminalType terminal_type );
+    UnaryOperator( Compiler::TerminalType terminal_type );
 
 private:
-    Lexer::TerminalType m_terminalType;
+    Compiler::TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------
 // PostfixExpression
 //------------------------------------------------------------------------------
 
-class PostfixExpression : public JoeLang::Parser::Expression
+class PostfixExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -551,7 +551,7 @@ private:
 // PostfixOperator
 //------------------------------------------------------------------------------
 
-class PostfixOperator : public JoeLang::Parser::Token
+class PostfixOperator : public JoeLang::Compiler::Token
 {
 public:
     virtual
@@ -567,7 +567,7 @@ protected:
 //------------------------------------------------------------------------------
 // SubscriptOperator
 //------------------------------------------------------------------------------
-class SubscriptOperator : public JoeLang::Parser::PostfixOperator
+class SubscriptOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
     virtual
@@ -589,7 +589,7 @@ private:
 //------------------------------------------------------------------------------
 // ArgumentListOperator
 //------------------------------------------------------------------------------
-class ArgumentListOperator : public JoeLang::Parser::PostfixOperator
+class ArgumentListOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
     virtual
@@ -611,7 +611,7 @@ private:
 //------------------------------------------------------------------------------
 // MemberAccessOperator
 //------------------------------------------------------------------------------
-class MemberAccessOperator : public JoeLang::Parser::PostfixOperator
+class MemberAccessOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
     virtual
@@ -633,7 +633,7 @@ private:
 //------------------------------------------------------------------------------
 // IncrementalOperator
 //------------------------------------------------------------------------------
-class IncrementalOperator : public JoeLang::Parser::PostfixOperator
+class IncrementalOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
     virtual
@@ -646,17 +646,17 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<IncrementalOperator>& token );
 
 protected:
-    IncrementalOperator( Lexer::TerminalType terminal_type );
+    IncrementalOperator( Compiler::TerminalType terminal_type );
 
 private:
-    Lexer::TerminalType m_terminalType;
+    Compiler::TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
-class PrimaryExpression : public JoeLang::Parser::Expression
+class PrimaryExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -678,7 +678,7 @@ private:
 // IdentifierExpression
 //------------------------------------------------------------------------------
 
-class IdentifierExpression : public JoeLang::Parser::Expression
+class IdentifierExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -704,7 +704,7 @@ private:
 // LiteralExpression
 //------------------------------------------------------------------------------
 
-class LiteralExpression : public JoeLang::Parser::Expression
+class LiteralExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -721,7 +721,7 @@ protected:
 // ConstantValueExpression
 //------------------------------------------------------------------------------
 
-class ConstantValueExpression : public JoeLang::Parser::Expression
+class ConstantValueExpression : public JoeLang::Compiler::Expression
 {
 public:
     virtual
@@ -750,7 +750,7 @@ private:
 // IntegralLiteralExpression
 //------------------------------------------------------------------------------
 
-class IntegralLiteralExpression : public JoeLang::Parser::LiteralExpression
+class IntegralLiteralExpression : public JoeLang::Compiler::LiteralExpression
 {
 public:
     virtual
@@ -779,7 +779,7 @@ private:
 // FloatingLiteralExpression
 //------------------------------------------------------------------------------
 
-class FloatingLiteralExpression : public JoeLang::Parser::LiteralExpression
+class FloatingLiteralExpression : public JoeLang::Compiler::LiteralExpression
 {
 public:
     virtual
@@ -809,7 +809,7 @@ private:
 // BooleanLiteralExpression
 //------------------------------------------------------------------------------
 
-class BooleanLiteralExpression : public JoeLang::Parser::LiteralExpression
+class BooleanLiteralExpression : public JoeLang::Compiler::LiteralExpression
 {
 public:
     virtual
@@ -838,7 +838,7 @@ private:
 // StringLiteralExpression
 //------------------------------------------------------------------------------
 
-class StringLiteralExpression : public JoeLang::Parser::LiteralExpression
+class StringLiteralExpression : public JoeLang::Compiler::LiteralExpression
 {
 public:
     virtual
@@ -864,5 +864,5 @@ private:
     std::string m_value;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

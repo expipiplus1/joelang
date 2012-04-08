@@ -32,7 +32,7 @@
 
 namespace JoeLang
 {
-namespace Lexer
+namespace Compiler
 {
 
 enum TerminalType : int;
@@ -70,5 +70,5 @@ private:
     std::size_t                 m_columnNumber = 1;
 };
 
-} // namespace Lexer
+} // namespace Compiler
 } // namespace JoeLang

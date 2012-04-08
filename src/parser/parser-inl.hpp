@@ -36,7 +36,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 template< typename T, typename U >
@@ -144,5 +144,5 @@ bool ExpectAnyOf( Parser& parser )
     return true;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

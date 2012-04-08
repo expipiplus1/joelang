@@ -31,7 +31,7 @@
 namespace JoeLang
 {
 
-namespace Parser
+namespace Compiler
 {
 
 #define CHECK_PARSER \
@@ -53,6 +53,6 @@ protected:
     Token() = default;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang
 

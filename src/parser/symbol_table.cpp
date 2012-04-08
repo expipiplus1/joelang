@@ -39,7 +39,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 SymbolTable::~SymbolTable()
@@ -88,5 +88,5 @@ bool SymbolTable::AddTechniqueName( const std::string& name )
     return m_techniqueNames.insert( name ).second;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

@@ -37,7 +37,7 @@ namespace JoeLang
 class Context;
 class Effect;
 
-namespace Parser
+namespace Compiler
 {
 
 class EffectFactory
@@ -53,5 +53,5 @@ private:
     const Context& m_context;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

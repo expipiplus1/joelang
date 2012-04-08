@@ -43,7 +43,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 //------------------------------------------------------------------------------
@@ -98,7 +98,7 @@ void EmptyDeclaration::Print(int depth) const
 
 bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::SEMICOLON ) )
+    if( !parser.ExpectTerminal( Compiler::SEMICOLON ) )
         return false;
 
     token.reset( new EmptyDeclaration );
@@ -149,14 +149,14 @@ void PassDeclaration::Print( int depth ) const
 
 bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::PASS ) )
+    if( !parser.ExpectTerminal( Compiler::PASS ) )
         return false;
 
     std::string name;
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
+    if( !parser.ExpectTerminal( Compiler::IDENTIFIER, name ) )
         return false;
 
-    if( parser.ExpectTerminal( Lexer::SEMICOLON ) )
+    if( parser.ExpectTerminal( Compiler::SEMICOLON ) )
     {
         //
         // This is a regular declaration
@@ -228,11 +228,11 @@ void TechniqueDeclaration::Print( int depth ) const
 
 bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::TECHNIQUE ) )
+    if( !parser.ExpectTerminal( Compiler::TECHNIQUE ) )
         return false;
 
     std::string name;
-    if( !parser.ExpectTerminal( Lexer::IDENTIFIER, name ) )
+    if( !parser.ExpectTerminal( Compiler::IDENTIFIER, name ) )
         return false;
 
     // TODO parser soft error
@@ -253,5 +253,5 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     return true;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

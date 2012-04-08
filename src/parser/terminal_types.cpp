@@ -36,7 +36,7 @@
 
 namespace JoeLang
 {
-namespace Lexer
+namespace Compiler
 {
 
 //------------------------------------------------------------------------------
@@ -485,5 +485,5 @@ bool IsDigitOrNonDigit( char c )
            ( c >= '0' && c <= '9' );
 }
 
-} // namespace Lexer
+} // namespace Compiler
 } // namespace JoeLang

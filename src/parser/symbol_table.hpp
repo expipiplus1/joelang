@@ -37,7 +37,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 class SymbolTable
@@ -67,5 +67,5 @@ private:
     std::vector<SymbolMaps> m_symbolStack;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

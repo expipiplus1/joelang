@@ -36,7 +36,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 class CodeGenerator;
@@ -50,7 +50,7 @@ class TechniqueDefinition;
 // Including function and technique definitions
 //------------------------------------------------------------------------------
 
-class DeclarationBase : public JoeLang::Parser::Token
+class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
     virtual ~DeclarationBase();
@@ -69,7 +69,7 @@ protected:
 // Matches ';'
 //------------------------------------------------------------------------------
 
-class EmptyDeclaration : public JoeLang::Parser::DeclarationBase
+class EmptyDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
     virtual ~EmptyDeclaration();
@@ -87,7 +87,7 @@ protected:
 // PassDeclaration
 //------------------------------------------------------------------------------
 
-class PassDeclaration : public JoeLang::Parser::DeclarationBase
+class PassDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
     virtual ~PassDeclaration();
@@ -112,7 +112,7 @@ private:
 // TechniqueDeclaration
 //------------------------------------------------------------------------------
 
-class TechniqueDeclaration : public JoeLang::Parser::DeclarationBase
+class TechniqueDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
     virtual ~TechniqueDeclaration();
@@ -134,5 +134,5 @@ private:
     std::unique_ptr<TechniqueDefinition> m_definition;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

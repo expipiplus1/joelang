@@ -40,7 +40,7 @@ namespace JoeLang
 class Pass;
 class Technique;
 
-namespace Parser
+namespace Compiler
 {
 
 class CodeGenerator;
@@ -52,7 +52,7 @@ class StateAssignmentStatement;
 // PassDefinition
 //------------------------------------------------------------------------------
 
-class PassDefinition : public JoeLang::Parser::Token
+class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
     virtual
@@ -79,7 +79,7 @@ private:
 // TechniqueDefinition
 //------------------------------------------------------------------------------
 
-class TechniqueDefinition : public JoeLang::Parser::Token
+class TechniqueDefinition : public JoeLang::Compiler::Token
 {
 public:
     virtual ~TechniqueDefinition();
@@ -100,5 +100,5 @@ private:
     std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

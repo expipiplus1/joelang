@@ -69,7 +69,7 @@ bool Context::AddState( StateBase* state )
 
 Effect* Context::CreateEffectFromString( const std::string& string )
 {
-    JoeLang::Parser::EffectFactory ef( *this );
+    JoeLang::Compiler::EffectFactory ef( *this );
     std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
     if( e )
     {

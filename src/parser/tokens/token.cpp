@@ -30,12 +30,12 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 Token::~Token()
 {
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

@@ -46,7 +46,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 //------------------------------------------------------------------------------
@@ -95,14 +95,14 @@ void PassDefinition::Print( int depth ) const
 
 bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+    if( !parser.ExpectTerminal( Compiler::OPEN_BRACE ) )
         return false;
 
     std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
     ExpectSequenceOf<StateAssignmentStatement>( parser, state_assignments );
     CHECK_PARSER;
 
-    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+    if( !parser.ExpectTerminal( Compiler::CLOSE_BRACE ) )
         return false;
 
     token.reset( new PassDefinition( std::move( state_assignments ) ) );
@@ -161,19 +161,19 @@ void TechniqueDefinition::Print( int depth ) const
 
 bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
 {
-    if( !parser.ExpectTerminal( Lexer::OPEN_BRACE ) )
+    if( !parser.ExpectTerminal( Compiler::OPEN_BRACE ) )
         return false;
 
     std::vector< std::unique_ptr<PassDeclaration> > passes;
     ExpectSequenceOf<PassDeclaration>( parser, passes );
     CHECK_PARSER;
 
-    if( !parser.ExpectTerminal( Lexer::CLOSE_BRACE ) )
+    if( !parser.ExpectTerminal( Compiler::CLOSE_BRACE ) )
         return false;
 
     token.reset( new TechniqueDefinition( std::move( passes ) ) );
     return true;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

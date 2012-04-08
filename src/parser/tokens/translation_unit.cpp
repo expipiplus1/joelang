@@ -39,7 +39,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 //------------------------------------------------------------------------------
@@ -75,12 +75,12 @@ bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& t
     if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
         return false;
 
-    if( !parser.ExpectTerminal( Lexer::END_OF_INPUT ) )
+    if( !parser.ExpectTerminal( Compiler::END_OF_INPUT ) )
         return false;
 
     token.reset( new TranslationUnit( std::move( declarations ) ) );
     return true;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

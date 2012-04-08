@@ -45,7 +45,7 @@ namespace JoeLang
 class Context;
 class StateBase;
 
-namespace Lexer
+namespace Compiler
 {
 class Lexer;
 
@@ -56,7 +56,7 @@ enum TerminalType : int;
 // Parser
 //------------------------------------------------------------------------------
 
-namespace Parser
+namespace Compiler
 {
 
 class Token;
@@ -73,8 +73,8 @@ public:
 
     bool Parse( const std::string& string );
 
-    bool ExpectTerminal( Lexer::TerminalType terminal_type );
-    bool ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string );
+    bool ExpectTerminal( Compiler::TerminalType terminal_type );
+    bool ExpectTerminal( Compiler::TerminalType terminal_type, std::string& string );
 
     SymbolTable& GetSymbolTable();
 
@@ -91,8 +91,8 @@ private:
 
     std::unique_ptr<TranslationUnit> m_translationUnit;
 
-    std::unique_ptr<Lexer::Lexer> m_lexer;
-    std::set<Lexer::TerminalType> m_expectedTerminals;
+    std::unique_ptr<Compiler::Lexer> m_lexer;
+    std::set<Compiler::TerminalType> m_expectedTerminals;
 
     SymbolTable m_symbolTable;
 
@@ -124,7 +124,7 @@ template<typename T, typename T1, typename... Rest>
 bool ExpectAnyOf( Parser& parser );
 
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang
 
 #include "parser-inl.hpp"

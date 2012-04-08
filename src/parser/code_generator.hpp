@@ -51,7 +51,7 @@ class Technique;
 
 enum class Type;
 
-namespace Parser
+namespace Compiler
 {
 
 class DeclarationBase;
@@ -130,5 +130,5 @@ private:
     std::unique_ptr<llvm::ExecutionEngine> m_llvmExecutionEngine;
 };
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

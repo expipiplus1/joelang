@@ -57,7 +57,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& techniques )
@@ -486,5 +486,5 @@ llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
     return m_llvmContext;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

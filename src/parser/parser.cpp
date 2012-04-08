@@ -40,7 +40,7 @@
 
 namespace JoeLang
 {
-namespace Parser
+namespace Compiler
 {
 
 Parser::Parser( const Context& context )
@@ -60,7 +60,7 @@ void Parser::Print() const
 
 bool Parser::Parse ( const std::string& string )
 {
-    m_lexer.reset( new Lexer::Lexer( string ) );
+    m_lexer.reset( new Compiler::Lexer( string ) );
 
     if( TranslationUnit::Parse( *this, m_translationUnit ) )
         return true;
@@ -70,9 +70,9 @@ bool Parser::Parse ( const std::string& string )
     if( m_errorMessage.size() == 0 )
     {
         std::cout << "Expected one of: ";
-        for( Lexer::TerminalType expected_terminal : m_expectedTerminals )
+        for( Compiler::TerminalType expected_terminal : m_expectedTerminals )
         {
-            std::cout << "\'" << Lexer::GetTerminalString( expected_terminal ) << "\', ";
+            std::cout << "\'" << Compiler::GetTerminalString( expected_terminal ) << "\', ";
         }
     }
     else
@@ -83,14 +83,14 @@ bool Parser::Parse ( const std::string& string )
     return false;
 }
 
-bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type )
+bool Parser::ExpectTerminal( Compiler::TerminalType terminal_type )
 {
     // TODO: Remove dummy
     std::string dummy;
     return ExpectTerminal( terminal_type, dummy );
 }
 
-bool Parser::ExpectTerminal( Lexer::TerminalType terminal_type, std::string& string )
+bool Parser::ExpectTerminal( Compiler::TerminalType terminal_type, std::string& string )
 {
     if( m_lexer->Expect( terminal_type, string ) )
     {
@@ -138,5 +138,5 @@ bool Parser::Good() const
     return m_good;
 }
 
-} // namespace Parser
+} // namespace Compiler
 } // namespace JoeLang

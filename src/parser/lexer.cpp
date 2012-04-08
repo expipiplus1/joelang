@@ -39,7 +39,7 @@
 
 namespace JoeLang
 {
-namespace Lexer
+namespace Compiler
 {
 
 
@@ -198,5 +198,5 @@ void Lexer::ReadChars( std::size_t num_chars )
     }
 }
 
-} // namespace Lexer
+} // namespace Compiler
 } // namespace JoeLang
