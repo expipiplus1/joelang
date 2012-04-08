@@ -54,7 +54,9 @@ public:
     //
     bool         Expect          ( TerminalType terminal_type );
     bool         Expect          ( TerminalType terminal_type,
-                                  std::string& string );
+                                   std::string& string );
+
+    TerminalType GetNextTerminal ( std::string& string );
 
     std::size_t  GetPosition     () const;
     std::size_t  GetLineNumber   () const;

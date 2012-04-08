@@ -152,6 +152,33 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
     return false;
 }
 
+TerminalType Lexer::GetNextTerminal( std::string& string )
+{
+    for( const auto& t_reader : g_punctuationTerminals )
+    {
+        TerminalType t = ReadPunctuationTerminal( t_reader.first, string );
+        if( t != TerminalType::UNKNOWN_CHARACTER )
+            return t;
+    }
+
+    for( const auto& t_reader : g_literalTerminals )
+    {
+        TerminalType t = ReadLiteralTerminal( t_reader.first, string );
+        if( t != TerminalType::UNKNOWN_CHARACTER )
+            return t;
+    }
+
+    for( const auto& t_reader : g_keywordTerminals )
+    {
+        TerminalType t = ReadPunctuationTerminal( t_reader.first, string );
+        if( t != TerminalType::UNKNOWN_CHARACTER )
+            return t;
+    }
+
+    // If it's anything else
+    return TerminalType::UNKNOWN_CHARACTER;
+}
+
 std::size_t Lexer::GetPosition() const
 {
     return m_position - m_string.begin();
