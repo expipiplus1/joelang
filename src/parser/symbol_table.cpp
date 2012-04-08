@@ -57,7 +57,8 @@ void SymbolTable::LeaveScope()
     m_symbolStack.pop_back();
 }
 
-bool SymbolTable::GetConstant( std::string identifier, std::shared_ptr<LiteralExpression>& constant )
+bool SymbolTable::GetConstant( std::string identifier,
+                               std::shared_ptr<LiteralExpression>& constant )
 {
     for( const auto& m : m_symbolStack )
     {
@@ -71,7 +72,8 @@ bool SymbolTable::GetConstant( std::string identifier, std::shared_ptr<LiteralEx
     return false;
 }
 
-bool SymbolTable::AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant )
+bool SymbolTable::AddConstant( std::string identifier,
+                               std::shared_ptr<LiteralExpression> constant )
 {
     return m_symbolStack.rbegin()->m_constants.insert( std::make_pair( identifier, std::move(constant) ) ).second;
 }

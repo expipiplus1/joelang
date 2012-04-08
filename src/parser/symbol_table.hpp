@@ -37,23 +37,24 @@
 
 namespace JoeLang
 {
-
 namespace Parser
 {
 
 class SymbolTable
 {
 public:
-    ~SymbolTable();
+         ~SymbolTable       ();
 
-    void EnterScope();
-    void LeaveScope();
+    void EnterScope         ();
+    void LeaveScope         ();
 
-    bool GetConstant( std::string identifier, std::shared_ptr<LiteralExpression>& constant );
-    bool AddConstant( std::string identifier, std::shared_ptr<LiteralExpression> constant );
+    bool GetConstant        ( std::string identifier,
+                              std::shared_ptr<LiteralExpression>& constant );
+    bool AddConstant        ( std::string identifier,
+                              std::shared_ptr<LiteralExpression> constant );
 
-    bool HasTechniqueName( const std::string& name ) const;
-    bool AddTechniqueName( const std::string& name );
+    bool HasTechniqueName   ( const std::string& name ) const;
+    bool AddTechniqueName   ( const std::string& name );
 
 private:
     struct SymbolMaps
@@ -61,7 +62,7 @@ private:
         std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
     };
 
-    std::set<std::string> m_techniqueNames;
+    std::set<std::string>   m_techniqueNames;
 
     std::vector<SymbolMaps> m_symbolStack;
 };
