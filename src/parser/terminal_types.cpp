@@ -137,44 +137,36 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     { TerminalType::FALSE,        { "false",      "" } }
 };
 
-//TODO use the map properly
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
-    for( const auto& i : g_ignoredTerminals )
-        if( i.first == terminal_type )
-            return i.second.readable_string;
+    std::map<TerminalType, LiteralTerminal>::const_iterator literal_iterator;
+    std::map<TerminalType, FunctionalTerminal>::const_iterator functional_iterator;
 
-    for( const auto& i : g_punctuationTerminals )
-         if( i.first == terminal_type )
-         {
-            if( i.second.readable_string.empty() )
-                return i.second.matched_string;
-            else
-                return i.second.readable_string;
-         }
+    functional_iterator = g_ignoredTerminals.find( terminal_type );
+    if( functional_iterator != g_ignoredTerminals.end() )
+        return functional_iterator->second.readable_string;
 
-    for( const auto& i : g_literalTerminals )
-        if( i.first == terminal_type )
-            return i.second.readable_string;
+    literal_iterator = g_punctuationTerminals.find( terminal_type );
+    if( literal_iterator != g_punctuationTerminals.end() )
+        return literal_iterator->second.readable_string.empty()
+                  ? literal_iterator->second.matched_string
+                  : literal_iterator->second.readable_string;
 
-    for( const auto& i : g_keywordTerminals )
-         if( i.first == terminal_type )
-         {
-            if( i.second.readable_string.empty() )
-                return i.second.matched_string;
-            else
-                return i.second.readable_string;
-         }
+    functional_iterator = g_literalTerminals.find( terminal_type );
+    if( functional_iterator != g_literalTerminals.end() )
+        return functional_iterator->second.readable_string;
 
-    const static std::string s = "Invalid Terminal";
-    const static std::string i = "identifier";
+    literal_iterator = g_keywordTerminals.find( terminal_type );
+    if( literal_iterator != g_keywordTerminals.end() )
+        return literal_iterator->second.readable_string.empty()
+                  ? literal_iterator->second.matched_string
+                  : literal_iterator->second.readable_string;
+
+    const static std::string s = "Unnamed Terminal";
     const static std::string e = "EOF";
 
-    if( terminal_type == TerminalType::IDENTIFIER )
-        return i;
-    else if ( terminal_type == TerminalType::END_OF_INPUT )
+    if ( terminal_type == TerminalType::END_OF_INPUT )
         return e;
-
     return s;
 }
 
