@@ -28,10 +28,7 @@
 
 #pragma once
 
-#include <map>
-#include <stack>
 #include <string>
-#include <vector>
 
 namespace JoeLang
 {
@@ -47,31 +44,30 @@ enum TerminalType : int;
 class Lexer
 {
 public:
-    Lexer() = delete;
-    Lexer( std::string string );
-    ~Lexer() = default;
+                Lexer           () = delete;
+                Lexer           ( std::string string );
+                ~Lexer          () = default;
 
     //
     // Expect return true and moves the position forward if the next terminal
     // matches terminal_type. It optionally returns the matched string
     //
-    bool Expect( TerminalType terminal_type );
-    bool Expect( TerminalType terminal_type, std::string& string );
+    bool        Expect          ( TerminalType terminal_type );
+    bool        Expect          ( TerminalType terminal_type,
+                                  std::string& string );
 
-    std::size_t GetPosition() const;
-    std::size_t GetLineNumber() const;
-    std::size_t GetColumnNumber() const;
+    std::size_t GetPosition     () const;
+    std::size_t GetLineNumber   () const;
+    std::size_t GetColumnNumber () const;
 
 private:
-    void ConsumeIgnoredTerminals();
-    void ReadChars( std::size_t num_chars );
+    void        ConsumeIgnoredTerminals();
+    void        ReadChars       ( std::size_t num_chars );
 
-    std::size_t m_numTokensRead;
-
-    const std::string m_string;
+    const std::string           m_string;
     std::string::const_iterator m_position;
-    std::size_t m_lineNumber = 1;
-    std::size_t m_columnNumber = 1;
+    std::size_t                 m_lineNumber = 1;
+    std::size_t                 m_columnNumber = 1;
 };
 
 } // namespace Lexer
