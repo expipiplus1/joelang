@@ -62,63 +62,65 @@ class Parser
 {
 public:
     Parser() = delete;
-    explicit Parser( const Context& c );
+    explicit
+    Parser( const Context& c );
     ~Parser();
 
-    void Print() const;
+    void                                    Print() const;
 
-    bool Parse( const std::string& string );
+    bool                                    Parse( const std::string& string );
 
-    bool ExpectTerminal( Compiler::TerminalType terminal_type );
-    bool ExpectTerminal( Compiler::TerminalType terminal_type, std::string& string );
+    SymbolTable&                            GetSymbolTable();
 
-    SymbolTable& GetSymbolTable();
+    const StateBase*                        GetNamedState( const std::string& name ) const;
 
-    const StateBase* GetNamedState( const std::string& name ) const;
-
-    std::size_t GetLexerPosition() const;
+    std::size_t                             GetLexerPosition() const;
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
 
-    void Error();
-    void Error( std::string error_message );
-    bool Good() const;
+    //
+    // Functions for detecting and reporting errors
+    //
+    void Error  ();
+    void Error  ( std::string error_message );
+    bool Good   () const;
+
+    //
+    // Functions for reading Tokens and Terminals
+    //
+    bool ExpectTerminal     ( TerminalType terminal_type );
+    bool ExpectTerminal     ( TerminalType terminal_type,
+                              std::string& string );
+
+    template< typename T, typename U >
+    bool Expect             ( std::unique_ptr<U>& token );
+    template< typename T >
+    bool Expect             ();
+
+    template<typename T, typename U>
+    bool ExpectSequenceOf   ( std::vector< std::unique_ptr<U> >& token_sequence );
+
+    template<typename T>
+    bool ExpectAnyOf        ( std::unique_ptr<Token>& token );
+    template<typename T, typename T1, typename... Rest>
+    bool ExpectAnyOf        ( std::unique_ptr<Token>& token );
+    template<typename T>
+    bool ExpectAnyOf        ();
+    template<typename T, typename T1, typename... Rest>
+    bool ExpectAnyOf        ();
 
 private:
+    std::unique_ptr<TranslationUnit>    m_translationUnit;
 
-    std::unique_ptr<TranslationUnit> m_translationUnit;
+    std::unique_ptr<Compiler::Lexer>    m_lexer;
+    SymbolTable                         m_symbolTable;
 
-    std::unique_ptr<Compiler::Lexer> m_lexer;
-    std::set<Compiler::TerminalType> m_expectedTerminals;
+    const Context&                      m_context;
 
-    SymbolTable m_symbolTable;
+    bool                                m_good = true;
+    std::string                         m_errorMessage;
+    std::set<TerminalType>              m_expectedTerminals;
 
-    bool m_good = true;
-    std::string m_errorMessage;
-
-    const Context& m_context;
 };
-
-template< typename T, typename U >
-bool Expect( Parser& parser, std::unique_ptr<U>& token );
-
-template< typename T >
-bool Expect( Parser& parser );
-
-template<typename T, typename U>
-bool ExpectSequenceOf( Parser& parser, std::vector< std::unique_ptr<U> >& token_sequence );
-
-template<typename T>
-bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
-
-template<typename T, typename T1, typename... Rest>
-bool ExpectAnyOf( Parser& parser, std::unique_ptr<Token>& token );
-
-template<typename T>
-bool ExpectAnyOf( Parser& parser );
-
-template<typename T, typename T1, typename... Rest>
-bool ExpectAnyOf( Parser& parser );
-
 
 } // namespace Compiler
 } // namespace JoeLang

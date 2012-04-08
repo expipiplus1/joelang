@@ -70,7 +70,7 @@ bool Parser::Parse ( const std::string& string )
     if( m_errorMessage.empty() )
     {
         std::cout << "Expected one of: ";
-        for( Compiler::TerminalType expected_terminal : m_expectedTerminals )
+        for( TerminalType expected_terminal : m_expectedTerminals )
         {
             std::cout << "\'" << Compiler::GetTerminalString( expected_terminal ) << "\', ";
         }
@@ -86,14 +86,14 @@ bool Parser::Parse ( const std::string& string )
     return false;
 }
 
-bool Parser::ExpectTerminal( Compiler::TerminalType terminal_type )
+bool Parser::ExpectTerminal( TerminalType terminal_type )
 {
     // TODO: Remove dummy
     std::string dummy;
     return ExpectTerminal( terminal_type, dummy );
 }
 
-bool Parser::ExpectTerminal( Compiler::TerminalType terminal_type, std::string& string )
+bool Parser::ExpectTerminal( TerminalType terminal_type, std::string& string )
 {
     if( m_lexer->Expect( terminal_type, string ) )
     {

@@ -132,10 +132,10 @@ public:
     bool Parse(Parser& parser, std::unique_ptr<AssignmentOperator> &token );
 
 protected:
-    AssignmentOperator( Compiler::TerminalType terminal_type );
+    AssignmentOperator( TerminalType terminal_type );
 
 private:
-    Compiler::TerminalType m_terminalType;
+    TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------
@@ -193,19 +193,19 @@ public:
     template< typename ExpressionType, typename SubExpressionType >
     static
     bool ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                      const std::vector<Compiler::TerminalType>& operator_terminals );
+                                      const std::vector<TerminalType>& operator_terminals );
 
     template< typename ExpressionType, typename SubExpressionType >
     static
     bool ParseRightAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                       const std::vector<Compiler::TerminalType>& operator_terminals );
+                                       const std::vector<TerminalType>& operator_terminals );
 
 protected:
-    BinaryOperatorExpression( Compiler::TerminalType operator_terminal,
+    BinaryOperatorExpression( TerminalType operator_terminal,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side );
 
-    Compiler::TerminalType m_operatorTerminal;
+    TerminalType m_operatorTerminal;
     std::unique_ptr<Expression> m_leftSide;
     std::unique_ptr<Expression> m_rightSide;
 
@@ -229,7 +229,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    LogicalOrExpression( Compiler::TerminalType operator_terminal,
+    LogicalOrExpression( TerminalType operator_terminal,
                          std::unique_ptr<Expression> left_side,
                          std::unique_ptr<Expression> right_side );
 
@@ -253,7 +253,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    LogicalAndExpression( Compiler::TerminalType operator_terminal,
+    LogicalAndExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -274,7 +274,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    InclusiveOrExpression( Compiler::TerminalType operator_terminal,
+    InclusiveOrExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -295,7 +295,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ExclusiveOrExpression( Compiler::TerminalType operator_terminal,
+    ExclusiveOrExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -316,7 +316,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    AndExpression( Compiler::TerminalType operator_terminal,
+    AndExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -340,7 +340,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    EqualityExpression( Compiler::TerminalType operator_terminal,
+    EqualityExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -364,7 +364,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    RelationalExpression( Compiler::TerminalType operator_terminal,
+    RelationalExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -385,7 +385,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    ShiftExpression( Compiler::TerminalType operator_terminal,
+    ShiftExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -406,7 +406,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    AdditiveExpression( Compiler::TerminalType operator_terminal,
+    AdditiveExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -427,7 +427,7 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
 protected:
-    MultiplicativeExpression( Compiler::TerminalType operator_terminal,
+    MultiplicativeExpression( TerminalType operator_terminal,
                           std::unique_ptr<Expression> left_side,
                           std::unique_ptr<Expression> right_side );
 
@@ -504,16 +504,16 @@ public:
     virtual
     void Print( int depth ) const;
 
-    Compiler::TerminalType GetTerminalType() const;
+    TerminalType GetTerminalType() const;
 
     static
     bool Parse(Parser& parser, std::unique_ptr<UnaryOperator> &token );
 
 protected:
-    UnaryOperator( Compiler::TerminalType terminal_type );
+    UnaryOperator( TerminalType terminal_type );
 
 private:
-    Compiler::TerminalType m_terminalType;
+    TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------
@@ -643,10 +643,10 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<IncrementalOperator>& token );
 
 protected:
-    IncrementalOperator( Compiler::TerminalType terminal_type );
+    IncrementalOperator( TerminalType terminal_type );
 
 private:
-    Compiler::TerminalType m_terminalType;
+    TerminalType m_terminalType;
 };
 
 //------------------------------------------------------------------------------

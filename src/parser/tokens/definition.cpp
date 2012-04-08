@@ -99,7 +99,7 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
         return false;
 
     std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
-    ExpectSequenceOf<StateAssignmentStatement>( parser, state_assignments );
+    parser.ExpectSequenceOf<StateAssignmentStatement>( state_assignments );
     CHECK_PARSER;
 
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
@@ -165,7 +165,7 @@ bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefini
         return false;
 
     std::vector< std::unique_ptr<PassDeclaration> > passes;
-    ExpectSequenceOf<PassDeclaration>( parser, passes );
+    parser.ExpectSequenceOf<PassDeclaration>( passes );
     CHECK_PARSER;
 
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )

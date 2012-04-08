@@ -61,9 +61,9 @@ void DeclarationBase::Accept( CodeGenerator& c )
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf< TechniqueDeclaration,
-                      PassDeclaration,
-                      EmptyDeclaration>( parser, t ) )
+    if( !parser.ExpectAnyOf< TechniqueDeclaration,
+                             PassDeclaration,
+                             EmptyDeclaration>( t ) )
         return false;
 
     Token* p = t.release();
@@ -172,7 +172,7 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
     //
     std::unique_ptr< PassDefinition > definition;
 
-    if( !Expect<PassDefinition>( parser, definition ) )
+    if( !parser.Expect<PassDefinition>( definition ) )
         return false;
 
     definition->SetName( name );
@@ -243,7 +243,7 @@ bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDecla
     // Technique Declarations always have a definition
     //
     std::unique_ptr<TechniqueDefinition> definition;
-    if( !Expect<TechniqueDefinition>( parser, definition ) )
+    if( !parser.Expect<TechniqueDefinition>( definition ) )
         return false;
 
     definition->SetName( name );

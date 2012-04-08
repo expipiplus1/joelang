@@ -160,7 +160,7 @@ bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssig
         symbol_table.AddConstant( s.first, s.second );
 
     std::unique_ptr< Expression > expression;
-    if( !Expect< Expression >( parser, expression ) )
+    if( !parser.Expect< Expression >( expression ) )
     {
         symbol_table.LeaveScope();
         return false;

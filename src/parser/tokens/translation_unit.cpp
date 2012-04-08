@@ -72,7 +72,7 @@ const std::vector< std::unique_ptr<DeclarationBase> >& TranslationUnit::GetDecla
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
     std::vector< std::unique_ptr<DeclarationBase> > declarations;
-    if( !ExpectSequenceOf<DeclarationBase>( parser, declarations ) )
+    if( !parser.ExpectSequenceOf<DeclarationBase>( declarations ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::END_OF_INPUT ) )

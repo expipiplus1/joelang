@@ -77,7 +77,7 @@ Type Expression::GetReturnType() const
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    return Expect<AssignmentExpression>( parser, token );
+    return parser.Expect<AssignmentExpression>( token );
 }
 
 //------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ Type AssignmentExpression::GetReturnType() const
 bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Expression> lhs_expression;
-    if( !Expect< ConditionalExpression >( parser, lhs_expression ) )
+    if( !parser.Expect< ConditionalExpression >( lhs_expression ) )
         return false;
 
     if( typeid( *lhs_expression ) != typeid( IdentifierExpression ) &&
@@ -129,7 +129,7 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     }
 
     std::unique_ptr<AssignmentOperator> assignment_operator;
-    if( !Expect< AssignmentOperator >( parser, assignment_operator ) )
+    if( !parser.Expect< AssignmentOperator >( assignment_operator ) )
     {
         CHECK_PARSER;
 
@@ -138,7 +138,7 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
     }
 
     std::unique_ptr<Expression> assignment_expression;
-    if( !Expect< AssignmentExpression >( parser, assignment_expression ) )
+    if( !parser.Expect< AssignmentExpression >( assignment_expression ) )
         return false;
 
     token.reset( new AssignmentExpression( std::move( lhs_expression ),
@@ -151,7 +151,7 @@ bool AssignmentExpression::Parse( Parser& parser, std::unique_ptr<Expression>& t
 // AssignmentOperator
 //------------------------------------------------------------------------------
 
-AssignmentOperator::AssignmentOperator( Compiler::TerminalType terminal_type )
+AssignmentOperator::AssignmentOperator( TerminalType terminal_type )
     :m_terminalType( terminal_type )
 {
 }
@@ -240,7 +240,7 @@ Type ConditionalExpression::GetReturnType() const
 bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Expression> condition;
-    if( !Expect< LogicalOrExpression >( parser, condition ) )
+    if( !parser.Expect< LogicalOrExpression >( condition ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::QUERY ) )
@@ -252,14 +252,14 @@ bool ConditionalExpression::Parse( Parser& parser, std::unique_ptr<Expression>& 
     }
 
     std::unique_ptr<Expression> true_expression;
-    if( !Expect<Expression>( parser, true_expression ) )
+    if( !parser.Expect<Expression>( true_expression ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::COLON ) )
         return false;
 
     std::unique_ptr<Expression> false_expression;
-    if( !Expect<AssignmentExpression>( parser, false_expression ) )
+    if( !parser.Expect<AssignmentExpression>( false_expression ) )
         return false;
 
     token.reset( new ConditionalExpression( std::move( condition ),
@@ -366,20 +366,20 @@ Type BinaryOperatorExpression::GetReturnType() const
 
 template< typename ExpressionType, typename SubExpressionType >
 bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique_ptr<Expression>& token,
-                                  const std::vector<Compiler::TerminalType>& operator_terminals )
+                                  const std::vector<TerminalType>& operator_terminals )
 {
     std::unique_ptr<Expression> left;
-    if( !Expect<SubExpressionType>( parser, left ) )
+    if( !parser.Expect<SubExpressionType>( left ) )
         return false;
 
-    std::vector< std::pair< Compiler::TerminalType,
+    std::vector< std::pair< TerminalType,
                             std::unique_ptr<Expression> > > rest;
 
     while( true )
     {
         bool cont = false;
-        Compiler::TerminalType operator_terminal;
-        for( Compiler::TerminalType o : operator_terminals )
+        TerminalType operator_terminal;
+        for( TerminalType o : operator_terminals )
         {
             if( parser.ExpectTerminal( o ) )
             {
@@ -393,7 +393,7 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique
             break;
 
         std::unique_ptr<Expression> next;
-        if( !Expect<SubExpressionType>( parser, next ) )
+        if( !parser.Expect<SubExpressionType>( next ) )
             return false;
 
         rest.push_back( std::make_pair( operator_terminal,
@@ -417,7 +417,7 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser, std::unique
 // Logical Or Expression
 //------------------------------------------------------------------------------
 
-LogicalOrExpression::LogicalOrExpression( Compiler::TerminalType operator_terminal,
+LogicalOrExpression::LogicalOrExpression( TerminalType operator_terminal,
                                           std::unique_ptr<Expression> left_side,
                                           std::unique_ptr<Expression> right_side )
     :BinaryOperatorExpression( operator_terminal,
@@ -450,7 +450,7 @@ bool LogicalOrExpression::Parse( Parser& parser, std::unique_ptr<Expression>& to
 // LogicalAndExpression
 //------------------------------------------------------------------------------
 
-LogicalAndExpression::LogicalAndExpression( Compiler::TerminalType operator_terminal,
+LogicalAndExpression::LogicalAndExpression( TerminalType operator_terminal,
                                           std::unique_ptr<Expression> left_side,
                                           std::unique_ptr<Expression> right_side )
     :BinaryOperatorExpression( operator_terminal,
@@ -741,7 +741,7 @@ Type CastExpression::GetReturnType() const
 //TODO
 bool CastExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    return Expect<UnaryExpression>( parser, token );
+    return parser.Expect<UnaryExpression>( token );
 }
 
 //------------------------------------------------------------------------------
@@ -796,18 +796,18 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_generator ) const
 bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<UnaryOperator> unary_operator;
-    if( Expect<UnaryOperator>( parser, unary_operator ) )
+    if( parser.Expect<UnaryOperator>( unary_operator ) )
     {
         std::unique_ptr<Expression> expression;
         if( unary_operator->GetTerminalType() == TerminalType::INCREMENT ||
             unary_operator->GetTerminalType() == TerminalType::DECREMENT )
         {
-            if( !Expect<UnaryExpression>( parser, expression ) )
+            if( !parser.Expect<UnaryExpression>( expression ) )
                 return false;
         }
         else
         {
-            if( !Expect<CastExpression>( parser, expression ) )
+            if( !parser.Expect<CastExpression>( expression ) )
                 return false;
         }
 
@@ -818,7 +818,7 @@ bool UnaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token 
 
     CHECK_PARSER;
 
-    return Expect<PostfixExpression>( parser, token );
+    return parser.Expect<PostfixExpression>( token );
 }
 
 //------------------------------------------------------------------------------
@@ -903,11 +903,11 @@ Type PostfixExpression::GetReturnType() const
 bool PostfixExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Expression> primary_expression;
-    if( !Expect<PrimaryExpression>( parser, primary_expression ) )
+    if( !parser.Expect<PrimaryExpression>( primary_expression ) )
         return false;
 
     std::vector< std::unique_ptr<PostfixOperator> > operators;
-    if( !ExpectSequenceOf<PostfixOperator>( parser, operators ) )
+    if( !parser.ExpectSequenceOf<PostfixOperator>( operators ) )
     {
         CHECK_PARSER;
 
@@ -941,10 +941,10 @@ PostfixOperator::~PostfixOperator()
 bool PostfixOperator::Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf<SubscriptOperator,
-                     ArgumentListOperator,
-                     MemberAccessOperator,
-                     IncrementalOperator>( parser, t ) )
+    if( !parser.ExpectAnyOf<SubscriptOperator,
+                            ArgumentListOperator,
+                            MemberAccessOperator,
+                            IncrementalOperator>( t ) )
         return false;
 
     Token* p = t.release();
@@ -984,7 +984,7 @@ bool SubscriptOperator::Parse( Parser& parser, std::unique_ptr<SubscriptOperator
         return false;
 
     std::unique_ptr<Expression> expression;
-    if( !Expect<Expression>( parser, expression ) )
+    if( !parser.Expect<Expression>( expression ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
@@ -1025,12 +1025,12 @@ bool ArgumentListOperator::Parse( Parser& parser, std::unique_ptr<ArgumentListOp
     std::vector< std::unique_ptr<Expression> > argument_expressions;
 
     std::unique_ptr<Expression> argument;
-    if( Expect<AssignmentExpression>( parser, argument ) )
+    if( parser.Expect<AssignmentExpression>( argument ) )
     {
         argument_expressions.push_back( std::move( argument ) );
         while( parser.ExpectTerminal( TerminalType::COMMA ) )
         {
-            if( !Expect<AssignmentExpression>( parser, argument ) )
+            if( !parser.Expect<AssignmentExpression>( argument ) )
                 return false;
             argument_expressions.push_back( std::move( argument ) );
         }
@@ -1135,17 +1135,17 @@ void PrimaryExpression::Print( int depth ) const
 bool PrimaryExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     //TODO this may require some more logic for handling arrays, functions and structs
-    if( Expect<IdentifierExpression>( parser, token ) )
+    if( parser.Expect<IdentifierExpression>( token ) )
         return true;
     CHECK_PARSER;
 
-    if( Expect<LiteralExpression>( parser, token ) )
+    if( parser.Expect<LiteralExpression>( token ) )
         return true;
     CHECK_PARSER;
 
     if( !parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
         return false;
-    if( !Expect<Expression>( parser, token ) )
+    if( !parser.Expect<Expression>( token ) )
         return false;
     if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
         return false;
@@ -1181,7 +1181,7 @@ Type IdentifierExpression::GetReturnType() const
 
 bool IdentifierExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
-    if( Expect<ConstantValueExpression>( parser, token ) )
+    if( parser.Expect<ConstantValueExpression>( token ) )
         return true;
     CHECK_PARSER;
 
@@ -1253,12 +1253,12 @@ LiteralExpression::~LiteralExpression()
 bool LiteralExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     std::unique_ptr<Token> t;
-    if( !ExpectAnyOf<FloatingLiteralExpression,
-                     IntegralLiteralExpression,
-                     BooleanLiteralExpression,
-                     //CharacterLiteralExpression,
-                     StringLiteralExpression
-        >( parser, t ) )
+    if( !parser.ExpectAnyOf<FloatingLiteralExpression,
+                            IntegralLiteralExpression,
+                            BooleanLiteralExpression,
+                            //CharacterLiteralExpression,
+                            StringLiteralExpression
+        >( t ) )
         return false;
 
     Token* p = t.release();
