@@ -29,6 +29,7 @@
 #include "terminal_types.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <map>
 #include <string>
@@ -135,6 +136,7 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     { FALSE,        { "false",      "" } }
 };
 
+//TODO use the map properly
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
     for( const auto& i : g_ignoredTerminals )
@@ -179,9 +181,10 @@ const std::string& GetTerminalString( TerminalType terminal_type )
 // LiteralTerminal
 //------------------------------------------------------------------------------
 
-int LiteralTerminal::Read( std::string::const_iterator begin,
-                           std::string::const_iterator end ) const
+std::size_t LiteralTerminal::Read( std::string::const_iterator begin,
+                                   std::string::const_iterator end ) const
 {
+    assert( end >= begin && "begin is past end" );
     if( std::size_t(end - begin) < matched_string.size() ||
         !std::equal( matched_string.begin(), matched_string.end(), begin ) )
         return 0;
@@ -193,9 +196,10 @@ int LiteralTerminal::Read( std::string::const_iterator begin,
 // FunctionalTerminal
 //------------------------------------------------------------------------------
 
-int FunctionalTerminal::Read( std::string::const_iterator begin,
-                              std::string::const_iterator end ) const
+std::size_t FunctionalTerminal::Read( std::string::const_iterator begin,
+                                      std::string::const_iterator end ) const
 {
+    assert( end >= begin && "begin is past end" );
     return function( begin, end );
 }
 
@@ -203,8 +207,8 @@ int FunctionalTerminal::Read( std::string::const_iterator begin,
 // Reading Functions
 //------------------------------------------------------------------------------
 
-int ReadWhitespace( std::string::const_iterator begin,
-                    std::string::const_iterator end )
+std::size_t ReadWhitespace( std::string::const_iterator begin,
+                            std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     while( p < end )
@@ -222,8 +226,8 @@ int ReadWhitespace( std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadLineComment( std::string::const_iterator begin,
-                     std::string::const_iterator end )
+std::size_t ReadLineComment( std::string::const_iterator begin,
+                             std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( end - begin < 2 )
@@ -245,8 +249,8 @@ int ReadLineComment( std::string::const_iterator begin,
     return 0;
 }
 
-int ReadBlockComment(   std::string::const_iterator begin,
-                        std::string::const_iterator end )
+std::size_t ReadBlockComment( std::string::const_iterator begin,
+                              std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( end - begin < 4 )
@@ -271,8 +275,8 @@ int ReadBlockComment(   std::string::const_iterator begin,
     return 0;
 }
 
-int ReadDigitSequence(      std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadDigitSequence( std::string::const_iterator begin,
+                               std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
@@ -284,8 +288,8 @@ int ReadDigitSequence(      std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadHexDigitSequence(      std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadHexDigitSequence( std::string::const_iterator begin,
+                                  std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
@@ -297,8 +301,8 @@ int ReadHexDigitSequence(      std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadOctalDigitSequence(      std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadOctalDigitSequence( std::string::const_iterator begin,
+                                    std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     char c = *p;
@@ -310,8 +314,8 @@ int ReadOctalDigitSequence(      std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadIntegerLiteral(     std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadIntegerLiteral( std::string::const_iterator begin,
+                                std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( *p == '0' )
@@ -337,8 +341,8 @@ int ReadIntegerLiteral(     std::string::const_iterator begin,
     }
 }
 
-int ReadExponent(           std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadExponent( std::string::const_iterator begin,
+                          std::string::const_iterator end )
 {
     if( end - begin < 2 )
         return 0;
@@ -362,8 +366,8 @@ int ReadExponent(           std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadFloatingLiteral(    std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadFloatingLiteral( std::string::const_iterator begin,
+                                 std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     int s = ReadDigitSequence( p, end );
@@ -411,9 +415,12 @@ int ReadFloatingLiteral(    std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadCharOrEscapedChar(  std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadCharOrEscapedChar( std::string::const_iterator begin,
+                                   std::string::const_iterator end )
 {
+    if( begin - end < 2 )
+        return 0;
+
     std::string::const_iterator p = begin;
     if( *p == '\\' )
         ++p;
@@ -422,8 +429,8 @@ int ReadCharOrEscapedChar(  std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadCharacterLiteral(   std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadCharacterLiteral( std::string::const_iterator begin,
+                                  std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( *p != '\'' )
@@ -437,8 +444,8 @@ int ReadCharacterLiteral(   std::string::const_iterator begin,
     return p - begin;
 }
 
-int ReadStringLiteral(      std::string::const_iterator begin,
-                            std::string::const_iterator end )
+std::size_t ReadStringLiteral( std::string::const_iterator begin,
+                               std::string::const_iterator end )
 {
     std::string::const_iterator p = begin;
     if( *p != '\"' )
@@ -447,7 +454,7 @@ int ReadStringLiteral(      std::string::const_iterator begin,
     ++p;
 
     while( *p != '\"' &&
-           p != end )
+           p < end )
         p += ReadCharOrEscapedChar( p, end );
 
     if( p == end )
@@ -457,7 +464,6 @@ int ReadStringLiteral(      std::string::const_iterator begin,
 
     return p - begin;
 }
-
 
 bool IsHexDigit( char c )
 {

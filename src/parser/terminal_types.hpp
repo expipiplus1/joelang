@@ -152,8 +152,8 @@ const std::string& GetTerminalString( TerminalType terminal_type );
 
 struct LiteralTerminal
 {
-    int Read( const std::string::const_iterator begin,
-              const std::string::const_iterator end ) const;
+    std::size_t Read( const std::string::const_iterator begin,
+                      const std::string::const_iterator end ) const;
 
     std::string matched_string;
     std::string readable_string;
@@ -165,8 +165,8 @@ struct LiteralTerminal
 
 struct FunctionalTerminal
 {
-    int Read( std::string::const_iterator begin,
-              std::string::const_iterator end ) const;
+    std::size_t Read( std::string::const_iterator begin,
+                      std::string::const_iterator end ) const;
 
     std::function< int( std::string::const_iterator,
                         std::string::const_iterator ) > function;
@@ -186,23 +186,23 @@ extern const std::map<TerminalType, LiteralTerminal>    g_keywordTerminals;
 // Reading Functions
 //------------------------------------------------------------------------------
 
-int ReadWhitespace(  std::string::const_iterator begin,
-                     std::string::const_iterator end );
-int ReadLineComment( std::string::const_iterator begin,
-                     std::string::const_iterator end );
-int ReadBlockComment( std::string::const_iterator begin,
-                      std::string::const_iterator end );
+std::size_t ReadWhitespace(   std::string::const_iterator begin,
+                              std::string::const_iterator end );
+std::size_t ReadLineComment(  std::string::const_iterator begin,
+                              std::string::const_iterator end );
+std::size_t ReadBlockComment( std::string::const_iterator begin,
+                              std::string::const_iterator end );
 
-int ReadIntegerLiteral(  std::string::const_iterator begin,
-                         std::string::const_iterator end );
-int ReadFloatingLiteral( std::string::const_iterator begin,
-                         std::string::const_iterator end );
-int ReadBooleanLiteral(  std::string::const_iterator begin,
-                         std::string::const_iterator end );
-int ReadCharacterLiteral( std::string::const_iterator begin,
-                          std::string::const_iterator end );
-int ReadStringLiteral(   std::string::const_iterator begin,
-                         std::string::const_iterator end );
+std::size_t ReadIntegerLiteral(   std::string::const_iterator begin,
+                                  std::string::const_iterator end );
+std::size_t ReadFloatingLiteral(  std::string::const_iterator begin,
+                                  std::string::const_iterator end );
+std::size_t ReadBooleanLiteral(   std::string::const_iterator begin,
+                                  std::string::const_iterator end );
+std::size_t ReadCharacterLiteral( std::string::const_iterator begin,
+                                  std::string::const_iterator end );
+std::size_t ReadStringLiteral(    std::string::const_iterator begin,
+                                  std::string::const_iterator end );
 
 //matches [0-9a-fA-F]
 bool IsHexDigit( char c );
