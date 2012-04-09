@@ -35,7 +35,6 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -54,19 +53,17 @@ DeclarationBase::~DeclarationBase()
 {
 }
 
-void DeclarationBase::Accept( CodeGenerator& c )
-{
-}
-
 bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
 {
+    // Try and parse any of the top level declarations
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf< TechniqueDeclaration,
                              PassDeclaration,
                              EmptyDeclaration>( t ) )
         return false;
 
-    //TODO use something like llvm's casting operators
+    // TODO use something like llvm's casting operators
+    // Cast it back to a DeclarationBase because ExpectAnyOf only returns a Token*
     token.reset( static_cast<DeclarationBase*>( t.release() ) );
     return true;
 }
@@ -92,6 +89,7 @@ void EmptyDeclaration::Print(int depth) const
 
 bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token )
 {
+    // Try to parse just a semicolon
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
         return false;
 
@@ -103,9 +101,10 @@ bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>&
 // PassDeclaration
 //------------------------------------------------------------------------------
 
-PassDeclaration::PassDeclaration( std::string name, std::shared_ptr<PassDefinition> definition )
-    :m_name( std::move( name ) )
-    ,m_definition( std::move( definition ) )
+PassDeclaration::PassDeclaration( std::string name,
+                                  std::unique_ptr<PassDefinition> definition )
+    :m_name         ( std::move(name) )
+    ,m_definition   ( std::move(definition) )
 {
 }
 
@@ -118,7 +117,12 @@ const std::string& PassDeclaration::GetName() const
     return m_name;
 }
 
-const std::shared_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
+bool PassDeclaration::HasDefinition() const
+{
+    return bool(m_definition);
+}
+
+const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
     return m_definition;
 }
@@ -143,33 +147,28 @@ void PassDeclaration::Print( int depth ) const
 
 bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
 {
+    // Needs to start with 'pass'
     if( !parser.ExpectTerminal( TerminalType::PASS ) )
         return false;
 
+    // TODO diagnostic about anonymous passes
     std::string name;
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
         return false;
 
+    // If we have a semicolon here, this pass doesn't have a definition
     if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
-        //
-        // This is a regular declaration
-        // TODO: Look up the name in a table and create links and things
-        //
         token.reset( new PassDeclaration( name, nullptr ) );
         return true;
     }
+    // We may have moved the lexer on trying to parse the semicolon
     CHECK_PARSER;
 
-    //
-    // This declaration is also has a definition
-    //
+    // This declaration must have a definition
     std::unique_ptr< PassDefinition > definition;
-
     if( !parser.Expect<PassDefinition>( definition ) )
         return false;
-
-    definition->SetName( name );
 
     token.reset( new PassDeclaration( std::move(name),
                                       std::move(definition) ) );
@@ -184,16 +183,11 @@ TechniqueDeclaration::TechniqueDeclaration( std::string name, std::unique_ptr<Te
     :m_name( std::move( name ) )
     ,m_definition( std::move( definition ) )
 {
-    assert( m_definition );
+    assert( m_definition && "TechniqueDeclaration given a null definition" );
 }
 
 TechniqueDeclaration::~TechniqueDeclaration()
 {
-}
-
-void TechniqueDeclaration::Accept( CodeGenerator& c )
-{
-    c.Visit( *this );
 }
 
 const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
@@ -219,31 +213,103 @@ void TechniqueDeclaration::Print( int depth ) const
     }
 }
 
-
 bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
 {
+    // Has to start with 'technique'
     if( !parser.ExpectTerminal( TerminalType::TECHNIQUE ) )
         return false;
 
+    // Parse the technique's name into name
     std::string name;
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
         return false;
 
-    // TODO parser soft error
-    if( parser.GetSymbolTable().HasTechniqueName( name ) )
-        return false;
-
-    //
     // Technique Declarations always have a definition
-    //
     std::unique_ptr<TechniqueDefinition> definition;
     if( !parser.Expect<TechniqueDefinition>( definition ) )
         return false;
 
-    definition->SetName( name );
-    parser.GetSymbolTable().AddTechniqueName( name );
     token.reset( new TechniqueDeclaration( std::move(name),
                                            std::move(definition) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// PassDeclarationOrIdentifier
+//------------------------------------------------------------------------------
+
+PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
+        std::string                      identifier,
+        std::unique_ptr<PassDeclaration> declaration )
+    :m_identifier ( std::move(identifier)  )
+    ,m_declaration( std::move(declaration) )
+{
+    // Assert if both are full, or none are
+    assert( (!m_identifier.empty()) ^ bool(m_declaration) &&
+            "PassDeclarationOrIdentifier must have one and only one value" );
+}
+
+PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
+{
+}
+
+void PassDeclarationOrIdentifier::Print( int depth ) const
+{
+    if( IsIdentifier() )
+    {
+        for( int i = 0; i < depth * 4; ++i )
+            std::cout << " ";
+        std::cout << m_identifier;
+    }
+    else
+    {
+        m_declaration->Print( depth );
+    }
+}
+
+bool PassDeclarationOrIdentifier::IsIdentifier() const
+{
+    return !m_identifier.empty();
+}
+
+const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
+{
+    assert( IsIdentifier() &&
+            "Can't get the identifier of a PassDeclarationOrIdentifier without an ideitifier" );
+    return m_identifier;
+}
+
+const std::unique_ptr<PassDeclaration>& PassDeclarationOrIdentifier::GetDeclaration() const
+{
+    assert( !IsIdentifier() &&
+            "Can't get the declaration of a PassDeclarationOrIdentifier without a declaration" );
+    return m_declaration;
+}
+
+bool PassDeclarationOrIdentifier::Parse( Parser& parser, std::unique_ptr<PassDeclarationOrIdentifier>& token )
+{
+    std::string identifier;
+    // Try to parse an identifier into identifier
+    if( parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
+    {
+        // This must be terminated by a semicolon
+        if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
+            return false;
+
+        // Construct a PassDeclarationOrIdentifier with an identifier
+        token.reset( new PassDeclarationOrIdentifier( identifier, nullptr ) );
+        return true;
+    }
+    // The lexer may be out of step
+    CHECK_PARSER;
+
+    // This must be a declaration
+    std::unique_ptr<PassDeclaration> declaration;
+    if( !parser.Expect<PassDeclaration>( declaration ) )
+        return false;
+
+    // Construct a PassDeclarationOrIdentifier with a declaration
+    token.reset( new PassDeclarationOrIdentifier( "", std::move(declaration) ) );
     return true;
 }
 

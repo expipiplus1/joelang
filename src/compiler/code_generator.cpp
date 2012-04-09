@@ -79,8 +79,8 @@ bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
                                   std::vector<Technique>& techniques,
                                   std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
 {
-    for( const auto& declaration : ast->GetDeclarations() )
-        declaration->Accept( *this );
+    //for( const auto& declaration : ast->GetDeclarations() )
+        //declaration->Accept( *this );
 
     //techniques = std::move(m_techniques);
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
@@ -100,10 +100,10 @@ void CodeGenerator::Visit( DeclarationBase& d )
 
 void CodeGenerator::Visit( TechniqueDeclaration& t )
 {
-    const TechniqueDefinition& definition = t.GetDefinition();
-    std::unique_ptr<Technique> technique = definition.GetTechnique( *this );
-    if( technique )
-        m_techniques.push_back( std::move(*technique) );
+    //const TechniqueDefinition& definition = t.GetDefinition();
+    //std::unique_ptr<Technique> technique = definition.GetTechnique( *this );
+    //if( technique )
+        //m_techniques.push_back( std::move(*technique) );
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(

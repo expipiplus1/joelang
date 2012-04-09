@@ -29,7 +29,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <compiler/tokens/token.hpp>
@@ -37,67 +36,102 @@
 namespace JoeLang
 {
 
-class Pass;
-class Technique;
-
 namespace Compiler
 {
 
-class CodeGenerator;
 class Parser;
-class PassDeclaration;
+class PassDeclarationOrIdentifier;
 class StateAssignmentStatement;
 
-//------------------------------------------------------------------------------
-// PassDefinition
-//------------------------------------------------------------------------------
-
+/**
+  * \class PassDefinition
+  * \brief Matches the definition of a pass
+  *
+  * PassDefinition = '{' (StateAssignmentStatement)* '}'
+  */
 class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
+    using StateAssignStmtVector =
+                    std::vector< std::unique_ptr<StateAssignmentStatement> >;
+
+    /**
+      * \param state_assignments
+      *   A vector of the StateAssignmentStatements belonging to this pass
+      * This constructor asserts on any null StateAssignmentStatements
+      */
+    PassDefinition  ( StateAssignStmtVector state_assignments );
+
     virtual
-    ~PassDefinition();
+    ~PassDefinition ();
 
-    std::unique_ptr<Pass> GetPass( CodeGenerator& code_generator ) const;
-
-    void SetName( std::string name );
-
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual
-    void Print( int depth ) const;
+    void                    Print   ( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
-
-protected:
-    PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments  );
+    /**
+      * Parses a pass definition
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully
+      *   false if the parse failed
+      */
+    static bool             Parse   ( Parser&                          parser,
+                                      std::unique_ptr<PassDefinition>& token );
 
 private:
-    std::string m_name;
-    std::vector< std::unique_ptr<StateAssignmentStatement> > m_stateAssignments;
+    StateAssignStmtVector   m_stateAssignments;
 };
 
-//------------------------------------------------------------------------------
-// TechniqueDefinition
-//------------------------------------------------------------------------------
-
+/**
+  * \class TechniqueDefinition
+  * \brief Matches the definition of a technique
+  *
+  * TechniqueDefinition = '{' (PassDeclarationOrIdentifier)* '}'
+  */
 class TechniqueDefinition : public JoeLang::Compiler::Token
 {
 public:
-    virtual ~TechniqueDefinition();
+    using PassDeclarationVector =
+                    std::vector< std::unique_ptr<PassDeclarationOrIdentifier> >;
+    /**
+      * This constructor Asserts on null declarations or identifiers
+      * \param passes
+      *   A vector of pass declarations or identifiers
+      */
+    TechniqueDefinition( PassDeclarationVector passes );
 
-    std::unique_ptr<Technique> GetTechnique( CodeGenerator& code_generator ) const;
+    virtual
+    ~TechniqueDefinition();
 
-    void SetName( std::string name );
-
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual void Print( int depth ) const;
 
+    /**
+      * Parses a technique definition
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully
+      *   false if the parse failed
+      */
     static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
 
-protected:
-    TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > m_passes );
-
 private:
-    std::string m_name;
-    std::vector< std::unique_ptr<PassDeclaration> > m_passes;
+    PassDeclarationVector m_passes;
 };
 
 } // namespace Compiler

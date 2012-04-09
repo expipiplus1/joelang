@@ -28,16 +28,13 @@
 
 #include "definition.hpp"
 
+#include <cassert>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <engine/pass.hpp>
-#include <engine/state_assignment.hpp>
-#include <engine/technique.hpp>
-#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -53,59 +50,40 @@ namespace Compiler
 // PassDefinition
 //------------------------------------------------------------------------------
 
-PassDefinition::PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments )
-    :m_stateAssignments( std::move( state_assignments ) )
+PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
+    :m_stateAssignments( std::move(state_assignments) )
 {
+    for( const auto& s : m_stateAssignments )
+        assert( s && "null StateAssignmentStatement given to PassDefinition" );
 }
 
 PassDefinition::~PassDefinition()
 {
 }
 
-std::unique_ptr<Pass> PassDefinition::GetPass( CodeGenerator& code_generator ) const
-{
-    std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments;
-    bool good = true;
-
-    //
-    // don't early out here to generate the error messages for the other state assignments
-    //
-    for( const auto& state_assignment : m_stateAssignments )
-    {
-        std::unique_ptr<StateAssignmentBase> sa = state_assignment->GetStateAssignment( code_generator );
-        good = good && sa;
-        state_assignments.push_back( std::move( sa ) );
-    }
-
-    if( !good )
-        return nullptr;
-    return std::unique_ptr<Pass>( new Pass( m_name, std::move(state_assignments) ) );
-}
-
-void PassDefinition::SetName(std::string name)
-{
-    m_name = std::move(name);
-}
-
 void PassDefinition::Print( int depth ) const
 {
-    for( const auto& state_assignment : m_stateAssignments )
-        state_assignment->Print( depth );
+    for( const auto& s: m_stateAssignments )
+        s->Print( depth );
 }
 
 bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
 {
+    // The definition starts with an open brace
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
         return false;
 
-    std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments;
+    // Parse some StateAssignmentStatements
+    StateAssignStmtVector state_assignments;
     parser.ExpectSequenceOf<StateAssignmentStatement>( state_assignments );
+    // The parser may have advanced the lexer too far
     CHECK_PARSER;
 
+    // The definiton ends with a close brace
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new PassDefinition( std::move( state_assignments ) ) );
+    token.reset( new PassDefinition( std::move(state_assignments) ) );
     return true;
 }
 
@@ -113,43 +91,16 @@ bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& tok
 // TechniqueDefinition
 //------------------------------------------------------------------------------
 
-TechniqueDefinition::TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > passes )
-    :m_passes( std::move( passes ) )
+TechniqueDefinition::TechniqueDefinition( PassDeclarationVector passes )
+    :m_passes( std::move(passes) )
 {
+    for( const auto& p : m_passes )
+        assert( p &&
+                "null PassDeclarationOrIdentifier given to TechniqueDefinition" );
 }
 
 TechniqueDefinition::~TechniqueDefinition()
 {
-}
-
-void TechniqueDefinition::SetName( std::string name )
-{
-    m_name = std::move( name );
-}
-
-std::unique_ptr<Technique> TechniqueDefinition::GetTechnique( CodeGenerator& code_generator ) const
-{
-    std::vector<Pass> passes;
-    bool good = true;
-    for( const auto& pass : m_passes )
-    {
-        const std::shared_ptr<PassDefinition>& definition = pass->GetDefinition();
-        if( !definition )
-            code_generator.Error( "Undefined Pass " +
-                                  pass->GetName() +
-                                  " in Technique " +
-                                  m_name );
-        else
-        {
-            std::unique_ptr<Pass> p = definition->GetPass( code_generator );
-            good = good && p;
-            if( p )
-                passes.emplace_back( std::move( *p ) );
-        }
-    }
-    if( !good )
-        return nullptr;
-    return std::unique_ptr<Technique>( new Technique( m_name, std::move(passes) ) );
 }
 
 void TechniqueDefinition::Print( int depth ) const
@@ -161,17 +112,20 @@ void TechniqueDefinition::Print( int depth ) const
 
 bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
 {
+    // Start with an open brace
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
         return false;
 
-    std::vector< std::unique_ptr<PassDeclaration> > passes;
-    parser.ExpectSequenceOf<PassDeclaration>( passes );
+    // Try and parse the pass declarations
+    PassDeclarationVector pass_declarations;
+    parser.ExpectSequenceOf<PassDeclarationOrIdentifier>( pass_declarations );
     CHECK_PARSER;
 
+    // End with a close brace
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new TechniqueDefinition( std::move( passes ) ) );
+    token.reset( new TechniqueDefinition( std::move(pass_declarations) ) );
     return true;
 }
 

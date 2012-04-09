@@ -44,32 +44,41 @@ class Parser;
 class PassDefinition;
 class TechniqueDefinition;
 
-//------------------------------------------------------------------------------
-// DeclarationBase
-// Parse Matches for any kind of declaration
-// Including function and technique definitions
-//------------------------------------------------------------------------------
-
+/**
+ * \class DeclarationBase
+ * \brief Abstract class for top level declarations
+ *
+ * DeclarationBase =   EmptyDeclaration
+ *                   | PassDeclaration
+ *                   | TechniqueDeclaration
+ */
 class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
-    DeclarationBase     () = default;
     virtual
     ~DeclarationBase    ();
 
-    virtual
-    void Accept         ( CodeGenerator& c );
-
+    /**
+      * Parses any top level declaration
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \return
+      *   true upon parsing successfully
+      *   false if the parse failed
+      */
     static
     bool Parse          ( Parser&                           parser,
                           std::unique_ptr<DeclarationBase>& token );
 };
 
-//------------------------------------------------------------------------------
-// EmptyDeclaration
-// Matches ';'
-//------------------------------------------------------------------------------
-
+/**
+  * \class EmptyDeclaration
+  * \brief Matches an empty declaration
+  *
+  * EmptyDeclaration = ';'
+  */
 class EmptyDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
@@ -77,67 +86,204 @@ public:
     virtual
     ~EmptyDeclaration   ();
 
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual
     void Print          ( int depth ) const override;
 
+    /**
+      * Parses an empty declaration
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
     static
     bool Parse          ( Parser&                            parser,
                           std::unique_ptr<EmptyDeclaration>& token );
 };
 
-//------------------------------------------------------------------------------
-// PassDeclaration
-//------------------------------------------------------------------------------
-
+/**
+  * \class PassDeclaration
+  * \brief Matches a pass declaration or definition
+  *
+  * PassDeclaration =   'pass' identifier ';'
+  *                   | 'pass' identifier PassDefinition
+  */
 class PassDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
+    /**
+      * \param name
+      *   The identifier for this pass
+      * \param definition
+      *   This pass's definition if it has one, otherwise nullptr
+      */
     PassDeclaration ( std::string                       name,
-                      std::shared_ptr<PassDefinition>   definition );
+                      std::unique_ptr<PassDefinition>   definition );
+
     virtual
     ~PassDeclaration();
 
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual
-    void                                    Print           ( int depth ) const;
+    void    Print   ( int depth ) const override;
 
+    /** \returns this pass's name **/
     const std::string&                      GetName         () const;
+    /** \returns whether this pass declaration has a definition **/
+    bool                                    HasDefinition   () const;
+    /** \returns this pass declaration's definition if it has one, otherwise
+      * nullptr **/
+    const std::unique_ptr<PassDefinition>&  GetDefinition   () const;
 
-    const std::shared_ptr<PassDefinition>&  GetDefinition   () const;
-
+    /**
+      * Parses a pass declaration
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<PassDeclaration>& token );
 
 private:
-    std::string m_name;
-    std::shared_ptr<PassDefinition> m_definition;
+    /** This pass declaration's identifier **/
+    std::string                     m_name;
+    /** Thie pass declaration's definition if it has one, otherwise nullptr **/
+    std::unique_ptr<PassDefinition> m_definition;
 };
 
-//------------------------------------------------------------------------------
-// TechniqueDeclaration
-//------------------------------------------------------------------------------
-
+/**
+  * \class TechniqueDeclaration
+  * \brief Matches a technique definition
+  *
+  * TechniqueDeclaration = 'technique' identifier TechniqueDefinition
+  */
 class TechniqueDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
-    virtual ~TechniqueDeclaration();
-
-    virtual
-    void Accept( CodeGenerator& c ) override;
-
-    const TechniqueDefinition& GetDefinition() const;
-
-    virtual void Print( int depth ) const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
-
-protected:
+    /**
+      * This constructor asserts on a null definition
+      * \param name
+      *   The identifier for this technique
+      * \param definition
+      *   The definition for this technique
+      */
     TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition );
 
+    virtual
+    ~TechniqueDeclaration();
+
+    /** \returns this technique's definition **/
+    const TechniqueDefinition& GetDefinition() const;
+
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
+    virtual
+    void Print( int depth ) const;
+
+    /**
+      * Parses a technique declaration
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \return
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
+    static
+    bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
+
 private:
+    /** This technique's identifier **/
     std::string m_name;
+    /** This technique's definition **/
     std::unique_ptr<TechniqueDefinition> m_definition;
 };
+
+/**
+  * \class PassDeclarationOrIdentifier
+  * \brief A helper token for TechniqueDefinitions
+  *
+  * This token matches either an identifier or a pass declaration
+  *
+  * PassDeclarationOrIdentifier =   identifier ';'
+  *                               | PassDeclaration
+  */
+class PassDeclarationOrIdentifier : public JoeLang::Compiler::Token
+{
+public:
+    /**
+      * This constructor will assert if the definition is not null and the name
+      * is not of zero length
+      * \param identifier
+      *   The identifier for this pass
+      * \param definition
+      *   This pass's definition if it has one, otherwise nullptr
+      */
+    PassDeclarationOrIdentifier( std::string                      identifier,
+                                 std::unique_ptr<PassDeclaration> declaration );
+
+    virtual
+    ~PassDeclarationOrIdentifier();
+
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
+    virtual
+    void    Print   ( int depth ) const override;
+
+    /** \returns if this token is an identifier for a pass **/
+    bool                                    IsIdentifier    () const;
+    /** This funciton will assert if this token represents a declaration
+      * \returns this token's identifier **/
+    const std::string&                      GetIdentifier   () const;
+    /** This function will assert if this token represents an identifier
+      * \returns this token's declaration **/
+    const std::unique_ptr<PassDeclaration>& GetDeclaration  () const;
+
+    /**
+      * Parses a pass declaration or identifier
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
+    static
+    bool Parse( Parser& parser,
+                std::unique_ptr<PassDeclarationOrIdentifier>& token );
+
+private:
+    /** This pass declaration's identifier if it has one, otherwise "" **/
+    std::string                      m_identifier;
+    /** This token's declaration if it has one, otherwise nullptr **/
+    std::unique_ptr<PassDeclaration> m_declaration;
+};
+
 
 } // namespace Compiler
 } // namespace JoeLang
