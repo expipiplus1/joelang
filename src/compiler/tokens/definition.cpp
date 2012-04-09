@@ -37,12 +37,12 @@
 #include <engine/pass.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
-#include <parser/code_generator.hpp>
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/token.hpp>
-#include <parser/tokens/state_assignment_statement.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/declaration.hpp>
+#include <compiler/tokens/token.hpp>
+#include <compiler/tokens/state_assignment_statement.hpp>
 
 namespace JoeLang
 {

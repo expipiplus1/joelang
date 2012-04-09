@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include <parser/tokens/token.hpp>
+#include <compiler/tokens/token.hpp>
 
 //------------------------------------------------------------------------------
 // Forward Declarations

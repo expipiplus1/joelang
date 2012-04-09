@@ -43,10 +43,10 @@
 
 #include <engine/types.hpp>
 #include <engine/internal/type_properties.hpp>
-#include <parser/code_generator.hpp>
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/token.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {

@@ -29,31 +29,31 @@ add_executable( joelang src/joelang.cpp
                         src/engine/state-inl.hpp
                         src/engine/internal/type_properties.cpp
                         src/engine/internal/type_properties.hpp
-                        src/parser/code_generator.cpp
-                        src/parser/code_generator.hpp
-                        src/parser/effect_factory.cpp
-                        src/parser/effect_factory.hpp
-                        src/parser/lexer.cpp
-                        src/parser/lexer.hpp
-                        src/parser/parser.cpp
-                        src/parser/parser.hpp
-                        src/parser/parser-inl.hpp
-                        src/parser/symbol_table.cpp
-                        src/parser/symbol_table.hpp
-                        src/parser/terminal_types.cpp
-                        src/parser/terminal_types.hpp
-                        src/parser/tokens/declaration.cpp
-                        src/parser/tokens/declaration.hpp
-                        src/parser/tokens/definition.cpp
-                        src/parser/tokens/definition.hpp
-                        src/parser/tokens/expression.cpp
-                        src/parser/tokens/expression.hpp
-                        src/parser/tokens/state_assignment_statement.cpp
-                        src/parser/tokens/state_assignment_statement.hpp
-                        src/parser/tokens/token.cpp
-                        src/parser/tokens/token.hpp
-                        src/parser/tokens/translation_unit.cpp
-                        src/parser/tokens/translation_unit.hpp )
+                        src/compiler/code_generator.cpp
+                        src/compiler/code_generator.hpp
+                        src/compiler/effect_factory.cpp
+                        src/compiler/effect_factory.hpp
+                        src/compiler/lexer.cpp
+                        src/compiler/lexer.hpp
+                        src/compiler/parser.cpp
+                        src/compiler/parser.hpp
+                        src/compiler/parser-inl.hpp
+                        src/compiler/symbol_table.cpp
+                        src/compiler/symbol_table.hpp
+                        src/compiler/terminal_types.cpp
+                        src/compiler/terminal_types.hpp
+                        src/compiler/tokens/declaration.cpp
+                        src/compiler/tokens/declaration.hpp
+                        src/compiler/tokens/definition.cpp
+                        src/compiler/tokens/definition.hpp
+                        src/compiler/tokens/expression.cpp
+                        src/compiler/tokens/expression.hpp
+                        src/compiler/tokens/state_assignment_statement.cpp
+                        src/compiler/tokens/state_assignment_statement.hpp
+                        src/compiler/tokens/token.cpp
+                        src/compiler/tokens/token.hpp
+                        src/compiler/tokens/translation_unit.cpp
+                        src/compiler/tokens/translation_unit.hpp )
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.jfx

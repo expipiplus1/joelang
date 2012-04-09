@@ -42,7 +42,7 @@
 
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
-#include <parser/effect_factory.hpp>
+#include <compiler/effect_factory.hpp>
 
 namespace JoeLang
 {

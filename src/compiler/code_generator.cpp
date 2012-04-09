@@ -50,10 +50,10 @@
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <engine/internal/type_properties.hpp>
-#include <parser/tokens/expression.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/definition.hpp>
-#include <parser/tokens/translation_unit.hpp>
+#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/declaration.hpp>
+#include <compiler/tokens/definition.hpp>
+#include <compiler/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {

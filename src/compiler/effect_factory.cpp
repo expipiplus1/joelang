@@ -31,8 +31,10 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
 #include <engine/effect.hpp>
-#include <parser/code_generator.hpp>
-#include <parser/parser.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/parser.hpp>
+
+#include <compiler/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {
@@ -51,7 +53,9 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
         return nullptr;
 
     const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
+    ast->Print(0);
 
+    return nullptr;
     std::vector<Technique> techniques;
     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 

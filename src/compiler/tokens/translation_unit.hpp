@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2011 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -28,44 +28,40 @@
 
 #pragma once
 
-#include <map>
 #include <memory>
-#include <set>
-#include <string>
+#include <vector>
 
-#include <parser/tokens/expression.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
+
 namespace Compiler
 {
 
-class SymbolTable
+class DeclarationBase;
+class Parser;
+
+class TranslationUnit : public JoeLang::Compiler::Token
 {
 public:
-         ~SymbolTable       ();
+    TranslationUnit() = delete;
+    virtual ~TranslationUnit();
 
-    void EnterScope         ();
-    void LeaveScope         ();
+    virtual
+    void Print( int depth = 0 ) const override;
 
-    bool GetConstant        ( std::string identifier,
-                              std::shared_ptr<LiteralExpression>& constant );
-    bool AddConstant        ( std::string identifier,
-                              std::shared_ptr<LiteralExpression> constant );
+    const std::vector< std::unique_ptr<DeclarationBase> >& GetDeclarations() const;
 
-    bool HasTechniqueName   ( const std::string& name ) const;
-    bool AddTechniqueName   ( const std::string& name );
+    static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
+
+protected:
+    TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations);
 
 private:
-    struct SymbolMaps
-    {
-        std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
-    };
-
-    std::set<std::string>   m_techniqueNames;
-
-    std::vector<SymbolMaps> m_symbolStack;
+    std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
 };
 
 } // namespace Compiler
 } // namespace JoeLang
+

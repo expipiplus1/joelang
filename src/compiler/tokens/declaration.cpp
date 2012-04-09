@@ -35,11 +35,11 @@
 #include <utility>
 #include <vector>
 
-#include <parser/code_generator.hpp>
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/definition.hpp>
-#include <parser/tokens/token.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/definition.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
@@ -66,20 +66,14 @@ bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& t
                              EmptyDeclaration>( t ) )
         return false;
 
-    Token* p = t.release();
-    token.reset( dynamic_cast<DeclarationBase*>( p ) );
-    if( !token )
-    {
-        delete p;
-        return false;
-    }
+    //TODO use something like llvm's casting operators
+    token.reset( static_cast<DeclarationBase*>( t.release() ) );
     return true;
 }
 
 //------------------------------------------------------------------------------
 // EmptyDeclaration
 //------------------------------------------------------------------------------
-
 
 EmptyDeclaration::EmptyDeclaration()
 {

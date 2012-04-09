@@ -32,10 +32,10 @@
 #include <memory>
 #include <vector>
 
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/declaration.hpp>
-#include <parser/tokens/token.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/declaration.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {

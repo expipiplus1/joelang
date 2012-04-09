@@ -34,9 +34,9 @@
 #include <string>
 
 #include <engine/context.hpp>
-#include <parser/lexer.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/translation_unit.hpp>
+#include <compiler/lexer.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/translation_unit.hpp>
 
 namespace JoeLang
 {

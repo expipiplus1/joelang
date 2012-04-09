@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-#include <parser/symbol_table.hpp>
+#include <compiler/symbol_table.hpp>
 
 namespace JoeLang
 {

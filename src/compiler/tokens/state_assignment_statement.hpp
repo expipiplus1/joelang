@@ -29,38 +29,40 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
-#include <parser/tokens/token.hpp>
+#include <engine/state_assignment.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
 
+class StateBase;
+
 namespace Compiler
 {
 
-class DeclarationBase;
+class CodeGenerator;
+class Expression;
 class Parser;
 
-class TranslationUnit : public JoeLang::Compiler::Token
+class StateAssignmentStatement : public JoeLang::Compiler::Token
 {
 public:
-    TranslationUnit() = delete;
-    virtual ~TranslationUnit();
+    virtual ~StateAssignmentStatement();
 
-    void Print( int depth = 0 ) const;
+    std::unique_ptr<StateAssignmentBase> GetStateAssignment( CodeGenerator& code_generator ) const;
 
-    const std::vector< std::unique_ptr<DeclarationBase> >& GetDeclarations() const;
+    virtual void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
 
 protected:
-    TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations);
+    StateAssignmentStatement( const StateBase& state, std::unique_ptr<Expression> expression );
 
 private:
-    std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
+    const StateBase& m_state;
+    std::unique_ptr<Expression> m_expression;
 };
 
 } // namespace Compiler
 } // namespace JoeLang
-

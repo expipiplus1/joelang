@@ -37,10 +37,10 @@
 #include <engine/types.hpp>
 #include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
-#include <parser/code_generator.hpp>
-#include <parser/parser.hpp>
-#include <parser/terminal_types.hpp>
-#include <parser/tokens/expression.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
 {

@@ -35,7 +35,7 @@
 #include <string>
 #include <utility>
 
-#include <parser/tokens/expression.hpp>
+#include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
 {

@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without modification, are
     permitted provided that the following conditions are met:
@@ -28,40 +28,43 @@
 
 #pragma once
 
+#include <map>
 #include <memory>
+#include <set>
+#include <string>
 
-#include <engine/state_assignment.hpp>
-#include <parser/tokens/token.hpp>
+#include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
 {
-
-class StateBase;
-
 namespace Compiler
 {
 
-class CodeGenerator;
-class Expression;
-class Parser;
-
-class StateAssignmentStatement : public JoeLang::Compiler::Token
+class SymbolTable
 {
 public:
-    virtual ~StateAssignmentStatement();
+         ~SymbolTable       ();
 
-    std::unique_ptr<StateAssignmentBase> GetStateAssignment( CodeGenerator& code_generator ) const;
+    void EnterScope         ();
+    void LeaveScope         ();
 
-    virtual void Print( int depth ) const;
+    bool GetConstant        ( std::string identifier,
+                              std::shared_ptr<LiteralExpression>& constant );
+    bool AddConstant        ( std::string identifier,
+                              std::shared_ptr<LiteralExpression> constant );
 
-    static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
-
-protected:
-    StateAssignmentStatement( const StateBase& state, std::unique_ptr<Expression> expression );
+    bool HasTechniqueName   ( const std::string& name ) const;
+    bool AddTechniqueName   ( const std::string& name );
 
 private:
-    const StateBase& m_state;
-    std::unique_ptr<Expression> m_expression;
+    struct SymbolMaps
+    {
+        std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
+    };
+
+    std::set<std::string>   m_techniqueNames;
+
+    std::vector<SymbolMaps> m_symbolStack;
 };
 
 } // namespace Compiler

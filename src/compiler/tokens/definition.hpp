@@ -32,106 +32,72 @@
 #include <string>
 #include <vector>
 
-#include <parser/tokens/token.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
+
+class Pass;
+class Technique;
+
 namespace Compiler
 {
 
 class CodeGenerator;
 class Parser;
-class PassDefinition;
-class TechniqueDefinition;
+class PassDeclaration;
+class StateAssignmentStatement;
 
 //------------------------------------------------------------------------------
-// DeclarationBase
-// Parse Matches for any kind of declaration
-// Including function and technique definitions
+// PassDefinition
 //------------------------------------------------------------------------------
 
-class DeclarationBase : public JoeLang::Compiler::Token
+class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
-    virtual ~DeclarationBase();
+    virtual
+    ~PassDefinition();
+
+    std::unique_ptr<Pass> GetPass( CodeGenerator& code_generator ) const;
+
+    void SetName( std::string name );
 
     virtual
-    void Accept( CodeGenerator& c );
+    void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token );
-
-protected:
-    DeclarationBase() = default;
-};
-
-//------------------------------------------------------------------------------
-// EmptyDeclaration
-// Matches ';'
-//------------------------------------------------------------------------------
-
-class EmptyDeclaration : public JoeLang::Compiler::DeclarationBase
-{
-public:
-    virtual ~EmptyDeclaration();
-
-    virtual void Print( int depth ) const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<PassDefinition>& token );
 
 protected:
-    EmptyDeclaration();
-};
-
-
-//------------------------------------------------------------------------------
-// PassDeclaration
-//------------------------------------------------------------------------------
-
-class PassDeclaration : public JoeLang::Compiler::DeclarationBase
-{
-public:
-    virtual ~PassDeclaration();
-
-    virtual void Print( int depth ) const;
-
-    const std::string& GetName() const;
-
-    const std::shared_ptr<PassDefinition>& GetDefinition() const;
-
-    static bool Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token );
-
-protected:
-    PassDeclaration( std::string name, std::shared_ptr<PassDefinition> definition );
+    PassDefinition( std::vector< std::unique_ptr<StateAssignmentStatement> > state_assignments  );
 
 private:
     std::string m_name;
-    std::shared_ptr<PassDefinition> m_definition;
+    std::vector< std::unique_ptr<StateAssignmentStatement> > m_stateAssignments;
 };
 
 //------------------------------------------------------------------------------
-// TechniqueDeclaration
+// TechniqueDefinition
 //------------------------------------------------------------------------------
 
-class TechniqueDeclaration : public JoeLang::Compiler::DeclarationBase
+class TechniqueDefinition : public JoeLang::Compiler::Token
 {
 public:
-    virtual ~TechniqueDeclaration();
+    virtual ~TechniqueDefinition();
 
-    virtual
-    void Accept( CodeGenerator& c ) override;
+    std::unique_ptr<Technique> GetTechnique( CodeGenerator& code_generator ) const;
 
-    const TechniqueDefinition& GetDefinition() const;
+    void SetName( std::string name );
 
     virtual void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
+    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
 
 protected:
-    TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition );
+    TechniqueDefinition( std::vector< std::unique_ptr<PassDeclaration> > m_passes );
 
 private:
     std::string m_name;
-    std::unique_ptr<TechniqueDefinition> m_definition;
+    std::vector< std::unique_ptr<PassDeclaration> > m_passes;
 };
 
 } // namespace Compiler

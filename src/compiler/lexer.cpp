@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-#include <parser/terminal_types.hpp>
+#include <compiler/terminal_types.hpp>
 
 namespace JoeLang
 {
