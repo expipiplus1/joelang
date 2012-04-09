@@ -464,6 +464,7 @@ private:
 // UnaryExpression
 //------------------------------------------------------------------------------
 
+// TODO intger promotion on '+'
 class UnaryExpression : public JoeLang::Compiler::Expression
 {
 public:
