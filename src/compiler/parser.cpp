@@ -75,7 +75,7 @@ bool Parser::Parse ( const std::string& string )
             std::cout << "\'" << Compiler::GetTerminalString( expected_terminal ) << "\', ";
         }
         std::string next_terminal;
-        m_lexer->GetNextTerminal( next_terminal );
+        m_lexer->PeekNextTerminal( next_terminal );
         std::cout << "Got: '" << next_terminal << "'";
     }
     else

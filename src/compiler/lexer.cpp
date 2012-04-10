@@ -28,12 +28,13 @@
 
 #include "lexer.hpp"
 
+#include <cassert>
 #include <algorithm>
 #include <functional>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include <compiler/terminal_types.hpp>
 
@@ -54,16 +55,21 @@ Lexer::Lexer( std::string string )
     ConsumeIgnoredTerminals();
 }
 
-TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal, std::string& string )
+TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal, std::string& string ) const
 {
+    // Find this terminal type in the punctuation terminal map
     std::map< TerminalType, LiteralTerminal >::const_iterator literal_iterator =
         g_punctuationTerminals.find( terminal );
 
+    // If it wasn't in the map, return UNKNOWN_CHARACTER
     if( literal_iterator == g_punctuationTerminals.end() )
         return TerminalType::UNKNOWN_CHARACTER;
 
+    // Try and read this terminal
     const LiteralTerminal& terminal_reader = literal_iterator->second;
     std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+
+    // If it didn't match, return UNKNOWN_CHARACTER
     if( !chars_read )
         return TerminalType::UNKNOWN_CHARACTER;
 
@@ -73,46 +79,49 @@ TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal, std::string&
             c.second.Read( m_position, m_string.end() ) )
             return c.first;
 
+    // Fill up string
     string = std::string( m_position, m_position + chars_read );
-    ReadChars( chars_read );
-    ConsumeIgnoredTerminals();
     return terminal;
 }
 
-TerminalType Lexer::ReadLiteralTerminal( TerminalType terminal, std::string& string )
+TerminalType Lexer::ReadLiteralTerminal( TerminalType terminal, std::string& string ) const
 {
+    // Find this terminal type in the literal terminal map
     std::map< TerminalType, FunctionalTerminal >::const_iterator functional_iterator =
         g_literalTerminals.find( terminal);
+
+    // If it wasn't in the map, return UNKNOWN_CHARACTER
     if( functional_iterator == g_literalTerminals.end() )
         return TerminalType::UNKNOWN_CHARACTER;
 
+    // Try and match this terminal
     const FunctionalTerminal& terminal_reader = functional_iterator->second;
     std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+
+    // if it didn't match return
     if( !chars_read )
         return TerminalType::UNKNOWN_CHARACTER;
 
-    // if it's an integer literal, we need to check that it's not just
-    // parsing the first part of a float
-    //if( terminal_type == TerminalType::INTEGER_LITERAL )
-     //   if( g_literalTerminals.at(TerminalType::FLOATING_LITERAL).Read( m_position, m_string.end() ) )
-      //      return false;
-
+    // fill up string
     string = std::string( m_position, m_position + chars_read );
-    ReadChars( chars_read );
-    ConsumeIgnoredTerminals();
     return terminal;
 }
 
-TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal, std::string& string )
+TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal, std::string& string ) const
 {
+    // Find this terminal in the punctuation terminal map
     std::map< TerminalType, LiteralTerminal >::const_iterator literal_iterator =
         g_keywordTerminals.find( terminal );
 
+    // If it wasn't in the map return
     if( literal_iterator == g_keywordTerminals.end() )
         return TerminalType::UNKNOWN_CHARACTER;
 
+    // Try and read this terminal
     const LiteralTerminal& terminal_reader = literal_iterator->second;
     std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+
+    // If it didn't match return
     if( !chars_read )
         return TerminalType::UNKNOWN_CHARACTER;
 
@@ -122,38 +131,44 @@ TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal, std::string& str
             c.second.Read( m_position, m_string.end() ) )
             return c.first;
 
+    // fill up the string
     string = std::string( m_position, m_position + chars_read );
-    ReadChars( chars_read );
-    ConsumeIgnoredTerminals();
     return terminal;
 }
 
 bool Lexer::Expect( TerminalType terminal_type, std::string& string )
 {
+    // If we've reached the end of the string
     if( terminal_type == TerminalType::END_OF_INPUT &&
         m_position == m_string.end() )
         return true;
 
     TerminalType t;
 
+    // See if it's a punctuation terminal
     t = ReadPunctuationTerminal( terminal_type, string );
-    if( t != TerminalType::UNKNOWN_CHARACTER )
-        return t == terminal_type;
 
-    t = ReadLiteralTerminal( terminal_type, string );
-    if( t != TerminalType::UNKNOWN_CHARACTER )
-        return t == terminal_type;
+    // If it wasn't matched by the punctuation try and match it as a literal
+    if( t == TerminalType::UNKNOWN_CHARACTER )
+        t = ReadLiteralTerminal( terminal_type, string );
 
-    t = ReadKeywordTerminal( terminal_type, string );
-    if( t != TerminalType::UNKNOWN_CHARACTER )
-        return t == terminal_type;
+    // If it wasn't matched try and match a keyword
+    if( t == TerminalType::UNKNOWN_CHARACTER )
+        t = ReadKeywordTerminal( terminal_type, string );
 
-    // If it's anything else
+    // If we've found a map, advance the position and clean up any whitespace
+    if( t == terminal_type )
+    {
+        ReadChars( string.size() );
+        ConsumeIgnoredTerminals();
+        return true;
+    }
     return false;
 }
 
-TerminalType Lexer::GetNextTerminal( std::string& string )
+TerminalType Lexer::PeekNextTerminal( std::string& string ) const
 {
+    // Try and match any punctuation terminals
     for( const auto& t_reader : g_punctuationTerminals )
     {
         TerminalType t = ReadPunctuationTerminal( t_reader.first, string );
@@ -161,6 +176,7 @@ TerminalType Lexer::GetNextTerminal( std::string& string )
             return t;
     }
 
+    // Try and match any literal terminals
     for( const auto& t_reader : g_literalTerminals )
     {
         TerminalType t = ReadLiteralTerminal( t_reader.first, string );
@@ -168,6 +184,7 @@ TerminalType Lexer::GetNextTerminal( std::string& string )
             return t;
     }
 
+    // Try and match any keyword terminals
     for( const auto& t_reader : g_keywordTerminals )
     {
         TerminalType t = ReadPunctuationTerminal( t_reader.first, string );
@@ -197,6 +214,7 @@ std::size_t Lexer::GetLineNumber() const
 void Lexer::ConsumeIgnoredTerminals()
 {
     int chars_read;
+    // While we keep having eaten something, try and parse the next terminal
     do
     {
         for( const auto& terminal_reader : g_ignoredTerminals )
@@ -212,6 +230,8 @@ void Lexer::ConsumeIgnoredTerminals()
 void Lexer::ReadChars( std::size_t num_chars )
 {
     std::string::const_iterator end = m_position + num_chars;
+    assert( end <= m_string.end() &&
+            "Trying to advance the lexer past the end of the file" );
     while( m_position < end )
     {
         if( *m_position == '\n' )
