@@ -29,38 +29,63 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
-#include <engine/state_assignment.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
-
-class StateBase;
-
 namespace Compiler
 {
 
-class CodeGenerator;
 class Expression;
 class Parser;
 
+/**
+  * \class StateAssignmentStatement
+  * \brief Matches a state assignment statement
+  *
+  * StateAssignmentStatement = identifier '=' Expression ';'
+  */
 class StateAssignmentStatement : public JoeLang::Compiler::Token
 {
 public:
-    virtual ~StateAssignmentStatement();
+    /**
+      * This constructor will assert on a null expression or empty identifier
+      * \param identifier
+      *   The identifier for the State to assign
+      * \param expression
+      *   The expression to assign to the State
+      */
+    StateAssignmentStatement( std::string identifier,
+                              std::unique_ptr<Expression> expression );
+    virtual
+    ~StateAssignmentStatement();
 
-    std::unique_ptr<StateAssignmentBase> GetStateAssignment( CodeGenerator& code_generator ) const;
-
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual void Print( int depth ) const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token );
-
-protected:
-    StateAssignmentStatement( const StateBase& state, std::unique_ptr<Expression> expression );
+    /**
+      * Parses a state assignment statement
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \return
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
+    static bool Parse( Parser& parser,
+                       std::unique_ptr<StateAssignmentStatement>& token );
 
 private:
-    const StateBase& m_state;
+    /** The identifier for the state to be assigned to **/
+    std::string m_identifier;
+    /** The expression to assign to the state **/
     std::unique_ptr<Expression> m_expression;
 };
 

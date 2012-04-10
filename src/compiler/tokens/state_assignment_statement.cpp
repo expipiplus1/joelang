@@ -28,16 +28,12 @@
 
 #include "state_assignment_statement.hpp"
 
+#include <cassert>
 #include <iostream>
-#include <map>
 #include <memory>
 #include <string>
 #include <utility>
 
-#include <engine/types.hpp>
-#include <engine/state.hpp>
-#include <engine/state_assignment.hpp>
-#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -47,138 +43,55 @@ namespace JoeLang
 namespace Compiler
 {
 
-StateAssignmentStatement::StateAssignmentStatement( const StateBase& state,
+//------------------------------------------------------------------------------
+// StateAssignmentStatement
+//------------------------------------------------------------------------------
+StateAssignmentStatement::StateAssignmentStatement( std::string identifier,
                                                     std::unique_ptr< Expression > expression )
-    :m_state( state )
-    ,m_expression( std::move( expression ) )
+    :m_identifier( std::move(identifier) )
+    ,m_expression( std::move(expression) )
 {
+    assert( !m_identifier.empty() &&
+            "Trying to create a StateAssignmentStatement with an empty state name" );
+    assert( m_expression &&
+            "Trying to create a StateAssignmentStatement with a null expression" );
 }
 
 StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-std::unique_ptr<StateAssignmentBase> StateAssignmentStatement::GetStateAssignment( CodeGenerator& code_generator ) const
-{
-    //TODO
-    return code_generator.GenerateStateAssignment( m_state, *m_expression );
-}
-
 void StateAssignmentStatement::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << "State Assignment to " << m_state.GetName() << "\n";
+    std::cout << "State Assignment to " << m_identifier << "\n";
     m_expression->Print( depth + 1 );
 }
 
-//TODO move this from here, and store these somewhere
-std::map<std::string, std::shared_ptr<LiteralExpression> >
-    GetLiteralValueEnumerantMap( const StateBase* state_base )
+bool StateAssignmentStatement::Parse( Parser& parser,
+                                      std::unique_ptr<StateAssignmentStatement>& token )
 {
-    std::map<std::string, std::shared_ptr<LiteralExpression> > ret;
-    switch( state_base->GetType() )
-    {
-    case Type::BOOL:
-        for( const auto& e : reinterpret_cast<const State<jl_bool>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<BooleanLiteralExpression>( e.second );
-        break;
-    case Type::FLOAT:
-        for( const auto& e : reinterpret_cast<const State<jl_float>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, false );
-        break;
-    case Type::DOUBLE:
-        for( const auto& e : reinterpret_cast<const State<jl_double>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<FloatingLiteralExpression>( e.second, true );
-        break;
-    case Type::I8:
-        for( const auto& e : reinterpret_cast<const State<jl_i8>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::I16:
-        for( const auto& e : reinterpret_cast<const State<jl_i16>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::I32:
-        for( const auto& e : reinterpret_cast<const State<jl_i32>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::I64:
-        for( const auto& e : reinterpret_cast<const State<jl_i64>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::U8:
-        for( const auto& e : reinterpret_cast<const State<jl_u8>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::U16:
-        for( const auto& e : reinterpret_cast<const State<jl_u16>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::U32:
-        for( const auto& e : reinterpret_cast<const State<jl_u32>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::U64:
-        for( const auto& e : reinterpret_cast<const State<jl_u64>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<IntegralLiteralExpression>( e.second );
-        break;
-    case Type::STRING:
-        for( const auto& e : reinterpret_cast<const State<jl_string>*>(state_base)->GetEnumerations() )
-            ret[e.first] = std::make_shared<StringLiteralExpression>( e.second );
-        break;
-    default:
-        assert( false && "state_base is of an unhandled type" );
-    }
-    return ret;
-}
-
-bool StateAssignmentStatement::Parse( Parser& parser, std::unique_ptr<StateAssignmentStatement>& token )
-{
-    std::string state_name;
-    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, state_name ) )
+    // Read the state identifier
+    std::string identifier;
+    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
-    //Check if the state name is a valid state name
-    const StateBase* state = parser.GetNamedState( state_name );
-    if( !state )
-    {
-        parser.Error( "\'" + state_name + "\' is not a valid state name" );
-        return false;
-    }
-
+    // The assignment operator
     if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
         return false;
 
-    // TODO some kind of raii for the symbol table scopes
-    //
-    // Add the state enumerants to the symbol table
-    //
-    SymbolTable& symbol_table = parser.GetSymbolTable();
-    symbol_table.EnterScope();
-    for( const auto& s : GetLiteralValueEnumerantMap( state ) )
-        symbol_table.AddConstant( s.first, s.second );
-
+    // And the expression
     std::unique_ptr< Expression > expression;
     if( !parser.Expect< Expression >( expression ) )
-    {
-        symbol_table.LeaveScope();
         return false;
-    }
 
+    // Closing semicolon
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
-    {
-        symbol_table.LeaveScope();
         return false;
-    }
 
-    //
-    // Reset the symbol table
-    //
-    symbol_table.LeaveScope();
-
-    token.reset( new StateAssignmentStatement( *state,
-                                               std::move( expression ) ) );
+    token.reset( new StateAssignmentStatement( std::move(identifier),
+                                               std::move(expression) ) );
     return true;
 }
 
