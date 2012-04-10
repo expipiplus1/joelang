@@ -245,7 +245,7 @@ PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
     ,m_declaration( std::move(declaration) )
 {
     // Assert if both are full, or none are
-    assert( (!m_identifier.empty()) ^ bool(m_declaration) &&
+    assert( m_identifier.empty() == bool(m_declaration) &&
             "PassDeclarationOrIdentifier must have one and only one value" );
 }
 
