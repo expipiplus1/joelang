@@ -48,7 +48,7 @@ EffectFactory::EffectFactory( const Context& context )
 
 std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string& string )
 {
-    Parser parser( m_context );
+    Parser parser;
     if( !parser.Parse( string ) )
         return nullptr;
 

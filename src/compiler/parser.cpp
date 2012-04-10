@@ -33,7 +33,6 @@
 #include <set>
 #include <string>
 
-#include <engine/context.hpp>
 #include <compiler/lexer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/translation_unit.hpp>
@@ -43,8 +42,7 @@ namespace JoeLang
 namespace Compiler
 {
 
-Parser::Parser( const Context& context )
-    :m_context( context )
+Parser::Parser()
 {
 }
 
@@ -60,11 +58,16 @@ void Parser::Print() const
 
 bool Parser::Parse ( const std::string& string )
 {
+    // Set up the lexer
     m_lexer.reset( new Compiler::Lexer( string ) );
 
+    // Try and parse a translation unit
     if( TranslationUnit::Parse( *this, m_translationUnit ) )
         return true;
 
+    //
+    // Report error
+    //
     std::cout << "Error parsing at " << m_lexer->GetLineNumber() << ":"
                                      << m_lexer->GetColumnNumber() << "\n";
     if( m_errorMessage.empty() )
@@ -88,7 +91,6 @@ bool Parser::Parse ( const std::string& string )
 
 bool Parser::ExpectTerminal( TerminalType terminal_type )
 {
-    // TODO: Remove dummy
     std::string dummy;
     return ExpectTerminal( terminal_type, dummy );
 }
@@ -103,21 +105,6 @@ bool Parser::ExpectTerminal( TerminalType terminal_type, std::string& string )
 
     m_expectedTerminals.insert( terminal_type );
     return false;
-}
-
-SymbolTable& Parser::GetSymbolTable()
-{
-    return m_symbolTable;
-}
-
-const StateBase* Parser::GetNamedState( const std::string& name ) const
-{
-    return m_context.GetNamedState( name );
-}
-
-std::size_t Parser::GetLexerPosition() const
-{
-    return m_lexer->GetPosition();
 }
 
 const std::unique_ptr<TranslationUnit>& Parser::GetTranslationUnit() const

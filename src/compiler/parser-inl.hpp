@@ -34,6 +34,8 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/lexer.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -45,7 +47,7 @@ bool Parser::Expect( std::unique_ptr<U>& token )
     if( !Good() )
         return false;
 
-    std::size_t p = GetLexerPosition();
+    std::size_t p = m_lexer->GetPosition();
 
     if( T::Parse( *this, token ) )
     {
@@ -53,7 +55,7 @@ bool Parser::Expect( std::unique_ptr<U>& token )
     }
     else
     {
-        if( GetLexerPosition() != p )
+        if( m_lexer->GetPosition() != p )
             Error();
 
         return false;
@@ -66,7 +68,7 @@ bool Parser::Expect()
     if( !Good() )
         return false;
 
-    std::size_t p = GetLexerPosition();
+    std::size_t p = m_lexer->GetPosition();
 
     if( T::Parse( *this ) )
     {
@@ -74,7 +76,7 @@ bool Parser::Expect()
     }
     else
     {
-        if( GetLexerPosition() != p )
+        if( m_lexer->GetPosition() != p )
             Error();
 
         return false;

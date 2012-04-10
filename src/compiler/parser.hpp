@@ -33,22 +33,8 @@
 #include <string>
 #include <vector>
 
-#include <compiler/symbol_table.hpp>
-
 namespace JoeLang
 {
-
-//------------------------------------------------------------------------------
-// Forward Declarations
-//------------------------------------------------------------------------------
-
-class Context;
-class StateBase;
-
-//------------------------------------------------------------------------------
-// Parser
-//------------------------------------------------------------------------------
-
 namespace Compiler
 {
 
@@ -61,65 +47,117 @@ class TranslationUnit;
 class Parser
 {
 public:
-    Parser() = delete;
-    explicit
-    Parser( const Context& c );
+    Parser();
     ~Parser();
 
+    /** Prints the CST **/
     void                                    Print() const;
 
+    /** Tries to parse the string
+      * \param string
+      *   The string to parse
+      * \returns
+      *   true if the parsing was successful,
+      *   false if the parsing failed
+      */
     bool                                    Parse( const std::string& string );
 
-    SymbolTable&                            GetSymbolTable();
-
-    const StateBase*                        GetNamedState( const std::string& name ) const;
-
-    std::size_t                             GetLexerPosition() const;
+    /** \returns the parsed CST or null if no successful parse has taken place **/
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
 
-    //
-    // Functions for detecting and reporting errors
-    //
+    /** Call to indicate that an error has occured during parsing **/
     void Error  ();
+    /** Call to indicate that an error has occured during parsing
+      * \param error_message
+      *   The error message
+      */
     void Error  ( std::string error_message );
+    /** \returns true if no error has occured **/
     bool Good   () const;
 
-    //
-    // Functions for reading Tokens and Terminals
-    //
+
+    /**
+      * Function to try to match a terminal
+      * \returns true if we have consumed a terminal
+      * \param terminal_type
+      *   The terminal type to try and consume
+      */
     bool ExpectTerminal     ( TerminalType terminal_type );
+    /** Function to try to match a terminal and return the matched string
+      * \returns true if we have consumed a terminal
+      * \param terminal_type
+      *   The terminal type to try and consume
+      * \param string
+      *   The string to fill with the matched characters
+      */
     bool ExpectTerminal     ( TerminalType terminal_type,
                               std::string& string );
 
-    template< typename T, typename U >
-    bool Expect             ( std::unique_ptr<U>& token );
+    /**
+      * Function to try and match a token
+      * \tparam T
+      *   The type of token to try and match
+      * \returns true if we have consumed the desired token
+      */
     template< typename T >
     bool Expect             ();
+    /**
+      * Function to try and match a token and return the matched token
+      * \tparam T
+      *   The type of token to try and match
+      * \tparam U
+      *   The type of pointer to return, determined automatically
+      * \param token
+      *   The token to fill with the matched token
+      * \returns true if we have consumed the desired token
+      */
+    template< typename T, typename U >
+    bool Expect             ( std::unique_ptr<U>& token );
 
+    /**
+      * Function to try and match one or more of the desired token
+      * \tparam T
+      *   The type of token to try and match
+      * \tparam U
+      *   The type of pointers to return, determined automatically
+      * \param token_sequence
+      *   A vector of token pointers to fill with the matched tokens
+      * \returns true if we have consumed one or more tokens
+      */
     template<typename T, typename U>
-    bool ExpectSequenceOf   ( std::vector< std::unique_ptr<U> >& token_sequence );
+    bool ExpectSequenceOf  ( std::vector< std::unique_ptr<U> >& token_sequence );
 
-    template<typename T>
-    bool ExpectAnyOf        ( std::unique_ptr<Token>& token );
+    /**
+      * Function to try and match any one of the desired tokens
+      * \tparam T
+      *   The type of tokens to try and match
+      * \param token
+      *   The matched token or null
+      * \returns true if we have consumed a token
+      */
     template<typename T, typename T1, typename... Rest>
     bool ExpectAnyOf        ( std::unique_ptr<Token>& token );
     template<typename T>
+    bool ExpectAnyOf        ( std::unique_ptr<Token>& token );
+    /**
+      * Function to try and match any one of the desired tokens
+      * \tparam T
+      *   The type of tokens to try and match
+      * \returns true if we have consumed a token
+      */
+    template<typename T, typename T1, typename... Rest>
     bool ExpectAnyOf        ();
-    template<typename T, typename T1, typename... Rest>
+    template<typename T>
     bool ExpectAnyOf        ();
 
 private:
     std::unique_ptr<TranslationUnit>    m_translationUnit;
 
-    std::unique_ptr<Compiler::Lexer>    m_lexer;
-    SymbolTable                         m_symbolTable;
-
-    const Context&                      m_context;
+    std::unique_ptr<Lexer>              m_lexer;
 
     bool                                m_good = true;
     std::string                         m_errorMessage;
     std::set<TerminalType>              m_expectedTerminals;
-
 };
 
 } // namespace Compiler

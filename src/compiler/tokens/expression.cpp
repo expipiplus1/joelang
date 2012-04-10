@@ -1223,6 +1223,7 @@ Type ConstantValueExpression::GetReturnType() const
 
 bool ConstantValueExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
+    assert( false && "not implemented" );
     std::string identifier;
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
@@ -1230,8 +1231,6 @@ bool ConstantValueExpression::Parse( Parser& parser, std::unique_ptr<Expression>
     //TODO undeclared identifier error reporting somewhere here
     //This will probably have to be folded into IdentifierExpression
     std::shared_ptr<LiteralExpression> e;
-    if( !parser.GetSymbolTable().GetConstant( identifier, e ) )
-        return false;
 
     token.reset( new ConstantValueExpression( e ) );
     return true;
