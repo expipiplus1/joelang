@@ -30,10 +30,17 @@
 
 namespace JoeLang
 {
-
 namespace Compiler
 {
 
+/**
+  * \def CHECK_PARSER
+  * Checks if the parser is good to continue, if it isn't return from the
+  * current function.
+  *
+  * To be used after calling any Parser::Expect* function and continuing on a
+  * false result.
+  */
 #define CHECK_PARSER \
     if( !parser.Good() ) return false; \
     else (void)0
@@ -42,15 +49,17 @@ namespace Compiler
     if( !code_generator.Good() ) return nullptr; \
     else (void)0
 
+/**
+  * \class Token
+  * \brief Abstract class for any token in the CST
+  */
 class Token
 {
 public:
+    Token() = default;
     virtual ~Token();
 
     virtual void Print( int depth ) const = 0;
-
-protected:
-    Token() = default;
 };
 
 } // namespace Compiler
