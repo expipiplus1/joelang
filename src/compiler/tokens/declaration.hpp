@@ -184,7 +184,8 @@ public:
       * \param definition
       *   The definition for this technique
       */
-    TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition );
+    TechniqueDeclaration( std::string name,
+                          std::unique_ptr<TechniqueDefinition> definition );
 
     virtual
     ~TechniqueDeclaration();
