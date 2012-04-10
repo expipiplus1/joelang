@@ -125,7 +125,7 @@ public:
       * \returns true if we have consumed one or more tokens
       */
     template<typename T, typename U>
-    bool ExpectSequenceOf  ( std::vector< std::unique_ptr<U> >& token_sequence );
+    bool ExpectSequenceOf ( std::vector< std::unique_ptr<U> >& token_sequence );
 
     /**
       * Function to try and match any one of the desired tokens
