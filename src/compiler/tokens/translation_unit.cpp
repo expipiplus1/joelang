@@ -46,8 +46,8 @@ namespace Compiler
 // TranslationUnit
 //------------------------------------------------------------------------------
 
-TranslationUnit::TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations )
-    :m_declarations( std::move( declarations ) )
+TranslationUnit::TranslationUnit( DeclarationVector declarations )
+    :m_declarations( std::move(declarations) )
 {
 }
 
@@ -64,21 +64,23 @@ void TranslationUnit::Print( int depth ) const
         declaration->Print( depth + 1 );
 }
 
-const std::vector< std::unique_ptr<DeclarationBase> >& TranslationUnit::GetDeclarations() const
+const TranslationUnit::DeclarationVector& TranslationUnit::GetDeclarations() const
 {
     return m_declarations;
 }
 
 bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
 {
-    std::vector< std::unique_ptr<DeclarationBase> > declarations;
+    // Parse all of the top level declarations in the file
+    DeclarationVector declarations;
     if( !parser.ExpectSequenceOf<DeclarationBase>( declarations ) )
         return false;
 
+    // Make sure that there's nothing left
     if( !parser.ExpectTerminal( TerminalType::END_OF_INPUT ) )
         return false;
 
-    token.reset( new TranslationUnit( std::move( declarations ) ) );
+    token.reset( new TranslationUnit( std::move(declarations) ) );
     return true;
 }
 

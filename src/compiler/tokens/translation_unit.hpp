@@ -42,24 +42,55 @@ namespace Compiler
 class DeclarationBase;
 class Parser;
 
+/**
+  * \class TranslationUnit
+  * \brief Matches a whole translation unit
+  *
+  * TranslationUnit = (DeclarationBase)* EOF
+  */
 class TranslationUnit : public JoeLang::Compiler::Token
 {
 public:
-    TranslationUnit() = delete;
-    virtual ~TranslationUnit();
+    using DeclarationVector = std::vector< std::unique_ptr<DeclarationBase> >;
 
+    /**
+      * This constructor asserts on any null declaration
+      * \param declarations
+      *   A vector of the top level declarations that appear in this translation
+      *   unit
+      */
+    TranslationUnit( DeclarationVector declarations );
+    virtual
+    ~TranslationUnit();
+
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
     virtual
     void Print( int depth = 0 ) const override;
 
-    const std::vector< std::unique_ptr<DeclarationBase> >& GetDeclarations() const;
+    /** \returns The top level declarations of this translation unit **/
+    const DeclarationVector& GetDeclarations() const;
 
-    static bool Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token );
-
-protected:
-    TranslationUnit( std::vector< std::unique_ptr<DeclarationBase> >&& declarations);
+    /**
+      * Parses a translation unit
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
+    static
+    bool Parse( Parser& parser,
+                std::unique_ptr<TranslationUnit>& token );
 
 private:
-    std::vector< std::unique_ptr<DeclarationBase> > m_declarations;
+    /** The vector of all the top level declarations **/
+    DeclarationVector m_declarations;
 };
 
 } // namespace Compiler
