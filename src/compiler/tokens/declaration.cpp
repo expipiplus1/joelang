@@ -297,7 +297,8 @@ bool PassDeclarationOrIdentifier::Parse( Parser& parser, std::unique_ptr<PassDec
             return false;
 
         // Construct a PassDeclarationOrIdentifier with an identifier
-        token.reset( new PassDeclarationOrIdentifier( identifier, nullptr ) );
+        token.reset( new PassDeclarationOrIdentifier( std::move(identifier),
+                                                      nullptr ) );
         return true;
     }
     // The lexer may be out of step
@@ -309,7 +310,8 @@ bool PassDeclarationOrIdentifier::Parse( Parser& parser, std::unique_ptr<PassDec
         return false;
 
     // Construct a PassDeclarationOrIdentifier with a declaration
-    token.reset( new PassDeclarationOrIdentifier( "", std::move(declaration) ) );
+    token.reset( new PassDeclarationOrIdentifier( "",
+                                                  std::move(declaration) ) );
     return true;
 }
 

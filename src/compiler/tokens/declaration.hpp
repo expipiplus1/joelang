@@ -39,7 +39,6 @@ namespace JoeLang
 namespace Compiler
 {
 
-class CodeGenerator;
 class Parser;
 class PassDefinition;
 class TechniqueDefinition;
