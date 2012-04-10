@@ -51,6 +51,10 @@ public:
                  Lexer           ( std::string string );
                  ~Lexer          () = default;
 
+    //
+    // Expect return true and moves the position forward if the next terminal
+    // matches terminal_type. It optionally returns the matched string
+    //
     /**
       * This function advances the stream by one token if terminal_type is the
       * next token in the stream, otherwise the stream doesn't move
