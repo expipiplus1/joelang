@@ -44,13 +44,14 @@ class PassDefinition;
 class TechniqueDefinition;
 
 /**
- * \class DeclarationBase
- * \brief Abstract class for top level declarations
- *
- * DeclarationBase =   EmptyDeclaration
- *                   | PassDeclaration
- *                   | TechniqueDeclaration
- */
+  * \class DeclarationBase
+  * \ingroup Tokens
+  * \brief Abstract class for top level declarations
+  *
+  * DeclarationBase =   EmptyDeclaration
+  *                   | PassDeclaration
+  *                   | TechniqueDeclaration
+  */
 class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
@@ -74,6 +75,7 @@ public:
 
 /**
   * \class EmptyDeclaration
+  * \ingroup Tokens
   * \brief Matches an empty declaration
   *
   * EmptyDeclaration = ';'
@@ -110,6 +112,7 @@ public:
 
 /**
   * \class PassDeclaration
+  * \ingroup Tokens
   * \brief Matches a pass declaration or definition
   *
   * PassDeclaration =   'pass' identifier ';'
@@ -169,6 +172,7 @@ private:
 
 /**
   * \class TechniqueDeclaration
+  * \ingroup Tokens
   * \brief Matches a technique definition
   *
   * TechniqueDeclaration = 'technique' identifier TechniqueDefinition
@@ -222,6 +226,7 @@ private:
 
 /**
   * \class PassDeclarationOrIdentifier
+  * \ingroup Tokens
   * \brief A helper token for TechniqueDefinitions
   *
   * This token matches either an identifier or a pass declaration
