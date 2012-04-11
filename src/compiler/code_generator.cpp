@@ -230,6 +230,9 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
 llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
 {
+    assert( false && "broken" );
+    return nullptr;
+    /*
     Type         e_type = e.GetReturnType();
     llvm::Value* e_code = e.CodeGen( *this );
 
@@ -279,12 +282,14 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
     else
         return m_llvmBuilder.CreateFPToUI( e_code,
                                            GetLLVMType( type, m_llvmContext ) );
+                                           */
 }
 
 //
 // Unary Operators
 //
 
+/*
 llvm::Value* CodeGenerator::CreateNeg( const Expression& e )
 {
     return m_llvmBuilder.CreateNeg( e.CodeGen( *this ) );
@@ -458,6 +463,7 @@ llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r 
     else
         return m_llvmBuilder.CreateURem( l_casted, r_casted );
 }
+*/
 
 //
 // Ternary Operators
@@ -467,9 +473,12 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
                                           const Expression& true_expression,
                                           const Expression& false_expression )
 {
-    return m_llvmBuilder.CreateSelect( condition.CodeGen( *this ),
+    assert( false && "broken" );
+    return nullptr;
+    /*return m_llvmBuilder.CreateSelect( condition.CodeGen( *this ),
                                        true_expression.CodeGen( *this ),
                                        false_expression.CodeGen( *this ) );
+                                       */
 }
 
 //
