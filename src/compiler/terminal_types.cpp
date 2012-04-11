@@ -356,10 +356,27 @@ std::size_t ReadIntegerLiteral( std::string::const_iterator begin,
     {
         p += ReadDigitSequence( begin, end );
     }
+
+    // Check that we haven't just read the first part of a float
     if( *p == '.' ||
         *p == 'e' ||
         *p == 'E' )
         return 0;
+
+    // Read the integer suffix
+    // TODO return any chars here for better diagnostics
+    if( *p == 'u' )
+        ++p;
+
+    if( *p == 'i' )
+        ++p;
+    else if( *p == 'l' )
+        ++p;
+    else if( *p == 's' )
+        ++p;
+    else if( *p == 't' )
+        ++p;
+
     return p - begin;
 }
 
@@ -431,7 +448,7 @@ std::size_t ReadFloatingLiteral( std::string::const_iterator begin,
         return p - begin;
 
     char c = *p;
-    if( c == 'f' || c == 'F' )
+    if( c == 'f' )
         ++p;
 
     return p - begin;
