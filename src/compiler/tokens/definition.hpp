@@ -44,6 +44,7 @@ class StateAssignmentStatement;
 
 /**
   * \class PassDefinition
+  * \ingroup Tokens
   * \brief Matches the definition of a pass
   *
   * PassDefinition = '{' (StateAssignmentStatement)* '}'
@@ -91,6 +92,7 @@ private:
 
 /**
   * \class TechniqueDefinition
+  * \ingroup Tokens
   * \brief Matches the definition of a technique
   *
   * TechniqueDefinition = '{' (PassDeclarationOrIdentifier)* '}'

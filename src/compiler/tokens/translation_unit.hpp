@@ -44,6 +44,7 @@ class Parser;
 
 /**
   * \class TranslationUnit
+  * \ingroup Tokens
   * \brief Matches a whole translation unit
   *
   * TranslationUnit = (DeclarationBase)* EOF

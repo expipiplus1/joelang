@@ -50,7 +50,16 @@ namespace Compiler
     else (void)0
 
 /**
+  * \defgroup Tokens
+  * Tokens must implement a static member function Parse taking a reference to a
+  * Parser and a reference to a pointer to the token type. Parse should return
+  * true if the token was parsed successfully, otherwise false. It should also
+  * return a pointer to the successfully parsed token or nullptr in token
+  */
+
+/**
   * \class Token
+  * \ingroup Tokens
   * \brief Abstract class for any token in the CST
   */
 class Token

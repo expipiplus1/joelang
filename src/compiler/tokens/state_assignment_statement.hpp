@@ -43,6 +43,7 @@ class Parser;
 
 /**
   * \class StateAssignmentStatement
+  * \ingroup Tokens
   * \brief Matches a state assignment statement
   *
   * StateAssignmentStatement = identifier '=' Expression ';'
