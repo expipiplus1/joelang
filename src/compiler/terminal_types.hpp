@@ -38,6 +38,11 @@ namespace JoeLang
 namespace Compiler
 {
 
+/**
+  * \enum TerminalType
+  * An enumeration for all the kinds of tokens the lexer may produce while
+  * lexing
+  */
 enum class TerminalType
 {
     //
@@ -145,12 +150,17 @@ enum class TerminalType
     IDENTIFIER
 };
 
+/** Get the human readable string associated with the given TerminalType **/
 const std::string& GetTerminalString( TerminalType terminal_type );
 
 //------------------------------------------------------------------------------
 // LiteralTerminal
 //------------------------------------------------------------------------------
 
+/**
+  * \struct LiteralTerminal
+  * \brief A struct to hold a terminal which is matched by a string
+  */
 struct LiteralTerminal
 {
     std::size_t Read( const std::string::const_iterator begin,
@@ -164,6 +174,10 @@ struct LiteralTerminal
 // FunctionalTerminal
 //------------------------------------------------------------------------------
 
+/**
+  * \struct FunctionalTerminal
+  * \brief A struct to hold a terminal which is matched by a custon function
+  */
 struct FunctionalTerminal
 {
     std::size_t Read( std::string::const_iterator begin,
