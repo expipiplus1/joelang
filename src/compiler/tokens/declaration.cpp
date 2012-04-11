@@ -54,7 +54,8 @@ DeclarationBase::~DeclarationBase()
 {
 }
 
-bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& token )
+bool DeclarationBase::Parse( Parser& parser,
+                             std::unique_ptr<DeclarationBase>& token )
 {
     // Try and parse any of the top level declarations
     std::unique_ptr<Token> t;
@@ -64,7 +65,7 @@ bool DeclarationBase::Parse( Parser& parser, std::unique_ptr<DeclarationBase>& t
         return false;
 
     // TODO use something like llvm's casting operators
-    // Cast it back to a DeclarationBase because ExpectAnyOf only returns a Token*
+    // Cast it back to a DeclarationBase because ExpectAnyOf only returns Token*
     token.reset( static_cast<DeclarationBase*>( t.release() ) );
     return true;
 }
@@ -88,7 +89,8 @@ void EmptyDeclaration::Print(int depth) const
     std::cout << "Empty Declaration\n";
 }
 
-bool EmptyDeclaration::Parse( Parser& parser, std::unique_ptr<EmptyDeclaration>& token )
+bool EmptyDeclaration::Parse( Parser& parser,
+                              std::unique_ptr<EmptyDeclaration>& token )
 {
     // Try to parse just a semicolon
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
@@ -146,7 +148,8 @@ void PassDeclaration::Print( int depth ) const
     }
 }
 
-bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& token )
+bool PassDeclaration::Parse( Parser& parser,
+                             std::unique_ptr<PassDeclaration>& token )
 {
     // Needs to start with 'pass'
     if( !parser.ExpectTerminal( TerminalType::PASS ) )
@@ -180,7 +183,9 @@ bool PassDeclaration::Parse( Parser& parser, std::unique_ptr<PassDeclaration>& t
 // TechniqueDeclaration
 //------------------------------------------------------------------------------
 
-TechniqueDeclaration::TechniqueDeclaration( std::string name, std::unique_ptr<TechniqueDefinition> definition )
+TechniqueDeclaration::TechniqueDeclaration(
+                               std::string name,
+                               std::unique_ptr<TechniqueDefinition> definition )
     :m_name( std::move( name ) )
     ,m_definition( std::move( definition ) )
 {
@@ -201,7 +206,7 @@ void TechniqueDeclaration::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
-    std::cout << "Technique: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
+    std::cout << "Technique: " << (m_name.size() ? m_name : "Unnamed") << "\n";
     if( m_definition )
     {
         m_definition->Print( depth + 1);
@@ -214,7 +219,8 @@ void TechniqueDeclaration::Print( int depth ) const
     }
 }
 
-bool TechniqueDeclaration::Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token )
+bool TechniqueDeclaration::Parse( Parser& parser,
+                                  std::unique_ptr<TechniqueDeclaration>& token )
 {
     // Has to start with 'technique'
     if( !parser.ExpectTerminal( TerminalType::TECHNIQUE ) )
@@ -276,18 +282,23 @@ bool PassDeclarationOrIdentifier::IsIdentifier() const
 const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
 {
     assert( IsIdentifier() &&
-            "Can't get the identifier of a PassDeclarationOrIdentifier without an ideitifier" );
+            "Can't get the identifier of a PassDeclarationOrIdentifier without "
+            "an identifier" );
     return m_identifier;
 }
 
-const std::unique_ptr<PassDeclaration>& PassDeclarationOrIdentifier::GetDeclaration() const
+const std::unique_ptr<PassDeclaration>&
+                            PassDeclarationOrIdentifier::GetDeclaration() const
 {
     assert( !IsIdentifier() &&
-            "Can't get the declaration of a PassDeclarationOrIdentifier without a declaration" );
+            "Can't get the declaration of a PassDeclarationOrIdentifier "
+            "without a declaration" );
     return m_declaration;
 }
 
-bool PassDeclarationOrIdentifier::Parse( Parser& parser, std::unique_ptr<PassDeclarationOrIdentifier>& token )
+bool PassDeclarationOrIdentifier::Parse(
+                           Parser& parser,
+                           std::unique_ptr<PassDeclarationOrIdentifier>& token )
 {
     std::string identifier;
     // Try to parse an identifier into identifier

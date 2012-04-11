@@ -76,7 +76,9 @@ bool Parser::Parse ( const std::string& string )
         std::cout << "Expected one of: ";
         for( TerminalType expected_terminal : m_expectedTerminals )
         {
-            std::cout << "\'" << Compiler::GetTerminalString( expected_terminal ) << "\', ";
+            std::cout << "\'"
+                      << Compiler::GetTerminalString( expected_terminal )
+                      << "\', ";
         }
         std::string next_terminal;
         m_lexer->PeekNextTerminal( next_terminal );

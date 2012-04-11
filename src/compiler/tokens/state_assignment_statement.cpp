@@ -47,15 +47,18 @@ namespace Compiler
 //------------------------------------------------------------------------------
 // StateAssignmentStatement
 //------------------------------------------------------------------------------
-StateAssignmentStatement::StateAssignmentStatement( std::string identifier,
-                                                    std::unique_ptr< Expression > expression )
+StateAssignmentStatement::StateAssignmentStatement(
+                                    std::string identifier,
+                                    std::unique_ptr< Expression > expression )
     :m_identifier( std::move(identifier) )
     ,m_expression( std::move(expression) )
 {
     assert( !m_identifier.empty() &&
-            "Trying to create a StateAssignmentStatement with an empty state name" );
+            "Trying to create a StateAssignmentStatement with an empty state "
+            "name" );
     assert( m_expression &&
-            "Trying to create a StateAssignmentStatement with a null expression" );
+            "Trying to create a StateAssignmentStatement with a null "
+            "expression" );
 }
 
 StateAssignmentStatement::~StateAssignmentStatement()
@@ -70,8 +73,9 @@ void StateAssignmentStatement::Print( int depth ) const
     m_expression->Print( depth + 1 );
 }
 
-bool StateAssignmentStatement::Parse( Parser& parser,
-                                      std::unique_ptr<StateAssignmentStatement>& token )
+bool StateAssignmentStatement::Parse(
+                              Parser& parser,
+                              std::unique_ptr<StateAssignmentStatement>& token )
 {
     // Read the state identifier
     std::string identifier;

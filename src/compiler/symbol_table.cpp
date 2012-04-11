@@ -45,7 +45,8 @@ namespace Compiler
 
 SymbolTable::~SymbolTable()
 {
-    assert( m_symbolStack.size() == 0 && "The symbol table is still inside a scope" );
+    assert( m_symbolStack.size() == 0 &&
+            "The symbol table is still inside a scope" );
 }
 
 void SymbolTable::EnterScope()
@@ -76,7 +77,8 @@ bool SymbolTable::GetConstant( std::string identifier,
 bool SymbolTable::AddConstant( std::string identifier,
                                std::shared_ptr<LiteralExpression> constant )
 {
-    return m_symbolStack.rbegin()->m_constants.insert( std::make_pair( identifier, std::move(constant) ) ).second;
+    return m_symbolStack.rbegin()->m_constants.insert(
+                    std::make_pair(identifier, std::move(constant)) ).second;
 }
 
 bool SymbolTable::HasTechniqueName( const std::string& name ) const

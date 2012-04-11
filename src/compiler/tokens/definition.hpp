@@ -130,7 +130,8 @@ public:
       *   true upon parsing successfully
       *   false if the parse failed
       */
-    static bool Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token );
+    static bool Parse( Parser& parser,
+                       std::unique_ptr<TechniqueDefinition>& token );
 
 private:
     PassDeclarationVector m_passes;

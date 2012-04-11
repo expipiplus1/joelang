@@ -68,7 +68,8 @@ void PassDefinition::Print( int depth ) const
         s->Print( depth );
 }
 
-bool PassDefinition::Parse( Parser& parser, std::unique_ptr<PassDefinition>& token )
+bool PassDefinition::Parse( Parser& parser,
+                            std::unique_ptr<PassDefinition>& token )
 {
     // The definition starts with an open brace
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
@@ -97,7 +98,8 @@ TechniqueDefinition::TechniqueDefinition( PassDeclarationVector passes )
 {
     for( const auto& p : m_passes )
         assert( p &&
-                "null PassDeclarationOrIdentifier given to TechniqueDefinition" );
+                "null PassDeclarationOrIdentifier given to "
+                "TechniqueDefinition" );
 }
 
 TechniqueDefinition::~TechniqueDefinition()
@@ -111,7 +113,8 @@ void TechniqueDefinition::Print( int depth ) const
 }
 
 
-bool TechniqueDefinition::Parse( Parser& parser, std::unique_ptr<TechniqueDefinition>& token )
+bool TechniqueDefinition::Parse( Parser& parser,
+                                 std::unique_ptr<TechniqueDefinition>& token )
 {
     // Start with an open brace
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )

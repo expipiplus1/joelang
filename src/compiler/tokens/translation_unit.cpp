@@ -65,12 +65,14 @@ void TranslationUnit::Print( int depth ) const
         declaration->Print( depth + 1 );
 }
 
-const TranslationUnit::DeclarationVector& TranslationUnit::GetDeclarations() const
+const TranslationUnit::DeclarationVector&
+                                        TranslationUnit::GetDeclarations() const
 {
     return m_declarations;
 }
 
-bool TranslationUnit::Parse( Parser& parser, std::unique_ptr<TranslationUnit>& token )
+bool TranslationUnit::Parse( Parser& parser,
+                             std::unique_ptr<TranslationUnit>& token )
 {
     // Parse all of the top level declarations in the file
     DeclarationVector declarations;

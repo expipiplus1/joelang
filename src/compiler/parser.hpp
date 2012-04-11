@@ -63,7 +63,7 @@ public:
       */
     bool                                    Parse( const std::string& string );
 
-    /** \returns the parsed CST or null if no successful parse has taken place **/
+    /** \returns the parsed CST or null if we haven't parsed a TU **/
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
 
     /** Call to indicate that an error has occured during parsing **/
