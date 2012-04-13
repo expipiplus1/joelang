@@ -42,8 +42,8 @@ namespace JoeLang
 {
 
 Effect::Effect( std::vector<Technique> techniques, std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine )
-    :m_techniques( std::move( techniques ) )
-    ,m_llvmExecutionEngine( std::move( llvm_execution_engine ) )
+    :m_techniques( std::move(techniques) )
+    ,m_llvmExecutionEngine( std::move(llvm_execution_engine) )
 {
 }
 
