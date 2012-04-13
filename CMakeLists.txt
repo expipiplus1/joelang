@@ -7,7 +7,7 @@ else() #clang
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -ftemplate-backtrace-limit=0")
 
 find_package( LLVM REQUIRED )
 
@@ -29,6 +29,7 @@ add_executable( joelang src/joelang.cpp
                         src/engine/state-inl.hpp
                         src/engine/internal/type_properties.cpp
                         src/engine/internal/type_properties.hpp
+                        src/compiler/casting.hpp
                         src/compiler/code_generator.cpp
                         src/compiler/code_generator.hpp
                         src/compiler/effect_factory.cpp
@@ -38,6 +39,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/parser.cpp
                         src/compiler/parser.hpp
                         src/compiler/parser-inl.hpp
+                        src/compiler/sema_analyzer.cpp
+                        src/compiler/sema_analyzer.hpp
                         src/compiler/symbol_table.cpp
                         src/compiler/symbol_table.hpp
                         src/compiler/terminal_types.cpp

@@ -32,6 +32,7 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
 #include <engine/effect.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 
@@ -56,7 +57,11 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
     ast->Print(0);
 
+    SemaAnalyzer a;
+    a.BuildAst( *ast );
+
     return nullptr;
+
     std::vector<Technique> techniques;
     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 

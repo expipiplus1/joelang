@@ -33,6 +33,7 @@
 #include <memory>
 #include <vector>
 
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -54,6 +55,12 @@ TranslationUnit::TranslationUnit( DeclarationVector declarations )
 
 TranslationUnit::~TranslationUnit()
 {
+}
+
+void TranslationUnit::PerformSema( SemaAnalyzer& sema )
+{
+    for( const auto& d : m_declarations )
+        d->PerformSema( sema );
 }
 
 void TranslationUnit::Print( int depth ) const

@@ -36,6 +36,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -59,6 +60,10 @@ PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
 }
 
 PassDefinition::~PassDefinition()
+{
+}
+
+void PassDefinition::PerformSema( SemaAnalyzer& ast_buider )
 {
 }
 
@@ -104,6 +109,23 @@ TechniqueDefinition::TechniqueDefinition( PassDeclarationVector passes )
 
 TechniqueDefinition::~TechniqueDefinition()
 {
+}
+
+void TechniqueDefinition::PerformSema( SemaAnalyzer& sema )
+{
+    for( auto& p : m_passes )
+    {
+        if( p->IsIdentifier() )
+        {
+            if( !sema.HasPass( p->GetIdentifier() ) )
+                sema.Error( "Undeclared pass used: " +
+                                   p->GetIdentifier() );
+        }
+        else
+        {
+            p->GetDeclaration().PerformSema( sema );
+        }
+    }
 }
 
 void TechniqueDefinition::Print( int depth ) const

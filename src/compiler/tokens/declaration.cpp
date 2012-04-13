@@ -36,6 +36,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -49,6 +50,11 @@ namespace Compiler
 //------------------------------------------------------------------------------
 // DeclarationBase
 //------------------------------------------------------------------------------
+
+DeclarationBase::DeclarationBase( DeclarationTy sub_class_id )
+    :m_subClassID( sub_class_id )
+{
+}
 
 DeclarationBase::~DeclarationBase()
 {
@@ -70,15 +76,32 @@ bool DeclarationBase::Parse( Parser& parser,
     return true;
 }
 
+DeclarationBase::DeclarationTy DeclarationBase::GetSubClassID() const
+{
+    return m_subClassID;
+}
+
+// A DeclarationBase is always a DeclarationBase
+bool DeclarationBase::classof( const DeclarationBase* d )
+{
+    return true;
+}
+
+
 //------------------------------------------------------------------------------
 // EmptyDeclaration
 //------------------------------------------------------------------------------
 
 EmptyDeclaration::EmptyDeclaration()
+    :DeclarationBase( DeclarationTy::EmptyDeclaration )
 {
 }
 
 EmptyDeclaration::~EmptyDeclaration()
+{
+}
+
+void EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
 {
 }
 
@@ -100,19 +123,35 @@ bool EmptyDeclaration::Parse( Parser& parser,
     return true;
 }
 
+bool EmptyDeclaration::classof( const DeclarationBase* d )
+{
+    return d->GetSubClassID() == DeclarationTy::EmptyDeclaration;
+}
+
+bool EmptyDeclaration::classof( const EmptyDeclaration* d )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // PassDeclaration
 //------------------------------------------------------------------------------
 
 PassDeclaration::PassDeclaration( std::string name,
                                   std::unique_ptr<PassDefinition> definition )
-    :m_name         ( std::move(name) )
+    :DeclarationBase( DeclarationTy::PassDeclaration )
+    ,m_name         ( std::move(name) )
     ,m_definition   ( std::move(definition) )
 {
 }
 
 PassDeclaration::~PassDeclaration()
 {
+}
+
+void PassDeclaration::PerformSema( SemaAnalyzer& sema )
+{
+    sema.DeclarePass( m_name, std::move(m_definition) );
 }
 
 const std::string& PassDeclaration::GetName() const
@@ -179,6 +218,16 @@ bool PassDeclaration::Parse( Parser& parser,
     return true;
 }
 
+bool PassDeclaration::classof( const DeclarationBase* d )
+{
+    return d->GetSubClassID() == DeclarationTy::PassDeclaration;
+}
+
+bool PassDeclaration::classof( const PassDeclaration* d )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // TechniqueDeclaration
 //------------------------------------------------------------------------------
@@ -186,7 +235,8 @@ bool PassDeclaration::Parse( Parser& parser,
 TechniqueDeclaration::TechniqueDeclaration(
                                std::string name,
                                std::unique_ptr<TechniqueDefinition> definition )
-    :m_name( std::move( name ) )
+    :DeclarationBase( DeclarationTy::TechniqueDeclaration )
+    ,m_name( std::move( name ) )
     ,m_definition( std::move( definition ) )
 {
     assert( m_definition && "TechniqueDeclaration given a null definition" );
@@ -194,6 +244,12 @@ TechniqueDeclaration::TechniqueDeclaration(
 
 TechniqueDeclaration::~TechniqueDeclaration()
 {
+}
+
+void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
+{
+    sema.DeclareTechnique( m_name );
+    m_definition->PerformSema( sema );
 }
 
 const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
@@ -238,6 +294,16 @@ bool TechniqueDeclaration::Parse( Parser& parser,
 
     token.reset( new TechniqueDeclaration( std::move(name),
                                            std::move(definition) ) );
+    return true;
+}
+
+bool TechniqueDeclaration::classof( const DeclarationBase* d )
+{
+    return d->GetSubClassID() == DeclarationTy::TechniqueDeclaration;
+}
+
+bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
+{
     return true;
 }
 
@@ -287,13 +353,20 @@ const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
     return m_identifier;
 }
 
-const std::unique_ptr<PassDeclaration>&
-                            PassDeclarationOrIdentifier::GetDeclaration() const
+const PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration() const
 {
-    assert( !IsIdentifier() &&
+    assert( m_declaration &&
             "Can't get the declaration of a PassDeclarationOrIdentifier "
             "without a declaration" );
-    return m_declaration;
+    return *m_declaration;
+}
+
+PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration()
+{
+    assert( m_declaration &&
+            "Can't get the declaration of a PassDeclarationOrIdentifier "
+            "without a declaration" );
+    return *m_declaration;
 }
 
 bool PassDeclarationOrIdentifier::Parse(

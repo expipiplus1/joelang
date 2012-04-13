@@ -40,6 +40,7 @@ namespace JoeLang
 namespace Compiler
 {
 
+class SemaAnalyzer;
 class Parser;
 class PassDefinition;
 class TechniqueDefinition;
@@ -56,8 +57,25 @@ class TechniqueDefinition;
 class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
+    enum class DeclarationTy
+    {
+        EmptyDeclaration,
+        PassDeclaration,
+        TechniqueDeclaration
+    };
+
+    DeclarationBase( DeclarationTy sub_class_id );
     virtual
     ~DeclarationBase    ();
+
+    /**
+      * Performs semantic ananysis on the declaration
+      * \param sema
+      *   The AstBuilder which contains the symbol table and things
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) = 0;
+
 
     /**
       * Parses any top level declaration
@@ -72,6 +90,16 @@ public:
     static
     bool Parse          ( Parser&                           parser,
                           std::unique_ptr<DeclarationBase>& token );
+
+    /** Used for casting **/
+    DeclarationTy GetSubClassID() const;
+    /** Used for casting **/
+    static
+    bool classof( const DeclarationBase* d );
+
+private:
+    // Subclass identifier for casts
+    const DeclarationTy m_subClassID;
 };
 
 /**
@@ -87,6 +115,15 @@ public:
     EmptyDeclaration    ();
     virtual
     ~EmptyDeclaration   ();
+
+    /**
+      * Performs semantic ananysis on the declaration
+      * This function does nothing
+      * \param sema
+      *   The AstBuilder which contains the symbol table and things
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     /**
       * Prints this node in the CST
@@ -109,6 +146,11 @@ public:
     static
     bool Parse          ( Parser&                            parser,
                           std::unique_ptr<EmptyDeclaration>& token );
+
+    static
+    bool classof( const DeclarationBase* d );
+    static
+    bool classof( const EmptyDeclaration* e );
 };
 
 /**
@@ -133,6 +175,14 @@ public:
 
     virtual
     ~PassDeclaration();
+
+    /**
+      * Performs semantic ananysis on the declaration
+      * \param sema
+      *   The AstBuilder which contains the symbol table and things
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     /**
       * Prints this node in the CST
@@ -164,6 +214,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<PassDeclaration>& token );
 
+    static
+    bool classof( const DeclarationBase* d );
+    static
+    bool classof( const PassDeclaration* e );
 private:
     /** This pass declaration's identifier **/
     std::string                     m_name;
@@ -194,6 +248,14 @@ public:
     virtual
     ~TechniqueDeclaration();
 
+    /**
+      * Performs semantic ananysis on the declaration
+      * \param sema
+      *   The AstBuilder which contains the symbol table and things
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
     /** \returns this technique's definition **/
     const TechniqueDefinition& GetDefinition() const;
 
@@ -218,6 +280,10 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<TechniqueDeclaration>& token );
 
+    static
+    bool classof( const DeclarationBase* d );
+    static
+    bool classof( const TechniqueDeclaration* e );
 private:
     /** This technique's identifier **/
     std::string m_name;
@@ -261,13 +327,14 @@ public:
     void    Print   ( int depth ) const override;
 
     /** \returns if this token is an identifier for a pass **/
-    bool                                    IsIdentifier    () const;
+    bool                   IsIdentifier    () const;
     /** This funciton will assert if this token represents a declaration
       * \returns this token's identifier **/
-    const std::string&                      GetIdentifier   () const;
+    const std::string&     GetIdentifier   () const;
     /** This function will assert if this token represents an identifier
       * \returns this token's declaration **/
-    const std::unique_ptr<PassDeclaration>& GetDeclaration  () const;
+    const PassDeclaration& GetDeclaration  () const;
+    PassDeclaration&       GetDeclaration  ();
 
     /**
       * Parses a pass declaration or identifier

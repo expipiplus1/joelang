@@ -39,6 +39,7 @@ namespace JoeLang
 namespace Compiler
 {
 
+class SemaAnalyzer;
 class Parser;
 class PassDeclarationOrIdentifier;
 class StateAssignmentStatement;
@@ -65,6 +66,11 @@ public:
 
     virtual
     ~PassDefinition ();
+
+    /**
+      * Performs semantic analysis on all the stateassignments
+      */
+    void PerformSema( SemaAnalyzer& sema );
 
     /**
       * Prints this node in the CST
@@ -109,6 +115,8 @@ public:
       *   A vector of pass declarations or identifiers
       */
     TechniqueDefinition( PassDeclarationVector passes );
+
+    void PerformSema( SemaAnalyzer& sema );
 
     virtual
     ~TechniqueDefinition();

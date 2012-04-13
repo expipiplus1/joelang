@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,81 +29,78 @@
 
 #pragma once
 
+#include <map>
+#include <string>
 #include <memory>
+#include <utility>
 #include <vector>
-
-#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
-
 namespace Compiler
 {
 
-class SemaAnalyzer;
-class DeclarationBase;
-class Parser;
+class PassDefinition;
+class TechniqueDefinition;
+class TranslationUnit;
 
 /**
-  * \class TranslationUnit
-  * \ingroup Tokens
-  * \brief Matches a whole translation unit
-  *
-  * TranslationUnit = (DeclarationBase)* EOF
+  * \class AstBuilder
+  * \brief A class to perform semantic analysis on the AST
+  *   suitable for code generation
   */
-class TranslationUnit : public JoeLang::Compiler::Token
+class SemaAnalyzer
 {
 public:
-    using DeclarationVector = std::vector< std::unique_ptr<DeclarationBase> >;
+    SemaAnalyzer();
+    ~SemaAnalyzer();
+
+    bool BuildAst( TranslationUnit& cst );
 
     /**
-      * This constructor asserts on any null declaration
-      * \param declarations
-      *   A vector of the top level declarations that appear in this translation
-      *   unit
+      * Declare and optionally define a pass.
+      * This will error if one tries to define an already defined pass
+      * \param name
+      *   The name of the pass to be declared
+      * \param definition
+      *   The definition of the pass if it has one, otherwise nullptr
       */
-    TranslationUnit( DeclarationVector declarations );
-    virtual
-    ~TranslationUnit();
+    void DeclarePass( std::string name,
+                      std::unique_ptr<PassDefinition> definition );
 
     /**
-      * Perform semantic analysis on the translation unit and all the
-      * declarations
-      * \param sema
-      *   The sema to contain the symbol table and other things
+      * Declare and define a technique.
+      * This will error if one tries to declare an already declared technique
+      * \param name
+      *   The name of the technique to be declared
       */
-    void PerformSema( SemaAnalyzer& sema );
+    void DeclareTechnique( std::string name );
 
     /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
+      * Check to see if a pass has been declared
+      * \param name
+      *   The name of the pass
+      * \returns true if the pass has been declared
       */
-    virtual
-    void Print( int depth = 0 ) const override;
-
-    /** \returns The top level declarations of this translation unit **/
-    const DeclarationVector& GetDeclarations() const;
+    bool HasPass( const std::string& name );
 
     /**
-      * Parses a translation unit
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \returns
-      *   true upon parsing successfully,
-      *   false if the parse failed
+      * Reports an error.
+      * Sets m_good to false
+      * \param error_message
+      *   The error message
       */
-    static
-    bool Parse( Parser& parser,
-                std::unique_ptr<TranslationUnit>& token );
+    void Error( const std::string& error_message );
 
 private:
-    /** The vector of all the top level declarations **/
-    DeclarationVector m_declarations;
+    using PassDefinitionMap = std::map<std::string,
+                                       std::unique_ptr<PassDefinition> >;
+
+    PassDefinitionMap        m_passDefinitions;
+    std::vector<std::string> m_techniques;
+
+    bool m_good = true;
 };
 
 } // namespace Compiler
 } // namespace JoeLang
-
