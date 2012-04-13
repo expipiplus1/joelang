@@ -33,8 +33,6 @@
 #include <string>
 #include <vector>
 
-#include <engine/state_assignment.hpp>
-
 namespace JoeLang
 {
 
@@ -48,6 +46,7 @@ public:
     Pass( std::string name );
     Pass( std::string name,
           std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
+    ~Pass();
 
     void SetState() const;
     void ResetState() const;

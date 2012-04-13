@@ -54,6 +54,10 @@ Pass::Pass( std::string name,
         assert( sa && "null state assignment given to Pass" );
 }
 
+Pass::~Pass()
+{
+}
+
 void Pass::SetState() const
 {
     for( const auto& sa : m_stateAssignments )
