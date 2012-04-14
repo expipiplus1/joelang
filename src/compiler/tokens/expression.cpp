@@ -46,6 +46,7 @@
 #include <engine/internal/type_properties.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -64,6 +65,11 @@ Expression::Expression()
 
 Expression::~Expression()
 {
+}
+
+void Expression::PerformSema( SemaAnalyzer& sema )
+{
+    assert( false && "remove this function" );
 }
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )

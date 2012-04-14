@@ -36,6 +36,7 @@
 #include <utility>
 
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
 
@@ -63,6 +64,14 @@ StateAssignmentStatement::StateAssignmentStatement(
 
 StateAssignmentStatement::~StateAssignmentStatement()
 {
+}
+
+void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
+{
+    if( !sema.HasState( m_identifier ) )
+        sema.Error( "Undeclared state: " + m_identifier );
+    // TODO cast to state type here
+    m_expression->PerformSema( sema );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

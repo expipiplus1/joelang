@@ -63,8 +63,10 @@ PassDefinition::~PassDefinition()
 {
 }
 
-void PassDefinition::PerformSema( SemaAnalyzer& ast_buider )
+void PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
+    for( auto& s : m_stateAssignments )
+        s->PerformSema( sema );
 }
 
 void PassDefinition::Print( int depth ) const

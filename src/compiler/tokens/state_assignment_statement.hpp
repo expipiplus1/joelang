@@ -41,6 +41,7 @@ namespace Compiler
 
 class Expression;
 class Parser;
+class SemaAnalyzer;
 
 /**
   * \class StateAssignmentStatement
@@ -63,6 +64,8 @@ public:
                               std::unique_ptr<Expression> expression );
     virtual
     ~StateAssignmentStatement();
+
+    void PerformSema( SemaAnalyzer& sema );
 
     /**
       * Prints this node in the CST

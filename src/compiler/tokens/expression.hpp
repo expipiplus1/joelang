@@ -49,6 +49,7 @@ namespace JoeLang
         enum class TerminalType;
 
         class Parser;
+        class SemaAnalyzer;
 
         class AssignmentOperator;
         class PostfixOperator;
@@ -81,6 +82,9 @@ public:
     Expression( );
     virtual
     ~Expression();
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema );
 
     /**
       * Parses any expression
