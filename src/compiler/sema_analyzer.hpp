@@ -85,6 +85,14 @@ public:
     bool HasPass( const std::string& name );
 
     /**
+      * Check to see if a state has been given to context
+      * \param name
+      *   The name of the state
+      * \returns true if the state has been declared
+      */
+    bool HasState( const std::string& name );
+
+    /**
       * Reports an error.
       * Sets m_good to false
       * \param error_message

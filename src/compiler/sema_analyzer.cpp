@@ -98,6 +98,11 @@ bool SemaAnalyzer::HasPass( const std::string& name )
     return m_passDefinitions.count( name ) > 0;
 }
 
+bool SemaAnalyzer::HasState( const std::string& name )
+{
+    return false;
+}
+
 void SemaAnalyzer::Error( const std::string& error_message )
 {
     m_good = false;
