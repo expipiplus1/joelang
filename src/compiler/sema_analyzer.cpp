@@ -40,13 +40,15 @@
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
+#include <engine/context.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-SemaAnalyzer::SemaAnalyzer()
+SemaAnalyzer::SemaAnalyzer( const Context& context )
+    :m_context( context )
 {
 }
 
@@ -100,7 +102,7 @@ bool SemaAnalyzer::HasPass( const std::string& name )
 
 bool SemaAnalyzer::HasState( const std::string& name )
 {
-    return false;
+    return m_context.GetNamedState( name ) != nullptr;
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )

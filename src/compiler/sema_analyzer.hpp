@@ -37,6 +37,9 @@
 
 namespace JoeLang
 {
+
+class Context;
+
 namespace Compiler
 {
 
@@ -52,7 +55,8 @@ class TranslationUnit;
 class SemaAnalyzer
 {
 public:
-    SemaAnalyzer();
+    explicit
+    SemaAnalyzer( const Context& context );
     ~SemaAnalyzer();
 
     bool BuildAst( TranslationUnit& cst );
@@ -108,6 +112,8 @@ private:
     std::vector<std::string> m_techniques;
 
     bool m_good = true;
+
+    const Context& m_context;
 };
 
 } // namespace Compiler
