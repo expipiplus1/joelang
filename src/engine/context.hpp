@@ -53,6 +53,7 @@ public:
 
     bool AddState( StateBase* state );
     const StateBase* GetNamedState( const std::string& name ) const;
+    const std::vector<StateBase*>& GetStates() const;
 
     void SetErrorCallback( std::function<void(std::string)> error_callback );
     const std::function<void(std::string)>& GetErrorCallback() const;
