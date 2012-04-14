@@ -39,8 +39,10 @@
 #include <compiler/casting.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
+#include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <engine/context.hpp>
+#include <engine/state.hpp>
 
 namespace JoeLang
 {
@@ -54,6 +56,8 @@ SemaAnalyzer::SemaAnalyzer( const Context& context )
 
 SemaAnalyzer::~SemaAnalyzer()
 {
+    assert( m_symbolStack.size() == 0 &&
+            "The symbol table is still inside a scope" );
 }
 
 bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
@@ -95,22 +99,151 @@ void SemaAnalyzer::DeclareTechnique( std::string name )
     m_techniques.push_back( std::move(name) );
 }
 
-bool SemaAnalyzer::HasPass( const std::string& name )
+bool SemaAnalyzer::HasPass( const std::string& name ) const
 {
     return m_passDefinitions.count( name ) > 0;
 }
 
-bool SemaAnalyzer::HasState( const std::string& name )
+bool SemaAnalyzer::HasState( const std::string& name ) const
 {
     return m_context.GetNamedState( name ) != nullptr;
 }
 
+const StateBase* SemaAnalyzer::GetState( const std::string& name ) const
+{
+    return m_context.GetNamedState( name );
+}
+
+std::map<std::string, std::shared_ptr<LiteralExpression> >
+    GetLiteralValueEnumerantMap( const StateBase& state_base )
+{
+    std::map<std::string, std::shared_ptr<LiteralExpression> > ret;
+    switch( state_base.GetType() )
+    {
+    case Type::BOOL:
+        for( const auto& e :
+             static_cast<const State<jl_bool>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<BooleanLiteralExpression>( e.second );
+        break;
+    case Type::FLOAT:
+        for( const auto& e :
+             static_cast<const State<jl_float>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<FloatingLiteralExpression>(
+                                    e.second,
+                                    FloatingLiteralExpression::Suffix::SINGLE );
+        break;
+    case Type::DOUBLE:
+        for( const auto& e :
+             static_cast<const State<jl_double>&>(state_base).GetEnumerations())
+            ret[e.first] =
+                    std::make_shared<FloatingLiteralExpression>(
+                                    e.second,
+                                    FloatingLiteralExpression::Suffix::NONE );
+        break;
+    case Type::I8:
+        for( const auto& e :
+             static_cast<const State<jl_i8>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                                    e.second,
+                                    IntegerLiteralExpression::Suffix::CHAR );
+        break;
+    case Type::I16:
+        for( const auto& e :
+             static_cast<const State<jl_i16>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                                    e.second,
+                                    IntegerLiteralExpression::Suffix::SHORT );
+        break;
+    case Type::I32:
+        for( const auto& e :
+             static_cast<const State<jl_i32>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                                    e.second,
+                                    IntegerLiteralExpression::Suffix::INT );
+        break;
+    case Type::I64:
+        for( const auto& e :
+             static_cast<const State<jl_i64>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                                    e.second,
+                                    IntegerLiteralExpression::Suffix::LONG );
+        break;
+    case Type::U8:
+        for( const auto& e :
+             static_cast<const State<jl_u8>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                            e.second,
+                            IntegerLiteralExpression::Suffix::UNSIGNED_CHAR );
+        break;
+    case Type::U16:
+        for( const auto& e :
+             static_cast<const State<jl_u16>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                            e.second,
+                            IntegerLiteralExpression::Suffix::UNSIGNED_SHORT );
+    break;
+    case Type::U32:
+        for( const auto& e :
+             static_cast<const State<jl_u32>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                            e.second,
+                            IntegerLiteralExpression::Suffix::UNSIGNED_INT );
+        break;
+    case Type::U64:
+        for( const auto& e :
+             static_cast<const State<jl_u64>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<IntegerLiteralExpression>(
+                            e.second,
+                            IntegerLiteralExpression::Suffix::UNSIGNED_LONG );
+        break;
+    case Type::STRING:
+        for( const auto& e :
+             static_cast<const State<jl_string>&>(state_base).GetEnumerations() )
+            ret[e.first] =
+                    std::make_shared<StringLiteralExpression>( e.second );
+        break;
+    default:
+        assert( false && "state_base is of an unhandled type" );
+    }
+    return ret;
+}
+
+void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
+{
+    // TODO cache these results
+    for( auto& v : GetLiteralValueEnumerantMap(state) )
+        DeclareVariable( v.first, v.second );
+}
+
+void SemaAnalyzer::DeclareVariable( std::string identifier,
+                                    std::shared_ptr<Expression> value )
+{
+    // TODO warning if variable shadows something
+
+    //If the value wasn't inserted
+    if( !m_symbolStack.rbegin()->m_variables.insert(
+            std::make_pair( std::move(identifier), std::move(value) ) ).second )
+        Error( "Duplicate definition of variable: " + identifier );
+}
+
 void SemaAnalyzer::EnterScope()
 {
+    m_symbolStack.resize( m_symbolStack.size() + 1 );
 }
 
 void SemaAnalyzer::LeaveScope()
 {
+    m_symbolStack.pop_back();
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )

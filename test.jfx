@@ -6,7 +6,7 @@ technique t1
     {
         my_int_state = 5l;
         my_bool_state = 1ul;
-        //my_string_state = string_enumerant;
+        my_string_state = string_enumerant;
     }
 
     pass p2

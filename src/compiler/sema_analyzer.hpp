@@ -39,10 +39,12 @@ namespace JoeLang
 {
 
 class Context;
+class StateBase;
 
 namespace Compiler
 {
 
+class Expression;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
@@ -86,7 +88,7 @@ public:
       *   The name of the pass
       * \returns true if the pass has been declared
       */
-    bool HasPass( const std::string& name );
+    bool HasPass( const std::string& name ) const;
 
     /**
       * Check to see if a state has been given to context
@@ -94,7 +96,32 @@ public:
       *   The name of the state
       * \returns true if the state has been declared
       */
-    bool HasState( const std::string& name );
+    bool HasState( const std::string& name ) const;
+
+    /**
+      * Gets the named state or nullptr
+      * \param name
+      *   The name of the state to get
+      * \returns the named state or nullptr if there is no state by that name
+      */
+    const StateBase* GetState( const std::string& name ) const;
+
+    /**
+      * Puts the state's enumerants into the scope as constant variables
+      * \param state
+      *   The state from which to load the enumerants
+      */
+    void LoadStateEnumerants( const StateBase& state );
+
+    /**
+      * Declares a variable with an optional value
+      * \param identifier
+      *   The identifier for the variable
+      * \param value
+      *   The optional init value
+      */
+    void DeclareVariable( std::string identifier,
+                          std::shared_ptr<Expression> value = nullptr );
 
     /**
       * Creates a new scope on the scope stack
@@ -115,11 +142,18 @@ public:
     void Error( const std::string& error_message );
 
 private:
+    struct SymbolMaps
+    {
+        std::map<std::string, std::shared_ptr<Expression> > m_variables;
+    };
+
     using PassDefinitionMap = std::map<std::string,
                                        std::unique_ptr<PassDefinition> >;
 
     PassDefinitionMap        m_passDefinitions;
     std::vector<std::string> m_techniques;
+
+    std::vector<SymbolMaps>  m_symbolStack;
 
     bool m_good = true;
 

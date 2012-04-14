@@ -824,7 +824,8 @@ private:
   *
   * LiteralExpression =   IntegerLiteralExpression
   *                     | FloatingLiteralExpression
-  *                     | StringLiteralExpression
+  *                     | StringLiteralExpressionon
+  *                     | CharacterLiteralExpression
   *                     | BooleanLiteralExpression
   */
 class LiteralExpression : public JoeLang::Compiler::Expression

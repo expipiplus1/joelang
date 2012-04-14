@@ -68,10 +68,18 @@ StateAssignmentStatement::~StateAssignmentStatement()
 
 void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
-    if( !sema.HasState( m_identifier ) )
+    sema.EnterScope();
+
+    const StateBase* state = sema.GetState( m_identifier );
+    if( !state )
         sema.Error( "Undeclared state: " + m_identifier );
+    else
+        sema.LoadStateEnumerants( *state );
+
     // TODO cast to state type here
     m_expression->PerformSema( sema );
+
+    sema.LeaveScope();
 }
 
 void StateAssignmentStatement::Print( int depth ) const
