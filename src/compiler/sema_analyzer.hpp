@@ -97,6 +97,16 @@ public:
     bool HasState( const std::string& name );
 
     /**
+      * Creates a new scope on the scope stack
+      */
+    void EnterScope();
+
+    /**
+      * Pops the innermost scope from the stack
+      */
+    void LeaveScope();
+
+    /**
       * Reports an error.
       * Sets m_good to false
       * \param error_message

@@ -105,6 +105,14 @@ bool SemaAnalyzer::HasState( const std::string& name )
     return m_context.GetNamedState( name ) != nullptr;
 }
 
+void SemaAnalyzer::EnterScope()
+{
+}
+
+void SemaAnalyzer::LeaveScope()
+{
+}
+
 void SemaAnalyzer::Error( const std::string& error_message )
 {
     m_good = false;
