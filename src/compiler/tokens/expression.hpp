@@ -834,6 +834,12 @@ public:
     virtual
     ~LiteralExpression();
 
+    /**
+      * Does nothing
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );

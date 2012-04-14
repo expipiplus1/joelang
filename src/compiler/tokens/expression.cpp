@@ -1091,6 +1091,10 @@ LiteralExpression::~LiteralExpression()
 {
 }
 
+void LiteralExpression::PerformSema( SemaAnalyzer& sema )
+{
+}
+
 bool LiteralExpression::Parse( Parser& parser,
                                std::unique_ptr<Expression>& token )
 {
