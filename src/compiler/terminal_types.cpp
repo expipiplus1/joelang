@@ -132,8 +132,14 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     { TerminalType::TECHNIQUE,    { "technique",  "" } },
     { TerminalType::PASS,         { "pass",       "" } },
 
+    //
+    // Types
+    //
     { TerminalType::TYPE_INT,     { "int",        "" } },
 
+    //
+    // Constants
+    //
     { TerminalType::TRUE,         { "true",       "" } },
     { TerminalType::FALSE,        { "false",      "" } }
 };
