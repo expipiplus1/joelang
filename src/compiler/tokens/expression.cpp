@@ -72,6 +72,11 @@ void Expression::PerformSema( SemaAnalyzer& sema )
     assert( false && "remove this function" );
 }
 
+Type Expression::GetReturnType() const
+{
+    assert( false && "remove this function" );
+}
+
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // TODO comma sep expressions
@@ -1143,6 +1148,32 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 {
 }
 
+Type IntegerLiteralExpression::GetReturnType() const
+{
+    // TODO vary type if something doesn't fit
+    switch( m_suffix )
+    {
+    case Suffix::CHAR:
+        return Type::I8;
+    case Suffix::INT:
+        return Type::I32;
+    case Suffix::SHORT:
+        return Type::I16;
+    case Suffix::LONG:
+        return Type::I64;
+    case Suffix::UNSIGNED_CHAR:
+        return Type::U8;
+    case Suffix::UNSIGNED_INT:
+        return Type::U32;
+    case Suffix::UNSIGNED_SHORT:
+        return Type::U16;
+    case Suffix::UNSIGNED_LONG:
+        return Type::U64;
+    default:
+        return Type::I32;
+    }
+}
+
 void IntegerLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1265,6 +1296,14 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 {
 }
 
+Type FloatingLiteralExpression::GetReturnType() const
+{
+    if( m_suffix == Suffix::SINGLE )
+        return Type::FLOAT;
+    else
+        return Type::DOUBLE;
+}
+
 void FloatingLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1326,6 +1365,11 @@ BooleanLiteralExpression::BooleanLiteralExpression( bool value )
 
 BooleanLiteralExpression::~BooleanLiteralExpression()
 {
+}
+
+Type BooleanLiteralExpression::GetReturnType() const
+{
+    return Type::BOOL;
 }
 
 void BooleanLiteralExpression::Print( int depth ) const
@@ -1422,6 +1466,11 @@ StringLiteralExpression::~StringLiteralExpression()
 {
 }
 
+Type StringLiteralExpression::GetReturnType() const
+{
+    return Type::STRING;
+}
+
 void StringLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1492,6 +1541,11 @@ CharacterLiteralExpression::CharacterLiteralExpression( char value )
 
 CharacterLiteralExpression::~CharacterLiteralExpression()
 {
+}
+
+Type CharacterLiteralExpression::GetReturnType() const
+{
+    return Type::I8;
 }
 
 void CharacterLiteralExpression::Print( int depth ) const

@@ -64,6 +64,7 @@ namespace Compiler
 /**
   * \defgroup Expressions
   * \ingroup Tokens
+    m_leftSide->PerformSema
   * Expressions parse part of expressions in statements.
   * The static member function Expression::Parse must take a pointer to the
   * abstract base class expression rather than to the more specific base class
@@ -85,6 +86,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema );
+
+    virtual
+    Type GetReturnType() const;
 
     /**
       * Parses any expression
@@ -892,6 +896,9 @@ public:
     ~IntegerLiteralExpression();
 
     virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -943,6 +950,9 @@ public:
     ~FloatingLiteralExpression();
 
     virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -984,6 +994,9 @@ public:
     ~BooleanLiteralExpression();
 
     virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -1007,6 +1020,9 @@ public:
     StringLiteralExpression( std::string value );
     virtual
     ~StringLiteralExpression();
+
+    virtual
+    Type GetReturnType() const override;
 
     virtual
     void Print( int depth ) const;
@@ -1048,6 +1064,9 @@ public:
     CharacterLiteralExpression( char value );
     virtual
     ~CharacterLiteralExpression();
+
+    virtual
+    Type GetReturnType() const override;
 
     virtual
     void Print( int depth ) const;
