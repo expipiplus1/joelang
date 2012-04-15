@@ -879,7 +879,7 @@ public:
       *   The integer suffix
       */
     explicit
-    IntegerLiteralExpression( long long value,
+    IntegerLiteralExpression( unsigned long long value,
                               Suffix suffix );
     virtual
     ~IntegerLiteralExpression();
@@ -903,10 +903,10 @@ private:
       */
     static
     bool ParseInteger( std::string string,
-                       long long&  value,
+                       unsigned long long&  value,
                        Suffix&     suffix );
 
-    long long m_value;
+    unsigned long long m_value;
     Suffix m_suffix;
 };
 

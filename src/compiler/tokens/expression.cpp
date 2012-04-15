@@ -1116,7 +1116,7 @@ bool LiteralExpression::Parse( Parser& parser,
 // IntegerlLiteralExpression
 //------------------------------------------------------------------------------
 
-IntegerLiteralExpression::IntegerLiteralExpression( long long value,
+IntegerLiteralExpression::IntegerLiteralExpression( unsigned long long value,
                                                     Suffix suffix )
     :m_value( value )
     ,m_suffix( suffix )
@@ -1135,7 +1135,7 @@ void IntegerLiteralExpression::Print( int depth ) const
 }
 
 bool IntegerLiteralExpression::ParseInteger( std::string string,
-                                             long long& value,
+                                             unsigned long long& value,
                                              Suffix& suffix )
 {
     if( string.empty() )
@@ -1224,7 +1224,7 @@ bool IntegerLiteralExpression::Parse(
     if( !parser.ExpectTerminal( TerminalType::INTEGER_LITERAL, string ) )
         return false;
 
-    long long value;
+    unsigned long long value;
     Suffix suffix;
 
     if( !ParseInteger( string, value, suffix ) )
