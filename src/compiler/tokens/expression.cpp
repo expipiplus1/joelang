@@ -707,6 +707,27 @@ UnaryExpression::~UnaryExpression()
 {
 }
 
+Type UnaryExpression::GetReturnType() const
+{
+    Type t = m_expression->GetReturnType();
+
+    switch( m_operator )
+    {
+    //TODO should plus perform integer promotion
+    //TODO check for bad type matching here?
+    case Op::PLUS:
+    case Op::MINUS:
+    case Op::INCREMENT:
+    case Op::DECREMENT:
+    case Op::BITWISE_NOT:
+        return t;
+    case Op::LOGICAL_NOT:
+        return Type::BOOL;
+    }
+    assert( false && "unreachable" );
+    return Type::UNKNOWN_TYPE;
+}
+
 void UnaryExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1072,6 +1093,13 @@ IdentifierExpression::IdentifierExpression( std::string identifier )
 
 IdentifierExpression::~IdentifierExpression()
 {
+}
+
+Type IdentifierExpression::GetReturnType() const
+{
+    if( m_readExpression )
+        return m_readExpression->GetReturnType();
+    return Type::UNKNOWN_TYPE;
 }
 
 void IdentifierExpression::PerformSema( SemaAnalyzer& sema )

@@ -590,6 +590,9 @@ public:
     ~UnaryExpression();
 
     virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -662,6 +665,7 @@ public:
   */
 class SubscriptOperator : public JoeLang::Compiler::PostfixOperator
 {
+
 public:
     /**
       * This constructor asserts on a null expression
@@ -812,6 +816,9 @@ public:
     IdentifierExpression( std::string identifier );
     virtual
     ~IdentifierExpression();
+
+    virtual
+    Type GetReturnType() const override;
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
