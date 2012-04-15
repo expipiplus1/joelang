@@ -532,7 +532,8 @@ public:
   * \ingroup Expressions
   * \brief Matches a c-style cast expression
   *
-  * This token is unimplemented and will just parse a UnaryExpression
+  * This token is unimplemented and will just parse a UnaryExpression.
+  * The class is used for representing casts though.
   *
   * CastExpression = '(' Type ')' UnaryExpression
   */
@@ -588,6 +589,9 @@ public:
                      std::unique_ptr<Expression> expression );
     virtual
     ~UnaryExpression();
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     Type GetReturnType() const override;

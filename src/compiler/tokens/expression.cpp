@@ -707,6 +707,16 @@ UnaryExpression::~UnaryExpression()
 {
 }
 
+void UnaryExpression::PerformSema( SemaAnalyzer& sema )
+{
+    m_expression->PerformSema( sema );
+    Type t = m_expression->GetReturnType();
+    if( t == Type::STRING )
+        sema.Error( "Invalid type to unary operator string" );
+    else if( t == Type::UNKNOWN_TYPE )
+        sema.Error( "Invalid type to unary operator unknown_type" );
+}
+
 Type UnaryExpression::GetReturnType() const
 {
     Type t = m_expression->GetReturnType();
