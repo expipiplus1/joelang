@@ -143,10 +143,9 @@ bool AssignmentExpression::Parse( Parser& parser,
     if( !parser.Expect< AssignmentExpression >( assignment_expression ) )
         return false;
 
-    token.reset( new AssignmentExpression(
-                                        std::move( lhs_expression ),
-                                        std::move( assignment_operator ),
-                                        std::move( assignment_expression ) ) );
+    token.reset( new AssignmentExpression( std::move(lhs_expression),
+                                           std::move(assignment_operator),
+                                           std::move(assignment_expression) ) );
     return true;
 }
 
@@ -1052,12 +1051,20 @@ bool PrimaryExpression::Parse( Parser& parser,
 
 IdentifierExpression::IdentifierExpression( std::string identifier )
     :m_identifier( std::move( identifier ) )
+    ,m_readExpression( nullptr )
 {
     assert( !m_identifier.empty() );
 }
 
 IdentifierExpression::~IdentifierExpression()
 {
+}
+
+void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
+{
+    m_readExpression = sema.GetVariable( m_identifier );
+    if( !m_readExpression )
+        sema.Error( "Undeclared variable: " + m_identifier );
 }
 
 void IdentifierExpression::Print( int depth ) const

@@ -807,6 +807,9 @@ public:
     ~IdentifierExpression();
 
     virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -814,7 +817,8 @@ public:
                 std::unique_ptr<Expression>& token );
 
 private:
-    std::string m_identifier;
+    std::string                 m_identifier;
+    std::shared_ptr<Expression> m_readExpression;
 };
 
 /**
