@@ -124,6 +124,14 @@ public:
                           std::shared_ptr<Expression> value = nullptr );
 
     /**
+      * \param identifier
+      *   The name of the variable
+      * \returns the Expression assiciated with the variable, or nullptr if
+      *   there is no variable with that name
+      */
+    std::shared_ptr<Expression> GetVariable( const std::string& identifier );
+
+    /**
       * Creates a new scope on the scope stack
       */
     void EnterScope();

@@ -236,6 +236,20 @@ void SemaAnalyzer::DeclareVariable( std::string identifier,
         Error( "Duplicate definition of variable: " + identifier );
 }
 
+std::shared_ptr<Expression> SemaAnalyzer::GetVariable(
+                                                const std::string& identifier )
+{
+    // iterate in reverse because deeper scopes take priority
+    for( std::vector<SymbolMaps>::const_reverse_iterator it = m_symbolStack.rbegin();
+         it != m_symbolStack.rend(); ++it )
+    {
+        const auto& v = it->m_variables.find( identifier );
+        if( v != it->m_variables.end() )
+            return v->second;
+    }
+    return nullptr;
+}
+
 void SemaAnalyzer::EnterScope()
 {
     m_symbolStack.resize( m_symbolStack.size() + 1 );
