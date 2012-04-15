@@ -287,6 +287,15 @@ BinaryOperatorExpression::~BinaryOperatorExpression()
 {
 }
 
+void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
+{
+    // TODO check types of operands
+    // TODO cast operands
+    // TODO constant folding?
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
+}
+
 void BinaryOperatorExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )

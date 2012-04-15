@@ -277,6 +277,9 @@ public:
     ~BinaryOperatorExpression();
 
     virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
     void Print( int depth ) const;
 
     /**
