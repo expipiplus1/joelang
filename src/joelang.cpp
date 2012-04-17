@@ -37,27 +37,37 @@
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
+
     JoeLang::State<int> my_int_state( "my_int_state" );
     my_int_state.SetCallbacks( [](int v) -> void
-                                 {std::cout << "setting my_int_state to " << v << std::endl;},
+                                 {std::cout << "setting my_int_state to "
+                                            << v << std::endl;},
                                nullptr,
                                nullptr );
 
-    JoeLang::State<float> my_state( "my_floating_state", std::map<std::string,float>({{"one", 1}, {"two", 2}}) );
+    JoeLang::State<float> my_state( "my_floating_state",
+                                    std::map<std::string,float>({{"one", 1},
+                                                                 {"two", 2}}) );
     my_state.SetCallbacks( [](float v) -> void
-                             {std::cout << "setting my_floating_state to " << v << std::endl;},
+                             {std::cout << "setting my_floating_state to "
+                                        << v << std::endl;},
                            nullptr,
                            nullptr );
 
-    JoeLang::State<bool> my_bool_state( "my_bool_state", std::map<std::string,bool>({{"on",true}, {"off", false}}) );
+    JoeLang::State<bool> my_bool_state( "my_bool_state",
+                                        std::map<std::string,bool>({{"on",true},
+                                                                    {"off", false}}) );
     my_bool_state.SetCallbacks( [](bool v) -> void
-                                  {std::cout << "setting my_bool_state to " << v << std::endl;},
+                                  {std::cout << "setting my_bool_state to "
+                                             << v << std::endl;},
                                 nullptr,
                                 nullptr );
 
-    JoeLang::State<std::string> my_string_state( "my_string_state", std::map<std::string, std::string>({{"string_enumerant","string_enumerant"}}));
+    JoeLang::State<std::string> my_string_state( "my_string_state",
+                                                 std::map<std::string, std::string>({{"string_enumerant","string_enumerant"}}));
     my_string_state.SetCallbacks( [](std::string v) -> void
-                                  {std::cout << "setting my_string_state to " << v << std::endl;},
+                                  {std::cout << "setting my_string_state to "
+                                             << v << std::endl;},
                                 nullptr,
                                 nullptr );
 
@@ -74,7 +84,8 @@ int main( int argc, char** argv )
         if( t )
             for( const auto& pass : t->GetPasses() )
             {
-                std::cout << "Setting Pass: \'" << pass.GetName() << "\' state\n";
+                std::cout << "Setting Pass: \'"
+                          << pass.GetName() << "\' state\n";
                 pass.SetState();
                 pass.ResetState();
             }
