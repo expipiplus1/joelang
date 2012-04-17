@@ -105,12 +105,12 @@ void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
-    m_assignee->PerformSema( sema );
-    m_assignedExpression->PerformSema( sema );
-
     m_assignedExpression = CastExpression::Create(
                                               m_assignee->GetReturnType(),
                                               std::move(m_assignedExpression) );
+
+    m_assignee->PerformSema( sema );
+    m_assignedExpression->PerformSema( sema );
 }
 
 Type AssignmentExpression::GetReturnType() const
@@ -250,21 +250,24 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
     //TODO constant folding
 
+    m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
+
+    Type t = GetReturnType();
+    if( t == Type::UNKNOWN_TYPE )
+        sema.Error( "Incompatable operand types" );
+    else
+    {
+        m_trueExpression = CastExpression::Create(
+                                                t,
+                                                std::move(m_trueExpression) );
+        m_falseExpression = CastExpression::Create(
+                                                t,
+                                                std::move(m_falseExpression) );
+    }
+
     m_condition->PerformSema( sema );
     m_trueExpression->PerformSema( sema );
     m_falseExpression->PerformSema( sema );
-
-    if( m_condition->GetReturnType() == Type::STRING )
-        //This error should really be in cast expression
-        sema.Error( "Can't convert string to type bool" );
-
-    Type t = GetReturnType();
-
-    m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
-    m_trueExpression = CastExpression::Create( t,
-                                               std::move(m_trueExpression) );
-    m_falseExpression = CastExpression::Create( t,
-                                                std::move(m_falseExpression) );
 }
 
 Type ConditionalExpression::GetReturnType() const
@@ -346,17 +349,20 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
     //TODO constant folding
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
 
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
         sema.Error( "Invalid operands to binary operator"
                     + GetTypeString( m_leftSide->GetReturnType() )
                     + GetTypeString( m_rightSide->GetReturnType() ) );
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
 
-    m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-    m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
 }
 
 Type BinaryOperatorExpression::GetReturnType() const
@@ -763,6 +769,8 @@ void CastExpression::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Can't cast string to " + GetTypeString( m_castType ) );
     else if( t == Type::UNKNOWN_TYPE )
         sema.Error( "Can't cast from unknown type" );
+
+    m_expression->PerformSema( sema );
 }
 
 Type CastExpression::GetReturnType() const
@@ -795,7 +803,6 @@ std::unique_ptr<Expression> CastExpression::Create(
                                                 std::move(cast_expression) ) );
 }
 
-
 //------------------------------------------------------------------------------
 // UnaryExpression
 //------------------------------------------------------------------------------
@@ -818,12 +825,13 @@ void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void UnaryExpression::PerformSema( SemaAnalyzer& sema )
 {
-    m_expression->PerformSema( sema );
     Type t = m_expression->GetReturnType();
     if( t == Type::STRING )
-        sema.Error( "Invalid type to unary operator string" );
+        sema.Error( "Invalid type to unary operator: string" );
     else if( t == Type::UNKNOWN_TYPE )
-        sema.Error( "Invalid type to unary operator unknown_type" );
+        sema.Error( "Invalid type to unary operator: unknown_type" );
+
+    m_expression->PerformSema( sema );
 }
 
 Type UnaryExpression::GetReturnType() const
@@ -919,6 +927,7 @@ void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 void PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
     assert( "false" && "Complete me" );
+    m_expression->PerformSema( sema );
 }
 
 Type PostfixExpression::GetReturnType() const
