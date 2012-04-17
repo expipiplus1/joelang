@@ -122,11 +122,11 @@ class AssignmentExpression : public JoeLang::Compiler::Expression
 public:
     /**
       * This constructor asserts on any null pointers
-      * \param unary_expression
+      * \param assignee
       *   The assignee
       * \param assignment_operator
       *   The assignment operator
-      * \param assignment_expression
+      * \param assigned_expression
       *   The assigned Expression
       */
     AssignmentExpression(
@@ -295,7 +295,7 @@ public:
       * \param right_side
       *   The expression to the right of the operator
       */
-    BinaryOperatorExpression( Op operator_terminal,
+    BinaryOperatorExpression( Op op,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side );
     virtual

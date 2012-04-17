@@ -309,8 +309,8 @@ public:
       * is not of zero length
       * \param identifier
       *   The identifier for this pass
-      * \param definition
-      *   This pass's definition if it has one, otherwise nullptr
+      * \param declaration
+      *   This pass's declaration if it has one, otherwise nullptr
       */
     PassDeclarationOrIdentifier( std::string                      identifier,
                                  std::unique_ptr<PassDeclaration> declaration );
