@@ -74,11 +74,11 @@ void SemaAnalyzer::DeclarePass( std::string name,
     if( definition )
         definition->PerformSema( *this );
 
-    PassDefinitionMap::iterator d = m_passDefinitions.find( name );
+    PassDefinitionMap::const_iterator d = m_passDefinitions.find( name );
 
     if( d == m_passDefinitions.end() )
         // If we haven't seen this name before: insert it
-        m_passDefinitions.insert( std::make_pair(name, std::move(definition)) );
+        m_passDefinitions[name] = std::move(definition);
     else
     {
         if( d->second && definition )
