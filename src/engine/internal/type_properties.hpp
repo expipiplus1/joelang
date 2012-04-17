@@ -42,6 +42,11 @@ namespace llvm
 namespace JoeLang
 {
 
+/**
+  * This returns the type according to the integer promotion rules
+  *
+  *
+  */
 Type GetCommonType( Type t1, Type t2 );
 
 bool IsFloatingPoint( Type t );
