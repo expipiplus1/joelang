@@ -85,10 +85,10 @@ public:
     ~Expression();
 
     virtual
-    void PerformSema( SemaAnalyzer& sema );
+    void PerformSema( SemaAnalyzer& sema ) = 0;
 
     virtual
-    Type GetReturnType() const;
+    Type GetReturnType() const = 0;
 
     /**
       * Parses any expression
@@ -132,6 +132,12 @@ public:
                         std::unique_ptr<Expression> assigned_expression );
     virtual
     ~AssignmentExpression();
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    Type GetReturnType() const override;
 
     virtual
     void Print( int depth ) const;
@@ -556,6 +562,12 @@ public:
     ~CastExpression();
 
     virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -637,6 +649,12 @@ public:
                        std::unique_ptr<PostfixOperator> postfix_operator );
     virtual
     ~PostfixExpression();
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    Type GetReturnType() const override;
 
     virtual
     void Print( int depth ) const;

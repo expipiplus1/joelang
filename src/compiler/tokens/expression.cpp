@@ -67,16 +67,6 @@ Expression::~Expression()
 {
 }
 
-void Expression::PerformSema( SemaAnalyzer& sema )
-{
-    assert( false && "remove this function" );
-}
-
-Type Expression::GetReturnType() const
-{
-    assert( false && "remove this function" );
-}
-
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // TODO comma sep expressions
@@ -105,6 +95,21 @@ AssignmentExpression::AssignmentExpression(
 
 AssignmentExpression::~AssignmentExpression()
 {
+}
+
+void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
+{
+    m_assignee->PerformSema( sema );
+    m_assignedExpression->PerformSema( sema );
+
+    m_assignedExpression = CastExpression::Create(
+                                              m_assignee->GetReturnType(),
+                                              std::move(m_assignedExpression) );
+}
+
+Type AssignmentExpression::GetReturnType() const
+{
+    return m_assignee->GetReturnType();
 }
 
 void AssignmentExpression::Print(int depth) const
@@ -720,6 +725,27 @@ CastExpression::~CastExpression()
 {
 }
 
+void CastExpression::PerformSema( SemaAnalyzer& sema )
+{
+    Type t = m_expression->GetReturnType();
+
+    if( m_castType == Type::UNKNOWN_TYPE )
+        sema.Error( "Can't cast to an unknown type" );
+    else if( m_castType == Type::STRING )
+        if( t != Type::STRING )
+            sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
+
+    if( t == Type::STRING )
+        sema.Error( "Can't cast string to " + GetTypeString( m_castType ) );
+    else if( t == Type::UNKNOWN_TYPE )
+        sema.Error( "Can't cast from unknown type" );
+}
+
+Type CastExpression::GetReturnType() const
+{
+    return m_castType;
+}
+
 void CastExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -854,6 +880,17 @@ PostfixExpression::PostfixExpression(
 
 PostfixExpression::~PostfixExpression()
 {
+}
+
+void PostfixExpression::PerformSema( SemaAnalyzer& sema )
+{
+    assert( "false" && "Complete me" );
+}
+
+Type PostfixExpression::GetReturnType() const
+{
+    assert( "false" && "Complete me" );
+    return Type::UNKNOWN_TYPE;
 }
 
 void PostfixExpression::Print( int depth ) const
