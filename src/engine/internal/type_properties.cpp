@@ -59,6 +59,14 @@ Type GetCommonType( Type t1, Type t2 )
         Type::BOOL
     };
 
+    if( t1 == Type::STRING )
+    {
+        if( t2 == Type::STRING )
+            return Type::STRING;
+        else
+            return Type::UNKNOWN_TYPE;
+    }
+
     for( Type t : promotion_ordering )
         if( t1 == t || t2 == t )
             return t;
