@@ -284,6 +284,9 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     /**
@@ -541,7 +544,8 @@ class CastExpression : public JoeLang::Compiler::Expression
 {
 public:
     explicit
-    CastExpression( Type cast_type );
+    CastExpression( Type cast_type,
+                    std::unique_ptr<Expression> expression );
     virtual
     ~CastExpression();
 
@@ -552,8 +556,14 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
 
+    static
+    std::unique_ptr<Expression> Create(
+                                  Type cast_type,
+                                  std::unique_ptr<Expression> cast_expression );
+
 private:
     Type m_castType;
+    std::unique_ptr<Expression> m_expression;
 };
 
 /**

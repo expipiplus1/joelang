@@ -294,11 +294,24 @@ BinaryOperatorExpression::~BinaryOperatorExpression()
 
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
-    // TODO check types of operands
-    // TODO cast operands
-    // TODO constant folding?
+    //TODO constant folding
     m_leftSide->PerformSema( sema );
     m_rightSide->PerformSema( sema );
+
+    Type t = GetReturnType();
+    if( t == Type::UNKNOWN_TYPE )
+        sema.Error( "Invalid operands to binary operator"
+                    + GetTypeString( m_leftSide->GetReturnType() )
+                    + GetTypeString( m_rightSide->GetReturnType() ) );
+
+    m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+    m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+}
+
+Type BinaryOperatorExpression::GetReturnType() const
+{
+    return GetCommonType( m_leftSide->GetReturnType(),
+                          m_rightSide->GetReturnType() );
 }
 
 void BinaryOperatorExpression::Print( int depth ) const
@@ -669,8 +682,10 @@ bool MultiplicativeExpression::Parse( Parser& parser,
 // CastExpression
 //------------------------------------------------------------------------------
 
-CastExpression::CastExpression( Type cast_type )
+CastExpression::CastExpression( Type cast_type,
+                                std::unique_ptr<Expression> expression )
     :m_castType( cast_type )
+    ,m_expression( std::move(expression) )
 {
 }
 
@@ -691,6 +706,18 @@ bool CastExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
     // for the time being, forward the parse to a UnaryExpression
     return parser.Expect<UnaryExpression>( token );
 }
+
+std::unique_ptr<Expression> CastExpression::Create(
+                                  Type cast_type,
+                                  std::unique_ptr<Expression> cast_expression )
+{
+    if( cast_expression->GetReturnType() == cast_type )
+        return cast_expression;
+    return std::unique_ptr<Expression>( new CastExpression(
+                                                cast_type,
+                                                std::move(cast_expression) ) );
+}
+
 
 //------------------------------------------------------------------------------
 // UnaryExpression
