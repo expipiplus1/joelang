@@ -218,6 +218,12 @@ public:
     ~ConditionalExpression();
 
     virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    Type GetReturnType() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static

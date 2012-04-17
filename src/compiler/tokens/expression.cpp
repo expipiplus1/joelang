@@ -228,6 +228,33 @@ ConditionalExpression::~ConditionalExpression()
 {
 }
 
+void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
+{
+    //TODO constant folding
+
+    m_condition->PerformSema( sema );
+    m_trueExpression->PerformSema( sema );
+    m_falseExpression->PerformSema( sema );
+
+    if( m_condition->GetReturnType() == Type::STRING )
+        //This error should really be in cast expression
+        sema.Error( "Can't convert string to type bool" );
+
+    Type t = GetReturnType();
+
+    m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
+    m_trueExpression = CastExpression::Create( t,
+                                               std::move(m_trueExpression) );
+    m_falseExpression = CastExpression::Create( t,
+                                                std::move(m_falseExpression) );
+}
+
+Type ConditionalExpression::GetReturnType() const
+{
+    return GetCommonType( m_trueExpression->GetReturnType(),
+                          m_falseExpression->GetReturnType() );
+}
+
 void ConditionalExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
