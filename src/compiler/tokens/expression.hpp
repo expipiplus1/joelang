@@ -84,11 +84,26 @@ public:
     virtual
     ~Expression();
 
+    /**
+      * Recurses down and resolves IdentifierExpressions using the symbol table
+      * in sema.
+      */
     virtual
     void ResolveIdentifiers( SemaAnalyzer& sema ) = 0;
 
+    /**
+      * Performs type checking and things.
+      */
     virtual
     void PerformSema( SemaAnalyzer& sema ) = 0;
+
+    /**
+      * Performs constant folding.
+      * \returns nullptr if no constant folding could be performed otherwise
+      * returns the folded expression
+      */
+    virtual
+    std::unique_ptr<Expression> FoldConstants();
 
     virtual
     Type GetReturnType() const = 0;
@@ -332,7 +347,7 @@ public:
                                std::unique_ptr<Expression>& token,
                                const OperatorTerminalMap& operator_terminals );
 
-private:
+protected:
     Op m_operator;
     std::unique_ptr<Expression> m_leftSide;
     std::unique_ptr<Expression> m_rightSide;
@@ -355,6 +370,18 @@ public:
     virtual
     ~LogicalOrExpression();
 
+    /**
+      * Casts both operands to bool
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    /**
+      * \returns Type::BOOL
+      */
+    virtual
+    Type GetReturnType() const override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
@@ -376,6 +403,18 @@ public:
     virtual
     ~LogicalAndExpression();
 
+    /**
+      * Casts both operands to bool
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    /**
+      * Returns bool
+      */
+    virtual
+    Type GetReturnType() const override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
@@ -393,6 +432,12 @@ class InclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 public:
     virtual
     ~InclusiveOrExpression();
+
+    /**
+      * Verifies that both operands are integral
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
@@ -421,6 +466,12 @@ public:
     virtual
     ~ExclusiveOrExpression();
 
+    /**
+      * Verifies that both operands are integral
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
@@ -441,6 +492,12 @@ public:
                    std::unique_ptr<Expression> right_side );
     virtual
     ~AndExpression();
+
+    /**
+      * Verifies that both operands are integral
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,
@@ -464,6 +521,12 @@ public:
     virtual
     ~EqualityExpression();
 
+    /**
+      * \returns Type::BOOL
+      */
+    virtual
+    Type GetReturnType() const override;
+
     static
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 };
@@ -485,6 +548,12 @@ public:
     virtual
     ~RelationalExpression();
 
+    /**
+      * \returns Type::BOOL
+      */
+    virtual
+    Type GetReturnType() const override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
@@ -505,6 +574,12 @@ public:
                      std::unique_ptr<Expression> right_side );
     virtual
     ~ShiftExpression();
+
+    /**
+      * Verifies that both operands are integral
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,

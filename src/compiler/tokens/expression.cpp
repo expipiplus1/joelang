@@ -67,6 +67,11 @@ Expression::~Expression()
 {
 }
 
+std::unique_ptr<Expression> Expression::FoldConstants()
+{
+    return nullptr;
+}
+
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // TODO comma sep expressions
@@ -348,8 +353,6 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
-    //TODO constant folding
-
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
         sema.Error( "Invalid operands to binary operator"
@@ -451,6 +454,20 @@ LogicalOrExpression::~LogicalOrExpression()
 {
 }
 
+void LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
+{
+    m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
+    m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
+}
+
+Type LogicalOrExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool LogicalOrExpression::Parse( Parser& parser,
                                  std::unique_ptr<Expression>& token )
 {
@@ -479,6 +496,20 @@ LogicalAndExpression::LogicalAndExpression(
 
 LogicalAndExpression::~LogicalAndExpression()
 {
+}
+
+void LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
+{
+    m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
+    m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
+}
+
+Type LogicalAndExpression::GetReturnType() const
+{
+    return Type::BOOL;
 }
 
 bool LogicalAndExpression::Parse( Parser& parser,
@@ -511,6 +542,24 @@ InclusiveOrExpression::~InclusiveOrExpression()
 {
 }
 
+void InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
+{
+    Type t = GetReturnType();
+
+    if( !IsIntegral(t) )
+        sema.Error( "Invalid operand types to to inclusive or operator: "
+                    + GetTypeString( m_leftSide->GetReturnType() )
+                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
+}
+
 bool InclusiveOrExpression::Parse( Parser& parser,
                                    std::unique_ptr<Expression>& token )
 {
@@ -539,6 +588,24 @@ ExclusiveOrExpression::ExclusiveOrExpression(
 
 ExclusiveOrExpression::~ExclusiveOrExpression()
 {
+}
+
+void ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
+{
+    Type t = GetReturnType();
+
+    if( !IsIntegral(t) )
+        sema.Error( "Invalid operand types to to exclusive or operator: "
+                    + GetTypeString( m_leftSide->GetReturnType() )
+                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
 }
 
 bool ExclusiveOrExpression::Parse( Parser& parser,
@@ -570,6 +637,26 @@ AndExpression::~AndExpression()
 {
 }
 
+void AndExpression::PerformSema( SemaAnalyzer& sema )
+{
+    //TODO constant folding
+
+    Type t = GetReturnType();
+
+    if( !IsIntegral(t) )
+        sema.Error( "Invalid operand types to to and operator: "
+                    + GetTypeString( m_leftSide->GetReturnType() )
+                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
+}
+
 bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     const static OperatorTerminalMap ops =
@@ -596,6 +683,11 @@ EqualityExpression::EqualityExpression( Op operator_terminal,
 
 EqualityExpression::~EqualityExpression()
 {
+}
+
+Type EqualityExpression::GetReturnType() const
+{
+    return Type::BOOL;
 }
 
 bool EqualityExpression::Parse( Parser& parser,
@@ -628,6 +720,11 @@ RelationalExpression::~RelationalExpression()
 {
 }
 
+Type RelationalExpression::GetReturnType() const
+{
+    return Type::BOOL;
+}
+
 bool RelationalExpression::Parse( Parser& parser,
                                   std::unique_ptr<Expression>& token )
 {
@@ -658,6 +755,24 @@ ShiftExpression::ShiftExpression( Op operator_terminal,
 
 ShiftExpression::~ShiftExpression()
 {
+}
+
+void ShiftExpression::PerformSema( SemaAnalyzer& sema )
+{
+    Type t = GetReturnType();
+
+    if( !IsIntegral(t) )
+        sema.Error( "Invalid operand types to to shift operator: "
+                    + GetTypeString( m_leftSide->GetReturnType() )
+                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
+
+    m_leftSide->PerformSema( sema );
+    m_rightSide->PerformSema( sema );
 }
 
 bool ShiftExpression::Parse( Parser& parser,
