@@ -97,6 +97,12 @@ AssignmentExpression::~AssignmentExpression()
 {
 }
 
+void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_assignee->ResolveIdentifiers( sema );
+    m_assignedExpression->ResolveIdentifiers( sema );
+}
+
 void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
     m_assignee->PerformSema( sema );
@@ -233,6 +239,13 @@ ConditionalExpression::~ConditionalExpression()
 {
 }
 
+void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_condition->ResolveIdentifiers( sema );
+    m_trueExpression->ResolveIdentifiers( sema );
+    m_falseExpression->ResolveIdentifiers( sema );
+}
+
 void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
     //TODO constant folding
@@ -322,6 +335,12 @@ BinaryOperatorExpression::BinaryOperatorExpression(
 
 BinaryOperatorExpression::~BinaryOperatorExpression()
 {
+}
+
+void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_leftSide->ResolveIdentifiers( sema );
+    m_rightSide->ResolveIdentifiers( sema );
 }
 
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
@@ -725,6 +744,11 @@ CastExpression::~CastExpression()
 {
 }
 
+void CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_expression->ResolveIdentifiers( sema );
+}
+
 void CastExpression::PerformSema( SemaAnalyzer& sema )
 {
     Type t = m_expression->GetReturnType();
@@ -785,6 +809,11 @@ UnaryExpression::UnaryExpression( Op op,
 
 UnaryExpression::~UnaryExpression()
 {
+}
+
+void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_expression->ResolveIdentifiers( sema );
 }
 
 void UnaryExpression::PerformSema( SemaAnalyzer& sema )
@@ -880,6 +909,11 @@ PostfixExpression::PostfixExpression(
 
 PostfixExpression::~PostfixExpression()
 {
+}
+
+void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    m_expression->ResolveIdentifiers( sema );
 }
 
 void PostfixExpression::PerformSema( SemaAnalyzer& sema )
@@ -1196,18 +1230,22 @@ IdentifierExpression::~IdentifierExpression()
 {
 }
 
-Type IdentifierExpression::GetReturnType() const
-{
-    if( m_readExpression )
-        return m_readExpression->GetReturnType();
-    return Type::UNKNOWN_TYPE;
-}
-
-void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
+void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
     m_readExpression = sema.GetVariable( m_identifier );
     if( !m_readExpression )
         sema.Error( "Undeclared variable: " + m_identifier );
+}
+
+Type IdentifierExpression::GetReturnType() const
+{
+    assert( m_readExpression &&
+            "Trying to get the type of an unresolved identifier" );
+    return m_readExpression->GetReturnType();
+}
+
+void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
+{
 }
 
 void IdentifierExpression::Print( int depth ) const
@@ -1238,6 +1276,10 @@ LiteralExpression::LiteralExpression()
 }
 
 LiteralExpression::~LiteralExpression()
+{
+}
+
+void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
 }
 

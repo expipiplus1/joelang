@@ -85,6 +85,9 @@ public:
     ~Expression();
 
     virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) = 0;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema ) = 0;
 
     virtual
@@ -132,6 +135,9 @@ public:
                         std::unique_ptr<Expression> assigned_expression );
     virtual
     ~AssignmentExpression();
+
+    virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
@@ -224,6 +230,9 @@ public:
     ~ConditionalExpression();
 
     virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -291,6 +300,9 @@ public:
                               std::unique_ptr<Expression> right_side );
     virtual
     ~BinaryOperatorExpression();
+
+    virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
@@ -562,6 +574,9 @@ public:
     ~CastExpression();
 
     virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -619,6 +634,9 @@ public:
     ~UnaryExpression();
 
     virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -649,6 +667,9 @@ public:
                        std::unique_ptr<PostfixOperator> postfix_operator );
     virtual
     ~PostfixExpression();
+
+    virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
@@ -856,6 +877,9 @@ public:
     ~IdentifierExpression();
 
     virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -890,6 +914,12 @@ public:
     LiteralExpression();
     virtual
     ~LiteralExpression();
+
+    /**
+      * Does nothing
+      */
+    virtual
+    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     /**
       * Does nothing
