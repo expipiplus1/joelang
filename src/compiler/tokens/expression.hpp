@@ -80,7 +80,36 @@ namespace Compiler
 class Expression : public JoeLang::Compiler::Token
 {
 public:
-    Expression( );
+    enum class ExpressionTy
+    {
+        AssignmentExpression,
+        ConditionalExpression,
+        BinaryOperatorExpression_Start,
+        LogicalOrExpression,
+        LogicalAndExpression,
+        InclusiveOrExpression,
+        ExclusiveOrExpression,
+        AndExpression,
+        EqualityExpression,
+        RelationalExpression,
+        ShiftExpression,
+        AdditiveExpression,
+        MultiplicativeExpression,
+        BinaryOperatorExpression_End,
+        CastExpression,
+        UnaryExpression,
+        PostfixExpression,
+        IdentifierExpression,
+        LiteralExpression_Start,
+        IntegerLiteralExpression,
+        FloatingLiteralExpression,
+        BooleanLiteralExpression,
+        StringLiteralExpression,
+        CharacterLiteralExpression,
+        LiteralExpression_End
+    };
+
+    Expression( ExpressionTy sub_class_id );
     virtual
     ~Expression();
 
@@ -121,6 +150,15 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    /** Used for casting **/
+    ExpressionTy GetSubClassID() const;
+    /** Used for casting **/
+    static
+    bool classof( const Expression* e );
+
+private:
+    const ExpressionTy m_subClassID;
 };
 
 /**
@@ -166,6 +204,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const AssignmentExpression* e );
 private:
     std::unique_ptr<Expression>         m_assignee;
     std::unique_ptr<AssignmentOperator> m_assignmentOperator;
@@ -249,6 +292,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    std::unique_ptr<Expression> FoldConstants() override;
 
     virtual
     Type GetReturnType() const override;

@@ -45,6 +45,7 @@
 #include <engine/types.hpp>
 #include <engine/internal/type_properties.hpp>
 #include <compiler/code_generator.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -76,6 +77,12 @@ bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // TODO comma sep expressions
     return parser.Expect<AssignmentExpression>( token );
+}
+
+bool Expression::classof( const Expression* e )
+{
+    // An Expression is always an Expression
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -167,6 +174,16 @@ bool AssignmentExpression::Parse( Parser& parser,
     token.reset( new AssignmentExpression( std::move(lhs_expression),
                                            std::move(assignment_operator),
                                            std::move(assignment_expression) ) );
+    return true;
+}
+
+bool AssignmentExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::AssignmentExpression;
+}
+
+bool AssignmentExpression::classof( const AssignmentExpression* e )
+{
     return true;
 }
 
@@ -273,6 +290,15 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     m_condition->PerformSema( sema );
     m_trueExpression->PerformSema( sema );
     m_falseExpression->PerformSema( sema );
+}
+
+std::unique_ptr<Expression> ConditionalExpression::FoldConstants()
+{
+    std::unique_ptr<Expression> new_condition = m_condition->FoldConstants();
+    if( new_condition )
+        m_condition = std::move(new_condition);
+
+    assert( false && "complete me" );
 }
 
 Type ConditionalExpression::GetReturnType() const
@@ -1409,6 +1435,11 @@ void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
+}
+
+bool LiteralExpression::IsConst() const
+{
+    return true;
 }
 
 bool LiteralExpression::Parse( Parser& parser,
