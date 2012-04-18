@@ -193,9 +193,9 @@ GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to lor GenericValues of non-bool type" );
+        assert( false && "Trying to lor GenericValues of non-bool type" );
     default:
-        assert( "Trying to lor GenericValues of unknown type" );
+        assert( false && "Trying to lor GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -224,9 +224,9 @@ GenericValue GenericValue::Land( const GenericValue& g1, const GenericValue& g2 
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to land GenericValues of non-bool type" );
+        assert( false && "Trying to land GenericValues of non-bool type" );
     default:
-        assert( "Trying to land GenericValues of unknown type" );
+        assert( false && "Trying to land GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -271,9 +271,9 @@ GenericValue GenericValue::Or( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to or GenericValues of non-integer type" );
+        assert( false && "Trying to or GenericValues of non-integer type" );
     default:
-        assert( "Trying to or GenericValues of unknown type" );
+        assert( false && "Trying to or GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -318,9 +318,9 @@ GenericValue GenericValue::Xor( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to xor GenericValues of non-integer type" );
+        assert( false && "Trying to xor GenericValues of non-integer type" );
     default:
-        assert( "Trying to xor GenericValues of unknown type" );
+        assert( false && "Trying to xor GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -365,9 +365,9 @@ GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to and GenericValues of non-integer type" );
+        assert( false && "Trying to and GenericValues of non-integer type" );
     default:
-        assert( "Trying to and GenericValues of unknown type" );
+        assert( false && "Trying to and GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -419,7 +419,7 @@ GenericValue GenericValue::EqualTo( const GenericValue& g1, const GenericValue& 
         ret.m_boolValue = g1.m_stringValue == g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare equality of GenericValues of unknown type" );
+        assert( false && "Trying to compare equality of GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -471,7 +471,7 @@ GenericValue GenericValue::NotEqualTo( const GenericValue& g1, const GenericValu
         ret.m_boolValue = g1.m_stringValue != g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare equality of GenericValues of unknown type" );
+        assert( false && "Trying to compare equality of GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -523,7 +523,7 @@ GenericValue GenericValue::LessThan( const GenericValue& g1, const GenericValue&
         ret.m_boolValue = g1.m_stringValue < g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare GenericValues of unknown type" );
+        assert( false && "Trying to compare GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -575,7 +575,7 @@ GenericValue GenericValue::GreaterThan( const GenericValue& g1, const GenericVal
         ret.m_boolValue = g1.m_stringValue > g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare GenericValues of unknown type" );
+        assert( false && "Trying to compare GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -627,7 +627,7 @@ GenericValue GenericValue::LessThanEqual( const GenericValue& g1, const GenericV
         ret.m_boolValue = g1.m_stringValue <= g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare GenericValues of unknown type" );
+        assert( false && "Trying to compare GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -679,7 +679,7 @@ GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1, const Gener
         ret.m_boolValue = g1.m_stringValue >= g2.m_stringValue;
         break;
     default:
-        assert( "Trying to compare GenericValues of unknown type" );
+        assert( false && "Trying to compare GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
@@ -724,9 +724,9 @@ GenericValue GenericValue::Shl( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to shift GenericValues of non-integer type" );
+        assert( false && "Trying to shift GenericValues of non-integer type" );
     default:
-        assert( "Trying to shift GenericValues of unknown type" );
+        assert( false && "Trying to shift GenericValues of unknown type" );
     }
 
     ret.m_type = g1.m_type;
@@ -772,9 +772,9 @@ GenericValue GenericValue::Shr( const GenericValue& g1, const GenericValue& g2 )
     case Type::FLOAT:
     case Type::DOUBLE:
     case Type::STRING:
-        assert( "Trying to shift GenericValues of non-integer type" );
+        assert( false && "Trying to shift GenericValues of non-integer type" );
     default:
-        assert( "Trying to shift GenericValues of unknown type" );
+        assert( false && "Trying to shift GenericValues of unknown type" );
     }
 
     ret.m_type = g1.m_type;
@@ -827,7 +827,7 @@ GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
         ret.m_stringValue = g1.m_stringValue + g2.m_stringValue;
         break;
     default:
-        assert( "Trying to add GenericValues of unknown type" );
+        assert( false && "Trying to add GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -876,9 +876,9 @@ GenericValue GenericValue::Sub( const GenericValue& g1, const GenericValue& g2 )
         ret.m_doubleValue = g1.m_doubleValue - g2.m_doubleValue;
         break;
     case Type::STRING:
-        assert( "Trying to sub GenericValues of string type" );
+        assert( false && "Trying to sub GenericValues of string type" );
     default:
-        assert( "Trying to sub GenericValues of unknown type" );
+        assert( false && "Trying to sub GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -927,9 +927,9 @@ GenericValue GenericValue::Mul( const GenericValue& g1, const GenericValue& g2 )
         ret.m_doubleValue = g1.m_doubleValue * g2.m_doubleValue;
         break;
     case Type::STRING:
-        assert( "Trying to mul GenericValues of string type" );
+        assert( false && "Trying to mul GenericValues of string type" );
     default:
-        assert( "Trying to mul GenericValues of unknown type" );
+        assert( false && "Trying to mul GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -978,9 +978,9 @@ GenericValue GenericValue::Div( const GenericValue& g1, const GenericValue& g2 )
         ret.m_doubleValue = g1.m_doubleValue / g2.m_doubleValue;
         break;
     case Type::STRING:
-        assert( "Trying to div GenericValues of string type" );
+        assert( false && "Trying to div GenericValues of string type" );
     default:
-        assert( "Trying to div GenericValues of unknown type" );
+        assert( false && "Trying to div GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
     return ret;
@@ -1026,11 +1026,141 @@ GenericValue GenericValue::Mod( const GenericValue& g1, const GenericValue& g2 )
     case Type::DOUBLE:
         // fmod here?
     case Type::STRING:
-        assert( "Trying to mod GenericValues of non-integer type" );
+        assert( false && "Trying to mod GenericValues of non-integer type" );
     default:
-        assert( "Trying to mod GenericValues of unknown type" );
+        assert( false && "Trying to mod GenericValues of unknown type" );
     }
     ret.m_type = g1.m_type;
+    return ret;
+}
+
+GenericValue GenericValue::UnaryPlus( const GenericValue& g )
+{
+    assert( g.m_type != Type::UNKNOWN_TYPE &&
+                        "Trying to unary plus GenericValue of unknown type" );
+    assert( g.m_type != Type::STRING &&
+                        "Trying to unary plus GenericValue of string type" );
+    return g;
+}
+
+GenericValue GenericValue::UnaryMinus( const GenericValue& g )
+{
+    GenericValue ret;
+
+    switch( g.m_type )
+    {
+    case Type::BOOL:
+        ret.m_boolValue = -g.m_boolValue;
+        break;
+    case Type::I8:
+        ret.m_i8Value = -g.m_i8Value;
+        break;
+    case Type::I16:
+        ret.m_i16Value = -g.m_i16Value;
+        break;
+    case Type::I32:
+        ret.m_i32Value = -g.m_i32Value;
+        break;
+    case Type::I64:
+        ret.m_i64Value = -g.m_i64Value;
+        break;
+    case Type::U8:
+        ret.m_u8Value = -g.m_u8Value;
+        break;
+    case Type::U16:
+        ret.m_u16Value = -g.m_u16Value;
+        break;
+    case Type::U32:
+        ret.m_u32Value = -g.m_u32Value;
+        break;
+    case Type::U64:
+        ret.m_u64Value = -g.m_u64Value;
+        break;
+    case Type::FLOAT:
+        ret.m_floatValue = -g.m_floatValue;
+        break;
+    case Type::DOUBLE:
+        ret.m_doubleValue = -g.m_doubleValue;
+        break;
+    case Type::STRING:
+        assert( false && "Trying to negate GenericValue of non-integer type" );
+    default:
+        assert( false && "Trying to negate GenericValue of unknown type" );
+    }
+    ret.m_type = g.m_type;
+    return ret;
+}
+
+GenericValue GenericValue::LogicalNot( const GenericValue& g )
+{
+    GenericValue ret;
+
+    switch( g.m_type )
+    {
+    case Type::BOOL:
+        ret.m_boolValue = !g.m_boolValue;
+        break;
+    case Type::I8:
+    case Type::I16:
+    case Type::I32:
+    case Type::I64:
+    case Type::U8:
+    case Type::U16:
+    case Type::U32:
+    case Type::U64:
+    case Type::FLOAT:
+    case Type::DOUBLE:
+    case Type::STRING:
+        assert( false && "Trying to negate GenericValue of non-bool type" );
+    default:
+        assert( false && "Trying to negate GenericValue of unknown type" );
+    }
+    ret.m_type = g.m_type;
+    return ret;
+}
+
+GenericValue GenericValue::BitwiseNot( const GenericValue& g )
+{
+    GenericValue ret;
+
+    switch( g.m_type )
+    {
+    case Type::BOOL:
+        ret.m_boolValue = ~g.m_boolValue;
+        break;
+    case Type::I8:
+        ret.m_i8Value = ~g.m_i8Value;
+        break;
+    case Type::I16:
+        ret.m_i16Value = ~g.m_i16Value;
+        break;
+    case Type::I32:
+        ret.m_i32Value = ~g.m_i32Value;
+        break;
+    case Type::I64:
+        ret.m_i64Value = ~g.m_i64Value;
+        break;
+    case Type::U8:
+        ret.m_u8Value = ~g.m_u8Value;
+        break;
+    case Type::U16:
+        ret.m_u16Value = ~g.m_u16Value;
+        break;
+    case Type::U32:
+        ret.m_u32Value = ~g.m_u32Value;
+        break;
+    case Type::U64:
+        ret.m_u64Value = ~g.m_u64Value;
+        break;
+    case Type::FLOAT:
+    case Type::DOUBLE:
+    case Type::STRING:
+        assert( false &&
+                "Trying to bitwise-not GenericValue of non-integer type" );
+    default:
+        assert( false && "Trying to bitwise-not GenericValue of unknown type" );
+    }
+    ret.m_type = g.m_type;
     return ret;
 }
 

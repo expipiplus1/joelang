@@ -58,6 +58,10 @@ class GenericValue
 
     ~GenericValue();
 
+    /**
+      * \defgroup GenericValue Binary operators
+      * \{
+      */
     static
     GenericValue Lor ( const GenericValue& g1, const GenericValue& g2 );
     static
@@ -103,6 +107,19 @@ class GenericValue
     GenericValue Div( const GenericValue& g1, const GenericValue& g2 );
     static
     GenericValue Mod( const GenericValue& g1, const GenericValue& g2 );
+    /**
+      * \}
+      */
+
+    static
+    GenericValue UnaryPlus( const GenericValue& g );
+    static
+    GenericValue UnaryMinus( const GenericValue& g );
+    static
+    GenericValue LogicalNot( const GenericValue& g );
+    static
+    GenericValue BitwiseNot( const GenericValue& g );
+
 private:
     Type m_type;
 
