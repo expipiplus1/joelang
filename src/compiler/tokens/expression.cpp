@@ -293,42 +293,37 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 
 void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
+    // Simplify the sub expressions
     m_condition->FoldConstants( m_condition );
     m_trueExpression->FoldConstants( m_trueExpression );
     m_falseExpression->FoldConstants( m_falseExpression );
 
+    // See if the condition is a boolean literal
+    LiteralExpression* l = nullptr;
     if( isa<LiteralExpression>( m_condition ) )
     {
-        std::unique_ptr<LiteralExpression> l(
-                     static_cast<LiteralExpression*>( m_condition.release() ) );
-        const GenericValue v = l->GetValue();
-        assert( v.GetType() == Type::BOOL &&
-                "ConditionalExpression has a non-bool condition" );
-
-        if( v.GetBool() )
-            self = std::move( m_trueExpression );
-        else
-            self = std::move( m_falseExpression );
+        l = static_cast<LiteralExpression*>( m_condition.get() );
     }
     else if( isa<IdentifierExpression>( m_condition ) )
     {
-        std::unique_ptr<IdentifierExpression> i(
-                 static_cast<IdentifierExpression*>( m_condition.release() ) );
+        IdentifierExpression* i =
+                        static_cast<IdentifierExpression*>( m_condition.get() );
         const std::shared_ptr<Expression>& read_expression = i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
-        {
-            LiteralExpression* l = static_cast<LiteralExpression*>(
-                                                      read_expression.get() );
-            const GenericValue v = l->GetValue();
-            assert( v.GetType() == Type::BOOL &&
-                    "ConditionalExpression has a non-bool condition" );
-
-            if( v.GetBool() )
-                self = std::move( m_trueExpression );
-            else
-                self = std::move( m_falseExpression );
-        }
+            l = static_cast<LiteralExpression*>( read_expression.get() );
     }
+
+    // If it wasn't constant, then we've done as much as we can
+    if( !l )
+        return;
+
+    // If it was constant, we can replace this node with just one of the values
+    const GenericValue v = l->GetValue();
+    assert( v.GetType() == Type::BOOL &&
+            "ConditionalExpression has a non-bool condition" );
+
+    self = v.GetBool() ? std::move(m_trueExpression)
+                       : std::move(m_falseExpression);
 }
 
 Type ConditionalExpression::GetReturnType() const
