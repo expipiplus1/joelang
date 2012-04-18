@@ -70,9 +70,8 @@ Expression::~Expression()
 {
 }
 
-std::unique_ptr<Expression> Expression::FoldConstants()
+void Expression::FoldConstants( std::unique_ptr<Expression>& self )
 {
-    return nullptr;
 }
 
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -156,15 +155,6 @@ bool AssignmentExpression::Parse( Parser& parser,
     std::unique_ptr<Expression> lhs_expression;
     if( !parser.Expect< ConditionalExpression >( lhs_expression ) )
         return false;
-
-    if( typeid( *lhs_expression ) != typeid( IdentifierExpression ) &&
-        typeid( *lhs_expression ) != typeid( PrimaryExpression ) &&
-        typeid( *lhs_expression ) != typeid( UnaryExpression ) &&
-        typeid( *lhs_expression ) != typeid( PostfixExpression ) )
-    {
-        token = std::move( lhs_expression );
-        return true;
-    }
 
     std::unique_ptr<AssignmentOperator> assignment_operator;
     if( !parser.Expect< AssignmentOperator >( assignment_operator ) )
@@ -301,13 +291,44 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     m_falseExpression->PerformSema( sema );
 }
 
-std::unique_ptr<Expression> ConditionalExpression::FoldConstants()
+void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
-    std::unique_ptr<Expression> new_condition = m_condition->FoldConstants();
-    if( new_condition )
-        m_condition = std::move(new_condition);
+    m_condition->FoldConstants( m_condition );
+    m_trueExpression->FoldConstants( m_trueExpression );
+    m_falseExpression->FoldConstants( m_falseExpression );
 
-    assert( false && "complete me" );
+    if( isa<LiteralExpression>( m_condition ) )
+    {
+        std::unique_ptr<LiteralExpression> l(
+                     static_cast<LiteralExpression*>( m_condition.release() ) );
+        const GenericValue v = l->GetValue();
+        assert( v.GetType() == Type::BOOL &&
+                "ConditionalExpression has a non-bool condition" );
+
+        if( v.GetBool() )
+            self = std::move( m_trueExpression );
+        else
+            self = std::move( m_falseExpression );
+    }
+    else if( isa<IdentifierExpression>( m_condition ) )
+    {
+        std::unique_ptr<IdentifierExpression> i(
+                 static_cast<IdentifierExpression*>( m_condition.release() ) );
+        const std::shared_ptr<Expression>& read_expression = i->GetReadExpression();
+        if( isa<LiteralExpression>( read_expression ) )
+        {
+            LiteralExpression* l = static_cast<LiteralExpression*>(
+                                                      read_expression.get() );
+            const GenericValue v = l->GetValue();
+            assert( v.GetType() == Type::BOOL &&
+                    "ConditionalExpression has a non-bool condition" );
+
+            if( v.GetBool() )
+                self = std::move( m_trueExpression );
+            else
+                self = std::move( m_falseExpression );
+        }
+    }
 }
 
 Type ConditionalExpression::GetReturnType() const
@@ -1563,6 +1584,11 @@ void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
 }
 
+const std::shared_ptr<Expression>&  IdentifierExpression::GetReadExpression() const
+{
+    return m_readExpression;
+}
+
 void IdentifierExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1676,6 +1702,31 @@ Type IntegerLiteralExpression::GetReturnType() const
         return Type::U64;
     default:
         return Type::I32;
+    }
+}
+
+GenericValue IntegerLiteralExpression::GetValue() const
+{
+    switch( m_suffix )
+    {
+    case Suffix::CHAR:
+        return GenericValue( jl_i8(m_value) );
+    case Suffix::INT:
+        return GenericValue( jl_i32(m_value) );
+    case Suffix::SHORT:
+        return GenericValue( jl_i16(m_value) );
+    case Suffix::LONG:
+        return GenericValue( jl_i64(m_value) );
+    case Suffix::UNSIGNED_CHAR:
+        return GenericValue( jl_u8(m_value) );
+    case Suffix::UNSIGNED_INT:
+        return GenericValue( jl_u32(m_value) );
+    case Suffix::UNSIGNED_SHORT:
+        return GenericValue( jl_u16(m_value) );
+    case Suffix::UNSIGNED_LONG:
+        return GenericValue( jl_u64(m_value) );
+    default:
+        return GenericValue( jl_i32(m_value) );
     }
 }
 
@@ -1820,6 +1871,17 @@ Type FloatingLiteralExpression::GetReturnType() const
         return Type::DOUBLE;
 }
 
+GenericValue FloatingLiteralExpression::GetValue() const
+{
+    switch( m_suffix )
+    {
+    case Suffix::SINGLE:
+        return GenericValue( jl_float(m_value) );
+    default:
+        return GenericValue( jl_double(m_value) );
+    }
+}
+
 void FloatingLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1897,6 +1959,11 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 Type BooleanLiteralExpression::GetReturnType() const
 {
     return Type::BOOL;
+}
+
+GenericValue BooleanLiteralExpression::GetValue() const
+{
+    return GenericValue( jl_bool(m_value) );
 }
 
 void BooleanLiteralExpression::Print( int depth ) const
@@ -2009,6 +2076,11 @@ Type StringLiteralExpression::GetReturnType() const
     return Type::STRING;
 }
 
+GenericValue StringLiteralExpression::GetValue() const
+{
+    return GenericValue( jl_string(m_value) );
+}
+
 void StringLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -2095,6 +2167,11 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 Type CharacterLiteralExpression::GetReturnType() const
 {
     return Type::I8;
+}
+
+GenericValue CharacterLiteralExpression::GetValue() const
+{
+    return GenericValue( jl_i8(m_value) );
 }
 
 void CharacterLiteralExpression::Print( int depth ) const

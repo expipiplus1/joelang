@@ -50,6 +50,7 @@ namespace JoeLang
 
         class Parser;
         class SemaAnalyzer;
+        class GenericValue;
 
         class AssignmentOperator;
         class PostfixOperator;
@@ -128,11 +129,13 @@ public:
 
     /**
       * Performs constant folding.
-      * \returns nullptr if no constant folding could be performed otherwise
-      * returns the folded expression
+      * \param self
+      *   A reference to a pointer to this. If this can be replaced by a
+      *   sub-expression then it's put into self.
+      *   Care must be taken to avoid destroying self too early.
       */
     virtual
-    std::unique_ptr<Expression> FoldConstants();
+    void FoldConstants( std::unique_ptr<Expression>& self );
 
     virtual
     Type GetReturnType() const = 0;
@@ -294,7 +297,7 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    std::unique_ptr<Expression> FoldConstants() override;
+    void FoldConstants( std::unique_ptr<Expression>& self ) override;
 
     virtual
     Type GetReturnType() const override;
@@ -1072,6 +1075,8 @@ public:
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
+    const std::shared_ptr<Expression>& GetReadExpression() const;
+
     virtual
     void Print( int depth ) const;
 
@@ -1115,6 +1120,9 @@ public:
       */
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    GenericValue GetValue() const = 0;
 
     static
     bool Parse( Parser& parser,
@@ -1166,6 +1174,9 @@ public:
 
     virtual
     Type GetReturnType() const override;
+
+    virtual
+    GenericValue GetValue() const override;
 
     virtual
     void Print( int depth ) const;
@@ -1227,6 +1238,9 @@ public:
     Type GetReturnType() const override;
 
     virtual
+    GenericValue GetValue() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -1276,6 +1290,9 @@ public:
     Type GetReturnType() const override;
 
     virtual
+    GenericValue GetValue() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -1307,6 +1324,9 @@ public:
 
     virtual
     Type GetReturnType() const override;
+
+    virtual
+    GenericValue GetValue() const override;
 
     virtual
     void Print( int depth ) const;
@@ -1357,6 +1377,9 @@ public:
 
     virtual
     void Print( int depth ) const;
+
+    virtual
+    GenericValue GetValue() const override;
 
     static
     bool Parse( Parser& parser,
