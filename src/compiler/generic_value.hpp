@@ -147,6 +147,16 @@ public:
       * \}
       */
 
+    /**
+      * \defgroup GenericValue Casting operators
+      * \{
+      */
+    static
+    GenericValue Cast( Type t, const GenericValue& g );
+    /**
+      * \}
+      */
+
 private:
     Type m_type;
 

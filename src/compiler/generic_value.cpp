@@ -34,6 +34,7 @@
 #include <utility>
 
 #include <engine/types.hpp>
+#include <engine/internal/type_properties.hpp>
 
 namespace JoeLang
 {
@@ -1259,6 +1260,110 @@ GenericValue GenericValue::BitwiseNot( const GenericValue& g )
     }
     ret.m_type = g.m_type;
     return ret;
+}
+
+GenericValue GenericValue::Cast( Type t, const GenericValue& g )
+{
+    assert( t != Type::UNKNOWN_TYPE &&
+                 "Trying to cast a GenericValue to an unknown type" );
+    assert( g.m_type != Type::UNKNOWN_TYPE &&
+                 "Trying to cast a GenericValue from an unknown type" );
+
+    union
+    {
+        unsigned long long i;
+        double f;
+    };
+    bool integral = false;
+
+    if( IsIntegral( g.m_type ) )
+    {
+        switch( g.m_type )
+        {
+        case Type::BOOL:
+            i = g.GetBool();
+            break;
+        case Type::I8:
+            i = g.GetI8();
+            break;
+        case Type::I16:
+            i = g.GetI16();
+            break;
+        case Type::I32:
+            i = g.GetI32();
+            break;
+        case Type::I64:
+            i = g.GetI64();
+            break;
+        case Type::U8:
+            i = g.GetU8();
+            break;
+        case Type::U16:
+            i = g.GetU16();
+            break;
+        case Type::U32:
+            i = g.GetU32();
+            break;
+        case Type::U64:
+            i = g.GetU64();
+            break;
+        default:
+            assert( false && "Unhandled integer type in GenericValue casting" );
+        }
+        integral = true;
+    }
+    else if( IsFloatingPoint( g.m_type ) )
+    {
+        switch( g.m_type )
+        {
+        case Type::FLOAT:
+            f = g.GetFloat();
+            break;
+        case Type::DOUBLE:
+            f = g.GetDouble();
+            break;
+        default:
+            assert( false &&
+                    "Unhandled floating point type in GenericValue casting" );
+        }
+    }
+    else
+    {
+        assert( t == Type::STRING &&
+                "Trying to cast a string to a numerical type in GenericValue" );
+        return g;
+    }
+
+    switch( t )
+    {
+    case Type::BOOL:
+        return GenericValue( jl_bool(integral ? i : f) );
+    case Type::I8:
+        return GenericValue( jl_i8(integral ? i : f) );
+    case Type::I16:
+        return GenericValue( jl_i16(integral ? i : f) );
+    case Type::I32:
+        return GenericValue( jl_i32(integral ? i : f) );
+    case Type::I64:
+        return GenericValue( jl_i64(integral ? i : f) );
+    case Type::U8:
+        return GenericValue( jl_u8(integral ? i : f) );
+    case Type::U16:
+        return GenericValue( jl_u16(integral ? i : f) );
+    case Type::U32:
+        return GenericValue( jl_u32(integral ? i : f) );
+    case Type::U64:
+        return GenericValue( jl_u64(integral ? i : f) );
+    case Type::FLOAT:
+        return GenericValue( jl_float(integral ? i : f) );
+    case Type::DOUBLE:
+        return GenericValue( jl_double(integral ? i : f) );
+    default:
+        assert(
+            false &&
+            "Trying to cast to an unhandled type in GenericValue" );
+        return GenericValue();
+    }
 }
 
 } // namespace Compiler
