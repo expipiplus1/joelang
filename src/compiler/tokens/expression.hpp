@@ -53,6 +53,7 @@ namespace JoeLang
         class GenericValue;
 
         class AssignmentOperator;
+        class LiteralExpression;
         class PostfixOperator;
     } // namespace Compiler
 } // namespace JoeLang
@@ -153,6 +154,16 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    /**
+      * Checks if e represents a LiteralExpression, either by being one, or
+      * being a constant variable
+      * \param e
+      *   The expression to check
+      * \returns nullptr if it wasn't a literal expression
+      */
+    static
+    LiteralExpression* GetLiteral( const std::unique_ptr<Expression>& e );
 
     /** Used for casting **/
     ExpressionTy GetSubClassID() const;
@@ -375,6 +386,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    void FoldConstants( std::unique_ptr<Expression>& self ) override;
 
     virtual
     Type GetReturnType() const override;
@@ -1127,6 +1141,9 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    std::unique_ptr<LiteralExpression> Create( const GenericValue& v );
 
     static
     bool classof( const Expression* e );

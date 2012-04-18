@@ -85,6 +85,29 @@ Expression::ExpressionTy Expression::GetSubClassID() const
     return m_subClassID;
 }
 
+LiteralExpression* Expression::GetLiteral(
+                                        const std::unique_ptr<Expression>& e )
+{
+    assert( e && "Trying to get the literal expression of nullptr" );
+
+    LiteralExpression* l = nullptr;
+    if( isa<LiteralExpression>( e ) )
+    {
+        l = static_cast<LiteralExpression*>( e.get() );
+    }
+    else if( isa<IdentifierExpression>( e ) )
+    {
+        IdentifierExpression* i =
+                        static_cast<IdentifierExpression*>( e.get() );
+        const std::shared_ptr<Expression>& read_expression =
+                                                        i->GetReadExpression();
+        if( isa<LiteralExpression>( read_expression ) )
+            l = static_cast<LiteralExpression*>( read_expression.get() );
+    }
+
+    return l;
+}
+
 bool Expression::classof( const Expression* e )
 {
     // An Expression is always an Expression
@@ -429,6 +452,90 @@ void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 
     m_leftSide->PerformSema( sema );
     m_rightSide->PerformSema( sema );
+}
+
+void BinaryOperatorExpression::FoldConstants(
+                                            std::unique_ptr<Expression>& self )
+{
+    m_leftSide->FoldConstants( m_leftSide );
+    m_rightSide->FoldConstants( m_rightSide );
+
+    LiteralExpression* l = GetLiteral( m_leftSide );
+    // If it wasn't constant, then we've done as much as we can
+    if( !l )
+        return;
+
+    LiteralExpression* r = GetLiteral( m_rightSide );
+    // If it wasn't constant, then we've done as much as we can
+    if( !r )
+        return;
+
+    // If it was constant, we can replace this node with just one of the values
+    GenericValue v;
+    GenericValue lv = l->GetValue();
+    GenericValue rv = r->GetValue();
+    switch( m_operator )
+    {
+    case Op::LOGICAL_OR:
+        v = GenericValue::Lor( l, r );
+        break;
+    case Op::LOGICAL_AND:
+        v = GenericValue::Land( l, r );
+        break;
+    case Op::OR:
+        v = GenericValue::Or( l, r );
+        break;
+    case Op::XOR:
+        v = GenericValue::Xor( l, r );
+        break;
+    case Op::AND:
+        v = GenericValue::And( l, r );
+        break;
+    case Op::EQUAL_TO:
+        v = GenericValue::EqualTo( l, r );
+        break;
+    case Op::NOT_EQUAL_TO:
+        v = GenericValue::NotEqualTo( l, r );
+        break;
+    case Op::LESS_THAN:
+        v = GenericValue::LessThan( l, r );
+        break;
+    case Op::GREATER_THAN:
+        v = GenericValue::GreaterThan( l, r );
+        break;
+    case Op::LESS_THAN_EQUALS:
+        v = GenericValue::LessThanEqual( l, r );
+        break;
+    case Op::GREATER_THAN_EQUALS:
+        v = GenericValue::GreaterThanEqual( l, r );
+        break;
+    case Op::LEFT_SHIFT:
+        v = GenericValue::Shl( l, r );
+        break;
+    case Op::RIGHT_SHIFT:
+        v = GenericValue::Shr( l, r );
+        break;
+    case Op::PLUS:
+        v = GenericValue::Add( l, r );
+        break;
+    case Op::MINUS:
+        v = GenericValue::Sub( l, r );
+        break;
+    case Op::MULTIPLY:
+        v = GenericValue::Mul( l, r );
+        break;
+    case Op::DIVIDE:
+        v = GenericValue::Div( l, r );
+        break;
+    case Op::MODULO:
+        v = GenericValue::Mod( l, r );
+        break;
+    }
+
+    assert( v.GetType() == GetReturnType() &&
+            "Return type mismatch in constant folding" );
+
+    self = LiteralExpression::Create( v );
 }
 
 Type BinaryOperatorExpression::GetReturnType() const
@@ -1644,6 +1751,62 @@ bool LiteralExpression::Parse( Parser& parser,
     // Cast to a LiteralExpression
     token.reset( static_cast<LiteralExpression*>( t.release() ) );
     return true;
+}
+
+std::unique_ptr<LiteralExpression> LiteralExpression::Create( const GenericValue& v )
+{
+    switch( v.GetType() )
+    {
+    case Type::BOOL:
+        return std::unique_ptr<LiteralExpression>(
+                                new BooleanLiteralExpression( v.GetBool() ) );
+    case Type::I8:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                                 v.GetI8(),
+                                 IntegerLiteralExpression::Suffix::CHAR ) );
+    case Type::I16:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                                 v.GetI16(),
+                                 IntegerLiteralExpression::Suffix::SHORT ) );
+    case Type::I32:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                                 v.GetI32(),
+                                 IntegerLiteralExpression::Suffix::INT ) );
+    case Type::I64:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                                 v.GetI64(),
+                                 IntegerLiteralExpression::Suffix::LONG ) );
+    case Type::U8:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                           v.GetU8(),
+                           IntegerLiteralExpression::Suffix::UNSIGNED_CHAR ) );
+    case Type::U16:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                           v.GetU16(),
+                           IntegerLiteralExpression::Suffix::UNSIGNED_SHORT ) );
+    case Type::U32:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                           v.GetU32(),
+                           IntegerLiteralExpression::Suffix::UNSIGNED_INT ) );
+    case Type::U64:
+        return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
+                           v.GetU64(),
+                           IntegerLiteralExpression::Suffix::UNSIGNED_LONG ) );
+    case Type::FLOAT:
+        return std::unique_ptr<LiteralExpression>(new FloatingLiteralExpression(
+                                v.GetFloat(),
+                                FloatingLiteralExpression::Suffix::SINGLE ) );
+    case Type::DOUBLE:
+        return std::unique_ptr<LiteralExpression>(new FloatingLiteralExpression(
+                                v.GetDouble(),
+                                FloatingLiteralExpression::Suffix::NONE ) );
+    case Type::STRING:
+        return std::unique_ptr<LiteralExpression>( new StringLiteralExpression(
+                                                            v.GetString() ) );
+    case Type::UNKNOWN_TYPE:
+        assert( false && "Trying to create LiteralExpression of unknown type" );
+    }
+    return nullptr;
 }
 
 bool LiteralExpression::classof( const Expression* e )
