@@ -306,6 +306,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
 
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const ConditionalExpression* e );
 private:
     std::unique_ptr<Expression> m_condition;
     std::unique_ptr<Expression> m_trueExpression;
@@ -356,7 +360,8 @@ public:
       * \param right_side
       *   The expression to the right of the operator
       */
-    BinaryOperatorExpression( Op op,
+    BinaryOperatorExpression( ExpressionTy sub_class_id,
+                              Op op,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side );
     virtual
@@ -393,6 +398,10 @@ public:
                                std::unique_ptr<Expression>& token,
                                const OperatorTerminalMap& operator_terminals );
 
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const BinaryOperatorExpression* e );
 protected:
     Op m_operator;
     std::unique_ptr<Expression> m_leftSide;
@@ -431,6 +440,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const LogicalOrExpression* e );
 };
 
 /**
@@ -464,6 +478,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const LogicalAndExpression* e );
 };
 
 /**
@@ -488,6 +507,10 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
 
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const InclusiveOrExpression* e );
 protected:
     InclusiveOrExpression( Op operator_terminal,
                           std::unique_ptr<Expression> left_side,
@@ -521,6 +544,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const ExclusiveOrExpression* e );
 };
 
 /**
@@ -548,6 +576,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const AndExpression* e );
 };
 
 /**
@@ -575,6 +608,11 @@ public:
 
     static
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const EqualityExpression* e );
 };
 
 /**
@@ -603,6 +641,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const RelationalExpression* e );
 };
 
 /**
@@ -630,6 +673,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const ShiftExpression* e );
 };
 
 /**
@@ -652,6 +700,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const AdditiveExpression* e );
 };
 
 /**
@@ -673,6 +726,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const MultiplicativeExpression* e );
 };
 
 /**
@@ -714,6 +772,11 @@ public:
     std::unique_ptr<Expression> Create(
                                   Type cast_type,
                                   std::unique_ptr<Expression> cast_expression );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const CastExpression* e );
 
 private:
     Type m_castType;
@@ -769,6 +832,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const UnaryExpression* e );
 private:
     Op m_operator;
     std::unique_ptr<Expression> m_expression;
@@ -804,6 +872,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const PostfixExpression* e );
 private:
     std::unique_ptr<Expression> m_expression;
     std::unique_ptr<PostfixOperator> m_postfixOperator;
@@ -966,13 +1039,6 @@ private:
 class PrimaryExpression : public JoeLang::Compiler::Expression
 {
 public:
-    PrimaryExpression();
-    virtual
-    ~PrimaryExpression();
-
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
@@ -1013,6 +1079,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
 
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const IdentifierExpression* e );
 private:
     std::string                 m_identifier;
     std::shared_ptr<Expression> m_readExpression;
@@ -1032,9 +1102,7 @@ private:
 class LiteralExpression : public JoeLang::Compiler::Expression
 {
 public:
-    LiteralExpression();
-    virtual
-    ~LiteralExpression();
+    LiteralExpression( ExpressionTy sub_class_id );
 
     /**
       * Does nothing
@@ -1051,6 +1119,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<Expression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const LiteralExpression* e );
 };
 
 /**
@@ -1100,6 +1173,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<IntegerLiteralExpression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const IntegerLiteralExpression* e );
 private:
     /**
       * This function parses an integer into value and suffix
@@ -1154,6 +1232,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<FloatingLiteralExpression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const FloatingLiteralExpression* e );
 private:
     /**
       * This function parses an float into value and suffix
@@ -1198,6 +1281,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<BooleanLiteralExpression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const BooleanLiteralExpression* e );
 private:
     bool m_value;
 };
@@ -1229,7 +1317,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<StringLiteralExpression>& token );
 
-
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const StringLiteralExpression* e );
 private:
     /**
       * This function parses an unescaped and quoted string into it's value
@@ -1270,6 +1361,11 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<CharacterLiteralExpression>& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const CharacterLiteralExpression* e );
 private:
     /**
       * This function parses an unescaped and quoted char into it's value

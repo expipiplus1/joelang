@@ -44,6 +44,7 @@
 
 #include <engine/types.hpp>
 #include <engine/internal/type_properties.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
@@ -60,7 +61,8 @@ namespace Compiler
 // Expression
 //------------------------------------------------------------------------------
 
-Expression::Expression()
+Expression::Expression( ExpressionTy sub_class_id )
+    :m_subClassID( sub_class_id )
 {
 }
 
@@ -79,6 +81,11 @@ bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
     return parser.Expect<AssignmentExpression>( token );
 }
 
+Expression::ExpressionTy Expression::GetSubClassID() const
+{
+    return m_subClassID;
+}
+
 bool Expression::classof( const Expression* e )
 {
     // An Expression is always an Expression
@@ -93,7 +100,8 @@ AssignmentExpression::AssignmentExpression(
                         std::unique_ptr<Expression> assignee,
                         std::unique_ptr<AssignmentOperator> assignment_operator,
                         std::unique_ptr<Expression> assigned_expression )
-    :m_assignee          ( std::move(assignee) )
+    :Expression( ExpressionTy::AssignmentExpression )
+    ,m_assignee          ( std::move(assignee) )
     ,m_assignmentOperator( std::move(assignment_operator) )
     ,m_assignedExpression( std::move(assigned_expression) )
 {
@@ -245,7 +253,8 @@ ConditionalExpression::ConditionalExpression(
                                   std::unique_ptr<Expression> condition,
                                   std::unique_ptr<Expression> true_expression,
                                   std::unique_ptr<Expression> false_expression )
-    :m_condition( std::move(condition) )
+    :Expression( ExpressionTy::ConditionalExpression )
+    ,m_condition( std::move(condition) )
     ,m_trueExpression( std::move(true_expression) )
     ,m_falseExpression( std::move(false_expression) )
 {
@@ -351,15 +360,27 @@ bool ConditionalExpression::Parse( Parser& parser,
     return true;
 }
 
+bool ConditionalExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::ConditionalExpression;
+}
+
+bool ConditionalExpression::classof( const ConditionalExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // BinaryOperatorExpression
 //------------------------------------------------------------------------------
 
 BinaryOperatorExpression::BinaryOperatorExpression(
+                                        ExpressionTy sub_class_id,
                                         Op op,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :m_operator( op )
+    :Expression( sub_class_id )
+    ,m_operator( op )
     ,m_leftSide( std::move(left_side) )
     ,m_rightSide( std::move(right_side) )
 {
@@ -462,6 +483,17 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
     return true;
 }
 
+bool BinaryOperatorExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() > ExpressionTy::BinaryOperatorExpression_Start &&
+           e->GetSubClassID() < ExpressionTy::BinaryOperatorExpression_End;
+}
+
+bool BinaryOperatorExpression::classof( const BinaryOperatorExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // Logical Or Expression
 //------------------------------------------------------------------------------
@@ -470,7 +502,8 @@ LogicalOrExpression::LogicalOrExpression(
                                         Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::LogicalOrExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -506,6 +539,16 @@ bool LogicalOrExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool LogicalOrExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::LogicalOrExpression;
+}
+
+bool LogicalOrExpression::classof( const LogicalOrExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // LogicalAndExpression
 //------------------------------------------------------------------------------
@@ -514,7 +557,8 @@ LogicalAndExpression::LogicalAndExpression(
                                         Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::LogicalAndExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -550,6 +594,16 @@ bool LogicalAndExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool LogicalAndExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::LogicalAndExpression;
+}
+
+bool LogicalAndExpression::classof( const LogicalAndExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // InclusiveOrExpression
 //------------------------------------------------------------------------------
@@ -558,7 +612,8 @@ InclusiveOrExpression::InclusiveOrExpression(
                                         Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::InclusiveOrExpression,
+                               operator_terminal,
                                std::move( left_side ),
                                std::move( right_side ) )
 {
@@ -598,6 +653,17 @@ bool InclusiveOrExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool InclusiveOrExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::InclusiveOrExpression;
+}
+
+bool InclusiveOrExpression::classof( const InclusiveOrExpression* e )
+{
+    return true;
+}
+
+
 //------------------------------------------------------------------------------
 // ExclusiveOrExpression
 //------------------------------------------------------------------------------
@@ -606,7 +672,8 @@ ExclusiveOrExpression::ExclusiveOrExpression(
                                         Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::ExclusiveOrExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -646,6 +713,16 @@ bool ExclusiveOrExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool ExclusiveOrExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::ExclusiveOrExpression;
+}
+
+bool ExclusiveOrExpression::classof( const ExclusiveOrExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // AndExpression
 //------------------------------------------------------------------------------
@@ -653,7 +730,8 @@ bool ExclusiveOrExpression::Parse( Parser& parser,
 AndExpression::AndExpression( Op operator_terminal,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::AndExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -694,6 +772,16 @@ bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
             ( parser, token, ops );
 }
 
+bool AndExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::AndExpression;
+}
+
+bool AndExpression::classof( const AndExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // EqualityExpression
 //------------------------------------------------------------------------------
@@ -701,7 +789,8 @@ bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 EqualityExpression::EqualityExpression( Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::EqualityExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -729,6 +818,16 @@ bool EqualityExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool EqualityExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::EqualityExpression;
+}
+
+bool EqualityExpression::classof( const EqualityExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // RelationalExpression
 //------------------------------------------------------------------------------
@@ -736,7 +835,8 @@ bool EqualityExpression::Parse( Parser& parser,
 RelationalExpression::RelationalExpression( Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::RelationalExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -766,6 +866,16 @@ bool RelationalExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool RelationalExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::RelationalExpression;
+}
+
+bool RelationalExpression::classof( const RelationalExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // ShiftExpression
 //------------------------------------------------------------------------------
@@ -773,7 +883,8 @@ bool RelationalExpression::Parse( Parser& parser,
 ShiftExpression::ShiftExpression( Op operator_terminal,
                                   std::unique_ptr<Expression> left_side,
                                   std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::ShiftExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -814,6 +925,16 @@ bool ShiftExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool ShiftExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::ShiftExpression;
+}
+
+bool ShiftExpression::classof( const ShiftExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // AdditiveExpression
 //------------------------------------------------------------------------------
@@ -821,7 +942,8 @@ bool ShiftExpression::Parse( Parser& parser,
 AdditiveExpression::AdditiveExpression( Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::AdditiveExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -844,6 +966,16 @@ bool AdditiveExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool AdditiveExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::AdditiveExpression;
+}
+
+bool AdditiveExpression::classof( const AdditiveExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // MultiplicativeExpression
 //------------------------------------------------------------------------------
@@ -852,7 +984,8 @@ MultiplicativeExpression::MultiplicativeExpression(
                                         Op operator_terminal,
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
-    :BinaryOperatorExpression( operator_terminal,
+    :BinaryOperatorExpression( ExpressionTy::MultiplicativeExpression,
+                               operator_terminal,
                                std::move(left_side),
                                std::move(right_side) )
 {
@@ -876,13 +1009,24 @@ bool MultiplicativeExpression::Parse( Parser& parser,
             ( parser, token, ops );
 }
 
+bool MultiplicativeExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::MultiplicativeExpression;
+}
+
+bool MultiplicativeExpression::classof( const MultiplicativeExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // CastExpression
 //------------------------------------------------------------------------------
 
 CastExpression::CastExpression( Type cast_type,
                                 std::unique_ptr<Expression> expression )
-    :m_castType( cast_type )
+    :Expression( ExpressionTy::CastExpression )
+    ,m_castType( cast_type )
     ,m_expression( std::move(expression) )
 {
 }
@@ -944,13 +1088,24 @@ std::unique_ptr<Expression> CastExpression::Create(
                                                 std::move(cast_expression) ) );
 }
 
+bool CastExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::CastExpression;
+}
+
+bool CastExpression::classof( const CastExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // UnaryExpression
 //------------------------------------------------------------------------------
 
 UnaryExpression::UnaryExpression( Op op,
                                   std::unique_ptr<Expression> expression )
-    :m_operator( op )
+    :Expression( ExpressionTy::UnaryExpression )
+    ,m_operator( op )
     ,m_expression( std::move(expression) )
 {
 }
@@ -1044,6 +1199,16 @@ bool UnaryExpression::Parse( Parser& parser,
     return parser.Expect<PostfixExpression>( token );
 }
 
+bool UnaryExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::UnaryExpression;
+}
+
+bool UnaryExpression::classof( const UnaryExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // PostfixExpression
 //------------------------------------------------------------------------------
@@ -1051,7 +1216,8 @@ bool UnaryExpression::Parse( Parser& parser,
 PostfixExpression::PostfixExpression(
                              std::unique_ptr<Expression> expression,
                              std::unique_ptr<PostfixOperator> postfix_operator )
-    :m_expression( std::move(expression) )
+    :Expression( ExpressionTy::PostfixExpression )
+    ,m_expression( std::move(expression) )
     ,m_postfixOperator( std::move(postfix_operator) )
 {
 }
@@ -1108,6 +1274,16 @@ bool PostfixExpression::Parse( Parser& parser,
         ret.reset( new PostfixExpression( std::move(ret),
                                           std::move(postfix_operator) ) );
     token = std::move(ret);
+    return true;
+}
+
+bool PostfixExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::PostfixExpression;
+}
+
+bool PostfixExpression::classof( const PostfixExpression* e )
+{
     return true;
 }
 
@@ -1329,18 +1505,6 @@ bool IncrementOrDecrementOperator::Parse(
 // PrimaryExpression
 //------------------------------------------------------------------------------
 
-PrimaryExpression::PrimaryExpression()
-{
-}
-
-PrimaryExpression::~PrimaryExpression()
-{
-}
-
-void PrimaryExpression::Print( int depth ) const
-{
-}
-
 bool PrimaryExpression::Parse( Parser& parser,
                                std::unique_ptr<Expression>& token )
 {
@@ -1370,7 +1534,8 @@ bool PrimaryExpression::Parse( Parser& parser,
 //------------------------------------------------------------------------------
 
 IdentifierExpression::IdentifierExpression( std::string identifier )
-    :m_identifier( std::move( identifier ) )
+    :Expression( ExpressionTy::IdentifierExpression )
+    ,m_identifier( std::move( identifier ) )
     ,m_readExpression( nullptr )
 {
     assert( !m_identifier.empty() );
@@ -1417,15 +1582,22 @@ bool IdentifierExpression::Parse( Parser& parser,
     return true;
 }
 
+bool IdentifierExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::IdentifierExpression;
+}
+
+bool IdentifierExpression::classof( const IdentifierExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // LiteralExpression
 //------------------------------------------------------------------------------
 
-LiteralExpression::LiteralExpression()
-{
-}
-
-LiteralExpression::~LiteralExpression()
+LiteralExpression::LiteralExpression( ExpressionTy sub_class_id )
+    :Expression( sub_class_id )
 {
 }
 
@@ -1435,11 +1607,6 @@ void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
-}
-
-bool LiteralExpression::IsConst() const
-{
-    return true;
 }
 
 bool LiteralExpression::Parse( Parser& parser,
@@ -1459,13 +1626,25 @@ bool LiteralExpression::Parse( Parser& parser,
     return true;
 }
 
+bool LiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() > ExpressionTy::LiteralExpression_Start &&
+           e->GetSubClassID() < ExpressionTy::LiteralExpression_End;
+}
+
+bool LiteralExpression::classof( const LiteralExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // IntegerlLiteralExpression
 //------------------------------------------------------------------------------
 
 IntegerLiteralExpression::IntegerLiteralExpression( unsigned long long value,
                                                     Suffix suffix )
-    :m_value( value )
+    :LiteralExpression( ExpressionTy::IntegerLiteralExpression )
+    ,m_value( value )
     ,m_suffix( suffix )
 {
 }
@@ -1607,13 +1786,24 @@ bool IntegerLiteralExpression::Parse(
     return true;
 }
 
+bool IntegerLiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::IntegerLiteralExpression;
+}
+
+bool IntegerLiteralExpression::classof( const IntegerLiteralExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // FloatingLiteralExpression
 //------------------------------------------------------------------------------
 
 FloatingLiteralExpression::FloatingLiteralExpression( double value,
                                                       Suffix suffix )
-    :m_value( value )
+    :LiteralExpression( ExpressionTy::FloatingLiteralExpression )
+    ,m_value( value )
     ,m_suffix( suffix )
 {
 }
@@ -1680,12 +1870,23 @@ bool FloatingLiteralExpression::Parse(
     return true;
 }
 
+bool FloatingLiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::FloatingLiteralExpression;
+}
+
+bool FloatingLiteralExpression::classof( const FloatingLiteralExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // BooleanLiteralExpression
 //------------------------------------------------------------------------------
 
 BooleanLiteralExpression::BooleanLiteralExpression( bool value )
-    :m_value( value )
+    :LiteralExpression( ExpressionTy::BooleanLiteralExpression )
+    ,m_value( value )
 {
 }
 
@@ -1724,6 +1925,16 @@ bool BooleanLiteralExpression::Parse(
     }
 
     return false;
+}
+
+bool BooleanLiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::BooleanLiteralExpression;
+}
+
+bool BooleanLiteralExpression::classof( const BooleanLiteralExpression* e )
+{
+    return true;
 }
 
 /**
@@ -1784,7 +1995,8 @@ char UnescapeCharacter( char c )
 //------------------------------------------------------------------------------
 
 StringLiteralExpression::StringLiteralExpression( std::string value )
-    :m_value( std::move(value) )
+    :LiteralExpression( ExpressionTy::BooleanLiteralExpression )
+    ,m_value( std::move(value) )
 {
 }
 
@@ -1856,12 +2068,23 @@ bool StringLiteralExpression::UnquoteAndUnescapeString(
     return true;
 }
 
+bool StringLiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::StringLiteralExpression;
+}
+
+bool StringLiteralExpression::classof( const StringLiteralExpression* e )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // CharacterLiteralExpression
 //------------------------------------------------------------------------------
 
 CharacterLiteralExpression::CharacterLiteralExpression( char value )
-    :m_value( value )
+    :LiteralExpression( ExpressionTy::CharacterLiteralExpression )
+    ,m_value( value )
 {
 }
 
@@ -1918,6 +2141,16 @@ bool CharacterLiteralExpression::UnquoteAndUnescapeChar(
     }
 
     unescaped_char = UnescapeCharacter( string[1] );
+    return true;
+}
+
+bool CharacterLiteralExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == ExpressionTy::CharacterLiteralExpression;
+}
+
+bool CharacterLiteralExpression::classof( const CharacterLiteralExpression* e )
+{
     return true;
 }
 
