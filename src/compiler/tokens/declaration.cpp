@@ -81,9 +81,9 @@ DeclarationBase::DeclarationTy DeclarationBase::GetSubClassID() const
     return m_subClassID;
 }
 
-// A DeclarationBase is always a DeclarationBase
 bool DeclarationBase::classof( const DeclarationBase* d )
 {
+    // A DeclarationBase is always a DeclarationBase
     return true;
 }
 
