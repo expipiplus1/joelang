@@ -484,8 +484,7 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
             return false;
 
         // Push this operator and expression to the list
-        rest.push_back( std::make_pair( op,
-                                        std::move( next ) ) );
+        rest.push_back( std::make_pair( op, std::move( next ) ) );
     }
 
     // for every operator+expression we have, set the lhs of the new left to
