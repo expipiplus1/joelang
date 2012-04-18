@@ -98,6 +98,21 @@ struct simplify_type<std::unique_ptr<T> >
 {
 };
 
+// Specialization for std::shared_ptr
+template<typename T>
+struct simplify_type<const std::shared_ptr<T> > {
+    typedef const T* SimpleType;
+    static SimpleType getSimplifiedValue( const std::shared_ptr<T> &Val) {
+        return Val.get();
+    }
+};
+
+template<typename T>
+struct simplify_type<std::shared_ptr<T> >
+        :public simplify_type<const std::shared_ptr<T> >
+{
+};
+
 // The core of the implementation of isa<X> is here; To and From should be
 // the names of classes.  This template can be specialized to customize the
 // implementation of isa<> without rewriting it from scratch.
