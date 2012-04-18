@@ -170,6 +170,18 @@ GenericValue::~GenericValue()
         m_stringValue.~string();
 }
 
+Type GenericValue::GetType() const
+{
+    return m_type;
+}
+
+jl_bool GenericValue::GetBool() const
+{
+    assert( m_type == Type::BOOL &&
+            "Trying to get the bool value from a non-bool GenericValue" );
+    return m_boolValue;
+}
+
 GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&

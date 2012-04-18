@@ -40,6 +40,7 @@ namespace Compiler
 
 class GenericValue
 {
+public:
     GenericValue();
     GenericValue( const GenericValue& g );
 
@@ -57,6 +58,17 @@ class GenericValue
     GenericValue( jl_string string_value );
 
     ~GenericValue();
+
+    /**
+      * \returns The type of this genericvalue
+      */
+    Type GetType() const;
+
+    /**
+      * This function will assert if this isn't a boolean GenericValue
+      * \returns The boolean value
+      */
+    jl_bool GetBool() const;
 
     /**
       * \defgroup GenericValue Binary operators
