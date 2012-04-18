@@ -43,6 +43,7 @@ class GenericValue
 public:
     GenericValue();
     GenericValue( const GenericValue& g );
+    const GenericValue& operator = ( const GenericValue& g );
 
     GenericValue( jl_bool   bool_value   );
     GenericValue( jl_i8     i8_value     );

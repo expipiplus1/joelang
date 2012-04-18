@@ -46,8 +46,14 @@ GenericValue::GenericValue()
 }
 
 GenericValue::GenericValue( const GenericValue& g )
-    :m_type( g.m_type )
 {
+    *this = g;
+}
+
+const GenericValue& GenericValue::operator = ( const GenericValue& g )
+{
+    m_type = g.m_type;
+
     switch( g.m_type )
     {
     case Type::BOOL:
@@ -89,6 +95,8 @@ GenericValue::GenericValue( const GenericValue& g )
     default:
         break;
     }
+
+    return *this;
 }
 
 GenericValue::GenericValue( jl_bool   bool_value   )
