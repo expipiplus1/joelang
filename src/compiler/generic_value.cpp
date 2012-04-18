@@ -182,6 +182,83 @@ jl_bool GenericValue::GetBool() const
     return m_boolValue;
 }
 
+jl_i8 GenericValue::GetI8() const
+{
+    assert( m_type == Type::I8 &&
+            "Trying to get the i8 value from a non-i8 GenericValue" );
+    return m_i8Value;
+}
+
+jl_i16 GenericValue::GetI16() const
+{
+    assert( m_type == Type::I16 &&
+            "Trying to get the i16 value from a non-i16 GenericValue" );
+    return m_i16Value;
+}
+
+jl_i32 GenericValue::GetI32() const
+{
+    assert( m_type == Type::I32 &&
+            "Trying to get the i32 value from a non-i32 GenericValue" );
+    return m_i32Value;
+}
+
+jl_i64 GenericValue::GetI64() const
+{
+    assert( m_type == Type::I64 &&
+            "Trying to get the i64 value from a non-i64 GenericValue" );
+    return m_i64Value;
+}
+
+jl_u8 GenericValue::GetU8() const
+{
+    assert( m_type == Type::U8 &&
+            "Trying to get the u8 value from a non-u8 GenericValue" );
+    return m_u8Value;
+}
+
+jl_u16 GenericValue::GetU16() const
+{
+    assert( m_type == Type::U16 &&
+            "Trying to get the u16 value from a non-u16 GenericValue" );
+    return m_u16Value;
+}
+
+jl_u32 GenericValue::GetU32() const
+{
+    assert( m_type == Type::U32 &&
+            "Trying to get the u32 value from a non-u32 GenericValue" );
+    return m_u32Value;
+}
+
+jl_u64 GenericValue::GetU64() const
+{
+    assert( m_type == Type::U64 &&
+            "Trying to get the u64 value from a non-u64 GenericValue" );
+    return m_u64Value;
+}
+
+jl_float GenericValue::GetFloat() const
+{
+    assert( m_type == Type::FLOAT &&
+            "Trying to get the float value from a non-float GenericValue" );
+    return m_floatValue;
+}
+
+jl_double GenericValue::GetDouble() const
+{
+    assert( m_type == Type::DOUBLE &&
+            "Trying to get the double value from a non-double GenericValue" );
+    return m_doubleValue;
+}
+
+const jl_string& GenericValue::GetString() const
+{
+    assert( m_type == Type::STRING &&
+            "Trying to get the string value from a non-string GenericValue" );
+    return m_stringValue;
+}
+
 GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&

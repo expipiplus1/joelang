@@ -64,11 +64,18 @@ public:
       */
     Type GetType() const;
 
-    /**
-      * This function will assert if this isn't a boolean GenericValue
-      * \returns The boolean value
-      */
-    jl_bool GetBool() const;
+    jl_bool          GetBool() const;
+    jl_i8            GetI8() const;
+    jl_i16           GetI16() const;
+    jl_i32           GetI32() const;
+    jl_i64           GetI64() const;
+    jl_u8            GetU8() const;
+    jl_u16           GetU16() const;
+    jl_u32           GetU32() const;
+    jl_u64           GetU64() const;
+    jl_float         GetFloat() const;
+    jl_double        GetDouble() const;
+    const jl_string& GetString() const;
 
     /**
       * \defgroup GenericValue Binary operators
