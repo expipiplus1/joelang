@@ -111,6 +111,10 @@ class GenericValue
       * \}
       */
 
+    /**
+      * \defgroup GenericValue Unary operators
+      * \{
+      */
     static
     GenericValue UnaryPlus( const GenericValue& g );
     static
@@ -119,6 +123,9 @@ class GenericValue
     GenericValue LogicalNot( const GenericValue& g );
     static
     GenericValue BitwiseNot( const GenericValue& g );
+    /**
+      * \}
+      */
 
 private:
     Type m_type;

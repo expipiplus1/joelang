@@ -50,7 +50,7 @@ class TechniqueDefinition;
 class TranslationUnit;
 
 /**
-  * \class AstBuilder
+  * \class SemaAnalyzer
   * \brief A class to perform semantic analysis on the AST
   *   suitable for code generation
   */
