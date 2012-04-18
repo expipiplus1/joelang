@@ -1180,6 +1180,28 @@ void CastExpression::PerformSema( SemaAnalyzer& sema )
     m_expression->PerformSema( sema );
 }
 
+void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
+{
+    m_expression->FoldConstants( m_expression );
+
+    LiteralExpression* l = GetLiteral( m_expression );
+
+    // If we are casting a literal expression, perform the cast now
+    if( l )
+    {
+        GenericValue v = GenericValue::Cast( m_castType, l->GetValue() );
+        self = LiteralExpression::Create( v );
+        return;
+    }
+
+    // It may not be a literal expression, but it may be another cast expression
+    if( isa<CastExpression>(m_expression) )
+    {
+        CastExpression* c = static_cast<CastExpression*>( m_expression.get() );
+        m_expression = std::move(c->m_expression);
+    }
+}
+
 Type CastExpression::GetReturnType() const
 {
     return m_castType;
@@ -1250,6 +1272,36 @@ void UnaryExpression::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Invalid type to unary operator: unknown_type" );
 
     m_expression->PerformSema( sema );
+}
+
+void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
+{
+    m_expression->FoldConstants( m_expression );
+
+    LiteralExpression* l = GetLiteral( m_expression );
+
+    if( l )
+    {
+        GenericValue v( l->GetValue() );
+
+        switch( m_operator )
+        {
+        case Op::PLUS:
+            self = LiteralExpression::Create( GenericValue::UnaryPlus( v ) );
+            return;
+        case Op::MINUS:
+            self = LiteralExpression::Create( GenericValue::UnaryMinus( v ) );
+            return;
+        case Op::BITWISE_NOT:
+            self = LiteralExpression::Create( GenericValue::BitwiseNot( v ) );
+            return;
+        case Op::LOGICAL_NOT:
+            self = LiteralExpression::Create( GenericValue::LogicalNot( v ) );
+            return;
+        default:
+            break;
+        }
+    }
 }
 
 Type UnaryExpression::GetReturnType() const

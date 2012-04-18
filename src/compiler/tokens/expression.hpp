@@ -776,6 +776,9 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
+    void FoldConstants( std::unique_ptr<Expression>& self ) override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -839,6 +842,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    void FoldConstants( std::unique_ptr<Expression>& self ) override;
 
     virtual
     Type GetReturnType() const override;
