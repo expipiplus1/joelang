@@ -40,6 +40,9 @@ namespace Compiler
 
 class GenericValue
 {
+    GenericValue();
+    GenericValue( const GenericValue& g );
+
     GenericValue( jl_bool   bool_value   );
     GenericValue( jl_i8     i8_value     );
     GenericValue( jl_i16    i16_value    );
@@ -53,6 +56,53 @@ class GenericValue
     GenericValue( jl_double double_value );
     GenericValue( jl_string string_value );
 
+    ~GenericValue();
+
+    static
+    GenericValue Lor ( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Land( const GenericValue& g1, const GenericValue& g2 );
+
+    static
+    GenericValue Or ( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Xor( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue And( const GenericValue& g1, const GenericValue& g2 );
+
+    static
+    GenericValue EqualTo    ( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue NotEqualTo ( const GenericValue& g1, const GenericValue& g2 );
+
+    static
+    GenericValue LessThan        ( const GenericValue& g1,
+                                   const GenericValue& g2 );
+    static
+    GenericValue GreaterThan     ( const GenericValue& g1,
+                                   const GenericValue& g2 );
+    static
+    GenericValue LessThanEqual   ( const GenericValue& g1,
+                                   const GenericValue& g2 );
+    static
+    GenericValue GreaterThanEqual( const GenericValue& g1,
+                                   const GenericValue& g2 );
+
+    static
+    GenericValue Shl    ( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Shr    ( const GenericValue& g1, const GenericValue& g2 );
+
+    static
+    GenericValue Add( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Sub( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Mul( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Div( const GenericValue& g1, const GenericValue& g2 );
+    static
+    GenericValue Mod( const GenericValue& g1, const GenericValue& g2 );
 private:
     Type m_type;
 
