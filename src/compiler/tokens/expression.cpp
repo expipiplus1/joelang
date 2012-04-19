@@ -331,7 +331,8 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
     {
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( m_condition.get() );
-        const std::shared_ptr<Expression>& read_expression = i->GetReadExpression();
+        const std::shared_ptr<Expression>& read_expression =
+                                                         i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
             l = static_cast<LiteralExpression*>( read_expression.get() );
     }
@@ -1473,7 +1474,8 @@ PostfixOperator::~PostfixOperator()
 {
 }
 
-bool PostfixOperator::Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token )
+bool PostfixOperator::Parse( Parser& parser,
+                             std::unique_ptr<PostfixOperator>& token )
 {
     // Try and parse any of the operators
     std::unique_ptr<Token> t;
@@ -1737,7 +1739,8 @@ void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
 }
 
-const std::shared_ptr<Expression>&  IdentifierExpression::GetReadExpression() const
+const std::shared_ptr<Expression>&
+                                 IdentifierExpression::GetReadExpression() const
 {
     return m_readExpression;
 }
@@ -1805,7 +1808,8 @@ bool LiteralExpression::Parse( Parser& parser,
     return true;
 }
 
-std::unique_ptr<LiteralExpression> LiteralExpression::Create( const GenericValue& v )
+std::unique_ptr<LiteralExpression> LiteralExpression::Create(
+                                                         const GenericValue& v )
 {
     switch( v.GetType() )
     {
