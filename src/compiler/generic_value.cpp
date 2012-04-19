@@ -1280,8 +1280,8 @@ GenericValue GenericValue::Cast( Type t, const GenericValue& g )
 
     union
     {
-        unsigned long long i;
-        double f;
+        jl_u64 i;
+        jl_double f;
     };
     bool integral = false;
 

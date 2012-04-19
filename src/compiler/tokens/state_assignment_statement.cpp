@@ -86,8 +86,6 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 
     m_expression->PerformSema( sema );
 
-    //TODO should constants be folded here?
-    //Perhaps not for source to source things
     m_expression->FoldConstants( m_expression );
 
     sema.LeaveScope();

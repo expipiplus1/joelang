@@ -117,15 +117,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 {
     StateAssignmentBase* sa;
 
-    if( state.GetType() == Type::STRING )
-    {
-        //TODO Get the string properly without that cast
-        sa = new ConstStateAssignment<jl_string>
-         ( static_cast<const State<jl_string>&>(state),
-           static_cast<const StringLiteralExpression&>(expression).GetString());
-        return std::unique_ptr<StateAssignmentBase>(sa);
-    }
-
     llvm::Type* t = GetLLVMType( state.GetType(), m_llvmContext );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
 

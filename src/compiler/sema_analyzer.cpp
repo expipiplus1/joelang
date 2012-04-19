@@ -81,8 +81,6 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 void SemaAnalyzer::DeclarePass( std::string name,
                                 std::unique_ptr<PassDefinition> definition )
 {
-    // TODO warning if name is funny
-
     if( definition )
         definition->PerformSema( *this );
 
@@ -255,12 +253,15 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 void SemaAnalyzer::DeclareVariable( std::string identifier,
                                     std::shared_ptr<Expression> value )
 {
-    // TODO warning if variable shadows something
-
     //If the value wasn't inserted
     if( !m_symbolStack.rbegin()->m_variables.insert(
             std::make_pair( std::move(identifier), std::move(value) ) ).second )
         Error( "Duplicate definition of variable: " + identifier );
+    else
+        for( const auto& s : m_symbolStack )
+            if( s.m_variables.find( identifier ) != s.m_variables.end() )
+                Error( "Declaration of " + identifier +
+                       " shadows previous declaration" );
 }
 
 std::shared_ptr<Expression> SemaAnalyzer::GetVariable(

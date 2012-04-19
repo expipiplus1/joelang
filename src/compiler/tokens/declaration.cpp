@@ -36,8 +36,9 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/sema_analyzer.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
@@ -74,7 +75,9 @@ bool DeclarationBase::Parse( Parser& parser,
                              EmptyDeclaration>( t ) )
         return false;
 
-    // TODO use something like llvm's casting operators
+    //TODO set up casting for every token
+    //assert( isa<DeclarationBase>( t ) &&
+            //"DeclarationBase parsed a non-declaration" );
     // Cast it back to a DeclarationBase because ExpectAnyOf only returns Token*
     token.reset( static_cast<DeclarationBase*>( t.release() ) );
     return true;

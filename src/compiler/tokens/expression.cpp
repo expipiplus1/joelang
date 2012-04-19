@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -176,7 +177,6 @@ void AssignmentExpression::Print(int depth) const
 bool AssignmentExpression::Parse( Parser& parser,
                                   std::unique_ptr<Expression>& token )
 {
-    // TODO clean this up
     std::unique_ptr<Expression> lhs_expression;
     if( !parser.Expect< ConditionalExpression >( lhs_expression ) )
         return false;
@@ -244,8 +244,6 @@ void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
-    //TODO constant folding
-
     m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
 
     Type t = GetReturnType();
@@ -818,8 +816,6 @@ AndExpression::~AndExpression()
 
 void AndExpression::PerformSema( SemaAnalyzer& sema )
 {
-    //TODO constant folding
-
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
@@ -1263,8 +1259,6 @@ Type UnaryExpression::GetReturnType() const
 
     switch( m_operator )
     {
-    //TODO should plus perform integer promotion
-    //TODO check for bad type matching here?
     case Op::PLUS:
     case Op::MINUS:
     case Op::INCREMENT:
@@ -1618,7 +1612,7 @@ bool LiteralExpression::classof( const LiteralExpression* e )
 // IntegerlLiteralExpression
 //------------------------------------------------------------------------------
 
-IntegerLiteralExpression::IntegerLiteralExpression( unsigned long long value,
+IntegerLiteralExpression::IntegerLiteralExpression( jl_u64 value,
                                                     Suffix suffix )
     :LiteralExpression( ExpressionTy::IntegerLiteralExpression )
     ,m_value( value )
@@ -1632,7 +1626,6 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 
 Type IntegerLiteralExpression::GetReturnType() const
 {
-    // TODO vary type if something doesn't fit
     switch( m_suffix )
     {
     case Suffix::CHAR:
@@ -1652,7 +1645,13 @@ Type IntegerLiteralExpression::GetReturnType() const
     case Suffix::UNSIGNED_LONG:
         return Type::U64;
     default:
-        return Type::I32;
+        return m_value <= jl_u64(std::numeric_limits<jl_i32>::max())
+                    ? Type::I32
+                    : m_value <= jl_u64(std::numeric_limits<jl_u32>::max())
+                        ? Type::U32
+                        : m_value <= jl_u64(std::numeric_limits<jl_i64>::max())
+                            ? Type::I64
+                            : Type::U64;
     }
 }
 
@@ -1689,7 +1688,7 @@ void IntegerLiteralExpression::Print( int depth ) const
 }
 
 bool IntegerLiteralExpression::ParseInteger( std::string string,
-                                             unsigned long long& value,
+                                             jl_u64& value,
                                              Suffix& suffix )
 {
     if( string.empty() )
@@ -1778,7 +1777,7 @@ bool IntegerLiteralExpression::Parse(
     if( !parser.ExpectTerminal( TerminalType::INTEGER_LITERAL, string ) )
         return false;
 
-    unsigned long long value;
+    jl_u64 value;
     Suffix suffix;
 
     if( !ParseInteger( string, value, suffix ) )

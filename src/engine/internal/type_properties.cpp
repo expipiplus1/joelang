@@ -45,7 +45,6 @@ Type GetCommonType( Type t1, Type t2 )
 {
     const static std::vector<Type> promotion_ordering =
     {
-        Type::UNKNOWN_TYPE,
         Type::DOUBLE,
         Type::FLOAT,
         Type::U64,
@@ -71,7 +70,7 @@ Type GetCommonType( Type t1, Type t2 )
         if( t1 == t || t2 == t )
             return t;
 
-    //TODO issue warning somewhere around here?
+    assert( false && "Trying to get the common type of unknown types" );
     return Type::UNKNOWN_TYPE;
 }
 

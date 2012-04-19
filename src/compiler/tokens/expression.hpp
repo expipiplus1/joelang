@@ -35,6 +35,7 @@
 #include <vector>
 
 #include <compiler/tokens/token.hpp>
+#include <engine/types.hpp>
 
 //------------------------------------------------------------------------------
 // Forward Declarations
@@ -1002,7 +1003,7 @@ public:
       *   The integer suffix
       */
     explicit
-    IntegerLiteralExpression( unsigned long long value,
+    IntegerLiteralExpression( jl_u64 value,
                               Suffix suffix );
     virtual
     ~IntegerLiteralExpression();
@@ -1037,10 +1038,10 @@ private:
       */
     static
     bool ParseInteger( std::string string,
-                       unsigned long long&  value,
+                       jl_u64&  value,
                        Suffix&     suffix );
 
-    unsigned long long m_value;
+    jl_u64 m_value;
     Suffix m_suffix;
 };
 
