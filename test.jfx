@@ -1,5 +1,3 @@
-pass u;
-
 technique t1
 {
     pass p1
@@ -14,13 +12,4 @@ technique t1
         my_floating_state = 2;
         my_string_state = "Hello, World!";
     }
-
-    u;
-}
-
-;;;
-
-pass e
-{
-    my_int_state = 333.;
 }
