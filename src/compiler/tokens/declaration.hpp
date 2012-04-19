@@ -37,12 +37,16 @@
 
 namespace JoeLang
 {
+
+class Technique;
+
 namespace Compiler
 {
 
-class SemaAnalyzer;
+class CodeGenerator;
 class Parser;
 class PassDefinition;
+class SemaAnalyzer;
 class TechniqueDefinition;
 
 /**
@@ -261,6 +265,14 @@ public:
 
     /** \returns this technique's name **/
     const std::string& GetName() const;
+
+    /**
+      * Generates the technique represented by this token.
+      * \param code_gen
+      *   The code generator used for creating llvm code.
+      * \returns The technique
+      */
+    Technique GenerateTechnique( CodeGenerator& code_gen ) const;
 
     /**
       * Prints this node in the CST

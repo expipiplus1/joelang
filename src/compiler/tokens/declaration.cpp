@@ -41,6 +41,8 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/technique.hpp>
+#include <engine/pass.hpp>
 
 namespace JoeLang
 {
@@ -260,6 +262,14 @@ const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
 const std::string& TechniqueDeclaration::GetName() const
 {
     return m_name;
+}
+
+Technique TechniqueDeclaration::GenerateTechnique(
+                                                 CodeGenerator& code_gen ) const
+{
+    std::vector<Pass> passes;
+    assert( false && "complete me" );
+    return Technique();
 }
 
 void TechniqueDeclaration::Print( int depth ) const
