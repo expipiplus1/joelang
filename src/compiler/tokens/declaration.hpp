@@ -45,6 +45,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Parser;
+class PassDeclarationOrIdentifier;
 class PassDefinition;
 class SemaAnalyzer;
 class TechniqueDefinition;
@@ -234,20 +235,24 @@ private:
   * \ingroup Tokens
   * \brief Matches a technique definition
   *
-  * TechniqueDeclaration = 'technique' identifier TechniqueDefinition
+  * TechniqueDeclaration = 'technique' identifier '{'
+  *                        (PassDeclarationOrIdentifier)* '}'
   */
 class TechniqueDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
+    using PassDeclarationVector =
+                    std::vector< std::unique_ptr<PassDeclarationOrIdentifier> >;
+
     /**
-      * This constructor asserts on a null definition
+      * This constructor Asserts on null declarations or identifiers
       * \param name
       *   The identifier for this technique
-      * \param definition
-      *   The definition for this technique
+      * \param passes
+      *   A vector of pass declarations or identifiers
       */
     TechniqueDeclaration( std::string name,
-                          std::unique_ptr<TechniqueDefinition> definition );
+                          PassDeclarationVector passes );
 
     virtual
     ~TechniqueDeclaration();
@@ -259,9 +264,6 @@ public:
       */
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
-
-    /** \returns this technique's definition **/
-    const TechniqueDefinition& GetDefinition() const;
 
     /** \returns this technique's name **/
     const std::string& GetName() const;
@@ -302,8 +304,8 @@ public:
 private:
     /** This technique's identifier **/
     std::string m_name;
-    /** This technique's definition **/
-    std::unique_ptr<TechniqueDefinition> m_definition;
+    /** This technique's passes **/
+    PassDeclarationVector m_passes;
 };
 
 /**

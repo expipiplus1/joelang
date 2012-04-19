@@ -97,53 +97,5 @@ private:
     StateAssignStmtVector   m_stateAssignments;
 };
 
-/**
-  * \class TechniqueDefinition
-  * \ingroup Tokens
-  * \brief Matches the definition of a technique
-  *
-  * TechniqueDefinition = '{' (PassDeclarationOrIdentifier)* '}'
-  */
-class TechniqueDefinition : public JoeLang::Compiler::Token
-{
-public:
-    using PassDeclarationVector =
-                    std::vector< std::unique_ptr<PassDeclarationOrIdentifier> >;
-    /**
-      * This constructor Asserts on null declarations or identifiers
-      * \param passes
-      *   A vector of pass declarations or identifiers
-      */
-    TechniqueDefinition( PassDeclarationVector passes );
-
-    void PerformSema( SemaAnalyzer& sema );
-
-    virtual
-    ~TechniqueDefinition();
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual void Print( int depth ) const;
-
-    /**
-      * Parses a technique definition
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \returns
-      *   true upon parsing successfully
-      *   false if the parse failed
-      */
-    static bool Parse( Parser& parser,
-                       std::unique_ptr<TechniqueDefinition>& token );
-
-private:
-    PassDeclarationVector m_passes;
-};
-
 } // namespace Compiler
 } // namespace JoeLang

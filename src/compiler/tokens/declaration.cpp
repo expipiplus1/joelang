@@ -234,14 +234,15 @@ bool PassDeclaration::classof( const PassDeclaration* d )
 // TechniqueDeclaration
 //------------------------------------------------------------------------------
 
-TechniqueDeclaration::TechniqueDeclaration(
-                               std::string name,
-                               std::unique_ptr<TechniqueDefinition> definition )
+TechniqueDeclaration::TechniqueDeclaration( std::string name,
+                                            PassDeclarationVector passes )
+
     :DeclarationBase( DeclarationTy::TechniqueDeclaration )
-    ,m_name( std::move( name ) )
-    ,m_definition( std::move( definition ) )
+    ,m_name( std::move(name) )
+    ,m_passes( std::move(passes) )
 {
-    assert( m_definition && "TechniqueDeclaration given a null definition" );
+    for( const auto& p : m_passes )
+        assert( p && "TechniqueDeclaration given a null pass" );
 }
 
 TechniqueDeclaration::~TechniqueDeclaration()
@@ -251,12 +252,8 @@ TechniqueDeclaration::~TechniqueDeclaration()
 void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     sema.DeclareTechnique( m_name );
-    m_definition->PerformSema( sema );
-}
-
-const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
-{
-    return *m_definition;
+    //for( auto& p : m_passes )
+        //p->PerformSema( sema );
 }
 
 const std::string& TechniqueDeclaration::GetName() const
@@ -278,16 +275,8 @@ void TechniqueDeclaration::Print( int depth ) const
         std::cout << " ";
 
     std::cout << "Technique: " << (m_name.size() ? m_name : "Unnamed") << "\n";
-    if( m_definition )
-    {
-        m_definition->Print( depth + 1);
-    }
-    else
-    {
-        for( int i = 0; i < depth * 4 + 4; ++i )
-            std::cout << " ";
-        std::cout << "No definition\n";
-    }
+    for( const auto& p : m_passes )
+        p->Print( depth + 1 );
 }
 
 bool TechniqueDeclaration::Parse( Parser& parser,
@@ -303,12 +292,22 @@ bool TechniqueDeclaration::Parse( Parser& parser,
         return false;
 
     // Technique Declarations always have a definition
-    std::unique_ptr<TechniqueDefinition> definition;
-    if( !parser.Expect<TechniqueDefinition>( definition ) )
+
+    // Start with an open brace
+    if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
+        return false;
+
+    // Try and parse the pass declarations
+    PassDeclarationVector pass_declarations;
+    parser.ExpectSequenceOf<PassDeclarationOrIdentifier>( pass_declarations );
+    CHECK_PARSER;
+
+    // End with a close brace
+    if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
     token.reset( new TechniqueDeclaration( std::move(name),
-                                           std::move(definition) ) );
+                                           std::move(pass_declarations) ) );
     return true;
 }
 
