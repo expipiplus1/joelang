@@ -1596,8 +1596,9 @@ std::unique_ptr<LiteralExpression> LiteralExpression::Create(
     case Type::STRING:
         return std::unique_ptr<LiteralExpression>( new StringLiteralExpression(
                                                             v.GetString() ) );
-    case Type::UNKNOWN_TYPE:
-        assert( false && "Trying to create LiteralExpression of unknown type" );
+    default:
+        assert( false &&
+                "Trying to create LiteralExpression with an unhandled type" );
     }
     return nullptr;
 }
