@@ -40,7 +40,9 @@
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/definition.hpp>
+#include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <engine/pass.hpp>
 
@@ -252,8 +254,8 @@ TechniqueDeclaration::~TechniqueDeclaration()
 void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     sema.DeclareTechnique( m_name );
-    //for( auto& p : m_passes )
-        //p->PerformSema( sema );
+    for( auto& p : m_passes )
+        p->PerformSema( sema );
 }
 
 const std::string& TechniqueDeclaration::GetName() const
@@ -265,8 +267,9 @@ Technique TechniqueDeclaration::GenerateTechnique(
                                                  CodeGenerator& code_gen ) const
 {
     std::vector<Pass> passes;
-    assert( false && "complete me" );
-    return Technique();
+    for( const auto& p : m_passes )
+        passes.push_back( p->GeneratePass( code_gen ) );
+    return Technique( m_name, std::move(passes) );
 }
 
 void TechniqueDeclaration::Print( int depth ) const
@@ -340,6 +343,18 @@ PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
 {
 }
 
+Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
+{
+    assert( m_definitionRef && "Trying to generate a pass with no definition" );
+    assert( *m_definitionRef && "Trying to generate an undefined pass" );
+
+    std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
+    for( const auto& s : (*m_definitionRef)->GetStateAssignments() )
+        state_assignments.push_back( s->GenerateStateAssignment( code_gen ) );
+    return Pass( IsIdentifier() ? m_identifier : m_declaration->GetName(),
+                 std::move(state_assignments) );
+}
+
 void PassDeclarationOrIdentifier::Print( int depth ) const
 {
     if( IsIdentifier() )
@@ -351,6 +366,23 @@ void PassDeclarationOrIdentifier::Print( int depth ) const
     else
     {
         m_declaration->Print( depth );
+    }
+}
+
+void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
+{
+    if( m_declaration )
+    {
+        m_declaration->PerformSema( sema );
+        m_definitionRef = sema.GetPass( m_declaration->GetName() );
+    }
+    else
+    {
+        SemaAnalyzer::PassDefinitionRef d = sema.GetPass( m_identifier );
+        if( !d )
+            sema.Error( "Use of undeclared pass: " + m_identifier );
+        else
+            m_definitionRef = d;
     }
 }
 

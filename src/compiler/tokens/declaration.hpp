@@ -38,6 +38,7 @@
 namespace JoeLang
 {
 
+class Pass;
 class Technique;
 
 namespace Compiler
@@ -336,12 +337,29 @@ public:
     ~PassDeclarationOrIdentifier();
 
     /**
+      * Generates the pass represented by the pass definition. This function
+      * will assert if it doesn't have a definition reference.
+      * \param code_gen
+      *   The code generator
+      * \returns the generated Pass
+      */
+    Pass GeneratePass( CodeGenerator& code_gen ) const;
+
+    /**
       * Prints this node in the CST
       * \param depth
       *   The indentation at which to print
       */
     virtual
     void    Print   ( int depth ) const override;
+
+    /**
+      * Resolves the identifier or performs sema on the pass
+      * \param sema
+      *   The semantic analyzer
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema );
 
     /** \returns if this token is an identifier for a pass **/
     bool                   IsIdentifier    () const;
@@ -372,6 +390,9 @@ private:
     std::string                      m_identifier;
     /** This token's declaration if it has one, otherwise nullptr **/
     std::unique_ptr<PassDeclaration> m_declaration;
+
+    /** The reference to the definition this token represents **/
+    std::shared_ptr<std::unique_ptr<PassDefinition> > m_definitionRef = nullptr;
 };
 
 
