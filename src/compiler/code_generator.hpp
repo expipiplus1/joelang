@@ -63,9 +63,7 @@ class TranslationUnit;
 class CodeGenerator
 {
 public:
-    // Passing techniques in here because of this bug
-    // http://gcc.gnu.org/bugzilla/show_bug.cgi?id=52591
-    CodeGenerator( const Context& context, std::vector<Technique>& techniques );
+    CodeGenerator( const Context& context );
     ~CodeGenerator();
 
     void GenerateCode(
@@ -124,8 +122,6 @@ private:
     const Context& m_context;
 
     bool m_good = true;
-
-    std::vector<Technique>& m_techniques;
 
     llvm::LLVMContext&              m_llvmContext;
     llvm::Module*                   m_llvmModule;

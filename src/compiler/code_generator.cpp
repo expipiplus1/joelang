@@ -62,10 +62,8 @@ namespace JoeLang
 namespace Compiler
 {
 
-CodeGenerator::CodeGenerator( const Context& context,
-                              std::vector<Technique>& techniques )
+CodeGenerator::CodeGenerator( const Context& context )
     :m_context( context )
-    ,m_techniques( techniques )
     ,m_llvmContext( llvm::getGlobalContext() )
     ,m_llvmModule( new llvm::Module( "", m_llvmContext ) )
     ,m_llvmBuilder( m_llvmContext )
@@ -83,7 +81,6 @@ void CodeGenerator::GenerateCode(
                  std::vector<Technique>& techniques,
                  std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
 {
-    //techniques = std::move(m_techniques);
     for( const auto& declaration : ast.GetDeclarations() )
     {
         if( isa<TechniqueDeclaration>(declaration) )
