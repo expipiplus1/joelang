@@ -57,6 +57,8 @@ class TranslationUnit;
 class SemaAnalyzer
 {
 public:
+    using PassDefinitionRef = std::shared_ptr<std::unique_ptr<PassDefinition> >;
+
     explicit
     SemaAnalyzer( const Context& context );
     ~SemaAnalyzer();
@@ -89,6 +91,14 @@ public:
       * \returns true if the pass has been declared
       */
     bool HasPass( const std::string& name ) const;
+
+    /**
+      * Gets the named pass
+      * \param name
+      *   The name of the pass
+      * \returns the pass definition or nullptr if there is no pass by that name
+      */
+    PassDefinitionRef GetPass( const std::string& name ) const;
 
     /**
       * Check to see if a state has been given to context
@@ -155,8 +165,7 @@ private:
         std::map<std::string, std::shared_ptr<Expression> > m_variables;
     };
 
-    using PassDefinitionMap = std::map<std::string,
-                                       std::unique_ptr<PassDefinition> >;
+    using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
 
     PassDefinitionMap        m_passDefinitions;
     std::vector<std::string> m_techniques;

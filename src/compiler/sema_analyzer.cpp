@@ -62,12 +62,24 @@ SemaAnalyzer::~SemaAnalyzer()
 
 bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 {
+    // Perform sema on the tree
     cst.PerformSema( *this );
+
+    // Check for undefined things
+    for( const auto& p : m_passDefinitions )
+    {
+        // If this pass is referenced and not defined
+        if( !p.second.unique() &&
+            !(*p.second) )
+            Error( "Use of undefined pass " + p.first );
+    }
+
+    // Return success or not
     return m_good;
 }
 
 void SemaAnalyzer::DeclarePass( std::string name,
-                              std::unique_ptr<PassDefinition> definition )
+                                std::unique_ptr<PassDefinition> definition )
 {
     // TODO warning if name is funny
 
@@ -78,12 +90,18 @@ void SemaAnalyzer::DeclarePass( std::string name,
 
     if( d == m_passDefinitions.end() )
         // If we haven't seen this name before: insert it
-        m_passDefinitions[name] = std::move(definition);
+        m_passDefinitions[name] =
+                        std::make_shared<std::unique_ptr<PassDefinition> >(
+                                                        std::move(definition) );
     else
     {
-        if( d->second && definition )
-            // If it's being defined now and was defined before
-            Error( "Multiple definition of pass " + name );
+        if( definition )
+        {
+            if( d->second  )
+                // If it's being defined now and was defined before
+                Error( "Multiple definition of pass " + name );
+            (*d->second) = std::move(definition);
+        }
     }
 }
 
@@ -102,6 +120,15 @@ void SemaAnalyzer::DeclareTechnique( std::string name )
 bool SemaAnalyzer::HasPass( const std::string& name ) const
 {
     return m_passDefinitions.count( name ) > 0;
+}
+
+SemaAnalyzer::PassDefinitionRef SemaAnalyzer::GetPass(
+                                                 const std::string& name ) const
+{
+    PassDefinitionMap::const_iterator p = m_passDefinitions.find( name );
+    if( p == m_passDefinitions.end() )
+        return nullptr;
+    return p->second;
 }
 
 bool SemaAnalyzer::HasState( const std::string& name ) const
@@ -208,7 +235,7 @@ std::map<std::string, std::shared_ptr<LiteralExpression> >
         break;
     case Type::STRING:
         for( const auto& e :
-             static_cast<const State<jl_string>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_string>&>(state_base).GetEnumerations())
             ret[e.first] =
                     std::make_shared<StringLiteralExpression>( e.second );
         break;
@@ -240,7 +267,7 @@ std::shared_ptr<Expression> SemaAnalyzer::GetVariable(
                                                 const std::string& identifier )
 {
     // iterate in reverse because deeper scopes take priority
-    for( std::vector<SymbolMaps>::const_reverse_iterator it = m_symbolStack.rbegin();
+    for( auto it = m_symbolStack.rbegin();
          it != m_symbolStack.rend(); ++it )
     {
         const auto& v = it->m_variables.find( identifier );
