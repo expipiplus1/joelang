@@ -40,6 +40,10 @@
 namespace JoeLang
 {
 
+Pass::Pass()
+{
+}
+
 Pass::Pass( std::string name )
     :m_name( std::move(name) )
 {
@@ -48,7 +52,7 @@ Pass::Pass( std::string name )
 Pass::Pass( std::string name,
             std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
     :m_name( std::move(name) )
-    ,m_stateAssignments( std::move( state_assignments ) )
+    ,m_stateAssignments( std::move(state_assignments) )
 {
     for( const auto& sa : m_stateAssignments )
         assert( sa && "null state assignment given to Pass" );

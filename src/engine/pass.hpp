@@ -38,14 +38,15 @@ namespace JoeLang
 
 class StateAssignmentBase;
 
+// TODO using definition for vector
 class Pass
 {
 public:
-    Pass() = default;
+    Pass();
     explicit
     Pass( std::string name );
     Pass( std::string name,
-          std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments );
+          std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments);
     ~Pass();
 
     void SetState() const;
@@ -56,7 +57,7 @@ public:
 
 private:
     std::string m_name;
-    std::vector< std::unique_ptr<StateAssignmentBase> > m_stateAssignments;
+    std::vector<std::unique_ptr<StateAssignmentBase> > m_stateAssignments;
 };
 
 } // namespace JoeLang
