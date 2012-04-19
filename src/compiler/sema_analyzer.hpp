@@ -52,7 +52,6 @@ class TranslationUnit;
 /**
   * \class SemaAnalyzer
   * \brief A class to perform semantic analysis on the AST
-  *   suitable for code generation
   */
 class SemaAnalyzer
 {
