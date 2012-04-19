@@ -222,6 +222,8 @@ std::size_t ReadCharacterLiteral( std::string::const_iterator begin,
 std::size_t ReadStringLiteral(    std::string::const_iterator begin,
                                   std::string::const_iterator end );
 
+bool IsValidIdentifier( const std::string& identifier );
+
 //matches [0-9a-fA-F]
 bool IsHexDigit( char c );
 //matches [a-zA-Z_]

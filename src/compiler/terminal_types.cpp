@@ -520,6 +520,13 @@ std::size_t ReadStringLiteral( std::string::const_iterator begin,
     return p - begin;
 }
 
+bool IsValidIdentifier( const std::string& identifier )
+{
+    return identifier.size() != 0 &&
+           ReadIdentifier( identifier.begin(), identifier.end() ) ==
+                                                              identifier.size();
+}
+
 bool IsHexDigit( char c )
 {
     return ( c >= '0' && c <= '9' ) ||
