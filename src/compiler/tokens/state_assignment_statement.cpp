@@ -70,16 +70,23 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
     sema.EnterScope();
 
-    const StateBase* state = sema.GetState( m_identifier );
+    m_state = sema.GetState( m_identifier );
     if( !state )
         sema.Error( "Undeclared state: " + m_identifier );
     else
-        sema.LoadStateEnumerants( *state );
+        sema.LoadStateEnumerants( *m_state );
 
     // TODO cast to state type here
     m_expression->PerformSema( sema );
 
     sema.LeaveScope();
+}
+
+std::unique_ptr<StateAssignmentBase>
+                    StateAssignmentStatement::GenerateStateAssignment(
+                                                 CodeGenerator& code_gen ) const
+{
+    assert( false );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

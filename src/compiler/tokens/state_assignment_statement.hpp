@@ -36,6 +36,9 @@
 
 namespace JoeLang
 {
+
+class StateAssignmentBase;
+
 namespace Compiler
 {
 
@@ -67,6 +70,9 @@ public:
 
     void PerformSema( SemaAnalyzer& sema );
 
+    std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
+                                                CodeGenerator& code_gen ) const;
+
     /**
       * Prints this node in the CST
       * \param depth
@@ -92,6 +98,9 @@ private:
     std::string m_identifier;
     /** The expression to assign to the state **/
     std::unique_ptr<Expression> m_expression;
+
+    /** The State being set by this assignment **/
+    StateBase* m_state = nullptr;
 };
 
 } // namespace Compiler
