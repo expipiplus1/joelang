@@ -47,6 +47,7 @@ public:
     Pass( std::string name );
     Pass( std::string name,
           std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments);
+    Pass( Pass&& p ) = default;
     ~Pass();
 
     void SetState() const;
