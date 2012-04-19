@@ -359,7 +359,12 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 
 void PassDeclarationOrIdentifier::Print( int depth ) const
 {
-    if( IsIdentifier() )
+    if( m_definitionRef &&
+        *m_definitionRef )
+    {
+        (*m_definitionRef)->Print( depth );
+    }
+    else if( IsIdentifier() )
     {
         for( int i = 0; i < depth * 4; ++i )
             std::cout << " ";

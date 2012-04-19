@@ -56,7 +56,6 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
         return nullptr;
 
     TranslationUnit& ast = *parser.GetTranslationUnit();
-    ast.Print();
 
     SemaAnalyzer sema( m_context );
     if( !sema.BuildAst( ast ) )
