@@ -45,17 +45,29 @@ public:
     GenericValue( const GenericValue& g );
     const GenericValue& operator = ( const GenericValue& g );
 
+    explicit
     GenericValue( jl_bool   bool_value   );
+    explicit
     GenericValue( jl_i8     i8_value     );
+    explicit
     GenericValue( jl_i16    i16_value    );
+    explicit
     GenericValue( jl_i32    i32_value    );
+    explicit
     GenericValue( jl_i64    i64_value    );
+    explicit
     GenericValue( jl_u8     u8_value     );
+    explicit
     GenericValue( jl_u16    u16_value    );
+    explicit
     GenericValue( jl_u32    u32_value    );
+    explicit
     GenericValue( jl_u64    u64_value    );
+    explicit
     GenericValue( jl_float  float_value  );
+    explicit
     GenericValue( jl_double double_value );
+    explicit
     GenericValue( jl_string string_value );
 
     ~GenericValue();
