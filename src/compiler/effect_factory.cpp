@@ -48,7 +48,8 @@ EffectFactory::EffectFactory( const Context& context )
 {
 }
 
-std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string& string )
+std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
+                                                     const std::string& string )
 {
     Parser parser;
     if( !parser.Parse( string ) )
@@ -57,8 +58,8 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
     ast->Print(0);
 
-    SemaAnalyzer a( m_context );
-    a.BuildAst( *ast );
+    SemaAnalyzer sema( m_context );
+    sema.BuildAst( *ast );
 
     return nullptr;
 
