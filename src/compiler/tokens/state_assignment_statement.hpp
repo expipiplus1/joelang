@@ -38,10 +38,12 @@ namespace JoeLang
 {
 
 class StateAssignmentBase;
+class StateBase;
 
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
 class Parser;
 class SemaAnalyzer;
@@ -100,7 +102,7 @@ private:
     std::unique_ptr<Expression> m_expression;
 
     /** The State being set by this assignment **/
-    StateBase* m_state = nullptr;
+    const StateBase* m_state = nullptr;
 };
 
 } // namespace Compiler

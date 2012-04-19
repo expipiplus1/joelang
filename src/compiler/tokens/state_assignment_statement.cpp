@@ -71,7 +71,7 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     sema.EnterScope();
 
     m_state = sema.GetState( m_identifier );
-    if( !state )
+    if( !m_state )
         sema.Error( "Undeclared state: " + m_identifier );
     else
         sema.LoadStateEnumerants( *m_state );
