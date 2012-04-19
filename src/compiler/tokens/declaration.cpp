@@ -243,8 +243,10 @@ TechniqueDeclaration::TechniqueDeclaration( std::string name,
     ,m_name( std::move(name) )
     ,m_passes( std::move(passes) )
 {
+#ifndef NDEBUG
     for( const auto& p : m_passes )
         assert( p && "TechniqueDeclaration given a null pass" );
+#endif
 }
 
 TechniqueDeclaration::~TechniqueDeclaration()

@@ -55,8 +55,10 @@ namespace Compiler
 PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
     :m_stateAssignments( std::move(state_assignments) )
 {
+#ifndef NDEBUG
     for( const auto& s : m_stateAssignments )
         assert( s && "null StateAssignmentStatement given to PassDefinition" );
+#endif
 }
 
 PassDefinition::~PassDefinition()

@@ -55,8 +55,10 @@ Pass::Pass(
     :m_name( std::move(name) )
     ,m_stateAssignments( std::move(state_assignments) )
 {
+#ifndef NDEBUG
     for( const auto& sa : m_stateAssignments )
         assert( sa && "null state assignment given to Pass" );
+#endif
 }
 
 Pass::~Pass()

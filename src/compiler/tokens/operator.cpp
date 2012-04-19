@@ -174,8 +174,10 @@ ArgumentListOperator::ArgumentListOperator(
         ArgumentExpressionVector argument_expressions )
     :m_argumentExpressions( std::move(argument_expressions) )
 {
+#ifndef NDEBUG
     for( const auto& e : m_argumentExpressions )
         assert( e && "ArgumentListOperator given a null argument expression" );
+#endif
 }
 
 ArgumentListOperator::~ArgumentListOperator()
