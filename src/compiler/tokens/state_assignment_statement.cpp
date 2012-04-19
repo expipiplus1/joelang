@@ -35,10 +35,13 @@
 #include <string>
 #include <utility>
 
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
+#include <engine/state.hpp>
+#include <engine/state_assignment.hpp>
 
 namespace JoeLang
 {
@@ -76,8 +79,16 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     else
         sema.LoadStateEnumerants( *m_state );
 
-    // TODO cast to state type here
+    m_expression->ResolveIdentifiers( sema );
+
+    m_expression = CastExpression::Create( m_state->GetType(),
+                                           std::move(m_expression) );
+
     m_expression->PerformSema( sema );
+
+    //TODO should constants be folded here?
+    //Perhaps not for source to source things
+    m_expression->FoldConstants( m_expression );
 
     sema.LeaveScope();
 }
@@ -86,7 +97,86 @@ std::unique_ptr<StateAssignmentBase>
                     StateAssignmentStatement::GenerateStateAssignment(
                                                  CodeGenerator& code_gen ) const
 {
-    assert( false );
+    Type t = m_state->GetType();
+    assert( m_expression->GetReturnType() == t &&
+            "Trying to create a state assignment with mismatched types" );
+
+    LiteralExpression* l = Expression::GetLiteral( m_expression );
+
+    // If this is just a constant return a ConstStateAssignment
+    if( l )
+    {
+        GenericValue v( l->GetValue() );
+        switch( t )
+        {
+        case Type::BOOL:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_bool>(
+                                 static_cast<const State<jl_bool>&>(*m_state),
+                                 v.GetBool() ) );
+        case Type::I8:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_i8>(
+                                 static_cast<const State<jl_i8>&>(*m_state),
+                                 v.GetI8() ) );
+        case Type::I16:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_i16>(
+                                 static_cast<const State<jl_i16>&>(*m_state),
+                                 v.GetI16() ) );
+        case Type::I32:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_i32>(
+                                 static_cast<const State<jl_i32>&>(*m_state),
+                                 v.GetI32() ) );
+        case Type::I64:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_i64>(
+                                 static_cast<const State<jl_i64>&>(*m_state),
+                                 v.GetI64() ) );
+        case Type::U8:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_u8>(
+                                 static_cast<const State<jl_u8>&>(*m_state),
+                                 v.GetU8() ) );
+        case Type::U16:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_u16>(
+                                 static_cast<const State<jl_u16>&>(*m_state),
+                                 v.GetU16() ) );
+        case Type::U32:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_u32>(
+                                 static_cast<const State<jl_u32>&>(*m_state),
+                                 v.GetU32() ) );
+        case Type::U64:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_u64>(
+                                 static_cast<const State<jl_u64>&>(*m_state),
+                                 v.GetU64() ) );
+        case Type::FLOAT:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_float>(
+                                 static_cast<const State<jl_float>&>(*m_state),
+                                 v.GetFloat() ) );
+        case Type::DOUBLE:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_double>(
+                                 static_cast<const State<jl_double>&>(*m_state),
+                                 v.GetDouble() ) );
+        case Type::STRING:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_string>(
+                                 static_cast<const State<jl_string>&>(*m_state),
+                                 v.GetString() ) );
+        default:
+            assert( false &&
+             "Trying to create a ConstStateAssignment with an unhandled type" );
+            return nullptr;
+        }
+    }
+    assert( false && "TODO generate non const things" );
+    return nullptr;
 }
 
 void StateAssignmentStatement::Print( int depth ) const
