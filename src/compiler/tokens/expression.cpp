@@ -478,58 +478,58 @@ void BinaryOperatorExpression::FoldConstants(
     switch( m_operator )
     {
     case Op::LOGICAL_OR:
-        v = GenericValue::Lor( l, r );
+        v = GenericValue::Lor( lv, rv );
         break;
     case Op::LOGICAL_AND:
-        v = GenericValue::Land( l, r );
+        v = GenericValue::Land( lv, rv );
         break;
     case Op::OR:
-        v = GenericValue::Or( l, r );
+        v = GenericValue::Or( lv, rv );
         break;
     case Op::XOR:
-        v = GenericValue::Xor( l, r );
+        v = GenericValue::Xor( lv, rv );
         break;
     case Op::AND:
-        v = GenericValue::And( l, r );
+        v = GenericValue::And( lv, rv );
         break;
     case Op::EQUAL_TO:
-        v = GenericValue::EqualTo( l, r );
+        v = GenericValue::EqualTo( lv, rv );
         break;
     case Op::NOT_EQUAL_TO:
-        v = GenericValue::NotEqualTo( l, r );
+        v = GenericValue::NotEqualTo( lv, rv );
         break;
     case Op::LESS_THAN:
-        v = GenericValue::LessThan( l, r );
+        v = GenericValue::LessThan( lv, rv );
         break;
     case Op::GREATER_THAN:
-        v = GenericValue::GreaterThan( l, r );
+        v = GenericValue::GreaterThan( lv, rv );
         break;
     case Op::LESS_THAN_EQUALS:
-        v = GenericValue::LessThanEqual( l, r );
+        v = GenericValue::LessThanEqual( lv, rv );
         break;
     case Op::GREATER_THAN_EQUALS:
-        v = GenericValue::GreaterThanEqual( l, r );
+        v = GenericValue::GreaterThanEqual( lv, rv );
         break;
     case Op::LEFT_SHIFT:
-        v = GenericValue::Shl( l, r );
+        v = GenericValue::Shl( lv, rv );
         break;
     case Op::RIGHT_SHIFT:
-        v = GenericValue::Shr( l, r );
+        v = GenericValue::Shr( lv, rv );
         break;
     case Op::PLUS:
-        v = GenericValue::Add( l, r );
+        v = GenericValue::Add( lv, rv );
         break;
     case Op::MINUS:
-        v = GenericValue::Sub( l, r );
+        v = GenericValue::Sub( lv, rv );
         break;
     case Op::MULTIPLY:
-        v = GenericValue::Mul( l, r );
+        v = GenericValue::Mul( lv, rv );
         break;
     case Op::DIVIDE:
-        v = GenericValue::Div( l, r );
+        v = GenericValue::Div( lv, rv );
         break;
     case Op::MODULO:
-        v = GenericValue::Mod( l, r );
+        v = GenericValue::Mod( lv, rv );
         break;
     }
 
