@@ -257,6 +257,11 @@ const TechniqueDefinition& TechniqueDeclaration::GetDefinition() const
     return *m_definition;
 }
 
+const std::string& TechniqueDeclaration::GetName() const
+{
+    return m_name;
+}
+
 void TechniqueDeclaration::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )

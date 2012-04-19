@@ -259,6 +259,9 @@ public:
     /** \returns this technique's definition **/
     const TechniqueDefinition& GetDefinition() const;
 
+    /** \returns this technique's name **/
+    const std::string& GetName() const;
+
     /**
       * Prints this node in the CST
       * \param depth
