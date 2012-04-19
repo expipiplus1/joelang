@@ -299,7 +299,8 @@ GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
     return ret;
 }
 
-GenericValue GenericValue::Land( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::Land( const GenericValue& g1,
+                                 const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to land GenericValues of differing type" );
@@ -471,7 +472,8 @@ GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
     return ret;
 }
 
-GenericValue GenericValue::EqualTo( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::EqualTo( const GenericValue& g1,
+                                    const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare equality of GenericValues of differing type" );
@@ -517,13 +519,15 @@ GenericValue GenericValue::EqualTo( const GenericValue& g1, const GenericValue& 
         ret.m_boolValue = g1.m_stringValue == g2.m_stringValue;
         break;
     default:
-        assert( false && "Trying to compare equality of GenericValues of unknown type" );
+        assert( false &&
+                "Trying to compare equality of GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
 }
 
-GenericValue GenericValue::NotEqualTo( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::NotEqualTo( const GenericValue& g1,
+                                       const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare equality of GenericValues of differing type" );
@@ -569,13 +573,15 @@ GenericValue GenericValue::NotEqualTo( const GenericValue& g1, const GenericValu
         ret.m_boolValue = g1.m_stringValue != g2.m_stringValue;
         break;
     default:
-        assert( false && "Trying to compare equality of GenericValues of unknown type" );
+        assert( false &&
+                "Trying to compare equality of GenericValues of unknown type" );
     }
     ret.m_type = Type::BOOL;
     return ret;
 }
 
-GenericValue GenericValue::LessThan( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::LessThan( const GenericValue& g1,
+                                     const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
@@ -627,7 +633,8 @@ GenericValue GenericValue::LessThan( const GenericValue& g1, const GenericValue&
     return ret;
 }
 
-GenericValue GenericValue::GreaterThan( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::GreaterThan( const GenericValue& g1,
+                                        const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
@@ -679,7 +686,8 @@ GenericValue GenericValue::GreaterThan( const GenericValue& g1, const GenericVal
     return ret;
 }
 
-GenericValue GenericValue::LessThanEqual( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::LessThanEqual( const GenericValue& g1,
+                                          const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
@@ -731,7 +739,8 @@ GenericValue GenericValue::LessThanEqual( const GenericValue& g1, const GenericV
     return ret;
 }
 
-GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1, const GenericValue& g2 )
+GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1,
+                                             const GenericValue& g2 )
 {
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );

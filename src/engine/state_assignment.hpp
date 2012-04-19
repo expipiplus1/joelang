@@ -83,7 +83,7 @@ template<typename T>
 class ConstStateAssignment : public StateAssignmentBase
 {
     static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
-                   "Can't create a ConstStateAssignment with an unhandled type" );
+                   "Can't create a ConstStateAssignment with unhandled type" );
 public:
     ConstStateAssignment( const State<T>& state, T value );
     virtual

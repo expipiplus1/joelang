@@ -121,8 +121,8 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     {
         //TODO Get the string properly without that cast
         sa = new ConstStateAssignment<jl_string>
-             ( static_cast<const State<jl_string>&>(state),
-               static_cast<const StringLiteralExpression&>(expression).GetString() );
+         ( static_cast<const State<jl_string>&>(state),
+           static_cast<const StringLiteralExpression&>(expression).GetString());
         return std::unique_ptr<StateAssignmentBase>(sa);
     }
 
@@ -136,10 +136,11 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                         false );
     assert( prototype && "Error generating empty function prototype" );
 
-    llvm::Function* function = llvm::Function::Create( prototype,
-                                                       llvm::Function::ExternalLinkage,
-                                                       "",
-                                                       m_llvmModule );
+    llvm::Function* function = llvm::Function::Create(
+                                                prototype,
+                                                llvm::Function::ExternalLinkage,
+                                                "",
+                                                m_llvmModule );
     assert( function && "Error generating llvm function" );
 
     llvm::BasicBlock* body = llvm::BasicBlock::Create( m_llvmContext,
@@ -164,7 +165,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         return nullptr;
     }
 
-    void* function_ptr = m_llvmExecutionEngine->getPointerToFunction( function );
+    void* function_ptr = m_llvmExecutionEngine->getPointerToFunction(function);
 
     switch( state.GetType() )
     {
@@ -263,11 +264,13 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
     if( IsFloatingPoint( type ) )
     {
         if( IsFloatingPoint( e_type ) )
-            return m_llvmBuilder.CreateFPCast( e_code,
-                                               GetLLVMType( type, m_llvmContext ) );
+            return m_llvmBuilder.CreateFPCast(
+                                           e_code,
+                                           GetLLVMType( type, m_llvmContext ) );
         if( IsSigned( e_type ) )
-            return m_llvmBuilder.CreateSIToFP( e_code,
-                                               GetLLVMType( type, m_llvmContext ) );
+            return m_llvmBuilder.CreateSIToFP(
+                                           e_code,
+                                           GetLLVMType( type, m_llvmContext ) );
         return m_llvmBuilder.CreateUIToFP( e_code,
                                            GetLLVMType( type, m_llvmContext ) );
     }
@@ -294,6 +297,7 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
 // Unary Operators
 //
 
+
 /*
 llvm::Value* CodeGenerator::CreateNeg( const Expression& e )
 {
@@ -316,14 +320,16 @@ llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 // Todo typing for all of these
 //
 
-llvm::Value* CodeGenerator::CreateLOr( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateLOr( const Expression& l,
+                                       const Expression& r )
 {
     llvm::Value* bool_l = CreateCast( l, Type::BOOL );
     llvm::Value* bool_r = CreateCast( r, Type::BOOL );
     return m_llvmBuilder.CreateOr( bool_l, bool_r );
 }
 
-llvm::Value* CodeGenerator::CreateLAnd( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateLAnd( const Expression& l,
+                                        const Expression& r )
 {
     llvm::Value* bool_l = CreateCast( l, Type::BOOL );
     llvm::Value* bool_r = CreateCast( r, Type::BOOL );
@@ -336,67 +342,78 @@ llvm::Value* CodeGenerator::CreateOr( const Expression& l, const Expression& r )
                                    r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateXor( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateXor( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateXor( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateAnd( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateAnd( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateAnd( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateEq( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateEq( const Expression& l,
+                                      const Expression& r )
 {
     return m_llvmBuilder.CreateICmpEQ( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateNeq( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateICmpNE( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateLT( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateLT( const Expression& l,
+                                      const Expression& r )
 {
     return m_llvmBuilder.CreateICmpSLT( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateGT( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateGT( const Expression& l,
+                                      const Expression& r )
 {
     return m_llvmBuilder.CreateICmpSGT( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateLTE( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateLTE( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateICmpSLE( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateGTE( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateGTE( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateICmpSGE( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateShl( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateShl( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateShl( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateShr( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateShr( const Expression& l,
+                                       const Expression& r )
 {
     return m_llvmBuilder.CreateAShr( l.CodeGen( *this ),
                                      r.CodeGen( *this ) );
 }
 
-llvm::Value* CodeGenerator::CreateAdd( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
+                                       const Expression& r )
 {
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
     llvm::Value* l_casted = CreateCast( l, common_type );
@@ -408,7 +425,8 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l, const Expression& r 
         return m_llvmBuilder.CreateAdd( l_casted, r_casted );
 }
 
-llvm::Value* CodeGenerator::CreateSub( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateSub( const Expression& l,
+                                       const Expression& r )
 {
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
     llvm::Value* l_casted = CreateCast( l, common_type );
@@ -420,7 +438,8 @@ llvm::Value* CodeGenerator::CreateSub( const Expression& l, const Expression& r 
         return m_llvmBuilder.CreateSub( l_casted, r_casted );
 }
 
-llvm::Value* CodeGenerator::CreateMul( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateMul( const Expression& l,
+                                       const Expression& r )
 {
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
     llvm::Value* l_casted = CreateCast( l, common_type );
@@ -432,7 +451,8 @@ llvm::Value* CodeGenerator::CreateMul( const Expression& l, const Expression& r 
         return m_llvmBuilder.CreateMul( l_casted, r_casted );
 }
 
-llvm::Value* CodeGenerator::CreateDiv( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateDiv( const Expression& l,
+                                       const Expression& r )
 {
     Type common_type = GetCommonType( l.GetReturnType(), r.GetReturnType() );
     llvm::Value* l_casted = CreateCast( l, common_type );
@@ -447,7 +467,8 @@ llvm::Value* CodeGenerator::CreateDiv( const Expression& l, const Expression& r 
             return m_llvmBuilder.CreateUDiv( l_casted, r_casted );
 }
 
-llvm::Value* CodeGenerator::CreateMod( const Expression& l, const Expression& r )
+llvm::Value* CodeGenerator::CreateMod( const Expression& l,
+                                       const Expression& r )
 {
     if( IsFloatingPoint( l.GetReturnType() ) ||
         IsFloatingPoint( r.GetReturnType() ) )

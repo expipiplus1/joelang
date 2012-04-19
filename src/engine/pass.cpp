@@ -49,8 +49,9 @@ Pass::Pass( std::string name )
 {
 }
 
-Pass::Pass( std::string name,
-            std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
+Pass::Pass(
+        std::string name,
+        std::vector< std::unique_ptr<StateAssignmentBase> > state_assignments )
     :m_name( std::move(name) )
     ,m_stateAssignments( std::move(state_assignments) )
 {

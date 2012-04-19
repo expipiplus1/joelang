@@ -114,7 +114,8 @@ const std::vector<StateBase*>& Context::GetStates() const
     return m_states;
 }
 
-void Context::SetErrorCallback( std::function<void(std::string)> error_callback )
+void Context::SetErrorCallback(
+                               std::function<void(std::string)> error_callback )
 {
     m_errorCallback = std::move(error_callback);
 }

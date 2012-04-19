@@ -117,11 +117,16 @@ const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
 //
 const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 {
-    { TerminalType::INTEGER_LITERAL,   { ReadIntegerLiteral,   "integer literal"   } },
-    { TerminalType::FLOATING_LITERAL,  { ReadFloatingLiteral,  "floating literal"  } },
-    { TerminalType::CHARACTER_LITERAL, { ReadCharacterLiteral, "character literal" } },
-    { TerminalType::STRING_LITERAL,    { ReadStringLiteral,    "string literal"    } },
-    { TerminalType::IDENTIFIER,        { ReadIdentifier,       "identifier"        } },
+    { TerminalType::INTEGER_LITERAL,   { ReadIntegerLiteral,
+                                         "integer literal"   } },
+    { TerminalType::FLOATING_LITERAL,  { ReadFloatingLiteral,
+                                         "floating literal"  } },
+    { TerminalType::CHARACTER_LITERAL, { ReadCharacterLiteral,
+                                         "character literal" } },
+    { TerminalType::STRING_LITERAL,    { ReadStringLiteral,
+                                         "string literal"    } },
+    { TerminalType::IDENTIFIER,        { ReadIdentifier,
+                                         "identifier"        } },
 };
 
 //
@@ -147,7 +152,8 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
     std::map<TerminalType, LiteralTerminal>::const_iterator literal_iterator;
-    std::map<TerminalType, FunctionalTerminal>::const_iterator functional_iterator;
+    std::map<TerminalType, FunctionalTerminal>::const_iterator
+                                                            functional_iterator;
 
     functional_iterator = g_ignoredTerminals.find( terminal_type );
     if( functional_iterator != g_ignoredTerminals.end() )
@@ -287,8 +293,11 @@ std::size_t ReadIdentifier( std::string::const_iterator begin,
         ++p;
 
     for( const auto& terminal_reader : g_keywordTerminals )
-        if( std::size_t( p - begin ) == terminal_reader.second.matched_string.size() &&
-            std::equal( begin, p, terminal_reader.second.matched_string.begin() ) )
+        if( std::size_t( p - begin ) ==
+                                terminal_reader.second.matched_string.size() &&
+            std::equal( begin,
+                        p,
+                        terminal_reader.second.matched_string.begin() ) )
             return 0;
 
     return p - begin;

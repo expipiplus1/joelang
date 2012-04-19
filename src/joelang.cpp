@@ -54,17 +54,20 @@ int main( int argc, char** argv )
                            nullptr,
                            nullptr );
 
-    JoeLang::State<bool> my_bool_state( "my_bool_state",
-                                        std::map<std::string,bool>({{"on",true},
-                                                                    {"off", false}}) );
+    JoeLang::State<bool> my_bool_state(
+                                "my_bool_state",
+                                std::map<std::string,bool>({{"on",true},
+                                                            {"off", false}}) );
     my_bool_state.SetCallbacks( [](bool v) -> void
                                   {std::cout << "setting my_bool_state to "
                                              << v << std::endl;},
                                 nullptr,
                                 nullptr );
 
-    JoeLang::State<std::string> my_string_state( "my_string_state",
-                                                 std::map<std::string, std::string>({{"string_enumerant","string_enumerant"}}));
+    JoeLang::State<std::string> my_string_state(
+                    "my_string_state",
+                    std::map<std::string, std::string>({{"string_enumerant",
+                                                         "string_enumerant"}}));
     my_string_state.SetCallbacks( [](std::string v) -> void
                                   {std::cout << "setting my_string_state to "
                                              << v << std::endl;},

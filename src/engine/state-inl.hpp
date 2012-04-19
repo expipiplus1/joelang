@@ -67,9 +67,12 @@ void State<T>::SetCallbacks( std::function<void(T)> set_callback,
                              std::function<void()> reset_callback,
                              std::function<bool()> validate_callback )
 {
-    m_setCallback   = set_callback ? set_callback : DefaultStateSetCallback<T>;
-    m_resetCallback = reset_callback ? reset_callback : DefaultStateResetCallback;
-    m_validateCallback   = validate_callback ? validate_callback : DefaultStateValidateCallback;
+    m_setCallback   = set_callback ? set_callback
+                                   : DefaultStateSetCallback<T>;
+    m_resetCallback = reset_callback ? reset_callback
+                                     : DefaultStateResetCallback;
+    m_validateCallback   = validate_callback ? validate_callback
+                                             : DefaultStateValidateCallback;
 }
 
 template<typename T>

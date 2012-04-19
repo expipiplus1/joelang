@@ -219,7 +219,7 @@ std::size_t Lexer::GetLineNumber() const
 
 void Lexer::ConsumeIgnoredTerminals()
 {
-    int chars_read;
+    int chars_read = 0;
     // While we keep having eaten something, try and parse the next terminal
     do
     {
