@@ -80,6 +80,8 @@ public:
     virtual
     void                    Print   ( int depth ) const;
 
+    const StateAssignStmtVector& GetStateAssignments() const;
+
     /**
       * Parses a pass definition
       * \param parser

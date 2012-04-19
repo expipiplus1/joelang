@@ -75,6 +75,12 @@ void PassDefinition::Print( int depth ) const
         s->Print( depth );
 }
 
+const PassDefinition::StateAssignStmtVector&
+                                    PassDefinition::GetStateAssignments() const
+{
+    return m_stateAssignments;
+}
+
 bool PassDefinition::Parse( Parser& parser,
                             std::unique_ptr<PassDefinition>& token )
 {
