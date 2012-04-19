@@ -51,6 +51,7 @@
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 #include <engine/internal/type_properties.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -61,7 +62,8 @@ namespace JoeLang
 namespace Compiler
 {
 
-CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& techniques )
+CodeGenerator::CodeGenerator( const Context& context,
+                              std::vector<Technique>& techniques )
     :m_context( context )
     ,m_techniques( techniques )
     ,m_llvmContext( llvm::getGlobalContext() )
@@ -69,24 +71,29 @@ CodeGenerator::CodeGenerator( const Context& context, std::vector<Technique>& te
     ,m_llvmBuilder( m_llvmContext )
     ,m_llvmExecutionEngine( llvm::ExecutionEngine::createJIT( m_llvmModule ) )
 {
-    assert( m_llvmExecutionEngine );
+    assert( m_llvmExecutionEngine && "Couldn't create a jit" );
 }
 
 CodeGenerator::~CodeGenerator()
 {
 }
 
-bool CodeGenerator::GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
-                                  std::vector<Technique>& techniques,
-                                  std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
+void CodeGenerator::GenerateCode(
+                 const TranslationUnit& ast,
+                 std::vector<Technique>& techniques,
+                 std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
 {
-    //for( const auto& declaration : ast->GetDeclarations() )
-        //declaration->Accept( *this );
-
     //techniques = std::move(m_techniques);
+    for( const auto& declaration : ast.GetDeclarations() )
+    {
+        if( isa<TechniqueDeclaration>(declaration) )
+        {
+            TechniqueDeclaration* t =
+                        static_cast<TechniqueDeclaration*>( declaration.get() );
+            techniques.push_back( t->GenerateTechnique( *this ) );
+        }
+    }
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
-
-    return m_good;
 }
 
 void CodeGenerator::Error( const std::string& message )

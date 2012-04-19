@@ -68,16 +68,18 @@ public:
     CodeGenerator( const Context& context, std::vector<Technique>& techniques );
     ~CodeGenerator();
 
-    bool GenerateCode( const std::unique_ptr<TranslationUnit>& ast,
-                       std::vector<Technique>& techniques,
-                       std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
+    void GenerateCode(
+                const TranslationUnit& ast,
+                std::vector<Technique>& techniques,
+                std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
 
 
     void Visit( DeclarationBase& p );
     void Visit( TechniqueDeclaration& t );
 
-    std::unique_ptr<StateAssignmentBase> GenerateStateAssignment( const StateBase& state,
-                                                                  const Expression& expression ) ;
+    std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
+                                                 const StateBase& state,
+                                                 const Expression& expression );
 
     void Error( const std::string& message );
 

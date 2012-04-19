@@ -55,25 +55,22 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     if( !parser.Parse( string ) )
         return nullptr;
 
-    const std::unique_ptr<TranslationUnit>& ast = parser.GetTranslationUnit();
-    ast->Print();
+    TranslationUnit& ast = *parser.GetTranslationUnit();
+    ast.Print();
 
     SemaAnalyzer sema( m_context );
-    if( !sema.BuildAst( *ast ) )
+    if( !sema.BuildAst( ast ) )
         return nullptr;
-
-
-    return nullptr;
 
     std::vector<Technique> techniques;
     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 
     CodeGenerator code_generator( m_context, techniques );
-    if( !code_generator.GenerateCode( ast, techniques, llvm_execution_engine ) )
-        return nullptr;
+    code_generator.GenerateCode( ast, techniques, llvm_execution_engine );
 
-    return std::unique_ptr<Effect>( new Effect( std::move(techniques),
-                                                std::move( llvm_execution_engine ) ) );
+    return std::unique_ptr<Effect>( new Effect(
+                                           std::move(techniques),
+                                           std::move(llvm_execution_engine) ) );
 }
 
 } // namespace Compiler
