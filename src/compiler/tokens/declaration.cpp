@@ -72,6 +72,7 @@ bool DeclarationBase::Parse( Parser& parser,
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf< TechniqueDeclaration,
                              PassDeclaration,
+                             VariableOrFunctionDeclaration,
                              EmptyDeclaration>( t ) )
         return false;
 
@@ -327,6 +328,37 @@ bool TechniqueDeclaration::classof( const DeclarationBase* d )
 bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 {
     return true;
+}
+
+//------------------------------------------------------------------------------
+// VariableOrFunctionDeclaration
+//------------------------------------------------------------------------------
+
+VariableOrFunctionDeclaration::VariableOrFunctionDeclaration()
+    :DeclarationBase( DeclarationTy::VariableOrFunctionDeclaration )
+{
+}
+
+VariableOrFunctionDeclaration::~VariableOrFunctionDeclaration()
+{
+}
+
+void VariableOrFunctionDeclaration::Print( int depth ) const
+{
+    for( int i = 0; i < depth; ++i )
+        std::cout << "    ";
+    std::cout << "declaration";
+}
+
+void VariableOrFunctionDeclaration::PerformSema( SemaAnalyzer& sema )
+{
+}
+
+bool VariableOrFunctionDeclaration::Parse(
+                          Parser& parser,
+                          std::unique_ptr<VariableOrFunctionDeclaration>& token )
+{
+    return false;
 }
 
 //------------------------------------------------------------------------------

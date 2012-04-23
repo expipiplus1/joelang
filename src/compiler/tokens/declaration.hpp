@@ -67,7 +67,8 @@ public:
     {
         EmptyDeclaration,
         PassDeclaration,
-        TechniqueDeclaration
+        TechniqueDeclaration,
+        VariableOrFunctionDeclaration
     };
 
     DeclarationBase( DeclarationTy sub_class_id );
@@ -307,6 +308,33 @@ private:
     std::string m_name;
     /** This technique's passes **/
     PassDeclarationVector m_passes;
+};
+
+//------------------------------------------------------------------------------
+// VariableOrFunctionDeclaration
+//------------------------------------------------------------------------------
+/**
+  * \class VariableOrFunctionDeclaration
+  * \ingroup Tokens
+  * \brief A C declaration
+  */
+class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
+{
+public:
+    VariableOrFunctionDeclaration();
+
+    virtual
+    ~VariableOrFunctionDeclaration();
+
+    virtual
+    void Print( int depth ) const override;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+
+    static
+    bool Parse( Parser& parser,
+                std::unique_ptr<VariableOrFunctionDeclaration>& token );
 };
 
 /**
