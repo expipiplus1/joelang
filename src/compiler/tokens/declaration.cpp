@@ -333,8 +333,10 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 // VariableOrFunctionDeclaration
 //------------------------------------------------------------------------------
 
-VariableOrFunctionDeclaration::VariableOrFunctionDeclaration()
+VariableOrFunctionDeclaration::VariableOrFunctionDeclaration(
+        std::unique_ptr<DeclarationSpecifiers> decl_specs )
     :DeclarationBase( DeclarationTy::VariableOrFunctionDeclaration )
+    ,m_declSpecs( std::move(decl_specs) )
 {
 }
 
@@ -357,9 +359,35 @@ bool VariableOrFunctionDeclaration::Parse(
                           Parser& parser,
                           std::unique_ptr<VariableOrFunctionDeclaration>& token )
 {
+    std::unique_ptr<DeclarationSpecifiers> decl_specs;
+    if( !parser.Expect<DeclarationSpecifiers>( decl_specs ) )
+        return false;
+
     return false;
 }
 
+//------------------------------------------------------------------------------
+// DeclarationSpecifiers
+//------------------------------------------------------------------------------
+
+DeclarationSpecifiers::DeclarationSpecifiers()
+{
+}
+
+DeclarationSpecifiers::~DeclarationSpecifiers()
+{
+}
+
+void DeclarationSpecifiers::Print( int depth ) const
+{
+}
+
+bool DeclarationSpecifiers::Parse(
+                                Parser& parser,
+                                std::unique_ptr<DeclarationSpecifiers>& token )
+{
+    return false;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

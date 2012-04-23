@@ -44,6 +44,7 @@ namespace Compiler
 {
 
 class CodeGenerator;
+class DeclarationSpecifiers;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -320,8 +321,8 @@ private:
 class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
-    VariableOrFunctionDeclaration();
-
+    VariableOrFunctionDeclaration(
+                            std::unique_ptr<DeclarationSpecifiers> decl_specs );
     virtual
     ~VariableOrFunctionDeclaration();
 
@@ -334,6 +335,28 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<VariableOrFunctionDeclaration>& token );
+
+private:
+    std::unique_ptr<DeclarationSpecifiers> m_declSpecs;
+};
+
+/**
+  * \class DeclarationSpecifiers
+  * \ingroup Tokens
+  * \brief A class to hold the specifiers for one declaration
+  */
+class DeclarationSpecifiers : public JoeLang::Compiler::Token
+{
+public:
+    DeclarationSpecifiers();
+    virtual
+    ~DeclarationSpecifiers();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static bool Parse( Parser& parser,
+                       std::unique_ptr<DeclarationSpecifiers>& token );
 };
 
 } // namespace Compiler
