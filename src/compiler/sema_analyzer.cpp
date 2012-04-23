@@ -95,7 +95,7 @@ void SemaAnalyzer::DeclarePass( std::string name,
     {
         if( definition )
         {
-            if( d->second  )
+            if( *d->second  )
                 // If it's being defined now and was defined before
                 Error( "Multiple definition of pass " + name );
             (*d->second) = std::move(definition);
