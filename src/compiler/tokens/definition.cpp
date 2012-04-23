@@ -42,6 +42,8 @@
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
+#include <engine/pass.hpp>
+#include <engine/state_assignment.hpp>
 
 namespace JoeLang
 {
@@ -101,6 +103,133 @@ bool PassDefinition::Parse( Parser& parser,
         return false;
 
     token.reset( new PassDefinition( std::move(state_assignments) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// PassDeclarationOrIdentifier
+//------------------------------------------------------------------------------
+
+PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
+        std::string                      identifier,
+        std::unique_ptr<PassDeclaration> declaration )
+    :m_identifier ( std::move(identifier)  )
+    ,m_declaration( std::move(declaration) )
+{
+    // Assert if both are full, or none are
+    assert( m_identifier.empty() == bool(m_declaration) &&
+            "PassDeclarationOrIdentifier must have one and only one value" );
+}
+
+PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
+{
+}
+
+Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
+{
+    assert( m_definitionRef && "Trying to generate a pass with no definition" );
+    assert( *m_definitionRef && "Trying to generate an undefined pass" );
+
+    std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
+    for( const auto& s : (*m_definitionRef)->GetStateAssignments() )
+        state_assignments.push_back( s->GenerateStateAssignment( code_gen ) );
+    return Pass( IsIdentifier() ? m_identifier : m_declaration->GetName(),
+                 std::move(state_assignments) );
+}
+
+void PassDeclarationOrIdentifier::Print( int depth ) const
+{
+    if( m_definitionRef &&
+        *m_definitionRef )
+    {
+        (*m_definitionRef)->Print( depth );
+    }
+    else if( IsIdentifier() )
+    {
+        for( int i = 0; i < depth * 4; ++i )
+            std::cout << " ";
+        std::cout << m_identifier;
+    }
+    else
+    {
+        m_declaration->Print( depth );
+    }
+}
+
+void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
+{
+    if( m_declaration )
+    {
+        m_declaration->PerformSema( sema );
+        m_definitionRef = sema.GetPass( m_declaration->GetName() );
+    }
+    else
+    {
+        SemaAnalyzer::PassDefinitionRef d = sema.GetPass( m_identifier );
+        if( !d )
+            sema.Error( "Use of undeclared pass: " + m_identifier );
+        else
+            m_definitionRef = d;
+    }
+}
+
+bool PassDeclarationOrIdentifier::IsIdentifier() const
+{
+    return !m_identifier.empty();
+}
+
+const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
+{
+    assert( IsIdentifier() &&
+            "Can't get the identifier of a PassDeclarationOrIdentifier without "
+            "an identifier" );
+    return m_identifier;
+}
+
+const PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration() const
+{
+    assert( m_declaration &&
+            "Can't get the declaration of a PassDeclarationOrIdentifier "
+            "without a declaration" );
+    return *m_declaration;
+}
+
+PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration()
+{
+    assert( m_declaration &&
+            "Can't get the declaration of a PassDeclarationOrIdentifier "
+            "without a declaration" );
+    return *m_declaration;
+}
+
+bool PassDeclarationOrIdentifier::Parse(
+                           Parser& parser,
+                           std::unique_ptr<PassDeclarationOrIdentifier>& token )
+{
+    std::string identifier;
+    // Try to parse an identifier into identifier
+    if( parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
+    {
+        // This must be terminated by a semicolon
+        if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
+            return false;
+
+        // Construct a PassDeclarationOrIdentifier with an identifier
+        token.reset( new PassDeclarationOrIdentifier( std::move(identifier),
+                                                      nullptr ) );
+        return true;
+    }
+    // The lexer may be out of step
+    CHECK_PARSER;
+
+    // This must be a declaration
+    std::unique_ptr<PassDeclaration> declaration;
+    if( !parser.Expect<PassDeclaration>( declaration ) )
+        return false;
+
+    // Construct a PassDeclarationOrIdentifier with a declaration
+    token.reset( new PassDeclarationOrIdentifier( "",
+                                                  std::move(declaration) ) );
     return true;
 }
 

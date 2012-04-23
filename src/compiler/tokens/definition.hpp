@@ -30,17 +30,23 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
+
+class Pass;
+
 namespace Compiler
 {
 
+class CodeGenerator;
 class SemaAnalyzer;
 class Parser;
+class PassDeclaration;
 class PassDeclarationOrIdentifier;
 class StateAssignmentStatement;
 
@@ -97,6 +103,92 @@ public:
 
 private:
     StateAssignStmtVector   m_stateAssignments;
+};
+
+/**
+  * \class PassDeclarationOrIdentifier
+  * \ingroup Tokens
+  * \brief A helper token for TechniqueDefinitions
+  *
+  * This token matches either an identifier or a pass declaration
+  *
+  * PassDeclarationOrIdentifier =   identifier ';'
+  *                               | PassDeclaration
+  */
+class PassDeclarationOrIdentifier : public JoeLang::Compiler::Token
+{
+public:
+    /**
+      * This constructor will assert if the definition is not null and the name
+      * is not of zero length
+      * \param identifier
+      *   The identifier for this pass
+      * \param declaration
+      *   This pass's declaration if it has one, otherwise nullptr
+      */
+    PassDeclarationOrIdentifier( std::string                      identifier,
+                                 std::unique_ptr<PassDeclaration> declaration );
+
+    virtual
+    ~PassDeclarationOrIdentifier();
+
+    /**
+      * Generates the pass represented by the pass definition. This function
+      * will assert if it doesn't have a definition reference.
+      * \param code_gen
+      *   The code generator
+      * \returns the generated Pass
+      */
+    Pass GeneratePass( CodeGenerator& code_gen ) const;
+
+    /**
+      * Prints this node in the CST
+      * \param depth
+      *   The indentation at which to print
+      */
+    virtual
+    void    Print   ( int depth ) const override;
+
+    /**
+      * Resolves the identifier or performs sema on the pass
+      * \param sema
+      *   The semantic analyzer
+      */
+    virtual
+    void PerformSema( SemaAnalyzer& sema );
+
+    /** \returns if this token is an identifier for a pass **/
+    bool                   IsIdentifier    () const;
+    /** This funciton will assert if this token represents a declaration
+      * \returns this token's identifier **/
+    const std::string&     GetIdentifier   () const;
+    /** This function will assert if this token represents an identifier
+      * \returns this token's declaration **/
+    const PassDeclaration& GetDeclaration  () const;
+    PassDeclaration&       GetDeclaration  ();
+
+    /**
+      * Parses a pass declaration or identifier
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \returns
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
+    static
+    bool Parse( Parser& parser,
+                std::unique_ptr<PassDeclarationOrIdentifier>& token );
+
+private:
+    /** This pass declaration's identifier if it has one, otherwise "" **/
+    std::string                      m_identifier;
+    /** This token's declaration if it has one, otherwise nullptr **/
+    std::unique_ptr<PassDeclaration> m_declaration;
+
+    /** The reference to the definition this token represents **/
+    std::shared_ptr<std::unique_ptr<PassDefinition> > m_definitionRef = nullptr;
 };
 
 } // namespace Compiler
