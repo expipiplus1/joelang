@@ -317,6 +317,8 @@ private:
   * \class VariableOrFunctionDeclaration
   * \ingroup Tokens
   * \brief A C declaration
+  *
+  * VariableOrFunctionDeclaration = DeclarationSpecifiers identifier ';'
   */
 class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
 {
@@ -344,6 +346,8 @@ private:
   * \class DeclarationSpecifiers
   * \ingroup Tokens
   * \brief A class to hold the specifiers for one declaration
+  *
+  * DeclarationSpecifiers = DeclarationSpecifier*
   */
 class DeclarationSpecifiers : public JoeLang::Compiler::Token
 {
@@ -355,8 +359,31 @@ public:
     virtual
     void Print( int depth ) const override;
 
-    static bool Parse( Parser& parser,
-                       std::unique_ptr<DeclarationSpecifiers>& token );
+    static
+    bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifiers>& token );
+};
+
+/**
+  * \class TypeSpecifier
+  * \ingroup Tokens
+  * \brief A class to hold one type specifier
+  *
+  * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
+  *                 | 'double' | 'signed' | 'unsigned'
+  *                 | typedef_name
+  */
+class TypeSpecifier : public JoeLang::Compiler::Token
+{
+public:
+    TypeSpecifier();
+    virtual
+    ~TypeSpecifier();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
 };
 
 } // namespace Compiler

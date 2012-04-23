@@ -389,5 +389,27 @@ bool DeclarationSpecifiers::Parse(
     return false;
 }
 
+//------------------------------------------------------------------------------
+// TypeSpecifier
+//------------------------------------------------------------------------------
+
+TypeSpecifier::TypeSpecifier()
+{
+}
+
+TypeSpecifier::~TypeSpecifier()
+{
+}
+
+void TypeSpecifier::Print( int depth ) const
+{
+}
+
+bool TypeSpecifier::Parse( Parser& parser,
+                           std::unique_ptr<TypeSpecifier>& token )
+{
+    return false;
+}
+
 } // namespace Compiler
 } // namespace JoeLang
