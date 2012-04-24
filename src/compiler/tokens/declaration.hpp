@@ -44,7 +44,7 @@ namespace Compiler
 {
 
 class CodeGenerator;
-class DeclarationSpecifiers;
+class DeclarationSpecifier;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -323,8 +323,10 @@ private:
 class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
-    VariableOrFunctionDeclaration(
-                            std::unique_ptr<DeclarationSpecifiers> decl_specs );
+    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
+
+    explicit
+    VariableOrFunctionDeclaration( DeclSpecsVector decl_specs );
     virtual
     ~VariableOrFunctionDeclaration();
 
@@ -339,28 +341,29 @@ public:
                 std::unique_ptr<VariableOrFunctionDeclaration>& token );
 
 private:
-    std::unique_ptr<DeclarationSpecifiers> m_declSpecs;
+    DeclSpecsVector m_declSpecs;
 };
 
 /**
   * \class DeclarationSpecifiers
   * \ingroup Tokens
-  * \brief A class to hold the specifiers for one declaration
+  * \brief Matches any declaration specifier
   *
-  * DeclarationSpecifiers = DeclarationSpecifier*
+  * DeclarationSpecifiers = (TypeSpecifier | TypeQualifier
+  *                          | StorageClassSpecifier)*
   */
-class DeclarationSpecifiers : public JoeLang::Compiler::Token
+class DeclarationSpecifier : public JoeLang::Compiler::Token
 {
 public:
-    DeclarationSpecifiers();
+    DeclarationSpecifier();
     virtual
-    ~DeclarationSpecifiers();
+    ~DeclarationSpecifier();
 
     virtual
     void Print( int depth ) const override;
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifiers>& token );
+    bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifier>& token );
 };
 
 /**
@@ -371,7 +374,7 @@ public:
   * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
   *                 | 'double' | 'signed' | 'unsigned' | 'string'
   */
-class TypeSpecifier : public JoeLang::Compiler::Token
+class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
     enum class TypeSpec
@@ -410,7 +413,7 @@ private:
   *
   * TypeQualifier = 'const' | 'volatile'
   */
-class TypeQualifier : public JoeLang::Compiler::Token
+class TypeQualifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
     enum class TypeQual
@@ -441,7 +444,7 @@ private:
   *
   * StorageClassSpecifier = 'static' | 'extern' | 'uniform' | 'varying'
   */
-class StorageClassSpecifier : public JoeLang::Compiler::Token
+class StorageClassSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
     enum class StorageClass

@@ -334,7 +334,7 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 //------------------------------------------------------------------------------
 
 VariableOrFunctionDeclaration::VariableOrFunctionDeclaration(
-        std::unique_ptr<DeclarationSpecifiers> decl_specs )
+        DeclSpecsVector decl_specs )
     :DeclarationBase( DeclarationTy::VariableOrFunctionDeclaration )
     ,m_declSpecs( std::move(decl_specs) )
 {
@@ -359,34 +359,43 @@ bool VariableOrFunctionDeclaration::Parse(
                           Parser& parser,
                           std::unique_ptr<VariableOrFunctionDeclaration>& token )
 {
-    std::unique_ptr<DeclarationSpecifiers> decl_specs;
-    if( !parser.Expect<DeclarationSpecifiers>( decl_specs ) )
+    DeclSpecsVector decl_specs;
+
+    // We need at least one declaration specifier
+    if( !parser.ExpectSequenceOf<DeclarationSpecifier>( decl_specs ) )
         return false;
 
-    return false;
+    token.reset( new VariableOrFunctionDeclaration( std::move(decl_specs) ) );
+    return true;
 }
 
 //------------------------------------------------------------------------------
-// DeclarationSpecifiers
+// DeclarationSpecifier
 //------------------------------------------------------------------------------
 
-DeclarationSpecifiers::DeclarationSpecifiers()
+DeclarationSpecifier::DeclarationSpecifier()
 {
 }
 
-DeclarationSpecifiers::~DeclarationSpecifiers()
+DeclarationSpecifier::~DeclarationSpecifier()
 {
 }
 
-void DeclarationSpecifiers::Print( int depth ) const
+void DeclarationSpecifier::Print( int depth ) const
 {
 }
 
-bool DeclarationSpecifiers::Parse(
-                                Parser& parser,
-                                std::unique_ptr<DeclarationSpecifiers>& token )
+bool DeclarationSpecifier::Parse( Parser& parser,
+                                  std::unique_ptr<DeclarationSpecifier>& token )
 {
-    return false;
+    std::unique_ptr<Token> t;
+    if( !parser.ExpectAnyOf<TypeSpecifier,
+                            TypeQualifier,
+                            StorageClassSpecifier>( t ) )
+        return false;
+
+    token.reset( static_cast<DeclarationSpecifier*>( t.release() ) );
+    return true;
 }
 
 //------------------------------------------------------------------------------
