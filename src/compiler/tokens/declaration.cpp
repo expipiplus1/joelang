@@ -45,7 +45,6 @@
 #include <compiler/tokens/token.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
-#include <engine/pass.hpp>
 
 namespace JoeLang
 {
@@ -72,6 +71,7 @@ bool DeclarationBase::Parse( Parser& parser,
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf< TechniqueDeclaration,
                              PassDeclaration,
+                             VariableOrFunctionDeclaration,
                              EmptyDeclaration>( t ) )
         return false;
 
@@ -330,130 +330,99 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 }
 
 //------------------------------------------------------------------------------
-// PassDeclarationOrIdentifier
+// VariableOrFunctionDeclaration
 //------------------------------------------------------------------------------
 
-PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
-        std::string                      identifier,
-        std::unique_ptr<PassDeclaration> declaration )
-    :m_identifier ( std::move(identifier)  )
-    ,m_declaration( std::move(declaration) )
-{
-    // Assert if both are full, or none are
-    assert( m_identifier.empty() == bool(m_declaration) &&
-            "PassDeclarationOrIdentifier must have one and only one value" );
-}
-
-PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
+VariableOrFunctionDeclaration::VariableOrFunctionDeclaration(
+        std::unique_ptr<DeclarationSpecifiers> decl_specs )
+    :DeclarationBase( DeclarationTy::VariableOrFunctionDeclaration )
+    ,m_declSpecs( std::move(decl_specs) )
 {
 }
 
-Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
+VariableOrFunctionDeclaration::~VariableOrFunctionDeclaration()
 {
-    assert( m_definitionRef && "Trying to generate a pass with no definition" );
-    assert( *m_definitionRef && "Trying to generate an undefined pass" );
-
-    std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
-    for( const auto& s : (*m_definitionRef)->GetStateAssignments() )
-        state_assignments.push_back( s->GenerateStateAssignment( code_gen ) );
-    return Pass( IsIdentifier() ? m_identifier : m_declaration->GetName(),
-                 std::move(state_assignments) );
 }
 
-void PassDeclarationOrIdentifier::Print( int depth ) const
+void VariableOrFunctionDeclaration::Print( int depth ) const
 {
-    if( m_definitionRef &&
-        *m_definitionRef )
-    {
-        (*m_definitionRef)->Print( depth );
-    }
-    else if( IsIdentifier() )
-    {
-        for( int i = 0; i < depth * 4; ++i )
-            std::cout << " ";
-        std::cout << m_identifier;
-    }
-    else
-    {
-        m_declaration->Print( depth );
-    }
+    for( int i = 0; i < depth; ++i )
+        std::cout << "    ";
+    std::cout << "declaration";
 }
 
-void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
+void VariableOrFunctionDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    if( m_declaration )
-    {
-        m_declaration->PerformSema( sema );
-        m_definitionRef = sema.GetPass( m_declaration->GetName() );
-    }
-    else
-    {
-        SemaAnalyzer::PassDefinitionRef d = sema.GetPass( m_identifier );
-        if( !d )
-            sema.Error( "Use of undeclared pass: " + m_identifier );
-        else
-            m_definitionRef = d;
-    }
 }
 
-bool PassDeclarationOrIdentifier::IsIdentifier() const
+bool VariableOrFunctionDeclaration::Parse(
+                          Parser& parser,
+                          std::unique_ptr<VariableOrFunctionDeclaration>& token )
 {
-    return !m_identifier.empty();
-}
-
-const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
-{
-    assert( IsIdentifier() &&
-            "Can't get the identifier of a PassDeclarationOrIdentifier without "
-            "an identifier" );
-    return m_identifier;
-}
-
-const PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration() const
-{
-    assert( m_declaration &&
-            "Can't get the declaration of a PassDeclarationOrIdentifier "
-            "without a declaration" );
-    return *m_declaration;
-}
-
-PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration()
-{
-    assert( m_declaration &&
-            "Can't get the declaration of a PassDeclarationOrIdentifier "
-            "without a declaration" );
-    return *m_declaration;
-}
-
-bool PassDeclarationOrIdentifier::Parse(
-                           Parser& parser,
-                           std::unique_ptr<PassDeclarationOrIdentifier>& token )
-{
-    std::string identifier;
-    // Try to parse an identifier into identifier
-    if( parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
-    {
-        // This must be terminated by a semicolon
-        if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
-            return false;
-
-        // Construct a PassDeclarationOrIdentifier with an identifier
-        token.reset( new PassDeclarationOrIdentifier( std::move(identifier),
-                                                      nullptr ) );
-        return true;
-    }
-    // The lexer may be out of step
-    CHECK_PARSER;
-
-    // This must be a declaration
-    std::unique_ptr<PassDeclaration> declaration;
-    if( !parser.Expect<PassDeclaration>( declaration ) )
+    std::unique_ptr<DeclarationSpecifiers> decl_specs;
+    if( !parser.Expect<DeclarationSpecifiers>( decl_specs ) )
         return false;
 
-    // Construct a PassDeclarationOrIdentifier with a declaration
-    token.reset( new PassDeclarationOrIdentifier( "",
-                                                  std::move(declaration) ) );
-    return true;
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// DeclarationSpecifiers
+//------------------------------------------------------------------------------
+
+DeclarationSpecifiers::DeclarationSpecifiers()
+{
+}
+
+DeclarationSpecifiers::~DeclarationSpecifiers()
+{
+}
+
+void DeclarationSpecifiers::Print( int depth ) const
+{
+}
+
+bool DeclarationSpecifiers::Parse(
+                                Parser& parser,
+                                std::unique_ptr<DeclarationSpecifiers>& token )
+{
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// TypeSpecifier
+//------------------------------------------------------------------------------
+
+TypeSpecifier::TypeSpecifier( TypeSpec t )
+    :m_typeSpec( t )
+{
+}
+
+TypeSpecifier::~TypeSpecifier()
+{
+}
+
+void TypeSpecifier::Print( int depth ) const
+{
+}
+
+bool TypeSpecifier::Parse( Parser& parser,
+                           std::unique_ptr<TypeSpecifier>& token )
+{
+    const static std::vector<std::pair<TerminalType, TypeSpec> > type_map =
+    {
+        { TerminalType::TYPE_VOID,     TypeSpec::VOID     },
+        { TerminalType::TYPE_CHAR,     TypeSpec::CHAR     },
+        { TerminalType::TYPE_SHORT,    TypeSpec::SHORT    },
+        { TerminalType::TYPE_INT,      TypeSpec::INT      },
+        { TerminalType::TYPE_LONG,     TypeSpec::LONG     },
+        { TerminalType::TYPE_SIGNED,   TypeSpec::SIGNED   },
+        { TerminalType::TYPE_UNSIGNED, TypeSpec::UNSIGNED },
+        { TerminalType::TYPE_FLOAT,    TypeSpec::FLOAT    },
+        { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
+        { TerminalType::TYPE_STRING,   TypeSpec::STRING   }
+    };
+    return false;
 }
 
 } // namespace Compiler

@@ -38,13 +38,13 @@
 namespace JoeLang
 {
 
-class Pass;
 class Technique;
 
 namespace Compiler
 {
 
 class CodeGenerator;
+class DeclarationSpecifiers;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -67,7 +67,8 @@ public:
     {
         EmptyDeclaration,
         PassDeclaration,
-        TechniqueDeclaration
+        TechniqueDeclaration,
+        VariableOrFunctionDeclaration
     };
 
     DeclarationBase( DeclarationTy sub_class_id );
@@ -309,92 +310,99 @@ private:
     PassDeclarationVector m_passes;
 };
 
+//------------------------------------------------------------------------------
+// VariableOrFunctionDeclaration
+//------------------------------------------------------------------------------
 /**
-  * \class PassDeclarationOrIdentifier
+  * \class VariableOrFunctionDeclaration
   * \ingroup Tokens
-  * \brief A helper token for TechniqueDefinitions
+  * \brief A C declaration
   *
-  * This token matches either an identifier or a pass declaration
-  *
-  * PassDeclarationOrIdentifier =   identifier ';'
-  *                               | PassDeclaration
+  * VariableOrFunctionDeclaration = DeclarationSpecifiers identifier ';'
   */
-class PassDeclarationOrIdentifier : public JoeLang::Compiler::Token
+class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
-    /**
-      * This constructor will assert if the definition is not null and the name
-      * is not of zero length
-      * \param identifier
-      *   The identifier for this pass
-      * \param declaration
-      *   This pass's declaration if it has one, otherwise nullptr
-      */
-    PassDeclarationOrIdentifier( std::string                      identifier,
-                                 std::unique_ptr<PassDeclaration> declaration );
+    VariableOrFunctionDeclaration(
+                            std::unique_ptr<DeclarationSpecifiers> decl_specs );
+    virtual
+    ~VariableOrFunctionDeclaration();
 
     virtual
-    ~PassDeclarationOrIdentifier();
+    void Print( int depth ) const override;
 
-    /**
-      * Generates the pass represented by the pass definition. This function
-      * will assert if it doesn't have a definition reference.
-      * \param code_gen
-      *   The code generator
-      * \returns the generated Pass
-      */
-    Pass GeneratePass( CodeGenerator& code_gen ) const;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
     virtual
-    void    Print   ( int depth ) const override;
+    void PerformSema( SemaAnalyzer& sema ) override;
 
-    /**
-      * Resolves the identifier or performs sema on the pass
-      * \param sema
-      *   The semantic analyzer
-      */
-    virtual
-    void PerformSema( SemaAnalyzer& sema );
-
-    /** \returns if this token is an identifier for a pass **/
-    bool                   IsIdentifier    () const;
-    /** This funciton will assert if this token represents a declaration
-      * \returns this token's identifier **/
-    const std::string&     GetIdentifier   () const;
-    /** This function will assert if this token represents an identifier
-      * \returns this token's declaration **/
-    const PassDeclaration& GetDeclaration  () const;
-    PassDeclaration&       GetDeclaration  ();
-
-    /**
-      * Parses a pass declaration or identifier
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \returns
-      *   true upon parsing successfully,
-      *   false if the parse failed
-      */
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<PassDeclarationOrIdentifier>& token );
+                std::unique_ptr<VariableOrFunctionDeclaration>& token );
 
 private:
-    /** This pass declaration's identifier if it has one, otherwise "" **/
-    std::string                      m_identifier;
-    /** This token's declaration if it has one, otherwise nullptr **/
-    std::unique_ptr<PassDeclaration> m_declaration;
-
-    /** The reference to the definition this token represents **/
-    std::shared_ptr<std::unique_ptr<PassDefinition> > m_definitionRef = nullptr;
+    std::unique_ptr<DeclarationSpecifiers> m_declSpecs;
 };
 
+/**
+  * \class DeclarationSpecifiers
+  * \ingroup Tokens
+  * \brief A class to hold the specifiers for one declaration
+  *
+  * DeclarationSpecifiers = DeclarationSpecifier*
+  */
+class DeclarationSpecifiers : public JoeLang::Compiler::Token
+{
+public:
+    DeclarationSpecifiers();
+    virtual
+    ~DeclarationSpecifiers();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifiers>& token );
+};
+
+/**
+  * \class TypeSpecifier
+  * \ingroup Tokens
+  * \brief A class to hold one type specifier
+  *
+  * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
+  *                 | 'double' | 'signed' | 'unsigned'
+  *                 | typedef_name
+  */
+class TypeSpecifier : public JoeLang::Compiler::Token
+{
+public:
+    enum class TypeSpec
+    {
+        VOID,
+        CHAR,
+        SHORT,
+        INT,
+        LONG,
+        SIGNED,
+        UNSIGNED,
+        FLOAT,
+        DOUBLE,
+        STRING
+    };
+
+    explicit
+    TypeSpecifier( TypeSpec t );
+    virtual
+    ~TypeSpecifier();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
+
+private:
+    TypeSpec m_typeSpec;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

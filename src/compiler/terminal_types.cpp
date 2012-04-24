@@ -140,9 +140,18 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     //
     // Types
     //
-    { TerminalType::TYPE_INT,     { "int",        "" } },
+    { TerminalType::TYPE_VOID,     { "void",      "" } },
+    { TerminalType::TYPE_CHAR,     { "char",      "" } },
+    { TerminalType::TYPE_SHORT,    { "short",     "" } },
+    { TerminalType::TYPE_INT,      { "int",       "" } },
+    { TerminalType::TYPE_LONG,     { "long",      "" } },
+    { TerminalType::TYPE_FLOAT,    { "float",     "" } },
+    { TerminalType::TYPE_DOUBLE,   { "double",    "" } },
+    { TerminalType::TYPE_SIGNED,   { "signed",    "" } },
+    { TerminalType::TYPE_UNSIGNED, { "unsigned",  "" } },
+    { TerminalType::TYPE_STRING,   { "string",    "" } },
 
-    //
+
     // Constants
     //
     { TerminalType::TRUE,         { "true",       "" } },

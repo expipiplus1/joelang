@@ -138,7 +138,16 @@ enum class TerminalType
     PASS,
 
     // Types
+    TYPE_VOID,
+    TYPE_CHAR,
+    TYPE_SHORT,
     TYPE_INT,
+    TYPE_LONG,
+    TYPE_FLOAT,
+    TYPE_DOUBLE,
+    TYPE_SIGNED,
+    TYPE_UNSIGNED,
+    TYPE_STRING,
 
     // Constants
     TRUE,
