@@ -134,8 +134,23 @@ const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 //
 const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 {
-    { TerminalType::TECHNIQUE,    { "technique",  "" } },
-    { TerminalType::PASS,         { "pass",       "" } },
+    { TerminalType::TECHNIQUE,     { "technique", "" } },
+    { TerminalType::PASS,          { "pass",      "" } },
+
+    //
+    // Type qualifiers
+    //
+    { TerminalType::CONST,         { "const",     "" } },
+    { TerminalType::VOLATILE,      { "volatile",  "" } },
+
+    //
+    // Storage class specifiers
+    //
+    { TerminalType::STATIC,        { "static",    "" } },
+    { TerminalType::EXTERN,        { "extern",    "" } },
+    { TerminalType::UNIFORM,       { "uniform",   "" } },
+    { TerminalType::VARYING,       { "varying",   "" } },
+
 
     //
     // Types
@@ -152,10 +167,11 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     { TerminalType::TYPE_STRING,   { "string",    "" } },
 
 
+    //
     // Constants
     //
-    { TerminalType::TRUE,         { "true",       "" } },
-    { TerminalType::FALSE,        { "false",      "" } }
+    { TerminalType::TRUE,          { "true",      "" } },
+    { TerminalType::FALSE,         { "false",     "" } }
 };
 
 const std::string& GetTerminalString( TerminalType terminal_type )

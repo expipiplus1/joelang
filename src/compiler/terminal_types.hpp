@@ -137,6 +137,16 @@ enum class TerminalType
     TECHNIQUE,
     PASS,
 
+    // Storage class specifiers
+    STATIC,
+    EXTERN,
+    UNIFORM,
+    VARYING,
+
+    // Type Qualifiers
+    CONST,
+    VOLATILE,
+
     // Types
     TYPE_VOID,
     TYPE_CHAR,
