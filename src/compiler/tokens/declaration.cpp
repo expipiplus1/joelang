@@ -393,7 +393,8 @@ bool DeclarationSpecifiers::Parse(
 // TypeSpecifier
 //------------------------------------------------------------------------------
 
-TypeSpecifier::TypeSpecifier()
+TypeSpecifier::TypeSpecifier( TypeSpec t )
+    :m_typeSpec( t )
 {
 }
 
@@ -408,6 +409,19 @@ void TypeSpecifier::Print( int depth ) const
 bool TypeSpecifier::Parse( Parser& parser,
                            std::unique_ptr<TypeSpecifier>& token )
 {
+    const static std::vector<std::pair<TerminalType, TypeSpec> > type_map =
+    {
+        { TerminalType::TYPE_VOID,     TypeSpec::VOID     },
+        { TerminalType::TYPE_CHAR,     TypeSpec::CHAR     },
+        { TerminalType::TYPE_SHORT,    TypeSpec::SHORT    },
+        { TerminalType::TYPE_INT,      TypeSpec::INT      },
+        { TerminalType::TYPE_LONG,     TypeSpec::LONG     },
+        { TerminalType::TYPE_SIGNED,   TypeSpec::SIGNED   },
+        { TerminalType::TYPE_UNSIGNED, TypeSpec::UNSIGNED },
+        { TerminalType::TYPE_FLOAT,    TypeSpec::FLOAT    },
+        { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
+        { TerminalType::TYPE_STRING,   TypeSpec::STRING   }
+    };
     return false;
 }
 

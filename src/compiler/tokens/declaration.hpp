@@ -375,7 +375,22 @@ public:
 class TypeSpecifier : public JoeLang::Compiler::Token
 {
 public:
-    TypeSpecifier();
+    enum class TypeSpec
+    {
+        VOID,
+        CHAR,
+        SHORT,
+        INT,
+        LONG,
+        SIGNED,
+        UNSIGNED,
+        FLOAT,
+        DOUBLE,
+        STRING
+    };
+
+    explicit
+    TypeSpecifier( TypeSpec t );
     virtual
     ~TypeSpecifier();
 
@@ -384,6 +399,9 @@ public:
 
     static
     bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
+
+private:
+    TypeSpec m_typeSpec;
 };
 
 } // namespace Compiler
