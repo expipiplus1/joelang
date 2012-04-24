@@ -422,6 +422,88 @@ bool TypeSpecifier::Parse( Parser& parser,
         { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
         { TerminalType::TYPE_STRING,   TypeSpec::STRING   }
     };
+
+    for( auto p : type_map )
+        if( parser.ExpectTerminal( p.first ) )
+        {
+            token.reset( new TypeSpecifier( p.second ) );
+            return true;
+        }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// TypeQualifier
+//------------------------------------------------------------------------------
+
+TypeQualifier::TypeQualifier( TypeQual t )
+    :m_typeQual( t )
+{
+}
+
+TypeQualifier::~TypeQualifier()
+{
+}
+
+void TypeQualifier::Print( int depth ) const
+{
+}
+
+bool TypeQualifier::Parse( Parser& parser,
+                           std::unique_ptr<TypeQualifier>& token )
+{
+    const static std::vector<std::pair<TerminalType, TypeQual> > qual_map =
+    {
+        { TerminalType::CONST,     TypeQual::CONST    },
+        { TerminalType::VOLATILE,  TypeQual::VOLATILE }
+    };
+
+    for( auto p : qual_map )
+        if( parser.ExpectTerminal( p.first ) )
+        {
+            token.reset( new TypeQualifier( p.second ) );
+            return true;
+        }
+
+    return false;
+}
+
+//------------------------------------------------------------------------------
+// StorageClassSpecifier
+//------------------------------------------------------------------------------
+
+StorageClassSpecifier::StorageClassSpecifier( StorageClass storage_class )
+    :m_storageClass( storage_class )
+{
+}
+
+StorageClassSpecifier::~StorageClassSpecifier()
+{
+}
+
+void StorageClassSpecifier::Print( int depth ) const
+{
+}
+
+bool StorageClassSpecifier::Parse( Parser& parser,
+                           std::unique_ptr<StorageClassSpecifier>& token )
+{
+    const static std::vector<std::pair<TerminalType, StorageClass> > sc_map =
+    {
+        { TerminalType::STATIC,     StorageClass::STATIC   },
+        { TerminalType::EXTERN,     StorageClass::EXTERN   },
+        { TerminalType::UNIFORM,    StorageClass::UNIFORM  },
+        { TerminalType::VARYING,    StorageClass::VARYING  }
+    };
+
+    for( auto p : sc_map )
+        if( parser.ExpectTerminal( p.first ) )
+        {
+            token.reset( new StorageClassSpecifier( p.second ) );
+            return true;
+        }
+
     return false;
 }
 

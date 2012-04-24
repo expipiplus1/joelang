@@ -369,8 +369,7 @@ public:
   * \brief A class to hold one type specifier
   *
   * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
-  *                 | 'double' | 'signed' | 'unsigned'
-  *                 | typedef_name
+  *                 | 'double' | 'signed' | 'unsigned' | 'string'
   */
 class TypeSpecifier : public JoeLang::Compiler::Token
 {
@@ -390,7 +389,7 @@ public:
     };
 
     explicit
-    TypeSpecifier( TypeSpec t );
+    TypeSpecifier( TypeSpec type_spec );
     virtual
     ~TypeSpecifier();
 
@@ -402,6 +401,70 @@ public:
 
 private:
     TypeSpec m_typeSpec;
+};
+
+/**
+  * \class TypeQualifier
+  * \ingroup Tokens
+  * \brief matches a type qualifier
+  *
+  * TypeQualifier = 'const' | 'volatile'
+  */
+class TypeQualifier : public JoeLang::Compiler::Token
+{
+public:
+    enum class TypeQual
+    {
+        CONST,
+        VOLATILE
+    };
+
+    explicit
+    TypeQualifier( TypeQual type_qual );
+    virtual
+    ~TypeQualifier();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static
+    bool Parse( Parser& parer, std::unique_ptr<TypeQualifier>& token );
+
+private:
+    TypeQual m_typeQual;
+};
+
+/**
+  * \class StorageClassSpecifier
+  * \ingroup Tokens
+  * \brief A class to hold one storage class specifier
+  *
+  * StorageClassSpecifier = 'static' | 'extern' | 'uniform' | 'varying'
+  */
+class StorageClassSpecifier : public JoeLang::Compiler::Token
+{
+public:
+    enum class StorageClass
+    {
+        STATIC,
+        EXTERN,
+        UNIFORM,
+        VARYING
+    };
+
+    explicit
+    StorageClassSpecifier( StorageClass type_spec );
+    virtual
+    ~StorageClassSpecifier();
+
+    virtual
+    void Print( int depth ) const override;
+
+    static
+    bool Parse( Parser& parser, std::unique_ptr<StorageClassSpecifier>& token );
+
+private:
+    StorageClass m_storageClass;
 };
 
 } // namespace Compiler
