@@ -193,7 +193,7 @@ TerminalType Lexer::PeekNextTerminal( std::string& string ) const
     // Try and match any keyword terminals
     for( const auto& t_reader : g_keywordTerminals )
     {
-        TerminalType t = ReadPunctuationTerminal( t_reader.first, string );
+        TerminalType t = ReadKeywordTerminal( t_reader.first, string );
         if( t != TerminalType::UNKNOWN_CHARACTER )
             return t;
     }
