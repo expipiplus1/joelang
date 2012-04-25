@@ -1,3 +1,7 @@
+const int i;
+
+uniform bool a,b,c;
+
 technique t1
 {
     pass p1
