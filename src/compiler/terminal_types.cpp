@@ -398,6 +398,10 @@ std::size_t ReadIntegerLiteral( std::string::const_iterator begin,
         p += ReadDigitSequence( begin, end );
     }
 
+    // If we've not seen any digits we can return
+    if( p-begin == 0 )
+        return 0;
+
     // Check that we haven't just read the first part of a float
     if( *p == '.' ||
         *p == 'e' ||
