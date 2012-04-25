@@ -104,6 +104,26 @@ bool Parser::ExpectSequenceOf(
     return true;
 }
 
+template<typename T, TerminalType s, typename U>
+bool Parser::ExpectListOf( std::vector< std::unique_ptr<U> >& token_sequence )
+{
+    std::unique_ptr<U> token;
+    if( !Expect<T>( token ) )
+        return false;
+
+    do
+    {
+        token_sequence.push_back( std::move( token ) );
+    }
+    while( ExpectTerminal(s) &&
+           Expect<T>( token ) );
+
+    if( !Good() )
+        return false;
+
+    return true;
+}
+
 template< typename T >
 bool Parser::ExpectAnyOf( std::unique_ptr<Token>& token )
 {

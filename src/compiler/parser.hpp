@@ -129,6 +129,20 @@ public:
     bool ExpectSequenceOf ( std::vector< std::unique_ptr<U> >& token_sequence );
 
     /**
+      * Function to try and match one or more of the desired token with a
+      * separator terminal
+      * \tparam T
+      *   The type of token to try and match
+      * \tparam U
+      *   The type of pointers to return, determined automatically
+      * \param token_sequence
+      *   A vector of token pointers to fill with the matched tokens
+      * \returns true if we have consumed one or more tokens
+      */
+    template<typename T, TerminalType s, typename U>
+    bool ExpectListOf ( std::vector< std::unique_ptr<U> >& token_sequence );
+
+    /**
       * Function to try and match any one of the desired tokens
       * \tparam T
       *   The type of tokens to try and match
