@@ -45,6 +45,7 @@ namespace Compiler
 
 class CodeGenerator;
 class DeclarationSpecifier;
+class Declarator;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -324,6 +325,7 @@ class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
 {
 public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
+    using DeclaratorVector = std::vector<std::unique_ptr<Declarator> >;
 
     explicit
     VariableOrFunctionDeclaration( DeclSpecsVector decl_specs );
@@ -380,6 +382,7 @@ public:
     enum class TypeSpec
     {
         VOID,
+        BOOL,
         CHAR,
         SHORT,
         INT,

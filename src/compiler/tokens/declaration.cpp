@@ -40,6 +40,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/tokens/declarator.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
@@ -365,6 +366,23 @@ bool VariableOrFunctionDeclaration::Parse(
     if( !parser.ExpectSequenceOf<DeclarationSpecifier>( decl_specs ) )
         return false;
 
+    // If we see a semicolon after the declaration without a declarator
+    if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
+    {
+        parser.Error( "declaration without a declarator" );
+        return false;
+    }
+    CHECK_PARSER;
+
+    // Try and parse some declarators
+    DeclaratorVector declarators;
+    if( !parser.ExpectListOf<Declarator, TerminalType::COMMA>( declarators ) )
+        return false;
+
+    // variable declarations must end in a semicolon
+    if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
+        return false;
+
     token.reset( new VariableOrFunctionDeclaration( std::move(decl_specs) ) );
     return true;
 }
@@ -421,6 +439,7 @@ bool TypeSpecifier::Parse( Parser& parser,
     const static std::vector<std::pair<TerminalType, TypeSpec> > type_map =
     {
         { TerminalType::TYPE_VOID,     TypeSpec::VOID     },
+        { TerminalType::TYPE_BOOL,     TypeSpec::BOOL     },
         { TerminalType::TYPE_CHAR,     TypeSpec::CHAR     },
         { TerminalType::TYPE_SHORT,    TypeSpec::SHORT    },
         { TerminalType::TYPE_INT,      TypeSpec::INT      },
