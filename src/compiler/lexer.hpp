@@ -80,6 +80,14 @@ public:
       */
     TerminalType PeekNextTerminal ( std::string& string ) const;
 
+    /**
+      * \param string
+      *   The characters belonging to the next identifier if there is one
+      * \returns
+      *   true if the next terminal is an identifier
+      */
+    bool PeekIdentifier( std::string& string ) const;
+
     /** \returns The position in characters from the start of the string **/
     std::size_t  GetPosition     () const;
     /** \returns The line numer in the currenst string **/

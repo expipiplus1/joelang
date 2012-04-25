@@ -202,6 +202,12 @@ TerminalType Lexer::PeekNextTerminal( std::string& string ) const
     return TerminalType::UNKNOWN_CHARACTER;
 }
 
+bool Lexer::PeekIdentifier( std::string& string ) const
+{
+    return ReadLiteralTerminal( TerminalType::IDENTIFIER, string ) ==
+           TerminalType::IDENTIFIER;
+}
+
 std::size_t Lexer::GetPosition() const
 {
     return m_position - m_string.begin();
