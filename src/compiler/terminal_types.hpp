@@ -149,6 +149,7 @@ enum class TerminalType
 
     // Types
     TYPE_VOID,
+    TYPE_BOOL,
     TYPE_CHAR,
     TYPE_SHORT,
     TYPE_INT,
