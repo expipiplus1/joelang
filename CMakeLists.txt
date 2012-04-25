@@ -42,6 +42,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/symbol_table.hpp
                         src/compiler/terminal_types.cpp
                         src/compiler/terminal_types.hpp
+                        src/compiler/tokens/declaration_specifier.cpp
+                        src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp
                         src/compiler/tokens/declaration.hpp
                         src/compiler/tokens/declarator.cpp
