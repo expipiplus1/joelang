@@ -81,7 +81,7 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
         return true;
     }
 
-    // We've seen an equals sign so parse te initializer
+    // We've seen an equals sign so parse the initializer
     std::unique_ptr<Expression> initializer;
     if( !parser.Expect<AssignmentExpression>( initializer ) )
         return false;
