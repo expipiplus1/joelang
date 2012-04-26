@@ -44,11 +44,12 @@ public:
     using StateAssignmentVector =
                              std::vector<std::unique_ptr<StateAssignmentBase> >;
     Pass();
+    Pass( Pass&& p ) = default;
+    Pass& operator = ( Pass&& p ) = default;
     explicit
     Pass( std::string name );
     Pass( std::string name,
           StateAssignmentVector state_assignments);
-    Pass( Pass&& p ) = default;
     ~Pass();
 
     void SetState() const;
