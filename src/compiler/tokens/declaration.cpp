@@ -403,6 +403,7 @@ void VariableDeclarationList::Print( int depth ) const
 
 void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
+
 }
 
 //------------------------------------------------------------------------------

@@ -50,7 +50,7 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> direct_declarator,
-                        std::unique_ptr<Expression> initializer )
+                                std::unique_ptr<Expression> initializer )
     : m_directDeclarator( std::move(direct_declarator) )
     , m_initializer( std::move(initializer) )
 {
@@ -69,7 +69,8 @@ void InitDeclarator::Print( int depth ) const
 {
 }
 
-bool InitDeclarator::Parse( Parser& parser, std::unique_ptr<InitDeclarator>& token )
+bool InitDeclarator::Parse( Parser& parser,
+                            std::unique_ptr<InitDeclarator>& token )
 {
     std::unique_ptr<Declarator> direct_declarator;
     if( !parser.Expect<Declarator>( direct_declarator ) )
@@ -87,7 +88,7 @@ bool InitDeclarator::Parse( Parser& parser, std::unique_ptr<InitDeclarator>& tok
         return false;
 
     token.reset( new InitDeclarator( std::move(direct_declarator),
-                                 std::move(initializer) ) );
+                                     std::move(initializer) ) );
     return true;
 }
 
