@@ -69,9 +69,11 @@ public:
         EmptyDeclaration,
         PassDeclaration,
         TechniqueDeclaration,
-        VariableOrFunctionDeclaration
+        VariableDeclarationList,
+        FunctionDefinition
     };
 
+    explicit
     DeclarationBase( DeclarationTy sub_class_id );
     virtual
     ~DeclarationBase    ();
@@ -311,40 +313,89 @@ private:
     PassDeclarationVector m_passes;
 };
 
-//------------------------------------------------------------------------------
-// VariableOrFunctionDeclaration
-//------------------------------------------------------------------------------
 /**
-  * \class VariableOrFunctionDeclaration
+  * \class VariableListOrFunctionDefinition
   * \ingroup Tokens
-  * \brief A C declaration
+  * \brief Helper to match declarations or definitions
   *
-  * VariableOrFunctionDeclaration = DeclarationSpecifiers identifier ';'
+  * VariableListOrFunctionDefinition =   VariableDeclarationList
+  *                                    | FunctionDefinition
   */
-class VariableOrFunctionDeclaration : public JoeLang::Compiler::DeclarationBase
+class VariableListOrFunctionDefinition
+        : public JoeLang::Compiler::DeclarationBase
 {
 public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
     using DeclaratorVector = std::vector<std::unique_ptr<Declarator> >;
 
-    explicit
-    VariableOrFunctionDeclaration( DeclSpecsVector decl_specs );
+    VariableListOrFunctionDefinition( DeclarationTy sub_class_id );
     virtual
-    ~VariableOrFunctionDeclaration();
+    ~VariableListOrFunctionDefinition();
 
-    virtual
-    void Print( int depth ) const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
-
+    /**
+      * Parses a VariableListOrFunctionDefinition
+      * This will parse the common tokens and then diverge
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \return
+      *   true upon parsing successfully,
+      *   false if the parse failed
+      */
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<VariableOrFunctionDeclaration>& token );
+                std::unique_ptr<VariableListOrFunctionDefinition>& token );
+};
+
+/**
+  * \class VariableDeclarationList
+  * \ingroup Tokens
+  * \brief A C declaration
+  *
+  * VariableDeclarationList = DeclarationSpecifier+ (Declarator ',') ';'
+  */
+class VariableDeclarationList :
+                    public JoeLang::Compiler::VariableListOrFunctionDefinition
+{
+public:
+    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
+    using DeclaratorVector = std::vector<std::unique_ptr<Declarator> >;
+
+    /** This constructor asserts if given no decl_specs **/
+    VariableDeclarationList( DeclSpecsVector decl_specs,
+                             DeclaratorVector declarators);
+    virtual
+    ~VariableDeclarationList();
+
+    virtual
+    void Print( int depth ) const;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema );
 
 private:
     DeclSpecsVector m_declSpecs;
+    DeclaratorVector m_declarators;
 };
+
+/**
+  * \class FunctionDefinition
+  * \ingroup Tokens
+  * \brief A function definition
+  *
+  * FunctionDefinition = DeclarationSpecifier+ Declarator CompoundStatement
+  */
+class FunctionDefinition :
+                    public JoeLang::Compiler::VariableListOrFunctionDefinition
+{
+public:
+    FunctionDefinition();
+    virtual
+    ~FunctionDefinition();
+};
+
+
 
 } // namespace Compiler
 } // namespace JoeLang

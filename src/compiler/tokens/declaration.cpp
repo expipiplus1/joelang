@@ -73,7 +73,7 @@ bool DeclarationBase::Parse( Parser& parser,
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf< TechniqueDeclaration,
                              PassDeclaration,
-                             VariableOrFunctionDeclaration,
+                             VariableListOrFunctionDefinition,
                              EmptyDeclaration>( t ) )
         return false;
 
@@ -332,34 +332,22 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 }
 
 //------------------------------------------------------------------------------
-// VariableOrFunctionDeclaration
+// VariableListOrFunctionDefinition
 //------------------------------------------------------------------------------
 
-VariableOrFunctionDeclaration::VariableOrFunctionDeclaration(
-        DeclSpecsVector decl_specs )
-    :DeclarationBase( DeclarationTy::VariableOrFunctionDeclaration )
-    ,m_declSpecs( std::move(decl_specs) )
+VariableListOrFunctionDefinition::VariableListOrFunctionDefinition(
+                                                    DeclarationTy sub_class_id )
+    :DeclarationBase( sub_class_id )
 {
 }
 
-VariableOrFunctionDeclaration::~VariableOrFunctionDeclaration()
+VariableListOrFunctionDefinition::~VariableListOrFunctionDefinition()
 {
 }
 
-void VariableOrFunctionDeclaration::Print( int depth ) const
-{
-    for( int i = 0; i < depth; ++i )
-        std::cout << "    ";
-    std::cout << "declaration";
-}
-
-void VariableOrFunctionDeclaration::PerformSema( SemaAnalyzer& sema )
-{
-}
-
-bool VariableOrFunctionDeclaration::Parse(
-                          Parser& parser,
-                          std::unique_ptr<VariableOrFunctionDeclaration>& token )
+bool VariableListOrFunctionDefinition::Parse(
+                      Parser& parser,
+                      std::unique_ptr<VariableListOrFunctionDefinition>& token )
 {
     DeclSpecsVector decl_specs;
 
@@ -370,6 +358,8 @@ bool VariableOrFunctionDeclaration::Parse(
     // If we see a semicolon after the declaration without a declarator
     if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
+        // This could also be a warning and return an empty
+        // VariableDeclarationList
         parser.Error( "declaration without a declarator" );
         return false;
     }
@@ -384,9 +374,50 @@ bool VariableOrFunctionDeclaration::Parse(
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
         return false;
 
-    token.reset( new VariableOrFunctionDeclaration( std::move(decl_specs) ) );
+    token.reset( new VariableDeclarationList( std::move(decl_specs),
+                                              std::move(declarators) ) );
     return true;
 }
+
+//------------------------------------------------------------------------------
+// VariableDeclarationList
+//------------------------------------------------------------------------------
+
+VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
+                                                  DeclaratorVector declarators)
+    :VariableListOrFunctionDefinition( DeclarationTy::VariableDeclarationList )
+    ,m_declSpecs( std::move(decl_specs) )
+    ,m_declarators( std::move(declarators) )
+{
+    assert( !m_declSpecs.empty() &&
+            "VariableDeclarationList given no declaration specifiers" );
+}
+
+VariableDeclarationList::~VariableDeclarationList()
+{
+}
+
+void VariableDeclarationList::Print( int depth ) const
+{
+}
+
+void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
+{
+}
+
+//------------------------------------------------------------------------------
+// FunctionDefinition
+//------------------------------------------------------------------------------
+
+FunctionDefinition::FunctionDefinition()
+    :VariableListOrFunctionDefinition( DeclarationTy::FunctionDefinition )
+{
+}
+
+FunctionDefinition::~FunctionDefinition()
+{
+}
+
 
 } // namespace Compiler
 } // namespace JoeLang
