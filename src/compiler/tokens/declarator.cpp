@@ -49,7 +49,7 @@ namespace Compiler
 // Declarator
 //------------------------------------------------------------------------------
 
-Declarator::Declarator( std::unique_ptr<DirectDeclarator> direct_declarator,
+InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> direct_declarator,
                         std::unique_ptr<Expression> initializer )
     : m_directDeclarator( std::move(direct_declarator) )
     , m_initializer( std::move(initializer) )
@@ -57,27 +57,27 @@ Declarator::Declarator( std::unique_ptr<DirectDeclarator> direct_declarator,
     assert( m_directDeclarator && "Declarator given a null direct_declarator" );
 }
 
-Declarator::~Declarator()
+InitDeclarator::~InitDeclarator()
 {
 }
 
-void Declarator::PerformSema( SemaAnalyzer& sema )
+void InitDeclarator::PerformSema( SemaAnalyzer& sema )
 {
 }
 
-void Declarator::Print( int depth ) const
+void InitDeclarator::Print( int depth ) const
 {
 }
 
-bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
+bool InitDeclarator::Parse( Parser& parser, std::unique_ptr<InitDeclarator>& token )
 {
-    std::unique_ptr<DirectDeclarator> direct_declarator;
-    if( !parser.Expect<DirectDeclarator>( direct_declarator ) )
+    std::unique_ptr<Declarator> direct_declarator;
+    if( !parser.Expect<Declarator>( direct_declarator ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
     {
-        token.reset( new Declarator( std::move(direct_declarator) ) );
+        token.reset( new InitDeclarator( std::move(direct_declarator) ) );
         return true;
     }
 
@@ -86,7 +86,7 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     if( !parser.Expect<AssignmentExpression>( initializer ) )
         return false;
 
-    token.reset( new Declarator( std::move(direct_declarator),
+    token.reset( new InitDeclarator( std::move(direct_declarator),
                                  std::move(initializer) ) );
     return true;
 }
@@ -95,28 +95,28 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 // DirectDeclarator
 //------------------------------------------------------------------------------
 
-DirectDeclarator::DirectDeclarator( std::string identifier )
+Declarator::Declarator( std::string identifier )
     :m_identifier( std::move(identifier) )
 {
 }
 
-DirectDeclarator::~DirectDeclarator()
+Declarator::~Declarator()
 {
 }
 
-void DirectDeclarator::Print( int depth ) const
+void Declarator::Print( int depth ) const
 {
 }
 
-bool DirectDeclarator::Parse( Parser& parser,
-                              std::unique_ptr<DirectDeclarator>& token )
+bool Declarator::Parse( Parser& parser,
+                              std::unique_ptr<Declarator>& token )
 {
     // Parse an identifier
     std::string identifier;
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
-    token.reset( new DirectDeclarator( std::move(identifier) ) );
+    token.reset( new Declarator( std::move(identifier) ) );
     return true;
 }
 

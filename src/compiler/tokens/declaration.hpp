@@ -45,7 +45,7 @@ namespace Compiler
 
 class CodeGenerator;
 class DeclarationSpecifier;
-class Declarator;
+class InitDeclarator;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -326,7 +326,7 @@ class VariableListOrFunctionDefinition
 {
 public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
-    using DeclaratorVector = std::vector<std::unique_ptr<Declarator> >;
+    using DeclaratorVector = std::vector<std::unique_ptr<InitDeclarator> >;
 
     VariableListOrFunctionDefinition( DeclarationTy sub_class_id );
     virtual
@@ -360,7 +360,7 @@ class VariableDeclarationList :
 {
 public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
-    using DeclaratorVector = std::vector<std::unique_ptr<Declarator> >;
+    using DeclaratorVector = std::vector<std::unique_ptr<InitDeclarator> >;
 
     /** This constructor asserts if given no decl_specs **/
     VariableDeclarationList( DeclSpecsVector decl_specs,

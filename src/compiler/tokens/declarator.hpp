@@ -38,26 +38,26 @@ namespace JoeLang
 {
 namespace Compiler
 {
-class DirectDeclarator;
+class Declarator;
 class Expression;
 class Parser;
 class SemaAnalyzer;
 
 /**
-  * \class Declarator
+  * \class InitDeclarator
   * \ingroup Tokens
   * \brief Matches a declarator with optional initializer
   *
-  * Declarator = DirectDeclarator ( '=' AssignmentExpression )?
+  * InitDeclarator = Declarator ( '=' AssignmentExpression )?
   */
-class Declarator : public JoeLang::Compiler::Token
+class InitDeclarator : public JoeLang::Compiler::Token
 {
 public:
     /** This constructor asserts on a null direct_declarator **/
-    Declarator  ( std::unique_ptr<DirectDeclarator> direct_declarator,
+    InitDeclarator  ( std::unique_ptr<Declarator> direct_declarator,
                   std::unique_ptr<Expression> initializer = nullptr );
     virtual
-    ~Declarator ();
+    ~InitDeclarator ();
 
     /**
       * Performs semantic ananysis on the declarator
@@ -80,26 +80,26 @@ public:
       *   false if the parse failed
       */
     static
-    bool Parse          ( Parser& parser, std::unique_ptr<Declarator>& token );
+    bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
 private:
-    std::unique_ptr<DirectDeclarator> m_directDeclarator;
+    std::unique_ptr<Declarator> m_directDeclarator;
     std::unique_ptr<Expression> m_initializer;
 };
 
 /**
-  * \class DirectDeclarator
+  * \class Declarator
   * \ingroup Tokens
   * \brief Matches a Declarator
   *
-  * DirectDeclarator = identifier
+  * Declarator = identifier
   */
-class DirectDeclarator : public JoeLang::Compiler::Token
+class Declarator : public JoeLang::Compiler::Token
 {
 public:
-    DirectDeclarator    ( std::string identifier );
+    Declarator    ( std::string identifier );
     virtual
-    ~DirectDeclarator   ();
+    ~Declarator   ();
 
     virtual
     void Print( int depth ) const override;
@@ -115,7 +115,7 @@ public:
       *   false if the parse failed
       */
     static
-    bool Parse ( Parser& parser, std::unique_ptr<DirectDeclarator>& token );
+    bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
 private:
     std::string m_identifier;
