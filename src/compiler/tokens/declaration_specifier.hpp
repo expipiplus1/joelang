@@ -50,7 +50,15 @@ class Parser;
 class DeclarationSpecifier : public JoeLang::Compiler::Token
 {
 public:
-    DeclarationSpecifier();
+    enum class DeclSpecTy
+    {
+        TypeSpecifier,
+        TypeQualifier,
+        StorageClassSpecifier
+    };
+
+    explicit
+    DeclarationSpecifier( DeclSpecTy sub_class_id );
     virtual
     ~DeclarationSpecifier();
 
@@ -59,6 +67,15 @@ public:
 
     static
     bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifier>& token );
+
+    /** Used for casting **/
+    DeclSpecTy GetSubClassID() const;
+    /** Used for casting **/
+    static
+    bool classof( const DeclarationSpecifier* d );
+private:
+    /** Subclass identifier for casts **/
+    const DeclSpecTy m_subClassID;
 };
 
 /**
@@ -98,6 +115,10 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
 
+    static
+    bool classof( const DeclarationSpecifier* d );
+    static
+    bool classof( const TypeSpecifier* d );
 private:
     TypeSpec m_typeSpec;
 };
@@ -129,6 +150,10 @@ public:
     static
     bool Parse( Parser& parer, std::unique_ptr<TypeQualifier>& token );
 
+    static
+    bool classof( const DeclarationSpecifier* d );
+    static
+    bool classof( const TypeQualifier* d );
 private:
     TypeQual m_typeQual;
 };
@@ -162,6 +187,10 @@ public:
     static
     bool Parse( Parser& parser, std::unique_ptr<StorageClassSpecifier>& token );
 
+    static
+    bool classof( const DeclarationSpecifier* d );
+    static
+    bool classof( const StorageClassSpecifier* d );
 private:
     StorageClass m_storageClass;
 };

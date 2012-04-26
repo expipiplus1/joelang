@@ -44,7 +44,8 @@ namespace Compiler
 // DeclarationSpecifier
 //------------------------------------------------------------------------------
 
-DeclarationSpecifier::DeclarationSpecifier()
+DeclarationSpecifier::DeclarationSpecifier( DeclSpecTy sub_class_id )
+    :m_subClassID( sub_class_id )
 {
 }
 
@@ -69,12 +70,24 @@ bool DeclarationSpecifier::Parse( Parser& parser,
     return true;
 }
 
+DeclarationSpecifier::DeclSpecTy DeclarationSpecifier::GetSubClassID() const
+{
+    return m_subClassID;
+}
+
+bool DeclarationSpecifier::classof( const DeclarationSpecifier* d )
+{
+    // A DeclarationSpecifier is always a DeclarationSpecifier
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // TypeSpecifier
 //------------------------------------------------------------------------------
 
 TypeSpecifier::TypeSpecifier( TypeSpec t )
-    :m_typeSpec( t )
+    :DeclarationSpecifier( DeclSpecTy::TypeSpecifier )
+    ,m_typeSpec( t )
 {
 }
 
@@ -114,12 +127,23 @@ bool TypeSpecifier::Parse( Parser& parser,
     return false;
 }
 
+bool TypeSpecifier::classof( const DeclarationSpecifier* d )
+{
+    return d->GetSubClassID() == DeclSpecTy::TypeSpecifier;
+}
+
+bool TypeSpecifier::classof( const TypeSpecifier* d )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // TypeQualifier
 //------------------------------------------------------------------------------
 
 TypeQualifier::TypeQualifier( TypeQual t )
-    :m_typeQual( t )
+    :DeclarationSpecifier( DeclSpecTy::TypeQualifier )
+    ,m_typeQual( t )
 {
 }
 
@@ -150,12 +174,23 @@ bool TypeQualifier::Parse( Parser& parser,
     return false;
 }
 
+bool TypeQualifier::classof( const DeclarationSpecifier* d )
+{
+    return d->GetSubClassID() == DeclSpecTy::TypeQualifier;
+}
+
+bool TypeQualifier::classof( const TypeQualifier* d )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // StorageClassSpecifier
 //------------------------------------------------------------------------------
 
 StorageClassSpecifier::StorageClassSpecifier( StorageClass storage_class )
-    :m_storageClass( storage_class )
+    :DeclarationSpecifier( DeclSpecTy::StorageClassSpecifier )
+    ,m_storageClass( storage_class )
 {
 }
 
@@ -186,6 +221,16 @@ bool StorageClassSpecifier::Parse( Parser& parser,
         }
 
     return false;
+}
+
+bool StorageClassSpecifier::classof( const DeclarationSpecifier* d )
+{
+    return d->GetSubClassID() == DeclSpecTy::StorageClassSpecifier;
+}
+
+bool StorageClassSpecifier::classof( const StorageClassSpecifier* d )
+{
+    return true;
 }
 
 } // namespace Compiler
