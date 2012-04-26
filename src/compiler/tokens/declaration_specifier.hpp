@@ -112,6 +112,8 @@ public:
     virtual
     void Print( int depth ) const override;
 
+    TypeSpec GetSpecifier() const;
+
     static
     bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
 
@@ -146,6 +148,8 @@ public:
 
     virtual
     void Print( int depth ) const override;
+
+    TypeQual GetQualifier() const;
 
     static
     bool Parse( Parser& parer, std::unique_ptr<TypeQualifier>& token );

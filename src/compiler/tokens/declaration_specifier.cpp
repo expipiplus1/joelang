@@ -99,6 +99,11 @@ void TypeSpecifier::Print( int depth ) const
 {
 }
 
+TypeSpecifier::TypeSpec TypeSpecifier::GetSpecifier() const
+{
+    return m_typeSpec;
+}
+
 bool TypeSpecifier::Parse( Parser& parser,
                            std::unique_ptr<TypeSpecifier>& token )
 {
@@ -153,6 +158,11 @@ TypeQualifier::~TypeQualifier()
 
 void TypeQualifier::Print( int depth ) const
 {
+}
+
+TypeQualifier::TypeQual TypeQualifier::GetQualifier() const
+{
+    return m_typeQual;
 }
 
 bool TypeQualifier::Parse( Parser& parser,
