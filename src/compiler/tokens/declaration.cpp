@@ -403,7 +403,54 @@ void VariableDeclarationList::Print( int depth ) const
 
 void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
+    // Handle the declaration specifiers
+    bool is_const = false;
+    bool is_volatile = false;
+    bool is_unsigned = false;
+    bool is_signed = false;
+    bool has_type = false;
+    Type type;
 
+
+    for( const auto& t : m_declSpecs )
+    {
+        if( isa<TypeQualifier>(t) )
+        {
+            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
+            switch( type_qual->GetQualifier() )
+            {
+            case TypeQualifier::TypeQual::CONST:
+                is_const = true;
+                break;
+            case TypeQualifier::TypeQual::VOLATILE:
+                is_volatile = true;
+                break;
+            }
+        }
+        else if( isa<TypeSpecifier>(t) )
+        {
+            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
+            switch( type_spec->GetSpecifier() )
+            {
+            case TypeSpecifier::TypeSpec::VOID:
+                if( has_type )
+                    sema.Error( "Can't combine void with ptevious type" );
+                // TODO should this be void
+                type = Type::UNKNOWN_TYPE;
+
+            case TypeSpecifier::TypeSpec::SIGNED:
+                if( is_unsigned )
+                    sema.Error( "Declaration can't be signed and unsigned" );
+                is_signed = true;
+                break;
+            case TypeSpecifier::TypeSpec::UNSIGNED:
+                if( is_signed )
+                    sema.Error( "Declaration can't be signed and unsigned" );
+                is_unsigned = true;
+                break;
+            }
+        }
+    }
 }
 
 //------------------------------------------------------------------------------
