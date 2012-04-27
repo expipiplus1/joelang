@@ -92,10 +92,9 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
             if( !Expression::GetLiteral( m_initializer ) )
                 sema.Error( "trying to initialize a variable with a non-const "
                             "expression" );
-            else
-                sema.DeclareVariable(
-                      m_declarator->GetIdentifier(),
-                      std::shared_ptr<Expression>( std::move(m_initializer) ) );
+            sema.DeclareVariable(
+                  m_declarator->GetIdentifier(),
+                  std::shared_ptr<Expression>( std::move(m_initializer) ) );
         }
     }
 }

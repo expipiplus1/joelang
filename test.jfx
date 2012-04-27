@@ -1,12 +1,13 @@
-const int i = 1;
+const string i = "hello";
+
 
 technique t1
 {
     pass p1
     {
-        my_int_state = 5l+2 + i;
+        my_int_state = 5l+2;
         my_bool_state = 1ul;
-        my_string_state = string_enumerant;
+        my_string_state = string_enumerant + i;
     }
 
     pass p2
