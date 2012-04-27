@@ -369,7 +369,8 @@ bool VariableListOrFunctionDefinition::Parse(
 
     // Try and parse some declarators
     DeclaratorVector declarators;
-    if( !parser.ExpectListOf<InitDeclarator, TerminalType::COMMA>( declarators ) )
+    if( !parser.ExpectListOf<InitDeclarator, TerminalType::COMMA>(
+                                                                 declarators ) )
         return false;
 
     // variable declarations must end in a semicolon
