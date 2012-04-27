@@ -93,7 +93,7 @@ public:
     {
         AssignmentExpression,
         ConditionalExpression,
-        BinaryOperatorExpression_Start,
+
         LogicalOrExpression,
         LogicalAndExpression,
         InclusiveOrExpression,
@@ -104,18 +104,23 @@ public:
         ShiftExpression,
         AdditiveExpression,
         MultiplicativeExpression,
-        BinaryOperatorExpression_End,
+
         CastExpression,
         UnaryExpression,
         PostfixExpression,
         IdentifierExpression,
-        LiteralExpression_Start,
+
         IntegerLiteralExpression,
         FloatingLiteralExpression,
         BooleanLiteralExpression,
         StringLiteralExpression,
         CharacterLiteralExpression,
-        LiteralExpression_End
+
+        BinaryOperatorExpression_Start = LogicalOrExpression,
+        BinaryOperatorExpression_End = MultiplicativeExpression,
+
+        LiteralExpression_Start = IntegerLiteralExpression,
+        LiteralExpression_End = CharacterLiteralExpression
     };
 
     Expression( ExpressionTy sub_class_id );

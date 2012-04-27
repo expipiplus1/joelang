@@ -637,8 +637,8 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
 
 bool BinaryOperatorExpression::classof( const Expression* e )
 {
-    return e->GetSubClassID() > ExpressionTy::BinaryOperatorExpression_Start &&
-           e->GetSubClassID() < ExpressionTy::BinaryOperatorExpression_End;
+    return e->GetSubClassID() >= ExpressionTy::BinaryOperatorExpression_Start &&
+           e->GetSubClassID() <= ExpressionTy::BinaryOperatorExpression_End;
 }
 
 bool BinaryOperatorExpression::classof( const BinaryOperatorExpression* e )
@@ -1736,8 +1736,8 @@ std::unique_ptr<LiteralExpression> LiteralExpression::Create(
 
 bool LiteralExpression::classof( const Expression* e )
 {
-    return e->GetSubClassID() > ExpressionTy::LiteralExpression_Start &&
-           e->GetSubClassID() < ExpressionTy::LiteralExpression_End;
+    return e->GetSubClassID() >= ExpressionTy::LiteralExpression_Start &&
+           e->GetSubClassID() <= ExpressionTy::LiteralExpression_End;
 }
 
 bool LiteralExpression::classof( const LiteralExpression* e )
