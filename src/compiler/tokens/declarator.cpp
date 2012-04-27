@@ -78,6 +78,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
             sema.Error( "Const variables must have an initializer" );
         else
         {
+            //TODO move this somewhere else
             m_initializer->ResolveIdentifiers( sema );
             m_initializer = CastExpression::Create(
                                                 decl_specs.GetType(),
