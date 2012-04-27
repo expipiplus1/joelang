@@ -155,6 +155,7 @@ llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
         return llvm::Type::getInt1Ty( c );
     if( IsIntegral( t ) )
         return llvm::Type::getIntNTy( c, SizeOf(t)*8 );
+    assert( false && "Trying to get the llvm::Type of an unhandled Type" );
     return nullptr;
 }
 
