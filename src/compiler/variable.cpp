@@ -29,10 +29,24 @@
 
 #include "variable.hpp"
 
+#include <memory>
+#include <utility>
+
+#include <compiler/tokens/expression.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
 {
+
+Variable::Variable( Type type,
+                    bool is_const,
+                    std::unique_ptr<Expression> initializer )
+    :m_type( type )
+    ,m_isConst( is_const )
+    ,m_initializer( std::move(initializer) )
+{
+}
 
 } // namespace Compiler
 } // namespace JoeLang

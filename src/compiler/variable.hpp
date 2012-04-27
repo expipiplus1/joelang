@@ -29,10 +29,17 @@
 
 #pragma once
 
+#include <memory>
+
 namespace JoeLang
 {
+
+enum class Type;
+
 namespace Compiler
 {
+
+class Expression;
 
 /**
   * \class Variable
@@ -41,7 +48,13 @@ namespace Compiler
 class Variable
 {
 public:
+    Variable( Type type,
+              bool is_const,
+              std::unique_ptr<Expression> initializer = nullptr );
 private:
+    Type m_type;
+    bool m_isConst;
+    std::unique_ptr<Expression> m_initializer;
 };
 
 } // namespace Compiler
