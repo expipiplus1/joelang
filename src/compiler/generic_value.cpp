@@ -43,12 +43,20 @@ namespace Compiler
 
 GenericValue::GenericValue()
     :m_type( Type::UNKNOWN_TYPE )
+    ,m_stringValue()
 {
 }
 
 GenericValue::GenericValue( const GenericValue& g )
+    :m_stringValue()
 {
     *this = g;
+}
+
+GenericValue::GenericValue( Type type )
+    :m_type( type )
+    ,m_stringValue()
+{
 }
 
 const GenericValue& GenericValue::operator = ( const GenericValue& g )
@@ -273,7 +281,7 @@ GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to lor GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -295,7 +303,6 @@ GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to lor GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -305,7 +312,7 @@ GenericValue GenericValue::Land( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to land GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -327,7 +334,6 @@ GenericValue GenericValue::Land( const GenericValue& g1,
     default:
         assert( false && "Trying to land GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -336,7 +342,7 @@ GenericValue GenericValue::Or( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to or GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -374,7 +380,6 @@ GenericValue GenericValue::Or( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to or GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -383,7 +388,7 @@ GenericValue GenericValue::Xor( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to xor GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -421,7 +426,6 @@ GenericValue GenericValue::Xor( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to xor GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -430,7 +434,7 @@ GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to and GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -468,7 +472,6 @@ GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to and GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -478,7 +481,7 @@ GenericValue GenericValue::EqualTo( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare equality of GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -522,7 +525,6 @@ GenericValue GenericValue::EqualTo( const GenericValue& g1,
         assert( false &&
                 "Trying to compare equality of GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -532,7 +534,7 @@ GenericValue GenericValue::NotEqualTo( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare equality of GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -576,7 +578,6 @@ GenericValue GenericValue::NotEqualTo( const GenericValue& g1,
         assert( false &&
                 "Trying to compare equality of GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -586,7 +587,7 @@ GenericValue GenericValue::LessThan( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -629,7 +630,6 @@ GenericValue GenericValue::LessThan( const GenericValue& g1,
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -639,7 +639,7 @@ GenericValue GenericValue::GreaterThan( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -682,7 +682,6 @@ GenericValue GenericValue::GreaterThan( const GenericValue& g1,
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -692,7 +691,7 @@ GenericValue GenericValue::LessThanEqual( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -735,7 +734,6 @@ GenericValue GenericValue::LessThanEqual( const GenericValue& g1,
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -745,7 +743,7 @@ GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1,
     assert( g1.m_type == g2.m_type &&
             "Trying to compare GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( Type::BOOL );
 
     switch( g1.m_type )
     {
@@ -788,7 +786,6 @@ GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1,
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
     }
-    ret.m_type = Type::BOOL;
     return ret;
 }
 
@@ -797,7 +794,7 @@ GenericValue GenericValue::Shl( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to shift GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -835,8 +832,6 @@ GenericValue GenericValue::Shl( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to shift GenericValues of unknown type" );
     }
-
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -845,7 +840,7 @@ GenericValue GenericValue::Shr( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to shift GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -883,8 +878,6 @@ GenericValue GenericValue::Shr( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to shift GenericValues of unknown type" );
     }
-
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -893,7 +886,7 @@ GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to add GenericValues of differing type" );
 
-    GenericValue ret;
+        GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -936,7 +929,6 @@ GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to add GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -945,7 +937,7 @@ GenericValue GenericValue::Sub( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to sub GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -987,7 +979,6 @@ GenericValue GenericValue::Sub( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to sub GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -996,7 +987,7 @@ GenericValue GenericValue::Mul( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to mul GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -1038,7 +1029,6 @@ GenericValue GenericValue::Mul( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to mul GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -1047,7 +1037,7 @@ GenericValue GenericValue::Div( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to div GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -1089,7 +1079,6 @@ GenericValue GenericValue::Div( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to div GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -1098,7 +1087,7 @@ GenericValue GenericValue::Mod( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to mod GenericValues of differing type" );
 
-    GenericValue ret;
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
@@ -1137,7 +1126,6 @@ GenericValue GenericValue::Mod( const GenericValue& g1, const GenericValue& g2 )
     default:
         assert( false && "Trying to mod GenericValues of unknown type" );
     }
-    ret.m_type = g1.m_type;
     return ret;
 }
 
@@ -1152,7 +1140,7 @@ GenericValue GenericValue::UnaryPlus( const GenericValue& g )
 
 GenericValue GenericValue::UnaryMinus( const GenericValue& g )
 {
-    GenericValue ret;
+    GenericValue ret( g.m_type );
 
     switch( g.m_type )
     {
@@ -1194,13 +1182,12 @@ GenericValue GenericValue::UnaryMinus( const GenericValue& g )
     default:
         assert( false && "Trying to negate GenericValue of unknown type" );
     }
-    ret.m_type = g.m_type;
     return ret;
 }
 
 GenericValue GenericValue::LogicalNot( const GenericValue& g )
 {
-    GenericValue ret;
+    GenericValue ret( g.m_type );
 
     switch( g.m_type )
     {
@@ -1222,13 +1209,12 @@ GenericValue GenericValue::LogicalNot( const GenericValue& g )
     default:
         assert( false && "Trying to negate GenericValue of unknown type" );
     }
-    ret.m_type = g.m_type;
     return ret;
 }
 
 GenericValue GenericValue::BitwiseNot( const GenericValue& g )
 {
-    GenericValue ret;
+    GenericValue ret( g.m_type );
 
     switch( g.m_type )
     {
@@ -1267,7 +1253,6 @@ GenericValue GenericValue::BitwiseNot( const GenericValue& g )
     default:
         assert( false && "Trying to bitwise-not GenericValue of unknown type" );
     }
-    ret.m_type = g.m_type;
     return ret;
 }
 

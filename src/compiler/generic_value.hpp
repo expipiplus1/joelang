@@ -43,6 +43,8 @@ class GenericValue
 public:
     GenericValue();
     GenericValue( const GenericValue& g );
+    explicit
+    GenericValue( Type type );
     const GenericValue& operator = ( const GenericValue& g );
 
     explicit
