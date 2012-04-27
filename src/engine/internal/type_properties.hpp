@@ -55,6 +55,11 @@ bool IsIntegral( Type t );
 
 bool IsSigned( Type t );
 
+/**
+  * \param t
+  *   The type to get the size of
+  * \returns the number of bytes used to store a t
+  */
 std::size_t SizeOf( Type t );
 
 /**
