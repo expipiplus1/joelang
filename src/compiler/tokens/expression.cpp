@@ -251,7 +251,16 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
-        sema.Error( "Incompatable operand types" );
+    {
+        // If both of the sub expressions are fine, then we know the problem's
+        // here
+        if( m_trueExpression->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_falseExpression->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Incompatable operand types in conditional expression "+
+                        GetTypeString( m_trueExpression->GetReturnType() ) +
+                        " and " +
+                        GetTypeString( m_falseExpression->GetReturnType() ) );
+    }
     else
     {
         m_trueExpression = CastExpression::Create(
@@ -393,11 +402,18 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
+
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
-        sema.Error( "Invalid operands to binary operator"
-                    + GetTypeString( m_leftSide->GetReturnType() )
-                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    {
+        // If both of the sub expressions are fine, then we know the problem's
+        // here
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operands to binary operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
     else
     {
         m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
@@ -411,6 +427,10 @@ void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 void BinaryOperatorExpression::FoldConstants(
                                             std::unique_ptr<Expression>& self )
 {
+    // If there is a type mismatch, don't fold things
+    if( GetReturnType() == Type::UNKNOWN_TYPE )
+        return;
+
     m_leftSide->FoldConstants( m_leftSide );
     m_rightSide->FoldConstants( m_rightSide );
 
@@ -428,6 +448,7 @@ void BinaryOperatorExpression::FoldConstants(
     GenericValue v;
     GenericValue lv = l->GetValue();
     GenericValue rv = r->GetValue();
+
     switch( m_operator )
     {
     case Op::LOGICAL_OR:
@@ -704,9 +725,13 @@ void InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
-        sema.Error( "Invalid operand types to to inclusive or operator: "
-                    + GetTypeString( m_leftSide->GetReturnType() )
-                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    {
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operand types to to inclusive or operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
     else
     {
         m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
@@ -764,9 +789,13 @@ void ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
-        sema.Error( "Invalid operand types to to exclusive or operator: "
-                    + GetTypeString( m_leftSide->GetReturnType() )
-                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    {
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operand types to to exclusive or operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
     else
     {
         m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
@@ -822,9 +851,13 @@ void AndExpression::PerformSema( SemaAnalyzer& sema )
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
-        sema.Error( "Invalid operand types to to and operator: "
-                    + GetTypeString( m_leftSide->GetReturnType() )
-                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    {
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operand types to to and operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
     else
     {
         m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
@@ -973,9 +1006,13 @@ void ShiftExpression::PerformSema( SemaAnalyzer& sema )
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
-        sema.Error( "Invalid operand types to to shift operator: "
-                    + GetTypeString( m_leftSide->GetReturnType() )
-                    + GetTypeString( m_rightSide->GetReturnType() ) );
+    {
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operand types to to shift operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
     else
     {
         m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
@@ -1121,13 +1158,12 @@ void CastExpression::PerformSema( SemaAnalyzer& sema )
     if( m_castType == Type::UNKNOWN_TYPE )
         sema.Error( "Can't cast to an unknown type" );
     else if( m_castType == Type::STRING )
-        if( t != Type::STRING )
+        if( t != Type::STRING &&
+            t != Type::UNKNOWN_TYPE )
             sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
 
-    if( t == Type::STRING )
+    if( t == Type::STRING && m_castType != Type::STRING )
         sema.Error( "Can't cast string to " + GetTypeString( m_castType ) );
-    else if( t == Type::UNKNOWN_TYPE )
-        sema.Error( "Can't cast from unknown type" );
 
     m_expression->PerformSema( sema );
 }
@@ -1135,6 +1171,15 @@ void CastExpression::PerformSema( SemaAnalyzer& sema )
 void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
     m_expression->FoldConstants( m_expression );
+
+    Type t = m_expression->GetReturnType();
+
+    // If this is an incompatible cast, return
+    if( m_castType == Type::UNKNOWN_TYPE ||
+        t == Type::UNKNOWN_TYPE ||
+        ( t == Type::STRING && m_castType != Type::STRING ) ||
+        ( m_castType == Type::STRING && t != Type::STRING ) )
+        return;
 
     LiteralExpression* l = GetLiteral( m_expression );
 
@@ -1220,8 +1265,6 @@ void UnaryExpression::PerformSema( SemaAnalyzer& sema )
     Type t = m_expression->GetReturnType();
     if( t == Type::STRING )
         sema.Error( "Invalid type to unary operator: string" );
-    else if( t == Type::UNKNOWN_TYPE )
-        sema.Error( "Invalid type to unary operator: unknown_type" );
 
     m_expression->PerformSema( sema );
 }
