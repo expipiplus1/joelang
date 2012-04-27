@@ -319,7 +319,9 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
 
 llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete Me" );
+    return code_gen.CreateSelect( *m_condition,
+                                  *m_trueExpression,
+                                  *m_falseExpression );
 }
 
 Type ConditionalExpression::GetReturnType() const
