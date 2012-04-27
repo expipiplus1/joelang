@@ -35,6 +35,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
@@ -104,6 +105,9 @@ std::unique_ptr<StateAssignmentBase>
             "Trying to create a state assignment with mismatched types" );
 
     LiteralExpression* l = Expression::GetLiteral( m_expression );
+
+    //TODO remove this, just for testing
+    l = nullptr;
 
     // If this is just a constant return a ConstStateAssignment
     if( l )
@@ -177,8 +181,8 @@ std::unique_ptr<StateAssignmentBase>
             return nullptr;
         }
     }
-    assert( false && "TODO generate non const things" );
-    return nullptr;
+
+    return code_gen.GenerateStateAssignment( *m_state, *m_expression );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

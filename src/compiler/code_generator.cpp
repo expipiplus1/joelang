@@ -93,43 +93,30 @@ void CodeGenerator::GenerateCode(
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
 }
 
-void CodeGenerator::Error( const std::string& message )
-{
-    m_good = false;
-    std::cout << "Code Generation Error: " << message << std::endl;
-}
-
-void CodeGenerator::Visit( DeclarationBase& d )
-{
-}
-
-void CodeGenerator::Visit( TechniqueDeclaration& t )
-{
-    //const TechniqueDefinition& definition = t.GetDefinition();
-    //std::unique_ptr<Technique> technique = definition.GetTechnique( *this );
-    //if( technique )
-        //m_techniques.push_back( std::move(*technique) );
-}
-
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression )
 {
-    StateAssignmentBase* sa;
-
     llvm::Type* t = GetLLVMType( state.GetType(), m_llvmContext );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
+    assert( expression.GetReturnType() == state.GetType() &&
+            "Type mismatch in state assignment code gen" );
 
-    std::vector<llvm::Type*> no_arguments;
+    //
+    // create a function prototype which takes no arguments!
+    //
     llvm::FunctionType* prototype = llvm::FunctionType::get(
                                         t,
-                                        no_arguments,
+                                        std::vector<llvm::Type*>(),
                                         false );
     assert( prototype && "Error generating empty function prototype" );
 
+    //
+    // create an anonymous function
+    //
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
-                                                llvm::Function::ExternalLinkage,
+                                                llvm::Function::InternalLinkage,
                                                 "",
                                                 m_llvmModule );
     assert( function && "Error generating llvm function" );
@@ -139,25 +126,33 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                                        function );
     m_llvmBuilder.SetInsertPoint( body );
 
-    llvm::Value* v = CreateCast( expression, state.GetType() );
-
-    if( !m_good )
-        return nullptr;
-
+    //
+    // Generate the code from the expression
+    //
+    llvm::Value* v = expression.CodeGen( *this );
     assert( v && "Invalid expression llvm::Value*" );
 
+    //
+    // set it as the return value for the function
+    //
     m_llvmBuilder.CreateRet( v );
+    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
+            "Function in stateassignment not valid" );
 
+    //
+    // output the function for fun
+    //
     function->dump();
 
-    if( llvm::verifyFunction( *function, llvm::PrintMessageAction ) )
-    {
-        Error( "Unknown problem generating llvm function" );
-        return nullptr;
-    }
-
+    //
+    // Get the function pointer
+    //
     void* function_ptr = m_llvmExecutionEngine->getPointerToFunction(function);
 
+    //
+    // Cast to the appropriate type
+    //
+    StateAssignmentBase* sa;
     switch( state.GetType() )
     {
         case Type::BOOL:
@@ -499,13 +494,29 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 }
 
 //
+// Constants
+//
+llvm::Value* CodeGenerator::CreateInteger( unsigned long long value,
+                                           unsigned size,
+                                           bool is_signed )
+{
+    return llvm::ConstantInt::get( llvm::Type::getIntNTy( m_llvmContext, size ),
+                                   value,
+                                   is_signed );
+}
+
+llvm::Value* CodeGenerator::CreateFloating( double value,
+                                            bool is_double )
+{
+    return llvm::ConstantFP::get( is_double
+                                    ? llvm::Type::getDoubleTy(m_llvmContext)
+                                    : llvm::Type::getFloatTy(m_llvmContext),
+                                  value );
+}
+
+//
 // Getters
 //
-
-bool CodeGenerator::Good() const
-{
-    return m_good;
-}
 
 llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
 {

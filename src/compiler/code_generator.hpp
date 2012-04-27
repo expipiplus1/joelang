@@ -71,15 +71,9 @@ public:
                 std::vector<Technique>& techniques,
                 std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
 
-
-    void Visit( DeclarationBase& p );
-    void Visit( TechniqueDeclaration& t );
-
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
                                                  const Expression& expression );
-
-    void Error( const std::string& message );
 
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, Type type );
@@ -114,14 +108,34 @@ public:
                                const Expression& true_expression,
                                const Expression& false_expression );
 
+    /**
+      * Create the llvm::Value representing an integer
+      * \param value
+      *   The value with which to create the integer
+      * \param size
+      *   The number of bits to the integer
+      * \returns the llvm::Value representing the integer
+      */
+    llvm::Value* CreateInteger( unsigned long long value,
+                                unsigned size,
+                                bool is_signed );
+
+    /**
+      * Create the llvm::Value representing a floating point value
+      * \param value
+      *   The value with which to create the float
+      * \param is_double
+      *   Whether this is a double precision float
+      * \returns the llvm::Value representing the float
+      */
+    llvm::Value* CreateFloating( double value,
+                                 bool is_double );
+
     // Getters
-    bool Good() const;
     llvm::LLVMContext& GetLLVMContext() const;
 
 private:
     const Context& m_context;
-
-    bool m_good = true;
 
     llvm::LLVMContext&              m_llvmContext;
     llvm::Module*                   m_llvmModule;

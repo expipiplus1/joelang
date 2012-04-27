@@ -41,6 +41,11 @@
 // Forward Declarations
 //------------------------------------------------------------------------------
 
+namespace llvm
+{
+    class Value;
+};
+
 namespace JoeLang
 {
     enum class Type;
@@ -49,9 +54,10 @@ namespace JoeLang
     {
         enum class TerminalType;
 
+        class CodeGenerator;
+        class GenericValue;
         class Parser;
         class SemaAnalyzer;
-        class GenericValue;
 
         class AssignmentOperator;
         class LiteralExpression;
@@ -140,6 +146,9 @@ public:
     void FoldConstants( std::unique_ptr<Expression>& self );
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const = 0;
+
+    virtual
     Type GetReturnType() const = 0;
 
     /**
@@ -211,6 +220,9 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -264,6 +276,10 @@ public:
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
+
+    virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
 
     virtual
     Type GetReturnType() const override;
@@ -344,6 +360,9 @@ public:
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override final;
+
+    virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override final;
 
     virtual
     Type GetReturnType() const override;
@@ -734,6 +753,9 @@ public:
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
 
     virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -802,6 +824,9 @@ public:
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
 
     virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -840,6 +865,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
     Type GetReturnType() const override;
@@ -907,6 +935,9 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     const std::shared_ptr<Expression>& GetReadExpression() const;
 
@@ -1009,6 +1040,9 @@ public:
     ~IntegerLiteralExpression();
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -1071,6 +1105,9 @@ public:
     ~FloatingLiteralExpression();
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -1123,6 +1160,9 @@ public:
     ~BooleanLiteralExpression();
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -1157,6 +1197,9 @@ public:
     StringLiteralExpression( std::string value );
     virtual
     ~StringLiteralExpression();
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
     Type GetReturnType() const override;
@@ -1207,6 +1250,9 @@ public:
     CharacterLiteralExpression( char value );
     virtual
     ~CharacterLiteralExpression();
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
     Type GetReturnType() const override;

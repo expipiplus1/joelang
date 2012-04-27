@@ -161,6 +161,11 @@ void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     m_assignedExpression->PerformSema( sema );
 }
 
+llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete Me" );
+}
+
 Type AssignmentExpression::GetReturnType() const
 {
     return m_assignee->GetReturnType();
@@ -310,6 +315,11 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
 
     self = v.GetBool() ? std::move(m_trueExpression)
                        : std::move(m_falseExpression);
+}
+
+llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete Me" );
 }
 
 Type ConditionalExpression::GetReturnType() const
@@ -511,6 +521,11 @@ void BinaryOperatorExpression::FoldConstants(
             "Return type mismatch in constant folding" );
 
     self = LiteralExpression::Create( v );
+}
+
+llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
 }
 
 Type BinaryOperatorExpression::GetReturnType() const
@@ -1199,6 +1214,11 @@ void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
     }
 }
 
+llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
+}
+
 Type CastExpression::GetReturnType() const
 {
     return m_castType;
@@ -1297,6 +1317,11 @@ void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
             break;
         }
     }
+}
+
+llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
 }
 
 Type UnaryExpression::GetReturnType() const
@@ -1404,6 +1429,11 @@ void PostfixExpression::PerformSema( SemaAnalyzer& sema )
     m_expression->PerformSema( sema );
 }
 
+llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
+}
+
 Type PostfixExpression::GetReturnType() const
 {
     assert( "false" && "Complete me" );
@@ -1505,6 +1535,11 @@ void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
         sema.Error( "Undeclared variable: " + m_identifier );
 }
 
+llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
+}
+
 Type IdentifierExpression::GetReturnType() const
 {
     if( !m_readExpression )
@@ -1514,7 +1549,7 @@ Type IdentifierExpression::GetReturnType() const
 
 void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
-    assert( m_readExpression && "Should have resolved this expression by now" );
+    //assert( m_readExpression && "Should have resolved this expression by now" );
 }
 
 const std::shared_ptr<Expression>&
@@ -1671,6 +1706,13 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 {
 }
 
+llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    return code_gen.CreateInteger( m_value,
+                                   SizeOf( GetReturnType() ) * 8,
+                                   IsSigned( GetReturnType() ) );
+}
+
 Type IntegerLiteralExpression::GetReturnType() const
 {
     switch( m_suffix )
@@ -1723,7 +1765,13 @@ GenericValue IntegerLiteralExpression::GetValue() const
     case Suffix::UNSIGNED_LONG:
         return GenericValue( jl_u64(m_value) );
     default:
-        return GenericValue( jl_i32(m_value) );
+        return m_value <= jl_u64(std::numeric_limits<jl_i32>::max())
+                    ? GenericValue( jl_i32(m_value) )
+                    : m_value <= jl_u64(std::numeric_limits<jl_u32>::max())
+                        ? GenericValue( jl_u32(m_value) )
+                        : m_value <= jl_u64(std::numeric_limits<jl_i64>::max())
+                            ? GenericValue( jl_i64(m_value) )
+                            : GenericValue( jl_u64(m_value) );
     }
 }
 
@@ -1860,6 +1908,11 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 {
 }
 
+llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    return code_gen.CreateFloating( m_value, m_suffix != Suffix::SINGLE );
+}
+
 Type FloatingLiteralExpression::GetReturnType() const
 {
     if( m_suffix == Suffix::SINGLE )
@@ -1951,6 +2004,11 @@ BooleanLiteralExpression::BooleanLiteralExpression( bool value )
 
 BooleanLiteralExpression::~BooleanLiteralExpression()
 {
+}
+
+llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    return code_gen.CreateInteger( m_value, 1, false );
 }
 
 Type BooleanLiteralExpression::GetReturnType() const
@@ -2068,6 +2126,11 @@ StringLiteralExpression::~StringLiteralExpression()
 {
 }
 
+llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Trying to generate code for a string literal" );
+}
+
 Type StringLiteralExpression::GetReturnType() const
 {
     return Type::STRING;
@@ -2159,6 +2222,11 @@ CharacterLiteralExpression::CharacterLiteralExpression( char value )
 
 CharacterLiteralExpression::~CharacterLiteralExpression()
 {
+}
+
+llvm::Value* CharacterLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
 }
 
 Type CharacterLiteralExpression::GetReturnType() const
