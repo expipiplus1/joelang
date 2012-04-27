@@ -382,68 +382,14 @@ bool VariableListOrFunctionDefinition::Parse(
     return true;
 }
 
-//------------------------------------------------------------------------------
-// VariableDeclarationList
-//------------------------------------------------------------------------------
-
-VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
-                                                  DeclaratorVector declarators)
-    :VariableListOrFunctionDefinition( DeclarationTy::VariableDeclarationList )
-    ,m_declSpecs( std::move(decl_specs) )
-    ,m_declarators( std::move(declarators) )
+Type VariableListOrFunctionDefinition::DeduceType(
+                               std::vector<TypeSpecifier::TypeSpec> type_specs,
+                               SemaAnalyzer& sema )
 {
-    assert( !m_declSpecs.empty() &&
-            "VariableDeclarationList given no declaration specifiers" );
-}
-
-VariableDeclarationList::~VariableDeclarationList()
-{
-}
-
-void VariableDeclarationList::Print( int depth ) const
-{
-}
-
-void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
-{
-    std::vector<TypeSpecifier::TypeSpec> type_specs;
-
-    // Handle the declaration specifiers
-    bool is_const = false;
-    bool is_volatile = false;
     bool is_unsigned = false;
     bool is_signed = false;
     bool has_type = false;
     Type type;
-
-
-    for( const auto& t : m_declSpecs )
-    {
-        if( isa<TypeQualifier>(t) )
-        {
-            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
-            switch( type_qual->GetQualifier() )
-            {
-            case TypeQualifier::TypeQual::CONST:
-                is_const = true;
-                break;
-            case TypeQualifier::TypeQual::VOLATILE:
-                is_volatile = true;
-                break;
-            }
-        }
-        else if( isa<TypeSpecifier>(t) )
-        {
-            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
-            type_specs.push_back( type_spec->GetSpecifier() );
-        }
-        else if( isa<StorageClassSpecifier>(t) )
-        {
-            //StorageClassSpecifier* storage_class =
-                    //static_cast<StorageClassSpecifier*>( t.get() );
-            sema.Error( "TODO, handle storage class specifiers" );
-        }
-    }
 
     // Sort the type specifiers to ease combination
     std::sort( type_specs.begin(), type_specs.end() );
@@ -570,7 +516,73 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
         }
     }
 
-    if( !has_type )
+    return type;
+}
+
+//------------------------------------------------------------------------------
+// VariableDeclarationList
+//------------------------------------------------------------------------------
+
+VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
+                                                  DeclaratorVector declarators)
+    :VariableListOrFunctionDefinition( DeclarationTy::VariableDeclarationList )
+    ,m_declSpecs( std::move(decl_specs) )
+    ,m_declarators( std::move(declarators) )
+{
+    assert( !m_declSpecs.empty() &&
+            "VariableDeclarationList given no declaration specifiers" );
+}
+
+VariableDeclarationList::~VariableDeclarationList()
+{
+}
+
+void VariableDeclarationList::Print( int depth ) const
+{
+}
+
+void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
+{
+    std::vector<TypeSpecifier::TypeSpec> type_specs;
+
+    // Handle the declaration specifiers
+    bool is_const = false;
+    bool is_volatile = false;
+
+    for( const auto& t : m_declSpecs )
+    {
+        if( isa<TypeQualifier>(t) )
+        {
+            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
+            switch( type_qual->GetQualifier() )
+            {
+            case TypeQualifier::TypeQual::CONST:
+                is_const = true;
+                break;
+            case TypeQualifier::TypeQual::VOLATILE:
+                is_volatile = true;
+                break;
+            }
+        }
+        else if( isa<TypeSpecifier>(t) )
+        {
+            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
+            type_specs.push_back( type_spec->GetSpecifier() );
+        }
+        else if( isa<StorageClassSpecifier>(t) )
+        {
+            //StorageClassSpecifier* storage_class =
+                    //static_cast<StorageClassSpecifier*>( t.get() );
+            sema.Error( "TODO, handle storage class specifiers" );
+        }
+    }
+
+    //
+    // Get the type from the specifiers
+    //
+    Type type = DeduceType( std::move(type_specs), sema );
+
+    if( type == Type::UNKNOWN_TYPE )
     {
         sema.Error( "No type in declaration specifier" );
         // No point in declaring things with no type

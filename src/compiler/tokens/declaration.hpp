@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -346,6 +347,10 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<VariableListOrFunctionDefinition>& token );
+
+    static
+    Type DeduceType( std::vector<TypeSpecifier::TypeSpec> type_specs,
+                     SemaAnalyzer& sema );
 };
 
 /**
