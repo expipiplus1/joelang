@@ -525,7 +525,45 @@ void BinaryOperatorExpression::FoldConstants(
 
 llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    switch( m_operator )
+    {
+    case Op::LOGICAL_OR:
+        return code_gen.CreateLOr(  *m_leftSide, *m_rightSide );
+    case Op::LOGICAL_AND:
+        return code_gen.CreateLAnd( *m_leftSide, *m_rightSide );
+    case Op::OR:
+        return code_gen.CreateOr(   *m_leftSide, *m_rightSide );
+    case Op::XOR:
+        return code_gen.CreateXor(  *m_leftSide, *m_rightSide );
+    case Op::AND:
+        return code_gen.CreateAnd(  *m_leftSide, *m_rightSide );
+    case Op::EQUAL_TO:
+        return code_gen.CreateEq(   *m_leftSide, *m_rightSide );
+    case Op::NOT_EQUAL_TO:
+        return code_gen.CreateNeq(  *m_leftSide, *m_rightSide );
+    case Op::LESS_THAN:
+        return code_gen.CreateLT(   *m_leftSide, *m_rightSide );
+    case Op::GREATER_THAN:
+        return code_gen.CreateGT(   *m_leftSide, *m_rightSide );
+    case Op::LESS_THAN_EQUALS:
+        return code_gen.CreateLTE(  *m_leftSide, *m_rightSide );
+    case Op::GREATER_THAN_EQUALS:
+        return code_gen.CreateGTE(  *m_leftSide, *m_rightSide );
+    case Op::LEFT_SHIFT:
+        return code_gen.CreateShl(  *m_leftSide, *m_rightSide );
+    case Op::RIGHT_SHIFT:
+        return code_gen.CreateShr(  *m_leftSide, *m_rightSide );
+    case Op::PLUS:
+        return code_gen.CreateAdd(  *m_leftSide, *m_rightSide );
+    case Op::MINUS:
+        return code_gen.CreateSub(  *m_leftSide, *m_rightSide );
+    case Op::MULTIPLY:
+        return code_gen.CreateMul(  *m_leftSide, *m_rightSide );
+    case Op::DIVIDE:
+        return code_gen.CreateDiv(  *m_leftSide, *m_rightSide );
+    case Op::MODULO:
+        return code_gen.CreateMod(  *m_leftSide, *m_rightSide );
+    }
 }
 
 Type BinaryOperatorExpression::GetReturnType() const
@@ -1216,7 +1254,7 @@ void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
 
 llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    return code_gen.CreateCast( *m_expression, m_castType );
 }
 
 Type CastExpression::GetReturnType() const
@@ -1321,7 +1359,21 @@ void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
 
 llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    switch( m_operator )
+    {
+    case Op::PLUS:
+        return m_expression->CodeGen( code_gen );
+    case Op::MINUS:
+        return code_gen.CreateNeg( *m_expression );
+    case Op::INCREMENT:
+    case Op::DECREMENT:
+        assert( false && "Complete me" );
+        return nullptr;
+    case Op::BITWISE_NOT:
+        return code_gen.CreateNot( *m_expression );
+    case Op::LOGICAL_NOT:
+        return code_gen.CreateLNot( *m_expression );
+    }
 }
 
 Type UnaryExpression::GetReturnType() const
@@ -1549,7 +1601,8 @@ Type IdentifierExpression::GetReturnType() const
 
 void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
-    //assert( m_readExpression && "Should have resolved this expression by now" );
+    //assert( m_readExpression &&
+    //        "Should have resolved this expression by now" );
 }
 
 const std::shared_ptr<Expression>&
@@ -2224,7 +2277,8 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 {
 }
 
-llvm::Value* CharacterLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
+llvm::Value* CharacterLiteralExpression::CodeGen(
+                                                CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_value, 8, true );
 }
