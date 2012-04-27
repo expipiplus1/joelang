@@ -35,10 +35,31 @@
 
 namespace JoeLang
 {
+enum class Type;
+
 namespace Compiler
 {
 
 class Parser;
+
+
+/**
+  * \class DeclSpecs
+  * \brief A class to hold declaration specifier information
+  *
+  */
+class DeclSpecs
+{
+public:
+    DeclSpecs( bool is_const, Type type );
+
+    bool IsConst() const;
+    Type GetType() const;
+
+private:
+    bool m_isConst;
+    Type m_type;
+};
 
 /**
   * \class DeclarationSpecifier

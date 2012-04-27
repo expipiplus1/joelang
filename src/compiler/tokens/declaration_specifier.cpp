@@ -41,6 +41,26 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
+// DeclSpecs
+//------------------------------------------------------------------------------
+
+DeclSpecs::DeclSpecs( bool is_const, Type type )
+    :m_isConst( is_const )
+    ,m_type( type )
+{
+}
+
+bool DeclSpecs::IsConst() const
+{
+    return m_isConst;
+}
+
+Type DeclSpecs::GetType() const
+{
+    return m_type;
+}
+
+//------------------------------------------------------------------------------
 // DeclarationSpecifier
 //------------------------------------------------------------------------------
 
