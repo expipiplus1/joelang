@@ -67,7 +67,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 {
     if( !decl_specs.IsConst() )
     {
-        sema.Error( "TODO non-const variables" );
         //return;
     }
 
