@@ -2226,7 +2226,7 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 
 llvm::Value* CharacterLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    return code_gen.CreateInteger( m_value, 8, true );
 }
 
 Type CharacterLiteralExpression::GetReturnType() const
