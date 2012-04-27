@@ -568,6 +568,18 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
             break;
         }
     }
+
+    if( !has_type )
+    {
+        sema.Error( "No type in declaration specifier" );
+        // No point in declaring things with no type
+        return;
+    }
+
+    DeclSpecs decl_specs( is_const, type );
+
+    for( const auto& declarator : m_declarators )
+        declarator->PerformSema( sema, decl_specs );
 }
 
 //------------------------------------------------------------------------------
