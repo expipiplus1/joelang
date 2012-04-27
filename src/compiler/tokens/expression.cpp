@@ -96,10 +96,13 @@ LiteralExpression* Expression::GetLiteral(
     LiteralExpression* l = nullptr;
     if( isa<LiteralExpression>( e ) )
     {
+        // If this is a literal expression, just return that
         l = static_cast<LiteralExpression*>( e.get() );
     }
     else if( isa<IdentifierExpression>( e ) )
     {
+        // Otherwise, see if this is a const variable from which we can get an
+        // identifier
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( e.get() );
         const std::shared_ptr<Expression>& read_expression =
