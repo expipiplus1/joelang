@@ -71,8 +71,10 @@ StateAssignmentStatement::~StateAssignmentStatement()
 
 void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
+    // create a scope for the enumerants
     sema.EnterScope();
 
+    // Try and get the state to which we are assigning
     m_state = sema.GetState( m_identifier );
     if( !m_state )
         sema.Error( "Undeclared state: " + m_identifier );
@@ -81,8 +83,10 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 
     m_expression->ResolveIdentifiers( sema );
 
-    m_expression = CastExpression::Create( m_state->GetType(),
-                                           std::move(m_expression) );
+    // only create the cast if we have a type to cast it to
+    if( m_state )
+        m_expression = CastExpression::Create( m_state->GetType(),
+                                               std::move(m_expression) );
 
     m_expression->PerformSema( sema );
 
