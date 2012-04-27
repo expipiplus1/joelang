@@ -402,8 +402,8 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
-
-    Type t = GetReturnType();
+    Type t = GetCommonType( m_rightSide->GetReturnType(),
+                            m_leftSide->GetReturnType() );
     if( t == Type::UNKNOWN_TYPE )
     {
         // If both of the sub expressions are fine, then we know the problem's
@@ -1507,8 +1507,8 @@ void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 Type IdentifierExpression::GetReturnType() const
 {
-    assert( m_readExpression &&
-            "Trying to get the type of an unresolved identifier" );
+    if( !m_readExpression )
+        return Type::UNKNOWN_TYPE;
     return m_readExpression->GetReturnType();
 }
 
