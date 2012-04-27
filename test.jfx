@@ -1,6 +1,6 @@
 const int i;
 
-uniform bool a,b,c;
+unsigned short a,b,c;
 
 technique t1
 {

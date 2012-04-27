@@ -29,6 +29,7 @@
 
 #include "declaration.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -45,6 +46,7 @@
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/internal/type_properties.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 
@@ -403,6 +405,8 @@ void VariableDeclarationList::Print( int depth ) const
 
 void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
+    std::vector<TypeSpecifier::TypeSpec> type_specs;
+
     // Handle the declaration specifiers
     bool is_const = false;
     bool is_volatile = false;
@@ -430,25 +434,138 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
         else if( isa<TypeSpecifier>(t) )
         {
             TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
-            switch( type_spec->GetSpecifier() )
-            {
-            case TypeSpecifier::TypeSpec::VOID:
-                if( has_type )
-                    sema.Error( "Can't combine void with ptevious type" );
-                // TODO should this be void
-                type = Type::UNKNOWN_TYPE;
+            type_specs.push_back( type_spec->GetSpecifier() );
+        }
+        else if( isa<StorageClassSpecifier>(t) )
+        {
+            //StorageClassSpecifier* storage_class =
+                    //static_cast<StorageClassSpecifier*>( t.get() );
+            sema.Error( "TODO, handle storage class specifiers" );
+        }
+    }
 
-            case TypeSpecifier::TypeSpec::SIGNED:
-                if( is_unsigned )
-                    sema.Error( "Declaration can't be signed and unsigned" );
-                is_signed = true;
-                break;
-            case TypeSpecifier::TypeSpec::UNSIGNED:
-                if( is_signed )
-                    sema.Error( "Declaration can't be signed and unsigned" );
-                is_unsigned = true;
-                break;
+    // Sort the type specifiers to ease combination
+    std::sort( type_specs.begin(), type_specs.end() );
+
+    for( auto ts : type_specs )
+    {
+        switch( ts )
+        {
+        case TypeSpecifier::TypeSpec::VOID:
+            if( has_type )
+                sema.Error( "Can't combine void with other type" +
+                            GetTypeString( type ) );
+            // TODO should this be void
+            type = Type::UNKNOWN_TYPE;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::STRING:
+            if( has_type )
+                sema.Error( "Can't combine string with other type" +
+                            GetTypeString( type ) );
+            type = Type::STRING;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::FLOAT:
+            if( has_type )
+                sema.Error( "Can't combine float with other type" +
+                            GetTypeString( type ) );
+            type = Type::FLOAT;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::DOUBLE:
+            if( has_type )
+                sema.Error( "Can't combine double with other type" +
+                            GetTypeString( type ) );
+            type = Type::DOUBLE;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::BOOL:
+            if( has_type )
+                sema.Error( "Can't combine bool with other type" +
+                            GetTypeString( type ) );
+            type = Type::BOOL;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::CHAR:
+            if( has_type )
+                sema.Error( "Can't combine char with other type" +
+                            GetTypeString( type ) );
+            // Types are signed by default
+            type = Type::I8;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::SHORT:
+            if( has_type )
+                sema.Error( "Can't combine short with other type" +
+                            GetTypeString( type ) );
+            // Types are signed by default
+            type = Type::I16;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::INT:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine int with other type" +
+                            GetTypeString( type ) );
+                // Don't change the type
             }
+            else
+            {
+                type = Type::I32;
+                has_type = true;
+            }
+            break;
+        case TypeSpecifier::TypeSpec::LONG:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL ||
+                    type == Type::I8 ||
+                    type == Type::I16 )
+                    sema.Error( "Can't combine long with other type" +
+                                GetTypeString( type ) );
+            }
+            has_type = true;
+            type = Type::I64;
+            break;
+        case TypeSpecifier::TypeSpec::SIGNED:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine signed with other type" +
+                                GetTypeString( type ) );
+                // Types are signed by default, no need to make them signed
+            }
+            else
+            {
+                has_type = true;
+                type = Type::I32;
+            }
+            is_signed = true;
+            break;
+        case TypeSpecifier::TypeSpec::UNSIGNED:
+            if( is_signed )
+                sema.Error( "Declaration can't be signed and unsigned" );
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine unsigned with other type: " +
+                                GetTypeString( type ) );
+                else
+                    type = MakeUnsigned( type );
+            }
+            else
+            {
+                has_type = true;
+                type = Type::U32;
+            }
+            is_unsigned = true;
+            break;
         }
     }
 }

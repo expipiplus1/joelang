@@ -89,19 +89,20 @@ private:
 class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
+    // the ordering here is imporant for VariableDeclarationList::PerformSema
     enum class TypeSpec
     {
         VOID,
+        STRING,
+        FLOAT,
+        DOUBLE,
         BOOL,
         CHAR,
         SHORT,
         INT,
         LONG,
         SIGNED,
-        UNSIGNED,
-        FLOAT,
-        DOUBLE,
-        STRING
+        UNSIGNED
     };
 
     explicit
