@@ -85,9 +85,15 @@ void CodeGenerator::GenerateCode(
     {
         if( isa<TechniqueDeclaration>(declaration) )
         {
-            TechniqueDeclaration* t =
-                        static_cast<TechniqueDeclaration*>( declaration.get() );
-            techniques.push_back( t->GenerateTechnique( *this ) );
+            TechniqueDeclaration& t =
+                        static_cast<TechniqueDeclaration&>( *declaration.get() );
+            techniques.push_back( t.GenerateTechnique( *this ) );
+        }
+        else if( isa<VariableDeclarationList>(declaration) )
+        {
+            VariableDeclarationList& v =
+                     static_cast<VariableDeclarationList&>( *declaration.get() );
+            //v.CodeGen( *this );
         }
     }
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
