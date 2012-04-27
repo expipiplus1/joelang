@@ -62,8 +62,10 @@ SemaAnalyzer::~SemaAnalyzer()
 
 bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 {
+    EnterScope();
     // Perform sema on the tree
     cst.PerformSema( *this );
+    LeaveScope();
 
     // Check for undefined things
     for( const auto& p : m_passDefinitions )
