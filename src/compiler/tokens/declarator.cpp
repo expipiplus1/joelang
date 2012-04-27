@@ -37,6 +37,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -49,20 +50,54 @@ namespace Compiler
 // Declarator
 //------------------------------------------------------------------------------
 
-InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> direct_declarator,
+InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
                                 std::unique_ptr<Expression> initializer )
-    : m_directDeclarator( std::move(direct_declarator) )
+    : m_declarator( std::move(declarator) )
     , m_initializer( std::move(initializer) )
 {
-    assert( m_directDeclarator && "Declarator given a null direct_declarator" );
+    assert( m_declarator && "InitDeclarator given a null declarator" );
 }
 
 InitDeclarator::~InitDeclarator()
 {
 }
 
-void InitDeclarator::PerformSema( SemaAnalyzer& sema )
+void InitDeclarator::PerformSema( SemaAnalyzer& sema,
+                                  const DeclSpecs& decl_specs )
 {
+    if( !decl_specs.IsConst() )
+    {
+        sema.Error( "TODO non-const variables" );
+        //return;
+    }
+
+
+    // If the variable is const, it must have an initializer
+    if( decl_specs.IsConst() )
+    {
+        if( !m_initializer )
+            sema.Error( "Const variables must have an initializer" );
+        else
+        {
+            m_initializer->ResolveIdentifiers( sema );
+            m_initializer = CastExpression::Create(
+                                                decl_specs.GetType(),
+                                                std::move( m_initializer ) );
+            m_initializer->PerformSema( sema );
+            m_initializer->FoldConstants( m_initializer );
+
+            assert( m_initializer->GetReturnType() == decl_specs.GetType() &&
+                    "Trying to initialize a variable with mismatched types" );
+
+            if( !Expression::GetLiteral( m_initializer ) )
+                sema.Error( "trying to initialize a variable with a non-const "
+                            "expression" );
+            else
+                sema.DeclareVariable(
+                      m_declarator->GetIdentifier(),
+                      std::shared_ptr<Expression>( std::move(m_initializer) ) );
+        }
+    }
 }
 
 void InitDeclarator::Print( int depth ) const
@@ -72,13 +107,13 @@ void InitDeclarator::Print( int depth ) const
 bool InitDeclarator::Parse( Parser& parser,
                             std::unique_ptr<InitDeclarator>& token )
 {
-    std::unique_ptr<Declarator> direct_declarator;
-    if( !parser.Expect<Declarator>( direct_declarator ) )
+    std::unique_ptr<Declarator> declarator;
+    if( !parser.Expect<Declarator>( declarator ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
     {
-        token.reset( new InitDeclarator( std::move(direct_declarator) ) );
+        token.reset( new InitDeclarator( std::move(declarator) ) );
         return true;
     }
 
@@ -87,7 +122,7 @@ bool InitDeclarator::Parse( Parser& parser,
     if( !parser.Expect<AssignmentExpression>( initializer ) )
         return false;
 
-    token.reset( new InitDeclarator( std::move(direct_declarator),
+    token.reset( new InitDeclarator( std::move(declarator),
                                      std::move(initializer) ) );
     return true;
 }
@@ -107,6 +142,11 @@ Declarator::~Declarator()
 
 void Declarator::Print( int depth ) const
 {
+}
+
+const std::string& Declarator::GetIdentifier() const
+{
+    return m_identifier;
 }
 
 bool Declarator::Parse( Parser& parser,

@@ -39,6 +39,7 @@ namespace JoeLang
 namespace Compiler
 {
 class Declarator;
+class DeclSpecs;
 class Expression;
 class Parser;
 class SemaAnalyzer;
@@ -54,8 +55,8 @@ class InitDeclarator : public JoeLang::Compiler::Token
 {
 public:
     /** This constructor asserts on a null direct_declarator **/
-    InitDeclarator  ( std::unique_ptr<Declarator> direct_declarator,
-                  std::unique_ptr<Expression> initializer = nullptr );
+    InitDeclarator  ( std::unique_ptr<Declarator> declarator,
+                      std::unique_ptr<Expression> initializer = nullptr );
     virtual
     ~InitDeclarator ();
 
@@ -64,7 +65,7 @@ public:
       * \param sema
       *   The AstBuilder which contains the symbol table and things
       */
-    void PerformSema( SemaAnalyzer& sema );
+    void PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
 
     virtual
     void Print( int depth ) const override;
@@ -83,7 +84,7 @@ public:
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
 private:
-    std::unique_ptr<Declarator> m_directDeclarator;
+    std::unique_ptr<Declarator> m_declarator;
     std::unique_ptr<Expression> m_initializer;
 };
 
@@ -103,6 +104,11 @@ public:
 
     virtual
     void Print( int depth ) const override;
+
+    /**
+      * \returns the identifier
+      */
+    const std::string& GetIdentifier() const;
 
     /**
       * Parses a direct declarator
