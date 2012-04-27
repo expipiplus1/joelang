@@ -57,6 +57,11 @@ bool IsSigned( Type t );
 
 std::size_t SizeOf( Type t );
 
+/**
+  * This asserts if t is not integral or t is bool
+  */
+Type MakeUnsigned( Type t );
+
 llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
 
 const std::string& GetTypeString( Type t );

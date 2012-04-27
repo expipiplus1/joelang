@@ -125,6 +125,26 @@ std::size_t SizeOf( Type t )
     return 0;
 }
 
+Type MakeUnsigned( Type t )
+{
+    assert( IsIntegral( t ) && t != Type::BOOL &&
+            "Trying to make an invalid type unsigned" );
+    switch( t )
+    {
+    case Type::I8:
+        return Type::U8;
+    case Type::I16:
+        return Type::U16;
+    case Type::I32:
+        return Type::U32;
+    case Type::I64:
+        return Type::U64;
+    default:
+        // t is already unsigned;
+        return t;
+    }
+}
+
 llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
 {
     if( t == Type::DOUBLE )
