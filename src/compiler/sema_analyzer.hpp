@@ -136,7 +136,7 @@ public:
       * \param value
       *   The optional init value
       */
-    void DeclareVariable( std::string identifier,
+    void DeclareVariable( const std::string& identifier,
                           std::shared_ptr<Expression> value = nullptr );
 
     /**
@@ -164,6 +164,13 @@ public:
       *   The error message
       */
     void Error( const std::string& error_message );
+
+    /**
+      * Reports a warning
+      * \param warning_message
+      *   The warning message
+      */
+    void Warning( const std::string& warning_message );
 
 private:
     struct SymbolMaps

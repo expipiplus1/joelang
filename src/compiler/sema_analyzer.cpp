@@ -252,18 +252,25 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         DeclareVariable( v.first, v.second );
 }
 
-void SemaAnalyzer::DeclareVariable( std::string identifier,
+void SemaAnalyzer::DeclareVariable( const std::string& identifier,
                                     std::shared_ptr<Expression> value )
 {
-    //If the value wasn't inserted
-    if( !m_symbolStack.rbegin()->m_variables.insert(
-            std::make_pair( std::move(identifier), std::move(value) ) ).second )
+    bool inserted = m_symbolStack.rbegin()->m_variables.insert(
+            std::make_pair( identifier, std::move(value) ) ).second;
+
+    if( !inserted )
         Error( "Duplicate definition of variable: " + identifier );
     else
-        for( const auto& s : m_symbolStack )
-            if( s.m_variables.find( identifier ) != s.m_variables.end() )
-                Error( "Declaration of " + identifier +
-                       " shadows previous declaration" );
+    {
+        for( auto it = ++m_symbolStack.rbegin();
+             it != m_symbolStack.rend();
+             ++it )
+        {
+            if( it->m_variables.find( identifier ) != it->m_variables.end() )
+                Warning( "Declaration of \'" + identifier +
+                         "\' shadows previous declaration" );
+        }
+    }
 }
 
 std::shared_ptr<Expression> SemaAnalyzer::GetVariable(
@@ -293,7 +300,14 @@ void SemaAnalyzer::LeaveScope()
 void SemaAnalyzer::Error( const std::string& error_message )
 {
     m_good = false;
-    std::cout << "Error during semantic analysis: " << error_message << "\n";
+    std::cout << "Error during semantic analysis: " << error_message <<
+                 std::endl;
+}
+
+void SemaAnalyzer::Warning( const std::string& warning_message)
+{
+    std::cout << "Warning during semantic analysis: " << warning_message <<
+                 std::endl;
 }
 
 } // namespace Compiler
