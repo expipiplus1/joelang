@@ -1514,6 +1514,7 @@ Type IdentifierExpression::GetReturnType() const
 
 void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
+    assert( m_readExpression && "Should have resolved this expression by now" );
 }
 
 const std::shared_ptr<Expression>&
