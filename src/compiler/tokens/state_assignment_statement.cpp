@@ -106,9 +106,6 @@ std::unique_ptr<StateAssignmentBase>
 
     LiteralExpression* l = Expression::GetLiteral( m_expression );
 
-    //TODO remove this, just for testing
-    l = nullptr;
-
     // If this is just a constant return a ConstStateAssignment
     if( l )
     {
