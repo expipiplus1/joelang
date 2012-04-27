@@ -62,6 +62,13 @@ public:
     SemaAnalyzer( const Context& context );
     ~SemaAnalyzer();
 
+    /**
+      * Insert implicit casts and verify types and resolve identifiers and all
+      * \param cst
+      *   The parse tree
+      * \returns
+      *   true if there were no errors
+      */
     bool BuildAst( TranslationUnit& cst );
 
     /**
