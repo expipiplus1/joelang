@@ -94,6 +94,7 @@ private:
     std::unique_ptr<Declarator> m_declarator;
     std::unique_ptr<Expression> m_initializer;
     std::shared_ptr<Variable>   m_variable;
+    bool                        m_isGlobal;
 };
 
 /**

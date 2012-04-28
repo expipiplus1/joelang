@@ -67,6 +67,8 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
+    m_isGlobal = sema.InGlobalScope();
+
     bool can_init = true;
 
     // Reduce the initializer as much as possible
@@ -105,6 +107,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     m_variable =  std::make_shared<Variable>( decl_specs.GetType(),
                                               decl_specs.IsConst() && can_init,
+                                              m_isGlobal,
                                               std::move(m_initializer) );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of parsing

@@ -54,6 +54,7 @@ public:
       */
     Variable( Type type,
               bool is_const,
+              bool is_global,
               std::unique_ptr<Expression> initializer = nullptr );
 
     Type GetType() const;
@@ -62,6 +63,7 @@ public:
 private:
     Type m_type;
     bool m_isConst;
+    bool m_isGlobal;
     std::unique_ptr<Expression> m_initializer;
 };
 

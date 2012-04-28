@@ -43,9 +43,11 @@ namespace Compiler
 
 Variable::Variable( Type type,
                     bool is_const,
+                    bool is_global,
                     std::unique_ptr<Expression> initializer )
     :m_type( type )
     ,m_isConst( is_const )
+    ,m_isGlobal( is_global )
     ,m_initializer( std::move(initializer) )
 {
     if( is_const )
@@ -69,7 +71,7 @@ const std::unique_ptr<Expression>& Variable::GetReadExpression() const
         return m_initializer;
 
     assert( false );
-    return nullptr;
+    return m_initializer;
 }
 
 } // namespace Compiler
