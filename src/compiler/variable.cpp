@@ -29,9 +29,11 @@
 
 #include "variable.hpp"
 
+#include <cassert>
 #include <memory>
 #include <utility>
 
+#include <compiler/casting.hpp>
 #include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
@@ -46,6 +48,14 @@ Variable::Variable( Type type,
     ,m_isConst( is_const )
     ,m_initializer( std::move(initializer) )
 {
+    if( is_const )
+    {
+        assert( isa<LiteralExpression>(m_initializer) &&
+                "Trying to initialize a const variable with a non-const "
+                "expression" );
+        assert( m_initializer->GetReturnType() == type &&
+                "Trying to initialize a const variable with the wrong type" );
+    }
 }
 
 } // namespace Compiler
