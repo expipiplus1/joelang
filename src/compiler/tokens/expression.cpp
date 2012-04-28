@@ -1330,6 +1330,9 @@ void UnaryExpression::PerformSema( SemaAnalyzer& sema )
     Type t = m_expression->GetReturnType();
     if( t == Type::STRING )
         sema.Error( "Invalid type to unary operator: string" );
+    if( !IsIntegral( t ) &&
+        m_operator == Op::BITWISE_NOT )
+        sema.Error( "Invalid type to bitwise unary not operator" );
 
     m_expression->PerformSema( sema );
 }
