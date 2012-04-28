@@ -401,8 +401,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
             if( has_type )
                 sema.Error( "Can't combine void with other type" +
                             GetTypeString( type ) );
-            // TODO should this be void
-            type = Type::UNKNOWN_TYPE;
+            type = Type::VOID;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::STRING:

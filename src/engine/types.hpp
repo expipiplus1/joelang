@@ -62,7 +62,10 @@ enum class Type
     DOUBLE,
 
     // String types
-    STRING
+    STRING,
+
+    // void
+    VOID
 };
 
 using jl_bool   = bool;
