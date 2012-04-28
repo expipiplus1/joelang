@@ -67,6 +67,9 @@ std::size_t SizeOf( Type t );
   */
 Type MakeUnsigned( Type t );
 
+/**
+  * This asserts if one tries to get the llvm type of an invalid Type
+  */
 llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
 
 const std::string& GetTypeString( Type t );
