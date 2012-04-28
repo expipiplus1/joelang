@@ -137,9 +137,12 @@ public:
 
     /**
       * Performs type checking and things.
+      * \param sema
+      *   The semantic analyzer to use
+      * \returns true if there were no errors parsing
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) = 0;
+    bool PerformSema( SemaAnalyzer& sema ) = 0;
 
     /**
       * Performs constant folding.
@@ -223,7 +226,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -278,7 +281,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
@@ -362,7 +365,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override final;
@@ -426,7 +429,7 @@ public:
       * Casts both operands to bool
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     /**
       * \returns Type::BOOL
@@ -464,7 +467,7 @@ public:
       * Casts both operands to bool
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     /**
       * Returns bool
@@ -499,7 +502,7 @@ public:
       * Verifies that both operands are integral
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
@@ -536,7 +539,7 @@ public:
       * Verifies that both operands are integral
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,
@@ -568,7 +571,7 @@ public:
       * Verifies that both operands are integral
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,
@@ -665,7 +668,7 @@ public:
       * Verifies that both operands are integral
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,
@@ -753,7 +756,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
@@ -824,7 +827,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self ) override;
@@ -870,7 +873,7 @@ public:
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -940,7 +943,7 @@ public:
     Type GetReturnType() const override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -989,7 +992,7 @@ public:
       * Does nothing
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override final;
 
     virtual
     GenericValue GetValue() const = 0;

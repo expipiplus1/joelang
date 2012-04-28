@@ -152,7 +152,7 @@ void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_assignedExpression->ResolveIdentifiers( sema );
 }
 
-void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
+bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
     m_assignedExpression = CastExpression::Create(
                                               m_assignee->GetReturnType(),
@@ -160,6 +160,9 @@ void AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 
     m_assignee->PerformSema( sema );
     m_assignedExpression->PerformSema( sema );
+
+    assert( false && "Complete me" );
+    return false;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -251,15 +254,19 @@ void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_falseExpression->ResolveIdentifiers( sema );
 }
 
-void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
+bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
 
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
     {
+        good = false;
+
         // If both of the sub expressions are fine, then we know the problem's
-        // here
+        // here, so report it
         if( m_trueExpression->GetReturnType() != Type::UNKNOWN_TYPE &&
             m_falseExpression->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Incompatable operand types in conditional expression "+
@@ -277,9 +284,11 @@ void ConditionalExpression::PerformSema( SemaAnalyzer& sema )
                                                 std::move(m_falseExpression) );
     }
 
-    m_condition->PerformSema( sema );
-    m_trueExpression->PerformSema( sema );
-    m_falseExpression->PerformSema( sema );
+    good &= m_condition->PerformSema( sema );
+    good &= m_trueExpression->PerformSema( sema );
+    good &= m_falseExpression->PerformSema( sema );
+
+    return good;
 }
 
 void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
@@ -413,12 +422,16 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_rightSide->ResolveIdentifiers( sema );
 }
 
-void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
+bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = GetCommonType( m_rightSide->GetReturnType(),
                             m_leftSide->GetReturnType() );
     if( t == Type::UNKNOWN_TYPE )
     {
+        good = false;
+
         // If both of the sub expressions are fine, then we know the problem's
         // here
         if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
@@ -433,8 +446,10 @@ void BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
         m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
     }
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 void BinaryOperatorExpression::FoldConstants(
@@ -670,13 +685,17 @@ LogicalOrExpression::~LogicalOrExpression()
 {
 }
 
-void LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
+bool LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
     m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 Type LogicalOrExpression::GetReturnType() const
@@ -725,13 +744,17 @@ LogicalAndExpression::~LogicalAndExpression()
 {
 }
 
-void LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
+bool LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
     m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 Type LogicalAndExpression::GetReturnType() const
@@ -780,12 +803,14 @@ InclusiveOrExpression::~InclusiveOrExpression()
 {
 }
 
-void InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
+bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
     {
+        good = false;
         if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
             m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to inclusive or operator: " +
@@ -798,8 +823,10 @@ void InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
         m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
     }
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 bool InclusiveOrExpression::Parse( Parser& parser,
@@ -844,12 +871,15 @@ ExclusiveOrExpression::~ExclusiveOrExpression()
 {
 }
 
-void ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
+bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
     {
+        good = false;
         if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
             m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to exclusive or operator: " +
@@ -862,8 +892,10 @@ void ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
         m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
     }
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 bool ExclusiveOrExpression::Parse( Parser& parser,
@@ -906,12 +938,15 @@ AndExpression::~AndExpression()
 {
 }
 
-void AndExpression::PerformSema( SemaAnalyzer& sema )
+bool AndExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
     {
+        good = false;
         if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
             m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to and operator: " +
@@ -924,8 +959,10 @@ void AndExpression::PerformSema( SemaAnalyzer& sema )
         m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
     }
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+
+    return good;
 }
 
 bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
@@ -1061,12 +1098,15 @@ ShiftExpression::~ShiftExpression()
 {
 }
 
-void ShiftExpression::PerformSema( SemaAnalyzer& sema )
+bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = GetReturnType();
 
     if( !IsIntegral(t) )
     {
+        good = false;
         if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
             m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to shift operator: " +
@@ -1079,8 +1119,9 @@ void ShiftExpression::PerformSema( SemaAnalyzer& sema )
         m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
     }
 
-    m_leftSide->PerformSema( sema );
-    m_rightSide->PerformSema( sema );
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+    return good;
 }
 
 bool ShiftExpression::Parse( Parser& parser,
@@ -1211,21 +1252,34 @@ void CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_expression->ResolveIdentifiers( sema );
 }
 
-void CastExpression::PerformSema( SemaAnalyzer& sema )
+bool CastExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = m_expression->GetReturnType();
 
     if( m_castType == Type::UNKNOWN_TYPE )
+    {
+        good = false;
         sema.Error( "Can't cast to an unknown type" );
+    }
     else if( m_castType == Type::STRING )
         if( t != Type::STRING &&
             t != Type::UNKNOWN_TYPE )
+        {
+            good = false;
             sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
+        }
 
     if( t == Type::STRING && m_castType != Type::STRING )
+    {
+        good = false;
         sema.Error( "Can't cast string to " + GetTypeString( m_castType ) );
+    }
 
-    m_expression->PerformSema( sema );
+    good &= m_expression->PerformSema( sema );
+
+    return good;
 }
 
 void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
@@ -1325,16 +1379,26 @@ void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_expression->ResolveIdentifiers( sema );
 }
 
-void UnaryExpression::PerformSema( SemaAnalyzer& sema )
+bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     Type t = m_expression->GetReturnType();
     if( t == Type::STRING )
+    {
+        good = false;
         sema.Error( "Invalid type to unary operator: string" );
+    }
     if( !IsIntegral( t ) &&
         m_operator == Op::BITWISE_NOT )
+    {
+        good = false;
         sema.Error( "Invalid type to bitwise unary not operator" );
+    }
 
-    m_expression->PerformSema( sema );
+    good &= m_expression->PerformSema( sema );
+
+    return good;
 }
 
 void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
@@ -1489,10 +1553,11 @@ void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_expression->ResolveIdentifiers( sema );
 }
 
-void PostfixExpression::PerformSema( SemaAnalyzer& sema )
+bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
-    assert( "false" && "Complete me" );
+    assert( false && "Complete me" );
     m_expression->PerformSema( sema );
+    return false;
 }
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1613,8 +1678,9 @@ Type IdentifierExpression::GetReturnType() const
     return m_variable->GetType();
 }
 
-void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
+bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
+    return bool(m_variable);
     //assert( m_readExpression &&
     //        "Should have resolved this expression by now" );
 }
@@ -1667,8 +1733,9 @@ void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
 }
 
-void LiteralExpression::PerformSema( SemaAnalyzer& sema )
+bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
+    return true;
 }
 
 bool LiteralExpression::Parse( Parser& parser,
