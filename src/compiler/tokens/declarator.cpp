@@ -111,6 +111,10 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     sema.DeclareVariable( m_declarator->GetIdentifier(), m_variable );
 }
 
+void InitDeclarator::CodeGen( CodeGenerator& code_gen )
+{
+}
+
 void InitDeclarator::Print( int depth ) const
 {
 }

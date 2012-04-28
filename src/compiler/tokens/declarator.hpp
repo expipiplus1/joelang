@@ -38,6 +38,7 @@ namespace JoeLang
 {
 namespace Compiler
 {
+class CodeGenerator;
 class Declarator;
 class DeclSpecs;
 class Expression;
@@ -67,6 +68,11 @@ public:
       *   The AstBuilder which contains the symbol table and things
       */
     void PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
+
+    /**
+      * Creates some memory in llvm to hold this variable
+      */
+    void CodeGen( CodeGenerator& code_gen );
 
     virtual
     void Print( int depth ) const override;
