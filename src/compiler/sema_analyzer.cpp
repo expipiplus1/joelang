@@ -37,6 +37,7 @@
 #include <utility>
 
 #include <compiler/casting.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -141,103 +142,115 @@ const StateBase* SemaAnalyzer::GetState( const std::string& name ) const
     return m_context.GetNamedState( name );
 }
 
-std::map<std::string, std::shared_ptr<LiteralExpression> >
+std::map<std::string, std::unique_ptr<LiteralExpression> >
     GetLiteralValueEnumerantMap( const StateBase& state_base )
 {
-    std::map<std::string, std::shared_ptr<LiteralExpression> > ret;
+    std::map<std::string, std::unique_ptr<LiteralExpression> > ret;
     switch( state_base.GetType() )
     {
     case Type::BOOL:
         for( const auto& e :
              static_cast<const State<jl_bool>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<BooleanLiteralExpression>( e.second );
+                    std::unique_ptr<BooleanLiteralExpression>(
+                        new BooleanLiteralExpression( e.second ) );
         break;
     case Type::FLOAT:
         for( const auto& e :
              static_cast<const State<jl_float>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<FloatingLiteralExpression>(
-                                    e.second,
-                                    FloatingLiteralExpression::Suffix::SINGLE );
+                    std::unique_ptr<FloatingLiteralExpression>(
+                            new FloatingLiteralExpression(
+                                  e.second,
+                                  FloatingLiteralExpression::Suffix::SINGLE ) );
         break;
     case Type::DOUBLE:
         for( const auto& e :
              static_cast<const State<jl_double>&>(state_base).GetEnumerations())
             ret[e.first] =
-                    std::make_shared<FloatingLiteralExpression>(
+                    std::unique_ptr<FloatingLiteralExpression>(
+                            new FloatingLiteralExpression(
                                     e.second,
-                                    FloatingLiteralExpression::Suffix::NONE );
+                                    FloatingLiteralExpression::Suffix::NONE ) );
         break;
     case Type::I8:
         for( const auto& e :
              static_cast<const State<jl_i8>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                                     e.second,
-                                    IntegerLiteralExpression::Suffix::CHAR );
+                                    IntegerLiteralExpression::Suffix::CHAR ) );
         break;
     case Type::I16:
         for( const auto& e :
              static_cast<const State<jl_i16>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                                     e.second,
-                                    IntegerLiteralExpression::Suffix::SHORT );
-        break;
+                                    IntegerLiteralExpression::Suffix::SHORT ) );
+         break;
     case Type::I32:
         for( const auto& e :
              static_cast<const State<jl_i32>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                                     e.second,
-                                    IntegerLiteralExpression::Suffix::INT );
-        break;
+                                    IntegerLiteralExpression::Suffix::INT ) );
+         break;
     case Type::I64:
         for( const auto& e :
              static_cast<const State<jl_i64>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                                     e.second,
-                                    IntegerLiteralExpression::Suffix::LONG );
-        break;
+                                    IntegerLiteralExpression::Suffix::LONG ) );
+         break;
     case Type::U8:
         for( const auto& e :
              static_cast<const State<jl_u8>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                             e.second,
-                            IntegerLiteralExpression::Suffix::UNSIGNED_CHAR );
-        break;
+                            IntegerLiteralExpression::Suffix::UNSIGNED_CHAR ) );
+         break;
     case Type::U16:
         for( const auto& e :
              static_cast<const State<jl_u16>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
-                            e.second,
-                            IntegerLiteralExpression::Suffix::UNSIGNED_SHORT );
-    break;
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
+                           e.second,
+                           IntegerLiteralExpression::Suffix::UNSIGNED_SHORT ) );
+     break;
     case Type::U32:
         for( const auto& e :
              static_cast<const State<jl_u32>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                             e.second,
-                            IntegerLiteralExpression::Suffix::UNSIGNED_INT );
-        break;
+                            IntegerLiteralExpression::Suffix::UNSIGNED_INT ) );
+         break;
     case Type::U64:
         for( const auto& e :
              static_cast<const State<jl_u64>&>(state_base).GetEnumerations() )
             ret[e.first] =
-                    std::make_shared<IntegerLiteralExpression>(
+                    std::unique_ptr<IntegerLiteralExpression>(
+                        new IntegerLiteralExpression(
                             e.second,
-                            IntegerLiteralExpression::Suffix::UNSIGNED_LONG );
-        break;
+                            IntegerLiteralExpression::Suffix::UNSIGNED_LONG ) );
+         break;
     case Type::STRING:
         for( const auto& e :
              static_cast<const State<jl_string>&>(state_base).GetEnumerations())
             ret[e.first] =
-                    std::make_shared<StringLiteralExpression>( e.second );
+                    std::unique_ptr<StringLiteralExpression>(
+                        new StringLiteralExpression( e.second ) );
         break;
     default:
         assert( false && "state_base is of an unhandled type" );
@@ -249,11 +262,14 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 {
     // TODO cache these results
     for( auto& v : GetLiteralValueEnumerantMap(state) )
-        DeclareVariable( v.first, v.second );
+        DeclareVariable( v.first,
+                         std::make_shared<Variable>( v.second->GetReturnType(),
+                                                     true,
+                                                     std::move(v.second) ) );
 }
 
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
-                                    std::shared_ptr<Expression> value )
+                                    std::shared_ptr<Variable> value )
 {
     bool inserted = m_symbolStack.rbegin()->m_variables.insert(
             std::make_pair( identifier, std::move(value) ) ).second;
@@ -273,7 +289,7 @@ void SemaAnalyzer::DeclareVariable( const std::string& identifier,
     }
 }
 
-std::shared_ptr<Expression> SemaAnalyzer::GetVariable(
+std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
                                                 const std::string& identifier )
 {
     // iterate in reverse because deeper scopes take priority

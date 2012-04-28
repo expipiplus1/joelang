@@ -58,5 +58,19 @@ Variable::Variable( Type type,
     }
 }
 
+Type Variable::GetType() const
+{
+    return m_type;
+}
+
+const std::unique_ptr<Expression>& Variable::GetReadExpression() const
+{
+    if( m_isConst )
+        return m_initializer;
+
+    assert( false );
+    return nullptr;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

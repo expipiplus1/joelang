@@ -48,6 +48,7 @@ class Expression;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
+class Variable;
 
 /**
   * \class SemaAnalyzer
@@ -130,22 +131,22 @@ public:
     void LoadStateEnumerants( const StateBase& state );
 
     /**
-      * Declares a variable with an optional value
+      * Declares a variable
       * \param identifier
       *   The identifier for the variable
-      * \param value
-      *   The optional init value
+      * \param variable
+      *   The variable object
       */
     void DeclareVariable( const std::string& identifier,
-                          std::shared_ptr<Expression> value = nullptr );
+                          std::shared_ptr<Variable> variable );
 
     /**
       * \param identifier
       *   The name of the variable
-      * \returns the Expression assiciated with the variable, or nullptr if
+      * \returns the Variable associated with the identifier, or nullptr if
       *   there is no variable with that name
       */
-    std::shared_ptr<Expression> GetVariable( const std::string& identifier );
+    std::shared_ptr<Variable> GetVariable( const std::string& identifier );
 
     /**
       * Creates a new scope on the scope stack
@@ -175,7 +176,7 @@ public:
 private:
     struct SymbolMaps
     {
-        std::map<std::string, std::shared_ptr<Expression> > m_variables;
+        std::map<std::string, std::shared_ptr<Variable> > m_variables;
     };
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;

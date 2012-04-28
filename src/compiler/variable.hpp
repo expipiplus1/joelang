@@ -55,6 +55,10 @@ public:
     Variable( Type type,
               bool is_const,
               std::unique_ptr<Expression> initializer = nullptr );
+
+    Type GetType() const;
+
+    const std::unique_ptr<Expression>& GetReadExpression() const;
 private:
     Type m_type;
     bool m_isConst;

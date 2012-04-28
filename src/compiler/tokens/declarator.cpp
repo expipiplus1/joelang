@@ -37,6 +37,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -65,38 +66,49 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
-    if( !decl_specs.IsConst() )
-    {
-        //return;
-    }
+    bool can_init = true;
 
+    // Reduce the initializer as much as possible
+    if( m_initializer )
+    {
+        //TODO move this somewhere else
+        m_initializer->ResolveIdentifiers( sema );
+        m_initializer = CastExpression::Create(
+                                            decl_specs.GetType(),
+                                            std::move( m_initializer ) );
+        m_initializer->PerformSema( sema );
+        m_initializer->FoldConstants( m_initializer );
+
+        assert( m_initializer->GetReturnType() == decl_specs.GetType() &&
+                "Trying to initialize a variable with mismatched types" );
+    }
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() )
     {
         if( !m_initializer )
+        {
             sema.Error( "Const variables must have an initializer" );
+            can_init = false;
+        }
         else
         {
-            //TODO move this somewhere else
-            m_initializer->ResolveIdentifiers( sema );
-            m_initializer = CastExpression::Create(
-                                                decl_specs.GetType(),
-                                                std::move( m_initializer ) );
-            m_initializer->PerformSema( sema );
-            m_initializer->FoldConstants( m_initializer );
-
-            assert( m_initializer->GetReturnType() == decl_specs.GetType() &&
-                    "Trying to initialize a variable with mismatched types" );
-
             if( !Expression::GetLiteral( m_initializer ) )
+            {
                 sema.Error( "trying to initialize a variable with a non-const "
                             "expression" );
-            sema.DeclareVariable(
-                  m_declarator->GetIdentifier(),
-                  std::shared_ptr<Expression>( std::move(m_initializer) ) );
+                can_init = false;
+            }
         }
     }
+
+    // If we can't initialize this for whatever reason, sema will have been
+    // notified, so just pretend that this is non-const for the sake of parsing
+    sema.DeclareVariable( m_declarator->GetIdentifier(),
+                          std::make_shared<Variable>(
+                                               decl_specs.GetType(),
+                                               decl_specs.IsConst() && can_init,
+                                               std::move(m_initializer) ) );
 }
 
 void InitDeclarator::Print( int depth ) const

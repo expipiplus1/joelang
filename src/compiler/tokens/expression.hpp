@@ -58,6 +58,7 @@ namespace JoeLang
         class GenericValue;
         class Parser;
         class SemaAnalyzer;
+        class Variable;
 
         class AssignmentOperator;
         class LiteralExpression;
@@ -944,7 +945,7 @@ public:
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
-    const std::shared_ptr<Expression>& GetReadExpression() const;
+    const std::unique_ptr<Expression>& GetReadExpression() const;
 
     virtual
     void Print( int depth ) const;
@@ -959,7 +960,7 @@ public:
     bool classof( const IdentifierExpression* e );
 private:
     std::string                 m_identifier;
-    std::shared_ptr<Expression> m_readExpression;
+    std::shared_ptr<Variable>   m_variable;
 };
 
 /**

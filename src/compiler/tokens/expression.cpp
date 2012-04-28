@@ -52,6 +52,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/operator.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -105,7 +106,7 @@ LiteralExpression* Expression::GetLiteral(
         // identifier
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( e.get() );
-        const std::shared_ptr<Expression>& read_expression =
+        const std::unique_ptr<Expression>& read_expression =
                                                         i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
             l = static_cast<LiteralExpression*>( read_expression.get() );
@@ -298,7 +299,7 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
     {
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( m_condition.get() );
-        const std::shared_ptr<Expression>& read_expression =
+        const std::unique_ptr<Expression>& read_expression =
                                                          i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
             l = static_cast<LiteralExpression*>( read_expression.get() );
@@ -1573,7 +1574,7 @@ bool PrimaryExpression::Parse( Parser& parser,
 IdentifierExpression::IdentifierExpression( std::string identifier )
     :Expression( ExpressionTy::IdentifierExpression )
     ,m_identifier( std::move( identifier ) )
-    ,m_readExpression( nullptr )
+    ,m_variable( nullptr )
 {
     assert( !m_identifier.empty() );
 }
@@ -1584,8 +1585,8 @@ IdentifierExpression::~IdentifierExpression()
 
 void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_readExpression = sema.GetVariable( m_identifier );
-    if( !m_readExpression )
+    m_variable = sema.GetVariable( m_identifier );
+    if( !m_variable )
         sema.Error( "Undeclared variable: " + m_identifier );
 }
 
@@ -1596,9 +1597,9 @@ llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
 
 Type IdentifierExpression::GetReturnType() const
 {
-    if( !m_readExpression )
+    if( !m_variable )
         return Type::UNKNOWN_TYPE;
-    return m_readExpression->GetReturnType();
+    return m_variable->GetType();
 }
 
 void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
@@ -1607,10 +1608,10 @@ void IdentifierExpression::PerformSema( SemaAnalyzer& sema )
     //        "Should have resolved this expression by now" );
 }
 
-const std::shared_ptr<Expression>&
+const std::unique_ptr<Expression>&
                                  IdentifierExpression::GetReadExpression() const
 {
-    return m_readExpression;
+    return m_variable->GetReadExpression();
 }
 
 void IdentifierExpression::Print( int depth ) const
