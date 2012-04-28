@@ -55,6 +55,7 @@ InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
                                 std::unique_ptr<Expression> initializer )
     : m_declarator( std::move(declarator) )
     , m_initializer( std::move(initializer) )
+    , m_variable( nullptr )
 {
     assert( m_declarator && "InitDeclarator given a null declarator" );
 }
@@ -102,13 +103,12 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         }
     }
 
+    m_variable =  std::make_shared<Variable>( decl_specs.GetType(),
+                                              decl_specs.IsConst() && can_init,
+                                              std::move(m_initializer) );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of parsing
-    sema.DeclareVariable( m_declarator->GetIdentifier(),
-                          std::make_shared<Variable>(
-                                               decl_specs.GetType(),
-                                               decl_specs.IsConst() && can_init,
-                                               std::move(m_initializer) ) );
+    sema.DeclareVariable( m_declarator->GetIdentifier(), m_variable );
 }
 
 void InitDeclarator::Print( int depth ) const

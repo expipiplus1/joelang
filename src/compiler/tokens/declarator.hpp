@@ -43,6 +43,7 @@ class DeclSpecs;
 class Expression;
 class Parser;
 class SemaAnalyzer;
+class Variable;
 
 /**
   * \class InitDeclarator
@@ -86,6 +87,7 @@ public:
 private:
     std::unique_ptr<Declarator> m_declarator;
     std::unique_ptr<Expression> m_initializer;
+    std::shared_ptr<Variable>   m_variable;
 };
 
 /**

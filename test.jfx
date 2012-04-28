@@ -3,6 +3,8 @@ const string hello = "Hello",
              hello_world = hello + ", " + world + "!";
 const unsigned twenty = 20ul;
 
+int a = 1;
+
 const float twentyone = twenty + 1;
 
 technique t1
