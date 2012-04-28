@@ -79,8 +79,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         m_initializer = CastExpression::Create(
                                             decl_specs.GetType(),
                                             std::move( m_initializer ) );
-        m_initializer->PerformSema( sema );
-        if( sema.Good() )
+        if( m_initializer->PerformSema( sema ) )
             m_initializer->FoldConstants( m_initializer );
 
         assert( m_initializer->GetReturnType() == decl_specs.GetType() &&

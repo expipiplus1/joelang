@@ -89,9 +89,7 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
         m_expression = CastExpression::Create( m_state->GetType(),
                                                std::move(m_expression) );
 
-    m_expression->PerformSema( sema );
-
-    if( sema.Good() )
+    if( m_expression->PerformSema( sema ) )
         m_expression->FoldConstants( m_expression );
 
     sema.LeaveScope();
