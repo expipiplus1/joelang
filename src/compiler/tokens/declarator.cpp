@@ -80,7 +80,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                             decl_specs.GetType(),
                                             std::move( m_initializer ) );
         m_initializer->PerformSema( sema );
-        m_initializer->FoldConstants( m_initializer );
+        if( sema.Good() )
+            m_initializer->FoldConstants( m_initializer );
 
         assert( m_initializer->GetReturnType() == decl_specs.GetType() &&
                 "Trying to initialize a variable with mismatched types" );

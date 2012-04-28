@@ -26,6 +26,6 @@ technique t1
     {
         my_floating_state = 2 + twentyone;
         my_string_state = "Hello, World!";
-        my_floating_state = one + 2;
+        my_floating_state = ~one + 2;
     }
 }

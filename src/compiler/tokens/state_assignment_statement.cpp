@@ -91,7 +91,8 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 
     m_expression->PerformSema( sema );
 
-    m_expression->FoldConstants( m_expression );
+    if( sema.Good() )
+        m_expression->FoldConstants( m_expression );
 
     sema.LeaveScope();
 }
