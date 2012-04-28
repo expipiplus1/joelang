@@ -584,6 +584,11 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
         // No point in declaring things with no type
         return;
     }
+    else if( type == Type::VOID )
+    {
+        sema.Error( "Can't declare variables of void type" );
+        return;
+    }
 
     DeclSpecs decl_specs( is_const, type );
 
