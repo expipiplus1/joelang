@@ -48,6 +48,10 @@ class Expression;
 class Variable
 {
 public:
+    /**
+      * This constructor asserts if the varible is const and hasn't been given
+      * an initializer
+      */
     Variable( Type type,
               bool is_const,
               std::unique_ptr<Expression> initializer = nullptr );
