@@ -93,7 +93,7 @@ void CodeGenerator::GenerateCode(
         {
             VariableDeclarationList& v =
                     static_cast<VariableDeclarationList&>( *declaration.get() );
-            //v.CodeGen( *this );
+            v.CodeGen( *this );
         }
     }
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
