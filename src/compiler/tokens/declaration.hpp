@@ -87,7 +87,6 @@ public:
     virtual
     void PerformSema( SemaAnalyzer& sema ) = 0;
 
-
     /**
       * Parses any top level declaration
       * \param parser
@@ -378,6 +377,8 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema );
+
+    void CodeGen( CodeGenerator& code_gen ) const;
 
 private:
     DeclSpecsVector m_declSpecs;

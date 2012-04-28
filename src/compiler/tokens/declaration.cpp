@@ -595,6 +595,10 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
         declarator->PerformSema( sema, decl_specs );
 }
 
+void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
+{
+}
+
 //------------------------------------------------------------------------------
 // FunctionDefinition
 //------------------------------------------------------------------------------
