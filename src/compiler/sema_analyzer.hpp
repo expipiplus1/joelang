@@ -159,6 +159,11 @@ public:
     void LeaveScope();
 
     /**
+      * \returns true if we are in the top scope
+      */
+    bool InGlobalScope() const;
+
+    /**
       * Reports an error.
       * Sets m_good to false
       * \param error_message

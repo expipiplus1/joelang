@@ -265,6 +265,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         DeclareVariable( v.first,
                          std::make_shared<Variable>( v.second->GetReturnType(),
                                                      true,
+                                                     false,
                                                      std::move(v.second) ) );
 }
 
@@ -311,6 +312,11 @@ void SemaAnalyzer::EnterScope()
 void SemaAnalyzer::LeaveScope()
 {
     m_symbolStack.pop_back();
+}
+
+bool SemaAnalyzer::InGlobalScope() const
+{
+    return m_symbolStack.size() == 1;
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )
