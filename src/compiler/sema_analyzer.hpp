@@ -178,6 +178,11 @@ public:
       */
     void Warning( const std::string& warning_message );
 
+    /**
+      * Checks the error state
+      * \returns true if there has been no call to Error
+      */
+    bool Good() const;
 private:
     struct SymbolMaps
     {

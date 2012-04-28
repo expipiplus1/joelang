@@ -332,5 +332,10 @@ void SemaAnalyzer::Warning( const std::string& warning_message)
                  std::endl;
 }
 
+bool SemaAnalyzer::Good() const
+{
+    return m_good;
+}
+
 } // namespace Compiler
 } // namespace JoeLang
