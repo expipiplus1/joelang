@@ -31,6 +31,11 @@
 
 #include <memory>
 
+namespace llvm
+{
+    class GlobalVariable;
+}
+
 namespace JoeLang
 {
 
@@ -39,6 +44,7 @@ enum class Type;
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
 
 /**
@@ -57,14 +63,20 @@ public:
               bool is_global,
               std::unique_ptr<Expression> initializer = nullptr );
 
+    void CodeGen( CodeGenerator& code_gen );
+
     Type GetType() const;
 
     const std::unique_ptr<Expression>& GetReadExpression() const;
+
 private:
     Type m_type;
     bool m_isConst;
     bool m_isGlobal;
     std::unique_ptr<Expression> m_initializer;
+
+    // TODO handle non global variables
+    llvm::GlobalVariable* m_globalVariable = nullptr;
 };
 
 } // namespace Compiler

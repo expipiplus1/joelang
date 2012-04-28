@@ -116,6 +116,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
 void InitDeclarator::CodeGen( CodeGenerator& code_gen )
 {
+    m_variable->CodeGen( code_gen );
 }
 
 void InitDeclarator::Print( int depth ) const

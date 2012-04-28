@@ -38,6 +38,7 @@
 namespace llvm
 {
     class ExecutionEngine;
+    class GlobalVariable;
     class LLVMContext;
     class Module;
 }
@@ -130,6 +131,22 @@ public:
       */
     llvm::Value* CreateFloating( double value,
                                  bool is_double );
+
+    // Variables
+    /**
+      * Allocate a llvm::GlobalVariable for the current module
+      * \param type
+      *   The type of the global variable
+      * \param is_const
+      *   Whether this is a const variable
+      * \param initializer
+      *   An optional value to initialize the variable with
+      * \returns the llvm::GlobalVariable allocated
+      */
+    llvm::GlobalVariable* CreateGlobalVariable(
+                     Type type,
+                     bool is_const,
+                     const std::unique_ptr<Expression>& initializer = nullptr );
 
     // Getters
     llvm::LLVMContext& GetLLVMContext() const;

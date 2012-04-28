@@ -38,6 +38,7 @@
 
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
+#include <llvm/GlobalVariable.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Type.h>
@@ -97,6 +98,9 @@ void CodeGenerator::GenerateCode(
         }
     }
     llvm_execution_engine = std::move( m_llvmExecutionEngine );
+
+    // output the module for fun
+    m_llvmModule->dump();
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
@@ -144,11 +148,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     m_llvmBuilder.CreateRet( v );
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function in stateassignment not valid" );
-
-    //
-    // output the function for fun
-    //
-    function->dump();
 
     //
     // Get the function pointer
@@ -520,6 +519,26 @@ llvm::Value* CodeGenerator::CreateFloating( double value,
                                   value );
 }
 
+//
+// Variables
+//
+
+llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
+                                Type type,
+                                bool is_const,
+                                const std::unique_ptr<Expression>& initializer )
+{
+    llvm::Type* t = GetLLVMType( type, m_llvmContext );
+    llvm::Value* init = initializer->CodeGen( *this );
+    return new llvm::GlobalVariable( *m_llvmModule,
+                                     t,
+                                     is_const,
+                                     llvm::GlobalVariable::CommonLinkage,
+                                     llvm::dyn_cast<llvm::Constant>(init),
+                                     "" );
+
+
+}
 //
 // Getters
 //

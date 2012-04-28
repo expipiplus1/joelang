@@ -34,6 +34,7 @@
 #include <utility>
 
 #include <compiler/casting.hpp>
+#include <compiler/code_generator.hpp>
 #include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
@@ -57,6 +58,24 @@ Variable::Variable( Type type,
                 "expression" );
         assert( m_initializer->GetReturnType() == type &&
                 "Trying to initialize a const variable with the wrong type" );
+    }
+}
+
+void Variable::CodeGen( CodeGenerator& code_gen )
+{
+    // Don't generate storage for strings, they're determined at compile time
+    if( m_type == Type::STRING )
+        return;
+
+    if( m_isGlobal )
+    {
+        m_globalVariable = code_gen.CreateGlobalVariable( m_type,
+                                                          m_isConst,
+                                                          m_initializer );
+    }
+    else
+    {
+        assert( false && "TODO: generate non global variables" );
     }
 }
 
