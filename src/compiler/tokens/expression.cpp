@@ -566,6 +566,10 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
         return code_gen.CreateDiv(  *m_leftSide, *m_rightSide );
     case Op::MODULO:
         return code_gen.CreateMod(  *m_leftSide, *m_rightSide );
+    default:
+        assert( false &&
+                "Trying to generate code for unhandled binary operator" );
+        return nullptr;
     }
 }
 
@@ -1376,6 +1380,10 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
         return code_gen.CreateNot( *m_expression );
     case Op::LOGICAL_NOT:
         return code_gen.CreateLNot( *m_expression );
+    default:
+        assert( false &&
+                "Trying to generate code for unhandled unary operator" );
+        return nullptr;
     }
 }
 

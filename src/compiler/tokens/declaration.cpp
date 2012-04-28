@@ -386,7 +386,6 @@ Type VariableListOrFunctionDefinition::DeduceType(
                                std::vector<TypeSpecifier::TypeSpec> type_specs,
                                SemaAnalyzer& sema )
 {
-    bool is_unsigned = false;
     bool is_signed = false;
     bool has_type = false;
     Type type;
@@ -511,7 +510,6 @@ Type VariableListOrFunctionDefinition::DeduceType(
                 has_type = true;
                 type = Type::U32;
             }
-            is_unsigned = true;
             break;
         }
     }
@@ -547,7 +545,6 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 
     // Handle the declaration specifiers
     bool is_const = false;
-    bool is_volatile = false;
 
     for( const auto& t : m_declSpecs )
     {
@@ -560,7 +557,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
                 is_const = true;
                 break;
             case TypeQualifier::TypeQual::VOLATILE:
-                is_volatile = true;
+                sema.Warning( "volatile specfier ignored in declaration" );
                 break;
             }
         }
