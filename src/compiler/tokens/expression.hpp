@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/tokens/operator.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/types.hpp>
 
@@ -60,9 +61,7 @@ namespace JoeLang
         class SemaAnalyzer;
         class Variable;
 
-        class AssignmentOperator;
         class LiteralExpression;
-        class PostfixOperator;
     } // namespace Compiler
 } // namespace JoeLang
 
@@ -161,6 +160,13 @@ public:
     Type GetReturnType() const = 0;
 
     /**
+      * \returns true if the Expression represents a l-value
+      * by default this returns false
+      */
+    virtual
+    bool IsLValue() const;
+
+    /**
       * Parses any expression
       * \param parser
       *   The current Parser
@@ -206,6 +212,8 @@ private:
 class AssignmentExpression : public JoeLang::Compiler::Expression
 {
 public:
+    using Op = AssignmentOperator::Op;
+
     /**
       * This constructor asserts on any null pointers
       * \param assignee
@@ -217,7 +225,7 @@ public:
       */
     AssignmentExpression(
                         std::unique_ptr<Expression> assignee,
-                        std::unique_ptr<AssignmentOperator> assignment_operator,
+                        Op assignment_operator,
                         std::unique_ptr<Expression> assigned_expression );
     virtual
     ~AssignmentExpression();
@@ -246,9 +254,9 @@ public:
     static
     bool classof( const AssignmentExpression* e );
 private:
-    std::unique_ptr<Expression>         m_assignee;
-    std::unique_ptr<AssignmentOperator> m_assignmentOperator;
-    std::unique_ptr<Expression>         m_assignedExpression;
+    std::unique_ptr<Expression> m_assignee;
+    Op                          m_assignmentOperator;
+    std::unique_ptr<Expression> m_assignedExpression;
 };
 
 /**
@@ -944,6 +952,12 @@ public:
 
     /** \returns true if this identifier represents a constant expression **/
     bool IsConst() const;
+
+    /** \returns true **/
+    virtual
+    bool IsLValue() const override;
+
+    const std::shared_ptr<Variable>& GetVariable() const;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;

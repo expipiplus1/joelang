@@ -78,6 +78,11 @@ void Expression::FoldConstants( std::unique_ptr<Expression>& self )
 {
 }
 
+bool Expression::IsLValue() const
+{
+    return false;
+}
+
 bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
 {
     // TODO comma sep expressions
@@ -130,17 +135,15 @@ bool Expression::classof( const Expression* e )
 
 AssignmentExpression::AssignmentExpression(
                         std::unique_ptr<Expression> assignee,
-                        std::unique_ptr<AssignmentOperator> assignment_operator,
+                        Op assignment_operator,
                         std::unique_ptr<Expression> assigned_expression )
     :Expression( ExpressionTy::AssignmentExpression )
     ,m_assignee          ( std::move(assignee) )
-    ,m_assignmentOperator( std::move(assignment_operator) )
+    ,m_assignmentOperator( assignment_operator)
     ,m_assignedExpression( std::move(assigned_expression) )
 {
     assert( m_assignee &&
             "AssignmentExpression given an invalid assignee" );
-    assert( m_assignmentOperator &&
-            "AssignmentExpression given an invalid assignment operator" );
     assert( m_assignedExpression &&
             "AssignmentExpression given an invalid assigned expression" );
 }
@@ -157,20 +160,54 @@ void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
     m_assignedExpression = CastExpression::Create(
                                               m_assignee->GetReturnType(),
                                               std::move(m_assignedExpression) );
 
-    m_assignee->PerformSema( sema );
-    m_assignedExpression->PerformSema( sema );
+    good &= m_assignee->PerformSema( sema );
+    good &= m_assignedExpression->PerformSema( sema );
 
-    assert( false && "Complete me" );
-    return false;
+    if( !isa<IdentifierExpression>(m_assignee) )
+    {
+        good = false;
+        sema.Error( "Trying to assign to a RValue" );
+    }
+    else
+    {
+        IdentifierExpression* i =
+                        static_cast<IdentifierExpression*>( m_assignee.get() );
+        if( i->IsConst() )
+        {
+            good = false;
+            sema.Error( "Trying to assign to a const value" );
+        }
+    }
+
+    return good;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete Me" );
+    assert( isa<IdentifierExpression>(m_assignee) &&
+            "Trying to code_gen assigning to a rvalue" );
+
+    IdentifierExpression* i =
+                    static_cast<IdentifierExpression*>( m_assignee.get() );
+
+    switch( m_assignmentOperator )
+    {
+    case Op::EQUALS:
+        code_gen.CreateVariableAssignment( *i->GetVariable(),
+                                           *m_assignedExpression );
+        break;
+    default:
+        assert( false && "unhandled assignment operator" );
+    }
+
+    // Return the new value of the variable
+    return i->CodeGen( code_gen );
 }
 
 Type AssignmentExpression::GetReturnType() const
@@ -185,7 +222,6 @@ void AssignmentExpression::Print(int depth) const
     std::cout << "Assignment Expression\n";
 
     m_assignee->Print( depth + 1 );
-    m_assignmentOperator->Print( depth + 1 );
     m_assignedExpression->Print( depth + 1 );
 }
 
@@ -210,7 +246,7 @@ bool AssignmentExpression::Parse( Parser& parser,
         return false;
 
     token.reset( new AssignmentExpression( std::move(lhs_expression),
-                                           std::move(assignment_operator),
+                                           assignment_operator->GetOp(),
                                            std::move(assignment_expression) ) );
     return true;
 }
@@ -1686,6 +1722,16 @@ Type IdentifierExpression::GetReturnType() const
 bool IdentifierExpression::IsConst() const
 {
     return m_variable->IsConst();
+}
+
+bool IdentifierExpression::IsLValue() const
+{
+    return true;
+}
+
+const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
+{
+    return m_variable;
 }
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
