@@ -53,6 +53,7 @@
 #include <engine/technique.hpp>
 #include <engine/internal/type_properties.hpp>
 #include <compiler/casting.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -539,6 +540,12 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
 
 
 }
+
+llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
+{
+    return m_llvmBuilder.CreateLoad( variable.GetLLVMPointer() );
+}
+
 //
 // Getters
 //

@@ -60,6 +60,7 @@ class DeclarationBase;
 class Expression;
 class TechniqueDeclaration;
 class TranslationUnit;
+class Variable;
 
 class CodeGenerator
 {
@@ -147,6 +148,8 @@ public:
                      Type type,
                      bool is_const,
                      const std::unique_ptr<Expression>& initializer = nullptr );
+
+    llvm::Value* CreateVariableRead( const Variable& variable );
 
     // Getters
     llvm::LLVMContext& GetLLVMContext() const;
