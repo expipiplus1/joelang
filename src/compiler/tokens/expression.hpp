@@ -942,6 +942,9 @@ public:
     virtual
     Type GetReturnType() const override;
 
+    /** \returns true if this identifier represents a constant expression **/
+    bool IsConst() const;
+
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 

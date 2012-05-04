@@ -106,10 +106,13 @@ LiteralExpression* Expression::GetLiteral(
         // identifier
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( e.get() );
-        const std::unique_ptr<Expression>& read_expression =
-                                                        i->GetReadExpression();
-        if( isa<LiteralExpression>( read_expression ) )
-            l = static_cast<LiteralExpression*>( read_expression.get() );
+        if( i->IsConst() )
+        {
+            const std::unique_ptr<Expression>& read_expression =
+                                                            i->GetReadExpression();
+            if( isa<LiteralExpression>( read_expression ) )
+                l = static_cast<LiteralExpression*>( read_expression.get() );
+        }
     }
 
     return l;
@@ -1668,7 +1671,9 @@ void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    assert( m_variable &&
+            "Trying to generate code for an unresolved variable" );
+    return code_gen.CreateVariableRead( *m_variable );
 }
 
 Type IdentifierExpression::GetReturnType() const
@@ -1676,6 +1681,11 @@ Type IdentifierExpression::GetReturnType() const
     if( !m_variable )
         return Type::UNKNOWN_TYPE;
     return m_variable->GetType();
+}
+
+bool IdentifierExpression::IsConst() const
+{
+    return m_variable->IsConst();
 }
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
