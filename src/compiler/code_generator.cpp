@@ -551,6 +551,8 @@ void CodeGenerator::CreateVariableAssignment( const Variable& variable,
 {
     assert( !variable.IsConst() &&
             "Trying to codegen an assignment to a const variable" );
+    assert( variable.GetType() == e.GetReturnType() &&
+            "Trying to assign a variable with a different type" );
     llvm::Value* assigned_value = e.CodeGen( *this );
     m_llvmBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
 }
