@@ -33,7 +33,7 @@
 
 namespace llvm
 {
-    class GlobalVariable;
+    class Value;
 }
 
 namespace JoeLang
@@ -65,7 +65,12 @@ public:
 
     void CodeGen( CodeGenerator& code_gen );
 
+    llvm::Value* GetLLVMPointer() const;
+
     Type GetType() const;
+
+    /** \returns true is this variable is const **/
+    bool IsConst() const;
 
     const std::unique_ptr<Expression>& GetReadExpression() const;
 
@@ -76,7 +81,7 @@ private:
     std::unique_ptr<Expression> m_initializer;
 
     // TODO handle non global variables
-    llvm::GlobalVariable* m_globalVariable = nullptr;
+    llvm::Value* m_llvmPointer = nullptr;
 };
 
 } // namespace Compiler

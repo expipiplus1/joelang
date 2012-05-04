@@ -33,6 +33,8 @@
 #include <memory>
 #include <utility>
 
+#include <llvm/GlobalVariable.h>
+
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -69,9 +71,9 @@ void Variable::CodeGen( CodeGenerator& code_gen )
 
     if( m_isGlobal )
     {
-        m_globalVariable = code_gen.CreateGlobalVariable( m_type,
-                                                          m_isConst,
-                                                          m_initializer );
+        m_llvmPointer = code_gen.CreateGlobalVariable( m_type,
+                                                       m_isConst,
+                                                       m_initializer );
     }
     else
     {
@@ -79,9 +81,19 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     }
 }
 
+llvm::Value* Variable::GetLLVMPointer() const
+{
+    return m_llvmPointer;
+}
+
 Type Variable::GetType() const
 {
     return m_type;
+}
+
+bool Variable::IsConst() const
+{
+    return m_isConst;
 }
 
 const std::unique_ptr<Expression>& Variable::GetReadExpression() const
