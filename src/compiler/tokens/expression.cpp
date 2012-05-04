@@ -1681,8 +1681,6 @@ Type IdentifierExpression::GetReturnType() const
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
     return bool(m_variable);
-    //assert( m_readExpression &&
-    //        "Should have resolved this expression by now" );
 }
 
 const std::unique_ptr<Expression>&
