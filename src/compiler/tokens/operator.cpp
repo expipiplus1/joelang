@@ -66,6 +66,11 @@ void AssignmentOperator::Print(int depth) const
     std::cout << "assignment_op" << std::endl;
 }
 
+AssignmentOperator::Op AssignmentOperator::GetOp() const
+{
+    return m_operator;
+}
+
 bool AssignmentOperator::Parse( Parser& parser,
                                 std::unique_ptr<AssignmentOperator>& token )
 {

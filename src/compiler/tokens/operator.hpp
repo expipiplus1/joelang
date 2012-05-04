@@ -79,6 +79,8 @@ public:
     virtual
     ~AssignmentOperator();
 
+    Op GetOp() const;
+
     virtual
     void Print( int depth ) const;
 
