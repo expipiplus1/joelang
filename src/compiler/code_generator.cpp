@@ -546,6 +546,15 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
     return m_llvmBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
+void CodeGenerator::CreateVariableAssignment( const Variable& variable,
+                                              const Expression& e )
+{
+    assert( !variable.IsConst() &&
+            "Trying to codegen an assignment to a const variable" );
+    llvm::Value* assigned_value = e.CodeGen( *this );
+    m_llvmBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
+}
+
 //
 // Getters
 //

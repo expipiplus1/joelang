@@ -151,6 +151,9 @@ public:
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
+    void CreateVariableAssignment( const Variable& variable,
+                                   const Expression& e );
+
     // Getters
     llvm::LLVMContext& GetLLVMContext() const;
 
