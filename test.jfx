@@ -3,7 +3,7 @@ const string hello = "Hello",
              hello_world = hello + ", " + world + "!";
 const unsigned twenty = 20ul;
 
-int a = 0;
+int a = 1;
 
 const float twentyone = twenty + 1;
 
@@ -11,8 +11,9 @@ technique t1
 {
     pass p0
     {
-        my_bool_state = a = 0;
         my_bool_state = a;
+        my_bool_state = a &= 3;
+        my_bool_state = a &= 0xf00;
     }
 
     pass p1

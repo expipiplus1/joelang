@@ -255,6 +255,7 @@ public:
     bool classof( const AssignmentExpression* e );
 private:
     std::unique_ptr<Expression> m_assignee;
+    std::shared_ptr<Variable>   m_assigneeVariable;
     Op                          m_assignmentOperator;
     std::unique_ptr<Expression> m_assignedExpression;
 };
@@ -503,6 +504,10 @@ public:
 class InclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
+    InclusiveOrExpression( Op operator_terminal,
+                           std::unique_ptr<Expression> left_side,
+                           std::unique_ptr<Expression> right_side );
+
     virtual
     ~InclusiveOrExpression();
 
@@ -519,12 +524,6 @@ public:
     bool classof( const Expression* e );
     static
     bool classof( const InclusiveOrExpression* e );
-protected:
-    InclusiveOrExpression( Op operator_terminal,
-                          std::unique_ptr<Expression> left_side,
-                          std::unique_ptr<Expression> right_side );
-
-    friend class BinaryOperatorExpression;
 };
 
 /**
@@ -730,6 +729,9 @@ public:
                               std::unique_ptr<Expression> right_side );
     virtual
     ~MultiplicativeExpression();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
     bool Parse( Parser& parser,

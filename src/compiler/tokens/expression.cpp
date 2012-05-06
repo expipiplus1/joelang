@@ -162,12 +162,8 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    m_assignedExpression = CastExpression::Create(
-                                              m_assignee->GetReturnType(),
-                                              std::move(m_assignedExpression) );
-
+    // Extract the identifier from the assignee
     good &= m_assignee->PerformSema( sema );
-    good &= m_assignedExpression->PerformSema( sema );
 
     if( !isa<IdentifierExpression>(m_assignee) )
     {
@@ -183,23 +179,112 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
             good = false;
             sema.Error( "Trying to assign to a const value" );
         }
+        else
+        {
+            m_assigneeVariable = i->GetVariable();
+        }
     }
+
+    switch( m_assignmentOperator )
+    {
+    case Op::EQUALS:
+        break;
+    case Op::SHL_EQUALS:
+        m_assignedExpression.reset(
+                    new ShiftExpression(
+                                      BinaryOperatorExpression::Op::LEFT_SHIFT,
+                                      std::move(m_assignee),
+                                      std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::SHR_EQUALS:
+        m_assignedExpression.reset(
+                    new ShiftExpression(
+                                      BinaryOperatorExpression::Op::RIGHT_SHIFT,
+                                      std::move(m_assignee),
+                                      std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::AND_EQUALS:
+        m_assignedExpression.reset(
+                    new AndExpression(
+                                      BinaryOperatorExpression::Op::AND,
+                                      std::move(m_assignee),
+                                      std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::XOR_EQUALS:
+        m_assignedExpression.reset(
+                    new ExclusiveOrExpression(
+                                      BinaryOperatorExpression::Op::XOR,
+                                      std::move(m_assignee),
+                                      std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::OR_EQUALS:
+        m_assignedExpression.reset(
+                    new InclusiveOrExpression(
+                                      BinaryOperatorExpression::Op::OR,
+                                      std::move(m_assignee),
+                                      std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::PLUS_EQUALS:
+        m_assignedExpression.reset(
+                    new AdditiveExpression( BinaryOperatorExpression::Op::PLUS,
+                                            std::move(m_assignee),
+                                            std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::MINUS_EQUALS:
+        m_assignedExpression.reset(
+                    new AdditiveExpression( BinaryOperatorExpression::Op::MINUS,
+                                            std::move(m_assignee),
+                                            std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::MULTIPLY_EQUALS:
+        m_assignedExpression.reset(
+                    new MultiplicativeExpression(
+                                        BinaryOperatorExpression::Op::MULTIPLY,
+                                        std::move(m_assignee),
+                                        std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::DIVIDE_EQUALS:
+        m_assignedExpression.reset(
+                    new MultiplicativeExpression(
+                                        BinaryOperatorExpression::Op::DIVIDE,
+                                        std::move(m_assignee),
+                                        std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    case Op::MODULO_EQUALS:
+        m_assignedExpression.reset(
+                    new MultiplicativeExpression(
+                                        BinaryOperatorExpression::Op::MODULO,
+                                        std::move(m_assignee),
+                                        std::move(m_assignedExpression) ) );
+        m_assignmentOperator = Op::EQUALS;
+        break;
+    }
+    m_assignedExpression = CastExpression::Create(
+                                              m_assigneeVariable->GetType(),
+                                              std::move(m_assignedExpression) );
+    good &= m_assignedExpression->PerformSema( sema );
 
     return good;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( isa<IdentifierExpression>(m_assignee) &&
-            "Trying to code_gen assigning to a rvalue" );
-
-    IdentifierExpression* i =
-                    static_cast<IdentifierExpression*>( m_assignee.get() );
+    assert( m_assigneeVariable &&
+            "Trying to code_gen to a null variable" );
 
     switch( m_assignmentOperator )
     {
     case Op::EQUALS:
-        code_gen.CreateVariableAssignment( *i->GetVariable(),
+        code_gen.CreateVariableAssignment( *m_assigneeVariable,
                                            *m_assignedExpression );
         break;
     default:
@@ -207,12 +292,15 @@ llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 
     // Return the new value of the variable
-    return i->CodeGen( code_gen );
+    return code_gen.CreateVariableRead( *m_assigneeVariable );
 }
 
 Type AssignmentExpression::GetReturnType() const
 {
-    return m_assignee->GetReturnType();
+    if( m_assignee )
+        return m_assignee->GetReturnType();
+    else
+        return m_assigneeVariable->GetType();
 }
 
 void AssignmentExpression::Print(int depth) const
@@ -1244,6 +1332,38 @@ MultiplicativeExpression::MultiplicativeExpression(
 
 MultiplicativeExpression::~MultiplicativeExpression()
 {
+}
+
+bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
+{
+    //
+    // Don't have any special handling for * and /
+    //
+    if( m_operator != BinaryOperatorExpression::Op::MODULO )
+        return BinaryOperatorExpression::PerformSema( sema );
+
+    bool good = true;
+
+    Type t = GetReturnType();
+
+    if( !IsIntegral(t) )
+    {
+        good = false;
+        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+            sema.Error( "Invalid operand types to to modulo operator: " +
+                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_rightSide->GetReturnType() ) );
+    }
+    else
+    {
+        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
+        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+    }
+
+    good &= m_leftSide->PerformSema( sema );
+    good &= m_rightSide->PerformSema( sema );
+    return good;
 }
 
 bool MultiplicativeExpression::Parse( Parser& parser,
