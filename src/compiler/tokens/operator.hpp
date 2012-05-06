@@ -59,16 +59,16 @@ public:
     enum class Op
     {
         EQUALS,
-        MULTIPLY_EQUALS,
-        DIVIDE_EQUALS,
-        MODULO_EQUALS,
-        PLUS_EQUALS,
-        MINUS_EQUALS,
         SHL_EQUALS,
         SHR_EQUALS,
         AND_EQUALS,
         XOR_EQUALS,
-        OR_EQUALS
+        OR_EQUALS,
+        PLUS_EQUALS,
+        MINUS_EQUALS,
+        MULTIPLY_EQUALS,
+        DIVIDE_EQUALS,
+        MODULO_EQUALS,
     };
 
     /**
