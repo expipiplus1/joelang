@@ -43,26 +43,25 @@ namespace Compiler
 
 GenericValue::GenericValue()
     :m_type( Type::UNKNOWN_TYPE )
-    ,m_stringValue()
 {
+    if( m_type == Type::STRING )
+        new(&m_stringValue) std::string;
 }
 
 GenericValue::GenericValue( const GenericValue& g )
-    :m_stringValue()
 {
     *this = g;
 }
 
 GenericValue::GenericValue( Type type )
     :m_type( type )
-    ,m_stringValue()
 {
+    if( m_type == Type::STRING )
+        new(&m_stringValue) std::string;
 }
 
 const GenericValue& GenericValue::operator = ( const GenericValue& g )
 {
-    m_type = g.m_type;
-
     switch( g.m_type )
     {
     case Type::BOOL:
@@ -99,11 +98,15 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
         m_doubleValue = g.m_doubleValue;
         break;
     case Type::STRING:
+        if( m_type != Type::STRING )
+            new(&m_stringValue) std::string;
         m_stringValue = g.m_stringValue;
         break;
     default:
         break;
     }
+
+    m_type = g.m_type;
 
     return *this;
 }
@@ -184,7 +187,9 @@ GenericValue::~GenericValue()
 {
     using std::string;
     if( m_type == Type::STRING )
+    {
         m_stringValue.~string();
+    }
 }
 
 Type GenericValue::GetType() const
@@ -886,7 +891,7 @@ GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
     assert( g1.m_type == g2.m_type &&
             "Trying to add GenericValues of differing type" );
 
-        GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_type );
 
     switch( g1.m_type )
     {
