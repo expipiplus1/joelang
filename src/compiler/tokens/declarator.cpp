@@ -104,6 +104,11 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
             }
         }
     }
+    else // If this isn't const it can't be a string
+    {
+        if( decl_specs.GetType() == Type::STRING )
+            sema.Error( "Variables of type string must be const" );
+    }
 
     m_variable =  std::make_shared<Variable>( decl_specs.GetType(),
                                               decl_specs.IsConst() && can_init,
