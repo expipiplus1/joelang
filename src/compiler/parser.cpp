@@ -68,7 +68,7 @@ bool Parser::Parse ( const std::string& string )
 
     //
     // Report error
-    //
+    // TODO move this to a better place
     std::cout << "Error parsing at " << m_lexer->GetLineNumber() << ":"
                                      << m_lexer->GetColumnNumber() << "\n";
     if( m_errorMessage.empty() )
