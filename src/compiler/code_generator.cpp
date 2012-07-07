@@ -539,8 +539,6 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                      llvm::GlobalVariable::CommonLinkage,
                                      init,
                                      "" );
-
-
 }
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
