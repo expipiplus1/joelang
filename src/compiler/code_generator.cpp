@@ -128,7 +128,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
                                                 llvm::Function::InternalLinkage,
-                                                "",
+                                                state.GetName().c_str(),
                                                 m_llvmModule );
     assert( function && "Error generating llvm function" );
 
@@ -530,12 +530,14 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 const std::unique_ptr<Expression>& initializer )
 {
     llvm::Type* t = GetLLVMType( type, m_llvmContext );
-    llvm::Value* init = initializer->CodeGen( *this );
+    llvm::Constant* init = nullptr;
+    if( initializer )
+        init = llvm::dyn_cast<llvm::Constant>(initializer->CodeGen( *this ));
     return new llvm::GlobalVariable( *m_llvmModule,
                                      t,
                                      is_const,
                                      llvm::GlobalVariable::CommonLinkage,
-                                     llvm::dyn_cast<llvm::Constant>(init),
+                                     init,
                                      "" );
 
 

@@ -7,6 +7,8 @@ int a = 1;
 
 const float twentyone = twenty + 1;
 
+int b;
+
 technique t1
 {
     pass p0
