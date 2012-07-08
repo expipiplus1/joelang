@@ -357,7 +357,7 @@ public:
   * \ingroup Tokens
   * \brief A C declaration
   *
-  * VariableDeclarationList = DeclarationSpecifier+ (Declarator ',') ';'
+  * VariableDeclarationList = DeclarationSpecifier+ (Declarator ',')+ ';'
   */
 class VariableDeclarationList :
                     public JoeLang::Compiler::VariableListOrFunctionDefinition
