@@ -115,7 +115,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                               m_isGlobal,
                                               std::move(m_initializer) );
     // If we can't initialize this for whatever reason, sema will have been
-    // notified, so just pretend that this is non-const for the sake of parsing
+    // notified, so just pretend that this is non-const for the sake of later
+    // analysis
     sema.DeclareVariable( m_declarator->GetIdentifier(), m_variable );
 }
 
@@ -152,11 +153,13 @@ bool InitDeclarator::Parse( Parser& parser,
 }
 
 //------------------------------------------------------------------------------
-// DirectDeclarator
+// Declarator
 //------------------------------------------------------------------------------
 
-Declarator::Declarator( std::string identifier )
+Declarator::Declarator( std::string identifier,
+                        Declarator::ArraySpecifierVector array_specifiers )
     :m_identifier( std::move(identifier) )
+    ,m_arraySpecifiers( std::move(array_specifiers) )
 {
 }
 
@@ -173,15 +176,73 @@ const std::string& Declarator::GetIdentifier() const
     return m_identifier;
 }
 
-bool Declarator::Parse( Parser& parser,
-                              std::unique_ptr<Declarator>& token )
+bool Declarator::IsArray() const
+{
+    return m_arraySpecifiers.size() != 0;
+}
+
+bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 {
     // Parse an identifier
     std::string identifier;
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
-    token.reset( new Declarator( std::move(identifier) ) );
+    // Is this a function declarator?
+    if( parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
+    {
+        parser.Error( "Functions not implemented yet" );
+    }
+
+    ArraySpecifierVector array_specifiers;
+    parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
+    CHECK_PARSER;
+
+    token.reset( new Declarator( std::move(identifier),
+                                 std::move(array_specifiers) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// ArraySpecifier
+//------------------------------------------------------------------------------
+
+ArraySpecifier::ArraySpecifier( std::unique_ptr<Expression> expression )
+    :m_expression( std::move( expression ) )
+{
+    assert( m_expression && "ArraySpecifier given a null expression" );
+}
+
+ArraySpecifier::~ArraySpecifier()
+{
+}
+
+void ArraySpecifier::Print( int depth ) const
+{
+}
+
+bool ArraySpecifier::Parse( Parser& parser,
+                            std::unique_ptr<ArraySpecifier>& token )
+{
+    // Opening square bracket
+    if( !parser.ExpectTerminal( TerminalType::OPEN_SQUARE ) )
+        return false;
+
+    std::unique_ptr<Expression> expression;
+    if( !parser.Expect<Expression>( expression ) )
+    {
+        parser.Error( "No expression in array specifier" );
+        return false;
+    }
+
+    if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
+    {
+        //TODO things like here non fatal error, assume the closing bracket
+        parser.Error( "']' missing in array specifier" );
+        return false;
+    }
+
+    token.reset( new ArraySpecifier( std::move(expression) ) );
     return true;
 }
 

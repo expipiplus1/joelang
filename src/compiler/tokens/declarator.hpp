@@ -31,6 +31,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
@@ -38,6 +39,7 @@ namespace JoeLang
 {
 namespace Compiler
 {
+class ArraySpecifier;
 class CodeGenerator;
 class Declarator;
 class DeclSpecs;
@@ -100,14 +102,18 @@ private:
 /**
   * \class Declarator
   * \ingroup Tokens
-  * \brief Matches a Declarator
+  * \brief Matches a Declarator with a param list or array specifiers or nothing
   *
-  * Declarator = identifier
+  * Declarator = identifier ( ( '(' ParamList ')' )
+  *                         | ( ArraySpecifier* ) )
   */
 class Declarator : public JoeLang::Compiler::Token
 {
 public:
-    Declarator    ( std::string identifier );
+    using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
+
+    Declarator    ( std::string identifier,
+                    ArraySpecifierVector array_specifiers );
     virtual
     ~Declarator   ();
 
@@ -118,6 +124,9 @@ public:
       * \returns the identifier
       */
     const std::string& GetIdentifier() const;
+
+    /** \returns true if this declarator represents an array **/
+    bool IsArray() const;
 
     /**
       * Parses a direct declarator
@@ -133,8 +142,44 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
 private:
-    std::string m_identifier;
+    std::string             m_identifier;
+    ArraySpecifierVector    m_arraySpecifiers;
 };
+
+/**
+  * \class ArraySpecifier
+  * \ingroup Tokens
+  * \brief Matches a ArraySpecifier
+  *
+  * ArraySpecifier = '[' Expression ']'
+  */
+class ArraySpecifier : public JoeLang::Compiler::Token
+{
+public:
+    ArraySpecifier    ( std::unique_ptr<Expression> expression );
+    virtual
+    ~ArraySpecifier   ();
+
+    virtual
+    void Print( int depth ) const override;
+
+    /**
+      * Parses an array specifier
+      * \param parser
+      *   The current Parser
+      * \param token
+      *   The returned token on a successful parse
+      * \return
+      *   true upon parsing successfully
+      *   false if the parse failed
+      */
+    static
+    bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
+
+private:
+    std::unique_ptr<Expression> m_expression;
+};
+
 
 } // namespace Compiler
 } // namespace JoeLang

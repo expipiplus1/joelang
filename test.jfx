@@ -7,7 +7,9 @@ int a = 1;
 
 const float twentyone = twenty + 1;
 
-int b;
+int b[12],
+    c[23],
+    d[1];
 
 technique t1
 {
