@@ -31,6 +31,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/effect_factory.hpp
                         src/compiler/generic_value.cpp
                         src/compiler/generic_value.hpp
+                        src/compiler/function.cpp
+                        src/compiler/function.hpp
                         src/compiler/lexer.cpp
                         src/compiler/lexer.hpp
                         src/compiler/parser.cpp
