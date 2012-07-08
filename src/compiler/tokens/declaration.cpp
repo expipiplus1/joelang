@@ -360,7 +360,7 @@ bool VariableListOrFunctionDefinition::Parse(
     // If we see a semicolon after the declaration without a declarator
     if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
-        // This could also be a warning and return an empty
+        // TODO This could also be a warning and return an empty
         // VariableDeclarationList
         parser.Error( "declaration without a declarator" );
         return false;
