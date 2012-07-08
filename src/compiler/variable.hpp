@@ -69,7 +69,7 @@ public:
 
     Type GetType() const;
 
-    /** \returns true is this variable is const **/
+    /** \returns true if this variable is const **/
     bool IsConst() const;
 
     const std::unique_ptr<Expression>& GetReadExpression() const;
