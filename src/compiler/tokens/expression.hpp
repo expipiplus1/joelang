@@ -95,6 +95,7 @@ public:
         ConditionalExpression,
 
         LogicalOrExpression,
+        BinaryOperatorExpression_Start = LogicalOrExpression,
         LogicalAndExpression,
         InclusiveOrExpression,
         ExclusiveOrExpression,
@@ -104,6 +105,7 @@ public:
         ShiftExpression,
         AdditiveExpression,
         MultiplicativeExpression,
+        BinaryOperatorExpression_End = MultiplicativeExpression,
 
         CastExpression,
         UnaryExpression,
@@ -111,16 +113,14 @@ public:
         IdentifierExpression,
 
         IntegerLiteralExpression,
+        LiteralExpression_Start = IntegerLiteralExpression,
         FloatingLiteralExpression,
         BooleanLiteralExpression,
         StringLiteralExpression,
         CharacterLiteralExpression,
-
-        BinaryOperatorExpression_Start = LogicalOrExpression,
-        BinaryOperatorExpression_End = MultiplicativeExpression,
-
-        LiteralExpression_Start = IntegerLiteralExpression,
         LiteralExpression_End = CharacterLiteralExpression
+
+
     };
 
     Expression( ExpressionTy sub_class_id );
