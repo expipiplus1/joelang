@@ -32,6 +32,7 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <llvm/GlobalVariable.h>
 
@@ -44,11 +45,14 @@ namespace JoeLang
 namespace Compiler
 {
 
-Variable::Variable( Type type,
-                    bool is_const,
-                    bool is_global,
-                    std::unique_ptr<Expression> initializer )
-    :m_type( type )
+Variable::Variable(
+                Type base_type,
+                std::vector<std::unique_ptr<Expression> > array_dimension_sizes,
+                bool is_const,
+                bool is_global,
+                std::unique_ptr<Expression> initializer )
+    :m_type( base_type )
+    ,m_arrayDimensionSizes( std::move(array_dimension_sizes) )
     ,m_isConst( is_const )
     ,m_isGlobal( is_global )
     ,m_initializer( std::move(initializer) )
@@ -58,7 +62,7 @@ Variable::Variable( Type type,
         assert( isa<LiteralExpression>(m_initializer) &&
                 "Trying to initialize a const variable with a non-const "
                 "expression" );
-        assert( m_initializer->GetReturnType() == type &&
+        assert( m_initializer->GetReturnType() == base_type &&
                 "Trying to initialize a const variable with the wrong type" );
     }
 }

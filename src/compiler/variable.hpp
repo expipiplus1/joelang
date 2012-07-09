@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 namespace llvm
 {
@@ -59,6 +60,7 @@ public:
       * an initializer
       */
     Variable( Type type,
+              std::vector<std::unique_ptr<Expression> > array_dimension_sizes,
               bool is_const,
               bool is_global,
               std::unique_ptr<Expression> initializer = nullptr );
@@ -76,6 +78,7 @@ public:
 
 private:
     Type m_type;
+    std::vector<std::unique_ptr<Expression> > m_arrayDimensionSizes;
     bool m_isConst;
     bool m_isGlobal;
     std::unique_ptr<Expression> m_initializer;
