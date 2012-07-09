@@ -261,12 +261,15 @@ std::map<std::string, std::unique_ptr<LiteralExpression> >
 void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 {
     // TODO cache these results
+    // TODO support arrays here
     for( auto& v : GetLiteralValueEnumerantMap(state) )
         DeclareVariable( v.first,
-                         std::make_shared<Variable>( v.second->GetReturnType(),
-                                                     true,
-                                                     false,
-                                                     std::move(v.second) ) );
+                         std::make_shared<Variable>(
+                                    v.second->GetReturnType(),
+                                    std::vector<std::unique_ptr<Expression> >(),
+                                    true,
+                                    false,
+                                    std::move(v.second) ) );
 }
 
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
@@ -317,6 +320,21 @@ void SemaAnalyzer::LeaveScope()
 bool SemaAnalyzer::InGlobalScope() const
 {
     return m_symbolStack.size() == 1;
+}
+
+bool SemaAnalyzer::TryResolveToLiteral( std::unique_ptr<Expression>& expression,
+                                        Type type)
+{
+    assert( expression && "Trying to resolve a null expression" );
+
+    //TODO move this somewhere else
+    expression->ResolveIdentifiers( *this );
+    expression = CastExpression::Create( type, std::move( expression ) );
+
+    if( expression->PerformSema( *this ) )
+        expression->FoldConstants( expression );
+
+    return Expression::GetLiteral( expression );
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )

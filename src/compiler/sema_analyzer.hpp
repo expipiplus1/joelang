@@ -40,6 +40,7 @@ namespace JoeLang
 
 class Context;
 class StateBase;
+enum class Type;
 
 namespace Compiler
 {
@@ -162,6 +163,17 @@ public:
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;
+
+    /**
+      * Resolves identifiers, folds constants and casts to the requested type
+      * \param expression
+      *   The expression to resolve
+      * \param type
+      *   The type to cast to
+      * \returns true if the expression represents an identifier
+      */
+    bool TryResolveToLiteral( std::unique_ptr<Expression>& expression,
+                              Type type );
 
     /**
       * Reports an error.
