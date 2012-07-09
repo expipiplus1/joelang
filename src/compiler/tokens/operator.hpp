@@ -109,13 +109,18 @@ private:
 class PostfixOperator : public JoeLang::Compiler::Token
 {
 public:
-    PostfixOperator( );
+    PostfixOperator( TokenTy sub_class_id );
     virtual
     ~PostfixOperator();
 
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<PostfixOperator>& token );
+
+    static
+    bool classof( const Token* e );
+    static
+    bool classof( const PostfixOperator* e );
 };
 
 /**

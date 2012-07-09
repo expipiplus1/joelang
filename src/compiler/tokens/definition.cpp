@@ -55,7 +55,8 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
-    :m_stateAssignments( std::move(state_assignments) )
+    :Token( TokenTy::PassDefinition )
+    ,m_stateAssignments( std::move(state_assignments) )
 {
 #ifndef NDEBUG
     for( const auto& s : m_stateAssignments )
@@ -113,7 +114,8 @@ bool PassDefinition::Parse( Parser& parser,
 PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
         std::string                      identifier,
         std::unique_ptr<PassDeclaration> declaration )
-    :m_identifier ( std::move(identifier)  )
+    :Token( TokenTy::PassDeclarationOrIdentifier )
+    ,m_identifier ( std::move(identifier)  )
     ,m_declaration( std::move(declaration) )
 {
     // Assert if both are full, or none are

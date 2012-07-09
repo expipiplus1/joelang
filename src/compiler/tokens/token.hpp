@@ -66,10 +66,90 @@ namespace Compiler
 class Token
 {
 public:
-    Token() = default;
-    virtual ~Token();
+    enum class TokenTy
+    {
+        TranslationUnit,
 
-    virtual void Print( int depth ) const = 0;
+        InitDeclarator,
+        Declarator,
+        ArraySpecifier,
+
+        PassDefinition,
+        PassDeclarationOrIdentifier,
+
+        TypeSpecifier,
+        TypeQualifier,
+        StorageClassSpecifier,
+        DeclarationSpecifier_Start = TypeSpecifier,
+        DeclarationSpecifier_End = StorageClassSpecifier,
+
+        EmptyDeclaration,
+        PassDeclaration,
+        TechniqueDeclaration,
+        VariableDeclarationList,
+        FunctionDefinition,
+        Declaration_Start = EmptyDeclaration,
+        Declaration_End = FunctionDefinition,
+
+        AssignmentOperator,
+
+        SubscriptOperator,
+        ArgumentListOperator,
+        MemberAccessOperator,
+        IncrementOrDecrementOperator,
+        PostfixOperator_Start = SubscriptOperator,
+        PostfixOperator_End = IncrementOrDecrementOperator,
+
+        StateAssignmentStatement,
+
+        AssignmentExpression,
+        ConditionalExpression,
+
+        LogicalOrExpression,
+        LogicalAndExpression,
+        InclusiveOrExpression,
+        ExclusiveOrExpression,
+        AndExpression,
+        EqualityExpression,
+        RelationalExpression,
+        ShiftExpression,
+        AdditiveExpression,
+        MultiplicativeExpression,
+        BinaryOperatorExpression_Start = LogicalOrExpression,
+        BinaryOperatorExpression_End = MultiplicativeExpression,
+
+        CastExpression,
+        UnaryExpression,
+        PostfixExpression,
+        IdentifierExpression,
+
+        IntegerLiteralExpression,
+        FloatingLiteralExpression,
+        BooleanLiteralExpression,
+        StringLiteralExpression,
+        CharacterLiteralExpression,
+        LiteralExpression_Start = IntegerLiteralExpression,
+        LiteralExpression_End = CharacterLiteralExpression,
+
+        Expression_Start = AssignmentExpression,
+        Expression_End = CharacterLiteralExpression,
+    };
+
+    explicit
+    Token( TokenTy sub_class_id );
+    virtual
+    ~Token();
+
+    virtual
+    void Print( int depth ) const = 0;
+
+    /** Used for casting **/
+    TokenTy GetSubClassID() const;
+    /** Used for casting **/
+    static
+    bool classof( const Token* t );
+private:
+    const TokenTy m_subClassID;
 };
 
 } // namespace Compiler

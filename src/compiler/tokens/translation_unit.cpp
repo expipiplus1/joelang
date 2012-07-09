@@ -49,7 +49,8 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 TranslationUnit::TranslationUnit( DeclarationVector declarations )
-    :m_declarations( std::move(declarations) )
+    :Token( TokenTy::TranslationUnit )
+    ,m_declarations( std::move(declarations) )
 {
 }
 

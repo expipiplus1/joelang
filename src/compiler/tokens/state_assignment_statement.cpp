@@ -55,7 +55,8 @@ namespace Compiler
 StateAssignmentStatement::StateAssignmentStatement(
                                     std::string identifier,
                                     std::unique_ptr< Expression > expression )
-    :m_identifier( std::move(identifier) )
+    :Token( TokenTy::StateAssignmentStatement )
+    ,m_identifier( std::move(identifier) )
     ,m_expression( std::move(expression) )
 {
     assert( !m_identifier.empty() &&

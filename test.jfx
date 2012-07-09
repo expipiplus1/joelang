@@ -22,7 +22,7 @@ technique t1
 
     pass p1
     {
-        my_int_state = 5l+2;
+        my_int_state = b[5l+2];
         my_bool_state = hello_world == "Hello, World!";
         my_string_state = hello + ", " + world + "!";
     }

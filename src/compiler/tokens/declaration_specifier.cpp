@@ -64,8 +64,8 @@ Type DeclSpecs::GetType() const
 // DeclarationSpecifier
 //------------------------------------------------------------------------------
 
-DeclarationSpecifier::DeclarationSpecifier( DeclSpecTy sub_class_id )
-    :m_subClassID( sub_class_id )
+DeclarationSpecifier::DeclarationSpecifier( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
@@ -90,9 +90,10 @@ bool DeclarationSpecifier::Parse( Parser& parser,
     return true;
 }
 
-DeclarationSpecifier::DeclSpecTy DeclarationSpecifier::GetSubClassID() const
+bool DeclarationSpecifier::classof( const Token* d )
 {
-    return m_subClassID;
+    return d->GetSubClassID() >= TokenTy::DeclarationSpecifier_Start &&
+           d->GetSubClassID() <= TokenTy::DeclarationSpecifier_End;
 }
 
 bool DeclarationSpecifier::classof( const DeclarationSpecifier* d )
@@ -106,7 +107,7 @@ bool DeclarationSpecifier::classof( const DeclarationSpecifier* d )
 //------------------------------------------------------------------------------
 
 TypeSpecifier::TypeSpecifier( TypeSpec t )
-    :DeclarationSpecifier( DeclSpecTy::TypeSpecifier )
+    :DeclarationSpecifier( TokenTy::TypeSpecifier )
     ,m_typeSpec( t )
 {
 }
@@ -154,7 +155,7 @@ bool TypeSpecifier::Parse( Parser& parser,
 
 bool TypeSpecifier::classof( const DeclarationSpecifier* d )
 {
-    return d->GetSubClassID() == DeclSpecTy::TypeSpecifier;
+    return d->GetSubClassID() == TokenTy::TypeSpecifier;
 }
 
 bool TypeSpecifier::classof( const TypeSpecifier* d )
@@ -167,7 +168,7 @@ bool TypeSpecifier::classof( const TypeSpecifier* d )
 //------------------------------------------------------------------------------
 
 TypeQualifier::TypeQualifier( TypeQual t )
-    :DeclarationSpecifier( DeclSpecTy::TypeQualifier )
+    :DeclarationSpecifier( TokenTy::TypeQualifier )
     ,m_typeQual( t )
 {
 }
@@ -206,7 +207,7 @@ bool TypeQualifier::Parse( Parser& parser,
 
 bool TypeQualifier::classof( const DeclarationSpecifier* d )
 {
-    return d->GetSubClassID() == DeclSpecTy::TypeQualifier;
+    return d->GetSubClassID() == TokenTy::TypeQualifier;
 }
 
 bool TypeQualifier::classof( const TypeQualifier* d )
@@ -219,7 +220,7 @@ bool TypeQualifier::classof( const TypeQualifier* d )
 //------------------------------------------------------------------------------
 
 StorageClassSpecifier::StorageClassSpecifier( StorageClass storage_class )
-    :DeclarationSpecifier( DeclSpecTy::StorageClassSpecifier )
+    :DeclarationSpecifier( TokenTy::StorageClassSpecifier )
     ,m_storageClass( storage_class )
 {
 }
@@ -255,7 +256,7 @@ bool StorageClassSpecifier::Parse( Parser& parser,
 
 bool StorageClassSpecifier::classof( const DeclarationSpecifier* d )
 {
-    return d->GetSubClassID() == DeclSpecTy::StorageClassSpecifier;
+    return d->GetSubClassID() == TokenTy::StorageClassSpecifier;
 }
 
 bool StorageClassSpecifier::classof( const StorageClassSpecifier* d )

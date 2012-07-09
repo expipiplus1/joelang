@@ -59,8 +59,8 @@ namespace Compiler
 // DeclarationBase
 //------------------------------------------------------------------------------
 
-DeclarationBase::DeclarationBase( DeclarationTy sub_class_id )
-    :m_subClassID( sub_class_id )
+DeclarationBase::DeclarationBase( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
@@ -87,9 +87,10 @@ bool DeclarationBase::Parse( Parser& parser,
     return true;
 }
 
-DeclarationBase::DeclarationTy DeclarationBase::GetSubClassID() const
+bool DeclarationBase::classof( const Token* d )
 {
-    return m_subClassID;
+    return d->GetSubClassID() >= TokenTy::Declaration_Start &&
+           d->GetSubClassID() <= TokenTy::Declaration_End;
 }
 
 bool DeclarationBase::classof( const DeclarationBase* d )
@@ -104,7 +105,7 @@ bool DeclarationBase::classof( const DeclarationBase* d )
 //------------------------------------------------------------------------------
 
 EmptyDeclaration::EmptyDeclaration()
-    :DeclarationBase( DeclarationTy::EmptyDeclaration )
+    :DeclarationBase( TokenTy::EmptyDeclaration )
 {
 }
 
@@ -136,7 +137,7 @@ bool EmptyDeclaration::Parse( Parser& parser,
 
 bool EmptyDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::EmptyDeclaration;
+    return d->GetSubClassID() == TokenTy::EmptyDeclaration;
 }
 
 bool EmptyDeclaration::classof( const EmptyDeclaration* d )
@@ -150,7 +151,7 @@ bool EmptyDeclaration::classof( const EmptyDeclaration* d )
 
 PassDeclaration::PassDeclaration( std::string name,
                                   std::unique_ptr<PassDefinition> definition )
-    :DeclarationBase( DeclarationTy::PassDeclaration )
+    :DeclarationBase( TokenTy::PassDeclaration )
     ,m_name         ( std::move(name) )
     ,m_definition   ( std::move(definition) )
 {
@@ -231,7 +232,7 @@ bool PassDeclaration::Parse( Parser& parser,
 
 bool PassDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::PassDeclaration;
+    return d->GetSubClassID() == TokenTy::PassDeclaration;
 }
 
 bool PassDeclaration::classof( const PassDeclaration* d )
@@ -246,7 +247,7 @@ bool PassDeclaration::classof( const PassDeclaration* d )
 TechniqueDeclaration::TechniqueDeclaration( std::string name,
                                             PassDeclarationVector passes )
 
-    :DeclarationBase( DeclarationTy::TechniqueDeclaration )
+    :DeclarationBase( TokenTy::TechniqueDeclaration )
     ,m_name( std::move(name) )
     ,m_passes( std::move(passes) )
 {
@@ -325,7 +326,7 @@ bool TechniqueDeclaration::Parse( Parser& parser,
 
 bool TechniqueDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::TechniqueDeclaration;
+    return d->GetSubClassID() == TokenTy::TechniqueDeclaration;
 }
 
 bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
@@ -338,7 +339,7 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 //------------------------------------------------------------------------------
 
 VariableListOrFunctionDefinition::VariableListOrFunctionDefinition(
-                                                    DeclarationTy sub_class_id )
+                                                    TokenTy sub_class_id )
     :DeclarationBase( sub_class_id )
 {
 }
@@ -522,7 +523,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
 
 VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
                                                   DeclaratorVector declarators)
-    :VariableListOrFunctionDefinition( DeclarationTy::VariableDeclarationList )
+    :VariableListOrFunctionDefinition( TokenTy::VariableDeclarationList )
     ,m_declSpecs( std::move(decl_specs) )
     ,m_declarators( std::move(declarators) )
 {
@@ -607,7 +608,7 @@ void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 //------------------------------------------------------------------------------
 
 FunctionDefinition::FunctionDefinition()
-    :VariableListOrFunctionDefinition( DeclarationTy::FunctionDefinition )
+    :VariableListOrFunctionDefinition( TokenTy::FunctionDefinition )
 {
 }
 

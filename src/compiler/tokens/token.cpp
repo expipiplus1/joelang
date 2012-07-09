@@ -34,8 +34,23 @@ namespace JoeLang
 namespace Compiler
 {
 
+Token::Token( TokenTy sub_class_id )
+    :m_subClassID( sub_class_id )
+{
+}
+
 Token::~Token()
 {
+}
+
+Token::TokenTy Token::GetSubClassID() const
+{
+    return m_subClassID;
+}
+
+bool Token::classof( const Token* t )
+{
+    return true;
 }
 
 } // namespace Compiler

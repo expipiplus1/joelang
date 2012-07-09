@@ -65,17 +65,8 @@ class TechniqueDefinition;
 class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
-    enum class DeclarationTy
-    {
-        EmptyDeclaration,
-        PassDeclaration,
-        TechniqueDeclaration,
-        VariableDeclarationList,
-        FunctionDefinition
-    };
-
     explicit
-    DeclarationBase( DeclarationTy sub_class_id );
+    DeclarationBase( TokenTy sub_class_id );
     virtual
     ~DeclarationBase    ();
 
@@ -102,14 +93,10 @@ public:
                           std::unique_ptr<DeclarationBase>& token );
 
     /** Used for casting **/
-    DeclarationTy GetSubClassID() const;
-    /** Used for casting **/
+    static
+    bool classof( const Token* t );
     static
     bool classof( const DeclarationBase* d );
-
-private:
-    // Subclass identifier for casts
-    const DeclarationTy m_subClassID;
 };
 
 /**
@@ -328,7 +315,7 @@ public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
     using DeclaratorVector = std::vector<std::unique_ptr<InitDeclarator> >;
 
-    VariableListOrFunctionDefinition( DeclarationTy sub_class_id );
+    VariableListOrFunctionDefinition( TokenTy sub_class_id );
     virtual
     ~VariableListOrFunctionDefinition();
 

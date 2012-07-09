@@ -53,9 +53,10 @@ namespace Compiler
 
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
                                 std::unique_ptr<Expression> initializer )
-    : m_declarator( std::move(declarator) )
-    , m_initializer( std::move(initializer) )
-    , m_variable( nullptr )
+    :Token( TokenTy::InitDeclarator )
+    ,m_declarator( std::move(declarator) )
+    ,m_initializer( std::move(initializer) )
+    ,m_variable( nullptr )
 {
     assert( m_declarator && "InitDeclarator given a null declarator" );
 }
@@ -67,6 +68,9 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
+    // Resolve things in the declarator
+    m_declarator->PerformSema( sema );
+
     m_isGlobal = sema.InGlobalScope();
 
     bool can_init = true;
@@ -110,10 +114,15 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
             sema.Error( "Variables of type string must be const" );
     }
 
-    m_variable =  std::make_shared<Variable>( decl_specs.GetType(),
-                                              decl_specs.IsConst() && can_init,
-                                              m_isGlobal,
-                                              std::move(m_initializer) );
+    Type base_type = decl_specs.GetType();
+    std::vector<std::unique_ptr<Expression>> array_dimension_sizes =
+                                        m_declarator->GetArrayDimensionSizes();
+
+    m_variable = std::make_shared<Variable>( base_type,
+                                             std::move(array_dimension_sizes),
+                                             decl_specs.IsConst() && can_init,
+                                             m_isGlobal,
+                                             std::move(m_initializer) );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of later
     // analysis
@@ -158,13 +167,20 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         Declarator::ArraySpecifierVector array_specifiers )
-    :m_identifier( std::move(identifier) )
+    :Token( TokenTy::Declarator )
+    ,m_identifier( std::move(identifier) )
     ,m_arraySpecifiers( std::move(array_specifiers) )
 {
 }
 
 Declarator::~Declarator()
 {
+}
+
+void Declarator::PerformSema( SemaAnalyzer& sema )
+{
+    for( auto& array_specifier : m_arraySpecifiers )
+        array_specifier->PerformSema( sema );
 }
 
 void Declarator::Print( int depth ) const
@@ -176,9 +192,13 @@ const std::string& Declarator::GetIdentifier() const
     return m_identifier;
 }
 
-bool Declarator::IsArray() const
+std::vector<std::unique_ptr<Expression> >
+                                    Declarator::GetArrayDimensionSizes() const
 {
-    return m_arraySpecifiers.size() != 0;
+    std::vector<std::unique_ptr<Expression>> ret;
+    for( const auto& array_specifier : m_arraySpecifiers )
+        ret.push_back( array_specifier->GetExpression() );
+    return ret;
 }
 
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
@@ -208,13 +228,25 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 //------------------------------------------------------------------------------
 
 ArraySpecifier::ArraySpecifier( std::unique_ptr<Expression> expression )
-    :m_expression( std::move( expression ) )
+    :Token( TokenTy::ArraySpecifier )
+    ,m_expression( std::move( expression ) )
 {
     assert( m_expression && "ArraySpecifier given a null expression" );
 }
 
 ArraySpecifier::~ArraySpecifier()
 {
+}
+
+void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
+{
+    if( !sema.TryResolveToLiteral( m_expression, Type::I64 ) )
+        sema.Error( "Can't create array with non-const dimension" );
+}
+
+std::unique_ptr<Expression> ArraySpecifier::GetExpression()
+{
+    return std::move(m_expression);
 }
 
 void ArraySpecifier::Print( int depth ) const

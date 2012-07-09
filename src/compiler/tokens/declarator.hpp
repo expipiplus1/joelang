@@ -117,6 +117,13 @@ public:
     virtual
     ~Declarator   ();
 
+    /**
+      * Performs semantic ananysis on the declarator
+      * \param sema
+      *   The SemaAnalyzer which contains the symbol table and things
+      */
+    void PerformSema( SemaAnalyzer& sema );
+
     virtual
     void Print( int depth ) const override;
 
@@ -125,8 +132,8 @@ public:
       */
     const std::string& GetIdentifier() const;
 
-    /** \returns true if this declarator represents an array **/
-    bool IsArray() const;
+    /** \returns a vector of the sizes of the array dimensions **/
+    std::vector<std::unique_ptr<Expression> > GetArrayDimensionSizes() const;
 
     /**
       * Parses a direct declarator
@@ -159,6 +166,15 @@ public:
     ArraySpecifier    ( std::unique_ptr<Expression> expression );
     virtual
     ~ArraySpecifier   ();
+
+    /**
+      * Performs semantic ananysis on the declarator
+      * \param sema
+      *   The SemaAnalyzer which contains the symbol table and things
+      */
+    void PerformSema( SemaAnalyzer& sema );
+
+    std::unique_ptr<Expression> GetExpression();
 
     virtual
     void Print( int depth ) const override;

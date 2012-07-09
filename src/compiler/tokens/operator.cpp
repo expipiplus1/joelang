@@ -36,6 +36,7 @@
 #include <utility>
 
 #include <engine/types.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -51,7 +52,8 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 AssignmentOperator::AssignmentOperator( Op op )
-    :m_operator(op)
+    :Token( TokenTy::AssignmentOperator )
+    ,m_operator(op)
 {
 }
 
@@ -105,7 +107,8 @@ bool AssignmentOperator::Parse( Parser& parser,
 // PostfixOperator
 //------------------------------------------------------------------------------
 
-PostfixOperator::PostfixOperator()
+PostfixOperator::PostfixOperator( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
@@ -125,7 +128,19 @@ bool PostfixOperator::Parse( Parser& parser,
         return false;
 
     // Cast the result to a PostfixOperator
+    assert( isa<PostfixOperator>(t) );
     token.reset( static_cast<PostfixOperator*>( t.release() ) );
+    return true;
+}
+
+bool PostfixOperator::classof( const Token* e )
+{
+    return e->GetSubClassID() >= TokenTy::PostfixOperator_Start &&
+           e->GetSubClassID() <= TokenTy::PostfixOperator_End;
+}
+
+bool PostfixOperator::classof( const PostfixOperator* e )
+{
     return true;
 }
 
@@ -134,7 +149,8 @@ bool PostfixOperator::Parse( Parser& parser,
 //------------------------------------------------------------------------------
 
 SubscriptOperator::SubscriptOperator( std::unique_ptr<Expression> expression )
-    :m_expression( std::move(expression) )
+    :PostfixOperator( TokenTy::SubscriptOperator )
+    ,m_expression( std::move(expression) )
 {
     assert( m_expression && "SubscriptOperator given a null index expression" );
 }
@@ -177,7 +193,8 @@ bool SubscriptOperator::Parse( Parser& parser,
 
 ArgumentListOperator::ArgumentListOperator(
         ArgumentExpressionVector argument_expressions )
-    :m_argumentExpressions( std::move(argument_expressions) )
+    :PostfixOperator( TokenTy::ArgumentListOperator )
+    ,m_argumentExpressions( std::move(argument_expressions) )
 {
 #ifndef NDEBUG
     for( const auto& e : m_argumentExpressions )
@@ -243,7 +260,8 @@ bool ArgumentListOperator::Parse( Parser& parser,
 //------------------------------------------------------------------------------
 
 MemberAccessOperator::MemberAccessOperator( std::string identifier )
-    :m_identifier( std::move( identifier ) )
+    :PostfixOperator( TokenTy::MemberAccessOperator )
+    ,m_identifier( std::move( identifier ) )
 {
 }
 
@@ -282,7 +300,8 @@ bool MemberAccessOperator::Parse( Parser& parser,
 //------------------------------------------------------------------------------
 
 IncrementOrDecrementOperator::IncrementOrDecrementOperator( Op op )
-    :m_operator( op )
+    :PostfixOperator( TokenTy::IncrementOrDecrementOperator )
+    ,m_operator( op )
 {
 }
 

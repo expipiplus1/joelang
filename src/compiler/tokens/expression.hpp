@@ -89,41 +89,7 @@ namespace Compiler
 class Expression : public JoeLang::Compiler::Token
 {
 public:
-    enum class ExpressionTy
-    {
-        AssignmentExpression,
-        ConditionalExpression,
-
-        LogicalOrExpression,
-        BinaryOperatorExpression_Start = LogicalOrExpression,
-        LogicalAndExpression,
-        InclusiveOrExpression,
-        ExclusiveOrExpression,
-        AndExpression,
-        EqualityExpression,
-        RelationalExpression,
-        ShiftExpression,
-        AdditiveExpression,
-        MultiplicativeExpression,
-        BinaryOperatorExpression_End = MultiplicativeExpression,
-
-        CastExpression,
-        UnaryExpression,
-        PostfixExpression,
-        IdentifierExpression,
-
-        IntegerLiteralExpression,
-        LiteralExpression_Start = IntegerLiteralExpression,
-        FloatingLiteralExpression,
-        BooleanLiteralExpression,
-        StringLiteralExpression,
-        CharacterLiteralExpression,
-        LiteralExpression_End = CharacterLiteralExpression
-
-
-    };
-
-    Expression( ExpressionTy sub_class_id );
+    Expression( TokenTy sub_class_id );
     virtual
     ~Expression();
 
@@ -191,13 +157,10 @@ public:
     LiteralExpression* GetLiteral( const std::unique_ptr<Expression>& e );
 
     /** Used for casting **/
-    ExpressionTy GetSubClassID() const;
-    /** Used for casting **/
+    static
+    bool classof( const Token* t );
     static
     bool classof( const Expression* e );
-
-private:
-    const ExpressionTy m_subClassID;
 };
 
 /**
@@ -363,7 +326,7 @@ public:
       * \param right_side
       *   The expression to the right of the operator
       */
-    BinaryOperatorExpression( ExpressionTy sub_class_id,
+    BinaryOperatorExpression( TokenTy sub_class_id,
                               Op op,
                               std::unique_ptr<Expression> left_side,
                               std::unique_ptr<Expression> right_side );
@@ -999,7 +962,7 @@ private:
 class LiteralExpression : public JoeLang::Compiler::Expression
 {
 public:
-    LiteralExpression( ExpressionTy sub_class_id );
+    LiteralExpression( TokenTy sub_class_id );
 
     /**
       * Does nothing
