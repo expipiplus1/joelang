@@ -42,6 +42,9 @@ enum class Type
     // Unknown type
     UNKNOWN_TYPE,
 
+    //Any array
+    ARRAY,
+
     // Boolean type
     BOOL,
 
