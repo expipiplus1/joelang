@@ -176,6 +176,7 @@ const std::string& GetTypeString( Type t )
         { Type::I8,           "i8" },
         { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
+        { Type::ARRAY,        "array" },
     };
 
     return string_map.at(t);
