@@ -58,6 +58,8 @@ namespace Compiler
 
 class DeclarationBase;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 class TechniqueDeclaration;
 class TranslationUnit;
 class Variable;
@@ -110,6 +112,10 @@ public:
                                const Expression& true_expression,
                                const Expression& false_expression );
 
+    // Other things
+    llvm::Value* CreateArrayIndex( const Expression& array,
+                                   const Expression& index );
+
     /**
       * Create the llvm::Value representing an integer
       * \param value
@@ -138,6 +144,8 @@ public:
       * Allocate a llvm::GlobalVariable for the current module
       * \param type
       *   The type of the global variable
+      * \param array_extents
+      *   The array dimensions (if any)
       * \param is_const
       *   Whether this is a const variable
       * \param initializer
@@ -146,6 +154,7 @@ public:
       */
     llvm::GlobalVariable* CreateGlobalVariable(
                      Type type,
+                     std::vector<Expression_sp> array_extents,
                      bool is_const,
                      const std::unique_ptr<Expression>& initializer = nullptr );
 

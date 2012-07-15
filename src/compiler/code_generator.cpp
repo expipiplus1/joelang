@@ -500,6 +500,17 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 }
 
 //
+// Other things
+//
+
+llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
+                                              const Expression& index)
+{
+    return m_llvmBuilder.CreateGEP( array.CodeGen( *this ),
+                                    index.CodeGen( *this ) );
+}
+
+//
 // Constants
 //
 llvm::Value* CodeGenerator::CreateInteger( unsigned long long value,
@@ -526,6 +537,7 @@ llvm::Value* CodeGenerator::CreateFloating( double value,
 
 llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
+                                std::vector<Expression_sp> array_extents,
                                 bool is_const,
                                 const std::unique_ptr<Expression>& initializer )
 {
