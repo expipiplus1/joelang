@@ -47,7 +47,7 @@ namespace Compiler
 
 Variable::Variable(
                 Type base_type,
-                std::vector<std::unique_ptr<Expression> > array_dimension_sizes,
+                std::vector<Expression_sp> array_dimension_sizes,
                 bool is_const,
                 bool is_global,
                 std::unique_ptr<Expression> initializer )
@@ -92,7 +92,17 @@ llvm::Value* Variable::GetLLVMPointer() const
 
 Type Variable::GetType() const
 {
+    return m_arrayDimensionSizes.size() == 0 ? m_type : Type::ARRAY;
+}
+
+Type Variable::GetUnderlyingType() const
+{
     return m_type;
+}
+
+const std::vector<Expression_sp>& Variable::GetArrayExtents() const
+{
+    return m_arrayDimensionSizes;
 }
 
 bool Variable::IsConst() const

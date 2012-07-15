@@ -47,6 +47,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
+typedef std::shared_ptr<Expression> Expression_sp;
 
 /**
   * \class Variable
@@ -60,7 +61,7 @@ public:
       * an initializer
       */
     Variable( Type type,
-              std::vector<std::unique_ptr<Expression> > array_dimension_sizes,
+              std::vector<Expression_sp> array_dimension_sizes,
               bool is_const,
               bool is_global,
               std::unique_ptr<Expression> initializer = nullptr );
@@ -71,6 +72,10 @@ public:
 
     Type GetType() const;
 
+    Type GetUnderlyingType() const;
+
+    const std::vector<Expression_sp>& GetArrayExtents() const;
+
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
@@ -78,7 +83,7 @@ public:
 
 private:
     Type m_type;
-    std::vector<std::unique_ptr<Expression> > m_arrayDimensionSizes;
+    std::vector<Expression_sp> m_arrayDimensionSizes;
     bool m_isConst;
     bool m_isGlobal;
     std::unique_ptr<Expression> m_initializer;

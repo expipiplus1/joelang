@@ -44,6 +44,8 @@ class CodeGenerator;
 class Declarator;
 class DeclSpecs;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 class Parser;
 class SemaAnalyzer;
 class Variable;
@@ -133,7 +135,7 @@ public:
     const std::string& GetIdentifier() const;
 
     /** \returns a vector of the sizes of the array dimensions **/
-    std::vector<std::unique_ptr<Expression> > GetArrayDimensionSizes() const;
+    std::vector<Expression_sp> GetArrayDimensionSizes() const;
 
     /**
       * Parses a direct declarator

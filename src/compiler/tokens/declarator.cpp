@@ -115,7 +115,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     }
 
     Type base_type = decl_specs.GetType();
-    std::vector<std::unique_ptr<Expression>> array_dimension_sizes =
+    std::vector<Expression_sp> array_dimension_sizes =
                                         m_declarator->GetArrayDimensionSizes();
 
     m_variable = std::make_shared<Variable>( base_type,
@@ -192,10 +192,9 @@ const std::string& Declarator::GetIdentifier() const
     return m_identifier;
 }
 
-std::vector<std::unique_ptr<Expression> >
-                                    Declarator::GetArrayDimensionSizes() const
+std::vector<Expression_sp> Declarator::GetArrayDimensionSizes() const
 {
-    std::vector<std::unique_ptr<Expression>> ret;
+    std::vector<Expression_sp> ret;
     for( const auto& array_specifier : m_arraySpecifiers )
         ret.push_back( array_specifier->GetExpression() );
     return ret;

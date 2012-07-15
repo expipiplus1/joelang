@@ -148,15 +148,46 @@ bool PostfixOperator::classof( const PostfixOperator* e )
 // SubscriptOperator
 //------------------------------------------------------------------------------
 
-SubscriptOperator::SubscriptOperator( std::unique_ptr<Expression> expression )
+SubscriptOperator::SubscriptOperator( Expression_up index_expression )
     :PostfixOperator( TokenTy::SubscriptOperator )
-    ,m_expression( std::move(expression) )
+    ,m_indexExpression( std::move(index_expression) )
 {
-    assert( m_expression && "SubscriptOperator given a null index expression" );
+    assert( m_indexExpression && "SubscriptOperator given a null index expression" );
 }
 
 SubscriptOperator::~SubscriptOperator()
 {
+}
+
+bool SubscriptOperator::PerformSema(
+                                SemaAnalyzer& sema,
+                                const std::unique_ptr<Expression>& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
+Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
+{
+    const std::vector<Expression_sp>& array_extents =
+                                                expression->GetArrayExtents();
+    if( array_extents.size() > 1 )
+        return Type::ARRAY;
+    return expression->GetUnderlyingType();
+}
+
+Type SubscriptOperator::GetUnderlyingType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+std::vector<Expression_sp> SubscriptOperator::GetArrayExtents(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
 }
 
 void SubscriptOperator::Print( int depth ) const
@@ -164,7 +195,7 @@ void SubscriptOperator::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "SubscriptOperator\n";
-    m_expression->Print( depth + 1 );
+    m_indexExpression->Print( depth + 1 );
 }
 
 bool SubscriptOperator::Parse( Parser& parser,
@@ -175,15 +206,15 @@ bool SubscriptOperator::Parse( Parser& parser,
         return false;
 
     // parse the index expression
-    std::unique_ptr<Expression> expression;
-    if( !parser.Expect<Expression>( expression ) )
+    std::unique_ptr<Expression> index_expression;
+    if( !parser.Expect<Expression>( index_expression ) )
         return false;
 
     // close bracket
     if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
         return false;
 
-    token.reset( new SubscriptOperator( std::move(expression) ) );
+    token.reset( new SubscriptOperator( std::move(index_expression) ) );
     return true;
 }
 
@@ -204,6 +235,35 @@ ArgumentListOperator::ArgumentListOperator(
 
 ArgumentListOperator::~ArgumentListOperator()
 {
+}
+
+bool ArgumentListOperator::PerformSema(
+                                SemaAnalyzer& sema,
+                                const std::unique_ptr<Expression>& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
+Type ArgumentListOperator::GetReturnType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+Type ArgumentListOperator::GetUnderlyingType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+std::vector<Expression_sp> ArgumentListOperator::GetArrayExtents(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
 }
 
 void ArgumentListOperator::Print( int depth ) const
@@ -269,6 +329,35 @@ MemberAccessOperator::~MemberAccessOperator()
 {
 }
 
+bool MemberAccessOperator::PerformSema(
+                                SemaAnalyzer& sema,
+                                const std::unique_ptr<Expression>& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
+Type MemberAccessOperator::GetReturnType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+Type MemberAccessOperator::GetUnderlyingType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+std::vector<Expression_sp> MemberAccessOperator::GetArrayExtents(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
 void MemberAccessOperator::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -307,6 +396,35 @@ IncrementOrDecrementOperator::IncrementOrDecrementOperator( Op op )
 
 IncrementOrDecrementOperator::~IncrementOrDecrementOperator()
 {
+}
+
+bool IncrementOrDecrementOperator::PerformSema(
+                                SemaAnalyzer& sema,
+                                const std::unique_ptr<Expression>& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
+Type IncrementOrDecrementOperator::GetReturnType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+Type IncrementOrDecrementOperator::GetUnderlyingType(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return Type::UNKNOWN_TYPE;
+}
+
+std::vector<Expression_sp> IncrementOrDecrementOperator::GetArrayExtents(
+                                        const Expression_up& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
 }
 
 void IncrementOrDecrementOperator::Print( int depth ) const

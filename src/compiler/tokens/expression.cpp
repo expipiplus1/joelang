@@ -304,6 +304,22 @@ Type AssignmentExpression::GetReturnType() const
         return m_assigneeVariable->GetType();
 }
 
+Type AssignmentExpression::GetUnderlyingType() const
+{
+    if( m_assignee )
+        return m_assignee->GetUnderlyingType();
+    else
+        return m_assigneeVariable->GetUnderlyingType();
+}
+
+std::vector<Expression_sp> AssignmentExpression::GetArrayExtents() const
+{
+    if( m_assignee )
+        return m_assignee->GetArrayExtents();
+    else
+        return m_assigneeVariable->GetArrayExtents();
+}
+
 void AssignmentExpression::Print(int depth) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -384,6 +400,7 @@ void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
+    /// TODO check that the true and false expressions are of equal array size
     bool good = true;
 
     m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
@@ -466,6 +483,18 @@ Type ConditionalExpression::GetReturnType() const
 {
     return GetCommonType( m_trueExpression->GetReturnType(),
                           m_falseExpression->GetReturnType() );
+}
+
+Type ConditionalExpression::GetUnderlyingType() const
+{
+    return GetCommonType( m_trueExpression->GetUnderlyingType(),
+                          m_falseExpression->GetUnderlyingType() );
+}
+
+std::vector<Expression_sp> ConditionalExpression::GetArrayExtents() const
+{
+    // The array extents should be the same between the two sides
+    return m_trueExpression->GetArrayExtents();
 }
 
 void ConditionalExpression::Print( int depth ) const
@@ -552,6 +581,7 @@ void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
+    /// TODO operands can't be arrays
     bool good = true;
 
     Type t = GetCommonType( m_rightSide->GetReturnType(),
@@ -720,6 +750,21 @@ Type BinaryOperatorExpression::GetReturnType() const
 {
     return GetCommonType( m_leftSide->GetReturnType(),
                           m_rightSide->GetReturnType() );
+}
+
+Type BinaryOperatorExpression::GetUnderlyingType() const
+{
+    return GetReturnType();
+}
+
+std::vector<Expression_sp> BinaryOperatorExpression::GetArrayExtents() const
+{
+    // Can't binary op between two arrays
+    assert( m_leftSide->GetArrayExtents().size() == 0 &&
+            "Binary operator left side is an array" );
+    assert( m_rightSide->GetArrayExtents().size() == 0 &&
+            "Binary operator right side is an array" );
+    return {};
 }
 
 void BinaryOperatorExpression::Print( int depth ) const
@@ -1480,7 +1525,19 @@ llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 
 Type CastExpression::GetReturnType() const
 {
+    if( m_expression->GetReturnType() == Type::ARRAY )
+        return Type::ARRAY;
     return m_castType;
+}
+
+Type CastExpression::GetUnderlyingType() const
+{
+    return m_castType;
+}
+
+std::vector<Expression_sp> CastExpression::GetArrayExtents() const
+{
+    return m_expression->GetArrayExtents();
 }
 
 void CastExpression::Print( int depth ) const
@@ -1541,6 +1598,7 @@ void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
 {
+    /// TODO check that expression isn't an array
     bool good = true;
 
     Type t = m_expression->GetReturnType();
@@ -1633,6 +1691,18 @@ Type UnaryExpression::GetReturnType() const
     return Type::UNKNOWN_TYPE;
 }
 
+Type UnaryExpression::GetUnderlyingType() const
+{
+    return GetReturnType();
+}
+
+std::vector<Expression_sp> UnaryExpression::GetArrayExtents() const
+{
+    assert( m_expression->GetArrayExtents().size() == 0 &&
+            "Unary Expression given an array" );
+    return {};
+}
+
 void UnaryExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1715,9 +1785,10 @@ void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
-    assert( false && "Complete me" );
-    m_expression->PerformSema( sema );
-    return false;
+    bool good = true;
+    good &= m_expression->PerformSema( sema );
+    good &= m_postfixOperator->PerformSema( sema, m_expression );
+    return good;
 }
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1727,8 +1798,17 @@ llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
 
 Type PostfixExpression::GetReturnType() const
 {
-    assert( "false" && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return m_postfixOperator->GetReturnType( m_expression );
+}
+
+Type PostfixExpression::GetUnderlyingType() const
+{
+    return m_postfixOperator->GetUnderlyingType( m_expression );
+}
+
+std::vector<Expression_sp> PostfixExpression::GetArrayExtents() const
+{
+    return m_postfixOperator->GetArrayExtents( m_expression );
 }
 
 void PostfixExpression::Print( int depth ) const
@@ -1840,6 +1920,21 @@ Type IdentifierExpression::GetReturnType() const
     return m_variable->GetType();
 }
 
+Type IdentifierExpression::GetUnderlyingType() const
+{
+    if( !m_variable )
+        return Type::UNKNOWN_TYPE;
+    return m_variable->GetUnderlyingType();
+}
+
+std::vector<Expression_sp> IdentifierExpression::GetArrayExtents() const
+{
+    /// TODO something better when !m_variable
+    if( !m_variable )
+        return {};
+    return m_variable->GetArrayExtents();
+}
+
 bool IdentifierExpression::IsConst() const
 {
     return m_variable->IsConst();
@@ -1911,6 +2006,16 @@ void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
     return true;
+}
+
+Type LiteralExpression::GetUnderlyingType() const
+{
+    return GetReturnType();
+}
+
+std::vector<Expression_sp> LiteralExpression::GetArrayExtents() const
+{
+    return {};
 }
 
 bool LiteralExpression::Parse( Parser& parser,

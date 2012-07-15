@@ -266,7 +266,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         DeclareVariable( v.first,
                          std::make_shared<Variable>(
                                     v.second->GetReturnType(),
-                                    std::vector<std::unique_ptr<Expression> >(),
+                                    std::vector<Expression_sp>(),
                                     true,
                                     false,
                                     std::move(v.second) ) );

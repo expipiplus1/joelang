@@ -37,11 +37,16 @@
 
 namespace JoeLang
 {
+enum class Type;
+
 namespace Compiler
 {
 
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 class Parser;
+class SemaAnalyzer;
 
 /**
   * \class AssignmentOperator
@@ -113,6 +118,20 @@ public:
     virtual
     ~PostfixOperator();
 
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const std::unique_ptr<Expression>& expression ) = 0;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const = 0;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const = 0;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents(
+                                    const Expression_up& expression) const = 0;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<PostfixOperator>& token );
@@ -139,9 +158,23 @@ public:
       * \param expression
       *   The index expression
       */
-    SubscriptOperator( std::unique_ptr<Expression> expression );
+    SubscriptOperator( std::unique_ptr<Expression> index_expression );
     virtual
     ~SubscriptOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents(
+                            const Expression_up& expression ) const override;
 
     virtual
     void Print( int depth ) const;
@@ -150,7 +183,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    std::unique_ptr<Expression> m_expression;
+    std::unique_ptr<Expression> m_indexExpression;
 };
 
 /**
@@ -169,6 +202,20 @@ public:
     ArgumentListOperator( ArgumentExpressionVector argument_expressions );
     virtual
     ~ArgumentListOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents(
+                            const Expression_up& expression ) const override;
 
     virtual
     void Print( int depth ) const;
@@ -200,6 +247,20 @@ public:
     ~MemberAccessOperator();
 
     virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents(
+                            const Expression_up& expression ) const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -227,6 +288,20 @@ public:
     IncrementOrDecrementOperator( Op terminal_type );
     virtual
     ~IncrementOrDecrementOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents(
+                            const Expression_up& expression ) const override;
 
     virtual
     void Print( int depth ) const;

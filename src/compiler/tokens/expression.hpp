@@ -56,6 +56,9 @@ namespace JoeLang
         enum class TerminalType;
 
         class CodeGenerator;
+        class Expression;
+        typedef std::unique_ptr<Expression> Expression_up;
+        typedef std::shared_ptr<Expression> Expression_sp;
         class GenericValue;
         class Parser;
         class SemaAnalyzer;
@@ -73,7 +76,6 @@ namespace Compiler
 /**
   * \defgroup Expressions
   * \ingroup Tokens
-    m_leftSide->PerformSema
   * Expressions parse part of expressions in statements.
   * The static member function Expression::Parse must take a pointer to the
   * abstract base class expression rather than to the more specific base class
@@ -119,11 +121,33 @@ public:
     virtual
     void FoldConstants( std::unique_ptr<Expression>& self );
 
+    /**
+      * Generates an llvm value for this expression
+      * \param code_gen
+      *   A reference to a CodeGenerator
+      * \returns the llvm value representing this expression
+      */
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const = 0;
 
+    /**
+      * \returns the type which this expression evaluates to
+      */
     virtual
     Type GetReturnType() const = 0;
+
+    /**
+      * \returns the underling type of this expression, with array extents
+      *   removed
+      */
+    virtual
+    Type GetUnderlyingType() const = 0;
+
+    /**
+      * \returns the array extents of this expression's return type
+      */
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const = 0;
 
     /**
       * \returns true if the Expression represents a l-value
@@ -206,6 +230,12 @@ public:
     Type GetReturnType() const override;
 
     virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -261,9 +291,14 @@ public:
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
-
     virtual
     Type GetReturnType() const override;
+
+    virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
 
     virtual
     void Print( int depth ) const;
@@ -347,6 +382,13 @@ public:
 
     virtual
     Type GetReturnType() const override;
+
+    /// \returns GetReturnType
+    virtual
+    Type GetUnderlyingType() const override final;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override final;
 
     virtual
     void Print( int depth ) const;
@@ -741,6 +783,12 @@ public:
     Type GetReturnType() const override;
 
     virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -812,6 +860,12 @@ public:
     Type GetReturnType() const override;
 
     virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -853,6 +907,12 @@ public:
 
     virtual
     Type GetReturnType() const override;
+
+    virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
 
     virtual
     void Print( int depth ) const;
@@ -915,6 +975,12 @@ public:
     virtual
     Type GetReturnType() const override;
 
+    virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override;
+
     /** \returns true if this identifier represents a constant expression **/
     bool IsConst() const;
 
@@ -975,6 +1041,14 @@ public:
       */
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override final;
+
+    /// \returns GetReturnType
+    virtual
+    Type GetUnderlyingType() const override final;
+
+    /// \returns {}
+    virtual
+    std::vector<Expression_sp> GetArrayExtents() const override final;
 
     virtual
     GenericValue GetValue() const = 0;
