@@ -50,8 +50,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-SemaAnalyzer::SemaAnalyzer( const Context& context )
+SemaAnalyzer::SemaAnalyzer( const Context& context, CodeGenerator& code_gen )
     :m_context( context )
+    ,m_codeGenerator( code_gen )
 {
 }
 

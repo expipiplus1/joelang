@@ -45,6 +45,7 @@ enum class Type;
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
 class PassDefinition;
 class TechniqueDefinition;
@@ -60,8 +61,7 @@ class SemaAnalyzer
 public:
     using PassDefinitionRef = std::shared_ptr<std::unique_ptr<PassDefinition> >;
 
-    explicit
-    SemaAnalyzer( const Context& context );
+    SemaAnalyzer( const Context& context, CodeGenerator& code_gen );
     ~SemaAnalyzer();
 
     /**
@@ -211,6 +211,7 @@ private:
     bool m_good = true;
 
     const Context& m_context;
+    CodeGenerator& m_codeGenerator;
 };
 
 } // namespace Compiler
