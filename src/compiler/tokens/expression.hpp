@@ -119,7 +119,7 @@ public:
       *   Care must be taken to avoid destroying self too early.
       */
     virtual
-    void FoldConstants( std::unique_ptr<Expression>& self );
+    void FoldConstants( Expression_up& self );
 
     /**
       * Generates an llvm value for this expression
@@ -168,7 +168,7 @@ public:
       */
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     /**
       * Checks if e represents a LiteralExpression, either by being one, or
@@ -178,7 +178,7 @@ public:
       * \returns nullptr if it wasn't a literal expression
       */
     static
-    LiteralExpression* GetLiteral( const std::unique_ptr<Expression>& e );
+    LiteralExpression* GetLiteral( const Expression_up& e );
 
     /** Used for casting **/
     static
@@ -211,9 +211,9 @@ public:
       *   The assigned Expression
       */
     AssignmentExpression(
-                        std::unique_ptr<Expression> assignee,
+                        Expression_up assignee,
                         Op assignment_operator,
-                        std::unique_ptr<Expression> assigned_expression );
+                        Expression_up assigned_expression );
     virtual
     ~AssignmentExpression();
 
@@ -240,17 +240,17 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
     static
     bool classof( const AssignmentExpression* e );
 private:
-    std::unique_ptr<Expression> m_Assignee;
+    Expression_up m_Assignee;
     std::shared_ptr<Variable>   m_AssigneeVariable;
     Op                          m_AssignmentOperator;
-    std::unique_ptr<Expression> m_AssignedExpression;
+    Expression_up m_AssignedExpression;
 };
 
 /**
@@ -273,9 +273,9 @@ public:
       * \param false_expression
       *   The expression to return if condition is false
       */
-    ConditionalExpression( std::unique_ptr<Expression> condition,
-                           std::unique_ptr<Expression> true_expression,
-                           std::unique_ptr<Expression> false_expression );
+    ConditionalExpression( Expression_up condition,
+                           Expression_up true_expression,
+                           Expression_up false_expression );
     virtual
     ~ConditionalExpression();
 
@@ -286,7 +286,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( std::unique_ptr<Expression>& self ) override;
+    void FoldConstants( Expression_up& self ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -305,16 +305,16 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
     static
     bool classof( const ConditionalExpression* e );
 private:
-    std::unique_ptr<Expression> m_Condition;
-    std::unique_ptr<Expression> m_TrueExpression;
-    std::unique_ptr<Expression> m_FalseExpression;
+    Expression_up m_Condition;
+    Expression_up m_TrueExpression;
+    Expression_up m_FalseExpression;
 };
 
 /**
@@ -363,8 +363,8 @@ public:
       */
     BinaryOperatorExpression( TokenTy sub_class_id,
                               Op op,
-                              std::unique_ptr<Expression> left_side,
-                              std::unique_ptr<Expression> right_side );
+                              Expression_up left_side,
+                              Expression_up right_side );
     virtual
     ~BinaryOperatorExpression();
 
@@ -375,7 +375,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( std::unique_ptr<Expression>& self ) override final;
+    void FoldConstants( Expression_up& self ) override final;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override final;
@@ -409,7 +409,7 @@ public:
     template< typename ExpressionType, typename SubExpressionType >
     static
     bool ParseLeftAssociative( Parser& parser,
-                               std::unique_ptr<Expression>& token,
+                               Expression_up& token,
                                const OperatorTerminalMap& operator_terminals );
 
     static
@@ -418,8 +418,8 @@ public:
     bool classof( const BinaryOperatorExpression* e );
 protected:
     Op m_Operator;
-    std::unique_ptr<Expression> m_LeftSide;
-    std::unique_ptr<Expression> m_RightSide;
+    Expression_up m_LeftSide;
+    Expression_up m_RightSide;
 };
 
 
@@ -434,8 +434,8 @@ class LogicalOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     LogicalOrExpression( Op operator_terminal,
-                         std::unique_ptr<Expression>  left_side,
-                         std::unique_ptr<Expression>  right_side );
+                         Expression_up  left_side,
+                         Expression_up  right_side );
     virtual
     ~LogicalOrExpression();
 
@@ -453,7 +453,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -472,8 +472,8 @@ class LogicalAndExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     LogicalAndExpression( Op operator_terminal,
-                          std::unique_ptr<Expression> left_side,
-                          std::unique_ptr<Expression> right_side );
+                          Expression_up left_side,
+                          Expression_up right_side );
     virtual
     ~LogicalAndExpression();
 
@@ -491,7 +491,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -510,8 +510,8 @@ class InclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     InclusiveOrExpression( Op operator_terminal,
-                           std::unique_ptr<Expression> left_side,
-                           std::unique_ptr<Expression> right_side );
+                           Expression_up left_side,
+                           Expression_up right_side );
 
     virtual
     ~InclusiveOrExpression();
@@ -523,7 +523,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+    bool Parse( Parser& parser, Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -542,8 +542,8 @@ class ExclusiveOrExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     ExclusiveOrExpression( Op operator_terminal,
-                          std::unique_ptr<Expression> left_side,
-                          std::unique_ptr<Expression> right_side );
+                          Expression_up left_side,
+                          Expression_up right_side );
     virtual
     ~ExclusiveOrExpression();
 
@@ -555,7 +555,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -574,8 +574,8 @@ class AndExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     AndExpression( Op operator_terminal,
-                   std::unique_ptr<Expression> left_side,
-                   std::unique_ptr<Expression> right_side );
+                   Expression_up left_side,
+                   Expression_up right_side );
     virtual
     ~AndExpression();
 
@@ -587,7 +587,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -607,8 +607,8 @@ class EqualityExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     EqualityExpression( Op operator_terminal,
-                          std::unique_ptr<Expression> left_side,
-                          std::unique_ptr<Expression> right_side );
+                          Expression_up left_side,
+                          Expression_up right_side );
     virtual
     ~EqualityExpression();
 
@@ -619,7 +619,7 @@ public:
     Type GetReturnType() const override;
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<Expression>& token );
+    bool Parse( Parser& parser, Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -639,8 +639,8 @@ class RelationalExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     RelationalExpression( Op operator_terminal,
-                          std::unique_ptr<Expression> left_side,
-                          std::unique_ptr<Expression> right_side );
+                          Expression_up left_side,
+                          Expression_up right_side );
     virtual
     ~RelationalExpression();
 
@@ -652,7 +652,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -671,8 +671,8 @@ class ShiftExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     ShiftExpression( Op operator_terminal,
-                     std::unique_ptr<Expression> left_side,
-                     std::unique_ptr<Expression> right_side );
+                     Expression_up left_side,
+                     Expression_up right_side );
     virtual
     ~ShiftExpression();
 
@@ -684,7 +684,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -704,14 +704,14 @@ class AdditiveExpression : public JoeLang::Compiler::BinaryOperatorExpression
 {
 public:
     AdditiveExpression( Op operator_terminal,
-                        std::unique_ptr<Expression> left_side,
-                        std::unique_ptr<Expression> right_side );
+                        Expression_up left_side,
+                        Expression_up right_side );
     virtual
     ~AdditiveExpression();
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -730,8 +730,8 @@ class MultiplicativeExpression : public Compiler::BinaryOperatorExpression
 {
 public:
     MultiplicativeExpression( Op operator_terminal,
-                              std::unique_ptr<Expression> left_side,
-                              std::unique_ptr<Expression> right_side );
+                              Expression_up left_side,
+                              Expression_up right_side );
     virtual
     ~MultiplicativeExpression();
 
@@ -740,7 +740,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -763,7 +763,7 @@ class CastExpression : public JoeLang::Compiler::Expression
 public:
     explicit
     CastExpression( Type cast_type,
-                    std::unique_ptr<Expression> expression );
+                    Expression_up expression );
     virtual
     ~CastExpression();
 
@@ -774,7 +774,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( std::unique_ptr<Expression>& self ) override;
+    void FoldConstants( Expression_up& self ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -793,12 +793,12 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
-    std::unique_ptr<Expression> Create(
+    Expression_up Create(
                                   Type cast_type,
-                                  std::unique_ptr<Expression> cast_expression );
+                                  Expression_up cast_expression );
 
     static
     bool classof( const Expression* e );
@@ -807,7 +807,7 @@ public:
 
 private:
     Type m_CastType;
-    std::unique_ptr<Expression> m_Expression;
+    Expression_up m_Expression;
 };
 
 /**
@@ -840,7 +840,7 @@ public:
       *   The expression
       */
     UnaryExpression( Op op,
-                     std::unique_ptr<Expression> expression );
+                     Expression_up expression );
     virtual
     ~UnaryExpression();
 
@@ -851,7 +851,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( std::unique_ptr<Expression>& self ) override;
+    void FoldConstants( Expression_up& self ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -870,7 +870,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -878,7 +878,7 @@ public:
     bool classof( const UnaryExpression* e );
 private:
     Op m_Operator;
-    std::unique_ptr<Expression> m_Expression;
+    Expression_up m_Expression;
 };
 
 /**
@@ -891,7 +891,7 @@ private:
 class PostfixExpression : public JoeLang::Compiler::Expression
 {
 public:
-    PostfixExpression( std::unique_ptr<Expression> expression,
+    PostfixExpression( Expression_up expression,
                        std::unique_ptr<PostfixOperator> postfix_operator );
     virtual
     ~PostfixExpression();
@@ -919,14 +919,14 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
     static
     bool classof( const PostfixExpression* e );
 private:
-    std::unique_ptr<Expression> m_Expression;
+    Expression_up m_Expression;
     std::unique_ptr<PostfixOperator> m_PostfixOperator;
 };
 
@@ -947,7 +947,7 @@ class PrimaryExpression : public JoeLang::Compiler::Expression
 public:
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 };
 
 /**
@@ -996,14 +996,14 @@ public:
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
-    const std::unique_ptr<Expression>& GetReadExpression() const;
+    const Expression_up& GetReadExpression() const;
 
     virtual
     void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     bool classof( const Expression* e );
@@ -1055,7 +1055,7 @@ public:
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<Expression>& token );
+                Expression_up& token );
 
     static
     std::unique_ptr<LiteralExpression> Create( const GenericValue& v );

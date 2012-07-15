@@ -164,7 +164,7 @@ SubscriptOperator::~SubscriptOperator()
 
 bool SubscriptOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const std::unique_ptr<Expression>& expression )
+                                const Expression_up& expression )
 {
     if( expression->GetReturnType() != Type::ARRAY )
     {
@@ -223,7 +223,7 @@ bool SubscriptOperator::Parse( Parser& parser,
         return false;
 
     // parse the index expression
-    std::unique_ptr<Expression> index_expression;
+    Expression_up index_expression;
     if( !parser.Expect<Expression>( index_expression ) )
         return false;
 
@@ -256,7 +256,7 @@ ArgumentListOperator::~ArgumentListOperator()
 
 bool ArgumentListOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const std::unique_ptr<Expression>& expression )
+                                const Expression_up& expression )
 {
     assert( false && "Complete me" );
     return false;
@@ -310,7 +310,7 @@ bool ArgumentListOperator::Parse( Parser& parser,
     ArgumentExpressionVector argument_expressions;
 
     // The pointer to hold each argument as we parse
-    std::unique_ptr<Expression> argument;
+    Expression_up argument;
 
     // Try and parse the first argument
     if( parser.Expect<AssignmentExpression>( argument ) )
@@ -355,7 +355,7 @@ MemberAccessOperator::~MemberAccessOperator()
 
 bool MemberAccessOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const std::unique_ptr<Expression>& expression )
+                                const Expression_up& expression )
 {
     assert( false && "Complete me" );
     return false;
@@ -431,7 +431,7 @@ IncrementOrDecrementOperator::~IncrementOrDecrementOperator()
 
 bool IncrementOrDecrementOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const std::unique_ptr<Expression>& expression )
+                                const Expression_up& expression )
 {
     assert( false && "Complete me" );
     return false;

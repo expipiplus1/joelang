@@ -156,7 +156,7 @@ public:
                      Type type,
                      std::vector<Expression_sp> array_extents,
                      bool is_const,
-                     const std::unique_ptr<Expression>& initializer = nullptr );
+                     const Expression_up& initializer = nullptr );
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 

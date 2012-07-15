@@ -323,7 +323,7 @@ bool SemaAnalyzer::InGlobalScope() const
     return m_SymbolStack.size() == 1;
 }
 
-bool SemaAnalyzer::TryResolveToLiteral( std::unique_ptr<Expression>& expression,
+bool SemaAnalyzer::TryResolveToLiteral( Expression_up& expression,
                                         Type type)
 {
     assert( expression && "Trying to resolve a null expression" );

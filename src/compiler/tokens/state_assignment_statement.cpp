@@ -54,7 +54,7 @@ namespace Compiler
 //------------------------------------------------------------------------------
 StateAssignmentStatement::StateAssignmentStatement(
                                     std::string identifier,
-                                    std::unique_ptr< Expression > expression )
+                                    Expression_up expression )
     :Token( TokenTy::StateAssignmentStatement )
     ,m_Identifier( std::move(identifier) )
     ,m_Expression( std::move(expression) )
@@ -204,7 +204,7 @@ bool StateAssignmentStatement::Parse(
         return false;
 
     // And the expression
-    std::unique_ptr< Expression > expression;
+    Expression_up expression;
     if( !parser.Expect< Expression >( expression ) )
         return false;
 

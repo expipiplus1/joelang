@@ -539,7 +539,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
                                 std::vector<Expression_sp> array_extents,
                                 bool is_const,
-                                const std::unique_ptr<Expression>& initializer )
+                                const Expression_up& initializer )
 {
     llvm::Type* t = GetLLVMType( type, m_LLVMContext );
     llvm::Constant* init = nullptr;

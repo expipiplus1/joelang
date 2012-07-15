@@ -50,7 +50,7 @@ Variable::Variable(
                 std::vector<Expression_sp> array_dimension_sizes,
                 bool is_const,
                 bool is_global,
-                std::unique_ptr<Expression> initializer )
+                Expression_up initializer )
     :m_Type( base_type )
     ,m_ArrayDimensionSizes( std::move(array_dimension_sizes) )
     ,m_IsConst( is_const )
@@ -111,7 +111,7 @@ bool Variable::IsConst() const
     return m_IsConst;
 }
 
-const std::unique_ptr<Expression>& Variable::GetReadExpression() const
+const Expression_up& Variable::GetReadExpression() const
 {
     if( m_IsConst )
         return m_Initializer;

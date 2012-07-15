@@ -52,7 +52,7 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
-                                std::unique_ptr<Expression> initializer )
+                                Expression_up initializer )
     :Token( TokenTy::InitDeclarator )
     ,m_Declarator( std::move(declarator) )
     ,m_Initializer( std::move(initializer) )
@@ -152,7 +152,7 @@ bool InitDeclarator::Parse( Parser& parser,
     }
 
     // We've seen an equals sign so parse the initializer
-    std::unique_ptr<Expression> initializer;
+    Expression_up initializer;
     if( !parser.Expect<AssignmentExpression>( initializer ) )
         return false;
 
@@ -226,7 +226,7 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 // ArraySpecifier
 //------------------------------------------------------------------------------
 
-ArraySpecifier::ArraySpecifier( std::unique_ptr<Expression> expression )
+ArraySpecifier::ArraySpecifier( Expression_up expression )
     :Token( TokenTy::ArraySpecifier )
     ,m_Expression( std::move( expression ) )
 {
@@ -243,7 +243,7 @@ void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Can't create array with non-const dimension" );
 }
 
-std::unique_ptr<Expression> ArraySpecifier::GetExpression()
+Expression_up ArraySpecifier::GetExpression()
 {
     return std::move(m_Expression);
 }
@@ -259,7 +259,7 @@ bool ArraySpecifier::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::OPEN_SQUARE ) )
         return false;
 
-    std::unique_ptr<Expression> expression;
+    Expression_up expression;
     if( !parser.Expect<Expression>( expression ) )
     {
         parser.Error( "No expression in array specifier" );

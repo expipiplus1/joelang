@@ -47,6 +47,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
@@ -172,7 +173,7 @@ public:
       *   The type to cast to
       * \returns true if the expression represents an identifier
       */
-    bool TryResolveToLiteral( std::unique_ptr<Expression>& expression,
+    bool TryResolveToLiteral( Expression_up& expression,
                               Type type );
 
     /**

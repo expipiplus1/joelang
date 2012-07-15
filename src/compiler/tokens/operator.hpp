@@ -126,7 +126,7 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const std::unique_ptr<Expression>& expression ) = 0;
+                      const Expression_up& expression ) = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -168,13 +168,13 @@ public:
       * \param expression
       *   The index expression
       */
-    SubscriptOperator( std::unique_ptr<Expression> index_expression );
+    SubscriptOperator( Expression_up index_expression );
     virtual
     ~SubscriptOperator();
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const std::unique_ptr<Expression>& expression ) override;
+                      const Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -197,7 +197,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    std::unique_ptr<Expression> m_IndexExpression;
+    Expression_up m_IndexExpression;
 };
 
 /**
@@ -211,7 +211,7 @@ private:
 class ArgumentListOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
-    using ArgumentExpressionVector = std::vector< std::unique_ptr<Expression> >;
+    using ArgumentExpressionVector = std::vector< Expression_up >;
 
     ArgumentListOperator( ArgumentExpressionVector argument_expressions );
     virtual
@@ -219,7 +219,7 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const std::unique_ptr<Expression>& expression ) override;
+                      const Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -266,7 +266,7 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const std::unique_ptr<Expression>& expression ) override;
+                      const Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -313,7 +313,7 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const std::unique_ptr<Expression>& expression ) override;
+                      const Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,

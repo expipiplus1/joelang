@@ -74,7 +74,7 @@ Expression::~Expression()
 {
 }
 
-void Expression::FoldConstants( std::unique_ptr<Expression>& self )
+void Expression::FoldConstants( Expression_up& self )
 {
 }
 
@@ -83,14 +83,14 @@ bool Expression::IsLValue() const
     return false;
 }
 
-bool Expression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+bool Expression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO comma sep expressions
     return parser.Expect<AssignmentExpression>( token );
 }
 
 LiteralExpression* Expression::GetLiteral(
-                                        const std::unique_ptr<Expression>& e )
+                                        const Expression_up& e )
 {
     assert( e && "Trying to get the literal expression of nullptr" );
 
@@ -108,7 +108,7 @@ LiteralExpression* Expression::GetLiteral(
                         static_cast<IdentifierExpression*>( e.get() );
         if( i->IsConst() )
         {
-            const std::unique_ptr<Expression>& read_expression =
+            const Expression_up& read_expression =
                                                             i->GetReadExpression();
             if( isa<LiteralExpression>( read_expression ) )
                 l = static_cast<LiteralExpression*>( read_expression.get() );
@@ -135,9 +135,9 @@ bool Expression::classof( const Expression* e )
 //------------------------------------------------------------------------------
 
 AssignmentExpression::AssignmentExpression(
-                        std::unique_ptr<Expression> assignee,
+                        Expression_up assignee,
                         Op assignment_operator,
-                        std::unique_ptr<Expression> assigned_expression )
+                        Expression_up assigned_expression )
     :Expression( TokenTy::AssignmentExpression )
     ,m_Assignee          ( std::move(assignee) )
     ,m_AssignmentOperator( assignment_operator)
@@ -331,9 +331,9 @@ void AssignmentExpression::Print(int depth) const
 }
 
 bool AssignmentExpression::Parse( Parser& parser,
-                                  std::unique_ptr<Expression>& token )
+                                  Expression_up& token )
 {
-    std::unique_ptr<Expression> lhs_expression;
+    Expression_up lhs_expression;
     if( !parser.Expect< ConditionalExpression >( lhs_expression ) )
         return false;
 
@@ -346,7 +346,7 @@ bool AssignmentExpression::Parse( Parser& parser,
         return true;
     }
 
-    std::unique_ptr<Expression> assignment_expression;
+    Expression_up assignment_expression;
     if( !parser.Expect< AssignmentExpression >( assignment_expression ) )
         return false;
 
@@ -371,9 +371,9 @@ bool AssignmentExpression::classof( const AssignmentExpression* e )
 //------------------------------------------------------------------------------
 
 ConditionalExpression::ConditionalExpression(
-                                  std::unique_ptr<Expression> condition,
-                                  std::unique_ptr<Expression> true_expression,
-                                  std::unique_ptr<Expression> false_expression )
+                                  Expression_up condition,
+                                  Expression_up true_expression,
+                                  Expression_up false_expression )
     :Expression( TokenTy::ConditionalExpression )
     ,m_Condition( std::move(condition) )
     ,m_TrueExpression( std::move(true_expression) )
@@ -436,7 +436,7 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
+void ConditionalExpression::FoldConstants( Expression_up& self )
 {
     // Simplify the sub expressions
     m_Condition->FoldConstants( m_Condition );
@@ -453,7 +453,7 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
     {
         IdentifierExpression* i =
                         static_cast<IdentifierExpression*>( m_Condition.get() );
-        const std::unique_ptr<Expression>& read_expression =
+        const Expression_up& read_expression =
                                                          i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
             l = static_cast<LiteralExpression*>( read_expression.get() );
@@ -509,10 +509,10 @@ void ConditionalExpression::Print( int depth ) const
 }
 
 bool ConditionalExpression::Parse( Parser& parser,
-                                   std::unique_ptr<Expression>& token )
+                                   Expression_up& token )
 {
     // Try and parse the condition
-    std::unique_ptr<Expression> condition;
+    Expression_up condition;
     if( !parser.Expect< LogicalOrExpression >( condition ) )
         return false;
 
@@ -524,14 +524,14 @@ bool ConditionalExpression::Parse( Parser& parser,
     }
 
     // We've seen the QUERY do must parse the rest of the ternary expression
-    std::unique_ptr<Expression> true_expression;
+    Expression_up true_expression;
     if( !parser.Expect<Expression>( true_expression ) )
         return false;
 
     if( !parser.ExpectTerminal( TerminalType::COLON ) )
         return false;
 
-    std::unique_ptr<Expression> false_expression;
+    Expression_up false_expression;
     if( !parser.Expect<AssignmentExpression>( false_expression ) )
         return false;
 
@@ -558,8 +558,8 @@ bool ConditionalExpression::classof( const ConditionalExpression* e )
 BinaryOperatorExpression::BinaryOperatorExpression(
                                         TokenTy sub_class_id,
                                         Op op,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :Expression( sub_class_id )
     ,m_Operator( op )
     ,m_LeftSide( std::move(left_side) )
@@ -611,7 +611,7 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 }
 
 void BinaryOperatorExpression::FoldConstants(
-                                            std::unique_ptr<Expression>& self )
+                                            Expression_up& self )
 {
     // If there is a type mismatch, don't fold things
     if( GetReturnType() == Type::UNKNOWN_TYPE )
@@ -778,17 +778,17 @@ void BinaryOperatorExpression::Print( int depth ) const
 
 template< typename TokenType, typename SubTokenType >
 bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
-                                  std::unique_ptr<Expression>& token,
+                                  Expression_up& token,
                                   const OperatorTerminalMap& op_terminal_map )
 {
     // Try and parse the sub expression for the left side
-    std::unique_ptr<Expression> left;
+    Expression_up left;
     if( !parser.Expect<SubTokenType>( left ) )
         return false;
 
     // A vector of operators and the next expression
     std::vector< std::pair< Op,
-                            std::unique_ptr<Expression> > > rest;
+                            Expression_up > > rest;
     while( true )
     {
         bool cont = false;
@@ -809,7 +809,7 @@ bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
             break;
 
         // We have an operator, there must be an expression here
-        std::unique_ptr<Expression> next;
+        Expression_up next;
         if( !parser.Expect<SubTokenType>( next ) )
             return false;
 
@@ -845,8 +845,8 @@ bool BinaryOperatorExpression::classof( const BinaryOperatorExpression* e )
 
 LogicalOrExpression::LogicalOrExpression(
                                         Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::LogicalOrExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -877,7 +877,7 @@ Type LogicalOrExpression::GetReturnType() const
 }
 
 bool LogicalOrExpression::Parse( Parser& parser,
-                                 std::unique_ptr<Expression>& token )
+                                 Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -904,8 +904,8 @@ bool LogicalOrExpression::classof( const LogicalOrExpression* e )
 
 LogicalAndExpression::LogicalAndExpression(
                                         Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::LogicalAndExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -936,7 +936,7 @@ Type LogicalAndExpression::GetReturnType() const
 }
 
 bool LogicalAndExpression::Parse( Parser& parser,
-                                  std::unique_ptr<Expression>& token )
+                                  Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -963,8 +963,8 @@ bool LogicalAndExpression::classof( const LogicalAndExpression* e )
 
 InclusiveOrExpression::InclusiveOrExpression(
                                         Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::InclusiveOrExpression,
                                operator_terminal,
                                std::move( left_side ),
@@ -1003,7 +1003,7 @@ bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 }
 
 bool InclusiveOrExpression::Parse( Parser& parser,
-                                   std::unique_ptr<Expression>& token )
+                                   Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1031,8 +1031,8 @@ bool InclusiveOrExpression::classof( const InclusiveOrExpression* e )
 
 ExclusiveOrExpression::ExclusiveOrExpression(
                                         Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::ExclusiveOrExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1072,7 +1072,7 @@ bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 }
 
 bool ExclusiveOrExpression::Parse( Parser& parser,
-                                   std::unique_ptr<Expression>& token )
+                                   Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1098,8 +1098,8 @@ bool ExclusiveOrExpression::classof( const ExclusiveOrExpression* e )
 //------------------------------------------------------------------------------
 
 AndExpression::AndExpression( Op operator_terminal,
-                              std::unique_ptr<Expression> left_side,
-                              std::unique_ptr<Expression> right_side )
+                              Expression_up left_side,
+                              Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::AndExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1138,7 +1138,7 @@ bool AndExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-bool AndExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+bool AndExpression::Parse( Parser& parser, Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1164,8 +1164,8 @@ bool AndExpression::classof( const AndExpression* e )
 //------------------------------------------------------------------------------
 
 EqualityExpression::EqualityExpression( Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::EqualityExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1183,7 +1183,7 @@ Type EqualityExpression::GetReturnType() const
 }
 
 bool EqualityExpression::Parse( Parser& parser,
-                                std::unique_ptr<Expression>& token )
+                                Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1210,8 +1210,8 @@ bool EqualityExpression::classof( const EqualityExpression* e )
 //------------------------------------------------------------------------------
 
 RelationalExpression::RelationalExpression( Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::RelationalExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1229,7 +1229,7 @@ Type RelationalExpression::GetReturnType() const
 }
 
 bool RelationalExpression::Parse( Parser& parser,
-                                  std::unique_ptr<Expression>& token )
+                                  Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1258,8 +1258,8 @@ bool RelationalExpression::classof( const RelationalExpression* e )
 //------------------------------------------------------------------------------
 
 ShiftExpression::ShiftExpression( Op operator_terminal,
-                                  std::unique_ptr<Expression> left_side,
-                                  std::unique_ptr<Expression> right_side )
+                                  Expression_up left_side,
+                                  Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::ShiftExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1298,7 +1298,7 @@ bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
 }
 
 bool ShiftExpression::Parse( Parser& parser,
-                             std::unique_ptr<Expression>& token )
+                             Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1325,8 +1325,8 @@ bool ShiftExpression::classof( const ShiftExpression* e )
 //------------------------------------------------------------------------------
 
 AdditiveExpression::AdditiveExpression( Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::AdditiveExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1339,7 +1339,7 @@ AdditiveExpression::~AdditiveExpression()
 }
 
 bool AdditiveExpression::Parse( Parser& parser,
-                                std::unique_ptr<Expression>& token )
+                                Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1367,8 +1367,8 @@ bool AdditiveExpression::classof( const AdditiveExpression* e )
 
 MultiplicativeExpression::MultiplicativeExpression(
                                         Op operator_terminal,
-                                        std::unique_ptr<Expression> left_side,
-                                        std::unique_ptr<Expression> right_side )
+                                        Expression_up left_side,
+                                        Expression_up right_side )
     :BinaryOperatorExpression( TokenTy::MultiplicativeExpression,
                                operator_terminal,
                                std::move(left_side),
@@ -1413,7 +1413,7 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
 }
 
 bool MultiplicativeExpression::Parse( Parser& parser,
-                                      std::unique_ptr<Expression>& token )
+                                      Expression_up& token )
 {
     const static OperatorTerminalMap ops =
     {
@@ -1441,7 +1441,7 @@ bool MultiplicativeExpression::classof( const MultiplicativeExpression* e )
 //------------------------------------------------------------------------------
 
 CastExpression::CastExpression( Type cast_type,
-                                std::unique_ptr<Expression> expression )
+                                Expression_up expression )
     :Expression( TokenTy::CastExpression )
     ,m_CastType( cast_type )
     ,m_Expression( std::move(expression) )
@@ -1487,7 +1487,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
+void CastExpression::FoldConstants( Expression_up& self )
 {
     m_Expression->FoldConstants( m_Expression );
 
@@ -1547,20 +1547,20 @@ void CastExpression::Print( int depth ) const
     std::cout << "Cast Expression\n";
 }
 
-bool CastExpression::Parse( Parser& parser, std::unique_ptr<Expression>& token )
+bool CastExpression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO implement c-style casts
     // for the time being, forward the parse to a UnaryExpression
     return parser.Expect<UnaryExpression>( token );
 }
 
-std::unique_ptr<Expression> CastExpression::Create(
+Expression_up CastExpression::Create(
                                   Type cast_type,
-                                  std::unique_ptr<Expression> cast_expression )
+                                  Expression_up cast_expression )
 {
     if( cast_expression->GetReturnType() == cast_type )
         return cast_expression;
-    return std::unique_ptr<Expression>( new CastExpression(
+    return Expression_up( new CastExpression(
                                                 cast_type,
                                                 std::move(cast_expression) ) );
 }
@@ -1580,7 +1580,7 @@ bool CastExpression::classof( const CastExpression* e )
 //------------------------------------------------------------------------------
 
 UnaryExpression::UnaryExpression( Op op,
-                                  std::unique_ptr<Expression> expression )
+                                  Expression_up expression )
     :Expression( TokenTy::UnaryExpression )
     ,m_Operator( op )
     ,m_Expression( std::move(expression) )
@@ -1619,7 +1619,7 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
+void UnaryExpression::FoldConstants( Expression_up& self )
 {
     m_Expression->FoldConstants( m_Expression );
 
@@ -1712,7 +1712,7 @@ void UnaryExpression::Print( int depth ) const
 }
 
 bool UnaryExpression::Parse( Parser& parser,
-                             std::unique_ptr<Expression>& token )
+                             Expression_up& token )
 {
     static const std::vector< std::pair<TerminalType, Op> >
             operator_terminal_map =
@@ -1738,7 +1738,7 @@ bool UnaryExpression::Parse( Parser& parser,
     if( found )
     {
         // Parse the next unary expression
-        std::unique_ptr<Expression> unary_expression;
+        Expression_up unary_expression;
         // we had a unary operator, there should be an expression
         if( !parser.Expect<UnaryExpression>( unary_expression ) )
             return false;
@@ -1766,7 +1766,7 @@ bool UnaryExpression::classof( const UnaryExpression* e )
 //------------------------------------------------------------------------------
 
 PostfixExpression::PostfixExpression(
-                             std::unique_ptr<Expression> expression,
+                             Expression_up expression,
                              std::unique_ptr<PostfixOperator> postfix_operator )
     :Expression( TokenTy::PostfixExpression )
     ,m_Expression( std::move(expression) )
@@ -1821,10 +1821,10 @@ void PostfixExpression::Print( int depth ) const
 }
 
 bool PostfixExpression::Parse( Parser& parser,
-                               std::unique_ptr<Expression>& token )
+                               Expression_up& token )
 {
     // Try and parse the primary expression
-    std::unique_ptr<Expression> primary_expression;
+    Expression_up primary_expression;
     if( !parser.Expect<PrimaryExpression>( primary_expression ) )
         return false;
 
@@ -1834,7 +1834,7 @@ bool PostfixExpression::Parse( Parser& parser,
     CHECK_PARSER;
 
     // set ret to just the primary expression
-    std::unique_ptr<Expression> ret = std::move( primary_expression );
+    Expression_up ret = std::move( primary_expression );
 
     // If we have any postfix operators create a new postfix expression with the
     // last one and the operator
@@ -1860,7 +1860,7 @@ bool PostfixExpression::classof( const PostfixExpression* e )
 //------------------------------------------------------------------------------
 
 bool PrimaryExpression::Parse( Parser& parser,
-                               std::unique_ptr<Expression>& token )
+                               Expression_up& token )
 {
     // Try and parse and identifier
     if( parser.Expect<IdentifierExpression>( token ) )
@@ -1955,7 +1955,7 @@ bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
     return bool(m_Variable);
 }
 
-const std::unique_ptr<Expression>&
+const Expression_up&
                                  IdentifierExpression::GetReadExpression() const
 {
     return m_Variable->GetReadExpression();
@@ -1969,7 +1969,7 @@ void IdentifierExpression::Print( int depth ) const
 }
 
 bool IdentifierExpression::Parse( Parser& parser,
-                                  std::unique_ptr<Expression>& token )
+                                  Expression_up& token )
 {
     // Try and parse the identifier
     std::string identifier;
@@ -2019,7 +2019,7 @@ std::vector<Expression_sp> LiteralExpression::GetArrayExtents() const
 }
 
 bool LiteralExpression::Parse( Parser& parser,
-                               std::unique_ptr<Expression>& token )
+                               Expression_up& token )
 {
     // Try to parse any of the literals
     std::unique_ptr<Token> t;

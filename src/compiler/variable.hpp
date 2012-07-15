@@ -47,6 +47,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
 
 /**
@@ -64,7 +65,7 @@ public:
               std::vector<Expression_sp> array_dimension_sizes,
               bool is_const,
               bool is_global,
-              std::unique_ptr<Expression> initializer = nullptr );
+              Expression_up initializer = nullptr );
 
     void CodeGen( CodeGenerator& code_gen );
 
@@ -79,14 +80,14 @@ public:
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
-    const std::unique_ptr<Expression>& GetReadExpression() const;
+    const Expression_up& GetReadExpression() const;
 
 private:
     Type m_Type;
     std::vector<Expression_sp> m_ArrayDimensionSizes;
     bool m_IsConst;
     bool m_IsGlobal;
-    std::unique_ptr<Expression> m_Initializer;
+    Expression_up m_Initializer;
 
     // TODO handle non global variables
     llvm::Value* m_LLVMPointer = nullptr;

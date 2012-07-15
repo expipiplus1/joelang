@@ -62,7 +62,7 @@ class InitDeclarator : public JoeLang::Compiler::Token
 public:
     /** This constructor asserts on a null direct_declarator **/
     InitDeclarator  ( std::unique_ptr<Declarator> declarator,
-                      std::unique_ptr<Expression> initializer = nullptr );
+                      Expression_up initializer = nullptr );
     virtual
     ~InitDeclarator ();
 
@@ -96,7 +96,7 @@ public:
 
 private:
     std::unique_ptr<Declarator> m_Declarator;
-    std::unique_ptr<Expression> m_Initializer;
+    Expression_up m_Initializer;
     std::shared_ptr<Variable>   m_Variable;
     bool                        m_IsGlobal;
 };
@@ -165,7 +165,7 @@ private:
 class ArraySpecifier : public JoeLang::Compiler::Token
 {
 public:
-    ArraySpecifier    ( std::unique_ptr<Expression> expression );
+    ArraySpecifier    ( Expression_up expression );
     virtual
     ~ArraySpecifier   ();
 
@@ -176,7 +176,7 @@ public:
       */
     void PerformSema( SemaAnalyzer& sema );
 
-    std::unique_ptr<Expression> GetExpression();
+    Expression_up GetExpression();
 
     virtual
     void Print( int depth ) const override;
@@ -195,7 +195,7 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
 
 private:
-    std::unique_ptr<Expression> m_Expression;
+    Expression_up m_Expression;
 };
 
 
