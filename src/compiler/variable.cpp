@@ -76,6 +76,7 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     if( m_isGlobal )
     {
         m_llvmPointer = code_gen.CreateGlobalVariable( m_type,
+                                                       m_arrayDimensionSizes,
                                                        m_isConst,
                                                        m_initializer );
     }

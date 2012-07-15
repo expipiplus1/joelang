@@ -37,6 +37,7 @@
 
 #include <engine/types.hpp>
 #include <compiler/casting.hpp>
+#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -153,7 +154,8 @@ SubscriptOperator::SubscriptOperator( Expression_up index_expression )
     :PostfixOperator( TokenTy::SubscriptOperator )
     ,m_indexExpression( std::move(index_expression) )
 {
-    assert( m_indexExpression && "SubscriptOperator given a null index expression" );
+    assert( m_indexExpression &&
+            "SubscriptOperator given a null index expression" );
 }
 
 SubscriptOperator::~SubscriptOperator()
@@ -169,19 +171,19 @@ bool SubscriptOperator::PerformSema(
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-
-    return true;
+    return m_indexExpression->PerformSema( sema );
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
                                          const Expression_up& expression )
 {
-    assert( false && "complete me" );
-    return nullptr;
+    assert( expression && "SubscriptOperator given an null expression" );
+    return code_gen.CreateArrayIndex( *expression, *m_indexExpression );
 }
 
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
 {
+    assert( expression && "SubscriptOperator given an null expression" );
     const std::vector<Expression_sp>& array_extents =
                                                 expression->GetArrayExtents();
     if( array_extents.size() > 1 )
@@ -192,6 +194,7 @@ Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
 Type SubscriptOperator::GetUnderlyingType(
                                         const Expression_up& expression ) const
 {
+    assert( expression && "SubscriptOperator given an null expression" );
     assert( false && "Complete me" );
     return Type::UNKNOWN_TYPE;
 }
@@ -199,6 +202,7 @@ Type SubscriptOperator::GetUnderlyingType(
 std::vector<Expression_sp> SubscriptOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
+    assert( expression && "SubscriptOperator given an null expression" );
     assert( false && "Complete me" );
     return {};
 }
