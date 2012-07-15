@@ -1793,7 +1793,7 @@ bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    return m_postfixOperator->CodeGen( code_gen, m_expression );
 }
 
 Type PostfixExpression::GetReturnType() const
