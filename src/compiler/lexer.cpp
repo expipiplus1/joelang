@@ -50,8 +50,8 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 Lexer::Lexer( std::string string )
-    :m_string( std::move( string ) )
-    ,m_position( m_string.begin() )
+    :m_String( std::move( string ) )
+    ,m_Position( m_String.begin() )
 {
     ConsumeIgnoredTerminals();
 }
@@ -69,7 +69,7 @@ TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal,
 
     // Try and read this terminal
     const LiteralTerminal& terminal_reader = literal_iterator->second;
-    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    std::size_t chars_read = terminal_reader.Read( m_Position, m_String.end() );
 
     // If it didn't match, return UNKNOWN_CHARACTER
     if( !chars_read )
@@ -79,11 +79,11 @@ TerminalType Lexer::ReadPunctuationTerminal( TerminalType terminal,
     for( const auto& c: g_punctuationTerminals )
         if( c.second.matched_string.size() >
                                         terminal_reader.matched_string.size() &&
-            c.second.Read( m_position, m_string.end() ) )
+            c.second.Read( m_Position, m_String.end() ) )
             return c.first;
 
     // Fill up string
-    string = std::string( m_position, m_position + chars_read );
+    string = std::string( m_Position, m_Position + chars_read );
     return terminal;
 }
 
@@ -100,14 +100,14 @@ TerminalType Lexer::ReadLiteralTerminal( TerminalType terminal,
 
     // Try and match this terminal
     const FunctionalTerminal& terminal_reader = functional_iterator->second;
-    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    std::size_t chars_read = terminal_reader.Read( m_Position, m_String.end() );
 
     // if it didn't match return
     if( !chars_read )
         return TerminalType::UNKNOWN_CHARACTER;
 
     // fill up string
-    string = std::string( m_position, m_position + chars_read );
+    string = std::string( m_Position, m_Position + chars_read );
     return terminal;
 }
 
@@ -124,7 +124,7 @@ TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal,
 
     // Try and read this terminal
     const LiteralTerminal& terminal_reader = literal_iterator->second;
-    std::size_t chars_read = terminal_reader.Read( m_position, m_string.end() );
+    std::size_t chars_read = terminal_reader.Read( m_Position, m_String.end() );
 
     // If it didn't match return
     if( !chars_read )
@@ -134,11 +134,11 @@ TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal,
     for( const auto& c: g_keywordTerminals )
         if( c.second.matched_string.size() >
                                         terminal_reader.matched_string.size() &&
-            c.second.Read( m_position, m_string.end() ) )
+            c.second.Read( m_Position, m_String.end() ) )
             return c.first;
 
     // fill up the string
-    string = std::string( m_position, m_position + chars_read );
+    string = std::string( m_Position, m_Position + chars_read );
     return terminal;
 }
 
@@ -146,7 +146,7 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
 {
     // If we've reached the end of the string
     if( terminal_type == TerminalType::END_OF_INPUT &&
-        m_position == m_string.end() )
+        m_Position == m_String.end() )
         return true;
 
     TerminalType t;
@@ -210,17 +210,17 @@ bool Lexer::PeekIdentifier( std::string& string ) const
 
 std::size_t Lexer::GetPosition() const
 {
-    return m_position - m_string.begin();
+    return m_Position - m_String.begin();
 }
 
 std::size_t Lexer::GetColumnNumber() const
 {
-    return m_columnNumber;
+    return m_ColumnNumber;
 }
 
 std::size_t Lexer::GetLineNumber() const
 {
-    return m_lineNumber;
+    return m_LineNumber;
 }
 
 void Lexer::ConsumeIgnoredTerminals()
@@ -231,8 +231,8 @@ void Lexer::ConsumeIgnoredTerminals()
     {
         for( const auto& terminal_reader : g_ignoredTerminals )
         {
-            chars_read = terminal_reader.second.Read( m_position,
-                                                      m_string.end() );
+            chars_read = terminal_reader.second.Read( m_Position,
+                                                      m_String.end() );
             if( chars_read )
                 break;
         }
@@ -242,18 +242,18 @@ void Lexer::ConsumeIgnoredTerminals()
 
 void Lexer::ReadChars( std::size_t num_chars )
 {
-    std::string::const_iterator end = m_position + num_chars;
-    assert( end <= m_string.end() &&
+    std::string::const_iterator end = m_Position + num_chars;
+    assert( end <= m_String.end() &&
             "Trying to advance the lexer past the end of the file" );
-    while( m_position < end )
+    while( m_Position < end )
     {
-        if( *m_position == '\n' )
+        if( *m_Position == '\n' )
         {
-            ++m_lineNumber;
-            m_columnNumber = 0;
+            ++m_LineNumber;
+            m_ColumnNumber = 0;
         }
-        ++m_columnNumber;
-        ++m_position;
+        ++m_ColumnNumber;
+        ++m_Position;
     }
 }
 

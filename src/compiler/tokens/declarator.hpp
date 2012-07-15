@@ -95,10 +95,10 @@ public:
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
 private:
-    std::unique_ptr<Declarator> m_declarator;
-    std::unique_ptr<Expression> m_initializer;
-    std::shared_ptr<Variable>   m_variable;
-    bool                        m_isGlobal;
+    std::unique_ptr<Declarator> m_Declarator;
+    std::unique_ptr<Expression> m_Initializer;
+    std::shared_ptr<Variable>   m_Variable;
+    bool                        m_IsGlobal;
 };
 
 /**
@@ -151,8 +151,8 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
 private:
-    std::string             m_identifier;
-    ArraySpecifierVector    m_arraySpecifiers;
+    std::string             m_Identifier;
+    ArraySpecifierVector    m_ArraySpecifiers;
 };
 
 /**
@@ -195,7 +195,7 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
 
 private:
-    std::unique_ptr<Expression> m_expression;
+    std::unique_ptr<Expression> m_Expression;
 };
 
 

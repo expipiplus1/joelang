@@ -65,13 +65,13 @@ namespace Compiler
 {
 
 CodeGenerator::CodeGenerator( const Context& context )
-    :m_context( context )
-    ,m_llvmContext( llvm::getGlobalContext() )
-    ,m_llvmModule( new llvm::Module( "", m_llvmContext ) )
-    ,m_llvmBuilder( m_llvmContext )
-    ,m_llvmExecutionEngine( llvm::ExecutionEngine::createJIT( m_llvmModule ) )
+    :m_Context( context )
+    ,m_LLVMContext( llvm::getGlobalContext() )
+    ,m_LLVMModule( new llvm::Module( "", m_LLVMContext ) )
+    ,m_LLVMBuilder( m_LLVMContext )
+    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
 {
-    assert( m_llvmExecutionEngine && "Couldn't create a jit" );
+    assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
 }
 
 CodeGenerator::~CodeGenerator()
@@ -98,17 +98,17 @@ void CodeGenerator::GenerateCode(
             v.CodeGen( *this );
         }
     }
-    llvm_execution_engine = std::move( m_llvmExecutionEngine );
+    llvm_execution_engine = std::move( m_LLVMExecutionEngine );
 
     // output the module for fun
-    m_llvmModule->dump();
+    m_LLVMModule->dump();
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression )
 {
-    llvm::Type* t = GetLLVMType( state.GetType(), m_llvmContext );
+    llvm::Type* t = GetLLVMType( state.GetType(), m_LLVMContext );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
@@ -129,13 +129,13 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                                 prototype,
                                                 llvm::Function::InternalLinkage,
                                                 state.GetName().c_str(),
-                                                m_llvmModule );
+                                                m_LLVMModule );
     assert( function && "Error generating llvm function" );
 
-    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_llvmContext,
+    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_LLVMContext,
                                                        "",
                                                        function );
-    m_llvmBuilder.SetInsertPoint( body );
+    m_LLVMBuilder.SetInsertPoint( body );
 
     //
     // Generate the code from the expression
@@ -146,14 +146,14 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     //
     // set it as the return value for the function
     //
-    m_llvmBuilder.CreateRet( v );
+    m_LLVMBuilder.CreateRet( v );
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function in stateassignment not valid" );
 
     //
     // Get the function pointer
     //
-    void* function_ptr = m_llvmExecutionEngine->getPointerToFunction(function);
+    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
     // Cast to the appropriate type
@@ -240,41 +240,41 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
     if( type == Type::BOOL )
     {
         if( IsFloatingPoint( e_type ) )
-            return m_llvmBuilder.CreateFCmpOEQ(
+            return m_LLVMBuilder.CreateFCmpOEQ(
                         e_code,
                         llvm::ConstantFP::getNullValue( e_code->getType() ) );
-        return m_llvmBuilder.CreateIsNotNull( e_code );
+        return m_LLVMBuilder.CreateIsNotNull( e_code );
     }
 
     if( IsFloatingPoint( type ) )
     {
         if( IsFloatingPoint( e_type ) )
-            return m_llvmBuilder.CreateFPCast(
+            return m_LLVMBuilder.CreateFPCast(
                                            e_code,
-                                           GetLLVMType( type, m_llvmContext ) );
+                                           GetLLVMType( type, m_LLVMContext ) );
         if( IsSigned( e_type ) )
-            return m_llvmBuilder.CreateSIToFP(
+            return m_LLVMBuilder.CreateSIToFP(
                                            e_code,
-                                           GetLLVMType( type, m_llvmContext ) );
-        return m_llvmBuilder.CreateUIToFP( e_code,
-                                           GetLLVMType( type, m_llvmContext ) );
+                                           GetLLVMType( type, m_LLVMContext ) );
+        return m_LLVMBuilder.CreateUIToFP( e_code,
+                                           GetLLVMType( type, m_LLVMContext ) );
     }
 
     assert( IsIntegral( type ) && "Type should be integral" );
     if( IsIntegral( e_type ) )
     {
-        return m_llvmBuilder.CreateIntCast( e_code,
-                                            GetLLVMType( type, m_llvmContext ),
+        return m_LLVMBuilder.CreateIntCast( e_code,
+                                            GetLLVMType( type, m_LLVMContext ),
                                             IsSigned( e_type ) );
     }
 
     assert( IsFloatingPoint( e_type ) && "e_type should be floating point" );
     if( IsSigned( type ) )
-        return m_llvmBuilder.CreateFPToSI( e_code,
-                                           GetLLVMType( type, m_llvmContext ) );
+        return m_LLVMBuilder.CreateFPToSI( e_code,
+                                           GetLLVMType( type, m_LLVMContext ) );
     else
-        return m_llvmBuilder.CreateFPToUI( e_code,
-                                           GetLLVMType( type, m_llvmContext ) );
+        return m_LLVMBuilder.CreateFPToUI( e_code,
+                                           GetLLVMType( type, m_LLVMContext ) );
 }
 
 //
@@ -284,17 +284,17 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
 
 llvm::Value* CodeGenerator::CreateNeg( const Expression& e )
 {
-    return m_llvmBuilder.CreateNeg( e.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateNeg( e.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateNot( const Expression& e )
 {
-    return m_llvmBuilder.CreateNot( e.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateNot( e.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateLNot( const Expression& e )
 {
-    return m_llvmBuilder.CreateIsNotNull( e.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateIsNotNull( e.CodeGen( *this ) );
 }
 
 //
@@ -307,7 +307,7 @@ llvm::Value* CodeGenerator::CreateLOr( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateOr( l.CodeGen( *this ), r.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateOr( l.CodeGen( *this ), r.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateLAnd( const Expression& l,
@@ -315,14 +315,14 @@ llvm::Value* CodeGenerator::CreateLAnd( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateAnd( l.CodeGen( *this ), r.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateAnd( l.CodeGen( *this ), r.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateOr( const Expression& l, const Expression& r )
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateOr( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateOr( l.CodeGen( *this ),
                                    r.CodeGen( *this ) );
 }
 
@@ -331,7 +331,7 @@ llvm::Value* CodeGenerator::CreateXor( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateXor( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateXor( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
@@ -340,7 +340,7 @@ llvm::Value* CodeGenerator::CreateAnd( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateAnd( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateAnd( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
@@ -349,7 +349,7 @@ llvm::Value* CodeGenerator::CreateEq( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpEQ( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpEQ( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
 
@@ -358,7 +358,7 @@ llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpNE( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpNE( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
 
@@ -367,7 +367,7 @@ llvm::Value* CodeGenerator::CreateLT( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpSLT( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpSLT( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -376,7 +376,7 @@ llvm::Value* CodeGenerator::CreateGT( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpSGT( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpSGT( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -385,7 +385,7 @@ llvm::Value* CodeGenerator::CreateLTE( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpSLE( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpSLE( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -394,7 +394,7 @@ llvm::Value* CodeGenerator::CreateGTE( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateICmpSGE( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateICmpSGE( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -403,7 +403,7 @@ llvm::Value* CodeGenerator::CreateShl( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateShl( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateShl( l.CodeGen( *this ),
                                     r.CodeGen( *this ) );
 }
 
@@ -412,7 +412,7 @@ llvm::Value* CodeGenerator::CreateShr( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    return m_llvmBuilder.CreateAShr( l.CodeGen( *this ),
+    return m_LLVMBuilder.CreateAShr( l.CodeGen( *this ),
                                      r.CodeGen( *this ) );
 }
 
@@ -422,10 +422,10 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsFloatingPoint( l.GetReturnType() ) )
-        return m_llvmBuilder.CreateFAdd( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateFAdd( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
-        return m_llvmBuilder.CreateAdd( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateAdd( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -435,10 +435,10 @@ llvm::Value* CodeGenerator::CreateSub( const Expression& l,
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsFloatingPoint( l.GetReturnType() ) )
-        return m_llvmBuilder.CreateFSub( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateFSub( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
-        return m_llvmBuilder.CreateSub( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateSub( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -448,10 +448,10 @@ llvm::Value* CodeGenerator::CreateMul( const Expression& l,
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsFloatingPoint( l.GetReturnType() ) )
-        return m_llvmBuilder.CreateFMul( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateFMul( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
-        return m_llvmBuilder.CreateMul( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateMul( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
 }
 
@@ -461,14 +461,14 @@ llvm::Value* CodeGenerator::CreateDiv( const Expression& l,
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsFloatingPoint( l.GetReturnType() ) )
-        return m_llvmBuilder.CreateFDiv( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateFDiv( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
         if( IsSigned( l.GetReturnType() ) )
-            return m_llvmBuilder.CreateSDiv( l.CodeGen( *this ),
+            return m_LLVMBuilder.CreateSDiv( l.CodeGen( *this ),
                                              r.CodeGen( *this ) );
         else
-            return m_llvmBuilder.CreateUDiv( l.CodeGen( *this ),
+            return m_LLVMBuilder.CreateUDiv( l.CodeGen( *this ),
                                              r.CodeGen( *this ) );
 }
 
@@ -478,10 +478,10 @@ llvm::Value* CodeGenerator::CreateMod( const Expression& l,
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsSigned( l.GetReturnType() ) )
-        return m_llvmBuilder.CreateSRem( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateSRem( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
-        return m_llvmBuilder.CreateURem( l.CodeGen( *this ),
+        return m_LLVMBuilder.CreateURem( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
 }
 
@@ -493,7 +493,7 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
                                           const Expression& true_expression,
                                           const Expression& false_expression )
 {
-    return m_llvmBuilder.CreateSelect( condition.CodeGen( *this ),
+    return m_LLVMBuilder.CreateSelect( condition.CodeGen( *this ),
                                        true_expression.CodeGen( *this ),
                                        false_expression.CodeGen( *this ) );
 
@@ -506,7 +506,7 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
                                               const Expression& index)
 {
-    return m_llvmBuilder.CreateGEP( array.CodeGen( *this ),
+    return m_LLVMBuilder.CreateGEP( array.CodeGen( *this ),
                                     index.CodeGen( *this ) );
 }
 
@@ -517,7 +517,7 @@ llvm::Value* CodeGenerator::CreateInteger( unsigned long long value,
                                            unsigned size,
                                            bool is_signed )
 {
-    return llvm::ConstantInt::get( llvm::Type::getIntNTy( m_llvmContext, size ),
+    return llvm::ConstantInt::get( llvm::Type::getIntNTy( m_LLVMContext, size ),
                                    value,
                                    is_signed );
 }
@@ -526,8 +526,8 @@ llvm::Value* CodeGenerator::CreateFloating( double value,
                                             bool is_double )
 {
     return llvm::ConstantFP::get( is_double
-                                    ? llvm::Type::getDoubleTy(m_llvmContext)
-                                    : llvm::Type::getFloatTy(m_llvmContext),
+                                    ? llvm::Type::getDoubleTy(m_LLVMContext)
+                                    : llvm::Type::getFloatTy(m_LLVMContext),
                                   value );
 }
 
@@ -541,11 +541,11 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 bool is_const,
                                 const std::unique_ptr<Expression>& initializer )
 {
-    llvm::Type* t = GetLLVMType( type, m_llvmContext );
+    llvm::Type* t = GetLLVMType( type, m_LLVMContext );
     llvm::Constant* init = nullptr;
     if( initializer )
         init = llvm::dyn_cast<llvm::Constant>(initializer->CodeGen( *this ));
-    return new llvm::GlobalVariable( *m_llvmModule,
+    return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
                                      llvm::GlobalVariable::CommonLinkage,
@@ -555,7 +555,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 {
-    return m_llvmBuilder.CreateLoad( variable.GetLLVMPointer() );
+    return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
 void CodeGenerator::CreateVariableAssignment( const Variable& variable,
@@ -566,7 +566,7 @@ void CodeGenerator::CreateVariableAssignment( const Variable& variable,
     assert( variable.GetType() == e.GetReturnType() &&
             "Trying to assign a variable with a different type" );
     llvm::Value* assigned_value = e.CodeGen( *this );
-    m_llvmBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
+    m_LLVMBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
 }
 
 //
@@ -575,7 +575,7 @@ void CodeGenerator::CreateVariableAssignment( const Variable& variable,
 
 llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
 {
-    return m_llvmContext;
+    return m_LLVMContext;
 }
 
 } // namespace Compiler

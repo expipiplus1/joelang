@@ -172,22 +172,22 @@ public:
       */
 
 private:
-    Type m_type;
+    Type m_Type;
 
     union
     {
-        jl_bool   m_boolValue;
-        jl_i8     m_i8Value;
-        jl_i16    m_i16Value;
-        jl_i32    m_i32Value;
-        jl_i64    m_i64Value;
-        jl_u8     m_u8Value;
-        jl_u16    m_u16Value;
-        jl_u32    m_u32Value;
-        jl_u64    m_u64Value;
-        jl_float  m_floatValue;
-        jl_double m_doubleValue;
-        jl_string m_stringValue;
+        jl_bool   m_BoolValue;
+        jl_i8     m_I8Value;
+        jl_i16    m_I16Value;
+        jl_i32    m_I32Value;
+        jl_i64    m_I64Value;
+        jl_u8     m_U8Value;
+        jl_u16    m_U16Value;
+        jl_u32    m_U32Value;
+        jl_u64    m_U64Value;
+        jl_float  m_FloatValue;
+        jl_double m_DoubleValue;
+        jl_string m_StringValue;
     };
 };
 

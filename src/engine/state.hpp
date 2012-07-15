@@ -56,7 +56,7 @@ public:
     Type GetType() const = 0;
 
 private:
-    std::string m_name;
+    std::string m_Name;
 };
 
 template<typename T>
@@ -85,11 +85,11 @@ public:
     const std::map<std::string, T>& GetEnumerations() const;
 
 private:
-    std::map<std::string, T> m_enumerations;
+    std::map<std::string, T> m_Enumerations;
 
-    std::function<void(T)> m_setCallback;
-    std::function<void()> m_resetCallback;
-    std::function<bool()> m_validateCallback;
+    std::function<void(T)> m_SetCallback;
+    std::function<void()> m_ResetCallback;
+    std::function<bool()> m_ValidateCallback;
 };
 
 } // namespace JoeLang

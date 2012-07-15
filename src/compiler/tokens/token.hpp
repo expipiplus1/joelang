@@ -149,7 +149,7 @@ public:
     static
     bool classof( const Token* t );
 private:
-    const TokenTy m_subClassID;
+    const TokenTy m_SubClassID;
 };
 
 } // namespace Compiler

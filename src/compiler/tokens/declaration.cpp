@@ -152,8 +152,8 @@ bool EmptyDeclaration::classof( const EmptyDeclaration* d )
 PassDeclaration::PassDeclaration( std::string name,
                                   std::unique_ptr<PassDefinition> definition )
     :DeclarationBase( TokenTy::PassDeclaration )
-    ,m_name         ( std::move(name) )
-    ,m_definition   ( std::move(definition) )
+    ,m_Name         ( std::move(name) )
+    ,m_Definition   ( std::move(definition) )
 {
 }
 
@@ -163,22 +163,22 @@ PassDeclaration::~PassDeclaration()
 
 void PassDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    sema.DeclarePass( m_name, std::move(m_definition) );
+    sema.DeclarePass( m_Name, std::move(m_Definition) );
 }
 
 const std::string& PassDeclaration::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 bool PassDeclaration::HasDefinition() const
 {
-    return bool(m_definition);
+    return bool(m_Definition);
 }
 
 const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
-    return m_definition;
+    return m_Definition;
 }
 
 void PassDeclaration::Print( int depth ) const
@@ -186,10 +186,10 @@ void PassDeclaration::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
-    std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-    if( m_definition )
+    std::cout << "Pass: " << ( m_Name.size() ? m_Name : "Unnamed" ) << "\n";
+    if( m_Definition )
     {
-        m_definition->Print( depth + 1);
+        m_Definition->Print( depth + 1);
     }
     else
     {
@@ -248,11 +248,11 @@ TechniqueDeclaration::TechniqueDeclaration( std::string name,
                                             PassDeclarationVector passes )
 
     :DeclarationBase( TokenTy::TechniqueDeclaration )
-    ,m_name( std::move(name) )
-    ,m_passes( std::move(passes) )
+    ,m_Name( std::move(name) )
+    ,m_Passes( std::move(passes) )
 {
 #ifndef NDEBUG
-    for( const auto& p : m_passes )
+    for( const auto& p : m_Passes )
         assert( p && "TechniqueDeclaration given a null pass" );
 #endif
 }
@@ -263,23 +263,23 @@ TechniqueDeclaration::~TechniqueDeclaration()
 
 void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    sema.DeclareTechnique( m_name );
-    for( auto& p : m_passes )
+    sema.DeclareTechnique( m_Name );
+    for( auto& p : m_Passes )
         p->PerformSema( sema );
 }
 
 const std::string& TechniqueDeclaration::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 Technique TechniqueDeclaration::GenerateTechnique(
                                                  CodeGenerator& code_gen ) const
 {
     std::vector<Pass> passes;
-    for( const auto& p : m_passes )
+    for( const auto& p : m_Passes )
         passes.push_back( p->GeneratePass( code_gen ) );
-    return Technique( m_name, std::move(passes) );
+    return Technique( m_Name, std::move(passes) );
 }
 
 void TechniqueDeclaration::Print( int depth ) const
@@ -287,8 +287,8 @@ void TechniqueDeclaration::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
-    std::cout << "Technique: " << (m_name.size() ? m_name : "Unnamed") << "\n";
-    for( const auto& p : m_passes )
+    std::cout << "Technique: " << (m_Name.size() ? m_Name : "Unnamed") << "\n";
+    for( const auto& p : m_Passes )
         p->Print( depth + 1 );
 }
 
@@ -524,10 +524,10 @@ Type VariableListOrFunctionDefinition::DeduceType(
 VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
                                                   DeclaratorVector declarators)
     :VariableListOrFunctionDefinition( TokenTy::VariableDeclarationList )
-    ,m_declSpecs( std::move(decl_specs) )
-    ,m_declarators( std::move(declarators) )
+    ,m_DeclSpecs( std::move(decl_specs) )
+    ,m_Declarators( std::move(declarators) )
 {
-    assert( !m_declSpecs.empty() &&
+    assert( !m_DeclSpecs.empty() &&
             "VariableDeclarationList given no declaration specifiers" );
 }
 
@@ -546,7 +546,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     // Handle the declaration specifiers
     bool is_const = false;
 
-    for( const auto& t : m_declSpecs )
+    for( const auto& t : m_DeclSpecs )
     {
         if( isa<TypeQualifier>(t) )
         {
@@ -593,13 +593,13 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 
     DeclSpecs decl_specs( is_const, type );
 
-    for( const auto& declarator : m_declarators )
+    for( const auto& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );
 }
 
 void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 {
-    for( const auto& d : m_declarators )
+    for( const auto& d : m_Declarators )
         d->CodeGen( code_gen );
 }
 

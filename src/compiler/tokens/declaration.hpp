@@ -217,9 +217,9 @@ public:
     bool classof( const PassDeclaration* e );
 private:
     /** This pass declaration's identifier **/
-    std::string                     m_name;
+    std::string                     m_Name;
     /** Thie pass declaration's definition if it has one, otherwise nullptr **/
-    std::unique_ptr<PassDefinition> m_definition;
+    std::unique_ptr<PassDefinition> m_Definition;
 };
 
 /**
@@ -295,9 +295,9 @@ public:
     bool classof( const TechniqueDeclaration* e );
 private:
     /** This technique's identifier **/
-    std::string m_name;
+    std::string m_Name;
     /** This technique's passes **/
-    PassDeclarationVector m_passes;
+    PassDeclarationVector m_Passes;
 };
 
 /**
@@ -368,8 +368,8 @@ public:
     void CodeGen( CodeGenerator& code_gen ) const;
 
 private:
-    DeclSpecsVector m_declSpecs;
-    DeclaratorVector m_declarators;
+    DeclSpecsVector m_DeclSpecs;
+    DeclaratorVector m_Declarators;
 };
 
 /**

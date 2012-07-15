@@ -99,7 +99,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<AssignmentOperator>& token );
 private:
-    Op m_operator;
+    Op m_Operator;
 };
 
 /**
@@ -197,7 +197,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    std::unique_ptr<Expression> m_indexExpression;
+    std::unique_ptr<Expression> m_IndexExpression;
 };
 
 /**
@@ -242,7 +242,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<ArgumentListOperator>& token );
 private:
-    ArgumentExpressionVector m_argumentExpressions;
+    ArgumentExpressionVector m_ArgumentExpressions;
 };
 
 /**
@@ -289,7 +289,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<MemberAccessOperator>& token );
 private:
-    std::string m_identifier;
+    std::string m_Identifier;
 };
 
 /**
@@ -336,7 +336,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<IncrementOrDecrementOperator>& token );
 private:
-    Op m_operator;
+    Op m_Operator;
 };
 
 } // namespace Compiler

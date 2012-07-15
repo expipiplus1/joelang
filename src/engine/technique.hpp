@@ -48,8 +48,8 @@ public:
     const std::string& GetName() const;
 
 private:
-    std::string m_name;
-    std::vector<Pass> m_passes;
+    std::string m_Name;
+    std::vector<Pass> m_Passes;
 };
 
 } // namespace JoeLang

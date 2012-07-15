@@ -59,12 +59,12 @@ Context::~Context()
 
 bool Context::AddState( StateBase* state )
 {
-    for( const auto s : m_states )
+    for( const auto s : m_States )
         if( s->GetName() == state->GetName() )
             return false;
 
     //TODO Check for invalid state enumerants
-    m_states.push_back( state );
+    m_States.push_back( state );
     return true;
 }
 
@@ -75,7 +75,7 @@ Effect* Context::CreateEffectFromString( const std::string& string )
     if( e )
     {
         Effect* ret = e.get();
-        m_effects.push_back( std::move(e) );
+        m_Effects.push_back( std::move(e) );
         return ret;
     }
     return nullptr;
@@ -100,10 +100,10 @@ Effect* Context::CreateEffectFromFile( const std::string& file_name )
 
 const StateBase* Context::GetNamedState(const std::string& name) const
 {
-    auto s = std::find_if( m_states.begin(), m_states.end(),
+    auto s = std::find_if( m_States.begin(), m_States.end(),
                            [&name](StateBase* p)
                              {return name == p->GetName();} );
-    if( s == m_states.end() )
+    if( s == m_States.end() )
         return nullptr;
 
     return *s;
@@ -111,18 +111,18 @@ const StateBase* Context::GetNamedState(const std::string& name) const
 
 const std::vector<StateBase*>& Context::GetStates() const
 {
-    return m_states;
+    return m_States;
 }
 
 void Context::SetErrorCallback(
                                std::function<void(std::string)> error_callback )
 {
-    m_errorCallback = std::move(error_callback);
+    m_ErrorCallback = std::move(error_callback);
 }
 
 const std::function<void(std::string)>& Context::GetErrorCallback() const
 {
-    return m_errorCallback;
+    return m_ErrorCallback;
 }
 
 } // namespace JoeLang

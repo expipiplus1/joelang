@@ -35,7 +35,7 @@ namespace Compiler
 {
 
 Token::Token( TokenTy sub_class_id )
-    :m_subClassID( sub_class_id )
+    :m_SubClassID( sub_class_id )
 {
 }
 
@@ -45,7 +45,7 @@ Token::~Token()
 
 Token::TokenTy Token::GetSubClassID() const
 {
-    return m_subClassID;
+    return m_SubClassID;
 }
 
 bool Token::classof( const Token* t )

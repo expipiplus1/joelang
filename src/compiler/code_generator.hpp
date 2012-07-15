@@ -167,12 +167,12 @@ public:
     llvm::LLVMContext& GetLLVMContext() const;
 
 private:
-    const Context& m_context;
+    const Context& m_Context;
 
-    llvm::LLVMContext&              m_llvmContext;
-    llvm::Module*                   m_llvmModule;
-    llvm::IRBuilder<>               m_llvmBuilder;
-    std::unique_ptr<llvm::ExecutionEngine> m_llvmExecutionEngine;
+    llvm::LLVMContext&              m_LLVMContext;
+    llvm::Module*                   m_LLVMModule;
+    llvm::IRBuilder<>               m_LLVMBuilder;
+    std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
 };
 
 } // namespace Compiler

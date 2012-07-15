@@ -75,8 +75,8 @@ public:
     bool ValidateState() const override;
 
 private:
-    const State<T>& m_state;
-    std::function<T()> m_getter;
+    const State<T>& m_State;
+    std::function<T()> m_Getter;
 };
 
 template<typename T>
@@ -99,8 +99,8 @@ public:
     bool ValidateState() const override;
 
 private:
-    const State<T>& m_state;
-    T m_value;
+    const State<T>& m_State;
+    T m_Value;
 };
 
 } // namespace JoeLang

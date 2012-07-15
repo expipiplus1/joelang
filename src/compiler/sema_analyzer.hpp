@@ -177,7 +177,7 @@ public:
 
     /**
       * Reports an error.
-      * Sets m_good to false
+      * Sets m_Good to false
       * \param error_message
       *   The error message
       */
@@ -198,20 +198,20 @@ public:
 private:
     struct SymbolMaps
     {
-        std::map<std::string, std::shared_ptr<Variable> > m_variables;
+        std::map<std::string, std::shared_ptr<Variable> > m_Variables;
     };
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
 
-    PassDefinitionMap        m_passDefinitions;
-    std::vector<std::string> m_techniques;
+    PassDefinitionMap        m_PassDefinitions;
+    std::vector<std::string> m_Techniques;
 
-    std::vector<SymbolMaps>  m_symbolStack;
+    std::vector<SymbolMaps>  m_SymbolStack;
 
-    bool m_good = true;
+    bool m_Good = true;
 
-    const Context& m_context;
-    CodeGenerator& m_codeGenerator;
+    const Context& m_Context;
+    CodeGenerator& m_CodeGenerator;
 };
 
 } // namespace Compiler

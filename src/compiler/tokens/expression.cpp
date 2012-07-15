@@ -139,13 +139,13 @@ AssignmentExpression::AssignmentExpression(
                         Op assignment_operator,
                         std::unique_ptr<Expression> assigned_expression )
     :Expression( TokenTy::AssignmentExpression )
-    ,m_assignee          ( std::move(assignee) )
-    ,m_assignmentOperator( assignment_operator)
-    ,m_assignedExpression( std::move(assigned_expression) )
+    ,m_Assignee          ( std::move(assignee) )
+    ,m_AssignmentOperator( assignment_operator)
+    ,m_AssignedExpression( std::move(assigned_expression) )
 {
-    assert( m_assignee &&
+    assert( m_Assignee &&
             "AssignmentExpression given an invalid assignee" );
-    assert( m_assignedExpression &&
+    assert( m_AssignedExpression &&
             "AssignmentExpression given an invalid assigned expression" );
 }
 
@@ -155,8 +155,8 @@ AssignmentExpression::~AssignmentExpression()
 
 void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_assignee->ResolveIdentifiers( sema );
-    m_assignedExpression->ResolveIdentifiers( sema );
+    m_Assignee->ResolveIdentifiers( sema );
+    m_AssignedExpression->ResolveIdentifiers( sema );
 }
 
 bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
@@ -164,9 +164,9 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     bool good = true;
 
     // Extract the identifier from the assignee
-    good &= m_assignee->PerformSema( sema );
+    good &= m_Assignee->PerformSema( sema );
 
-    if( !isa<IdentifierExpression>(m_assignee) )
+    if( !isa<IdentifierExpression>(m_Assignee) )
     {
         good = false;
         sema.Error( "Trying to assign to a RValue" );
@@ -174,7 +174,7 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     else
     {
         IdentifierExpression* i =
-                        static_cast<IdentifierExpression*>( m_assignee.get() );
+                        static_cast<IdentifierExpression*>( m_Assignee.get() );
         if( i->IsConst() )
         {
             good = false;
@@ -182,142 +182,142 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
         }
         else
         {
-            m_assigneeVariable = i->GetVariable();
+            m_AssigneeVariable = i->GetVariable();
         }
     }
 
-    switch( m_assignmentOperator )
+    switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
         break;
     case Op::SHL_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new ShiftExpression(
                                       BinaryOperatorExpression::Op::LEFT_SHIFT,
-                                      std::move(m_assignee),
-                                      std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                      std::move(m_Assignee),
+                                      std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::SHR_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new ShiftExpression(
                                       BinaryOperatorExpression::Op::RIGHT_SHIFT,
-                                      std::move(m_assignee),
-                                      std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                      std::move(m_Assignee),
+                                      std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::AND_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new AndExpression(
                                       BinaryOperatorExpression::Op::AND,
-                                      std::move(m_assignee),
-                                      std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                      std::move(m_Assignee),
+                                      std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::XOR_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new ExclusiveOrExpression(
                                       BinaryOperatorExpression::Op::XOR,
-                                      std::move(m_assignee),
-                                      std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                      std::move(m_Assignee),
+                                      std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::OR_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new InclusiveOrExpression(
                                       BinaryOperatorExpression::Op::OR,
-                                      std::move(m_assignee),
-                                      std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                      std::move(m_Assignee),
+                                      std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::PLUS_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new AdditiveExpression( BinaryOperatorExpression::Op::PLUS,
-                                            std::move(m_assignee),
-                                            std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                            std::move(m_Assignee),
+                                            std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::MINUS_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new AdditiveExpression( BinaryOperatorExpression::Op::MINUS,
-                                            std::move(m_assignee),
-                                            std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                            std::move(m_Assignee),
+                                            std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::MULTIPLY_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new MultiplicativeExpression(
                                         BinaryOperatorExpression::Op::MULTIPLY,
-                                        std::move(m_assignee),
-                                        std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                        std::move(m_Assignee),
+                                        std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::DIVIDE_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new MultiplicativeExpression(
                                         BinaryOperatorExpression::Op::DIVIDE,
-                                        std::move(m_assignee),
-                                        std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                        std::move(m_Assignee),
+                                        std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::MODULO_EQUALS:
-        m_assignedExpression.reset(
+        m_AssignedExpression.reset(
                     new MultiplicativeExpression(
                                         BinaryOperatorExpression::Op::MODULO,
-                                        std::move(m_assignee),
-                                        std::move(m_assignedExpression) ) );
-        m_assignmentOperator = Op::EQUALS;
+                                        std::move(m_Assignee),
+                                        std::move(m_AssignedExpression) ) );
+        m_AssignmentOperator = Op::EQUALS;
         break;
     }
-    m_assignedExpression = CastExpression::Create(
-                                              m_assigneeVariable->GetType(),
-                                              std::move(m_assignedExpression) );
-    good &= m_assignedExpression->PerformSema( sema );
+    m_AssignedExpression = CastExpression::Create(
+                                              m_AssigneeVariable->GetType(),
+                                              std::move(m_AssignedExpression) );
+    good &= m_AssignedExpression->PerformSema( sema );
 
     return good;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( m_assigneeVariable &&
+    assert( m_AssigneeVariable &&
             "Trying to code_gen to a null variable" );
 
-    switch( m_assignmentOperator )
+    switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
-        code_gen.CreateVariableAssignment( *m_assigneeVariable,
-                                           *m_assignedExpression );
+        code_gen.CreateVariableAssignment( *m_AssigneeVariable,
+                                           *m_AssignedExpression );
         break;
     default:
         assert( false && "unhandled assignment operator" );
     }
 
     // Return the new value of the variable
-    return code_gen.CreateVariableRead( *m_assigneeVariable );
+    return code_gen.CreateVariableRead( *m_AssigneeVariable );
 }
 
 Type AssignmentExpression::GetReturnType() const
 {
-    if( m_assignee )
-        return m_assignee->GetReturnType();
+    if( m_Assignee )
+        return m_Assignee->GetReturnType();
     else
-        return m_assigneeVariable->GetType();
+        return m_AssigneeVariable->GetType();
 }
 
 Type AssignmentExpression::GetUnderlyingType() const
 {
-    if( m_assignee )
-        return m_assignee->GetUnderlyingType();
+    if( m_Assignee )
+        return m_Assignee->GetUnderlyingType();
     else
-        return m_assigneeVariable->GetUnderlyingType();
+        return m_AssigneeVariable->GetUnderlyingType();
 }
 
 std::vector<Expression_sp> AssignmentExpression::GetArrayExtents() const
 {
-    if( m_assignee )
-        return m_assignee->GetArrayExtents();
+    if( m_Assignee )
+        return m_Assignee->GetArrayExtents();
     else
-        return m_assigneeVariable->GetArrayExtents();
+        return m_AssigneeVariable->GetArrayExtents();
 }
 
 void AssignmentExpression::Print(int depth) const
@@ -326,8 +326,8 @@ void AssignmentExpression::Print(int depth) const
         std::cout << " ";
     std::cout << "Assignment Expression\n";
 
-    m_assignee->Print( depth + 1 );
-    m_assignedExpression->Print( depth + 1 );
+    m_Assignee->Print( depth + 1 );
+    m_AssignedExpression->Print( depth + 1 );
 }
 
 bool AssignmentExpression::Parse( Parser& parser,
@@ -375,15 +375,15 @@ ConditionalExpression::ConditionalExpression(
                                   std::unique_ptr<Expression> true_expression,
                                   std::unique_ptr<Expression> false_expression )
     :Expression( TokenTy::ConditionalExpression )
-    ,m_condition( std::move(condition) )
-    ,m_trueExpression( std::move(true_expression) )
-    ,m_falseExpression( std::move(false_expression) )
+    ,m_Condition( std::move(condition) )
+    ,m_TrueExpression( std::move(true_expression) )
+    ,m_FalseExpression( std::move(false_expression) )
 {
-    assert( m_condition &&
+    assert( m_Condition &&
             "ConditionalExpression given a null condition" );
-    assert( m_trueExpression &&
+    assert( m_TrueExpression &&
             "ConditionalExpression given a true_expression" );
-    assert( m_falseExpression &&
+    assert( m_FalseExpression &&
             "ConditionalExpression given a null false_expression" );
 }
 
@@ -393,9 +393,9 @@ ConditionalExpression::~ConditionalExpression()
 
 void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_condition->ResolveIdentifiers( sema );
-    m_trueExpression->ResolveIdentifiers( sema );
-    m_falseExpression->ResolveIdentifiers( sema );
+    m_Condition->ResolveIdentifiers( sema );
+    m_TrueExpression->ResolveIdentifiers( sema );
+    m_FalseExpression->ResolveIdentifiers( sema );
 }
 
 bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
@@ -403,7 +403,7 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO check that the true and false expressions are of equal array size
     bool good = true;
 
-    m_condition = CastExpression::Create( Type::BOOL, std::move(m_condition) );
+    m_Condition = CastExpression::Create( Type::BOOL, std::move(m_Condition) );
 
     Type t = GetReturnType();
     if( t == Type::UNKNOWN_TYPE )
@@ -412,26 +412,26 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 
         // If both of the sub expressions are fine, then we know the problem's
         // here, so report it
-        if( m_trueExpression->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_falseExpression->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_TrueExpression->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_FalseExpression->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Incompatable operand types in conditional expression "+
-                        GetTypeString( m_trueExpression->GetReturnType() ) +
+                        GetTypeString( m_TrueExpression->GetReturnType() ) +
                         " and " +
-                        GetTypeString( m_falseExpression->GetReturnType() ) );
+                        GetTypeString( m_FalseExpression->GetReturnType() ) );
     }
     else
     {
-        m_trueExpression = CastExpression::Create(
+        m_TrueExpression = CastExpression::Create(
                                                 t,
-                                                std::move(m_trueExpression) );
-        m_falseExpression = CastExpression::Create(
+                                                std::move(m_TrueExpression) );
+        m_FalseExpression = CastExpression::Create(
                                                 t,
-                                                std::move(m_falseExpression) );
+                                                std::move(m_FalseExpression) );
     }
 
-    good &= m_condition->PerformSema( sema );
-    good &= m_trueExpression->PerformSema( sema );
-    good &= m_falseExpression->PerformSema( sema );
+    good &= m_Condition->PerformSema( sema );
+    good &= m_TrueExpression->PerformSema( sema );
+    good &= m_FalseExpression->PerformSema( sema );
 
     return good;
 }
@@ -439,20 +439,20 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
     // Simplify the sub expressions
-    m_condition->FoldConstants( m_condition );
-    m_trueExpression->FoldConstants( m_trueExpression );
-    m_falseExpression->FoldConstants( m_falseExpression );
+    m_Condition->FoldConstants( m_Condition );
+    m_TrueExpression->FoldConstants( m_TrueExpression );
+    m_FalseExpression->FoldConstants( m_FalseExpression );
 
     // See if the condition is a boolean literal
     LiteralExpression* l = nullptr;
-    if( isa<LiteralExpression>( m_condition ) )
+    if( isa<LiteralExpression>( m_Condition ) )
     {
-        l = static_cast<LiteralExpression*>( m_condition.get() );
+        l = static_cast<LiteralExpression*>( m_Condition.get() );
     }
-    else if( isa<IdentifierExpression>( m_condition ) )
+    else if( isa<IdentifierExpression>( m_Condition ) )
     {
         IdentifierExpression* i =
-                        static_cast<IdentifierExpression*>( m_condition.get() );
+                        static_cast<IdentifierExpression*>( m_Condition.get() );
         const std::unique_ptr<Expression>& read_expression =
                                                          i->GetReadExpression();
         if( isa<LiteralExpression>( read_expression ) )
@@ -468,33 +468,33 @@ void ConditionalExpression::FoldConstants( std::unique_ptr<Expression>& self )
     assert( v.GetType() == Type::BOOL &&
             "ConditionalExpression has a non-bool condition" );
 
-    self = v.GetBool() ? std::move(m_trueExpression)
-                       : std::move(m_falseExpression);
+    self = v.GetBool() ? std::move(m_TrueExpression)
+                       : std::move(m_FalseExpression);
 }
 
 llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateSelect( *m_condition,
-                                  *m_trueExpression,
-                                  *m_falseExpression );
+    return code_gen.CreateSelect( *m_Condition,
+                                  *m_TrueExpression,
+                                  *m_FalseExpression );
 }
 
 Type ConditionalExpression::GetReturnType() const
 {
-    return GetCommonType( m_trueExpression->GetReturnType(),
-                          m_falseExpression->GetReturnType() );
+    return GetCommonType( m_TrueExpression->GetReturnType(),
+                          m_FalseExpression->GetReturnType() );
 }
 
 Type ConditionalExpression::GetUnderlyingType() const
 {
-    return GetCommonType( m_trueExpression->GetUnderlyingType(),
-                          m_falseExpression->GetUnderlyingType() );
+    return GetCommonType( m_TrueExpression->GetUnderlyingType(),
+                          m_FalseExpression->GetUnderlyingType() );
 }
 
 std::vector<Expression_sp> ConditionalExpression::GetArrayExtents() const
 {
     // The array extents should be the same between the two sides
-    return m_trueExpression->GetArrayExtents();
+    return m_TrueExpression->GetArrayExtents();
 }
 
 void ConditionalExpression::Print( int depth ) const
@@ -503,9 +503,9 @@ void ConditionalExpression::Print( int depth ) const
         std::cout << " ";
     std::cout << "Conditional Expression\n";
 
-    m_condition->Print( depth + 1 );
-    m_trueExpression->Print( depth + 1 );
-    m_falseExpression->Print( depth + 1 );
+    m_Condition->Print( depth + 1 );
+    m_TrueExpression->Print( depth + 1 );
+    m_FalseExpression->Print( depth + 1 );
 }
 
 bool ConditionalExpression::Parse( Parser& parser,
@@ -561,12 +561,12 @@ BinaryOperatorExpression::BinaryOperatorExpression(
                                         std::unique_ptr<Expression> left_side,
                                         std::unique_ptr<Expression> right_side )
     :Expression( sub_class_id )
-    ,m_operator( op )
-    ,m_leftSide( std::move(left_side) )
-    ,m_rightSide( std::move(right_side) )
+    ,m_Operator( op )
+    ,m_LeftSide( std::move(left_side) )
+    ,m_RightSide( std::move(right_side) )
 {
-    assert( m_leftSide && "BinaryOperatorExpression given a null lhs" );
-    assert( m_rightSide && "BinaryOperatorExpression given a null rhs" );
+    assert( m_LeftSide && "BinaryOperatorExpression given a null lhs" );
+    assert( m_RightSide && "BinaryOperatorExpression given a null rhs" );
 }
 
 BinaryOperatorExpression::~BinaryOperatorExpression()
@@ -575,8 +575,8 @@ BinaryOperatorExpression::~BinaryOperatorExpression()
 
 void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_leftSide->ResolveIdentifiers( sema );
-    m_rightSide->ResolveIdentifiers( sema );
+    m_LeftSide->ResolveIdentifiers( sema );
+    m_RightSide->ResolveIdentifiers( sema );
 }
 
 bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
@@ -584,28 +584,28 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO operands can't be arrays
     bool good = true;
 
-    Type t = GetCommonType( m_rightSide->GetReturnType(),
-                            m_leftSide->GetReturnType() );
+    Type t = GetCommonType( m_RightSide->GetReturnType(),
+                            m_LeftSide->GetReturnType() );
     if( t == Type::UNKNOWN_TYPE )
     {
         good = false;
 
         // If both of the sub expressions are fine, then we know the problem's
         // here
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operands to binary operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -617,15 +617,15 @@ void BinaryOperatorExpression::FoldConstants(
     if( GetReturnType() == Type::UNKNOWN_TYPE )
         return;
 
-    m_leftSide->FoldConstants( m_leftSide );
-    m_rightSide->FoldConstants( m_rightSide );
+    m_LeftSide->FoldConstants( m_LeftSide );
+    m_RightSide->FoldConstants( m_RightSide );
 
-    LiteralExpression* l = GetLiteral( m_leftSide );
+    LiteralExpression* l = GetLiteral( m_LeftSide );
     // If it wasn't constant, then we've done as much as we can
     if( !l )
         return;
 
-    LiteralExpression* r = GetLiteral( m_rightSide );
+    LiteralExpression* r = GetLiteral( m_RightSide );
     // If it wasn't constant, then we've done as much as we can
     if( !r )
         return;
@@ -635,7 +635,7 @@ void BinaryOperatorExpression::FoldConstants(
     GenericValue lv = l->GetValue();
     GenericValue rv = r->GetValue();
 
-    switch( m_operator )
+    switch( m_Operator )
     {
     case Op::LOGICAL_OR:
         v = GenericValue::Lor( lv, rv );
@@ -701,44 +701,44 @@ void BinaryOperatorExpression::FoldConstants(
 
 llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    switch( m_operator )
+    switch( m_Operator )
     {
     case Op::LOGICAL_OR:
-        return code_gen.CreateLOr(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateLOr(  *m_LeftSide, *m_RightSide );
     case Op::LOGICAL_AND:
-        return code_gen.CreateLAnd( *m_leftSide, *m_rightSide );
+        return code_gen.CreateLAnd( *m_LeftSide, *m_RightSide );
     case Op::OR:
-        return code_gen.CreateOr(   *m_leftSide, *m_rightSide );
+        return code_gen.CreateOr(   *m_LeftSide, *m_RightSide );
     case Op::XOR:
-        return code_gen.CreateXor(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateXor(  *m_LeftSide, *m_RightSide );
     case Op::AND:
-        return code_gen.CreateAnd(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateAnd(  *m_LeftSide, *m_RightSide );
     case Op::EQUAL_TO:
-        return code_gen.CreateEq(   *m_leftSide, *m_rightSide );
+        return code_gen.CreateEq(   *m_LeftSide, *m_RightSide );
     case Op::NOT_EQUAL_TO:
-        return code_gen.CreateNeq(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateNeq(  *m_LeftSide, *m_RightSide );
     case Op::LESS_THAN:
-        return code_gen.CreateLT(   *m_leftSide, *m_rightSide );
+        return code_gen.CreateLT(   *m_LeftSide, *m_RightSide );
     case Op::GREATER_THAN:
-        return code_gen.CreateGT(   *m_leftSide, *m_rightSide );
+        return code_gen.CreateGT(   *m_LeftSide, *m_RightSide );
     case Op::LESS_THAN_EQUALS:
-        return code_gen.CreateLTE(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateLTE(  *m_LeftSide, *m_RightSide );
     case Op::GREATER_THAN_EQUALS:
-        return code_gen.CreateGTE(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateGTE(  *m_LeftSide, *m_RightSide );
     case Op::LEFT_SHIFT:
-        return code_gen.CreateShl(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateShl(  *m_LeftSide, *m_RightSide );
     case Op::RIGHT_SHIFT:
-        return code_gen.CreateShr(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateShr(  *m_LeftSide, *m_RightSide );
     case Op::PLUS:
-        return code_gen.CreateAdd(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateAdd(  *m_LeftSide, *m_RightSide );
     case Op::MINUS:
-        return code_gen.CreateSub(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateSub(  *m_LeftSide, *m_RightSide );
     case Op::MULTIPLY:
-        return code_gen.CreateMul(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateMul(  *m_LeftSide, *m_RightSide );
     case Op::DIVIDE:
-        return code_gen.CreateDiv(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateDiv(  *m_LeftSide, *m_RightSide );
     case Op::MODULO:
-        return code_gen.CreateMod(  *m_leftSide, *m_rightSide );
+        return code_gen.CreateMod(  *m_LeftSide, *m_RightSide );
     default:
         assert( false &&
                 "Trying to generate code for unhandled binary operator" );
@@ -748,8 +748,8 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
 
 Type BinaryOperatorExpression::GetReturnType() const
 {
-    return GetCommonType( m_leftSide->GetReturnType(),
-                          m_rightSide->GetReturnType() );
+    return GetCommonType( m_LeftSide->GetReturnType(),
+                          m_RightSide->GetReturnType() );
 }
 
 Type BinaryOperatorExpression::GetUnderlyingType() const
@@ -760,9 +760,9 @@ Type BinaryOperatorExpression::GetUnderlyingType() const
 std::vector<Expression_sp> BinaryOperatorExpression::GetArrayExtents() const
 {
     // Can't binary op between two arrays
-    assert( m_leftSide->GetArrayExtents().size() == 0 &&
+    assert( m_LeftSide->GetArrayExtents().size() == 0 &&
             "Binary operator left side is an array" );
-    assert( m_rightSide->GetArrayExtents().size() == 0 &&
+    assert( m_RightSide->GetArrayExtents().size() == 0 &&
             "Binary operator right side is an array" );
     return {};
 }
@@ -772,8 +772,8 @@ void BinaryOperatorExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "binary_operator" << std::endl;
-    m_leftSide->Print( depth + 1 );
-    m_rightSide->Print( depth + 1 );
+    m_LeftSide->Print( depth + 1 );
+    m_RightSide->Print( depth + 1 );
 }
 
 template< typename TokenType, typename SubTokenType >
@@ -862,11 +862,11 @@ bool LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
-    m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
+    m_LeftSide = CastExpression::Create( Type::BOOL, std::move(m_LeftSide) );
+    m_RightSide = CastExpression::Create( Type::BOOL, std::move(m_RightSide) );
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -921,11 +921,11 @@ bool LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    m_leftSide = CastExpression::Create( Type::BOOL, std::move(m_leftSide) );
-    m_rightSide = CastExpression::Create( Type::BOOL, std::move(m_rightSide) );
+    m_LeftSide = CastExpression::Create( Type::BOOL, std::move(m_LeftSide) );
+    m_RightSide = CastExpression::Create( Type::BOOL, std::move(m_RightSide) );
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -984,20 +984,20 @@ bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to inclusive or operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -1053,20 +1053,20 @@ bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to exclusive or operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -1120,20 +1120,20 @@ bool AndExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to and operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     return good;
 }
@@ -1280,20 +1280,20 @@ bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to shift operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
     return good;
 }
 
@@ -1385,7 +1385,7 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
     //
     // Don't have any special handling for * and /
     //
-    if( m_operator != BinaryOperatorExpression::Op::MODULO )
+    if( m_Operator != BinaryOperatorExpression::Op::MODULO )
         return BinaryOperatorExpression::PerformSema( sema );
 
     bool good = true;
@@ -1395,20 +1395,20 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_leftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_rightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
             sema.Error( "Invalid operand types to to modulo operator: " +
-                        GetTypeString( m_leftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_rightSide->GetReturnType() ) );
+                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
+                        GetTypeString( m_RightSide->GetReturnType() ) );
     }
     else
     {
-        m_leftSide  = CastExpression::Create( t, std::move(m_leftSide) );
-        m_rightSide = CastExpression::Create( t, std::move(m_rightSide) );
+        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
+        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
     }
 
-    good &= m_leftSide->PerformSema( sema );
-    good &= m_rightSide->PerformSema( sema );
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
     return good;
 }
 
@@ -1443,8 +1443,8 @@ bool MultiplicativeExpression::classof( const MultiplicativeExpression* e )
 CastExpression::CastExpression( Type cast_type,
                                 std::unique_ptr<Expression> expression )
     :Expression( TokenTy::CastExpression )
-    ,m_castType( cast_type )
-    ,m_expression( std::move(expression) )
+    ,m_CastType( cast_type )
+    ,m_Expression( std::move(expression) )
 {
 }
 
@@ -1454,21 +1454,21 @@ CastExpression::~CastExpression()
 
 void CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_expression->ResolveIdentifiers( sema );
+    m_Expression->ResolveIdentifiers( sema );
 }
 
 bool CastExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    Type t = m_expression->GetReturnType();
+    Type t = m_Expression->GetReturnType();
 
-    if( m_castType == Type::UNKNOWN_TYPE )
+    if( m_CastType == Type::UNKNOWN_TYPE )
     {
         good = false;
         sema.Error( "Can't cast to an unknown type" );
     }
-    else if( m_castType == Type::STRING )
+    else if( m_CastType == Type::STRING )
         if( t != Type::STRING &&
             t != Type::UNKNOWN_TYPE )
         {
@@ -1476,68 +1476,68 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
             sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
         }
 
-    if( t == Type::STRING && m_castType != Type::STRING )
+    if( t == Type::STRING && m_CastType != Type::STRING )
     {
         good = false;
-        sema.Error( "Can't cast string to " + GetTypeString( m_castType ) );
+        sema.Error( "Can't cast string to " + GetTypeString( m_CastType ) );
     }
 
-    good &= m_expression->PerformSema( sema );
+    good &= m_Expression->PerformSema( sema );
 
     return good;
 }
 
 void CastExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
-    m_expression->FoldConstants( m_expression );
+    m_Expression->FoldConstants( m_Expression );
 
-    Type t = m_expression->GetReturnType();
+    Type t = m_Expression->GetReturnType();
 
     // If this is an incompatible cast, return
-    if( m_castType == Type::UNKNOWN_TYPE ||
+    if( m_CastType == Type::UNKNOWN_TYPE ||
         t == Type::UNKNOWN_TYPE ||
-        ( t == Type::STRING && m_castType != Type::STRING ) ||
-        ( m_castType == Type::STRING && t != Type::STRING ) )
+        ( t == Type::STRING && m_CastType != Type::STRING ) ||
+        ( m_CastType == Type::STRING && t != Type::STRING ) )
         return;
 
-    LiteralExpression* l = GetLiteral( m_expression );
+    LiteralExpression* l = GetLiteral( m_Expression );
 
     // If we are casting a literal expression, perform the cast now
     if( l )
     {
-        GenericValue v = GenericValue::Cast( m_castType, l->GetValue() );
+        GenericValue v = GenericValue::Cast( m_CastType, l->GetValue() );
         self = LiteralExpression::Create( v );
         return;
     }
 
     // It may not be a literal expression, but it may be another cast expression
-    if( isa<CastExpression>(m_expression) )
+    if( isa<CastExpression>(m_Expression) )
     {
-        CastExpression* c = static_cast<CastExpression*>( m_expression.get() );
-        m_expression = std::move(c->m_expression);
+        CastExpression* c = static_cast<CastExpression*>( m_Expression.get() );
+        m_Expression = std::move(c->m_Expression);
     }
 }
 
 llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateCast( *m_expression, m_castType );
+    return code_gen.CreateCast( *m_Expression, m_CastType );
 }
 
 Type CastExpression::GetReturnType() const
 {
-    if( m_expression->GetReturnType() == Type::ARRAY )
+    if( m_Expression->GetReturnType() == Type::ARRAY )
         return Type::ARRAY;
-    return m_castType;
+    return m_CastType;
 }
 
 Type CastExpression::GetUnderlyingType() const
 {
-    return m_castType;
+    return m_CastType;
 }
 
 std::vector<Expression_sp> CastExpression::GetArrayExtents() const
 {
-    return m_expression->GetArrayExtents();
+    return m_Expression->GetArrayExtents();
 }
 
 void CastExpression::Print( int depth ) const
@@ -1582,8 +1582,8 @@ bool CastExpression::classof( const CastExpression* e )
 UnaryExpression::UnaryExpression( Op op,
                                   std::unique_ptr<Expression> expression )
     :Expression( TokenTy::UnaryExpression )
-    ,m_operator( op )
-    ,m_expression( std::move(expression) )
+    ,m_Operator( op )
+    ,m_Expression( std::move(expression) )
 {
 }
 
@@ -1593,7 +1593,7 @@ UnaryExpression::~UnaryExpression()
 
 void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_expression->ResolveIdentifiers( sema );
+    m_Expression->ResolveIdentifiers( sema );
 }
 
 bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
@@ -1601,35 +1601,35 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO check that expression isn't an array
     bool good = true;
 
-    Type t = m_expression->GetReturnType();
+    Type t = m_Expression->GetReturnType();
     if( t == Type::STRING )
     {
         good = false;
         sema.Error( "Invalid type to unary operator: string" );
     }
     if( !IsIntegral( t ) &&
-        m_operator == Op::BITWISE_NOT )
+        m_Operator == Op::BITWISE_NOT )
     {
         good = false;
         sema.Error( "Invalid type to bitwise unary not operator" );
     }
 
-    good &= m_expression->PerformSema( sema );
+    good &= m_Expression->PerformSema( sema );
 
     return good;
 }
 
 void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
 {
-    m_expression->FoldConstants( m_expression );
+    m_Expression->FoldConstants( m_Expression );
 
-    LiteralExpression* l = GetLiteral( m_expression );
+    LiteralExpression* l = GetLiteral( m_Expression );
 
     if( l )
     {
         GenericValue v( l->GetValue() );
 
-        switch( m_operator )
+        switch( m_Operator )
         {
         case Op::PLUS:
             self = LiteralExpression::Create( GenericValue::UnaryPlus( v ) );
@@ -1651,20 +1651,20 @@ void UnaryExpression::FoldConstants( std::unique_ptr<Expression>& self )
 
 llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    switch( m_operator )
+    switch( m_Operator )
     {
     case Op::PLUS:
-        return m_expression->CodeGen( code_gen );
+        return m_Expression->CodeGen( code_gen );
     case Op::MINUS:
-        return code_gen.CreateNeg( *m_expression );
+        return code_gen.CreateNeg( *m_Expression );
     case Op::INCREMENT:
     case Op::DECREMENT:
         assert( false && "Complete me" );
         return nullptr;
     case Op::BITWISE_NOT:
-        return code_gen.CreateNot( *m_expression );
+        return code_gen.CreateNot( *m_Expression );
     case Op::LOGICAL_NOT:
-        return code_gen.CreateLNot( *m_expression );
+        return code_gen.CreateLNot( *m_Expression );
     default:
         assert( false &&
                 "Trying to generate code for unhandled unary operator" );
@@ -1674,9 +1674,9 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
 
 Type UnaryExpression::GetReturnType() const
 {
-    Type t = m_expression->GetReturnType();
+    Type t = m_Expression->GetReturnType();
 
-    switch( m_operator )
+    switch( m_Operator )
     {
     case Op::PLUS:
     case Op::MINUS:
@@ -1698,7 +1698,7 @@ Type UnaryExpression::GetUnderlyingType() const
 
 std::vector<Expression_sp> UnaryExpression::GetArrayExtents() const
 {
-    assert( m_expression->GetArrayExtents().size() == 0 &&
+    assert( m_Expression->GetArrayExtents().size() == 0 &&
             "Unary Expression given an array" );
     return {};
 }
@@ -1708,7 +1708,7 @@ void UnaryExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Unary Expression\n";
-    m_expression->Print( depth + 1 );
+    m_Expression->Print( depth + 1 );
 }
 
 bool UnaryExpression::Parse( Parser& parser,
@@ -1769,8 +1769,8 @@ PostfixExpression::PostfixExpression(
                              std::unique_ptr<Expression> expression,
                              std::unique_ptr<PostfixOperator> postfix_operator )
     :Expression( TokenTy::PostfixExpression )
-    ,m_expression( std::move(expression) )
-    ,m_postfixOperator( std::move(postfix_operator) )
+    ,m_Expression( std::move(expression) )
+    ,m_PostfixOperator( std::move(postfix_operator) )
 {
 }
 
@@ -1780,35 +1780,35 @@ PostfixExpression::~PostfixExpression()
 
 void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_expression->ResolveIdentifiers( sema );
+    m_Expression->ResolveIdentifiers( sema );
 }
 
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
-    good &= m_expression->PerformSema( sema );
-    good &= m_postfixOperator->PerformSema( sema, m_expression );
+    good &= m_Expression->PerformSema( sema );
+    good &= m_PostfixOperator->PerformSema( sema, m_Expression );
     return good;
 }
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return m_postfixOperator->CodeGen( code_gen, m_expression );
+    return m_PostfixOperator->CodeGen( code_gen, m_Expression );
 }
 
 Type PostfixExpression::GetReturnType() const
 {
-    return m_postfixOperator->GetReturnType( m_expression );
+    return m_PostfixOperator->GetReturnType( m_Expression );
 }
 
 Type PostfixExpression::GetUnderlyingType() const
 {
-    return m_postfixOperator->GetUnderlyingType( m_expression );
+    return m_PostfixOperator->GetUnderlyingType( m_Expression );
 }
 
 std::vector<Expression_sp> PostfixExpression::GetArrayExtents() const
 {
-    return m_postfixOperator->GetArrayExtents( m_expression );
+    return m_PostfixOperator->GetArrayExtents( m_Expression );
 }
 
 void PostfixExpression::Print( int depth ) const
@@ -1816,8 +1816,8 @@ void PostfixExpression::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "Postfix Expression\n";
-    m_expression->Print( depth + 1 );
-    m_postfixOperator->Print( depth + 1 );
+    m_Expression->Print( depth + 1 );
+    m_PostfixOperator->Print( depth + 1 );
 }
 
 bool PostfixExpression::Parse( Parser& parser,
@@ -1889,10 +1889,10 @@ bool PrimaryExpression::Parse( Parser& parser,
 
 IdentifierExpression::IdentifierExpression( std::string identifier )
     :Expression( TokenTy::IdentifierExpression )
-    ,m_identifier( std::move( identifier ) )
-    ,m_variable( nullptr )
+    ,m_Identifier( std::move( identifier ) )
+    ,m_Variable( nullptr )
 {
-    assert( !m_identifier.empty() );
+    assert( !m_Identifier.empty() );
 }
 
 IdentifierExpression::~IdentifierExpression()
@@ -1901,43 +1901,43 @@ IdentifierExpression::~IdentifierExpression()
 
 void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_variable = sema.GetVariable( m_identifier );
-    if( !m_variable )
-        sema.Error( "Undeclared variable: " + m_identifier );
+    m_Variable = sema.GetVariable( m_Identifier );
+    if( !m_Variable )
+        sema.Error( "Undeclared variable: " + m_Identifier );
 }
 
 llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( m_variable &&
+    assert( m_Variable &&
             "Trying to generate code for an unresolved variable" );
-    return code_gen.CreateVariableRead( *m_variable );
+    return code_gen.CreateVariableRead( *m_Variable );
 }
 
 Type IdentifierExpression::GetReturnType() const
 {
-    if( !m_variable )
+    if( !m_Variable )
         return Type::UNKNOWN_TYPE;
-    return m_variable->GetType();
+    return m_Variable->GetType();
 }
 
 Type IdentifierExpression::GetUnderlyingType() const
 {
-    if( !m_variable )
+    if( !m_Variable )
         return Type::UNKNOWN_TYPE;
-    return m_variable->GetUnderlyingType();
+    return m_Variable->GetUnderlyingType();
 }
 
 std::vector<Expression_sp> IdentifierExpression::GetArrayExtents() const
 {
-    /// TODO something better when !m_variable
-    if( !m_variable )
+    /// TODO something better when !m_Variable
+    if( !m_Variable )
         return {};
-    return m_variable->GetArrayExtents();
+    return m_Variable->GetArrayExtents();
 }
 
 bool IdentifierExpression::IsConst() const
 {
-    return m_variable->IsConst();
+    return m_Variable->IsConst();
 }
 
 bool IdentifierExpression::IsLValue() const
@@ -1947,25 +1947,25 @@ bool IdentifierExpression::IsLValue() const
 
 const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 {
-    return m_variable;
+    return m_Variable;
 }
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
-    return bool(m_variable);
+    return bool(m_Variable);
 }
 
 const std::unique_ptr<Expression>&
                                  IdentifierExpression::GetReadExpression() const
 {
-    return m_variable->GetReadExpression();
+    return m_Variable->GetReadExpression();
 }
 
 void IdentifierExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << m_identifier << "\n";
+    std::cout << m_Identifier << "\n";
 }
 
 bool IdentifierExpression::Parse( Parser& parser,
@@ -2111,8 +2111,8 @@ bool LiteralExpression::classof( const LiteralExpression* e )
 IntegerLiteralExpression::IntegerLiteralExpression( jl_u64 value,
                                                     Suffix suffix )
     :LiteralExpression( TokenTy::IntegerLiteralExpression )
-    ,m_value( value )
-    ,m_suffix( suffix )
+    ,m_Value( value )
+    ,m_Suffix( suffix )
 {
 }
 
@@ -2122,14 +2122,14 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_value,
+    return code_gen.CreateInteger( m_Value,
                                    SizeOf( GetReturnType() ) * 8,
                                    IsSigned( GetReturnType() ) );
 }
 
 Type IntegerLiteralExpression::GetReturnType() const
 {
-    switch( m_suffix )
+    switch( m_Suffix )
     {
     case Suffix::CHAR:
         return Type::I8;
@@ -2148,11 +2148,11 @@ Type IntegerLiteralExpression::GetReturnType() const
     case Suffix::UNSIGNED_LONG:
         return Type::U64;
     default:
-        return m_value <= jl_u64(std::numeric_limits<jl_i32>::max())
+        return m_Value <= jl_u64(std::numeric_limits<jl_i32>::max())
                     ? Type::I32
-                    : m_value <= jl_u64(std::numeric_limits<jl_u32>::max())
+                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
                         ? Type::U32
-                        : m_value <= jl_u64(std::numeric_limits<jl_i64>::max())
+                        : m_Value <= jl_u64(std::numeric_limits<jl_i64>::max())
                             ? Type::I64
                             : Type::U64;
     }
@@ -2160,32 +2160,32 @@ Type IntegerLiteralExpression::GetReturnType() const
 
 GenericValue IntegerLiteralExpression::GetValue() const
 {
-    switch( m_suffix )
+    switch( m_Suffix )
     {
     case Suffix::CHAR:
-        return GenericValue( jl_i8(m_value) );
+        return GenericValue( jl_i8(m_Value) );
     case Suffix::INT:
-        return GenericValue( jl_i32(m_value) );
+        return GenericValue( jl_i32(m_Value) );
     case Suffix::SHORT:
-        return GenericValue( jl_i16(m_value) );
+        return GenericValue( jl_i16(m_Value) );
     case Suffix::LONG:
-        return GenericValue( jl_i64(m_value) );
+        return GenericValue( jl_i64(m_Value) );
     case Suffix::UNSIGNED_CHAR:
-        return GenericValue( jl_u8(m_value) );
+        return GenericValue( jl_u8(m_Value) );
     case Suffix::UNSIGNED_INT:
-        return GenericValue( jl_u32(m_value) );
+        return GenericValue( jl_u32(m_Value) );
     case Suffix::UNSIGNED_SHORT:
-        return GenericValue( jl_u16(m_value) );
+        return GenericValue( jl_u16(m_Value) );
     case Suffix::UNSIGNED_LONG:
-        return GenericValue( jl_u64(m_value) );
+        return GenericValue( jl_u64(m_Value) );
     default:
-        return m_value <= jl_u64(std::numeric_limits<jl_i32>::max())
-                    ? GenericValue( jl_i32(m_value) )
-                    : m_value <= jl_u64(std::numeric_limits<jl_u32>::max())
-                        ? GenericValue( jl_u32(m_value) )
-                        : m_value <= jl_u64(std::numeric_limits<jl_i64>::max())
-                            ? GenericValue( jl_i64(m_value) )
-                            : GenericValue( jl_u64(m_value) );
+        return m_Value <= jl_u64(std::numeric_limits<jl_i32>::max())
+                    ? GenericValue( jl_i32(m_Value) )
+                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
+                        ? GenericValue( jl_u32(m_Value) )
+                        : m_Value <= jl_u64(std::numeric_limits<jl_i64>::max())
+                            ? GenericValue( jl_i64(m_Value) )
+                            : GenericValue( jl_u64(m_Value) );
     }
 }
 
@@ -2193,7 +2193,7 @@ void IntegerLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << m_value << "\n";
+    std::cout << m_Value << "\n";
 }
 
 bool IntegerLiteralExpression::ParseInteger( std::string string,
@@ -2313,8 +2313,8 @@ bool IntegerLiteralExpression::classof( const IntegerLiteralExpression* e )
 FloatingLiteralExpression::FloatingLiteralExpression( double value,
                                                       Suffix suffix )
     :LiteralExpression( TokenTy::FloatingLiteralExpression )
-    ,m_value( value )
-    ,m_suffix( suffix )
+    ,m_Value( value )
+    ,m_Suffix( suffix )
 {
 }
 
@@ -2324,12 +2324,12 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 
 llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateFloating( m_value, m_suffix != Suffix::SINGLE );
+    return code_gen.CreateFloating( m_Value, m_Suffix != Suffix::SINGLE );
 }
 
 Type FloatingLiteralExpression::GetReturnType() const
 {
-    if( m_suffix == Suffix::SINGLE )
+    if( m_Suffix == Suffix::SINGLE )
         return Type::FLOAT;
     else
         return Type::DOUBLE;
@@ -2337,12 +2337,12 @@ Type FloatingLiteralExpression::GetReturnType() const
 
 GenericValue FloatingLiteralExpression::GetValue() const
 {
-    switch( m_suffix )
+    switch( m_Suffix )
     {
     case Suffix::SINGLE:
-        return GenericValue( jl_float(m_value) );
+        return GenericValue( jl_float(m_Value) );
     default:
-        return GenericValue( jl_double(m_value) );
+        return GenericValue( jl_double(m_Value) );
     }
 }
 
@@ -2350,7 +2350,7 @@ void FloatingLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << m_value << "\n";
+    std::cout << m_Value << "\n";
 }
 
 bool FloatingLiteralExpression::ParseFloat( std::string string,
@@ -2412,7 +2412,7 @@ bool FloatingLiteralExpression::classof( const FloatingLiteralExpression* e )
 
 BooleanLiteralExpression::BooleanLiteralExpression( bool value )
     :LiteralExpression( TokenTy::BooleanLiteralExpression )
-    ,m_value( value )
+    ,m_Value( value )
 {
 }
 
@@ -2422,7 +2422,7 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_value, 1, false );
+    return code_gen.CreateInteger( m_Value, 1, false );
 }
 
 Type BooleanLiteralExpression::GetReturnType() const
@@ -2432,14 +2432,14 @@ Type BooleanLiteralExpression::GetReturnType() const
 
 GenericValue BooleanLiteralExpression::GetValue() const
 {
-    return GenericValue( jl_bool(m_value) );
+    return GenericValue( jl_bool(m_Value) );
 }
 
 void BooleanLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << std::boolalpha << m_value << std::noboolalpha << "\n";
+    std::cout << std::boolalpha << m_Value << std::noboolalpha << "\n";
 }
 
 bool BooleanLiteralExpression::Parse(
@@ -2532,7 +2532,7 @@ char UnescapeCharacter( char c )
 
 StringLiteralExpression::StringLiteralExpression( std::string value )
     :LiteralExpression( TokenTy::BooleanLiteralExpression )
-    ,m_value( std::move(value) )
+    ,m_Value( std::move(value) )
 {
 }
 
@@ -2552,19 +2552,19 @@ Type StringLiteralExpression::GetReturnType() const
 
 GenericValue StringLiteralExpression::GetValue() const
 {
-    return GenericValue( jl_string(m_value) );
+    return GenericValue( jl_string(m_Value) );
 }
 
 void StringLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << '\"' << m_value << "\"\n";
+    std::cout << '\"' << m_Value << "\"\n";
 }
 
 const std::string& StringLiteralExpression::GetString() const
 {
-    return m_value;
+    return m_Value;
 }
 
 bool StringLiteralExpression::Parse(
@@ -2630,7 +2630,7 @@ bool StringLiteralExpression::classof( const StringLiteralExpression* e )
 
 CharacterLiteralExpression::CharacterLiteralExpression( char value )
     :LiteralExpression( TokenTy::CharacterLiteralExpression )
-    ,m_value( value )
+    ,m_Value( value )
 {
 }
 
@@ -2641,7 +2641,7 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 llvm::Value* CharacterLiteralExpression::CodeGen(
                                                 CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_value, 8, true );
+    return code_gen.CreateInteger( m_Value, 8, true );
 }
 
 Type CharacterLiteralExpression::GetReturnType() const
@@ -2651,14 +2651,14 @@ Type CharacterLiteralExpression::GetReturnType() const
 
 GenericValue CharacterLiteralExpression::GetValue() const
 {
-    return GenericValue( jl_i8(m_value) );
+    return GenericValue( jl_i8(m_Value) );
 }
 
 void CharacterLiteralExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << '\'' << m_value << '\'' << "\n";
+    std::cout << '\'' << m_Value << '\'' << "\n";
 }
 
 bool CharacterLiteralExpression::Parse(

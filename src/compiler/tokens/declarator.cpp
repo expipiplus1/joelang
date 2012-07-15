@@ -54,11 +54,11 @@ namespace Compiler
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
                                 std::unique_ptr<Expression> initializer )
     :Token( TokenTy::InitDeclarator )
-    ,m_declarator( std::move(declarator) )
-    ,m_initializer( std::move(initializer) )
-    ,m_variable( nullptr )
+    ,m_Declarator( std::move(declarator) )
+    ,m_Initializer( std::move(initializer) )
+    ,m_Variable( nullptr )
 {
-    assert( m_declarator && "InitDeclarator given a null declarator" );
+    assert( m_Declarator && "InitDeclarator given a null declarator" );
 }
 
 InitDeclarator::~InitDeclarator()
@@ -69,38 +69,38 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
     // Resolve things in the declarator
-    m_declarator->PerformSema( sema );
+    m_Declarator->PerformSema( sema );
 
-    m_isGlobal = sema.InGlobalScope();
+    m_IsGlobal = sema.InGlobalScope();
 
     bool can_init = true;
 
     // Reduce the initializer as much as possible
-    if( m_initializer )
+    if( m_Initializer )
     {
         //TODO move this somewhere else
-        m_initializer->ResolveIdentifiers( sema );
-        m_initializer = CastExpression::Create(
+        m_Initializer->ResolveIdentifiers( sema );
+        m_Initializer = CastExpression::Create(
                                             decl_specs.GetType(),
-                                            std::move( m_initializer ) );
-        if( m_initializer->PerformSema( sema ) )
-            m_initializer->FoldConstants( m_initializer );
+                                            std::move( m_Initializer ) );
+        if( m_Initializer->PerformSema( sema ) )
+            m_Initializer->FoldConstants( m_Initializer );
 
-        assert( m_initializer->GetReturnType() == decl_specs.GetType() &&
+        assert( m_Initializer->GetReturnType() == decl_specs.GetType() &&
                 "Trying to initialize a variable with mismatched types" );
     }
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() )
     {
-        if( !m_initializer )
+        if( !m_Initializer )
         {
             sema.Error( "Const variables must have an initializer" );
             can_init = false;
         }
         else
         {
-            if( !Expression::GetLiteral( m_initializer ) )
+            if( !Expression::GetLiteral( m_Initializer ) )
             {
                 sema.Error( "trying to initialize a variable with a non-const "
                             "expression" );
@@ -116,22 +116,22 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     Type base_type = decl_specs.GetType();
     std::vector<Expression_sp> array_dimension_sizes =
-                                        m_declarator->GetArrayDimensionSizes();
+                                        m_Declarator->GetArrayDimensionSizes();
 
-    m_variable = std::make_shared<Variable>( base_type,
+    m_Variable = std::make_shared<Variable>( base_type,
                                              std::move(array_dimension_sizes),
                                              decl_specs.IsConst() && can_init,
-                                             m_isGlobal,
-                                             std::move(m_initializer) );
+                                             m_IsGlobal,
+                                             std::move(m_Initializer) );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of later
     // analysis
-    sema.DeclareVariable( m_declarator->GetIdentifier(), m_variable );
+    sema.DeclareVariable( m_Declarator->GetIdentifier(), m_Variable );
 }
 
 void InitDeclarator::CodeGen( CodeGenerator& code_gen )
 {
-    m_variable->CodeGen( code_gen );
+    m_Variable->CodeGen( code_gen );
 }
 
 void InitDeclarator::Print( int depth ) const
@@ -168,8 +168,8 @@ bool InitDeclarator::Parse( Parser& parser,
 Declarator::Declarator( std::string identifier,
                         Declarator::ArraySpecifierVector array_specifiers )
     :Token( TokenTy::Declarator )
-    ,m_identifier( std::move(identifier) )
-    ,m_arraySpecifiers( std::move(array_specifiers) )
+    ,m_Identifier( std::move(identifier) )
+    ,m_ArraySpecifiers( std::move(array_specifiers) )
 {
 }
 
@@ -179,7 +179,7 @@ Declarator::~Declarator()
 
 void Declarator::PerformSema( SemaAnalyzer& sema )
 {
-    for( auto& array_specifier : m_arraySpecifiers )
+    for( auto& array_specifier : m_ArraySpecifiers )
         array_specifier->PerformSema( sema );
 }
 
@@ -189,13 +189,13 @@ void Declarator::Print( int depth ) const
 
 const std::string& Declarator::GetIdentifier() const
 {
-    return m_identifier;
+    return m_Identifier;
 }
 
 std::vector<Expression_sp> Declarator::GetArrayDimensionSizes() const
 {
     std::vector<Expression_sp> ret;
-    for( const auto& array_specifier : m_arraySpecifiers )
+    for( const auto& array_specifier : m_ArraySpecifiers )
         ret.push_back( array_specifier->GetExpression() );
     return ret;
 }
@@ -228,9 +228,9 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 
 ArraySpecifier::ArraySpecifier( std::unique_ptr<Expression> expression )
     :Token( TokenTy::ArraySpecifier )
-    ,m_expression( std::move( expression ) )
+    ,m_Expression( std::move( expression ) )
 {
-    assert( m_expression && "ArraySpecifier given a null expression" );
+    assert( m_Expression && "ArraySpecifier given a null expression" );
 }
 
 ArraySpecifier::~ArraySpecifier()
@@ -239,13 +239,13 @@ ArraySpecifier::~ArraySpecifier()
 
 void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
 {
-    if( !sema.TryResolveToLiteral( m_expression, Type::I64 ) )
+    if( !sema.TryResolveToLiteral( m_Expression, Type::I64 ) )
         sema.Error( "Can't create array with non-const dimension" );
 }
 
 std::unique_ptr<Expression> ArraySpecifier::GetExpression()
 {
-    return std::move(m_expression);
+    return std::move(m_Expression);
 }
 
 void ArraySpecifier::Print( int depth ) const

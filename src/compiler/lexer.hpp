@@ -140,11 +140,11 @@ private:
     void         ReadChars               ( std::size_t num_chars );
 
 
-    const std::string           m_string;
+    const std::string           m_String;
 
-    std::string::const_iterator m_position;
-    std::size_t                 m_lineNumber = 1;
-    std::size_t                 m_columnNumber = 1;
+    std::string::const_iterator m_Position;
+    std::size_t                 m_LineNumber = 1;
+    std::size_t                 m_ColumnNumber = 1;
 };
 
 } // namespace Compiler

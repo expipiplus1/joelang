@@ -45,19 +45,19 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 DeclSpecs::DeclSpecs( bool is_const, Type type )
-    :m_isConst( is_const )
-    ,m_type( type )
+    :m_IsConst( is_const )
+    ,m_Type( type )
 {
 }
 
 bool DeclSpecs::IsConst() const
 {
-    return m_isConst;
+    return m_IsConst;
 }
 
 Type DeclSpecs::GetType() const
 {
-    return m_type;
+    return m_Type;
 }
 
 //------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ bool DeclarationSpecifier::classof( const DeclarationSpecifier* d )
 
 TypeSpecifier::TypeSpecifier( TypeSpec t )
     :DeclarationSpecifier( TokenTy::TypeSpecifier )
-    ,m_typeSpec( t )
+    ,m_TypeSpec( t )
 {
 }
 
@@ -122,7 +122,7 @@ void TypeSpecifier::Print( int depth ) const
 
 TypeSpecifier::TypeSpec TypeSpecifier::GetSpecifier() const
 {
-    return m_typeSpec;
+    return m_TypeSpec;
 }
 
 bool TypeSpecifier::Parse( Parser& parser,
@@ -169,7 +169,7 @@ bool TypeSpecifier::classof( const TypeSpecifier* d )
 
 TypeQualifier::TypeQualifier( TypeQual t )
     :DeclarationSpecifier( TokenTy::TypeQualifier )
-    ,m_typeQual( t )
+    ,m_TypeQual( t )
 {
 }
 
@@ -183,7 +183,7 @@ void TypeQualifier::Print( int depth ) const
 
 TypeQualifier::TypeQual TypeQualifier::GetQualifier() const
 {
-    return m_typeQual;
+    return m_TypeQual;
 }
 
 bool TypeQualifier::Parse( Parser& parser,
@@ -221,7 +221,7 @@ bool TypeQualifier::classof( const TypeQualifier* d )
 
 StorageClassSpecifier::StorageClassSpecifier( StorageClass storage_class )
     :DeclarationSpecifier( TokenTy::StorageClassSpecifier )
-    ,m_storageClass( storage_class )
+    ,m_StorageClass( storage_class )
 {
 }
 

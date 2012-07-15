@@ -82,14 +82,14 @@ public:
     const std::unique_ptr<Expression>& GetReadExpression() const;
 
 private:
-    Type m_type;
-    std::vector<Expression_sp> m_arrayDimensionSizes;
-    bool m_isConst;
-    bool m_isGlobal;
-    std::unique_ptr<Expression> m_initializer;
+    Type m_Type;
+    std::vector<Expression_sp> m_ArrayDimensionSizes;
+    bool m_IsConst;
+    bool m_IsGlobal;
+    std::unique_ptr<Expression> m_Initializer;
 
     // TODO handle non global variables
-    llvm::Value* m_llvmPointer = nullptr;
+    llvm::Value* m_LLVMPointer = nullptr;
 };
 
 } // namespace Compiler

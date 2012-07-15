@@ -57,8 +57,8 @@ public:
     Type GetType() const;
 
 private:
-    bool m_isConst;
-    Type m_type;
+    bool m_IsConst;
+    Type m_Type;
 };
 
 /**
@@ -135,7 +135,7 @@ public:
     static
     bool classof( const TypeSpecifier* d );
 private:
-    TypeSpec m_typeSpec;
+    TypeSpec m_TypeSpec;
 };
 
 /**
@@ -172,7 +172,7 @@ public:
     static
     bool classof( const TypeQualifier* d );
 private:
-    TypeQual m_typeQual;
+    TypeQual m_TypeQual;
 };
 
 /**
@@ -209,7 +209,7 @@ public:
     static
     bool classof( const StorageClassSpecifier* d );
 private:
-    StorageClass m_storageClass;
+    StorageClass m_StorageClass;
 };
 
 } // namespace Compiler

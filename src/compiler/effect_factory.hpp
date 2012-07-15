@@ -51,7 +51,7 @@ public:
     std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
 
 private:
-    const Context& m_context;
+    const Context& m_Context;
 };
 
 } // namespace Compiler

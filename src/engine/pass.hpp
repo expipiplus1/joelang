@@ -59,8 +59,8 @@ public:
     const std::string& GetName() const;
 
 private:
-    std::string m_name;
-    StateAssignmentVector m_stateAssignments;
+    std::string m_Name;
+    StateAssignmentVector m_StateAssignments;
 };
 
 } // namespace JoeLang

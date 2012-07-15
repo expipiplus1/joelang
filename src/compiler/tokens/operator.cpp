@@ -55,7 +55,7 @@ namespace Compiler
 
 AssignmentOperator::AssignmentOperator( Op op )
     :Token( TokenTy::AssignmentOperator )
-    ,m_operator(op)
+    ,m_Operator(op)
 {
 }
 
@@ -72,7 +72,7 @@ void AssignmentOperator::Print(int depth) const
 
 AssignmentOperator::Op AssignmentOperator::GetOp() const
 {
-    return m_operator;
+    return m_Operator;
 }
 
 bool AssignmentOperator::Parse( Parser& parser,
@@ -152,9 +152,9 @@ bool PostfixOperator::classof( const PostfixOperator* e )
 
 SubscriptOperator::SubscriptOperator( Expression_up index_expression )
     :PostfixOperator( TokenTy::SubscriptOperator )
-    ,m_indexExpression( std::move(index_expression) )
+    ,m_IndexExpression( std::move(index_expression) )
 {
-    assert( m_indexExpression &&
+    assert( m_IndexExpression &&
             "SubscriptOperator given a null index expression" );
 }
 
@@ -171,14 +171,14 @@ bool SubscriptOperator::PerformSema(
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    return m_indexExpression->PerformSema( sema );
+    return m_IndexExpression->PerformSema( sema );
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
                                          const Expression_up& expression )
 {
     assert( expression && "SubscriptOperator given an null expression" );
-    return code_gen.CreateArrayIndex( *expression, *m_indexExpression );
+    return code_gen.CreateArrayIndex( *expression, *m_IndexExpression );
 }
 
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
@@ -212,7 +212,7 @@ void SubscriptOperator::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "SubscriptOperator\n";
-    m_indexExpression->Print( depth + 1 );
+    m_IndexExpression->Print( depth + 1 );
 }
 
 bool SubscriptOperator::Parse( Parser& parser,
@@ -242,10 +242,10 @@ bool SubscriptOperator::Parse( Parser& parser,
 ArgumentListOperator::ArgumentListOperator(
         ArgumentExpressionVector argument_expressions )
     :PostfixOperator( TokenTy::ArgumentListOperator )
-    ,m_argumentExpressions( std::move(argument_expressions) )
+    ,m_ArgumentExpressions( std::move(argument_expressions) )
 {
 #ifndef NDEBUG
-    for( const auto& e : m_argumentExpressions )
+    for( const auto& e : m_ArgumentExpressions )
         assert( e && "ArgumentListOperator given a null argument expression" );
 #endif
 }
@@ -295,7 +295,7 @@ void ArgumentListOperator::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "ArgumentListOperator\n";
-    for( const auto& i : m_argumentExpressions )
+    for( const auto& i : m_ArgumentExpressions )
         i->Print( depth + 1 );
 }
 
@@ -345,7 +345,7 @@ bool ArgumentListOperator::Parse( Parser& parser,
 
 MemberAccessOperator::MemberAccessOperator( std::string identifier )
     :PostfixOperator( TokenTy::MemberAccessOperator )
-    ,m_identifier( std::move( identifier ) )
+    ,m_Identifier( std::move( identifier ) )
 {
 }
 
@@ -396,7 +396,7 @@ void MemberAccessOperator::Print( int depth ) const
     std::cout << ".\n";
     for( int i = 0; i < depth * 4 + 4; ++i )
         std::cout << " ";
-    std::cout << m_identifier << std::endl;
+    std::cout << m_Identifier << std::endl;
 }
 
 bool MemberAccessOperator::Parse( Parser& parser,
@@ -421,7 +421,7 @@ bool MemberAccessOperator::Parse( Parser& parser,
 
 IncrementOrDecrementOperator::IncrementOrDecrementOperator( Op op )
     :PostfixOperator( TokenTy::IncrementOrDecrementOperator )
-    ,m_operator( op )
+    ,m_Operator( op )
 {
 }
 
@@ -470,7 +470,7 @@ void IncrementOrDecrementOperator::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
-    std::cout << (m_operator == Op::INCREMENT ? "++" : "--") << std::endl;
+    std::cout << (m_Operator == Op::INCREMENT ? "++" : "--") << std::endl;
 }
 
 bool IncrementOrDecrementOperator::Parse(

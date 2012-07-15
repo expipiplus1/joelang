@@ -45,7 +45,7 @@ bool DefaultStateValidateCallback()
 }
 
 StateBase::StateBase( std::string name )
-    :m_name( std::move(name) )
+    :m_Name( std::move(name) )
 {
 }
 
@@ -55,7 +55,7 @@ StateBase::~StateBase()
 
 const std::string& StateBase::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 } // namespace JoeLang

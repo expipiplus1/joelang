@@ -58,10 +58,10 @@ public:
     void SetErrorCallback( std::function<void(std::string)> error_callback );
     const std::function<void(std::string)>& GetErrorCallback() const;
 private:
-    std::vector<StateBase*>               m_states;
-    std::vector<std::unique_ptr<Effect> > m_effects;
+    std::vector<StateBase*>               m_States;
+    std::vector<std::unique_ptr<Effect> > m_Effects;
 
-    std::function<void(std::string)>      m_errorCallback;
+    std::function<void(std::string)>      m_ErrorCallback;
 };
 
 } // namespace JoeLang

@@ -51,14 +51,14 @@ namespace Compiler
 {
 
 SemaAnalyzer::SemaAnalyzer( const Context& context, CodeGenerator& code_gen )
-    :m_context( context )
-    ,m_codeGenerator( code_gen )
+    :m_Context( context )
+    ,m_CodeGenerator( code_gen )
 {
 }
 
 SemaAnalyzer::~SemaAnalyzer()
 {
-    assert( m_symbolStack.size() == 0 &&
+    assert( m_SymbolStack.size() == 0 &&
             "The symbol table is still inside a scope" );
 }
 
@@ -70,7 +70,7 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
     LeaveScope();
 
     // Check for undefined things
-    for( const auto& p : m_passDefinitions )
+    for( const auto& p : m_PassDefinitions )
     {
         // If this pass is referenced and not defined
         if( !p.second.unique() &&
@@ -79,7 +79,7 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
     }
 
     // Return success or not
-    return m_good;
+    return m_Good;
 }
 
 void SemaAnalyzer::DeclarePass( std::string name,
@@ -88,11 +88,11 @@ void SemaAnalyzer::DeclarePass( std::string name,
     if( definition )
         definition->PerformSema( *this );
 
-    PassDefinitionMap::const_iterator d = m_passDefinitions.find( name );
+    PassDefinitionMap::const_iterator d = m_PassDefinitions.find( name );
 
-    if( d == m_passDefinitions.end() )
+    if( d == m_PassDefinitions.end() )
         // If we haven't seen this name before: insert it
-        m_passDefinitions[name] =
+        m_PassDefinitions[name] =
                         std::make_shared<std::unique_ptr<PassDefinition> >(
                                                         std::move(definition) );
     else
@@ -110,37 +110,37 @@ void SemaAnalyzer::DeclarePass( std::string name,
 void SemaAnalyzer::DeclareTechnique( std::string name )
 {
     // Check if this technique has already been defined
-    const auto& i = std::find( m_techniques.begin(), m_techniques.end(), name );
+    const auto& i = std::find( m_Techniques.begin(), m_Techniques.end(), name );
 
-    if( i != m_techniques.end() )
+    if( i != m_Techniques.end() )
         Error( "Multiple definitions of technique " + name );
 
     // Add the technique
-    m_techniques.push_back( std::move(name) );
+    m_Techniques.push_back( std::move(name) );
 }
 
 bool SemaAnalyzer::HasPass( const std::string& name ) const
 {
-    return m_passDefinitions.count( name ) > 0;
+    return m_PassDefinitions.count( name ) > 0;
 }
 
 SemaAnalyzer::PassDefinitionRef SemaAnalyzer::GetPass(
                                                  const std::string& name ) const
 {
-    PassDefinitionMap::const_iterator p = m_passDefinitions.find( name );
-    if( p == m_passDefinitions.end() )
+    PassDefinitionMap::const_iterator p = m_PassDefinitions.find( name );
+    if( p == m_PassDefinitions.end() )
         return nullptr;
     return p->second;
 }
 
 bool SemaAnalyzer::HasState( const std::string& name ) const
 {
-    return m_context.GetNamedState( name ) != nullptr;
+    return m_Context.GetNamedState( name ) != nullptr;
 }
 
 const StateBase* SemaAnalyzer::GetState( const std::string& name ) const
 {
-    return m_context.GetNamedState( name );
+    return m_Context.GetNamedState( name );
 }
 
 std::map<std::string, std::unique_ptr<LiteralExpression> >
@@ -276,18 +276,18 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
                                     std::shared_ptr<Variable> value )
 {
-    bool inserted = m_symbolStack.rbegin()->m_variables.insert(
+    bool inserted = m_SymbolStack.rbegin()->m_Variables.insert(
             std::make_pair( identifier, std::move(value) ) ).second;
 
     if( !inserted )
         Error( "Duplicate definition of variable: " + identifier );
     else
     {
-        for( auto it = ++m_symbolStack.rbegin();
-             it != m_symbolStack.rend();
+        for( auto it = ++m_SymbolStack.rbegin();
+             it != m_SymbolStack.rend();
              ++it )
         {
-            if( it->m_variables.find( identifier ) != it->m_variables.end() )
+            if( it->m_Variables.find( identifier ) != it->m_Variables.end() )
                 Warning( "Declaration of \'" + identifier +
                          "\' shadows previous declaration" );
         }
@@ -298,11 +298,11 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
                                                 const std::string& identifier )
 {
     // iterate in reverse because deeper scopes take priority
-    for( auto it = m_symbolStack.rbegin();
-         it != m_symbolStack.rend(); ++it )
+    for( auto it = m_SymbolStack.rbegin();
+         it != m_SymbolStack.rend(); ++it )
     {
-        const auto& v = it->m_variables.find( identifier );
-        if( v != it->m_variables.end() )
+        const auto& v = it->m_Variables.find( identifier );
+        if( v != it->m_Variables.end() )
             return v->second;
     }
     return nullptr;
@@ -310,17 +310,17 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
 
 void SemaAnalyzer::EnterScope()
 {
-    m_symbolStack.resize( m_symbolStack.size() + 1 );
+    m_SymbolStack.resize( m_SymbolStack.size() + 1 );
 }
 
 void SemaAnalyzer::LeaveScope()
 {
-    m_symbolStack.pop_back();
+    m_SymbolStack.pop_back();
 }
 
 bool SemaAnalyzer::InGlobalScope() const
 {
-    return m_symbolStack.size() == 1;
+    return m_SymbolStack.size() == 1;
 }
 
 bool SemaAnalyzer::TryResolveToLiteral( std::unique_ptr<Expression>& expression,
@@ -340,7 +340,7 @@ bool SemaAnalyzer::TryResolveToLiteral( std::unique_ptr<Expression>& expression,
 
 void SemaAnalyzer::Error( const std::string& error_message )
 {
-    m_good = false;
+    m_Good = false;
     std::cout << "Error during semantic analysis: " << error_message <<
                  std::endl;
 }
@@ -353,7 +353,7 @@ void SemaAnalyzer::Warning( const std::string& warning_message)
 
 bool SemaAnalyzer::Good() const
 {
-    return m_good;
+    return m_Good;
 }
 
 } // namespace Compiler

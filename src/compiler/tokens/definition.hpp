@@ -102,7 +102,7 @@ public:
                                       std::unique_ptr<PassDefinition>& token );
 
 private:
-    StateAssignStmtVector   m_stateAssignments;
+    StateAssignStmtVector   m_StateAssignments;
 };
 
 /**
@@ -183,12 +183,12 @@ public:
 
 private:
     /** This pass declaration's identifier if it has one, otherwise "" **/
-    std::string                      m_identifier;
+    std::string                      m_Identifier;
     /** This token's declaration if it has one, otherwise nullptr **/
-    std::unique_ptr<PassDeclaration> m_declaration;
+    std::unique_ptr<PassDeclaration> m_Declaration;
 
     /** The reference to the definition this token represents **/
-    std::shared_ptr<std::unique_ptr<PassDefinition> > m_definitionRef = nullptr;
+    std::shared_ptr<std::unique_ptr<PassDefinition> > m_DefinitionRef = nullptr;
 };
 
 } // namespace Compiler

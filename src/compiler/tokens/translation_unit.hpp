@@ -101,7 +101,7 @@ public:
 
 private:
     /** The vector of all the top level declarations **/
-    DeclarationVector m_declarations;
+    DeclarationVector m_Declarations;
 };
 
 } // namespace Compiler

@@ -50,7 +50,7 @@ namespace Compiler
 
 TranslationUnit::TranslationUnit( DeclarationVector declarations )
     :Token( TokenTy::TranslationUnit )
-    ,m_declarations( std::move(declarations) )
+    ,m_Declarations( std::move(declarations) )
 {
 }
 
@@ -60,7 +60,7 @@ TranslationUnit::~TranslationUnit()
 
 void TranslationUnit::PerformSema( SemaAnalyzer& sema )
 {
-    for( const auto& d : m_declarations )
+    for( const auto& d : m_Declarations )
         d->PerformSema( sema );
 }
 
@@ -69,14 +69,14 @@ void TranslationUnit::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i)
         std::cout << " ";
     std::cout << "TranslationUnit\n";
-    for( const auto& declaration : m_declarations )
+    for( const auto& declaration : m_Declarations )
         declaration->Print( depth + 1 );
 }
 
 const TranslationUnit::DeclarationVector&
                                         TranslationUnit::GetDeclarations() const
 {
-    return m_declarations;
+    return m_Declarations;
 }
 
 bool TranslationUnit::Parse( Parser& parser,

@@ -56,10 +56,10 @@ namespace Compiler
 
 PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
     :Token( TokenTy::PassDefinition )
-    ,m_stateAssignments( std::move(state_assignments) )
+    ,m_StateAssignments( std::move(state_assignments) )
 {
 #ifndef NDEBUG
-    for( const auto& s : m_stateAssignments )
+    for( const auto& s : m_StateAssignments )
         assert( s && "null StateAssignmentStatement given to PassDefinition" );
 #endif
 }
@@ -70,20 +70,20 @@ PassDefinition::~PassDefinition()
 
 void PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
-    for( auto& s : m_stateAssignments )
+    for( auto& s : m_StateAssignments )
         s->PerformSema( sema );
 }
 
 void PassDefinition::Print( int depth ) const
 {
-    for( const auto& s: m_stateAssignments )
+    for( const auto& s: m_StateAssignments )
         s->Print( depth );
 }
 
 const PassDefinition::StateAssignStmtVector&
                                     PassDefinition::GetStateAssignments() const
 {
-    return m_stateAssignments;
+    return m_StateAssignments;
 }
 
 bool PassDefinition::Parse( Parser& parser,
@@ -115,11 +115,11 @@ PassDeclarationOrIdentifier::PassDeclarationOrIdentifier(
         std::string                      identifier,
         std::unique_ptr<PassDeclaration> declaration )
     :Token( TokenTy::PassDeclarationOrIdentifier )
-    ,m_identifier ( std::move(identifier)  )
-    ,m_declaration( std::move(declaration) )
+    ,m_Identifier ( std::move(identifier)  )
+    ,m_Declaration( std::move(declaration) )
 {
     // Assert if both are full, or none are
-    assert( m_identifier.empty() == bool(m_declaration) &&
+    assert( m_Identifier.empty() == bool(m_Declaration) &&
             "PassDeclarationOrIdentifier must have one and only one value" );
 }
 
@@ -129,55 +129,55 @@ PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
 
 Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 {
-    assert( m_definitionRef && "Trying to generate a pass with no definition" );
-    assert( *m_definitionRef && "Trying to generate an undefined pass" );
+    assert( m_DefinitionRef && "Trying to generate a pass with no definition" );
+    assert( *m_DefinitionRef && "Trying to generate an undefined pass" );
 
     std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
-    for( const auto& s : (*m_definitionRef)->GetStateAssignments() )
+    for( const auto& s : (*m_DefinitionRef)->GetStateAssignments() )
         state_assignments.push_back( s->GenerateStateAssignment( code_gen ) );
-    return Pass( IsIdentifier() ? m_identifier : m_declaration->GetName(),
+    return Pass( IsIdentifier() ? m_Identifier : m_Declaration->GetName(),
                  std::move(state_assignments) );
 }
 
 void PassDeclarationOrIdentifier::Print( int depth ) const
 {
-    if( m_definitionRef &&
-        *m_definitionRef )
+    if( m_DefinitionRef &&
+        *m_DefinitionRef )
     {
-        (*m_definitionRef)->Print( depth );
+        (*m_DefinitionRef)->Print( depth );
     }
     else if( IsIdentifier() )
     {
         for( int i = 0; i < depth * 4; ++i )
             std::cout << " ";
-        std::cout << m_identifier;
+        std::cout << m_Identifier;
     }
     else
     {
-        m_declaration->Print( depth );
+        m_Declaration->Print( depth );
     }
 }
 
 void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
 {
-    if( m_declaration )
+    if( m_Declaration )
     {
-        m_declaration->PerformSema( sema );
-        m_definitionRef = sema.GetPass( m_declaration->GetName() );
+        m_Declaration->PerformSema( sema );
+        m_DefinitionRef = sema.GetPass( m_Declaration->GetName() );
     }
     else
     {
-        SemaAnalyzer::PassDefinitionRef d = sema.GetPass( m_identifier );
+        SemaAnalyzer::PassDefinitionRef d = sema.GetPass( m_Identifier );
         if( !d )
-            sema.Error( "Use of undeclared pass: " + m_identifier );
+            sema.Error( "Use of undeclared pass: " + m_Identifier );
         else
-            m_definitionRef = d;
+            m_DefinitionRef = d;
     }
 }
 
 bool PassDeclarationOrIdentifier::IsIdentifier() const
 {
-    return !m_identifier.empty();
+    return !m_Identifier.empty();
 }
 
 const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
@@ -185,23 +185,23 @@ const std::string& PassDeclarationOrIdentifier::GetIdentifier() const
     assert( IsIdentifier() &&
             "Can't get the identifier of a PassDeclarationOrIdentifier without "
             "an identifier" );
-    return m_identifier;
+    return m_Identifier;
 }
 
 const PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration() const
 {
-    assert( m_declaration &&
+    assert( m_Declaration &&
             "Can't get the declaration of a PassDeclarationOrIdentifier "
             "without a declaration" );
-    return *m_declaration;
+    return *m_Declaration;
 }
 
 PassDeclaration& PassDeclarationOrIdentifier::GetDeclaration()
 {
-    assert( m_declaration &&
+    assert( m_Declaration &&
             "Can't get the declaration of a PassDeclarationOrIdentifier "
             "without a declaration" );
-    return *m_declaration;
+    return *m_Declaration;
 }
 
 bool PassDeclarationOrIdentifier::Parse(

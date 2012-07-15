@@ -44,7 +44,7 @@ namespace Compiler
 {
 
 EffectFactory::EffectFactory( const Context& context )
-    :m_context( context )
+    :m_Context( context )
 {
 }
 
@@ -57,8 +57,8 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
 
     TranslationUnit& ast = *parser.GetTranslationUnit();
 
-    CodeGenerator code_generator( m_context );
-    SemaAnalyzer sema( m_context, code_generator );
+    CodeGenerator code_generator( m_Context );
+    SemaAnalyzer sema( m_Context, code_generator );
     if( !sema.BuildAst( ast ) )
         return nullptr;
 

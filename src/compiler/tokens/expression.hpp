@@ -247,10 +247,10 @@ public:
     static
     bool classof( const AssignmentExpression* e );
 private:
-    std::unique_ptr<Expression> m_assignee;
-    std::shared_ptr<Variable>   m_assigneeVariable;
-    Op                          m_assignmentOperator;
-    std::unique_ptr<Expression> m_assignedExpression;
+    std::unique_ptr<Expression> m_Assignee;
+    std::shared_ptr<Variable>   m_AssigneeVariable;
+    Op                          m_AssignmentOperator;
+    std::unique_ptr<Expression> m_AssignedExpression;
 };
 
 /**
@@ -312,9 +312,9 @@ public:
     static
     bool classof( const ConditionalExpression* e );
 private:
-    std::unique_ptr<Expression> m_condition;
-    std::unique_ptr<Expression> m_trueExpression;
-    std::unique_ptr<Expression> m_falseExpression;
+    std::unique_ptr<Expression> m_Condition;
+    std::unique_ptr<Expression> m_TrueExpression;
+    std::unique_ptr<Expression> m_FalseExpression;
 };
 
 /**
@@ -417,9 +417,9 @@ public:
     static
     bool classof( const BinaryOperatorExpression* e );
 protected:
-    Op m_operator;
-    std::unique_ptr<Expression> m_leftSide;
-    std::unique_ptr<Expression> m_rightSide;
+    Op m_Operator;
+    std::unique_ptr<Expression> m_LeftSide;
+    std::unique_ptr<Expression> m_RightSide;
 };
 
 
@@ -806,8 +806,8 @@ public:
     bool classof( const CastExpression* e );
 
 private:
-    Type m_castType;
-    std::unique_ptr<Expression> m_expression;
+    Type m_CastType;
+    std::unique_ptr<Expression> m_Expression;
 };
 
 /**
@@ -877,8 +877,8 @@ public:
     static
     bool classof( const UnaryExpression* e );
 private:
-    Op m_operator;
-    std::unique_ptr<Expression> m_expression;
+    Op m_Operator;
+    std::unique_ptr<Expression> m_Expression;
 };
 
 /**
@@ -926,8 +926,8 @@ public:
     static
     bool classof( const PostfixExpression* e );
 private:
-    std::unique_ptr<Expression> m_expression;
-    std::unique_ptr<PostfixOperator> m_postfixOperator;
+    std::unique_ptr<Expression> m_Expression;
+    std::unique_ptr<PostfixOperator> m_PostfixOperator;
 };
 
 /**
@@ -1010,8 +1010,8 @@ public:
     static
     bool classof( const IdentifierExpression* e );
 private:
-    std::string                 m_identifier;
-    std::shared_ptr<Variable>   m_variable;
+    std::string                 m_Identifier;
+    std::shared_ptr<Variable>   m_Variable;
 };
 
 /**
@@ -1140,8 +1140,8 @@ private:
                        jl_u64&  value,
                        Suffix&     suffix );
 
-    jl_u64 m_value;
-    Suffix m_suffix;
+    jl_u64 m_Value;
+    Suffix m_Suffix;
 };
 
 /**
@@ -1205,8 +1205,8 @@ private:
                      double& value,
                      Suffix& suffix );
 
-    double m_value;
-    Suffix m_suffix;
+    double m_Value;
+    Suffix m_Suffix;
 };
 
 /**
@@ -1245,7 +1245,7 @@ public:
     static
     bool classof( const BooleanLiteralExpression* e );
 private:
-    bool m_value;
+    bool m_Value;
 };
 
 /**
@@ -1298,7 +1298,7 @@ private:
     bool UnquoteAndUnescapeString( const std::string& string,
                                    std::string& unescaped_string );
 
-    std::string m_value;
+    std::string m_Value;
 };
 
 /**
@@ -1349,7 +1349,7 @@ private:
     bool UnquoteAndUnescapeChar( const std::string& character,
                                  char& unescaped_char );
 
-    char m_value;
+    char m_Value;
 };
 
 } // namespace Compiler
