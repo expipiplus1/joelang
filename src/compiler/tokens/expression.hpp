@@ -147,7 +147,7 @@ public:
       * \returns the array extents of this expression's return type
       */
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const = 0;
+    const std::vector<unsigned>& GetArrayExtents() const = 0;
 
     /**
       * \returns true if the Expression represents a l-value
@@ -239,7 +239,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -307,7 +307,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -400,7 +400,7 @@ public:
     Type GetUnderlyingType() const override final;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override final;
+    const std::vector<unsigned>& GetArrayExtents() const override final;
 
     virtual
     bool IsConst() const override;
@@ -801,7 +801,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -881,7 +881,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -934,7 +934,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -1004,7 +1004,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override;
+    const std::vector<unsigned>& GetArrayExtents() const override;
 
     /** \returns true **/
     virtual
@@ -1073,7 +1073,7 @@ public:
 
     /// \returns {}
     virtual
-    std::vector<Expression_sp> GetArrayExtents() const override final;
+    const std::vector<unsigned>& GetArrayExtents() const override final;
 
     virtual
     bool IsConst() const override;

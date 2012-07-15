@@ -269,7 +269,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         DeclareVariable( v.first,
                          std::make_shared<Variable>(
                                     v.second->GetReturnType(),
-                                    std::vector<Expression_sp>(),
+                                    std::vector<unsigned>(),
                                     true,
                                     false,
                                     std::move(v.second) ) );

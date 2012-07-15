@@ -38,6 +38,7 @@
 #include <engine/types.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -171,6 +172,15 @@ bool SubscriptOperator::PerformSema(
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
+    const std::vector<unsigned> extents = expression->GetArrayExtents();
+    assert( extents.size() != 0 && "Indexing into a non array" );
+    if( m_IndexExpression->IsConst() )
+    {
+        unsigned index = sema.EvaluateExpression( *m_IndexExpression ).GetI64();
+        if( index >= extents[0] )
+            sema.Error( "Indexing beyond array bounds" );
+    }
+    m_ArrayExtents.assign( ++extents.begin(), extents.end() );
     return m_IndexExpression->PerformSema( sema );
 }
 
@@ -184,8 +194,7 @@ llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
 {
     assert( expression && "SubscriptOperator given an null expression" );
-    const std::vector<Expression_sp>& array_extents =
-                                                expression->GetArrayExtents();
+    const std::vector<unsigned>& array_extents = expression->GetArrayExtents();
     if( array_extents.size() > 1 )
         return Type::ARRAY;
     return expression->GetUnderlyingType();
@@ -199,12 +208,10 @@ Type SubscriptOperator::GetUnderlyingType(
     return Type::UNKNOWN_TYPE;
 }
 
-std::vector<Expression_sp> SubscriptOperator::GetArrayExtents(
+const std::vector<unsigned>& SubscriptOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
-    assert( expression && "SubscriptOperator given an null expression" );
-    assert( false && "Complete me" );
-    return {};
+    return m_ArrayExtents;
 }
 
 bool SubscriptOperator::IsConst( const Expression& expression ) const
@@ -289,11 +296,12 @@ Type ArgumentListOperator::GetUnderlyingType(
     return Type::UNKNOWN_TYPE;
 }
 
-std::vector<Expression_sp> ArgumentListOperator::GetArrayExtents(
+const std::vector<unsigned>& ArgumentListOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    const static std::vector<unsigned> empty;
+    return empty;
 }
 
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
@@ -393,11 +401,12 @@ Type MemberAccessOperator::GetUnderlyingType(
     return Type::UNKNOWN_TYPE;
 }
 
-std::vector<Expression_sp> MemberAccessOperator::GetArrayExtents(
+const std::vector<unsigned>& MemberAccessOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    const static std::vector<unsigned> empty;
+    return empty;
 }
 
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
@@ -475,11 +484,12 @@ Type IncrementOrDecrementOperator::GetUnderlyingType(
     return Type::UNKNOWN_TYPE;
 }
 
-std::vector<Expression_sp> IncrementOrDecrementOperator::GetArrayExtents(
+const std::vector<unsigned>& IncrementOrDecrementOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    const static std::vector<unsigned> empty;
+    return empty;
 }
 
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const

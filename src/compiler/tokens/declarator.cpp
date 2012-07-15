@@ -34,6 +34,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -41,6 +42,7 @@
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/internal/type_properties.hpp>
 
 namespace JoeLang
 {
@@ -115,7 +117,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     }
 
     Type base_type = decl_specs.GetType();
-    std::vector<Expression_sp> array_dimension_sizes =
+    std::vector<unsigned> array_dimension_sizes =
                                         m_Declarator->GetArrayDimensionSizes();
 
     m_Variable = std::make_shared<Variable>( base_type,
@@ -180,7 +182,16 @@ Declarator::~Declarator()
 void Declarator::PerformSema( SemaAnalyzer& sema )
 {
     for( auto& array_specifier : m_ArraySpecifiers )
+    {
+        // This ensures it's const
         array_specifier->PerformSema( sema );
+        GenericValue g = sema.EvaluateExpression(
+                                            *array_specifier->GetExpression() );
+        jl_i64 size = g.GetI64();
+        if( size <= 0 )
+            sema.Error( "Can't create an array with a non-positive dimension" );
+        m_ArrayExtents.push_back( size );
+    }
 }
 
 void Declarator::Print( int depth ) const
@@ -192,12 +203,9 @@ const std::string& Declarator::GetIdentifier() const
     return m_Identifier;
 }
 
-std::vector<Expression_sp> Declarator::GetArrayDimensionSizes() const
+const std::vector<unsigned>& Declarator::GetArrayDimensionSizes() const
 {
-    std::vector<Expression_sp> ret;
-    for( const auto& array_specifier : m_ArraySpecifiers )
-        ret.push_back( array_specifier->GetExpression() );
-    return ret;
+    return m_ArrayExtents;
 }
 
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
@@ -239,7 +247,12 @@ ArraySpecifier::~ArraySpecifier()
 
 void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
 {
-    if( !sema.TryResolveToLiteral( m_Expression, Type::I64 ) )
+    if( !IsIntegral( m_Expression->GetReturnType() ) )
+        sema.Error( "Can't create array with non-integer dimension" );
+    m_Expression = CastExpression::Create( Type::I64,
+                                           std::move(m_Expression) );
+    m_Expression->PerformSema( sema );
+    if( !m_Expression->IsConst() )
         sema.Error( "Can't create array with non-const dimension" );
 }
 

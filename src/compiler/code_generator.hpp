@@ -158,7 +158,7 @@ public:
       */
     llvm::GlobalVariable* CreateGlobalVariable(
                      Type type,
-                     std::vector<Expression_sp> array_extents,
+                     std::vector<unsigned> array_extents,
                      bool is_const,
                      const Expression_up& initializer = nullptr );
 

@@ -135,7 +135,7 @@ public:
     const std::string& GetIdentifier() const;
 
     /** \returns a vector of the sizes of the array dimensions **/
-    std::vector<Expression_sp> GetArrayDimensionSizes() const;
+    const std::vector<unsigned>& GetArrayDimensionSizes() const;
 
     /**
       * Parses a direct declarator
@@ -153,6 +153,7 @@ public:
 private:
     std::string             m_Identifier;
     ArraySpecifierVector    m_ArraySpecifiers;
+    std::vector<unsigned>   m_ArrayExtents;
 };
 
 /**

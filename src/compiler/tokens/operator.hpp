@@ -140,7 +140,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const = 0;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents(
+    const std::vector<unsigned>& GetArrayExtents(
                                     const Expression_up& expression) const = 0;
 
     virtual
@@ -191,7 +191,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents(
+    const std::vector<unsigned>& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     virtual
@@ -204,7 +204,8 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    Expression_up m_IndexExpression;
+    Expression_up           m_IndexExpression;
+    std::vector<unsigned>   m_ArrayExtents;
 };
 
 /**
@@ -239,7 +240,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents(
+    const std::vector<unsigned>& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     /** \returns false **/
@@ -290,7 +291,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents(
+    const std::vector<unsigned>& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     virtual
@@ -340,7 +341,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    std::vector<Expression_sp> GetArrayExtents(
+    const std::vector<unsigned>& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     /** \returns false **/

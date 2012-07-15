@@ -62,7 +62,7 @@ public:
       * an initializer
       */
     Variable( Type type,
-              std::vector<Expression_sp> array_dimension_sizes,
+              std::vector<unsigned> array_dimension_sizes,
               bool is_const,
               bool is_global,
               Expression_up initializer = nullptr );
@@ -75,7 +75,7 @@ public:
 
     Type GetUnderlyingType() const;
 
-    const std::vector<Expression_sp>& GetArrayExtents() const;
+    const std::vector<unsigned>& GetArrayExtents() const;
 
     /** \returns true if this variable is const **/
     bool IsConst() const;
@@ -84,7 +84,7 @@ public:
 
 private:
     Type m_Type;
-    std::vector<Expression_sp> m_ArrayDimensionSizes;
+    std::vector<unsigned> m_ArrayDimensionSizes;
     bool m_IsConst;
     bool m_IsGlobal;
     Expression_up m_Initializer;

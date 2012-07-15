@@ -226,9 +226,106 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
 GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 {
+    assert( expression.IsConst() &&
+            "Trying to evaluate a non-const expression" );
+
     llvm::Type* t = GetLLVMType( expression, m_LLVMContext );
-    t = t;
-    return GenericValue();
+    assert( t && "trying to get the type of an unhandled JoeLang::Type" );
+
+    llvm::IRBuilder<> llvm_builder( m_LLVMContext );
+
+    //
+    // create a function prototype which takes no arguments!
+    //
+    llvm::FunctionType* prototype = llvm::FunctionType::get(
+                                        t,
+                                        std::vector<llvm::Type*>(),
+                                        false );
+    assert( prototype && "Error generating empty function prototype" );
+
+    //
+    // create an anonymous function
+    //
+    llvm::Function* function = llvm::Function::Create(
+                                                prototype,
+                                                llvm::Function::InternalLinkage,
+                                                "",
+                                                m_LLVMModule );
+    assert( function && "Error generating llvm function" );
+
+    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_LLVMContext,
+                                                       "",
+                                                       function );
+    llvm_builder.SetInsertPoint( body );
+
+    //
+    // Generate the code from the expression
+    //
+    llvm::Value* v = expression.CodeGen( *this );
+    assert( v && "Invalid expression llvm::Value*" );
+
+    //
+    // Set it as the return value for the function
+    //
+    llvm_builder.CreateRet( v );
+    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
+            "Function not valid" );
+
+    //
+    // Evaluate the function
+    //
+    llvm::GenericValue g = m_LLVMExecutionEngine->runFunction( function,
+                                                               {} );
+
+    //
+    // Extract the result
+    //
+    GenericValue ret;
+
+    if( IsIntegral( expression.GetReturnType() ) )
+    {
+        jl_u64 result = g.IntVal.getLimitedValue();
+        switch( expression.GetReturnType() )
+        {
+        case Type::BOOL:
+            ret = GenericValue( static_cast<jl_bool>(result) );
+            break;
+        case Type::I8:
+            ret = GenericValue( static_cast<jl_i8>(result) );
+            break;
+        case Type::I16:
+            ret = GenericValue( static_cast<jl_i16>(result) );
+            break;
+        case Type::I32:
+            ret = GenericValue( static_cast<jl_i32>(result) );
+            break;
+        case Type::I64:
+            ret = GenericValue( static_cast<jl_i64>(result) );
+            break;
+        case Type::U8:
+            ret = GenericValue( static_cast<jl_u8>(result) );
+            break;
+        case Type::U16:
+            ret = GenericValue( static_cast<jl_u16>(result) );
+            break;
+        case Type::U32:
+            ret = GenericValue( static_cast<jl_u32>(result) );
+            break;
+        case Type::U64:
+            ret = GenericValue( static_cast<jl_u64>(result) );
+            break;
+        default:
+            assert( false &&
+                    "Trying to get the integer result of a non-integer "
+                    "expression" );
+        }
+    }
+    else
+    {
+        assert( false && "Complete me" );
+    }
+
+    return ret;
 }
 
 //
@@ -546,7 +643,7 @@ llvm::Value* CodeGenerator::CreateFloating( double value,
 
 llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
-                                std::vector<Expression_sp> array_extents,
+                                std::vector<unsigned> array_extents,
                                 bool is_const,
                                 const Expression_up& initializer )
 {

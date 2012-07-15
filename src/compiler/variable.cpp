@@ -47,7 +47,7 @@ namespace Compiler
 
 Variable::Variable(
                 Type base_type,
-                std::vector<Expression_sp> array_dimension_sizes,
+                std::vector<unsigned> array_dimension_sizes,
                 bool is_const,
                 bool is_global,
                 Expression_up initializer )
@@ -101,7 +101,7 @@ Type Variable::GetUnderlyingType() const
     return m_Type;
 }
 
-const std::vector<Expression_sp>& Variable::GetArrayExtents() const
+const std::vector<unsigned>& Variable::GetArrayExtents() const
 {
     return m_ArrayDimensionSizes;
 }

@@ -311,7 +311,7 @@ Type AssignmentExpression::GetUnderlyingType() const
         return m_AssigneeVariable->GetUnderlyingType();
 }
 
-std::vector<Expression_sp> AssignmentExpression::GetArrayExtents() const
+const std::vector<unsigned>& AssignmentExpression::GetArrayExtents() const
 {
     if( m_Assignee )
         return m_Assignee->GetArrayExtents();
@@ -495,7 +495,7 @@ Type ConditionalExpression::GetUnderlyingType() const
                           m_FalseExpression->GetUnderlyingType() );
 }
 
-std::vector<Expression_sp> ConditionalExpression::GetArrayExtents() const
+const std::vector<unsigned>& ConditionalExpression::GetArrayExtents() const
 {
     // The array extents should be the same between the two sides
     return m_TrueExpression->GetArrayExtents();
@@ -770,14 +770,14 @@ Type BinaryOperatorExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-std::vector<Expression_sp> BinaryOperatorExpression::GetArrayExtents() const
+const std::vector<unsigned>& BinaryOperatorExpression::GetArrayExtents() const
 {
     // Can't binary op between two arrays
     assert( m_LeftSide->GetArrayExtents().size() == 0 &&
             "Binary operator left side is an array" );
     assert( m_RightSide->GetArrayExtents().size() == 0 &&
             "Binary operator right side is an array" );
-    return {};
+    return m_LeftSide->GetArrayExtents();
 }
 
 bool BinaryOperatorExpression::IsConst() const
@@ -1554,7 +1554,7 @@ Type CastExpression::GetUnderlyingType() const
     return m_CastType;
 }
 
-std::vector<Expression_sp> CastExpression::GetArrayExtents() const
+const std::vector<unsigned>& CastExpression::GetArrayExtents() const
 {
     return m_Expression->GetArrayExtents();
 }
@@ -1720,11 +1720,11 @@ Type UnaryExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-std::vector<Expression_sp> UnaryExpression::GetArrayExtents() const
+const std::vector<unsigned>& UnaryExpression::GetArrayExtents() const
 {
     assert( m_Expression->GetArrayExtents().size() == 0 &&
             "Unary Expression given an array" );
-    return {};
+    return m_Expression->GetArrayExtents();
 }
 
 bool UnaryExpression::IsConst() const
@@ -1839,7 +1839,7 @@ Type PostfixExpression::GetUnderlyingType() const
     return m_PostfixOperator->GetUnderlyingType( m_Expression );
 }
 
-std::vector<Expression_sp> PostfixExpression::GetArrayExtents() const
+const std::vector<unsigned>& PostfixExpression::GetArrayExtents() const
 {
     return m_PostfixOperator->GetArrayExtents( m_Expression );
 }
@@ -1965,11 +1965,10 @@ Type IdentifierExpression::GetUnderlyingType() const
     return m_Variable->GetUnderlyingType();
 }
 
-std::vector<Expression_sp> IdentifierExpression::GetArrayExtents() const
+const std::vector<unsigned>& IdentifierExpression::GetArrayExtents() const
 {
-    /// TODO something better when !m_Variable
-    if( !m_Variable )
-        return {};
+    assert( m_Variable &&
+            "Trying to get the array extents of an unresolved identifier" );
     return m_Variable->GetArrayExtents();
 }
 
@@ -2051,9 +2050,10 @@ Type LiteralExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-std::vector<Expression_sp> LiteralExpression::GetArrayExtents() const
+const std::vector<unsigned>& LiteralExpression::GetArrayExtents() const
 {
-    return {};
+    const static std::vector<unsigned> empty;
+    return empty;
 }
 
 bool LiteralExpression::IsConst() const
