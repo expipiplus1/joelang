@@ -157,6 +157,12 @@ public:
     bool IsLValue() const;
 
     /**
+      * \returns true if this is a constexpr
+      */
+    virtual
+    bool IsConst() const = 0;
+
+    /**
       * Parses any expression
       * \param parser
       *   The current Parser
@@ -236,6 +242,9 @@ public:
     std::vector<Expression_sp> GetArrayExtents() const override;
 
     virtual
+    bool IsConst() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -299,6 +308,9 @@ public:
 
     virtual
     std::vector<Expression_sp> GetArrayExtents() const override;
+
+    virtual
+    bool IsConst() const override;
 
     virtual
     void Print( int depth ) const;
@@ -389,6 +401,9 @@ public:
 
     virtual
     std::vector<Expression_sp> GetArrayExtents() const override final;
+
+    virtual
+    bool IsConst() const override;
 
     virtual
     void Print( int depth ) const;
@@ -789,6 +804,9 @@ public:
     std::vector<Expression_sp> GetArrayExtents() const override;
 
     virtual
+    bool IsConst() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -866,6 +884,9 @@ public:
     std::vector<Expression_sp> GetArrayExtents() const override;
 
     virtual
+    bool IsConst() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -891,6 +912,7 @@ private:
 class PostfixExpression : public JoeLang::Compiler::Expression
 {
 public:
+    /** This asserts on a null expression or operator **/
     PostfixExpression( Expression_up expression,
                        std::unique_ptr<PostfixOperator> postfix_operator );
     virtual
@@ -913,6 +935,9 @@ public:
 
     virtual
     std::vector<Expression_sp> GetArrayExtents() const override;
+
+    virtual
+    bool IsConst() const override;
 
     virtual
     void Print( int depth ) const;
@@ -981,12 +1006,12 @@ public:
     virtual
     std::vector<Expression_sp> GetArrayExtents() const override;
 
-    /** \returns true if this identifier represents a constant expression **/
-    bool IsConst() const;
-
     /** \returns true **/
     virtual
     bool IsLValue() const override;
+
+    virtual
+    bool IsConst() const override;
 
     const std::shared_ptr<Variable>& GetVariable() const;
 
@@ -1049,6 +1074,9 @@ public:
     /// \returns {}
     virtual
     std::vector<Expression_sp> GetArrayExtents() const override final;
+
+    virtual
+    bool IsConst() const override;
 
     virtual
     GenericValue GetValue() const = 0;

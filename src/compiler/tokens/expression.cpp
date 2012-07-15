@@ -108,8 +108,7 @@ LiteralExpression* Expression::GetLiteral(
                         static_cast<IdentifierExpression*>( e.get() );
         if( i->IsConst() )
         {
-            const Expression_up& read_expression =
-                                                            i->GetReadExpression();
+            const Expression_up& read_expression = i->GetReadExpression();
             if( isa<LiteralExpression>( read_expression ) )
                 l = static_cast<LiteralExpression*>( read_expression.get() );
         }
@@ -320,6 +319,11 @@ std::vector<Expression_sp> AssignmentExpression::GetArrayExtents() const
         return m_AssigneeVariable->GetArrayExtents();
 }
 
+bool AssignmentExpression::IsConst() const
+{
+    return false;
+}
+
 void AssignmentExpression::Print(int depth) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -495,6 +499,15 @@ std::vector<Expression_sp> ConditionalExpression::GetArrayExtents() const
 {
     // The array extents should be the same between the two sides
     return m_TrueExpression->GetArrayExtents();
+}
+
+bool ConditionalExpression::IsConst() const
+{
+    /// TODO only check the taken select
+    return m_Condition->IsConst() &&
+           m_TrueExpression->IsConst() &&
+           m_FalseExpression->IsConst();
+
 }
 
 void ConditionalExpression::Print( int depth ) const
@@ -765,6 +778,12 @@ std::vector<Expression_sp> BinaryOperatorExpression::GetArrayExtents() const
     assert( m_RightSide->GetArrayExtents().size() == 0 &&
             "Binary operator right side is an array" );
     return {};
+}
+
+bool BinaryOperatorExpression::IsConst() const
+{
+    return m_LeftSide->IsConst() &&
+           m_RightSide->IsConst();
 }
 
 void BinaryOperatorExpression::Print( int depth ) const
@@ -1540,6 +1559,11 @@ std::vector<Expression_sp> CastExpression::GetArrayExtents() const
     return m_Expression->GetArrayExtents();
 }
 
+bool CastExpression::IsConst() const
+{
+    return m_Expression->IsConst();
+}
+
 void CastExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1703,6 +1727,13 @@ std::vector<Expression_sp> UnaryExpression::GetArrayExtents() const
     return {};
 }
 
+bool UnaryExpression::IsConst() const
+{
+    return m_Expression->IsConst() &&
+           m_Operator != Op::INCREMENT &&
+           m_Operator != Op::DECREMENT;
+}
+
 void UnaryExpression::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -1772,6 +1803,8 @@ PostfixExpression::PostfixExpression(
     ,m_Expression( std::move(expression) )
     ,m_PostfixOperator( std::move(postfix_operator) )
 {
+    assert( m_Expression && "PostfixExpression given a null expression" );
+    assert( m_PostfixOperator && "PostfixExpression given a null operator" );
 }
 
 PostfixExpression::~PostfixExpression()
@@ -1809,6 +1842,11 @@ Type PostfixExpression::GetUnderlyingType() const
 std::vector<Expression_sp> PostfixExpression::GetArrayExtents() const
 {
     return m_PostfixOperator->GetArrayExtents( m_Expression );
+}
+
+bool PostfixExpression::IsConst() const
+{
+    return m_PostfixOperator->IsConst( *m_Expression );
 }
 
 void PostfixExpression::Print( int depth ) const
@@ -1935,14 +1973,14 @@ std::vector<Expression_sp> IdentifierExpression::GetArrayExtents() const
     return m_Variable->GetArrayExtents();
 }
 
-bool IdentifierExpression::IsConst() const
-{
-    return m_Variable->IsConst();
-}
-
 bool IdentifierExpression::IsLValue() const
 {
     return true;
+}
+
+bool IdentifierExpression::IsConst() const
+{
+    return m_Variable->IsConst();
 }
 
 const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
@@ -2016,6 +2054,11 @@ Type LiteralExpression::GetUnderlyingType() const
 std::vector<Expression_sp> LiteralExpression::GetArrayExtents() const
 {
     return {};
+}
+
+bool LiteralExpression::IsConst() const
+{
+    return true;
 }
 
 bool LiteralExpression::Parse( Parser& parser,

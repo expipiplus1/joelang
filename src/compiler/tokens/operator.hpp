@@ -135,12 +135,16 @@ public:
     virtual
     Type GetReturnType( const Expression_up& expression ) const = 0;
 
+    /// todo make these all take references
     virtual
     Type GetUnderlyingType( const Expression_up& expression ) const = 0;
 
     virtual
     std::vector<Expression_sp> GetArrayExtents(
                                     const Expression_up& expression) const = 0;
+
+    virtual
+    bool IsConst( const Expression& expression ) const = 0;
 
     static
     bool Parse( Parser& parser,
@@ -191,6 +195,9 @@ public:
                             const Expression_up& expression ) const override;
 
     virtual
+    bool IsConst( const Expression& expression ) const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -234,6 +241,10 @@ public:
     virtual
     std::vector<Expression_sp> GetArrayExtents(
                             const Expression_up& expression ) const override;
+
+    /** \returns false **/
+    virtual
+    bool IsConst( const Expression& expression ) const override;
 
     virtual
     void Print( int depth ) const;
@@ -283,6 +294,9 @@ public:
                             const Expression_up& expression ) const override;
 
     virtual
+    bool IsConst( const Expression& expression ) const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -328,6 +342,10 @@ public:
     virtual
     std::vector<Expression_sp> GetArrayExtents(
                             const Expression_up& expression ) const override;
+
+    /** \returns false **/
+    virtual
+    bool IsConst( const Expression& expression ) const override;
 
     virtual
     void Print( int depth ) const;

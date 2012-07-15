@@ -207,6 +207,12 @@ std::vector<Expression_sp> SubscriptOperator::GetArrayExtents(
     return {};
 }
 
+bool SubscriptOperator::IsConst( const Expression& expression ) const
+{
+    return expression.IsConst() &&
+           m_IndexExpression->IsConst();
+}
+
 void SubscriptOperator::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -288,6 +294,11 @@ std::vector<Expression_sp> ArgumentListOperator::GetArrayExtents(
 {
     assert( false && "Complete me" );
     return {};
+}
+
+bool ArgumentListOperator::IsConst( const Expression& expression ) const
+{
+    return false;
 }
 
 void ArgumentListOperator::Print( int depth ) const
@@ -389,6 +400,11 @@ std::vector<Expression_sp> MemberAccessOperator::GetArrayExtents(
     return {};
 }
 
+bool MemberAccessOperator::IsConst( const Expression& expression ) const
+{
+    return expression.IsConst();
+}
+
 void MemberAccessOperator::Print( int depth ) const
 {
     for( int i = 0; i < depth * 4; ++i )
@@ -464,6 +480,11 @@ std::vector<Expression_sp> IncrementOrDecrementOperator::GetArrayExtents(
 {
     assert( false && "Complete me" );
     return {};
+}
+
+bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const
+{
+    return false;
 }
 
 void IncrementOrDecrementOperator::Print( int depth ) const
