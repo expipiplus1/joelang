@@ -35,6 +35,11 @@
 
 #include <compiler/tokens/token.hpp>
 
+namespace llvm
+{
+    class Value;
+}
+
 namespace JoeLang
 {
 enum class Type;
@@ -42,6 +47,7 @@ enum class Type;
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
@@ -123,6 +129,10 @@ public:
                       const std::unique_ptr<Expression>& expression ) = 0;
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) = 0;
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const = 0;
 
     virtual
@@ -167,6 +177,10 @@ public:
                       const std::unique_ptr<Expression>& expression ) override;
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const override;
 
     virtual
@@ -206,6 +220,10 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema,
                       const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const override;
@@ -251,6 +269,10 @@ public:
                       const std::unique_ptr<Expression>& expression ) override;
 
     virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const override;
 
     virtual
@@ -292,6 +314,10 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema,
                       const std::unique_ptr<Expression>& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const override;

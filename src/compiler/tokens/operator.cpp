@@ -38,6 +38,7 @@
 #include <engine/types.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -163,8 +164,20 @@ bool SubscriptOperator::PerformSema(
                                 SemaAnalyzer& sema,
                                 const std::unique_ptr<Expression>& expression )
 {
-    assert( false && "Complete me" );
-    return false;
+    if( expression->GetReturnType() != Type::ARRAY )
+    {
+        sema.Error( "Trying to index into a non-array" );
+        return false;
+    }
+
+    return true;
+}
+
+llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
+                                         const Expression_up& expression )
+{
+    assert( false && "complete me" );
+    return nullptr;
 }
 
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
@@ -243,6 +256,13 @@ bool ArgumentListOperator::PerformSema(
 {
     assert( false && "Complete me" );
     return false;
+}
+
+llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
+                                            const Expression_up& expression )
+{
+    assert( false && "complete me" );
+    return nullptr;
 }
 
 Type ArgumentListOperator::GetReturnType(
@@ -337,6 +357,13 @@ bool MemberAccessOperator::PerformSema(
     return false;
 }
 
+llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
+                                            const Expression_up& expression )
+{
+    assert( false && "complete me" );
+    return nullptr;
+}
+
 Type MemberAccessOperator::GetReturnType(
                                         const Expression_up& expression ) const
 {
@@ -404,6 +431,14 @@ bool IncrementOrDecrementOperator::PerformSema(
 {
     assert( false && "Complete me" );
     return false;
+}
+
+llvm::Value* IncrementOrDecrementOperator::CodeGen(
+                                               CodeGenerator& code_gen,
+                                               const Expression_up& expression )
+{
+    assert( false && "complete me" );
+    return nullptr;
 }
 
 Type IncrementOrDecrementOperator::GetReturnType(
