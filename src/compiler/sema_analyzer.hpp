@@ -48,6 +48,7 @@ namespace Compiler
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
+class GenericValue;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
@@ -164,6 +165,16 @@ public:
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;
+
+    /**
+      * Evaluates an expression using llvm
+      * \param expression
+      *   The expression to evaluate
+      * \returns the llvm genericvalue containing the expression's result
+      *
+      * This function asserts that expression is const
+      */
+    GenericValue EvaluateExpression( const Expression& expression );
 
     /**
       * Resolves identifiers, folds constants and casts to the requested type

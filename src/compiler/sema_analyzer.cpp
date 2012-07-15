@@ -37,6 +37,8 @@
 #include <utility>
 
 #include <compiler/casting.hpp>
+#include <compiler/code_generator.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -321,6 +323,13 @@ void SemaAnalyzer::LeaveScope()
 bool SemaAnalyzer::InGlobalScope() const
 {
     return m_SymbolStack.size() == 1;
+}
+
+GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
+{
+    assert( expression.IsConst() &&
+            "Trying to evaluate a non-const expression" );
+    return m_CodeGenerator.EvaluateExpression( expression );
 }
 
 bool SemaAnalyzer::TryResolveToLiteral( Expression_up& expression,

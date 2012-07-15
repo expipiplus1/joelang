@@ -38,6 +38,7 @@
 namespace llvm
 {
     class ExecutionEngine;
+    class GenericValue;
     class GlobalVariable;
     class LLVMContext;
     class Module;
@@ -60,6 +61,7 @@ class DeclarationBase;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
+class GenericValue;
 class TechniqueDeclaration;
 class TranslationUnit;
 class Variable;
@@ -78,6 +80,8 @@ public:
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
                                                  const Expression& expression );
+
+    GenericValue EvaluateExpression( const Expression& expression );
 
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, Type type );

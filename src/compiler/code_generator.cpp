@@ -44,6 +44,7 @@
 #include <llvm/Type.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/Support/IRBuilder.h>
 
@@ -53,6 +54,7 @@
 #include <engine/technique.hpp>
 #include <engine/internal/type_properties.hpp>
 #include <compiler/casting.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -220,6 +222,13 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
             sa = nullptr;
     }
     return std::unique_ptr<StateAssignmentBase>( sa );
+}
+
+GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
+{
+    llvm::Type* t = GetLLVMType( expression, m_LLVMContext );
+    t = t;
+    return GenericValue();
 }
 
 //
