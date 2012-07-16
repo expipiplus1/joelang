@@ -39,6 +39,7 @@
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
 #include <llvm/GlobalVariable.h>
+#include <llvm/IRBuilder.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Type.h>
@@ -46,7 +47,6 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/Support/IRBuilder.h>
 
 #include <engine/context.hpp>
 #include <engine/state.hpp>

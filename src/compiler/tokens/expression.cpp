@@ -39,10 +39,10 @@
 
 #include <llvm/DerivedTypes.h>
 #include <llvm/Instructions.h>
+#include <llvm/IRBuilder.h>
 #include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/Support/IRBuilder.h>
 
 #include <engine/types.hpp>
 #include <engine/internal/type_properties.hpp>
@@ -2587,6 +2587,7 @@ StringLiteralExpression::~StringLiteralExpression()
 llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     assert( false && "Trying to generate code for a string literal" );
+    return nullptr;
 }
 
 Type StringLiteralExpression::GetReturnType() const

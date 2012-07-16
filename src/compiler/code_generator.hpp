@@ -33,7 +33,7 @@
 #include <memory>
 #include <vector>
 
-#include <llvm/Support/IRBuilder.h>
+#include <llvm/IRBuilder.h>
 
 namespace llvm
 {
