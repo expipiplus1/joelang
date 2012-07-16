@@ -5,6 +5,8 @@ project( joelang )
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall")
 
 find_package( LLVM REQUIRED )
+include_directories( ${LLVM_INCLUDE_DIRS} )
+link_directories( ${LLVM_LIBRARY_DIRS} )
 
 add_executable( joelang src/joelang.cpp
                         src/engine/context.cpp
@@ -73,8 +75,6 @@ add_custom_command(
 add_custom_target( copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
 add_dependencies( joelang copy_files )
 
-include_directories( ${LLVM_INCLUDE_DIRS} )
-link_directories( ${LLVM_LIBRARY_DIRS} )
 llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native )
 set( joelang_libraries ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
