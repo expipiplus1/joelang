@@ -1989,6 +1989,7 @@ const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
+    this->ResolveIdentifiers( sema );
     return bool(m_Variable);
 }
 
