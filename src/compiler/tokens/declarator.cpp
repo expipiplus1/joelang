@@ -102,7 +102,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         }
         else
         {
-            if( !Expression::GetLiteral( m_Initializer ) )
+            if( !m_Initializer->IsConst() )
             {
                 sema.Error( "trying to initialize a variable with a non-const "
                             "expression" );
