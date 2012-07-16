@@ -9,7 +9,7 @@ const float twentyone = twenty + 1;
 
 int b[12],
     c[23],
-    d[(1+4+9)%6];
+    d[(1+4+twentyone)%6];
 
 technique t1
 {
