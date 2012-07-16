@@ -32,6 +32,8 @@
 #include <memory>
 #include <vector>
 
+#include <compiler/generic_value.hpp>
+
 namespace llvm
 {
     class Value;
@@ -64,8 +66,8 @@ public:
     Variable( Type type,
               std::vector<unsigned> array_dimension_sizes,
               bool is_const,
-              bool is_global,
-              Expression_up initializer = nullptr );
+              bool is_global = false,
+              GenericValue initializer = GenericValue() );
 
     void CodeGen( CodeGenerator& code_gen );
 
@@ -87,9 +89,9 @@ private:
     std::vector<unsigned> m_ArrayDimensionSizes;
     bool m_IsConst;
     bool m_IsGlobal;
-    Expression_up m_Initializer;
+    GenericValue m_Initializer;
 
-    // TODO handle non global variables
+    /// TODO handle non global variables
     llvm::Value* m_LLVMPointer = nullptr;
 };
 

@@ -1584,9 +1584,8 @@ Expression_up CastExpression::Create(
 {
     if( cast_expression->GetReturnType() == cast_type )
         return cast_expression;
-    return Expression_up( new CastExpression(
-                                                cast_type,
-                                                std::move(cast_expression) ) );
+    return Expression_up( new CastExpression( cast_type,
+                                              std::move(cast_expression) ) );
 }
 
 bool CastExpression::classof( const Expression* e )
@@ -1993,8 +1992,7 @@ bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
     return bool(m_Variable);
 }
 
-const Expression_up&
-                                 IdentifierExpression::GetReadExpression() const
+const Expression_up& IdentifierExpression::GetReadExpression() const
 {
     return m_Variable->GetReadExpression();
 }

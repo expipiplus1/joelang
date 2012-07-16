@@ -33,6 +33,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_generator.hpp>
 #include <engine/types.hpp>
 #include <engine/internal/type_properties.hpp>
 
@@ -190,6 +191,39 @@ GenericValue::~GenericValue()
     {
         m_StringValue.~string();
     }
+}
+
+llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
+{
+    switch( m_Type )
+    {
+    case Type::BOOL:
+        return code_gen.CreateInteger( m_BoolValue, 1, false );
+    case Type::I8:
+        return code_gen.CreateInteger( m_I8Value, 8, true );
+    case Type::I16:
+        return code_gen.CreateInteger( m_I16Value, 16, true );
+    case Type::I32:
+        return code_gen.CreateInteger( m_I32Value, 32, true );
+    case Type::I64:
+        return code_gen.CreateInteger( m_I64Value, 64, true );
+    case Type::U8:
+        return code_gen.CreateInteger( m_U8Value, 8, false );
+    case Type::U16:
+        return code_gen.CreateInteger( m_U16Value, 16, false );
+    case Type::U32:
+        return code_gen.CreateInteger( m_U32Value, 32, false );
+    case Type::U64:
+        return code_gen.CreateInteger( m_U64Value, 64, false );
+    case Type::FLOAT:
+        return code_gen.CreateFloating( m_FloatValue, false );
+    case Type::DOUBLE:
+        return code_gen.CreateFloating( m_DoubleValue, true );
+    case Type::STRING:
+    default:
+        assert( false && "Trying to codegen an unhandled type" );
+    }
+    return nullptr;
 }
 
 Type GenericValue::GetType() const

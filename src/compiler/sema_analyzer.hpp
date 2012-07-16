@@ -207,6 +207,11 @@ public:
       * \returns true if there has been no call to Error
       */
     bool Good() const;
+
+    /**
+      * \returns the CodeGenerator object
+      */
+    CodeGenerator& GetCodeGenerator();
 private:
     struct SymbolMaps
     {

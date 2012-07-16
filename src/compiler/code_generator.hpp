@@ -128,9 +128,9 @@ public:
       *   The number of bits to the integer
       * \returns the llvm::Value representing the integer
       */
-    llvm::Value* CreateInteger( unsigned long long value,
-                                unsigned size,
-                                bool is_signed );
+    llvm::Constant* CreateInteger( unsigned long long value,
+                                   unsigned size,
+                                   bool is_signed );
 
     /**
       * Create the llvm::Value representing a floating point value
@@ -140,8 +140,8 @@ public:
       *   Whether this is a double precision float
       * \returns the llvm::Value representing the float
       */
-    llvm::Value* CreateFloating( double value,
-                                 bool is_double );
+    llvm::Constant* CreateFloating( double value,
+                                    bool is_double );
 
     // Variables
     /**
@@ -160,7 +160,7 @@ public:
                      Type type,
                      std::vector<unsigned> array_extents,
                      bool is_const,
-                     const Expression_up& initializer = nullptr );
+                     const GenericValue& initializer );
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 

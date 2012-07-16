@@ -50,6 +50,7 @@ DeclSpecs::DeclSpecs( bool is_const, Type type )
 {
 }
 
+/// TODO rename to has const specifier
 bool DeclSpecs::IsConst() const
 {
     return m_IsConst;

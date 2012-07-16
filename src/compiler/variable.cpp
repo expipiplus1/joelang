@@ -38,6 +38,7 @@
 
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/tokens/expression.hpp>
 
 namespace JoeLang
@@ -45,26 +46,22 @@ namespace JoeLang
 namespace Compiler
 {
 
-Variable::Variable(
-                Type base_type,
-                std::vector<unsigned> array_dimension_sizes,
-                bool is_const,
-                bool is_global,
-                Expression_up initializer )
+Variable::Variable( Type base_type,
+                    std::vector<unsigned> array_dimension_sizes,
+                    bool is_const,
+                    bool is_global,
+                    GenericValue initializer )
     :m_Type( base_type )
     ,m_ArrayDimensionSizes( std::move(array_dimension_sizes) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
     ,m_Initializer( std::move(initializer) )
 {
-    if( is_const )
-    {
-        assert( isa<LiteralExpression>(m_Initializer) &&
-                "Trying to initialize a const variable with a non-const "
-                "expression" );
-        assert( m_Initializer->GetReturnType() == base_type &&
+    // Assert that this has the correct initializer if this is const
+    // Or that if it has an initializer it's the correct type
+    if( m_IsConst || m_Initializer.GetType() != Type::UNKNOWN_TYPE )
+        assert( m_Initializer.GetType() == base_type &&
                 "Trying to initialize a const variable with the wrong type" );
-    }
 }
 
 void Variable::CodeGen( CodeGenerator& code_gen )
@@ -113,11 +110,8 @@ bool Variable::IsConst() const
 
 const Expression_up& Variable::GetReadExpression() const
 {
-    if( m_IsConst )
-        return m_Initializer;
-
     assert( false );
-    return m_Initializer;
+    return nullptr;
 }
 
 } // namespace Compiler

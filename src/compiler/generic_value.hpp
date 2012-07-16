@@ -33,10 +33,17 @@
 
 #include <engine/types.hpp>
 
+namespace llvm
+{
+    class Constant;
+}
+
 namespace JoeLang
 {
 namespace Compiler
 {
+
+class CodeGenerator;
 
 class GenericValue
 {
@@ -73,6 +80,8 @@ public:
     GenericValue( jl_string string_value );
 
     ~GenericValue();
+
+    llvm::Constant* CodeGen( CodeGenerator& code_gen ) const;
 
     /**
       * \returns The type of this genericvalue

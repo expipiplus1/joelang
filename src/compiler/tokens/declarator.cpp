@@ -70,69 +70,66 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
+    /// TODO support array initializers
     // Resolve things in the declarator
     m_Declarator->PerformSema( sema );
 
     m_IsGlobal = sema.InGlobalScope();
 
-    bool can_init = true;
-
-    // Reduce the initializer as much as possible
+    // Cast the initializer to the right type
     if( m_Initializer )
     {
-        //TODO move this somewhere else
         m_Initializer->ResolveIdentifiers( sema );
-        m_Initializer = CastExpression::Create(
-                                            decl_specs.GetType(),
-                                            std::move( m_Initializer ) );
-        if( m_Initializer->PerformSema( sema ) )
-            m_Initializer->FoldConstants( m_Initializer );
+        m_Initializer = CastExpression::Create( decl_specs.GetType(),
+                                                std::move( m_Initializer ) );
+        m_Initializer->PerformSema( sema );
 
         assert( m_Initializer->GetReturnType() == decl_specs.GetType() &&
                 "Trying to initialize a variable with mismatched types" );
     }
 
+    bool can_init = true;
     // If the variable is const, it must have an initializer
-    if( decl_specs.IsConst() )
+    if( decl_specs.IsConst() &&
+        !m_Initializer )
     {
-        if( !m_Initializer )
-        {
-            sema.Error( "Const variables must have an initializer" );
-            can_init = false;
-        }
-        else
-        {
-            if( !m_Initializer->IsConst() )
-            {
-                sema.Error( "trying to initialize a variable with a non-const "
-                            "expression" );
-                can_init = false;
-            }
-        }
-    }
-    else // If this isn't const it can't be a string
-    {
-        if( decl_specs.GetType() == Type::STRING )
-            sema.Error( "Variables of type string must be const" );
+        sema.Error( "Const variables must have an initializer" );
+        can_init = false;
     }
 
+    // If this isn't const it can't be a string
+    if( !decl_specs.IsConst() &&
+        decl_specs.GetType() == Type::STRING )
+        sema.Error( "Variables of type string must be const" );
+
+    // Evaluate the initializer
+    GenericValue initializer;
+    if( m_Initializer )
+        initializer = sema.EvaluateExpression( *m_Initializer );
+
     Type base_type = decl_specs.GetType();
-    std::vector<unsigned> array_dimension_sizes =
+    const std::vector<unsigned>& array_dimension_sizes =
                                         m_Declarator->GetArrayDimensionSizes();
 
     m_Variable = std::make_shared<Variable>( base_type,
-                                             std::move(array_dimension_sizes),
+                                             array_dimension_sizes,
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
-                                             std::move(m_Initializer) );
+                                             std::move(initializer) );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of later
     // analysis
     sema.DeclareVariable( m_Declarator->GetIdentifier(), m_Variable );
+
+    //
+    // CodeGen
+    //
+    m_Variable->CodeGen( sema.GetCodeGenerator() );
 }
 
 void InitDeclarator::CodeGen( CodeGenerator& code_gen )
 {
+    assert( false && "remove me" );
     m_Variable->CodeGen( code_gen );
 }
 

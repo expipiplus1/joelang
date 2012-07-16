@@ -236,7 +236,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     llvm::Type* t = GetLLVMType( expression, m_LLVMContext );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
 
-    llvm::IRBuilder<> llvm_builder( m_LLVMContext );
+    auto insert_point = m_LLVMBuilder.saveAndClearIP();
 
     //
     // create a function prototype which takes no arguments!
@@ -253,14 +253,14 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
                                                 llvm::Function::InternalLinkage,
-                                                "",
+                                                "TemporaryEvaluation",
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
 
     llvm::BasicBlock* body = llvm::BasicBlock::Create( m_LLVMContext,
                                                        "",
                                                        function );
-    llvm_builder.SetInsertPoint( body );
+    m_LLVMBuilder.SetInsertPoint( body );
 
     //
     // Generate the code from the expression
@@ -271,7 +271,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     //
     // Set it as the return value for the function
     //
-    llvm_builder.CreateRet( v );
+    m_LLVMBuilder.CreateRet( v );
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function not valid" );
 
@@ -324,11 +324,28 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
                     "expression" );
         }
     }
+    else if( IsFloatingPoint( expression.GetReturnType() ) )
+    {
+        switch( expression.GetReturnType() )
+        {
+        case Type::FLOAT:
+            ret = GenericValue( g.FloatVal );
+            break;
+        case Type::DOUBLE:
+            ret = GenericValue( g.DoubleVal );
+            break;
+        default:
+            assert( false &&
+                    "Trying to get the floating result of a non-floating "
+                    "expression" );
+        }
+    }
     else
     {
         assert( false && "Complete me" );
     }
 
+    m_LLVMBuilder.restoreIP( insert_point );
     return ret;
 }
 
@@ -623,17 +640,17 @@ llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
 //
 // Constants
 //
-llvm::Value* CodeGenerator::CreateInteger( unsigned long long value,
-                                           unsigned size,
-                                           bool is_signed )
+llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
+                                              unsigned size,
+                                              bool is_signed )
 {
     return llvm::ConstantInt::get( llvm::Type::getIntNTy( m_LLVMContext, size ),
                                    value,
                                    is_signed );
 }
 
-llvm::Value* CodeGenerator::CreateFloating( double value,
-                                            bool is_double )
+llvm::Constant* CodeGenerator::CreateFloating( double value,
+                                               bool is_double )
 {
     return llvm::ConstantFP::get( is_double
                                     ? llvm::Type::getDoubleTy(m_LLVMContext)
@@ -649,12 +666,15 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
                                 std::vector<unsigned> array_extents,
                                 bool is_const,
-                                const Expression_up& initializer )
+                                const GenericValue& initializer )
 {
+    assert( ( type == initializer.GetType() ||
+              initializer.GetType() == Type::UNKNOWN_TYPE ) &&
+            "Initializer type mismatch" );
     llvm::Type* t = GetLLVMType( type, m_LLVMContext );
     llvm::Constant* init = nullptr;
-    if( initializer )
-        init = llvm::dyn_cast<llvm::Constant>(initializer->CodeGen( *this ));
+    if( initializer.GetType() != Type::UNKNOWN_TYPE )
+        init = initializer.CodeGen( *this );
     return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
