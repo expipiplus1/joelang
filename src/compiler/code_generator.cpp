@@ -74,6 +74,10 @@ CodeGenerator::CodeGenerator( const Context& context )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
 {
     assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
+    //
+    // Compiling lazily doesn't work on windows
+    //
+    m_LLVMExecutionEngine->DisableLazyCompilation();
 }
 
 CodeGenerator::~CodeGenerator()
