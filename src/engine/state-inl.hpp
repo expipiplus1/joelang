@@ -49,10 +49,10 @@ void DefaultStateSetCallback( T value )
 template<typename T>
 State<T>::State( std::string name, std::map< std::string, T > enumerations )
     :StateBase( std::move(name) )
-    ,m_enumerations( std::move(enumerations) )
-    ,m_setCallback( DefaultStateSetCallback<T> )
-    ,m_resetCallback( DefaultStateResetCallback )
-    ,m_validateCallback( DefaultStateValidateCallback )
+    ,m_Enumerations( std::move(enumerations) )
+    ,m_SetCallback( DefaultStateSetCallback<T> )
+    ,m_ResetCallback( DefaultStateResetCallback )
+    ,m_ValidateCallback( DefaultStateValidateCallback )
 {
     //TODO check enumerations
 }
@@ -67,30 +67,30 @@ void State<T>::SetCallbacks( std::function<void(T)> set_callback,
                              std::function<void()> reset_callback,
                              std::function<bool()> validate_callback )
 {
-    m_setCallback   = set_callback ? set_callback
+    m_SetCallback   = set_callback ? set_callback
                                    : DefaultStateSetCallback<T>;
-    m_resetCallback = reset_callback ? reset_callback
+    m_ResetCallback = reset_callback ? reset_callback
                                      : DefaultStateResetCallback;
-    m_validateCallback   = validate_callback ? validate_callback
+    m_ValidateCallback   = validate_callback ? validate_callback
                                              : DefaultStateValidateCallback;
 }
 
 template<typename T>
 void State<T>::SetState( T value ) const
 {
-    m_setCallback( value );
+    m_SetCallback( value );
 }
 
 template<typename T>
 void State<T>::ResetState() const
 {
-    m_resetCallback();
+    m_ResetCallback();
 }
 
 template<typename T>
 bool State<T>::ValidateState() const
 {
-    return m_validateCallback();
+    return m_ValidateCallback();
 }
 
 template<typename T>
@@ -102,7 +102,7 @@ Type State<T>::GetType() const
 template<typename T>
 const std::map<std::string, T>& State<T>::GetEnumerations() const
 {
-    return m_enumerations;
+    return m_Enumerations;
 }
 
 } // namespace JoeLang

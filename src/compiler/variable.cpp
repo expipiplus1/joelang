@@ -32,6 +32,7 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <llvm/GlobalVariable.h>
 
@@ -44,21 +45,24 @@ namespace JoeLang
 namespace Compiler
 {
 
-Variable::Variable( Type type,
-                    bool is_const,
-                    bool is_global,
-                    std::unique_ptr<Expression> initializer )
-    :m_type( type )
-    ,m_isConst( is_const )
-    ,m_isGlobal( is_global )
-    ,m_initializer( std::move(initializer) )
+Variable::Variable(
+                Type base_type,
+                std::vector<unsigned> array_dimension_sizes,
+                bool is_const,
+                bool is_global,
+                Expression_up initializer )
+    :m_Type( base_type )
+    ,m_ArrayDimensionSizes( std::move(array_dimension_sizes) )
+    ,m_IsConst( is_const )
+    ,m_IsGlobal( is_global )
+    ,m_Initializer( std::move(initializer) )
 {
     if( is_const )
     {
-        assert( isa<LiteralExpression>(m_initializer) &&
+        assert( isa<LiteralExpression>(m_Initializer) &&
                 "Trying to initialize a const variable with a non-const "
                 "expression" );
-        assert( m_initializer->GetReturnType() == type &&
+        assert( m_Initializer->GetReturnType() == base_type &&
                 "Trying to initialize a const variable with the wrong type" );
     }
 }
@@ -66,14 +70,15 @@ Variable::Variable( Type type,
 void Variable::CodeGen( CodeGenerator& code_gen )
 {
     // Don't generate storage for strings, they're determined at compile time
-    if( m_type == Type::STRING )
+    if( m_Type == Type::STRING )
         return;
 
-    if( m_isGlobal )
+    if( m_IsGlobal )
     {
-        m_llvmPointer = code_gen.CreateGlobalVariable( m_type,
-                                                       m_isConst,
-                                                       m_initializer );
+        m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,
+                                                       m_ArrayDimensionSizes,
+                                                       m_IsConst,
+                                                       m_Initializer );
     }
     else
     {
@@ -83,26 +88,36 @@ void Variable::CodeGen( CodeGenerator& code_gen )
 
 llvm::Value* Variable::GetLLVMPointer() const
 {
-    return m_llvmPointer;
+    return m_LLVMPointer;
 }
 
 Type Variable::GetType() const
 {
-    return m_type;
+    return m_ArrayDimensionSizes.size() == 0 ? m_Type : Type::ARRAY;
+}
+
+Type Variable::GetUnderlyingType() const
+{
+    return m_Type;
+}
+
+const std::vector<unsigned>& Variable::GetArrayExtents() const
+{
+    return m_ArrayDimensionSizes;
 }
 
 bool Variable::IsConst() const
 {
-    return m_isConst;
+    return m_IsConst;
 }
 
-const std::unique_ptr<Expression>& Variable::GetReadExpression() const
+const Expression_up& Variable::GetReadExpression() const
 {
-    if( m_isConst )
-        return m_initializer;
+    if( m_IsConst )
+        return m_Initializer;
 
     assert( false );
-    return m_initializer;
+    return m_Initializer;
 }
 
 } // namespace Compiler

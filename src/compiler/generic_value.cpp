@@ -42,10 +42,10 @@ namespace Compiler
 {
 
 GenericValue::GenericValue()
-    :m_type( Type::UNKNOWN_TYPE )
+    :m_Type( Type::UNKNOWN_TYPE )
 {
-    if( m_type == Type::STRING )
-        new(&m_stringValue) std::string;
+    if( m_Type == Type::STRING )
+        new(&m_StringValue) std::string;
 }
 
 GenericValue::GenericValue( const GenericValue& g )
@@ -54,244 +54,244 @@ GenericValue::GenericValue( const GenericValue& g )
 }
 
 GenericValue::GenericValue( Type type )
-    :m_type( type )
+    :m_Type( type )
 {
-    if( m_type == Type::STRING )
-        new(&m_stringValue) std::string;
+    if( m_Type == Type::STRING )
+        new(&m_StringValue) std::string;
 }
 
 const GenericValue& GenericValue::operator = ( const GenericValue& g )
 {
-    switch( g.m_type )
+    switch( g.m_Type )
     {
     case Type::BOOL:
-        m_boolValue = g.m_boolValue;
+        m_BoolValue = g.m_BoolValue;
         break;
     case Type::I8:
-        m_i8Value = g.m_i8Value;
+        m_I8Value = g.m_I8Value;
         break;
     case Type::I16:
-        m_i16Value = g.m_i16Value;
+        m_I16Value = g.m_I16Value;
         break;
     case Type::I32:
-        m_i32Value = g.m_i32Value;
+        m_I32Value = g.m_I32Value;
         break;
     case Type::I64:
-        m_i64Value = g.m_i64Value;
+        m_I64Value = g.m_I64Value;
         break;
     case Type::U8:
-        m_u8Value = g.m_u8Value;
+        m_U8Value = g.m_U8Value;
         break;
     case Type::U16:
-        m_u16Value = g.m_u16Value;
+        m_U16Value = g.m_U16Value;
         break;
     case Type::U32:
-        m_u32Value = g.m_u32Value;
+        m_U32Value = g.m_U32Value;
         break;
     case Type::U64:
-        m_u64Value = g.m_u64Value;
+        m_U64Value = g.m_U64Value;
         break;
     case Type::FLOAT:
-        m_floatValue = g.m_floatValue;
+        m_FloatValue = g.m_FloatValue;
         break;
     case Type::DOUBLE:
-        m_doubleValue = g.m_doubleValue;
+        m_DoubleValue = g.m_DoubleValue;
         break;
     case Type::STRING:
-        if( m_type != Type::STRING )
-            new(&m_stringValue) std::string;
-        m_stringValue = g.m_stringValue;
+        if( m_Type != Type::STRING )
+            new(&m_StringValue) std::string;
+        m_StringValue = g.m_StringValue;
         break;
     default:
         break;
     }
 
-    m_type = g.m_type;
+    m_Type = g.m_Type;
 
     return *this;
 }
 
 GenericValue::GenericValue( jl_bool   bool_value   )
-    :m_type( Type::BOOL )
-    ,m_boolValue( bool_value )
+    :m_Type( Type::BOOL )
+    ,m_BoolValue( bool_value )
 {
 }
 
 GenericValue::GenericValue( jl_i8     i8_value     )
-    :m_type( Type::I8 )
-    ,m_i8Value( i8_value )
+    :m_Type( Type::I8 )
+    ,m_I8Value( i8_value )
 {
 }
 
 GenericValue::GenericValue( jl_i16    i16_value    )
-    :m_type( Type::I16 )
-    ,m_i16Value( i16_value )
+    :m_Type( Type::I16 )
+    ,m_I16Value( i16_value )
 {
 }
 
 GenericValue::GenericValue( jl_i32    i32_value    )
-    :m_type( Type::I32 )
-    ,m_i32Value( i32_value )
+    :m_Type( Type::I32 )
+    ,m_I32Value( i32_value )
 {
 }
 
 GenericValue::GenericValue( jl_i64    i64_value    )
-    :m_type( Type::I64 )
-    ,m_i64Value( i64_value )
+    :m_Type( Type::I64 )
+    ,m_I64Value( i64_value )
 {
 }
 
 GenericValue::GenericValue( jl_u8     u8_value     )
-    :m_type( Type::U8 )
-    ,m_u8Value( u8_value )
+    :m_Type( Type::U8 )
+    ,m_U8Value( u8_value )
 {
 }
 
 GenericValue::GenericValue( jl_u16    u16_value    )
-    :m_type( Type::U16 )
-    ,m_u16Value( u16_value )
+    :m_Type( Type::U16 )
+    ,m_U16Value( u16_value )
 {
 }
 
 GenericValue::GenericValue( jl_u32    u32_value    )
-    :m_type( Type::U32 )
-    ,m_u32Value( u32_value )
+    :m_Type( Type::U32 )
+    ,m_U32Value( u32_value )
 {
 }
 
 GenericValue::GenericValue( jl_u64    u64_value    )
-    :m_type( Type::U64 )
-    ,m_u64Value( u64_value )
+    :m_Type( Type::U64 )
+    ,m_U64Value( u64_value )
 {
 }
 
 GenericValue::GenericValue( jl_float  float_value  )
-    :m_type( Type::FLOAT )
-    ,m_floatValue( float_value )
+    :m_Type( Type::FLOAT )
+    ,m_FloatValue( float_value )
 {
 }
 
 GenericValue::GenericValue( jl_double double_value )
-    :m_type( Type::DOUBLE )
-    ,m_doubleValue( double_value )
+    :m_Type( Type::DOUBLE )
+    ,m_DoubleValue( double_value )
 {
 }
 
 GenericValue::GenericValue( std::string string_value )
-    :m_type( Type::STRING )
-    ,m_stringValue( std::move(string_value) )
+    :m_Type( Type::STRING )
+    ,m_StringValue( std::move(string_value) )
 {
 }
 
 GenericValue::~GenericValue()
 {
     using std::string;
-    if( m_type == Type::STRING )
+    if( m_Type == Type::STRING )
     {
-        m_stringValue.~string();
+        m_StringValue.~string();
     }
 }
 
 Type GenericValue::GetType() const
 {
-    return m_type;
+    return m_Type;
 }
 
 jl_bool GenericValue::GetBool() const
 {
-    assert( m_type == Type::BOOL &&
+    assert( m_Type == Type::BOOL &&
             "Trying to get the bool value from a non-bool GenericValue" );
-    return m_boolValue;
+    return m_BoolValue;
 }
 
 jl_i8 GenericValue::GetI8() const
 {
-    assert( m_type == Type::I8 &&
+    assert( m_Type == Type::I8 &&
             "Trying to get the i8 value from a non-i8 GenericValue" );
-    return m_i8Value;
+    return m_I8Value;
 }
 
 jl_i16 GenericValue::GetI16() const
 {
-    assert( m_type == Type::I16 &&
+    assert( m_Type == Type::I16 &&
             "Trying to get the i16 value from a non-i16 GenericValue" );
-    return m_i16Value;
+    return m_I16Value;
 }
 
 jl_i32 GenericValue::GetI32() const
 {
-    assert( m_type == Type::I32 &&
+    assert( m_Type == Type::I32 &&
             "Trying to get the i32 value from a non-i32 GenericValue" );
-    return m_i32Value;
+    return m_I32Value;
 }
 
 jl_i64 GenericValue::GetI64() const
 {
-    assert( m_type == Type::I64 &&
+    assert( m_Type == Type::I64 &&
             "Trying to get the i64 value from a non-i64 GenericValue" );
-    return m_i64Value;
+    return m_I64Value;
 }
 
 jl_u8 GenericValue::GetU8() const
 {
-    assert( m_type == Type::U8 &&
+    assert( m_Type == Type::U8 &&
             "Trying to get the u8 value from a non-u8 GenericValue" );
-    return m_u8Value;
+    return m_U8Value;
 }
 
 jl_u16 GenericValue::GetU16() const
 {
-    assert( m_type == Type::U16 &&
+    assert( m_Type == Type::U16 &&
             "Trying to get the u16 value from a non-u16 GenericValue" );
-    return m_u16Value;
+    return m_U16Value;
 }
 
 jl_u32 GenericValue::GetU32() const
 {
-    assert( m_type == Type::U32 &&
+    assert( m_Type == Type::U32 &&
             "Trying to get the u32 value from a non-u32 GenericValue" );
-    return m_u32Value;
+    return m_U32Value;
 }
 
 jl_u64 GenericValue::GetU64() const
 {
-    assert( m_type == Type::U64 &&
+    assert( m_Type == Type::U64 &&
             "Trying to get the u64 value from a non-u64 GenericValue" );
-    return m_u64Value;
+    return m_U64Value;
 }
 
 jl_float GenericValue::GetFloat() const
 {
-    assert( m_type == Type::FLOAT &&
+    assert( m_Type == Type::FLOAT &&
             "Trying to get the float value from a non-float GenericValue" );
-    return m_floatValue;
+    return m_FloatValue;
 }
 
 jl_double GenericValue::GetDouble() const
 {
-    assert( m_type == Type::DOUBLE &&
+    assert( m_Type == Type::DOUBLE &&
             "Trying to get the double value from a non-double GenericValue" );
-    return m_doubleValue;
+    return m_DoubleValue;
 }
 
 const jl_string& GenericValue::GetString() const
 {
-    assert( m_type == Type::STRING &&
+    assert( m_Type == Type::STRING &&
             "Trying to get the string value from a non-string GenericValue" );
-    return m_stringValue;
+    return m_StringValue;
 }
 
 GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to lor GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue || g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue || g2.m_BoolValue;
         break;
     case Type::I8:
     case Type::I16:
@@ -314,15 +314,15 @@ GenericValue GenericValue::Lor( const GenericValue& g1, const GenericValue& g2 )
 GenericValue GenericValue::Land( const GenericValue& g1,
                                  const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to land GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue || g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue || g2.m_BoolValue;
         break;
     case Type::I8:
     case Type::I16:
@@ -344,39 +344,39 @@ GenericValue GenericValue::Land( const GenericValue& g1,
 
 GenericValue GenericValue::Or( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to or GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue | g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue | g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value | g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value | g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value | g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value | g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value | g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value | g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value | g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value | g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value | g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value | g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value | g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value | g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value | g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value | g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value | g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value | g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -390,39 +390,39 @@ GenericValue GenericValue::Or( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Xor( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to xor GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue ^ g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue ^ g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value ^ g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value ^ g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value ^ g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value ^ g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value ^ g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value ^ g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value ^ g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value ^ g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value ^ g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value ^ g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value ^ g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value ^ g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value ^ g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value ^ g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value ^ g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value ^ g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -436,39 +436,39 @@ GenericValue GenericValue::Xor( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to and GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue & g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue & g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value & g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value & g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value & g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value & g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value & g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value & g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value & g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value & g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value & g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value & g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value & g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value & g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value & g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value & g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value & g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value & g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -483,48 +483,48 @@ GenericValue GenericValue::And( const GenericValue& g1, const GenericValue& g2 )
 GenericValue GenericValue::EqualTo( const GenericValue& g1,
                                     const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare equality of GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue == g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue == g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value == g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value == g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value == g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value == g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value == g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value == g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value == g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value == g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value == g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value == g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value == g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value == g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value == g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value == g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value == g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value == g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue == g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue == g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue == g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue == g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue == g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue == g2.m_StringValue;
         break;
     default:
         assert( false &&
@@ -536,48 +536,48 @@ GenericValue GenericValue::EqualTo( const GenericValue& g1,
 GenericValue GenericValue::NotEqualTo( const GenericValue& g1,
                                        const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare equality of GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue != g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue != g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value != g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value != g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value != g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value != g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value != g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value != g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value != g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value != g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value != g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value != g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value != g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value != g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value != g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value != g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value != g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value != g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue != g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue != g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue != g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue != g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue != g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue != g2.m_StringValue;
         break;
     default:
         assert( false &&
@@ -589,48 +589,48 @@ GenericValue GenericValue::NotEqualTo( const GenericValue& g1,
 GenericValue GenericValue::LessThan( const GenericValue& g1,
                                      const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue < g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue < g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value < g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value < g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value < g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value < g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value < g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value < g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value < g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value < g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value < g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value < g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value < g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value < g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value < g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value < g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value < g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value < g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue < g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue < g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue < g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue < g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue < g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue < g2.m_StringValue;
         break;
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
@@ -641,48 +641,48 @@ GenericValue GenericValue::LessThan( const GenericValue& g1,
 GenericValue GenericValue::GreaterThan( const GenericValue& g1,
                                         const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue > g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue > g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value > g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value > g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value > g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value > g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value > g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value > g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value > g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value > g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value > g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value > g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value > g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value > g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value > g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value > g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value > g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value > g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue > g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue > g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue > g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue > g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue > g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue > g2.m_StringValue;
         break;
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
@@ -693,48 +693,48 @@ GenericValue GenericValue::GreaterThan( const GenericValue& g1,
 GenericValue GenericValue::LessThanEqual( const GenericValue& g1,
                                           const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue <= g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue <= g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value <= g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value <= g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value <= g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value <= g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value <= g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value <= g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value <= g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value <= g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value <= g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value <= g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value <= g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value <= g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value <= g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value <= g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value <= g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value <= g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue <= g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue <= g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue <= g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue <= g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue <= g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue <= g2.m_StringValue;
         break;
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
@@ -745,48 +745,48 @@ GenericValue GenericValue::LessThanEqual( const GenericValue& g1,
 GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1,
                                              const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to compare GenericValues of differing type" );
 
     GenericValue ret( Type::BOOL );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue >= g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue >= g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_boolValue = g1.m_i8Value >= g2.m_i8Value;
+        ret.m_BoolValue = g1.m_I8Value >= g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_boolValue = g1.m_i16Value >= g2.m_i16Value;
+        ret.m_BoolValue = g1.m_I16Value >= g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_boolValue = g1.m_i32Value >= g2.m_i32Value;
+        ret.m_BoolValue = g1.m_I32Value >= g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_boolValue = g1.m_i64Value >= g2.m_i64Value;
+        ret.m_BoolValue = g1.m_I64Value >= g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_boolValue = g1.m_u8Value >= g2.m_u8Value;
+        ret.m_BoolValue = g1.m_U8Value >= g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_boolValue = g1.m_u16Value >= g2.m_u16Value;
+        ret.m_BoolValue = g1.m_U16Value >= g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_boolValue = g1.m_u32Value >= g2.m_u32Value;
+        ret.m_BoolValue = g1.m_U32Value >= g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_boolValue = g1.m_u64Value >= g2.m_u64Value;
+        ret.m_BoolValue = g1.m_U64Value >= g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_boolValue = g1.m_floatValue >= g2.m_floatValue;
+        ret.m_BoolValue = g1.m_FloatValue >= g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_boolValue = g1.m_doubleValue >= g2.m_doubleValue;
+        ret.m_BoolValue = g1.m_DoubleValue >= g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_boolValue = g1.m_stringValue >= g2.m_stringValue;
+        ret.m_BoolValue = g1.m_StringValue >= g2.m_StringValue;
         break;
     default:
         assert( false && "Trying to compare GenericValues of unknown type" );
@@ -796,39 +796,39 @@ GenericValue GenericValue::GreaterThanEqual( const GenericValue& g1,
 
 GenericValue GenericValue::Shl( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to shift GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue << g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue << g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value << g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value << g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value << g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value << g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value << g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value << g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value << g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value << g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value << g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value << g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value << g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value << g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value << g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value << g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value << g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value << g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -842,39 +842,39 @@ GenericValue GenericValue::Shl( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Shr( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to shift GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue >> g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue >> g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value >> g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value >> g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value >> g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value >> g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value >> g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value >> g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value >> g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value >> g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value >> g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value >> g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value >> g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value >> g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value >> g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value >> g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value >> g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value >> g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -888,48 +888,48 @@ GenericValue GenericValue::Shr( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to add GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue + g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue + g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value + g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value + g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value + g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value + g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value + g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value + g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value + g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value + g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value + g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value + g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value + g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value + g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value + g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value + g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value + g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value + g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_floatValue = g1.m_floatValue + g2.m_floatValue;
+        ret.m_FloatValue = g1.m_FloatValue + g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_doubleValue = g1.m_doubleValue + g2.m_doubleValue;
+        ret.m_DoubleValue = g1.m_DoubleValue + g2.m_DoubleValue;
         break;
     case Type::STRING:
-        ret.m_stringValue = g1.m_stringValue + g2.m_stringValue;
+        ret.m_StringValue = g1.m_StringValue + g2.m_StringValue;
         break;
     default:
         assert( false && "Trying to add GenericValues of unknown type" );
@@ -939,45 +939,45 @@ GenericValue GenericValue::Add( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Sub( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to sub GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue - g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue - g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value - g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value - g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value - g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value - g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value - g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value - g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value - g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value - g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value - g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value - g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value - g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value - g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value - g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value - g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value - g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value - g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_floatValue = g1.m_floatValue - g2.m_floatValue;
+        ret.m_FloatValue = g1.m_FloatValue - g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_doubleValue = g1.m_doubleValue - g2.m_doubleValue;
+        ret.m_DoubleValue = g1.m_DoubleValue - g2.m_DoubleValue;
         break;
     case Type::STRING:
         assert( false && "Trying to sub GenericValues of string type" );
@@ -989,45 +989,45 @@ GenericValue GenericValue::Sub( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Mul( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to mul GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue * g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue * g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value * g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value * g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value * g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value * g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value * g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value * g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value * g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value * g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value * g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value * g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value * g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value * g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value * g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value * g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value * g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value * g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_floatValue = g1.m_floatValue * g2.m_floatValue;
+        ret.m_FloatValue = g1.m_FloatValue * g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_doubleValue = g1.m_doubleValue * g2.m_doubleValue;
+        ret.m_DoubleValue = g1.m_DoubleValue * g2.m_DoubleValue;
         break;
     case Type::STRING:
         assert( false && "Trying to mul GenericValues of string type" );
@@ -1039,45 +1039,45 @@ GenericValue GenericValue::Mul( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Div( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to div GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue / g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue / g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value / g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value / g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value / g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value / g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value / g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value / g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value / g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value / g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value / g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value / g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value / g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value / g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value / g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value / g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value / g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value / g2.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_floatValue = g1.m_floatValue / g2.m_floatValue;
+        ret.m_FloatValue = g1.m_FloatValue / g2.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_doubleValue = g1.m_doubleValue / g2.m_doubleValue;
+        ret.m_DoubleValue = g1.m_DoubleValue / g2.m_DoubleValue;
         break;
     case Type::STRING:
         assert( false && "Trying to div GenericValues of string type" );
@@ -1089,39 +1089,39 @@ GenericValue GenericValue::Div( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::Mod( const GenericValue& g1, const GenericValue& g2 )
 {
-    assert( g1.m_type == g2.m_type &&
+    assert( g1.m_Type == g2.m_Type &&
             "Trying to mod GenericValues of differing type" );
 
-    GenericValue ret( g1.m_type );
+    GenericValue ret( g1.m_Type );
 
-    switch( g1.m_type )
+    switch( g1.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = g1.m_boolValue % g2.m_boolValue;
+        ret.m_BoolValue = g1.m_BoolValue % g2.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = g1.m_i8Value % g2.m_i8Value;
+        ret.m_I8Value = g1.m_I8Value % g2.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = g1.m_i16Value % g2.m_i16Value;
+        ret.m_I16Value = g1.m_I16Value % g2.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = g1.m_i32Value % g2.m_i32Value;
+        ret.m_I32Value = g1.m_I32Value % g2.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = g1.m_i64Value % g2.m_i64Value;
+        ret.m_I64Value = g1.m_I64Value % g2.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = g1.m_u8Value % g2.m_u8Value;
+        ret.m_U8Value = g1.m_U8Value % g2.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = g1.m_u16Value % g2.m_u16Value;
+        ret.m_U16Value = g1.m_U16Value % g2.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = g1.m_u32Value % g2.m_u32Value;
+        ret.m_U32Value = g1.m_U32Value % g2.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = g1.m_u64Value % g2.m_u64Value;
+        ret.m_U64Value = g1.m_U64Value % g2.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -1136,51 +1136,51 @@ GenericValue GenericValue::Mod( const GenericValue& g1, const GenericValue& g2 )
 
 GenericValue GenericValue::UnaryPlus( const GenericValue& g )
 {
-    assert( g.m_type != Type::UNKNOWN_TYPE &&
+    assert( g.m_Type != Type::UNKNOWN_TYPE &&
                         "Trying to unary plus GenericValue of unknown type" );
-    assert( g.m_type != Type::STRING &&
+    assert( g.m_Type != Type::STRING &&
                         "Trying to unary plus GenericValue of string type" );
     return g;
 }
 
 GenericValue GenericValue::UnaryMinus( const GenericValue& g )
 {
-    GenericValue ret( g.m_type );
+    GenericValue ret( g.m_Type );
 
-    switch( g.m_type )
+    switch( g.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = -g.m_boolValue;
+        ret.m_BoolValue = -g.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = -g.m_i8Value;
+        ret.m_I8Value = -g.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = -g.m_i16Value;
+        ret.m_I16Value = -g.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = -g.m_i32Value;
+        ret.m_I32Value = -g.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = -g.m_i64Value;
+        ret.m_I64Value = -g.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = -g.m_u8Value;
+        ret.m_U8Value = -g.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = -g.m_u16Value;
+        ret.m_U16Value = -g.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = -g.m_u32Value;
+        ret.m_U32Value = -g.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = -g.m_u64Value;
+        ret.m_U64Value = -g.m_U64Value;
         break;
     case Type::FLOAT:
-        ret.m_floatValue = -g.m_floatValue;
+        ret.m_FloatValue = -g.m_FloatValue;
         break;
     case Type::DOUBLE:
-        ret.m_doubleValue = -g.m_doubleValue;
+        ret.m_DoubleValue = -g.m_DoubleValue;
         break;
     case Type::STRING:
         assert( false && "Trying to negate GenericValue of non-integer type" );
@@ -1192,12 +1192,12 @@ GenericValue GenericValue::UnaryMinus( const GenericValue& g )
 
 GenericValue GenericValue::LogicalNot( const GenericValue& g )
 {
-    GenericValue ret( g.m_type );
+    GenericValue ret( g.m_Type );
 
-    switch( g.m_type )
+    switch( g.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = !g.m_boolValue;
+        ret.m_BoolValue = !g.m_BoolValue;
         break;
     case Type::I8:
     case Type::I16:
@@ -1219,36 +1219,36 @@ GenericValue GenericValue::LogicalNot( const GenericValue& g )
 
 GenericValue GenericValue::BitwiseNot( const GenericValue& g )
 {
-    GenericValue ret( g.m_type );
+    GenericValue ret( g.m_Type );
 
-    switch( g.m_type )
+    switch( g.m_Type )
     {
     case Type::BOOL:
-        ret.m_boolValue = ~g.m_boolValue;
+        ret.m_BoolValue = ~g.m_BoolValue;
         break;
     case Type::I8:
-        ret.m_i8Value = ~g.m_i8Value;
+        ret.m_I8Value = ~g.m_I8Value;
         break;
     case Type::I16:
-        ret.m_i16Value = ~g.m_i16Value;
+        ret.m_I16Value = ~g.m_I16Value;
         break;
     case Type::I32:
-        ret.m_i32Value = ~g.m_i32Value;
+        ret.m_I32Value = ~g.m_I32Value;
         break;
     case Type::I64:
-        ret.m_i64Value = ~g.m_i64Value;
+        ret.m_I64Value = ~g.m_I64Value;
         break;
     case Type::U8:
-        ret.m_u8Value = ~g.m_u8Value;
+        ret.m_U8Value = ~g.m_U8Value;
         break;
     case Type::U16:
-        ret.m_u16Value = ~g.m_u16Value;
+        ret.m_U16Value = ~g.m_U16Value;
         break;
     case Type::U32:
-        ret.m_u32Value = ~g.m_u32Value;
+        ret.m_U32Value = ~g.m_U32Value;
         break;
     case Type::U64:
-        ret.m_u64Value = ~g.m_u64Value;
+        ret.m_U64Value = ~g.m_U64Value;
         break;
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -1265,7 +1265,7 @@ GenericValue GenericValue::Cast( Type t, const GenericValue& g )
 {
     assert( t != Type::UNKNOWN_TYPE &&
                  "Trying to cast a GenericValue to an unknown type" );
-    assert( g.m_type != Type::UNKNOWN_TYPE &&
+    assert( g.m_Type != Type::UNKNOWN_TYPE &&
                  "Trying to cast a GenericValue from an unknown type" );
 
     union
@@ -1275,9 +1275,9 @@ GenericValue GenericValue::Cast( Type t, const GenericValue& g )
     };
     bool integral = false;
 
-    if( IsIntegral( g.m_type ) )
+    if( IsIntegral( g.m_Type ) )
     {
-        switch( g.m_type )
+        switch( g.m_Type )
         {
         case Type::BOOL:
             i = g.GetBool();
@@ -1311,9 +1311,9 @@ GenericValue GenericValue::Cast( Type t, const GenericValue& g )
         }
         integral = true;
     }
-    else if( IsFloatingPoint( g.m_type ) )
+    else if( IsFloatingPoint( g.m_Type ) )
     {
-        switch( g.m_type )
+        switch( g.m_Type )
         {
         case Type::FLOAT:
             f = g.GetFloat();

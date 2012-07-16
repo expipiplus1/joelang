@@ -57,8 +57,8 @@ public:
     Type GetType() const;
 
 private:
-    bool m_isConst;
-    Type m_type;
+    bool m_IsConst;
+    Type m_Type;
 };
 
 /**
@@ -71,15 +71,8 @@ private:
 class DeclarationSpecifier : public JoeLang::Compiler::Token
 {
 public:
-    enum class DeclSpecTy
-    {
-        TypeSpecifier,
-        TypeQualifier,
-        StorageClassSpecifier
-    };
-
     explicit
-    DeclarationSpecifier( DeclSpecTy sub_class_id );
+    DeclarationSpecifier( TokenTy sub_class_id );
     virtual
     ~DeclarationSpecifier();
 
@@ -90,13 +83,11 @@ public:
     bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifier>& token );
 
     /** Used for casting **/
-    DeclSpecTy GetSubClassID() const;
-    /** Used for casting **/
+    static
+    bool classof( const Token* d );
     static
     bool classof( const DeclarationSpecifier* d );
 private:
-    /** Subclass identifier for casts **/
-    const DeclSpecTy m_subClassID;
 };
 
 /**
@@ -144,7 +135,7 @@ public:
     static
     bool classof( const TypeSpecifier* d );
 private:
-    TypeSpec m_typeSpec;
+    TypeSpec m_TypeSpec;
 };
 
 /**
@@ -181,7 +172,7 @@ public:
     static
     bool classof( const TypeQualifier* d );
 private:
-    TypeQual m_typeQual;
+    TypeQual m_TypeQual;
 };
 
 /**
@@ -218,7 +209,7 @@ public:
     static
     bool classof( const StorageClassSpecifier* d );
 private:
-    StorageClass m_storageClass;
+    StorageClass m_StorageClass;
 };
 
 } // namespace Compiler

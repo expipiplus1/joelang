@@ -166,13 +166,13 @@ public:
     bool ExpectAnyOf        ();
 
 private:
-    std::unique_ptr<TranslationUnit>    m_translationUnit;
+    std::unique_ptr<TranslationUnit>    m_TranslationUnit;
 
-    std::unique_ptr<Lexer>              m_lexer;
+    std::unique_ptr<Lexer>              m_Lexer;
 
-    bool                                m_good = true;
-    std::string                         m_errorMessage;
-    std::set<TerminalType>              m_expectedTerminals;
+    bool                                m_Good = true;
+    std::string                         m_ErrorMessage;
+    std::set<TerminalType>              m_ExpectedTerminals;
 };
 
 } // namespace Compiler

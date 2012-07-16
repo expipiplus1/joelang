@@ -40,11 +40,15 @@ namespace JoeLang
 
 class Context;
 class StateBase;
+enum class Type;
 
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+class GenericValue;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
@@ -59,8 +63,7 @@ class SemaAnalyzer
 public:
     using PassDefinitionRef = std::shared_ptr<std::unique_ptr<PassDefinition> >;
 
-    explicit
-    SemaAnalyzer( const Context& context );
+    SemaAnalyzer( const Context& context, CodeGenerator& code_gen );
     ~SemaAnalyzer();
 
     /**
@@ -164,8 +167,29 @@ public:
     bool InGlobalScope() const;
 
     /**
+      * Evaluates an expression using llvm
+      * \param expression
+      *   The expression to evaluate
+      * \returns the llvm genericvalue containing the expression's result
+      *
+      * This function asserts that expression is const
+      */
+    GenericValue EvaluateExpression( const Expression& expression );
+
+    /**
+      * Resolves identifiers, folds constants and casts to the requested type
+      * \param expression
+      *   The expression to resolve
+      * \param type
+      *   The type to cast to
+      * \returns true if the expression represents an identifier
+      */
+    bool TryResolveToLiteral( Expression_up& expression,
+                              Type type );
+
+    /**
       * Reports an error.
-      * Sets m_good to false
+      * Sets m_Good to false
       * \param error_message
       *   The error message
       */
@@ -186,19 +210,20 @@ public:
 private:
     struct SymbolMaps
     {
-        std::map<std::string, std::shared_ptr<Variable> > m_variables;
+        std::map<std::string, std::shared_ptr<Variable> > m_Variables;
     };
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
 
-    PassDefinitionMap        m_passDefinitions;
-    std::vector<std::string> m_techniques;
+    PassDefinitionMap        m_PassDefinitions;
+    std::vector<std::string> m_Techniques;
 
-    std::vector<SymbolMaps>  m_symbolStack;
+    std::vector<SymbolMaps>  m_SymbolStack;
 
-    bool m_good = true;
+    bool m_Good = true;
 
-    const Context& m_context;
+    const Context& m_Context;
+    CodeGenerator& m_CodeGenerator;
 };
 
 } // namespace Compiler

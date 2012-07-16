@@ -38,6 +38,7 @@
 namespace llvm
 {
     class ExecutionEngine;
+    class GenericValue;
     class GlobalVariable;
     class LLVMContext;
     class Module;
@@ -58,6 +59,9 @@ namespace Compiler
 
 class DeclarationBase;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
+class GenericValue;
 class TechniqueDeclaration;
 class TranslationUnit;
 class Variable;
@@ -76,6 +80,8 @@ public:
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
                                                  const Expression& expression );
+
+    GenericValue EvaluateExpression( const Expression& expression );
 
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, Type type );
@@ -110,6 +116,10 @@ public:
                                const Expression& true_expression,
                                const Expression& false_expression );
 
+    // Other things
+    llvm::Value* CreateArrayIndex( const Expression& array,
+                                   const Expression& index );
+
     /**
       * Create the llvm::Value representing an integer
       * \param value
@@ -138,6 +148,8 @@ public:
       * Allocate a llvm::GlobalVariable for the current module
       * \param type
       *   The type of the global variable
+      * \param array_extents
+      *   The array dimensions (if any)
       * \param is_const
       *   Whether this is a const variable
       * \param initializer
@@ -146,8 +158,9 @@ public:
       */
     llvm::GlobalVariable* CreateGlobalVariable(
                      Type type,
+                     std::vector<unsigned> array_extents,
                      bool is_const,
-                     const std::unique_ptr<Expression>& initializer = nullptr );
+                     const Expression_up& initializer = nullptr );
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
@@ -158,12 +171,12 @@ public:
     llvm::LLVMContext& GetLLVMContext() const;
 
 private:
-    const Context& m_context;
+    const Context& m_Context;
 
-    llvm::LLVMContext&              m_llvmContext;
-    llvm::Module*                   m_llvmModule;
-    llvm::IRBuilder<>               m_llvmBuilder;
-    std::unique_ptr<llvm::ExecutionEngine> m_llvmExecutionEngine;
+    llvm::LLVMContext&              m_LLVMContext;
+    llvm::Module*                   m_LLVMModule;
+    llvm::IRBuilder<>               m_LLVMBuilder;
+    std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
 };
 
 } // namespace Compiler

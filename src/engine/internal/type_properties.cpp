@@ -36,6 +36,7 @@
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
 
+#include <compiler/tokens/expression.hpp>
 #include <engine/types.hpp>
 
 namespace JoeLang
@@ -159,6 +160,34 @@ llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
     return nullptr;
 }
 
+llvm::Type* GetLLVMType( const Compiler::Expression& expression,
+                         llvm::LLVMContext& c )
+{
+    Type underlying_type = expression.GetUnderlyingType();
+    llvm::Type* t;
+    if( underlying_type == Type::DOUBLE )
+        t = llvm::Type::getDoubleTy( c );
+    else if( underlying_type == Type::FLOAT )
+        t = llvm::Type::getFloatTy( c );
+    else if( underlying_type == Type::BOOL )
+        t = llvm::Type::getInt1Ty( c );
+    else if( IsIntegral( underlying_type ) )
+        t = llvm::Type::getIntNTy( c, SizeOf(underlying_type)*8 );
+    else
+    {
+        assert( false && "Trying to get the llvm::Type of an unhandled Type" );
+        return nullptr;
+    }
+
+    std::vector<unsigned> array_extents = expression.GetArrayExtents();
+    for( auto extent = array_extents.rbegin();
+         extent != array_extents.rend();
+         ++extent )
+        t = llvm::ArrayType::get( t, *extent );
+
+    return t;
+}
+
 const std::string& GetTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =
@@ -176,6 +205,7 @@ const std::string& GetTypeString( Type t )
         { Type::I8,           "i8" },
         { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
+        { Type::ARRAY,        "array" },
     };
 
     return string_map.at(t);

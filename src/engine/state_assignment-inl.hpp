@@ -41,8 +41,8 @@ namespace JoeLang
 template<typename T>
 StateAssignment<T>::StateAssignment( const State<T>& state,
                                      std::function<T()> getter )
-    :m_state(state)
-    ,m_getter(std::move(getter))
+    :m_State(state)
+    ,m_Getter(std::move(getter))
 {
 }
 
@@ -54,26 +54,26 @@ StateAssignment<T>::~StateAssignment()
 template<typename T>
 void StateAssignment<T>::SetState() const
 {
-    m_state.SetState( m_getter() );
+    m_State.SetState( m_Getter() );
 }
 
 template<typename T>
 void StateAssignment<T>::ResetState() const
 {
-    m_state.ResetState();
+    m_State.ResetState();
 }
 
 template<typename T>
 bool StateAssignment<T>::ValidateState() const
 {
-    return m_state.ValidateState();
+    return m_State.ValidateState();
 }
 
 template<typename T>
 ConstStateAssignment<T>::ConstStateAssignment( const State<T>& state,
                                                T value )
-    :m_state( state )
-    ,m_value( std::move(value) )
+    :m_State( state )
+    ,m_Value( std::move(value) )
 {
 }
 
@@ -85,19 +85,19 @@ ConstStateAssignment<T>::~ConstStateAssignment()
 template<typename T>
 void ConstStateAssignment<T>::SetState() const
 {
-    m_state.SetState( m_value );
+    m_State.SetState( m_Value );
 }
 
 template<typename T>
 void ConstStateAssignment<T>::ResetState() const
 {
-    m_state.ResetState();
+    m_State.ResetState();
 }
 
 template<typename T>
 bool ConstStateAssignment<T>::ValidateState() const
 {
-    return m_state.ValidateState();
+    return m_State.ValidateState();
 }
 
 } // namespace JoeLang

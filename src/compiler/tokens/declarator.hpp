@@ -44,6 +44,8 @@ class CodeGenerator;
 class Declarator;
 class DeclSpecs;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 class Parser;
 class SemaAnalyzer;
 class Variable;
@@ -60,7 +62,7 @@ class InitDeclarator : public JoeLang::Compiler::Token
 public:
     /** This constructor asserts on a null direct_declarator **/
     InitDeclarator  ( std::unique_ptr<Declarator> declarator,
-                      std::unique_ptr<Expression> initializer = nullptr );
+                      Expression_up initializer = nullptr );
     virtual
     ~InitDeclarator ();
 
@@ -93,10 +95,10 @@ public:
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
 private:
-    std::unique_ptr<Declarator> m_declarator;
-    std::unique_ptr<Expression> m_initializer;
-    std::shared_ptr<Variable>   m_variable;
-    bool                        m_isGlobal;
+    std::unique_ptr<Declarator> m_Declarator;
+    Expression_up m_Initializer;
+    std::shared_ptr<Variable>   m_Variable;
+    bool                        m_IsGlobal;
 };
 
 /**
@@ -117,6 +119,13 @@ public:
     virtual
     ~Declarator   ();
 
+    /**
+      * Performs semantic ananysis on the declarator
+      * \param sema
+      *   The SemaAnalyzer which contains the symbol table and things
+      */
+    void PerformSema( SemaAnalyzer& sema );
+
     virtual
     void Print( int depth ) const override;
 
@@ -125,8 +134,8 @@ public:
       */
     const std::string& GetIdentifier() const;
 
-    /** \returns true if this declarator represents an array **/
-    bool IsArray() const;
+    /** \returns a vector of the sizes of the array dimensions **/
+    const std::vector<unsigned>& GetArrayDimensionSizes() const;
 
     /**
       * Parses a direct declarator
@@ -142,8 +151,9 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
 private:
-    std::string             m_identifier;
-    ArraySpecifierVector    m_arraySpecifiers;
+    std::string             m_Identifier;
+    ArraySpecifierVector    m_ArraySpecifiers;
+    std::vector<unsigned>   m_ArrayExtents;
 };
 
 /**
@@ -156,9 +166,18 @@ private:
 class ArraySpecifier : public JoeLang::Compiler::Token
 {
 public:
-    ArraySpecifier    ( std::unique_ptr<Expression> expression );
+    ArraySpecifier    ( Expression_up expression );
     virtual
     ~ArraySpecifier   ();
+
+    /**
+      * Performs semantic ananysis on the declarator
+      * \param sema
+      *   The SemaAnalyzer which contains the symbol table and things
+      */
+    void PerformSema( SemaAnalyzer& sema );
+
+    Expression_up GetExpression();
 
     virtual
     void Print( int depth ) const override;
@@ -177,7 +196,7 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
 
 private:
-    std::unique_ptr<Expression> m_expression;
+    Expression_up m_Expression;
 };
 
 

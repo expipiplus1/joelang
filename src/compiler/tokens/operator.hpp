@@ -35,13 +35,24 @@
 
 #include <compiler/tokens/token.hpp>
 
+namespace llvm
+{
+    class Value;
+}
+
 namespace JoeLang
 {
+enum class Type;
+
 namespace Compiler
 {
 
+class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 class Parser;
+class SemaAnalyzer;
 
 /**
   * \class AssignmentOperator
@@ -88,7 +99,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<AssignmentOperator>& token );
 private:
-    Op m_operator;
+    Op m_Operator;
 };
 
 /**
@@ -109,13 +120,40 @@ private:
 class PostfixOperator : public JoeLang::Compiler::Token
 {
 public:
-    PostfixOperator( );
+    PostfixOperator( TokenTy sub_class_id );
     virtual
     ~PostfixOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const Expression_up& expression ) = 0;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) = 0;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const = 0;
+
+    /// todo make these all take references
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const = 0;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents(
+                                    const Expression_up& expression) const = 0;
+
+    virtual
+    bool IsConst( const Expression& expression ) const = 0;
 
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<PostfixOperator>& token );
+
+    static
+    bool classof( const Token* e );
+    static
+    bool classof( const PostfixOperator* e );
 };
 
 /**
@@ -134,9 +172,30 @@ public:
       * \param expression
       *   The index expression
       */
-    SubscriptOperator( std::unique_ptr<Expression> expression );
+    SubscriptOperator( Expression_up index_expression );
     virtual
     ~SubscriptOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const Expression_up& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents(
+                            const Expression_up& expression ) const override;
+
+    virtual
+    bool IsConst( const Expression& expression ) const override;
 
     virtual
     void Print( int depth ) const;
@@ -145,7 +204,8 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    std::unique_ptr<Expression> m_expression;
+    Expression_up           m_IndexExpression;
+    std::vector<unsigned>   m_ArrayExtents;
 };
 
 /**
@@ -159,11 +219,33 @@ private:
 class ArgumentListOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
-    using ArgumentExpressionVector = std::vector< std::unique_ptr<Expression> >;
+    using ArgumentExpressionVector = std::vector< Expression_up >;
 
     ArgumentListOperator( ArgumentExpressionVector argument_expressions );
     virtual
     ~ArgumentListOperator();
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const Expression_up& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents(
+                            const Expression_up& expression ) const override;
+
+    /** \returns false **/
+    virtual
+    bool IsConst( const Expression& expression ) const override;
 
     virtual
     void Print( int depth ) const;
@@ -172,7 +254,7 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<ArgumentListOperator>& token );
 private:
-    ArgumentExpressionVector m_argumentExpressions;
+    ArgumentExpressionVector m_ArgumentExpressions;
 };
 
 /**
@@ -195,13 +277,34 @@ public:
     ~MemberAccessOperator();
 
     virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const Expression_up& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents(
+                            const Expression_up& expression ) const override;
+
+    virtual
+    bool IsConst( const Expression& expression ) const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<MemberAccessOperator>& token );
 private:
-    std::string m_identifier;
+    std::string m_Identifier;
 };
 
 /**
@@ -224,13 +327,35 @@ public:
     ~IncrementOrDecrementOperator();
 
     virtual
+    bool PerformSema( SemaAnalyzer& sema,
+                      const Expression_up& expression ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen,
+                          const Expression_up& expression ) override;
+
+    virtual
+    Type GetReturnType( const Expression_up& expression ) const override;
+
+    virtual
+    Type GetUnderlyingType( const Expression_up& expression ) const override;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents(
+                            const Expression_up& expression ) const override;
+
+    /** \returns false **/
+    virtual
+    bool IsConst( const Expression& expression ) const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<IncrementOrDecrementOperator>& token );
 private:
-    Op m_operator;
+    Op m_Operator;
 };
 
 } // namespace Compiler

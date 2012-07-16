@@ -45,6 +45,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
 class Parser;
 class SemaAnalyzer;
 
@@ -66,7 +67,7 @@ public:
       *   The expression to assign to the State
       */
     StateAssignmentStatement( std::string identifier,
-                              std::unique_ptr<Expression> expression );
+                              Expression_up expression );
     virtual
     ~StateAssignmentStatement();
 
@@ -97,12 +98,12 @@ public:
 
 private:
     /** The identifier for the state to be assigned to **/
-    std::string m_identifier;
+    std::string m_Identifier;
     /** The expression to assign to the state **/
-    std::unique_ptr<Expression> m_expression;
+    Expression_up m_Expression;
 
     /** The State being set by this assignment **/
-    const StateBase* m_state = nullptr;
+    const StateBase* m_State = nullptr;
 };
 
 } // namespace Compiler

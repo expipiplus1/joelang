@@ -59,8 +59,8 @@ namespace Compiler
 // DeclarationBase
 //------------------------------------------------------------------------------
 
-DeclarationBase::DeclarationBase( DeclarationTy sub_class_id )
-    :m_subClassID( sub_class_id )
+DeclarationBase::DeclarationBase( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
@@ -87,9 +87,10 @@ bool DeclarationBase::Parse( Parser& parser,
     return true;
 }
 
-DeclarationBase::DeclarationTy DeclarationBase::GetSubClassID() const
+bool DeclarationBase::classof( const Token* d )
 {
-    return m_subClassID;
+    return d->GetSubClassID() >= TokenTy::Declaration_Start &&
+           d->GetSubClassID() <= TokenTy::Declaration_End;
 }
 
 bool DeclarationBase::classof( const DeclarationBase* d )
@@ -104,7 +105,7 @@ bool DeclarationBase::classof( const DeclarationBase* d )
 //------------------------------------------------------------------------------
 
 EmptyDeclaration::EmptyDeclaration()
-    :DeclarationBase( DeclarationTy::EmptyDeclaration )
+    :DeclarationBase( TokenTy::EmptyDeclaration )
 {
 }
 
@@ -136,7 +137,7 @@ bool EmptyDeclaration::Parse( Parser& parser,
 
 bool EmptyDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::EmptyDeclaration;
+    return d->GetSubClassID() == TokenTy::EmptyDeclaration;
 }
 
 bool EmptyDeclaration::classof( const EmptyDeclaration* d )
@@ -150,9 +151,9 @@ bool EmptyDeclaration::classof( const EmptyDeclaration* d )
 
 PassDeclaration::PassDeclaration( std::string name,
                                   std::unique_ptr<PassDefinition> definition )
-    :DeclarationBase( DeclarationTy::PassDeclaration )
-    ,m_name         ( std::move(name) )
-    ,m_definition   ( std::move(definition) )
+    :DeclarationBase( TokenTy::PassDeclaration )
+    ,m_Name         ( std::move(name) )
+    ,m_Definition   ( std::move(definition) )
 {
 }
 
@@ -162,22 +163,22 @@ PassDeclaration::~PassDeclaration()
 
 void PassDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    sema.DeclarePass( m_name, std::move(m_definition) );
+    sema.DeclarePass( m_Name, std::move(m_Definition) );
 }
 
 const std::string& PassDeclaration::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 bool PassDeclaration::HasDefinition() const
 {
-    return bool(m_definition);
+    return bool(m_Definition);
 }
 
 const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
-    return m_definition;
+    return m_Definition;
 }
 
 void PassDeclaration::Print( int depth ) const
@@ -185,10 +186,10 @@ void PassDeclaration::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
-    std::cout << "Pass: " << ( m_name.size() ? m_name : "Unnamed" ) << "\n";
-    if( m_definition )
+    std::cout << "Pass: " << ( m_Name.size() ? m_Name : "Unnamed" ) << "\n";
+    if( m_Definition )
     {
-        m_definition->Print( depth + 1);
+        m_Definition->Print( depth + 1);
     }
     else
     {
@@ -231,7 +232,7 @@ bool PassDeclaration::Parse( Parser& parser,
 
 bool PassDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::PassDeclaration;
+    return d->GetSubClassID() == TokenTy::PassDeclaration;
 }
 
 bool PassDeclaration::classof( const PassDeclaration* d )
@@ -246,12 +247,12 @@ bool PassDeclaration::classof( const PassDeclaration* d )
 TechniqueDeclaration::TechniqueDeclaration( std::string name,
                                             PassDeclarationVector passes )
 
-    :DeclarationBase( DeclarationTy::TechniqueDeclaration )
-    ,m_name( std::move(name) )
-    ,m_passes( std::move(passes) )
+    :DeclarationBase( TokenTy::TechniqueDeclaration )
+    ,m_Name( std::move(name) )
+    ,m_Passes( std::move(passes) )
 {
 #ifndef NDEBUG
-    for( const auto& p : m_passes )
+    for( const auto& p : m_Passes )
         assert( p && "TechniqueDeclaration given a null pass" );
 #endif
 }
@@ -262,23 +263,23 @@ TechniqueDeclaration::~TechniqueDeclaration()
 
 void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    sema.DeclareTechnique( m_name );
-    for( auto& p : m_passes )
+    sema.DeclareTechnique( m_Name );
+    for( auto& p : m_Passes )
         p->PerformSema( sema );
 }
 
 const std::string& TechniqueDeclaration::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 Technique TechniqueDeclaration::GenerateTechnique(
                                                  CodeGenerator& code_gen ) const
 {
     std::vector<Pass> passes;
-    for( const auto& p : m_passes )
+    for( const auto& p : m_Passes )
         passes.push_back( p->GeneratePass( code_gen ) );
-    return Technique( m_name, std::move(passes) );
+    return Technique( m_Name, std::move(passes) );
 }
 
 void TechniqueDeclaration::Print( int depth ) const
@@ -286,8 +287,8 @@ void TechniqueDeclaration::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
 
-    std::cout << "Technique: " << (m_name.size() ? m_name : "Unnamed") << "\n";
-    for( const auto& p : m_passes )
+    std::cout << "Technique: " << (m_Name.size() ? m_Name : "Unnamed") << "\n";
+    for( const auto& p : m_Passes )
         p->Print( depth + 1 );
 }
 
@@ -325,7 +326,7 @@ bool TechniqueDeclaration::Parse( Parser& parser,
 
 bool TechniqueDeclaration::classof( const DeclarationBase* d )
 {
-    return d->GetSubClassID() == DeclarationTy::TechniqueDeclaration;
+    return d->GetSubClassID() == TokenTy::TechniqueDeclaration;
 }
 
 bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
@@ -338,7 +339,7 @@ bool TechniqueDeclaration::classof( const TechniqueDeclaration* d )
 //------------------------------------------------------------------------------
 
 VariableListOrFunctionDefinition::VariableListOrFunctionDefinition(
-                                                    DeclarationTy sub_class_id )
+                                                    TokenTy sub_class_id )
     :DeclarationBase( sub_class_id )
 {
 }
@@ -522,11 +523,11 @@ Type VariableListOrFunctionDefinition::DeduceType(
 
 VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
                                                   DeclaratorVector declarators)
-    :VariableListOrFunctionDefinition( DeclarationTy::VariableDeclarationList )
-    ,m_declSpecs( std::move(decl_specs) )
-    ,m_declarators( std::move(declarators) )
+    :VariableListOrFunctionDefinition( TokenTy::VariableDeclarationList )
+    ,m_DeclSpecs( std::move(decl_specs) )
+    ,m_Declarators( std::move(declarators) )
 {
-    assert( !m_declSpecs.empty() &&
+    assert( !m_DeclSpecs.empty() &&
             "VariableDeclarationList given no declaration specifiers" );
 }
 
@@ -545,7 +546,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     // Handle the declaration specifiers
     bool is_const = false;
 
-    for( const auto& t : m_declSpecs )
+    for( const auto& t : m_DeclSpecs )
     {
         if( isa<TypeQualifier>(t) )
         {
@@ -592,13 +593,13 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 
     DeclSpecs decl_specs( is_const, type );
 
-    for( const auto& declarator : m_declarators )
+    for( const auto& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );
 }
 
 void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 {
-    for( const auto& d : m_declarators )
+    for( const auto& d : m_Declarators )
         d->CodeGen( code_gen );
 }
 
@@ -607,7 +608,7 @@ void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 //------------------------------------------------------------------------------
 
 FunctionDefinition::FunctionDefinition()
-    :VariableListOrFunctionDefinition( DeclarationTy::FunctionDefinition )
+    :VariableListOrFunctionDefinition( TokenTy::FunctionDefinition )
 {
 }
 

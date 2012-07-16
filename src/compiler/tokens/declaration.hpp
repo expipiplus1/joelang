@@ -65,17 +65,8 @@ class TechniqueDefinition;
 class DeclarationBase : public JoeLang::Compiler::Token
 {
 public:
-    enum class DeclarationTy
-    {
-        EmptyDeclaration,
-        PassDeclaration,
-        TechniqueDeclaration,
-        VariableDeclarationList,
-        FunctionDefinition
-    };
-
     explicit
-    DeclarationBase( DeclarationTy sub_class_id );
+    DeclarationBase( TokenTy sub_class_id );
     virtual
     ~DeclarationBase    ();
 
@@ -102,14 +93,10 @@ public:
                           std::unique_ptr<DeclarationBase>& token );
 
     /** Used for casting **/
-    DeclarationTy GetSubClassID() const;
-    /** Used for casting **/
+    static
+    bool classof( const Token* t );
     static
     bool classof( const DeclarationBase* d );
-
-private:
-    // Subclass identifier for casts
-    const DeclarationTy m_subClassID;
 };
 
 /**
@@ -230,9 +217,9 @@ public:
     bool classof( const PassDeclaration* e );
 private:
     /** This pass declaration's identifier **/
-    std::string                     m_name;
+    std::string                     m_Name;
     /** Thie pass declaration's definition if it has one, otherwise nullptr **/
-    std::unique_ptr<PassDefinition> m_definition;
+    std::unique_ptr<PassDefinition> m_Definition;
 };
 
 /**
@@ -308,9 +295,9 @@ public:
     bool classof( const TechniqueDeclaration* e );
 private:
     /** This technique's identifier **/
-    std::string m_name;
+    std::string m_Name;
     /** This technique's passes **/
-    PassDeclarationVector m_passes;
+    PassDeclarationVector m_Passes;
 };
 
 /**
@@ -328,7 +315,7 @@ public:
     using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
     using DeclaratorVector = std::vector<std::unique_ptr<InitDeclarator> >;
 
-    VariableListOrFunctionDefinition( DeclarationTy sub_class_id );
+    VariableListOrFunctionDefinition( TokenTy sub_class_id );
     virtual
     ~VariableListOrFunctionDefinition();
 
@@ -357,7 +344,7 @@ public:
   * \ingroup Tokens
   * \brief A C declaration
   *
-  * VariableDeclarationList = DeclarationSpecifier+ (Declarator ',') ';'
+  * VariableDeclarationList = DeclarationSpecifier+ (Declarator ',')+ ';'
   */
 class VariableDeclarationList :
                     public JoeLang::Compiler::VariableListOrFunctionDefinition
@@ -381,8 +368,8 @@ public:
     void CodeGen( CodeGenerator& code_gen ) const;
 
 private:
-    DeclSpecsVector m_declSpecs;
-    DeclaratorVector m_declarators;
+    DeclSpecsVector m_DeclSpecs;
+    DeclaratorVector m_Declarators;
 };
 
 /**

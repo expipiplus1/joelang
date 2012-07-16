@@ -53,40 +53,40 @@ Parser::~Parser()
 
 void Parser::Print() const
 {
-    if( m_translationUnit )
-        m_translationUnit->Print();
+    if( m_TranslationUnit )
+        m_TranslationUnit->Print();
 }
 
 bool Parser::Parse ( const std::string& string )
 {
     // Set up the lexer
-    m_lexer.reset( new Compiler::Lexer( string ) );
+    m_Lexer.reset( new Compiler::Lexer( string ) );
 
     // Try and parse a translation unit
-    if( TranslationUnit::Parse( *this, m_translationUnit ) )
+    if( TranslationUnit::Parse( *this, m_TranslationUnit ) )
         return true;
 
     //
     // Report error
     // TODO move this to a better place
-    std::cout << "Error parsing at " << m_lexer->GetLineNumber() << ":"
-                                     << m_lexer->GetColumnNumber() << "\n";
-    if( m_errorMessage.empty() )
+    std::cout << "Error parsing at " << m_Lexer->GetLineNumber() << ":"
+                                     << m_Lexer->GetColumnNumber() << "\n";
+    if( m_ErrorMessage.empty() )
     {
         std::cout << "Expected one of: ";
-        for( TerminalType expected_terminal : m_expectedTerminals )
+        for( TerminalType expected_terminal : m_ExpectedTerminals )
         {
             std::cout << "\'"
                       << Compiler::GetTerminalString( expected_terminal )
                       << "\', ";
         }
         std::string next_terminal;
-        m_lexer->PeekNextTerminal( next_terminal );
+        m_Lexer->PeekNextTerminal( next_terminal );
         std::cout << "Got: '" << next_terminal << "'";
     }
     else
     {
-        std::cout << m_errorMessage;
+        std::cout << m_ErrorMessage;
     }
     std::cout << std::endl;
     return false;
@@ -100,35 +100,35 @@ bool Parser::ExpectTerminal( TerminalType terminal_type )
 
 bool Parser::ExpectTerminal( TerminalType terminal_type, std::string& string )
 {
-    if( m_lexer->Expect( terminal_type, string ) )
+    if( m_Lexer->Expect( terminal_type, string ) )
     {
-        m_expectedTerminals.clear();
+        m_ExpectedTerminals.clear();
         return true;
     }
 
-    m_expectedTerminals.insert( terminal_type );
+    m_ExpectedTerminals.insert( terminal_type );
     return false;
 }
 
 const std::unique_ptr<TranslationUnit>& Parser::GetTranslationUnit() const
 {
-    return m_translationUnit;
+    return m_TranslationUnit;
 }
 
 void Parser::Error()
 {
-    m_good = false;
+    m_Good = false;
 }
 
 void Parser::Error( std::string error_message )
 {
-    m_errorMessage = std::move( error_message );
+    m_ErrorMessage = std::move( error_message );
     Error();
 }
 
 bool Parser::Good() const
 {
-    return m_good;
+    return m_Good;
 }
 
 } // namespace Compiler

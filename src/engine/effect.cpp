@@ -43,8 +43,8 @@ namespace JoeLang
 
 Effect::Effect( std::vector<Technique> techniques,
                 std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine )
-    :m_techniques( std::move(techniques) )
-    ,m_llvmExecutionEngine( std::move(llvm_execution_engine) )
+    :m_Techniques( std::move(techniques) )
+    ,m_LLVMExecutionEngine( std::move(llvm_execution_engine) )
 {
 }
 
@@ -54,16 +54,16 @@ Effect::~Effect()
 
 const std::vector<Technique>& Effect::GetTechniques() const
 {
-    return m_techniques;
+    return m_Techniques;
 }
 
 const Technique* Effect::GetNamedTechnique( const std::string& name ) const
 {
-    const auto& technique = std::find_if( m_techniques.begin(),
-                                          m_techniques.end(),
+    const auto& technique = std::find_if( m_Techniques.begin(),
+                                          m_Techniques.end(),
                                          [&name](const Technique& t)
                                             {return t.GetName() == name;} );
-    return technique == m_techniques.end() ? nullptr :  &*technique;
+    return technique == m_Techniques.end() ? nullptr :  &*technique;
 }
 
 } // namespace JoeLang

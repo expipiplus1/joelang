@@ -45,27 +45,27 @@ namespace Compiler
 
 SymbolTable::~SymbolTable()
 {
-    assert( m_symbolStack.size() == 0 &&
+    assert( m_SymbolStack.size() == 0 &&
             "The symbol table is still inside a scope" );
 }
 
 void SymbolTable::EnterScope()
 {
-    m_symbolStack.resize( m_symbolStack.size() + 1 );
+    m_SymbolStack.resize( m_SymbolStack.size() + 1 );
 }
 
 void SymbolTable::LeaveScope()
 {
-    m_symbolStack.pop_back();
+    m_SymbolStack.pop_back();
 }
 
 bool SymbolTable::GetConstant( std::string identifier,
                                std::shared_ptr<LiteralExpression>& constant )
 {
-    for( const auto& m : m_symbolStack )
+    for( const auto& m : m_SymbolStack )
     {
-        auto e = m.m_constants.find( identifier );
-        if( e != m.m_constants.end() )
+        auto e = m.m_Constants.find( identifier );
+        if( e != m.m_Constants.end() )
         {
             constant = e->second;
             return true;
@@ -77,18 +77,18 @@ bool SymbolTable::GetConstant( std::string identifier,
 bool SymbolTable::AddConstant( std::string identifier,
                                std::shared_ptr<LiteralExpression> constant )
 {
-    return m_symbolStack.rbegin()->m_constants.insert(
+    return m_SymbolStack.rbegin()->m_Constants.insert(
                     std::make_pair(identifier, std::move(constant)) ).second;
 }
 
 bool SymbolTable::HasTechniqueName( const std::string& name ) const
 {
-    return m_techniqueNames.find( name ) != m_techniqueNames.end();
+    return m_TechniqueNames.find( name ) != m_TechniqueNames.end();
 }
 
 bool SymbolTable::AddTechniqueName( const std::string& name )
 {
-    return m_techniqueNames.insert( name ).second;
+    return m_TechniqueNames.insert( name ).second;
 }
 
 } // namespace Compiler

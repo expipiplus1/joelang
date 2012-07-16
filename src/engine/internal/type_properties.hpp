@@ -42,10 +42,13 @@ namespace llvm
 namespace JoeLang
 {
 
+namespace Compiler
+{
+    class Expression;
+}
+
 /**
   * This returns the type according to the integer promotion rules
-  *
-  *
   */
 Type GetCommonType( Type t1, Type t2 );
 
@@ -71,6 +74,12 @@ Type MakeUnsigned( Type t );
   * This asserts if one tries to get the llvm type of an invalid Type
   */
 llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
+
+/**
+  * This asserts if one tries to get the llvm type of an invalid Type
+  */
+llvm::Type* GetLLVMType( const Compiler::Expression& expression,
+                         llvm::LLVMContext& c );
 
 const std::string& GetTypeString( Type t );
 

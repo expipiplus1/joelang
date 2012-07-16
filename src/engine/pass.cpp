@@ -45,18 +45,18 @@ Pass::Pass()
 }
 
 Pass::Pass( std::string name )
-    :m_name( std::move(name) )
+    :m_Name( std::move(name) )
 {
 }
 
 Pass::Pass(
         std::string name,
         StateAssignmentVector state_assignments )
-    :m_name( std::move(name) )
-    ,m_stateAssignments( std::move(state_assignments) )
+    :m_Name( std::move(name) )
+    ,m_StateAssignments( std::move(state_assignments) )
 {
 #ifndef NDEBUG
-    for( const auto& sa : m_stateAssignments )
+    for( const auto& sa : m_StateAssignments )
         assert( sa && "null state assignment given to Pass" );
 #endif
 }
@@ -67,19 +67,19 @@ Pass::~Pass()
 
 void Pass::SetState() const
 {
-    for( const auto& sa : m_stateAssignments )
+    for( const auto& sa : m_StateAssignments )
         sa->SetState();
 }
 
 void Pass::ResetState() const
 {
-    for( const auto& sa : m_stateAssignments )
+    for( const auto& sa : m_StateAssignments )
         sa->ResetState();
 }
 
 bool Pass::Validate() const
 {
-    for( const auto& sa : m_stateAssignments )
+    for( const auto& sa : m_StateAssignments )
         if( !sa->ValidateState() )
             return false;
     return true;
@@ -87,7 +87,7 @@ bool Pass::Validate() const
 
 const std::string& Pass::GetName() const
 {
-    return m_name;
+    return m_Name;
 }
 
 } // namespace JoeLang

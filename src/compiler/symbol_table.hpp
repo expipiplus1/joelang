@@ -60,12 +60,12 @@ public:
 private:
     struct SymbolMaps
     {
-        std::map< std::string, std::shared_ptr<LiteralExpression> > m_constants;
+        std::map< std::string, std::shared_ptr<LiteralExpression> > m_Constants;
     };
 
-    std::set<std::string>   m_techniqueNames;
+    std::set<std::string>   m_TechniqueNames;
 
-    std::vector<SymbolMaps> m_symbolStack;
+    std::vector<SymbolMaps> m_SymbolStack;
 };
 
 } // namespace Compiler

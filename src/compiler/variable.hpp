@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 namespace llvm
 {
@@ -46,6 +47,8 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
+typedef std::unique_ptr<Expression> Expression_up;
+typedef std::shared_ptr<Expression> Expression_sp;
 
 /**
   * \class Variable
@@ -59,9 +62,10 @@ public:
       * an initializer
       */
     Variable( Type type,
+              std::vector<unsigned> array_dimension_sizes,
               bool is_const,
               bool is_global,
-              std::unique_ptr<Expression> initializer = nullptr );
+              Expression_up initializer = nullptr );
 
     void CodeGen( CodeGenerator& code_gen );
 
@@ -69,19 +73,24 @@ public:
 
     Type GetType() const;
 
+    Type GetUnderlyingType() const;
+
+    const std::vector<unsigned>& GetArrayExtents() const;
+
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
-    const std::unique_ptr<Expression>& GetReadExpression() const;
+    const Expression_up& GetReadExpression() const;
 
 private:
-    Type m_type;
-    bool m_isConst;
-    bool m_isGlobal;
-    std::unique_ptr<Expression> m_initializer;
+    Type m_Type;
+    std::vector<unsigned> m_ArrayDimensionSizes;
+    bool m_IsConst;
+    bool m_IsGlobal;
+    Expression_up m_Initializer;
 
     // TODO handle non global variables
-    llvm::Value* m_llvmPointer = nullptr;
+    llvm::Value* m_LLVMPointer = nullptr;
 };
 
 } // namespace Compiler
