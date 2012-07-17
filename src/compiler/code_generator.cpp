@@ -95,10 +95,6 @@ CodeGenerator::CodeGenerator( const Context& context )
                                                    m_LLVMContext );
         assert( s_RuntimeModule && "Couldn't parse runtime library" );
 
-        s_StringType = s_RuntimeModule->getTypeByName( "struct.String" );
-        assert( s_StringType &&
-                "Can't find String type" );
-        /// TODO make assertions about string type;
 
         s_StringEqualFunction = s_RuntimeModule->getFunction( "String_Equal" );
         assert( s_StringEqualFunction &&
@@ -111,6 +107,12 @@ CodeGenerator::CodeGenerator( const Context& context )
                                                            "String_Concat" );
         assert( s_StringConcatFunction &&
                "Can't find String_Concat in runtime" );
+
+        s_StringType = llvm::dyn_cast<llvm::StructType>(
+                                    s_StringConcatFunction->getReturnType() );
+        assert( s_StringType &&
+                "Can't find String type" );
+        /// TODO make assertions about string type;
     }
 }
 
