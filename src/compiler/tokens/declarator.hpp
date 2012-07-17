@@ -68,15 +68,13 @@ public:
 
     /**
       * Performs semantic ananysis on the declarator
+      * This also codegens the variable
       * \param sema
       *   The AstBuilder which contains the symbol table and things
+      * \param decl_specs
+      *   The declaration specifiers for this declarator
       */
     void PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
-
-    /**
-      * Creates some memory in llvm to hold this variable
-      */
-    void CodeGen( CodeGenerator& code_gen );
 
     virtual
     void Print( int depth ) const override;

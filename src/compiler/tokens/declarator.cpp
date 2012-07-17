@@ -128,12 +128,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     m_Variable->CodeGen( sema.GetCodeGenerator() );
 }
 
-void InitDeclarator::CodeGen( CodeGenerator& code_gen )
-{
-    assert( false && "remove me" );
-    m_Variable->CodeGen( code_gen );
-}
-
 void InitDeclarator::Print( int depth ) const
 {
 }

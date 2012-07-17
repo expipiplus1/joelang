@@ -222,13 +222,17 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
     // TODO cache these results
     // TODO support arrays here
     for( auto& v : GetGenericValueEnumerantMap(state) )
-        DeclareVariable( v.first,
-                         std::make_shared<Variable>(
-                                    v.second.GetType(),
-                                    std::vector<unsigned>(),
-                                    true,
-                                    false,
-                                    std::move(v.second) ) );
+    {
+        std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
+                                                        v.second.GetType(),
+                                                        std::vector<unsigned>(),
+                                                        true,
+                                                        true,
+                                                        std::move(v.second),
+                                                        v.first );
+        variable->CodeGen( m_CodeGenerator );
+        DeclareVariable( v.first, std::move(variable) );
+    }
 }
 
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,

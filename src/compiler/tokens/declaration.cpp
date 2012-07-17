@@ -599,8 +599,6 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 
 void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 {
-    for( const auto& d : m_Declarators )
-        d->CodeGen( code_gen );
 }
 
 //------------------------------------------------------------------------------

@@ -74,6 +74,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
     // create a scope for the enumerants
+    /// TODO create some scope raii
     sema.EnterScope();
 
     // Try and get the state to which we are assigning
@@ -81,17 +82,17 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     if( !m_State )
         sema.Error( "Undeclared state: " + m_Identifier );
     else
+    {
         sema.LoadStateEnumerants( *m_State );
 
-    m_Expression->ResolveIdentifiers( sema );
+        m_Expression->ResolveIdentifiers( sema );
 
-    // only create the cast if we have a type to cast it to
-    if( m_State )
+        // only create the cast if we have a type to cast it to
         m_Expression = CastExpression::Create( m_State->GetType(),
                                                std::move(m_Expression) );
 
-    if( m_Expression->PerformSema( sema ) )
-        m_Expression->FoldConstants( m_Expression );
+        m_Expression->PerformSema( sema );
+    }
 
     sema.LeaveScope();
 }
@@ -104,12 +105,10 @@ std::unique_ptr<StateAssignmentBase>
     assert( m_Expression->GetReturnType() == t &&
             "Trying to create a state assignment with mismatched types" );
 
-    LiteralExpression* l = Expression::GetLiteral( m_Expression );
-
     // If this is just a constant return a ConstStateAssignment
-    if( l )
+    if( m_Expression->IsConst() )
     {
-        GenericValue v( l->GetValue() );
+        GenericValue v = code_gen.EvaluateExpression( *m_Expression );
         switch( t )
         {
         case Type::BOOL:
