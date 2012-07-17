@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -50,12 +51,14 @@ Variable::Variable( Type base_type,
                     std::vector<unsigned> array_dimension_sizes,
                     bool is_const,
                     bool is_global,
-                    GenericValue initializer )
+                    GenericValue initializer,
+                    std::string name )
     :m_Type( base_type )
     ,m_ArrayDimensionSizes( std::move(array_dimension_sizes) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
     ,m_Initializer( std::move(initializer) )
+    ,m_Name( std::move(name) )
 {
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
@@ -75,7 +78,8 @@ void Variable::CodeGen( CodeGenerator& code_gen )
         m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,
                                                        m_ArrayDimensionSizes,
                                                        m_IsConst,
-                                                       m_Initializer );
+                                                       m_Initializer,
+                                                       m_Name );
     }
     else
     {

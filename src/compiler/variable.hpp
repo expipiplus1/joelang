@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <compiler/generic_value.hpp>
@@ -67,7 +68,8 @@ public:
               std::vector<unsigned> array_dimension_sizes,
               bool is_const,
               bool is_global = false,
-              GenericValue initializer = GenericValue() );
+              GenericValue initializer = GenericValue(),
+              std::string name = "" );
 
     void CodeGen( CodeGenerator& code_gen );
 
@@ -90,6 +92,7 @@ private:
     bool m_IsConst;
     bool m_IsGlobal;
     GenericValue m_Initializer;
+    std::string m_Name;
 
     /// TODO handle non global variables
     llvm::Value* m_LLVMPointer = nullptr;

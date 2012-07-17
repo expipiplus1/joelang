@@ -160,7 +160,8 @@ public:
                      Type type,
                      std::vector<unsigned> array_extents,
                      bool is_const,
-                     const GenericValue& initializer );
+                     const GenericValue& initializer,
+                     const std::string& name );
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 

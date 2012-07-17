@@ -666,7 +666,8 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
                                 std::vector<unsigned> array_extents,
                                 bool is_const,
-                                const GenericValue& initializer )
+                                const GenericValue& initializer,
+                                const std::string& name )
 {
     assert( ( type == initializer.GetType() ||
               initializer.GetType() == Type::UNKNOWN_TYPE ) &&
@@ -680,7 +681,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                      is_const,
                                      llvm::GlobalVariable::CommonLinkage,
                                      init,
-                                     "" );
+                                     name );
 }
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )

@@ -115,7 +115,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                              array_dimension_sizes,
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
-                                             std::move(initializer) );
+                                             std::move(initializer),
+                                             m_Declarator->GetIdentifier() );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of later
     // analysis
