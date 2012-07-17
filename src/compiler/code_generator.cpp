@@ -44,9 +44,13 @@
 #include <llvm/Module.h>
 #include <llvm/Type.h>
 #include <llvm/Analysis/Verifier.h>
+#include <llvm/ADT/OwningPtr.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/system_error.h>
 
 #include <engine/context.hpp>
 #include <engine/state.hpp>
@@ -66,6 +70,13 @@ namespace JoeLang
 namespace Compiler
 {
 
+/// TODO have a singleton for storing these
+llvm::Module*       CodeGenerator::s_RuntimeModule = nullptr;
+llvm::StructType*   CodeGenerator::s_StringType = nullptr;
+llvm::Function*     CodeGenerator::s_StringEqualFunction = nullptr;
+llvm::Function*     CodeGenerator::s_StringNotEqualFunction = nullptr;
+llvm::Function*     CodeGenerator::s_StringConcatFunction = nullptr;
+
 CodeGenerator::CodeGenerator( const Context& context )
     :m_Context( context )
     ,m_LLVMContext( llvm::getGlobalContext() )
@@ -74,10 +85,33 @@ CodeGenerator::CodeGenerator( const Context& context )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
 {
     assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
-    //
-    // Compiling lazily doesn't work on windows
-    //
-    m_LLVMExecutionEngine->DisableLazyCompilation();
+
+    if( !s_RuntimeModule )
+    {
+        llvm::OwningPtr<llvm::MemoryBuffer> buffer;
+        llvm::MemoryBuffer::getFile( "runtime.bc", buffer );
+        assert( buffer && "Couldn't load runtime library" );
+        s_RuntimeModule = llvm::ParseBitcodeFile ( buffer.get(),
+                                                   m_LLVMContext );
+        assert( s_RuntimeModule && "Couldn't parse runtime library" );
+
+        s_StringType = s_RuntimeModule->getTypeByName( "struct.String" );
+        assert( s_StringType &&
+                "Can't find String type" );
+        /// TODO make assertions about string type;
+
+        s_StringEqualFunction = s_RuntimeModule->getFunction( "String_Equal" );
+        assert( s_StringEqualFunction &&
+               "Can't find String_Equal in runtime" );
+        s_StringNotEqualFunction = s_RuntimeModule->getFunction(
+                                                           "String_NotEqual" );
+        assert( s_StringNotEqualFunction &&
+               "Can't find String_NotEqual in runtime" );
+        s_StringConcatFunction = s_RuntimeModule->getFunction(
+                                                           "String_Concat" );
+        assert( s_StringConcatFunction &&
+               "Can't find String_Concat in runtime" );
+    }
 }
 
 CodeGenerator::~CodeGenerator()
@@ -650,13 +684,50 @@ llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
                                    is_signed );
 }
 
-llvm::Constant* CodeGenerator::CreateFloating( double value,
-                                               bool is_double )
+llvm::Constant* CodeGenerator::CreateFloating( double value, bool is_double )
 {
     return llvm::ConstantFP::get( is_double
                                     ? llvm::Type::getDoubleTy(m_LLVMContext)
                                     : llvm::Type::getFloatTy(m_LLVMContext),
                                   value );
+}
+
+llvm::Constant* CodeGenerator::CreateString( const std::string& value )
+{
+    //
+    // Set up the globalvariable holding the characters in an array
+    //
+    llvm::ArrayType* array_type = llvm::ArrayType::get(
+                                         GetLLVMType( Type::U8, m_LLVMContext ),
+                                         value.size() );
+    std::vector<llvm::Constant*> characters;
+    for( char c : value )
+        characters.push_back( CreateInteger( c, 8, false ) );
+    llvm::Constant* data_constant = llvm::ConstantArray::get(
+                                                        array_type,
+                                                        characters );
+    llvm::GlobalVariable* data_array = new llvm::GlobalVariable(
+                                           *m_LLVMModule,
+                                           array_type,
+                                           true,
+                                           llvm::GlobalVariable::PrivateLinkage,
+                                           data_constant,
+                                           "string_data" );
+
+    llvm::Constant* size_constant = CreateInteger( value.size(), 64, false );
+
+    llvm::Constant* data_pointer = llvm::ConstantExpr::getGetElementPtr(
+                                            data_array,
+                                            std::vector<llvm::Constant*>
+                                              {CreateInteger( 0, 32, false ),
+                                               CreateInteger( 0, 32, false )} );
+
+    llvm::Constant* string = llvm::ConstantStruct::get(
+                                                   s_StringType,
+                                                   std::vector<llvm::Constant*>
+                                                     {size_constant,
+                                                      data_pointer} );
+    return string;
 }
 
 //
@@ -673,14 +744,15 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
     assert( ( type == initializer.GetType() ||
               initializer.GetType() == Type::UNKNOWN_TYPE ) &&
             "Initializer type mismatch" );
-    llvm::Type* t = GetLLVMType( type, m_LLVMContext );
+    llvm::Type* t = type == Type::STRING ? s_StringType :
+                                           GetLLVMType( type, m_LLVMContext );
     llvm::Constant* init = nullptr;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )
         init = initializer.CodeGen( *this );
     return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
-                                     llvm::GlobalVariable::CommonLinkage,
+                                     llvm::GlobalVariable::PrivateLinkage,
                                      init,
                                      name );
 }

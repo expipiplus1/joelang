@@ -70,9 +70,6 @@ Variable::Variable( Type base_type,
 void Variable::CodeGen( CodeGenerator& code_gen )
 {
     // Don't generate storage for strings, they're determined at compile time
-    if( m_Type == Type::STRING )
-        return;
-
     if( m_IsGlobal )
     {
         m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,

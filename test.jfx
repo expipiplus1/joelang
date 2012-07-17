@@ -11,6 +11,8 @@ int b[12],
     c[23],
     d[(1+4+twentyone)%6];
 
+const string hello = "Hello";
+
 technique t1
 {
     pass p0

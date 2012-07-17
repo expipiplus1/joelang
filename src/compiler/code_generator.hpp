@@ -140,8 +140,15 @@ public:
       *   Whether this is a double precision float
       * \returns the llvm::Value representing the float
       */
-    llvm::Constant* CreateFloating( double value,
-                                    bool is_double );
+    llvm::Constant* CreateFloating( double value, bool is_double );
+
+    /**
+      * Create the llvm::Value representing a string struct
+      * \param value
+      *   The value with which to create the string
+      * \returns the llvm::Value representing the string
+      */
+    llvm::Constant* CreateString( const std::string& value );
 
     // Variables
     /**
@@ -178,6 +185,12 @@ private:
     llvm::Module*                   m_LLVMModule;
     llvm::IRBuilder<>               m_LLVMBuilder;
     std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
+
+    static llvm::Module*            s_RuntimeModule;
+    static llvm::StructType*        s_StringType;
+    static llvm::Function*          s_StringEqualFunction;
+    static llvm::Function*          s_StringNotEqualFunction;
+    static llvm::Function*          s_StringConcatFunction;
 };
 
 } // namespace Compiler

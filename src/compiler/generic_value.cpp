@@ -220,6 +220,7 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
     case Type::DOUBLE:
         return code_gen.CreateFloating( m_DoubleValue, true );
     case Type::STRING:
+        return code_gen.CreateString( m_StringValue );
     default:
         assert( false && "Trying to codegen an unhandled type" );
     }

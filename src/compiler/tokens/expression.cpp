@@ -2584,8 +2584,7 @@ StringLiteralExpression::~StringLiteralExpression()
 
 llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "Trying to generate code for a string literal" );
-    return nullptr;
+    return code_gen.CreateString( m_Value );
 }
 
 Type StringLiteralExpression::GetReturnType() const
