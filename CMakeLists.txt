@@ -67,6 +67,10 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/translation_unit.cpp
                         src/compiler/tokens/translation_unit.hpp )
 
+#
+# Various custom commands
+#
+
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.jfx
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.jfx ${CMAKE_CURRENT_BINARY_DIR}/test.jfx
@@ -74,6 +78,18 @@ add_custom_command(
 
 add_custom_target( copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
 add_dependencies( joelang copy_files )
+
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    COMMAND clang -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.c -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.c )
+
+add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc" )
+add_dependencies( joelang compile_runtime )
+
+#
+# Linking
+#
 
 llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native )
 set( joelang_libraries ${REQ_LLVM_LIBRARIES} )
