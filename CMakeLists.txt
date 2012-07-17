@@ -81,8 +81,9 @@ add_dependencies( joelang copy_files )
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.c -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.c )
+    COMMAND clang++ -O0 -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.hpp
+    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp )
 
 add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc" )
 add_dependencies( joelang compile_runtime )

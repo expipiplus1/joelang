@@ -27,15 +27,9 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <stdbool.h>
-#include <stdlib.h>
-#include <string.h>
+#include "string.hpp"
 
-typedef struct
-{
-    size_t size;
-    char* data;
-} String;
+#include <cstring>
 
 bool String_Equal( String a, String b )
 {
@@ -52,7 +46,7 @@ String String_Concat( String a, String b )
 {
     String ret;
     ret.size = a.size + b.size;
-    ret.data = malloc( ret.size );
+    ret.data = new char[ret.size];
     memcpy( ret.data, a.data, a.size );
     memcpy( ret.data + a.size, b.data, b.size );
     return ret;
@@ -60,5 +54,5 @@ String String_Concat( String a, String b )
 
 void String_Destroy( String a )
 {
-    free( a.data );
+    delete[] a.data;
 }
