@@ -219,8 +219,9 @@ std::map<std::string, GenericValue>
 
 void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 {
-    // TODO cache these results
-    // TODO support arrays here
+    /// TODO cache these results
+    /// TODO support arrays here
+    /// TODO something better than making these global
     for( auto& v : GetGenericValueEnumerantMap(state) )
     {
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
