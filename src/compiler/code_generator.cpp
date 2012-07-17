@@ -230,6 +230,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 
 GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 {
+    /// TODO is this really necessary?
     assert( expression.IsConst() &&
             "Trying to evaluate a non-const expression" );
 
