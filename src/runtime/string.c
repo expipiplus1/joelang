@@ -35,25 +35,30 @@ typedef struct
 {
     size_t size;
     char* data;
-} string;
+} String;
 
-bool Equal( string a, string b )
+bool String_Equal( String a, String b )
 {
     return a.size == b.size &&
            memcmp( a.data, b.data, a.size ) == 0;
 }
 
-bool NotEqual( string a, string b )
+bool String_NotEqual( String a, String b )
 {
-    return !Equal( a, b );
+    return !String_Equal( a, b );
 }
 
-string Concat( string a, string b )
+String String_Concat( String a, String b )
 {
-    string ret;
+    String ret;
     ret.size = a.size + b.size;
     ret.data = malloc( ret.size );
     memcpy( ret.data, a.data, a.size );
     memcpy( ret.data + a.size, b.data, b.size );
     return ret;
+}
+
+void String_Destroy( String a )
+{
+    free( a.data );
 }
