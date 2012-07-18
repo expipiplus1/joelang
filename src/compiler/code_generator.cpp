@@ -171,7 +171,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     //
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
-                                                llvm::Function::InternalLinkage,
+                                                llvm::Function::ExternalLinkage,
                                                 state.GetName().c_str(),
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
@@ -291,7 +291,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     //
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
-                                                llvm::Function::InternalLinkage,
+                                                llvm::Function::ExternalLinkage,
                                                 "TemporaryEvaluation",
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
@@ -319,6 +319,10 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     //
     llvm::GenericValue g = m_LLVMExecutionEngine->runFunction( function,
                                                                {} );
+
+    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
+    function->removeFromParent();
+    delete function;
 
     //
     // Extract the result
