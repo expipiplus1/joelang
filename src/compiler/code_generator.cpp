@@ -108,10 +108,11 @@ CodeGenerator::CodeGenerator( const Context& context )
         assert( s_StringConcatFunction &&
                "Can't find String_Concat in runtime" );
 
-        s_StringType = llvm::dyn_cast<llvm::StructType>(
-                                    s_StringConcatFunction->getReturnType() );
-        if( !s_StringType )
-            s_StringType = s_RuntimeModule->getTypeByName( "struct.String" );
+        llvm::Type* size_type = llvm::Type::getIntNTy( m_LLVMContext,
+                                                       sizeof(std::size_t)*8 );
+        llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
+        s_StringType = llvm::StructType::create( std::vector<llvm::Type*>
+                                                   {size_type, char_ptr_type} );
         assert( s_StringType &&
                 "Can't find String type" );
         /// TODO make assertions about string type;
@@ -317,78 +318,57 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     //
     // Evaluate the function
     //
-    llvm::GenericValue g = m_LLVMExecutionEngine->runFunction( function,
-                                                               {} );
-
-    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
-    function->removeFromParent();
-    delete function;
+    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
     // Extract the result
     //
     GenericValue ret;
-
-    if( IsIntegral( expression.GetReturnType() ) )
+    switch( expression.GetReturnType() )
     {
-        jl_u64 result = g.IntVal.getLimitedValue();
-        switch( expression.GetReturnType() )
-        {
-        case Type::BOOL:
-            ret = GenericValue( static_cast<jl_bool>(result) );
-            break;
-        case Type::I8:
-            ret = GenericValue( static_cast<jl_i8>(result) );
-            break;
-        case Type::I16:
-            ret = GenericValue( static_cast<jl_i16>(result) );
-            break;
-        case Type::I32:
-            ret = GenericValue( static_cast<jl_i32>(result) );
-            break;
-        case Type::I64:
-            ret = GenericValue( static_cast<jl_i64>(result) );
-            break;
-        case Type::U8:
-            ret = GenericValue( static_cast<jl_u8>(result) );
-            break;
-        case Type::U16:
-            ret = GenericValue( static_cast<jl_u16>(result) );
-            break;
-        case Type::U32:
-            ret = GenericValue( static_cast<jl_u32>(result) );
-            break;
-        case Type::U64:
-            ret = GenericValue( static_cast<jl_u64>(result) );
-            break;
-        default:
-            assert( false &&
-                    "Trying to get the integer result of a non-integer "
-                    "expression" );
-        }
-    }
-    else if( IsFloatingPoint( expression.GetReturnType() ) )
-    {
-        switch( expression.GetReturnType() )
-        {
-        case Type::FLOAT:
-            ret = GenericValue( g.FloatVal );
-            break;
-        case Type::DOUBLE:
-            ret = GenericValue( g.DoubleVal );
-            break;
-        default:
-            assert( false &&
-                    "Trying to get the floating result of a non-floating "
-                    "expression" );
-        }
-    }
-    else
-    {
-        assert( false && "Complete me" );
+    case Type::BOOL:
+        ret = GenericValue( reinterpret_cast<jl_bool(*)()>(function_ptr)() );
+        break;
+    case Type::I8:
+        ret = GenericValue( reinterpret_cast<jl_i8(*)()>(function_ptr)() );
+        break;
+    case Type::I16:
+        ret = GenericValue( reinterpret_cast<jl_i16(*)()>(function_ptr)() );
+        break;
+    case Type::I32:
+        ret = GenericValue( reinterpret_cast<jl_i32(*)()>(function_ptr)() );
+        break;
+    case Type::I64:
+        ret = GenericValue( reinterpret_cast<jl_i64(*)()>(function_ptr)() );
+        break;
+    case Type::U8:
+        ret = GenericValue( reinterpret_cast<jl_u8(*)()>(function_ptr)() );
+        break;
+    case Type::U16:
+        ret = GenericValue( reinterpret_cast<jl_u16(*)()>(function_ptr)() );
+        break;
+    case Type::U32:
+        ret = GenericValue( reinterpret_cast<jl_u32(*)()>(function_ptr)() );
+        break;
+    case Type::U64:
+        ret = GenericValue( reinterpret_cast<jl_u64(*)()>(function_ptr)() );
+        break;
+    case Type::FLOAT:
+        ret = GenericValue( reinterpret_cast<jl_float(*)()>(function_ptr)() );
+        break;
+    case Type::DOUBLE:
+        ret = GenericValue( reinterpret_cast<jl_double(*)()>(function_ptr)() );
+        break;
+    default:
+        assert( false &&
+                "Trying to run a function returning an unhandled type" );
     }
 
+    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
+    function->removeFromParent();
+    delete function;
     m_LLVMBuilder.restoreIP( insert_point );
+
     return ret;
 }
 
