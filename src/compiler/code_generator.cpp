@@ -110,6 +110,8 @@ CodeGenerator::CodeGenerator( const Context& context )
 
         s_StringType = llvm::dyn_cast<llvm::StructType>(
                                     s_StringConcatFunction->getReturnType() );
+        if( !s_StringType )
+            s_StringType = s_RuntimeModule->getTypeByName( "struct.String" );
         assert( s_StringType &&
                 "Can't find String type" );
         /// TODO make assertions about string type;
@@ -716,7 +718,8 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            data_constant,
                                            "string_data" );
 
-    llvm::Constant* size_constant = CreateInteger( value.size(), 64, false );
+    /// TODO get size better than this
+    llvm::Constant* size_constant = CreateInteger( value.size(), sizeof(size_t)*8, false );
 
     llvm::Constant* data_pointer = llvm::ConstantExpr::getGetElementPtr(
                                             data_array,
@@ -786,3 +789,4 @@ llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
 
 } // namespace Compiler
 } // namespace JoeLang
+
