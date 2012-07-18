@@ -77,6 +77,11 @@ Runtime::Runtime()
     /// TODO make assertions about string type;
 }
 
+Runtime::~Runtime()
+{
+    delete m_RuntimeModule;
+}
+
 llvm::LLVMContext& Runtime::GetLLVMContext()
 {
     return m_LLVMContext;

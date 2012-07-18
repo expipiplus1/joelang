@@ -52,6 +52,7 @@ class Runtime
 {
 public:
     Runtime();
+    ~Runtime();
 
     llvm::LLVMContext&  GetLLVMContext();
 
