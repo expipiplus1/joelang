@@ -27,6 +27,8 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
+#pragma once
+
 #include <stdint.h>
 #include <cstring>
 
