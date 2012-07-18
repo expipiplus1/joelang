@@ -112,16 +112,6 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) = 0;
 
     /**
-      * Performs constant folding.
-      * \param self
-      *   A reference to a pointer to this. If this can be replaced by a
-      *   sub-expression then it's put into self.
-      *   Care must be taken to avoid destroying self too early.
-      */
-    virtual
-    void FoldConstants( Expression_up& self );
-
-    /**
       * Generates an llvm value for this expression
       * \param code_gen
       *   A reference to a CodeGenerator
@@ -175,16 +165,6 @@ public:
     static
     bool Parse( Parser& parser,
                 Expression_up& token );
-
-    /**
-      * Checks if e represents a LiteralExpression, either by being one, or
-      * being a constant variable
-      * \param e
-      *   The expression to check
-      * \returns nullptr if it wasn't a literal expression
-      */
-    static
-    LiteralExpression* GetLiteral( const Expression_up& e );
 
     /** Used for casting **/
     static
@@ -295,9 +275,6 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( Expression_up& self ) override;
-
-    virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
@@ -385,9 +362,6 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
-
-    virtual
-    void FoldConstants( Expression_up& self ) override final;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override final;
@@ -789,9 +763,6 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    void FoldConstants( Expression_up& self ) override;
-
-    virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
@@ -867,9 +838,6 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
-
-    virtual
-    void FoldConstants( Expression_up& self ) override;
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
@@ -1020,8 +988,6 @@ public:
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
-
-    const Expression_up& GetReadExpression() const;
 
     virtual
     void Print( int depth ) const;

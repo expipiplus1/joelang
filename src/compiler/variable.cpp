@@ -109,11 +109,5 @@ bool Variable::IsConst() const
     return m_IsConst;
 }
 
-const Expression_up& Variable::GetReadExpression() const
-{
-    assert( false );
-    return nullptr;
-}
-
 } // namespace Compiler
 } // namespace JoeLang

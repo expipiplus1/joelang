@@ -84,8 +84,6 @@ public:
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
-    const Expression_up& GetReadExpression() const;
-
 private:
     Type m_Type;
     std::vector<unsigned> m_ArrayDimensionSizes;

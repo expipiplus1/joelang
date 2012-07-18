@@ -74,9 +74,6 @@ Expression::~Expression()
 {
 }
 
-void Expression::FoldConstants( Expression_up& self )
-{
-}
 
 bool Expression::IsLValue() const
 {
@@ -87,34 +84,6 @@ bool Expression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO comma sep expressions
     return parser.Expect<AssignmentExpression>( token );
-}
-
-LiteralExpression* Expression::GetLiteral(
-                                        const Expression_up& e )
-{
-    assert( e && "Trying to get the literal expression of nullptr" );
-
-    LiteralExpression* l = nullptr;
-    if( isa<LiteralExpression>( e ) )
-    {
-        // If this is a literal expression, just return that
-        l = static_cast<LiteralExpression*>( e.get() );
-    }
-    else if( isa<IdentifierExpression>( e ) )
-    {
-        // Otherwise, see if this is a const variable from which we can get an
-        // identifier
-        IdentifierExpression* i =
-                        static_cast<IdentifierExpression*>( e.get() );
-        if( i->IsConst() )
-        {
-            const Expression_up& read_expression = i->GetReadExpression();
-            if( isa<LiteralExpression>( read_expression ) )
-                l = static_cast<LiteralExpression*>( read_expression.get() );
-        }
-    }
-
-    return l;
 }
 
 bool Expression::classof( const Token* t )
@@ -440,42 +409,6 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-void ConditionalExpression::FoldConstants( Expression_up& self )
-{
-    // Simplify the sub expressions
-    m_Condition->FoldConstants( m_Condition );
-    m_TrueExpression->FoldConstants( m_TrueExpression );
-    m_FalseExpression->FoldConstants( m_FalseExpression );
-
-    // See if the condition is a boolean literal
-    LiteralExpression* l = nullptr;
-    if( isa<LiteralExpression>( m_Condition ) )
-    {
-        l = static_cast<LiteralExpression*>( m_Condition.get() );
-    }
-    else if( isa<IdentifierExpression>( m_Condition ) )
-    {
-        IdentifierExpression* i =
-                        static_cast<IdentifierExpression*>( m_Condition.get() );
-        const Expression_up& read_expression =
-                                                         i->GetReadExpression();
-        if( isa<LiteralExpression>( read_expression ) )
-            l = static_cast<LiteralExpression*>( read_expression.get() );
-    }
-
-    // If it wasn't constant, then we've done as much as we can
-    if( !l )
-        return;
-
-    // If it was constant, we can replace this node with just one of the values
-    const GenericValue v = l->GetValue();
-    assert( v.GetType() == Type::BOOL &&
-            "ConditionalExpression has a non-bool condition" );
-
-    self = v.GetBool() ? std::move(m_TrueExpression)
-                       : std::move(m_FalseExpression);
-}
-
 llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateSelect( *m_Condition,
@@ -621,95 +554,6 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     good &= m_RightSide->PerformSema( sema );
 
     return good;
-}
-
-void BinaryOperatorExpression::FoldConstants(
-                                            Expression_up& self )
-{
-    // If there is a type mismatch, don't fold things
-    if( GetReturnType() == Type::UNKNOWN_TYPE )
-        return;
-
-    m_LeftSide->FoldConstants( m_LeftSide );
-    m_RightSide->FoldConstants( m_RightSide );
-
-    LiteralExpression* l = GetLiteral( m_LeftSide );
-    // If it wasn't constant, then we've done as much as we can
-    if( !l )
-        return;
-
-    LiteralExpression* r = GetLiteral( m_RightSide );
-    // If it wasn't constant, then we've done as much as we can
-    if( !r )
-        return;
-
-    // If it was constant, we can replace this node with just one of the values
-    GenericValue v;
-    GenericValue lv = l->GetValue();
-    GenericValue rv = r->GetValue();
-
-    switch( m_Operator )
-    {
-    case Op::LOGICAL_OR:
-        v = GenericValue::Lor( lv, rv );
-        break;
-    case Op::LOGICAL_AND:
-        v = GenericValue::Land( lv, rv );
-        break;
-    case Op::OR:
-        v = GenericValue::Or( lv, rv );
-        break;
-    case Op::XOR:
-        v = GenericValue::Xor( lv, rv );
-        break;
-    case Op::AND:
-        v = GenericValue::And( lv, rv );
-        break;
-    case Op::EQUAL_TO:
-        v = GenericValue::EqualTo( lv, rv );
-        break;
-    case Op::NOT_EQUAL_TO:
-        v = GenericValue::NotEqualTo( lv, rv );
-        break;
-    case Op::LESS_THAN:
-        v = GenericValue::LessThan( lv, rv );
-        break;
-    case Op::GREATER_THAN:
-        v = GenericValue::GreaterThan( lv, rv );
-        break;
-    case Op::LESS_THAN_EQUALS:
-        v = GenericValue::LessThanEqual( lv, rv );
-        break;
-    case Op::GREATER_THAN_EQUALS:
-        v = GenericValue::GreaterThanEqual( lv, rv );
-        break;
-    case Op::LEFT_SHIFT:
-        v = GenericValue::Shl( lv, rv );
-        break;
-    case Op::RIGHT_SHIFT:
-        v = GenericValue::Shr( lv, rv );
-        break;
-    case Op::PLUS:
-        v = GenericValue::Add( lv, rv );
-        break;
-    case Op::MINUS:
-        v = GenericValue::Sub( lv, rv );
-        break;
-    case Op::MULTIPLY:
-        v = GenericValue::Mul( lv, rv );
-        break;
-    case Op::DIVIDE:
-        v = GenericValue::Div( lv, rv );
-        break;
-    case Op::MODULO:
-        v = GenericValue::Mod( lv, rv );
-        break;
-    }
-
-    assert( v.GetType() == GetReturnType() &&
-            "Return type mismatch in constant folding" );
-
-    self = LiteralExpression::Create( v );
 }
 
 llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1506,37 +1350,6 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-void CastExpression::FoldConstants( Expression_up& self )
-{
-    m_Expression->FoldConstants( m_Expression );
-
-    Type t = m_Expression->GetReturnType();
-
-    // If this is an incompatible cast, return
-    if( m_CastType == Type::UNKNOWN_TYPE ||
-        t == Type::UNKNOWN_TYPE ||
-        ( t == Type::STRING && m_CastType != Type::STRING ) ||
-        ( m_CastType == Type::STRING && t != Type::STRING ) )
-        return;
-
-    LiteralExpression* l = GetLiteral( m_Expression );
-
-    // If we are casting a literal expression, perform the cast now
-    if( l )
-    {
-        GenericValue v = GenericValue::Cast( m_CastType, l->GetValue() );
-        self = LiteralExpression::Create( v );
-        return;
-    }
-
-    // It may not be a literal expression, but it may be another cast expression
-    if( isa<CastExpression>(m_Expression) )
-    {
-        CastExpression* c = static_cast<CastExpression*>( m_Expression.get() );
-        m_Expression = std::move(c->m_Expression);
-    }
-}
-
 llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateCast( *m_Expression, m_CastType );
@@ -1640,36 +1453,6 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     good &= m_Expression->PerformSema( sema );
 
     return good;
-}
-
-void UnaryExpression::FoldConstants( Expression_up& self )
-{
-    m_Expression->FoldConstants( m_Expression );
-
-    LiteralExpression* l = GetLiteral( m_Expression );
-
-    if( l )
-    {
-        GenericValue v( l->GetValue() );
-
-        switch( m_Operator )
-        {
-        case Op::PLUS:
-            self = LiteralExpression::Create( GenericValue::UnaryPlus( v ) );
-            return;
-        case Op::MINUS:
-            self = LiteralExpression::Create( GenericValue::UnaryMinus( v ) );
-            return;
-        case Op::BITWISE_NOT:
-            self = LiteralExpression::Create( GenericValue::BitwiseNot( v ) );
-            return;
-        case Op::LOGICAL_NOT:
-            self = LiteralExpression::Create( GenericValue::LogicalNot( v ) );
-            return;
-        default:
-            break;
-        }
-    }
 }
 
 llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1990,11 +1773,6 @@ bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
     this->ResolveIdentifiers( sema );
     return bool(m_Variable);
-}
-
-const Expression_up& IdentifierExpression::GetReadExpression() const
-{
-    return m_Variable->GetReadExpression();
 }
 
 void IdentifierExpression::Print( int depth ) const
@@ -2594,8 +2372,7 @@ Type StringLiteralExpression::GetReturnType() const
 
 GenericValue StringLiteralExpression::GetValue() const
 {
-    assert( false && "Remove me" );
-    return GenericValue();
+    return GenericValue( m_Value );
 }
 
 void StringLiteralExpression::Print( int depth ) const

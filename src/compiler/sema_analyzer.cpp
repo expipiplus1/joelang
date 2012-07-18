@@ -294,21 +294,6 @@ GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
     return m_CodeGenerator.EvaluateExpression( expression );
 }
 
-bool SemaAnalyzer::TryResolveToLiteral( Expression_up& expression,
-                                        Type type)
-{
-    assert( expression && "Trying to resolve a null expression" );
-
-    //TODO move this somewhere else
-    expression->ResolveIdentifiers( *this );
-    expression = CastExpression::Create( type, std::move( expression ) );
-
-    if( expression->PerformSema( *this ) )
-        expression->FoldConstants( expression );
-
-    return Expression::GetLiteral( expression );
-}
-
 void SemaAnalyzer::Error( const std::string& error_message )
 {
     m_Good = false;
