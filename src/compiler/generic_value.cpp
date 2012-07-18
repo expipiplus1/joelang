@@ -50,6 +50,7 @@ GenericValue::GenericValue()
 }
 
 GenericValue::GenericValue( const GenericValue& g )
+    :m_Type( Type::UNKNOWN_TYPE )
 {
     *this = g;
 }
@@ -175,6 +176,12 @@ GenericValue::GenericValue( jl_float  float_value  )
 GenericValue::GenericValue( jl_double double_value )
     :m_Type( Type::DOUBLE )
     ,m_DoubleValue( double_value )
+{
+}
+
+GenericValue::GenericValue( jl_string string_value )
+    :m_Type( Type::STRING )
+    ,m_StringValue( string_value.data, string_value.size )
 {
 }
 
@@ -309,7 +316,7 @@ jl_double GenericValue::GetDouble() const
     return m_DoubleValue;
 }
 
-const jl_string& GenericValue::GetString() const
+const std::string& GenericValue::GetString() const
 {
     assert( m_Type == Type::STRING &&
             "Trying to get the string value from a non-string GenericValue" );

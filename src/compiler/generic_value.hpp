@@ -31,7 +31,7 @@
 
 #include <string>
 
-#include <engine/types.hpp>
+#include <runtime/types.hpp>
 
 namespace llvm
 {
@@ -40,6 +40,9 @@ namespace llvm
 
 namespace JoeLang
 {
+
+enum class Type;
+
 namespace Compiler
 {
 
@@ -78,6 +81,8 @@ public:
     GenericValue( jl_double double_value );
     explicit
     GenericValue( jl_string string_value );
+    explicit
+    GenericValue( std::string string_value );
 
     ~GenericValue();
 
@@ -88,18 +93,18 @@ public:
       */
     Type GetType() const;
 
-    jl_bool          GetBool() const;
-    jl_i8            GetI8() const;
-    jl_i16           GetI16() const;
-    jl_i32           GetI32() const;
-    jl_i64           GetI64() const;
-    jl_u8            GetU8() const;
-    jl_u16           GetU16() const;
-    jl_u32           GetU32() const;
-    jl_u64           GetU64() const;
-    jl_float         GetFloat() const;
-    jl_double        GetDouble() const;
-    const jl_string& GetString() const;
+    jl_bool            GetBool() const;
+    jl_i8              GetI8() const;
+    jl_i16             GetI16() const;
+    jl_i32             GetI32() const;
+    jl_i64             GetI64() const;
+    jl_u8              GetU8() const;
+    jl_u16             GetU16() const;
+    jl_u32             GetU32() const;
+    jl_u64             GetU64() const;
+    jl_float           GetFloat() const;
+    jl_double          GetDouble() const;
+    const std::string& GetString() const;
 
     /**
       * \defgroup GenericValue Binary operators
@@ -185,18 +190,18 @@ private:
 
     union
     {
-        jl_bool   m_BoolValue;
-        jl_i8     m_I8Value;
-        jl_i16    m_I16Value;
-        jl_i32    m_I32Value;
-        jl_i64    m_I64Value;
-        jl_u8     m_U8Value;
-        jl_u16    m_U16Value;
-        jl_u32    m_U32Value;
-        jl_u64    m_U64Value;
-        jl_float  m_FloatValue;
-        jl_double m_DoubleValue;
-        jl_string m_StringValue;
+        jl_bool     m_BoolValue;
+        jl_i8       m_I8Value;
+        jl_i16      m_I16Value;
+        jl_i32      m_I32Value;
+        jl_i64      m_I64Value;
+        jl_u8       m_U8Value;
+        jl_u16      m_U16Value;
+        jl_u32      m_U32Value;
+        jl_u64      m_U64Value;
+        jl_float    m_FloatValue;
+        jl_double   m_DoubleValue;
+        std::string m_StringValue;
     };
 };
 

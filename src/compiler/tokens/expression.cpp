@@ -2594,7 +2594,8 @@ Type StringLiteralExpression::GetReturnType() const
 
 GenericValue StringLiteralExpression::GetValue() const
 {
-    return GenericValue( jl_string(m_Value) );
+    assert( false && "Remove me" );
+    return GenericValue();
 }
 
 void StringLiteralExpression::Print( int depth ) const

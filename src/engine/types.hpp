@@ -82,7 +82,6 @@ using jl_u32    = std::uint32_t;
 using jl_u64    = std::uint64_t;
 using jl_float  = float;
 using jl_double = double;
-using jl_string = std::string;
 
 template<typename T>
 struct JoeLangType

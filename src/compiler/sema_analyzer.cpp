@@ -208,7 +208,8 @@ std::map<std::string, GenericValue>
          break;
     case Type::STRING:
         for( const auto& e :
-             static_cast<const State<jl_string>&>(state_base).GetEnumerations())
+             static_cast<const State<std::string>&>(
+                                                 state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
         break;
     default:
@@ -290,8 +291,6 @@ GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
 {
     assert( expression.IsConst() &&
             "Trying to evaluate a non-const expression" );
-    if( expression.GetReturnType() == Type::STRING )
-        return GenericValue( std::string("TODO String Stuff") );
     return m_CodeGenerator.EvaluateExpression( expression );
 }
 

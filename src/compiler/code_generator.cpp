@@ -59,6 +59,7 @@
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
+#include <runtime/types.hpp>
 
 namespace JoeLang
 {
@@ -320,6 +321,9 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
         break;
     case Type::DOUBLE:
         ret = GenericValue( reinterpret_cast<jl_double(*)()>(function_ptr)() );
+        break;
+    case Type::STRING:
+        ret = GenericValue( reinterpret_cast<jl_string(*)()>(function_ptr)() );
         break;
     default:
         assert( false &&

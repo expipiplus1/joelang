@@ -168,9 +168,9 @@ std::unique_ptr<StateAssignmentBase>
                                  v.GetDouble() ) );
         case Type::STRING:
             return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_string>(
-                                 static_cast<const State<jl_string>&>(*m_State),
-                                 v.GetString() ) );
+                          new ConstStateAssignment<std::string>(
+                               static_cast<const State<std::string>&>(*m_State),
+                               v.GetString() ) );
         default:
             assert( false &&
              "Trying to create a ConstStateAssignment with an unhandled type" );
