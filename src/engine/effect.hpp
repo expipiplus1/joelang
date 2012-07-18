@@ -55,8 +55,8 @@ public:
     const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
-    std::vector<Technique> m_Techniques;
-    std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
+    std::vector<Technique>                  m_Techniques;
+    std::unique_ptr<llvm::ExecutionEngine>  m_LLVMExecutionEngine;
 };
 
 } // namespace JoeLang
