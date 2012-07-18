@@ -27,17 +27,28 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "types.hpp"
+#include <stdint.h>
+#include <cstring>
 
 extern "C"
 {
 
-bool String_Equal( jl_string a, jl_string b );
+using jl_bool   = bool;
+using jl_i8     = int8_t;
+using jl_i16    = int16_t;
+using jl_i32    = int32_t;
+using jl_i64    = int64_t;
+using jl_u8     = uint8_t;
+using jl_u16    = uint16_t;
+using jl_u32    = uint32_t;
+using jl_u64    = uint64_t;
+using jl_float  = float;
+using jl_double = double;
 
-bool String_NotEqual( jl_string a, jl_string b );
-
-jl_string String_Concat( jl_string a, jl_string b );
-
-void String_Destroy( jl_string a );
+struct jl_string
+{
+    jl_u32 size;
+    const char* data;
+};
 
 }

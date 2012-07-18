@@ -33,12 +33,6 @@
 
 #include <engine/types.hpp>
 
-namespace llvm
-{
-    class Type;
-    class LLVMContext;
-}
-
 namespace JoeLang
 {
 
@@ -69,17 +63,6 @@ std::size_t SizeOf( Type t );
   * This asserts if t is not integral or t is bool
   */
 Type MakeUnsigned( Type t );
-
-/**
-  * This asserts if one tries to get the llvm type of an invalid Type
-  */
-llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c );
-
-/**
-  * This asserts if one tries to get the llvm type of an invalid Type
-  */
-llvm::Type* GetLLVMType( const Compiler::Expression& expression,
-                         llvm::LLVMContext& c );
 
 const std::string& GetTypeString( Type t );
 

@@ -40,17 +40,11 @@
 #include <llvm/Function.h>
 #include <llvm/GlobalVariable.h>
 #include <llvm/IRBuilder.h>
-#include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
-#include <llvm/Type.h>
 #include <llvm/Analysis/Verifier.h>
-#include <llvm/ADT/OwningPtr.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/system_error.h>
 
 #include <engine/context.hpp>
 #include <engine/state.hpp>
@@ -59,6 +53,7 @@
 #include <engine/internal/type_properties.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -70,53 +65,16 @@ namespace JoeLang
 namespace Compiler
 {
 
-/// TODO have a singleton for storing these
-llvm::Module*       CodeGenerator::s_RuntimeModule = nullptr;
-llvm::StructType*   CodeGenerator::s_StringType = nullptr;
-llvm::Function*     CodeGenerator::s_StringEqualFunction = nullptr;
-llvm::Function*     CodeGenerator::s_StringNotEqualFunction = nullptr;
-llvm::Function*     CodeGenerator::s_StringConcatFunction = nullptr;
-
-CodeGenerator::CodeGenerator( const Context& context )
+CodeGenerator::CodeGenerator( const Context& context,
+                              Runtime& runtime )
     :m_Context( context )
-    ,m_LLVMContext( llvm::getGlobalContext() )
-    ,m_LLVMModule( new llvm::Module( "", m_LLVMContext ) )
-    ,m_LLVMBuilder( m_LLVMContext )
+    ,m_Runtime( runtime )
+    ,m_LLVMModule( new llvm::Module( "Put_filename_here",
+                                     m_Runtime.GetLLVMContext() ) )
+    ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
 {
     assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
-
-    if( !s_RuntimeModule )
-    {
-        llvm::OwningPtr<llvm::MemoryBuffer> buffer;
-        llvm::MemoryBuffer::getFile( "runtime.bc", buffer );
-        assert( buffer && "Couldn't load runtime library" );
-        s_RuntimeModule = llvm::ParseBitcodeFile ( buffer.get(),
-                                                   m_LLVMContext );
-        assert( s_RuntimeModule && "Couldn't parse runtime library" );
-
-
-        s_StringEqualFunction = s_RuntimeModule->getFunction( "String_Equal" );
-        assert( s_StringEqualFunction &&
-               "Can't find String_Equal in runtime" );
-        s_StringNotEqualFunction = s_RuntimeModule->getFunction(
-                                                           "String_NotEqual" );
-        assert( s_StringNotEqualFunction &&
-               "Can't find String_NotEqual in runtime" );
-        s_StringConcatFunction = s_RuntimeModule->getFunction(
-                                                           "String_Concat" );
-        assert( s_StringConcatFunction &&
-               "Can't find String_Concat in runtime" );
-
-        llvm::Type* size_type = llvm::Type::getIntNTy( m_LLVMContext,
-                                                       sizeof(std::size_t)*8 );
-        llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
-        s_StringType = llvm::StructType::create( std::vector<llvm::Type*>
-                                                   {size_type, char_ptr_type} );
-        assert( s_StringType &&
-                "Can't find String type" );
-        /// TODO make assertions about string type;
-    }
 }
 
 CodeGenerator::~CodeGenerator()
@@ -153,7 +111,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression )
 {
-    llvm::Type* t = GetLLVMType( state.GetType(), m_LLVMContext );
+    llvm::Type* t = m_Runtime.GetLLVMType( state.GetType() );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
@@ -177,9 +135,10 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
 
-    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_LLVMContext,
-                                                       "",
-                                                       function );
+    llvm::BasicBlock* body = llvm::BasicBlock::Create(
+                                                    m_Runtime.GetLLVMContext(),
+                                                    "",
+                                                    function );
     m_LLVMBuilder.SetInsertPoint( body );
 
     //
@@ -273,7 +232,9 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     assert( expression.IsConst() &&
             "Trying to evaluate a non-const expression" );
 
-    llvm::Type* t = GetLLVMType( expression, m_LLVMContext );
+    /// Todo overload for get type from expression
+    llvm::Type* t = m_Runtime.GetLLVMType( expression.GetUnderlyingType(),
+                                           expression.GetArrayExtents() );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
 
     auto insert_point = m_LLVMBuilder.saveAndClearIP();
@@ -297,9 +258,10 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
 
-    llvm::BasicBlock* body = llvm::BasicBlock::Create( m_LLVMContext,
-                                                       "",
-                                                       function );
+    llvm::BasicBlock* body = llvm::BasicBlock::Create(
+                                                    m_Runtime.GetLLVMContext(),
+                                                    "",
+                                                    function );
     m_LLVMBuilder.SetInsertPoint( body );
 
     //
@@ -399,32 +361,30 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
     if( IsFloatingPoint( type ) )
     {
         if( IsFloatingPoint( e_type ) )
-            return m_LLVMBuilder.CreateFPCast(
-                                           e_code,
-                                           GetLLVMType( type, m_LLVMContext ) );
+            return m_LLVMBuilder.CreateFPCast( e_code,
+                                               m_Runtime.GetLLVMType( type ) );
         if( IsSigned( e_type ) )
-            return m_LLVMBuilder.CreateSIToFP(
-                                           e_code,
-                                           GetLLVMType( type, m_LLVMContext ) );
+            return m_LLVMBuilder.CreateSIToFP( e_code,
+                                               m_Runtime.GetLLVMType( type ) );
         return m_LLVMBuilder.CreateUIToFP( e_code,
-                                           GetLLVMType( type, m_LLVMContext ) );
+                                           m_Runtime.GetLLVMType( type ) );
     }
 
     assert( IsIntegral( type ) && "Type should be integral" );
     if( IsIntegral( e_type ) )
     {
         return m_LLVMBuilder.CreateIntCast( e_code,
-                                            GetLLVMType( type, m_LLVMContext ),
+                                            m_Runtime.GetLLVMType( type ),
                                             IsSigned( e_type ) );
     }
 
     assert( IsFloatingPoint( e_type ) && "e_type should be floating point" );
     if( IsSigned( type ) )
         return m_LLVMBuilder.CreateFPToSI( e_code,
-                                           GetLLVMType( type, m_LLVMContext ) );
+                                           m_Runtime.GetLLVMType( type ) );
     else
         return m_LLVMBuilder.CreateFPToUI( e_code,
-                                           GetLLVMType( type, m_LLVMContext ) );
+                                           m_Runtime.GetLLVMType( type ) );
 }
 
 //
@@ -664,19 +624,20 @@ llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
 // Constants
 //
 llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
-                                              unsigned size,
-                                              bool is_signed )
+                                              Type type )
 {
-    return llvm::ConstantInt::get( llvm::Type::getIntNTy( m_LLVMContext, size ),
+    assert( IsIntegral( type ) &&
+            "Trying to create an integer constant of non-integer type" );
+    return llvm::ConstantInt::get( m_Runtime.GetLLVMType( type ),
                                    value,
-                                   is_signed );
+                                   IsSigned( type ) );
 }
 
-llvm::Constant* CodeGenerator::CreateFloating( double value, bool is_double )
+llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )
 {
-    return llvm::ConstantFP::get( is_double
-                                    ? llvm::Type::getDoubleTy(m_LLVMContext)
-                                    : llvm::Type::getFloatTy(m_LLVMContext),
+    assert( IsFloatingPoint( type ) &&
+            "Trying to create a floating point constant of non-floating type" );
+    return llvm::ConstantFP::get( m_Runtime.GetLLVMType( type ),
                                   value );
 }
 
@@ -686,11 +647,11 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
     // Set up the globalvariable holding the characters in an array
     //
     llvm::ArrayType* array_type = llvm::ArrayType::get(
-                                         GetLLVMType( Type::U8, m_LLVMContext ),
+                                         m_Runtime.GetLLVMType( Type::U8 ),
                                          value.size() );
     std::vector<llvm::Constant*> characters;
     for( char c : value )
-        characters.push_back( CreateInteger( c, 8, false ) );
+        characters.push_back( CreateInteger( c, Type::U8 ) );
     llvm::Constant* data_constant = llvm::ConstantArray::get(
                                                         array_type,
                                                         characters );
@@ -703,19 +664,18 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            "string_data" );
 
     /// TODO get size better than this
-    llvm::Constant* size_constant = CreateInteger( value.size(), sizeof(size_t)*8, false );
+    llvm::Constant* size_constant = CreateInteger( value.size(), Type::U32 );
 
     llvm::Constant* data_pointer = llvm::ConstantExpr::getGetElementPtr(
                                             data_array,
                                             std::vector<llvm::Constant*>
-                                              {CreateInteger( 0, 32, false ),
-                                               CreateInteger( 0, 32, false )} );
+                                              {CreateInteger( 0, Type::U32 ),
+                                               CreateInteger( 0, Type::U32 )} );
 
     llvm::Constant* string = llvm::ConstantStruct::get(
-                                                   s_StringType,
-                                                   std::vector<llvm::Constant*>
-                                                     {size_constant,
-                                                      data_pointer} );
+          llvm::dyn_cast<llvm::StructType>(m_Runtime.GetLLVMType(Type::STRING)),
+          std::vector<llvm::Constant*>
+            {size_constant, data_pointer} );
     return string;
 }
 
@@ -733,8 +693,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
     assert( ( type == initializer.GetType() ||
               initializer.GetType() == Type::UNKNOWN_TYPE ) &&
             "Initializer type mismatch" );
-    llvm::Type* t = type == Type::STRING ? s_StringType :
-                                           GetLLVMType( type, m_LLVMContext );
+    llvm::Type* t = m_Runtime.GetLLVMType( type );
     llvm::Constant* init = nullptr;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )
         init = initializer.CodeGen( *this );
@@ -760,15 +719,6 @@ void CodeGenerator::CreateVariableAssignment( const Variable& variable,
             "Trying to assign a variable with a different type" );
     llvm::Value* assigned_value = e.CodeGen( *this );
     m_LLVMBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
-}
-
-//
-// Getters
-//
-
-llvm::LLVMContext& CodeGenerator::GetLLVMContext() const
-{
-    return m_LLVMContext;
 }
 
 } // namespace Compiler

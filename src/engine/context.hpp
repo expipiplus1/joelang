@@ -40,8 +40,12 @@ namespace JoeLang
 class Effect;
 class StateBase;
 
-//TODO implement error collection
-//TODO compile joemath to bc and call that
+namespace Compiler
+{
+    class EffectFactory;
+}
+
+/// \todo implement error collection
 class Context
 {
 public:
@@ -58,10 +62,12 @@ public:
     void SetErrorCallback( std::function<void(std::string)> error_callback );
     const std::function<void(std::string)>& GetErrorCallback() const;
 private:
-    std::vector<StateBase*>               m_States;
-    std::vector<std::unique_ptr<Effect> > m_Effects;
+    std::vector<StateBase*>                     m_States;
+    std::vector<std::unique_ptr<Effect> >       m_Effects;
 
-    std::function<void(std::string)>      m_ErrorCallback;
+    std::function<void(std::string)>            m_ErrorCallback;
+
+    std::unique_ptr<Compiler::EffectFactory>    m_EffectFactory;
 };
 
 } // namespace JoeLang

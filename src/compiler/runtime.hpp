@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2011 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,17 +27,47 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "types.hpp"
+#pragma once
 
-extern "C"
+#include <vector>
+
+namespace llvm
+{
+    class Function;
+    class LLVMContext;
+    class Module;
+    class StructType;
+    class Type;
+}
+
+namespace JoeLang
 {
 
-bool String_Equal( jl_string a, jl_string b );
+enum class Type;
 
-bool String_NotEqual( jl_string a, jl_string b );
+namespace Compiler
+{
 
-jl_string String_Concat( jl_string a, jl_string b );
+class Runtime
+{
+public:
+    Runtime();
 
-void String_Destroy( jl_string a );
+    llvm::LLVMContext&  GetLLVMContext();
 
-}
+    llvm::Type*         GetLLVMType(
+                            Type base_type,
+                            const std::vector<unsigned>& array_extents = {} );
+private:
+    llvm::LLVMContext&  m_LLVMContext;
+
+    llvm::Module*       m_RuntimeModule;
+
+    llvm::StructType*   m_StringType;
+    llvm::Function*     m_StringEqualFunction;
+    llvm::Function*     m_StringNotEqualFunction;
+    llvm::Function*     m_StringConcatFunction;
+};
+
+} // namespace Compiler
+} // namespace JoeLang

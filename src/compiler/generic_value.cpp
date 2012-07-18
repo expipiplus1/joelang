@@ -198,27 +198,27 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
     switch( m_Type )
     {
     case Type::BOOL:
-        return code_gen.CreateInteger( m_BoolValue, 1, false );
+        return code_gen.CreateInteger( m_BoolValue, Type::BOOL );
     case Type::I8:
-        return code_gen.CreateInteger( m_I8Value, 8, true );
+        return code_gen.CreateInteger( m_I8Value, Type::I8 );
     case Type::I16:
-        return code_gen.CreateInteger( m_I16Value, 16, true );
+        return code_gen.CreateInteger( m_I16Value, Type::I16 );
     case Type::I32:
-        return code_gen.CreateInteger( m_I32Value, 32, true );
+        return code_gen.CreateInteger( m_I32Value, Type::I32 );
     case Type::I64:
-        return code_gen.CreateInteger( m_I64Value, 64, true );
+        return code_gen.CreateInteger( m_I64Value, Type::I64 );
     case Type::U8:
-        return code_gen.CreateInteger( m_U8Value, 8, false );
+        return code_gen.CreateInteger( m_U8Value,  Type::U8 );
     case Type::U16:
-        return code_gen.CreateInteger( m_U16Value, 16, false );
+        return code_gen.CreateInteger( m_U16Value, Type::U16 );
     case Type::U32:
-        return code_gen.CreateInteger( m_U32Value, 32, false );
+        return code_gen.CreateInteger( m_U32Value, Type::U32 );
     case Type::U64:
-        return code_gen.CreateInteger( m_U64Value, 64, false );
+        return code_gen.CreateInteger( m_U64Value, Type::U64 );
     case Type::FLOAT:
-        return code_gen.CreateFloating( m_FloatValue, false );
+        return code_gen.CreateFloating( m_FloatValue, Type::FLOAT );
     case Type::DOUBLE:
-        return code_gen.CreateFloating( m_DoubleValue, true );
+        return code_gen.CreateFloating( m_DoubleValue, Type::DOUBLE );
     case Type::STRING:
         return code_gen.CreateString( m_StringValue );
     default:

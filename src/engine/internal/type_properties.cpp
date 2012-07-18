@@ -146,48 +146,6 @@ Type MakeUnsigned( Type t )
     }
 }
 
-llvm::Type* GetLLVMType( Type t, llvm::LLVMContext& c )
-{
-    if( t == Type::DOUBLE )
-        return llvm::Type::getDoubleTy( c );
-    if( t == Type::FLOAT )
-        return llvm::Type::getFloatTy( c );
-    if( t == Type::BOOL )
-        return llvm::Type::getInt1Ty( c );
-    if( IsIntegral( t ) )
-        return llvm::Type::getIntNTy( c, SizeOf(t)*8 );
-    assert( false && "Trying to get the llvm::Type of an unhandled Type" );
-    return nullptr;
-}
-
-llvm::Type* GetLLVMType( const Compiler::Expression& expression,
-                         llvm::LLVMContext& c )
-{
-    Type underlying_type = expression.GetUnderlyingType();
-    llvm::Type* t;
-    if( underlying_type == Type::DOUBLE )
-        t = llvm::Type::getDoubleTy( c );
-    else if( underlying_type == Type::FLOAT )
-        t = llvm::Type::getFloatTy( c );
-    else if( underlying_type == Type::BOOL )
-        t = llvm::Type::getInt1Ty( c );
-    else if( IsIntegral( underlying_type ) )
-        t = llvm::Type::getIntNTy( c, SizeOf(underlying_type)*8 );
-    else
-    {
-        assert( false && "Trying to get the llvm::Type of an unhandled Type" );
-        return nullptr;
-    }
-
-    std::vector<unsigned> array_extents = expression.GetArrayExtents();
-    for( auto extent = array_extents.rbegin();
-         extent != array_extents.rend();
-         ++extent )
-        t = llvm::ArrayType::get( t, *extent );
-
-    return t;
-}
-
 const std::string& GetTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =

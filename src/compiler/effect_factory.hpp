@@ -32,6 +32,8 @@
 #include <memory>
 #include <vector>
 
+#include <compiler/runtime.hpp>
+
 namespace JoeLang
 {
 
@@ -44,7 +46,6 @@ namespace Compiler
 class EffectFactory
 {
 public:
-    EffectFactory() = delete;
     EffectFactory( const Context& context );
     ~EffectFactory() = default;
 
@@ -52,6 +53,7 @@ public:
 
 private:
     const Context& m_Context;
+    Runtime        m_Runtime;
 };
 
 } // namespace Compiler

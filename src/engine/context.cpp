@@ -39,18 +39,16 @@
 #include <utility>
 #include <vector>
 
-#include <llvm/Support/TargetSelect.h>
-
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
 #include <compiler/effect_factory.hpp>
+#include <compiler/runtime.hpp>
 
 namespace JoeLang
 {
 
 Context::Context()
 {
-    llvm::InitializeNativeTarget();
 }
 
 Context::~Context()
@@ -70,13 +68,16 @@ bool Context::AddState( StateBase* state )
 
 Effect* Context::CreateEffectFromString( const std::string& string )
 {
-    JoeLang::Compiler::EffectFactory ef( *this );
-    std::unique_ptr<Effect> e( ef.CreateEffectFromString( string ) );
-    if( e )
+    if( !m_EffectFactory )
+        m_EffectFactory.reset( new JoeLang::Compiler::EffectFactory( *this ) );
+    assert( m_EffectFactory && "Couldn't create an effect factory" );
+
+    std::unique_ptr<Effect> effect(
+                            m_EffectFactory->CreateEffectFromString(string) );
+    if( effect )
     {
-        Effect* ret = e.get();
-        m_Effects.push_back( std::move(e) );
-        return ret;
+        m_Effects.push_back( std::move(effect) );
+        return m_Effects.rbegin()->get();
     }
     return nullptr;
 }

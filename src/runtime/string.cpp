@@ -31,28 +31,29 @@
 
 #include <cstring>
 
-bool String_Equal( String a, String b )
+bool String_Equal( jl_string a, jl_string b )
 {
     return a.size == b.size &&
            memcmp( a.data, b.data, a.size ) == 0;
 }
 
-bool String_NotEqual( String a, String b )
+bool String_NotEqual( jl_string a, jl_string b )
 {
     return !String_Equal( a, b );
 }
 
-String String_Concat( String a, String b )
+jl_string String_Concat( jl_string a, jl_string b )
 {
-    String ret;
+    jl_string ret;
     ret.size = a.size + b.size;
-    ret.data = new char[ret.size];
-    memcpy( ret.data, a.data, a.size );
-    memcpy( ret.data + a.size, b.data, b.size );
+    char* data = new char[ret.size];
+    memcpy( data, a.data, a.size );
+    memcpy( data + a.size, b.data, b.size );
+    ret.data = data;
     return ret;
 }
 
-void String_Destroy( String a )
+void String_Destroy( jl_string a )
 {
     delete[] a.data;
 }

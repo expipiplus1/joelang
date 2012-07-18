@@ -2164,9 +2164,7 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_Value,
-                                   SizeOf( GetReturnType() ) * 8,
-                                   IsSigned( GetReturnType() ) );
+    return code_gen.CreateInteger( m_Value, GetReturnType() );
 }
 
 Type IntegerLiteralExpression::GetReturnType() const
@@ -2366,7 +2364,9 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 
 llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateFloating( m_Value, m_Suffix != Suffix::SINGLE );
+    return code_gen.CreateFloating( m_Value,
+                                    m_Suffix == Suffix::SINGLE ? Type::FLOAT
+                                                               : Type::DOUBLE );
 }
 
 Type FloatingLiteralExpression::GetReturnType() const
@@ -2464,7 +2464,7 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_Value, 1, false );
+    return code_gen.CreateInteger( m_Value, Type::BOOL );
 }
 
 Type BooleanLiteralExpression::GetReturnType() const
@@ -2683,7 +2683,7 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 llvm::Value* CharacterLiteralExpression::CodeGen(
                                                 CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_Value, 8, true );
+    return code_gen.CreateInteger( m_Value, Type::I8 );
 }
 
 Type CharacterLiteralExpression::GetReturnType() const

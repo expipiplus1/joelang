@@ -62,14 +62,17 @@ class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
 class GenericValue;
+class Runtime;
 class TechniqueDeclaration;
 class TranslationUnit;
 class Variable;
 
+/// todo make this reusable
 class CodeGenerator
 {
 public:
-    CodeGenerator( const Context& context );
+    CodeGenerator( const Context& context,
+                   Runtime& runtime );
     ~CodeGenerator();
 
     void GenerateCode(
@@ -124,13 +127,13 @@ public:
       * Create the llvm::Value representing an integer
       * \param value
       *   The value with which to create the integer
-      * \param size
-      *   The number of bits to the integer
+      * \param type
+      *   The type of integer
       * \returns the llvm::Value representing the integer
+      *
+      * This will assert if type isn't an integer type
       */
-    llvm::Constant* CreateInteger( unsigned long long value,
-                                   unsigned size,
-                                   bool is_signed );
+    llvm::Constant* CreateInteger( unsigned long long value, Type type );
 
     /**
       * Create the llvm::Value representing a floating point value
@@ -139,8 +142,10 @@ public:
       * \param is_double
       *   Whether this is a double precision float
       * \returns the llvm::Value representing the float
+      *
+      * This will assert if type isn't a floating point type
       */
-    llvm::Constant* CreateFloating( double value, bool is_double );
+    llvm::Constant* CreateFloating( double value, Type type );
 
     /**
       * Create the llvm::Value representing a string struct
@@ -175,22 +180,13 @@ public:
     void CreateVariableAssignment( const Variable& variable,
                                    const Expression& e );
 
-    // Getters
-    llvm::LLVMContext& GetLLVMContext() const;
-
 private:
-    const Context& m_Context;
+    const Context&  m_Context;
+    Runtime&        m_Runtime;
 
-    llvm::LLVMContext&              m_LLVMContext;
     llvm::Module*                   m_LLVMModule;
     llvm::IRBuilder<>               m_LLVMBuilder;
     std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
-
-    static llvm::Module*            s_RuntimeModule;
-    static llvm::StructType*        s_StringType;
-    static llvm::Function*          s_StringEqualFunction;
-    static llvm::Function*          s_StringNotEqualFunction;
-    static llvm::Function*          s_StringConcatFunction;
 };
 
 } // namespace Compiler
