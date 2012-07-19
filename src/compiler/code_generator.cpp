@@ -460,25 +460,35 @@ llvm::Value* CodeGenerator::CreateEq( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
-    if( l.GetReturnType() == Type::STRING )
+    if( IsIntegral( l.GetReturnType() ) )
+        return m_LLVMBuilder.CreateICmpEQ( l.CodeGen( *this ),
+                                           r.CodeGen( *this ) );
+    else if( IsFloatingPoint( l.GetReturnType() ) )
+        return m_LLVMBuilder.CreateFCmpOEQ( l.CodeGen( *this ),
+                                            r.CodeGen( *this ) );
+    else if( l.GetReturnType() == Type::STRING )
         return m_Runtime.CreateStringEqualCall( l.CodeGen( *this ),
                                                 r.CodeGen( *this ),
                                                 m_LLVMBuilder );
-    return m_LLVMBuilder.CreateICmpEQ( l.CodeGen( *this ),
-                                       r.CodeGen( *this ) );
+    assert( false && "Trying to compare unhandled type" );
+    return nullptr;
 }
 
 llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
                                        const Expression& r )
 {
-    assert( l.GetReturnType() == r.GetReturnType() &&
-            "Type mismatch in code gen for binary operator" );
-    if( l.GetReturnType() == Type::STRING )
+    if( IsIntegral( l.GetReturnType() ) )
+        return m_LLVMBuilder.CreateICmpNE( l.CodeGen( *this ),
+                                           r.CodeGen( *this ) );
+    else if( IsFloatingPoint( l.GetReturnType() ) )
+        return m_LLVMBuilder.CreateFCmpONE( l.CodeGen( *this ),
+                                            r.CodeGen( *this ) );
+    else if( l.GetReturnType() == Type::STRING )
         return m_Runtime.CreateStringNotEqualCall( l.CodeGen( *this ),
                                                    r.CodeGen( *this ),
                                                    m_LLVMBuilder );
-    return m_LLVMBuilder.CreateICmpNE( l.CodeGen( *this ),
-                                       r.CodeGen( *this ) );
+    assert( false && "Trying to compare unhandled type" );
+    return nullptr;
 }
 
 llvm::Value* CodeGenerator::CreateLT( const Expression& l,

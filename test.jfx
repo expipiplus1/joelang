@@ -29,7 +29,7 @@ technique t1
 
     pass p2
     {
-        my_floating_state = 2 + twentyone;
+        my_floating_state = 2 + twentyone == 23.0f;
         my_string_state = "Hello, World!";
         my_floating_state = one + 2;
     }
