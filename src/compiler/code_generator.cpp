@@ -544,12 +544,13 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
     else if( l.GetReturnType() == Type::STRING )
     {
         /// todo garbage collection!
-        return m_LLVMBuilder.CreateCall2( m_Runtime.GetStringConcatFunction(),
-                                          l.CodeGen( *this ),
-                                          r.CodeGen( *this ) );
+        return m_Runtime.CreateStringConcatCall( l.CodeGen( *this ),
+                                                 r.CodeGen( *this ),
+                                                 m_LLVMBuilder );
     }
 
     assert( false && "Trying to Add unhandled types" );
+    return nullptr;
 }
 
 llvm::Value* CodeGenerator::CreateSub( const Expression& l,

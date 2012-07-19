@@ -49,7 +49,7 @@ using jl_double = double;
 
 struct jl_string
 {
-    jl_u32 size;
+    jl_u8 size;
     const char* data;
 };
 

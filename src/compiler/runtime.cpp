@@ -33,6 +33,7 @@
 #include <llvm/Module.h>
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
+#include <llvm/IRBuilder.h>
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -91,9 +92,29 @@ llvm::LLVMContext& Runtime::GetLLVMContext()
 // String functions
 //
 
-llvm::Function* Runtime::GetStringConcatFunction() const
+llvm::Value* Runtime::CreateStringConcatCall( llvm::Value* lhs,
+                                              llvm::Value* rhs,
+                                              llvm::IRBuilder<>& builder ) const
 {
-    return m_StringConcatFunction;
+    /// TODO find this manually
+#ifdef ARCH_I686
+    llvm::PointerType* pointer_type = llvm::cast<llvm::PointerType>(
+                   m_StringConcatFunction->getFunctionType()->getParamType(0) );
+    llvm::Type* element_type = pointer_type->getElementType();
+    llvm::Type* return_type = m_StringConcatFunction->getReturnType();
+    llvm::Value* lhs_ptr = builder.CreateAlloca( element_type );
+    llvm::Value* rhs_ptr = builder.CreateAlloca( element_type );
+    llvm::Value* ret_ptr = builder.CreateAlloca( return_type );
+    //builder.CreateStore( lhs, lhs_ptr );
+    //builder.CreateStore( rhs, rhs_ptr );
+    llvm::Value* ret_int = builder.CreateCall2( m_StringConcatFunction,
+                                                lhs_ptr,
+                                                rhs_ptr );
+    builder.CreateStore( ret_int, ret_ptr );
+    llvm::Value* ret_string_ptr = builder.CreateBitCast(ret_ptr, pointer_type);
+    return builder.CreateLoad( ret_string_ptr );
+#elif ARCH_X86_64
+#endif
 }
 
 //

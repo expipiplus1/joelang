@@ -31,6 +31,16 @@
 
 #include <vector>
 
+#include <llvm/IRBuilder.h>
+
+#ifdef __i686
+#define ARCH_I686
+#elif __X86_64
+#define ARCH_X86_64
+#else
+#error Incompatible Arch
+#endif
+
 namespace llvm
 {
     class Function;
@@ -38,6 +48,7 @@ namespace llvm
     class Module;
     class StructType;
     class Type;
+    class Value;
 }
 
 namespace JoeLang
@@ -59,7 +70,10 @@ public:
     //
     // String functions
     //
-    llvm::Function*     GetStringConcatFunction() const;
+    llvm::Value*        CreateStringConcatCall( 
+                                           llvm::Value* lhs,
+                                           llvm::Value* rhs,
+                                           llvm::IRBuilder<>& builder) const;
 
     llvm::Type*         GetLLVMType(
                             Type base_type,
