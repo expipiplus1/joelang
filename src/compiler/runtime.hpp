@@ -56,6 +56,11 @@ public:
 
     llvm::LLVMContext&  GetLLVMContext();
 
+    //
+    // String functions
+    //
+    llvm::Function*     GetStringConcatFunction() const;
+
     llvm::Type*         GetLLVMType(
                             Type base_type,
                             const std::vector<unsigned>& array_extents = {} );

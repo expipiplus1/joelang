@@ -538,9 +538,18 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
     if( IsFloatingPoint( l.GetReturnType() ) )
         return m_LLVMBuilder.CreateFAdd( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
-    else
+    else if( IsIntegral( l.GetReturnType() ) )
         return m_LLVMBuilder.CreateAdd( l.CodeGen( *this ),
                                         r.CodeGen( *this ) );
+    else if( l.GetReturnType() == Type::STRING )
+    {
+        /// todo garbage collection!
+        return m_LLVMBuilder.CreateCall2( m_Runtime.GetStringConcatFunction(),
+                                          l.CodeGen( *this ),
+                                          r.CodeGen( *this ) );
+    }
+
+    assert( false && "Trying to Add unhandled types" );
 }
 
 llvm::Value* CodeGenerator::CreateSub( const Expression& l,

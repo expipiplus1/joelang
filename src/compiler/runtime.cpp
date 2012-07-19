@@ -87,6 +87,19 @@ llvm::LLVMContext& Runtime::GetLLVMContext()
     return m_LLVMContext;
 }
 
+//
+// String functions
+//
+
+llvm::Function* Runtime::GetStringConcatFunction() const
+{
+    return m_StringConcatFunction;
+}
+
+//
+// Misc
+//
+
 llvm::Type* Runtime::GetLLVMType( Type base_type,
                                   const std::vector<unsigned>& array_extents )
 {
