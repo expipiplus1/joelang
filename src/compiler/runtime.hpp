@@ -35,7 +35,7 @@
 
 #ifdef __i686
 #define ARCH_I686
-#elif __X86_64
+#elif __x86_64
 #define ARCH_X86_64
 #else
 #error Incompatible Arch
@@ -66,24 +66,61 @@ public:
     ~Runtime();
 
     llvm::LLVMContext&  GetLLVMContext();
+    llvm::Module*       GetModule();
 
     //
     // String functions
     //
-    llvm::Value*        CreateStringConcatCall( 
+    llvm::Value*        CreateStringEqualCall(
+                                           llvm::Value* lhs,
+                                           llvm::Value* rhs,
+                                           llvm::IRBuilder<>& builder) const;
+    llvm::Value*        CreateStringNotEqualCall(
+                                           llvm::Value* lhs,
+                                           llvm::Value* rhs,
+                                           llvm::IRBuilder<>& builder) const;
+    llvm::Value*        CreateStringConcatCall(
                                            llvm::Value* lhs,
                                            llvm::Value* rhs,
                                            llvm::IRBuilder<>& builder) const;
 
     llvm::Type*         GetLLVMType(
-                            Type base_type,
-                            const std::vector<unsigned>& array_extents = {} );
+                        Type base_type,
+                        const std::vector<unsigned>& array_extents = {} ) const;
 private:
+    enum class ReturnType
+    {
+        DEFAULT, /// return the type as it is
+        POINTER, /// return by hidden first poiner argument
+        INTEGER, /// return by casting into an integer
+    };
+
+    enum class ParamType
+    {
+        DEFAULT, /// Pass this param as it is
+        EXPAND,  /// Expand this struct param
+        POINTER, /// Pass this param by pointer
+    };
+
+    struct ParamValue
+    {
+        llvm::Value* value;
+        ParamType    param_type;
+    };
+
+    llvm::Value*        CreateCall( llvm::Function* function,
+                                    ReturnType return_type,
+                                    const std::vector<ParamValue>& param_types,
+                                    llvm::IRBuilder<>& builder ) const;
+
     llvm::LLVMContext&  m_LLVMContext;
 
     llvm::Module*       m_RuntimeModule;
 
     llvm::StructType*   m_StringType;
+    ParamType           m_StringPassType;
+    ReturnType          m_StringReturnType;
+
     llvm::Function*     m_StringEqualFunction;
     llvm::Function*     m_StringNotEqualFunction;
     llvm::Function*     m_StringConcatFunction;

@@ -70,8 +70,7 @@ CodeGenerator::CodeGenerator( const Context& context,
                               Runtime& runtime )
     :m_Context( context )
     ,m_Runtime( runtime )
-    ,m_LLVMModule( new llvm::Module( "Put_filename_here",
-                                     m_Runtime.GetLLVMContext() ) )
+    ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
 {
@@ -92,7 +91,7 @@ void CodeGenerator::GenerateCode(
         if( isa<TechniqueDeclaration>(declaration) )
         {
             TechniqueDeclaration& t =
-                       static_cast<TechniqueDeclaration&>( *declaration.get() );
+                    static_cast<TechniqueDeclaration&>( *declaration.get() );
             techniques.push_back( t.GenerateTechnique( *this ) );
         }
         else if( isa<VariableDeclarationList>(declaration) )
@@ -103,9 +102,6 @@ void CodeGenerator::GenerateCode(
         }
     }
     llvm_execution_engine = std::move( m_LLVMExecutionEngine );
-
-    // output the module for fun
-    m_LLVMModule->dump();
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
@@ -330,9 +326,10 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
                 "Trying to run a function returning an unhandled type" );
     }
 
-    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
-    function->removeFromParent();
-    delete function;
+    /// Cant remove the function because it trashes global variables...
+    //m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
+    //function->removeFromParent();
+    //delete function;
     m_LLVMBuilder.restoreIP( insert_point );
 
     return ret;
@@ -463,6 +460,10 @@ llvm::Value* CodeGenerator::CreateEq( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
+    if( l.GetReturnType() == Type::STRING )
+        return m_Runtime.CreateStringEqualCall( l.CodeGen( *this ),
+                                                r.CodeGen( *this ),
+                                                m_LLVMBuilder );
     return m_LLVMBuilder.CreateICmpEQ( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
@@ -472,6 +473,10 @@ llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
 {
     assert( l.GetReturnType() == r.GetReturnType() &&
             "Type mismatch in code gen for binary operator" );
+    if( l.GetReturnType() == Type::STRING )
+        return m_Runtime.CreateStringNotEqualCall( l.CodeGen( *this ),
+                                                   r.CodeGen( *this ),
+                                                   m_LLVMBuilder );
     return m_LLVMBuilder.CreateICmpNE( l.CodeGen( *this ),
                                        r.CodeGen( *this ) );
 }
@@ -714,7 +719,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
     return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
-                                     llvm::GlobalVariable::PrivateLinkage,
+                                     llvm::GlobalVariable::ExternalLinkage,
                                      init,
                                      name );
 }

@@ -57,10 +57,3 @@ void String_Destroy( jl_string a )
 {
     delete[] a.data;
 }
-
-void foo()
-{
-jl_string a,b;
-jl_string r = String_Concat(a,b);
-String_Destroy( r );
-}

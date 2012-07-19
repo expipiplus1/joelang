@@ -73,6 +73,10 @@ Runtime::Runtime()
     llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
     m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
                                                {size_type, char_ptr_type} );
+    m_StringType = llvm::cast<llvm::StructType>(m_StringConcatFunction->getReturnType());
+
+    assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
+                                m_StringConcatFunction->getReturnType() ) ) );
     assert( m_StringType &&
             "Can't find String type" );
     /// TODO make assertions about string type;
@@ -80,7 +84,6 @@ Runtime::Runtime()
 
 Runtime::~Runtime()
 {
-    delete m_RuntimeModule;
 }
 
 llvm::LLVMContext& Runtime::GetLLVMContext()
@@ -88,32 +91,70 @@ llvm::LLVMContext& Runtime::GetLLVMContext()
     return m_LLVMContext;
 }
 
+llvm::Module* Runtime::GetModule()
+{
+    return m_RuntimeModule;
+}
+
 //
 // String functions
 //
+llvm::Value* Runtime::CreateStringEqualCall( llvm::Value* lhs,
+                                             llvm::Value* rhs,
+                                             llvm::IRBuilder<>& builder ) const
+{
+#if defined(ARCH_I686)
+    return CreateCall( m_StringEqualFunction,
+                       ReturnType::DEFAULT,
+                       { {lhs, ParamType::POINTER},
+                         {rhs, ParamType::POINTER} },
+                       builder );
+#elif defined(ARCH_X86_64)
+    return CreateCall( m_StringEqualFunction,
+                       ReturnType::DEFAULT,
+                       { {lhs, ParamType::EXPAND},
+                         {rhs, ParamType::EXPAND} },
+                       builder );
+#endif
+}
+
+llvm::Value* Runtime::CreateStringNotEqualCall(
+                                            llvm::Value* lhs,
+                                            llvm::Value* rhs,
+                                            llvm::IRBuilder<>& builder ) const
+{
+#if defined(ARCH_I686)
+    return CreateCall( m_StringNotEqualFunction,
+                       ReturnType::DEFAULT,
+                       { {lhs, ParamType::POINTER},
+                         {rhs, ParamType::POINTER} },
+                       builder );
+#elif defined(ARCH_X86_64)
+    return CreateCall( m_StringNotEqualFunction,
+                       ReturnType::DEFAULT,
+                       { {lhs, ParamType::EXPAND},
+                         {rhs, ParamType::EXPAND} },
+                       builder );
+#endif
+}
 
 llvm::Value* Runtime::CreateStringConcatCall( llvm::Value* lhs,
                                               llvm::Value* rhs,
                                               llvm::IRBuilder<>& builder ) const
 {
     /// TODO find this manually
-#ifdef ARCH_I686
-    llvm::PointerType* pointer_type = llvm::cast<llvm::PointerType>(
-                   m_StringConcatFunction->getFunctionType()->getParamType(0) );
-    llvm::Type* element_type = pointer_type->getElementType();
-    llvm::Type* return_type = m_StringConcatFunction->getReturnType();
-    llvm::Value* lhs_ptr = builder.CreateAlloca( element_type );
-    llvm::Value* rhs_ptr = builder.CreateAlloca( element_type );
-    llvm::Value* ret_ptr = builder.CreateAlloca( return_type );
-    //builder.CreateStore( lhs, lhs_ptr );
-    //builder.CreateStore( rhs, rhs_ptr );
-    llvm::Value* ret_int = builder.CreateCall2( m_StringConcatFunction,
-                                                lhs_ptr,
-                                                rhs_ptr );
-    builder.CreateStore( ret_int, ret_ptr );
-    llvm::Value* ret_string_ptr = builder.CreateBitCast(ret_ptr, pointer_type);
-    return builder.CreateLoad( ret_string_ptr );
-#elif ARCH_X86_64
+#if defined(ARCH_I686)
+    return CreateCall( m_StringConcatFunction,
+                       ReturnType::INTEGER,
+                       { {lhs, ParamType::POINTER},
+                         {rhs, ParamType::POINTER} },
+                       builder );
+#elif defined(ARCH_X86_64)
+    return CreateCall( m_StringConcatFunction,
+                       ReturnType::DEFAULT,
+                       { {lhs, ParamType::EXPAND},
+                         {rhs, ParamType::EXPAND} },
+                       builder );
 #endif
 }
 
@@ -121,8 +162,9 @@ llvm::Value* Runtime::CreateStringConcatCall( llvm::Value* lhs,
 // Misc
 //
 
-llvm::Type* Runtime::GetLLVMType( Type base_type,
-                                  const std::vector<unsigned>& array_extents )
+llvm::Type* Runtime::GetLLVMType(
+                              Type base_type,
+                              const std::vector<unsigned>& array_extents ) const
 {
     llvm::Type* t;
     if( base_type == Type::DOUBLE )
@@ -148,6 +190,45 @@ llvm::Type* Runtime::GetLLVMType( Type base_type,
 
     return t;
 }
+
+llvm::Value* Runtime::CreateCall( llvm::Function* function,
+                                  ReturnType return_type,
+                                  const std::vector<ParamValue>& param_types,
+                                  llvm::IRBuilder<>& builder ) const
+{
+    assert( return_type == ReturnType::DEFAULT && "Complete Me" );
+    std::vector<llvm::Value*> params;
+    for( auto param_type : param_types )
+    {
+        switch( param_type.param_type )
+        {
+        case ParamType::DEFAULT:
+        {
+            params.push_back( param_type.value );
+            break;
+        }
+        case ParamType::EXPAND:
+        {
+            assert( llvm::isa<llvm::StructType>( param_type.value->getType() )&&
+                    "Can't expand a non-struct type" );
+            for( unsigned i = 0;
+                 i < llvm::cast<llvm::StructType>(
+                                 param_type.value->getType())->getNumElements();
+                 ++i )
+            {
+                params.push_back( builder.CreateExtractValue(
+                                                   param_type.value,
+                                                   std::vector<unsigned>{i} ) );
+            }
+            break;
+        }
+        case ParamType::POINTER:
+            assert( false && "Complete me" );
+        }
+    }
+    return builder.CreateCall( function, params );
+}
+
 
 } // namespace Compiler
 } // namespace JoeLang

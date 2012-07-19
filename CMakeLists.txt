@@ -87,7 +87,7 @@ set( runtime_sources src/runtime/string.cpp
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O1 -std=c++11 -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )    
 
 add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc" 
