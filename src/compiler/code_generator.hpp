@@ -82,7 +82,8 @@ public:
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
-                                                 const Expression& expression );
+                                                 const Expression& expression,
+                                                 const std::string& name = "" );
 
     GenericValue EvaluateExpression( const Expression& expression );
 

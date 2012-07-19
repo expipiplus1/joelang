@@ -74,7 +74,8 @@ public:
     void PerformSema( SemaAnalyzer& sema );
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
-                                                CodeGenerator& code_gen ) const;
+                                                CodeGenerator& code_gen,
+                                                const std::string& name ) const;
 
     /**
       * Prints this node in the CST

@@ -99,7 +99,8 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 
 std::unique_ptr<StateAssignmentBase>
                     StateAssignmentStatement::GenerateStateAssignment(
-                                                 CodeGenerator& code_gen ) const
+                                                 CodeGenerator& code_gen,
+                                                 const std::string& name ) const
 {
     Type t = m_State->GetType();
     assert( m_Expression->GetReturnType() == t &&
@@ -178,7 +179,9 @@ std::unique_ptr<StateAssignmentBase>
         }
     }
 
-    return code_gen.GenerateStateAssignment( *m_State, *m_Expression );
+    return code_gen.GenerateStateAssignment( *m_State,
+                                             *m_Expression,
+                                             name + "_" + m_Identifier );
 }
 
 void StateAssignmentStatement::Print( int depth ) const

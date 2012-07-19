@@ -134,7 +134,9 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 
     std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& s : (*m_DefinitionRef)->GetStateAssignments() )
-        state_assignments.push_back( s->GenerateStateAssignment( code_gen ) );
+        state_assignments.push_back( s->GenerateStateAssignment(
+                                                 code_gen,
+                                                 m_Declaration->GetName() ) );
     return Pass( IsIdentifier() ? m_Identifier : m_Declaration->GetName(),
                  std::move(state_assignments) );
 }

@@ -102,11 +102,14 @@ void CodeGenerator::GenerateCode(
         }
     }
     llvm_execution_engine = std::move( m_LLVMExecutionEngine );
+
+    m_LLVMModule->dump();
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
-        const Expression& expression )
+        const Expression& expression,
+        const std::string& name )
 {
     llvm::Type* t = m_Runtime.GetLLVMType( state.GetType() );
     assert( t && "trying to get the type of an unhandled JoeLang::Type" );
@@ -128,13 +131,13 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
                                                 llvm::Function::ExternalLinkage,
-                                                state.GetName().c_str(),
+                                                name,
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
 
     llvm::BasicBlock* body = llvm::BasicBlock::Create(
                                                     m_Runtime.GetLLVMContext(),
-                                                    "",
+                                                    "entry",
                                                     function );
     m_LLVMBuilder.SetInsertPoint( body );
 
@@ -482,7 +485,7 @@ llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
                                            r.CodeGen( *this ) );
     else if( IsFloatingPoint( l.GetReturnType() ) )
         return m_LLVMBuilder.CreateFCmpONE( l.CodeGen( *this ),
-                                            r.CodeGen( *this ) );
+                                           r.CodeGen( *this ) );
     else if( l.GetReturnType() == Type::STRING )
         return m_Runtime.CreateStringNotEqualCall( l.CodeGen( *this ),
                                                    r.CodeGen( *this ),
