@@ -167,6 +167,7 @@ bool SubscriptOperator::PerformSema(
                                 SemaAnalyzer& sema,
                                 const Expression_up& expression )
 {
+    bool good = m_IndexExpression->PerformSema( sema );
     if( expression->GetReturnType() != Type::ARRAY )
     {
         sema.Error( "Trying to index into a non-array" );
@@ -181,7 +182,7 @@ bool SubscriptOperator::PerformSema(
             sema.Error( "Indexing beyond array bounds" );
     }
     m_ArrayExtents.assign( ++extents.begin(), extents.end() );
-    return m_IndexExpression->PerformSema( sema );
+    return good;
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,

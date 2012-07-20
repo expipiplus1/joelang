@@ -725,7 +725,7 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
     assert( ( type == initializer.GetType() ||
               initializer.GetType() == Type::UNKNOWN_TYPE ) &&
             "Initializer type mismatch" );
-    llvm::Type* t = m_Runtime.GetLLVMType( type );
+    llvm::Type* t = m_Runtime.GetLLVMType( type, array_extents );
     llvm::Constant* init = nullptr;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )
         init = initializer.CodeGen( *this );
