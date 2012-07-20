@@ -163,10 +163,11 @@ SubscriptOperator::~SubscriptOperator()
 {
 }
 
-bool SubscriptOperator::PerformSema(
-                                SemaAnalyzer& sema,
-                                const Expression_up& expression )
+bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
+                                     const Expression_up& expression )
 {
+    m_IndexExpression = CastExpression::Create( Type::I64,
+                                                std::move(m_IndexExpression) );
     bool good = m_IndexExpression->PerformSema( sema );
     if( expression->GetReturnType() != Type::ARRAY )
     {

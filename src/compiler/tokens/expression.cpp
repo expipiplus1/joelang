@@ -80,6 +80,12 @@ bool Expression::IsLValue() const
     return false;
 }
 
+llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
+{
+    assert( false && "Complete me" );
+    return nullptr;
+}
+
 bool Expression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO comma sep expressions
@@ -1731,6 +1737,14 @@ llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
     assert( m_Variable &&
             "Trying to generate code for an unresolved variable" );
     return code_gen.CreateVariableRead( *m_Variable );
+}
+
+llvm::Value* IdentifierExpression::CodeGenPointerTo( 
+                                                 CodeGenerator& code_gen ) const
+{
+    assert( m_Variable &&
+            "Trying to generate code for an unresolved variable" );
+    return m_Variable->GetLLVMPointer();
 }
 
 Type IdentifierExpression::GetReturnType() const

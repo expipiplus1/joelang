@@ -253,7 +253,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     //
     llvm::Function* function = llvm::Function::Create(
                                                 prototype,
-                                                llvm::Function::ExternalLinkage,
+                                                llvm::Function::PrivateLinkage,
                                                 "TemporaryEvaluation",
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
@@ -646,10 +646,13 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 //
 
 llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
-                                              const Expression& index)
+                                              const Expression& index )
 {
-    return m_LLVMBuilder.CreateGEP( array.CodeGen( *this ),
-                                    index.CodeGen( *this ) );
+    llvm::Value* array_ptr = m_LLVMBuilder.CreateConstGEP2_32(
+                                    array.CodeGenPointerTo( *this ), 
+                                    0, 0 );
+    llvm::Value* ptr = m_LLVMBuilder.CreateGEP( array_ptr, index.CodeGen( *this ) );
+    return m_LLVMBuilder.CreateLoad( ptr );
 }
 
 //
@@ -675,6 +678,7 @@ llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )
 
 llvm::Constant* CodeGenerator::CreateString( const std::string& value )
 {
+    /// TODO use CreateClobalString here
     //
     // Set up the globalvariable holding the characters in an array
     //
@@ -691,7 +695,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            *m_LLVMModule,
                                            array_type,
                                            true,
-                                           llvm::GlobalVariable::PrivateLinkage,
+                                           llvm::GlobalVariable::CommonLinkage,
                                            data_constant,
                                            "string_data" );
 
@@ -729,10 +733,12 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
     llvm::Constant* init = nullptr;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )
         init = initializer.CodeGen( *this );
+    else
+        init = llvm::ConstantAggregateZero::get( t );
     return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
-                                     llvm::GlobalVariable::ExternalLinkage,
+                                     llvm::GlobalVariable::CommonLinkage,
                                      init,
                                      name );
 }

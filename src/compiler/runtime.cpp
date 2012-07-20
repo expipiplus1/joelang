@@ -69,14 +69,19 @@ Runtime::Runtime()
     m_StringConcatFunction = m_RuntimeModule->getFunction( "String_Concat" );
     assert( m_StringConcatFunction && "Can't find String_Concat in runtime" );
 
-    llvm::Type* size_type = GetLLVMType( Type::U32 );
-    llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
-    m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
-                                               {size_type, char_ptr_type} );
+#if defined( ARCH_X86_64 )
     m_StringType = llvm::cast<llvm::StructType>(m_StringConcatFunction->getReturnType());
 
     assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
                                 m_StringConcatFunction->getReturnType() ) ) );
+#elif defined( ARCH_I686 )
+    m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
+#else
+    llvm::Type* size_type = GetLLVMType( Type::U32 );
+    llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
+    m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
+                                               {size_type, char_ptr_type} );
+#endif
     assert( m_StringType &&
             "Can't find String type" );
     /// TODO make assertions about string type;
@@ -196,8 +201,8 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
                                   const std::vector<ParamValue>& param_types,
                                   llvm::IRBuilder<>& builder ) const
 {
-    assert( return_type == ReturnType::DEFAULT && "Complete Me" );
     std::vector<llvm::Value*> params;
+
     for( auto param_type : param_types )
     {
         switch( param_type.param_type )
@@ -223,10 +228,41 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
             break;
         }
         case ParamType::POINTER:
-            assert( false && "Complete me" );
+        {
+            // Store it and send pointer
+
+            llvm::Value* ptr = builder.CreateAlloca( m_StringType );
+            builder.CreateStore( param_type.value, ptr );
+            params.push_back( ptr );
+            break;
+        }
         }
     }
-    return builder.CreateCall( function, params );
+    
+    llvm::Value* call = builder.CreateCall( function, params );
+
+    switch( return_type )
+    {
+    case ReturnType::DEFAULT:
+        return call;
+    case ReturnType::POINTER:
+        assert( false && "Complete me" );
+        return nullptr;
+    case ReturnType::INTEGER:
+        // The function returns an integer big enough to hold the struct
+        // Store the int 
+        llvm::Type* int_type = function->getReturnType();
+        /// TODO types other than string
+        llvm::Type* ptr_type = llvm::PointerType::get( m_StringType,
+                                                       0 );
+        llvm::Value* int_ptr = builder.CreateAlloca( int_type );
+        builder.CreateStore( call, int_ptr );
+        llvm::Value* string_ptr = builder.CreateBitCast( int_ptr,
+                                                         ptr_type );
+        return builder.CreateLoad( string_ptr );
+    }
+    assert( false && "How did you get here?" );
+    return nullptr;
 }
 
 

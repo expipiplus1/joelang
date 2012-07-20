@@ -119,6 +119,15 @@ public:
       */
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const = 0;
+    
+    /**
+      * Generates an llvm value for a pointer to the value of this expression
+      * \param code_gen
+      *   A reference to a CodeGenerator
+      * \returns the llvm value representing this expression's value's pointer
+      */
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const;
 
     /**
       * \returns the type which this expression evaluates to
@@ -785,9 +794,7 @@ public:
                 Expression_up& token );
 
     static
-    Expression_up Create(
-                                  Type cast_type,
-                                  Expression_up cast_expression );
+    Expression_up Create( Type cast_type, Expression_up cast_expression ); 
 
     static
     bool classof( const Expression* e );
@@ -987,7 +994,10 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
     void Print( int depth ) const;
