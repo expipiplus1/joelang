@@ -730,11 +730,11 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
               initializer.GetType() == Type::UNKNOWN_TYPE ) &&
             "Initializer type mismatch" );
     llvm::Type* t = m_Runtime.GetLLVMType( type, array_extents );
-    llvm::Constant* init = nullptr;
+    llvm::Constant* init;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )
         init = initializer.CodeGen( *this );
     else
-        init = llvm::ConstantAggregateZero::get( t );
+        init = llvm::Constant::getNullValue( t );
     return new llvm::GlobalVariable( *m_LLVMModule,
                                      t,
                                      is_const,
