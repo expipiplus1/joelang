@@ -133,6 +133,10 @@ public:
                           const Expression_up& expression ) = 0;
 
     virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression_up& expression );
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const = 0;
 
     /// todo make these all take references
@@ -145,6 +149,12 @@ public:
 
     virtual
     bool IsConst( const Expression& expression ) const = 0;
+
+    /**
+      * Returns false by default
+      */
+    virtual
+    bool IsLValue( const Expression& expression ) const;
 
     static
     bool Parse( Parser& parser,
@@ -180,9 +190,14 @@ public:
     bool PerformSema( SemaAnalyzer& sema,
                       const Expression_up& expression ) override;
 
+    //TODO pass expression as reference instead of pointer
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression_up& expression ) override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression_up& expression ) override;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const override;
@@ -196,6 +211,9 @@ public:
 
     virtual
     bool IsConst( const Expression& expression ) const override;
+
+    virtual
+    bool IsLValue( const Expression& expression ) const override;
 
     virtual
     void Print( int depth ) const;

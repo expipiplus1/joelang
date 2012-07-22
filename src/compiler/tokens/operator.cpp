@@ -136,6 +136,22 @@ bool PostfixOperator::Parse( Parser& parser,
     return true;
 }
 
+llvm::Value* PostfixOperator::CodeGenPointerTo(
+                                            CodeGenerator& code_gen,
+                                            const Expression_up& expression )
+{
+    assert( false && "complete me" );
+    return nullptr;
+}
+
+
+bool PostfixOperator::IsLValue( const Expression& expression ) const
+{
+    return false;
+}
+
+
+
 bool PostfixOperator::classof( const Token* e )
 {
     return e->GetSubClassID() >= TokenTy::PostfixOperator_Start &&
@@ -166,6 +182,7 @@ SubscriptOperator::~SubscriptOperator()
 bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
                                      const Expression_up& expression )
 {
+    m_IndexExpression->ResolveIdentifiers( sema );
     m_IndexExpression = CastExpression::Create( Type::I64,
                                                 std::move(m_IndexExpression) );
     bool good = m_IndexExpression->PerformSema( sema );
@@ -191,6 +208,15 @@ llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
 {
     assert( expression && "SubscriptOperator given an null expression" );
     return code_gen.CreateArrayIndex( *expression, *m_IndexExpression );
+}
+
+llvm::Value* SubscriptOperator::CodeGenPointerTo(
+                                            CodeGenerator& code_gen,
+                                            const Expression_up& expression )
+{
+    assert( expression && "SubscriptOperator given an null expression" );
+    return code_gen.CreateArrayIndexPointerTo( *expression,
+                                               *m_IndexExpression );
 }
 
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
@@ -220,6 +246,11 @@ bool SubscriptOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst() &&
            m_IndexExpression->IsConst();
+}
+
+bool SubscriptOperator::IsLValue( const Expression& expression ) const
+{
+    return true;
 }
 
 void SubscriptOperator::Print( int depth ) const
