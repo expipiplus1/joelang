@@ -70,7 +70,8 @@ Runtime::Runtime()
     assert( m_StringConcatFunction && "Can't find String_Concat in runtime" );
 
 #if defined( ARCH_X86_64 )
-    m_StringType = llvm::cast<llvm::StructType>(m_StringConcatFunction->getReturnType());
+    m_StringType = llvm::cast<llvm::StructType>(
+                                    m_StringConcatFunction->getReturnType() );
 
     assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
                                 m_StringConcatFunction->getReturnType() ) ) );
@@ -238,7 +239,7 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
         }
         }
     }
-    
+
     llvm::Value* call = builder.CreateCall( function, params );
 
     switch( return_type )
@@ -250,7 +251,7 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
         return nullptr;
     case ReturnType::INTEGER:
         // The function returns an integer big enough to hold the struct
-        // Store the int 
+        // Store the int
         llvm::Type* int_type = function->getReturnType();
         /// TODO types other than string
         llvm::Type* ptr_type = llvm::PointerType::get( m_StringType,
