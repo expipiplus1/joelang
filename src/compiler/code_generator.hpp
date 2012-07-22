@@ -38,7 +38,7 @@
 namespace llvm
 {
     class ExecutionEngine;
-    class GenericValue;
+    struct GenericValue;
     class GlobalVariable;
     class LLVMContext;
     class Module;
@@ -71,8 +71,7 @@ class Variable;
 class CodeGenerator
 {
 public:
-    CodeGenerator( const Context& context,
-                   Runtime& runtime );
+    CodeGenerator( Runtime& runtime );
     ~CodeGenerator();
 
     void GenerateCode(
@@ -123,6 +122,9 @@ public:
     // Other things
     llvm::Value* CreateArrayIndex( const Expression& array,
                                    const Expression& index );
+
+    llvm::Value* CreateArrayIndexPointerTo( const Expression& array,
+                                            const Expression& index );
 
     /**
       * Create the llvm::Value representing an integer
@@ -178,11 +180,10 @@ public:
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
-    void CreateVariableAssignment( const Variable& variable,
+    void CreateVariableAssignment( const Expression& variable,
                                    const Expression& e );
 
 private:
-    const Context&  m_Context;
     Runtime&        m_Runtime;
 
     llvm::Module*                   m_LLVMModule;

@@ -66,10 +66,8 @@ namespace JoeLang
 namespace Compiler
 {
 
-CodeGenerator::CodeGenerator( const Context& context,
-                              Runtime& runtime )
-    :m_Context( context )
-    ,m_Runtime( runtime )
+CodeGenerator::CodeGenerator( Runtime& runtime )
+    :m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
@@ -648,11 +646,17 @@ llvm::Value* CodeGenerator::CreateSelect( const Expression& condition,
 llvm::Value* CodeGenerator::CreateArrayIndex( const Expression& array,
                                               const Expression& index )
 {
-    llvm::Value* array_ptr = m_LLVMBuilder.CreateConstGEP2_32(
-                                    array.CodeGenPointerTo( *this ), 
-                                    0, 0 );
-    llvm::Value* ptr = m_LLVMBuilder.CreateGEP( array_ptr, index.CodeGen( *this ) );
+    llvm::Value* ptr = CreateArrayIndexPointerTo( array, index );
     return m_LLVMBuilder.CreateLoad( ptr );
+}
+
+llvm::Value* CodeGenerator::CreateArrayIndexPointerTo( const Expression& array,
+                                                       const Expression& index )
+{
+    llvm::Value* array_ptr = m_LLVMBuilder.CreateConstGEP2_32(
+                                    array.CodeGenPointerTo( *this ),
+                                    0, 0 );
+    return m_LLVMBuilder.CreateGEP( array_ptr, index.CodeGen( *this ) );
 }
 
 //
@@ -748,15 +752,18 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
-void CodeGenerator::CreateVariableAssignment( const Variable& variable,
+void CodeGenerator::CreateVariableAssignment( const Expression& variable,
                                               const Expression& e )
 {
+    assert( variable.IsLValue() &&
+            "Trying to codegen an assignment to a RValue" );
     assert( !variable.IsConst() &&
             "Trying to codegen an assignment to a const variable" );
-    assert( variable.GetType() == e.GetReturnType() &&
+    assert( variable.GetReturnType() == e.GetReturnType() &&
             "Trying to assign a variable with a different type" );
     llvm::Value* assigned_value = e.CodeGen( *this );
-    m_LLVMBuilder.CreateStore( assigned_value, variable.GetLLVMPointer() );
+    m_LLVMBuilder.CreateStore( assigned_value,
+                               variable.CodeGenPointerTo( *this ) );
 }
 
 } // namespace Compiler

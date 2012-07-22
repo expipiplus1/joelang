@@ -121,6 +121,7 @@ AssignmentExpression::AssignmentExpression(
             "AssignmentExpression given an invalid assignee" );
     assert( m_AssignedExpression &&
             "AssignmentExpression given an invalid assigned expression" );
+    m_AssigneePtr = m_Assignee.get();
 }
 
 AssignmentExpression::~AssignmentExpression()
@@ -140,24 +141,16 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     // Extract the identifier from the assignee
     good &= m_Assignee->PerformSema( sema );
 
-    if( !isa<IdentifierExpression>(m_Assignee) )
+    if( !m_Assignee->IsLValue() )
     {
         good = false;
         sema.Error( "Trying to assign to a RValue" );
     }
-    else
+
+    if( m_Assignee->IsConst() )
     {
-        IdentifierExpression* i =
-                        static_cast<IdentifierExpression*>( m_Assignee.get() );
-        if( i->IsConst() )
-        {
-            good = false;
-            sema.Error( "Trying to assign to a const value" );
-        }
-        else
-        {
-            m_AssigneeVariable = i->GetVariable();
-        }
+        good = false;
+        sema.Error( "Trying to assign to a Const expression" );
     }
 
     switch( m_AssignmentOperator )
@@ -166,40 +159,35 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
         break;
     case Op::SHL_EQUALS:
         m_AssignedExpression.reset(
-                    new ShiftExpression(
-                                      BinaryOperatorExpression::Op::LEFT_SHIFT,
+                  new ShiftExpression( BinaryOperatorExpression::Op::LEFT_SHIFT,
                                       std::move(m_Assignee),
                                       std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::SHR_EQUALS:
         m_AssignedExpression.reset(
-                    new ShiftExpression(
-                                      BinaryOperatorExpression::Op::RIGHT_SHIFT,
+                 new ShiftExpression( BinaryOperatorExpression::Op::RIGHT_SHIFT,
                                       std::move(m_Assignee),
                                       std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::AND_EQUALS:
         m_AssignedExpression.reset(
-                    new AndExpression(
-                                      BinaryOperatorExpression::Op::AND,
+                   new AndExpression( BinaryOperatorExpression::Op::AND,
                                       std::move(m_Assignee),
                                       std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::XOR_EQUALS:
         m_AssignedExpression.reset(
-                    new ExclusiveOrExpression(
-                                      BinaryOperatorExpression::Op::XOR,
+           new ExclusiveOrExpression( BinaryOperatorExpression::Op::XOR,
                                       std::move(m_Assignee),
                                       std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::OR_EQUALS:
         m_AssignedExpression.reset(
-                    new InclusiveOrExpression(
-                                      BinaryOperatorExpression::Op::OR,
+           new InclusiveOrExpression( BinaryOperatorExpression::Op::OR,
                                       std::move(m_Assignee),
                                       std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
@@ -220,31 +208,29 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
         break;
     case Op::MULTIPLY_EQUALS:
         m_AssignedExpression.reset(
-                    new MultiplicativeExpression(
-                                        BinaryOperatorExpression::Op::MULTIPLY,
+          new MultiplicativeExpression( BinaryOperatorExpression::Op::MULTIPLY,
                                         std::move(m_Assignee),
                                         std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::DIVIDE_EQUALS:
         m_AssignedExpression.reset(
-                    new MultiplicativeExpression(
-                                        BinaryOperatorExpression::Op::DIVIDE,
+          new MultiplicativeExpression( BinaryOperatorExpression::Op::DIVIDE,
                                         std::move(m_Assignee),
                                         std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     case Op::MODULO_EQUALS:
         m_AssignedExpression.reset(
-                    new MultiplicativeExpression(
-                                        BinaryOperatorExpression::Op::MODULO,
+          new MultiplicativeExpression( BinaryOperatorExpression::Op::MODULO,
                                         std::move(m_Assignee),
                                         std::move(m_AssignedExpression) ) );
         m_AssignmentOperator = Op::EQUALS;
         break;
     }
+    // Assuming that we can assign to the same as ReturnType;
     m_AssignedExpression = CastExpression::Create(
-                                              m_AssigneeVariable->GetType(),
+                                              m_AssigneePtr->GetReturnType(),
                                               std::move(m_AssignedExpression) );
     good &= m_AssignedExpression->PerformSema( sema );
 
@@ -253,13 +239,12 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( m_AssigneeVariable &&
-            "Trying to code_gen to a null variable" );
-
+    assert( m_AssigneePtr &&
+            "Trying to codegen an assignmentexpression with null assigneeptr" );
     switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
-        code_gen.CreateVariableAssignment( *m_AssigneeVariable,
+        code_gen.CreateVariableAssignment( *m_AssigneePtr,
                                            *m_AssignedExpression );
         break;
     default:
@@ -267,31 +252,22 @@ llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 
     // Return the new value of the variable
-    return code_gen.CreateVariableRead( *m_AssigneeVariable );
+    return m_AssigneePtr->CodeGen( code_gen );
 }
 
 Type AssignmentExpression::GetReturnType() const
 {
-    if( m_Assignee )
-        return m_Assignee->GetReturnType();
-    else
-        return m_AssigneeVariable->GetType();
+    return m_AssigneePtr->GetReturnType();
 }
 
 Type AssignmentExpression::GetUnderlyingType() const
 {
-    if( m_Assignee )
-        return m_Assignee->GetUnderlyingType();
-    else
-        return m_AssigneeVariable->GetUnderlyingType();
+    return m_AssigneePtr->GetUnderlyingType();
 }
 
 const std::vector<unsigned>& AssignmentExpression::GetArrayExtents() const
 {
-    if( m_Assignee )
-        return m_Assignee->GetArrayExtents();
-    else
-        return m_AssigneeVariable->GetArrayExtents();
+    return m_AssigneePtr->GetArrayExtents();
 }
 
 bool AssignmentExpression::IsConst() const
@@ -305,7 +281,7 @@ void AssignmentExpression::Print(int depth) const
         std::cout << " ";
     std::cout << "Assignment Expression\n";
 
-    m_Assignee->Print( depth + 1 );
+    m_AssigneePtr->Print( depth + 1 );
     m_AssignedExpression->Print( depth + 1 );
 }
 
@@ -1617,6 +1593,12 @@ llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
     return m_PostfixOperator->CodeGen( code_gen, m_Expression );
 }
 
+llvm::Value* PostfixExpression::CodeGenPointerTo(
+                                                CodeGenerator& code_gen ) const
+{
+    return m_PostfixOperator->CodeGenPointerTo( code_gen, m_Expression );
+}
+
 Type PostfixExpression::GetReturnType() const
 {
     return m_PostfixOperator->GetReturnType( m_Expression );
@@ -1635,6 +1617,11 @@ const std::vector<unsigned>& PostfixExpression::GetArrayExtents() const
 bool PostfixExpression::IsConst() const
 {
     return m_PostfixOperator->IsConst( *m_Expression );
+}
+
+bool PostfixExpression::IsLValue() const
+{
+    return m_PostfixOperator->IsLValue( *m_Expression );
 }
 
 void PostfixExpression::Print( int depth ) const
@@ -1739,7 +1726,7 @@ llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateVariableRead( *m_Variable );
 }
 
-llvm::Value* IdentifierExpression::CodeGenPointerTo( 
+llvm::Value* IdentifierExpression::CodeGenPointerTo(
                                                  CodeGenerator& code_gen ) const
 {
     assert( m_Variable &&

@@ -119,7 +119,7 @@ public:
       */
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const = 0;
-    
+
     /**
       * Generates an llvm value for a pointer to the value of this expression
       * \param code_gen
@@ -205,16 +205,21 @@ public:
       * \param assigned_expression
       *   The assigned Expression
       */
-    AssignmentExpression(
-                        Expression_up assignee,
-                        Op assignment_operator,
-                        Expression_up assigned_expression );
+    AssignmentExpression( Expression_up assignee,
+                          Op assignment_operator,
+                          Expression_up assigned_expression );
     virtual
     ~AssignmentExpression();
 
     virtual
     void ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
+    /**
+      * For expressions such as 'a += b' this is inteerpreted as 'a = a+b', with
+      * m_AssignedExpression being replaced with a+b and ownership of a being
+      * given to m_AssignedExpression and a pointer being kept in m_AssigneePtr,
+      * In the case of 'a = b' m_Assignee keeps the ownership;
+      */
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 
@@ -246,8 +251,10 @@ public:
     bool classof( const AssignmentExpression* e );
 private:
     Expression_up m_Assignee;
-    std::shared_ptr<Variable>   m_AssigneeVariable;
-    Op                          m_AssignmentOperator;
+    /// This points to the assignee, to hold onto it after ownership has been
+    /// given to AssignedExpression for expressions such as a += b;
+    Expression*   m_AssigneePtr = nullptr;
+    Op            m_AssignmentOperator;
     Expression_up m_AssignedExpression;
 };
 
@@ -794,7 +801,7 @@ public:
                 Expression_up& token );
 
     static
-    Expression_up Create( Type cast_type, Expression_up cast_expression ); 
+    Expression_up Create( Type cast_type, Expression_up cast_expression );
 
     static
     bool classof( const Expression* e );
@@ -900,7 +907,10 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
     Type GetReturnType() const override;
@@ -913,6 +923,9 @@ public:
 
     virtual
     bool IsConst() const override;
+
+    virtual
+    bool IsLValue() const override;
 
     virtual
     void Print( int depth ) const;
