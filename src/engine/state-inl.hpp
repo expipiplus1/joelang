@@ -54,7 +54,6 @@ State<T>::State( std::string name, std::map< std::string, T > enumerations )
     ,m_ResetCallback( DefaultStateResetCallback )
     ,m_ValidateCallback( DefaultStateValidateCallback )
 {
-    //TODO check enumerations
 }
 
 template<typename T>
