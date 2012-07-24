@@ -682,7 +682,7 @@ llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )
 
 llvm::Constant* CodeGenerator::CreateString( const std::string& value )
 {
-    /// TODO use CreateClobalString here
+    /// TODO use CreateGlobalString here
     //
     // Set up the globalvariable holding the characters in an array
     //
@@ -717,6 +717,20 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
           std::vector<llvm::Constant*>
             {size_constant, data_pointer} );
     return string;
+}
+
+llvm::Constant* CodeGenerator::CreateArray( 
+                                        const std::vector<GenericValue>& value )
+{
+    assert( !value.empty() && 
+            "Trying to create an array constant of zero size" );
+    std::vector<llvm::Constant*> array_data;
+    array_data.reserve( value.size() );
+    for( const auto& g : value )
+        array_data.push_back( value.CodeGen( *this ) );
+
+    return llvm::Constant::get( m_Runtime.GetLLVMType( value[0].GetType() ),
+                                array_data ); 
 }
 
 //

@@ -158,6 +158,16 @@ public:
       */
     llvm::Constant* CreateString( const std::string& value );
 
+    /**
+      * Create the llvm::Value representing an array of values
+      * \param value
+      *   The value with which to create the array
+      * \returns the llvm::Value representing the array
+      *
+      * This will assert that all the values are of matching type
+      */
+    llvm::Constant* CreateArray( const std::vector<GenericValue>& value );
+
     // Variables
     /**
       * Allocate a llvm::GlobalVariable for the current module
