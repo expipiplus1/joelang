@@ -32,6 +32,7 @@
 #include <cassert>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <compiler/code_generator.hpp>
 #include <engine/types.hpp>
@@ -45,8 +46,6 @@ namespace Compiler
 GenericValue::GenericValue()
     :m_Type( Type::UNKNOWN_TYPE )
 {
-    if( m_Type == Type::STRING )
-        new(&m_StringValue) std::string;
 }
 
 GenericValue::GenericValue( const GenericValue& g )
@@ -58,12 +57,21 @@ GenericValue::GenericValue( const GenericValue& g )
 GenericValue::GenericValue( Type type )
     :m_Type( type )
 {
-    if( m_Type == Type::STRING )
+    switch( m_Type )
+    {
+    case Type::STRING:
         new(&m_StringValue) std::string;
+        break;
+    case Type::ARRAY:
+        new(&m_ArrayValue) std::vector<GenericValue>;
+        break;
+    }
 }
 
 const GenericValue& GenericValue::operator = ( const GenericValue& g )
 {
+    FreeData();
+
     switch( g.m_Type )
     {
     case Type::BOOL:
@@ -100,11 +108,15 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
         m_DoubleValue = g.m_DoubleValue;
         break;
     case Type::STRING:
-        if( m_Type != Type::STRING )
-            new(&m_StringValue) std::string;
+        new(&m_StringValue) std::string;
         m_StringValue = g.m_StringValue;
         break;
+    case Type::ARRAY:
+        new(&m_ArrayValue) std::vector<GenericValue>;
+        m_ArrayValue = g.m_ArrayValue;
+        break;
     default:
+        assert( false && "Assigning from GenericValue with an unhandled Type" );
         break;
     }
 
@@ -191,13 +203,26 @@ GenericValue::GenericValue( std::string string_value )
 {
 }
 
+GenericValue::GenericValue( std::vector<GenericValue> array_value )
+    :m_Type( Type::ARRAY )
+    ,m_ArrayValue( std::move(string_value) )
+{
+#ifndef NDEBUG
+    if( !m_ArrayValue.empty() )
+    {
+        Type t = m_ArrayValue[0].m_Type;
+        for( auto i = m_ArrayValue.begin()+1; i < m_ArrayValue.end; ++i )
+        {
+            assert( i->m_Type == t && 
+                    "GenericValue given array with mismatched types" );
+        }
+    }
+#endif
+}
+
 GenericValue::~GenericValue()
 {
-    using std::string;
-    if( m_Type == Type::STRING )
-    {
-        m_StringValue.~string();
-    }
+    FreeData();
 }
 
 llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
@@ -228,6 +253,8 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
         return code_gen.CreateFloating( m_DoubleValue, Type::DOUBLE );
     case Type::STRING:
         return code_gen.CreateString( m_StringValue );
+    case Type::ARRAY:
+        return code_gen.CreateArray( m_ArrayValue );
     default:
         assert( false && "Trying to codegen an unhandled type" );
     }
@@ -321,6 +348,31 @@ const std::string& GenericValue::GetString() const
     assert( m_Type == Type::STRING &&
             "Trying to get the string value from a non-string GenericValue" );
     return m_StringValue;
+}
+
+const std::vector<GenericValue>& GenericValue::GetArray() const
+{
+    assert( m_Type == Type::ARRAY &&
+            "Trying to get the array value from a non-array GenericValue" );
+    return m_ArrayValue;
+}
+
+void GenericValue::FreeData()
+{
+    using std::string;
+    using std::vector<GenericValue>;
+
+    switch( m_Type )
+    {
+    case Type::ARRAY:
+        m_ArrayValue.~vector();
+        break;
+    case Type::STRING:
+        m_StringValue.~string();
+        break;
+    }
+
+    m_Type = Type::UNKNOWN_TYPE;
 }
 
 } // namespace Compiler
