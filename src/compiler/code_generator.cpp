@@ -727,10 +727,12 @@ llvm::Constant* CodeGenerator::CreateArray(
     std::vector<llvm::Constant*> array_data;
     array_data.reserve( value.size() );
     for( const auto& g : value )
-        array_data.push_back( value.CodeGen( *this ) );
+        array_data.push_back( g.CodeGen( *this ) );
 
-    return llvm::Constant::get( m_Runtime.GetLLVMType( value[0].GetType() ),
-                                array_data ); 
+    llvm::Type* type = m_Runtime.GetLLVMType( value[0].GetType() );
+
+    return llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( type ),
+                                     array_data ); 
 }
 
 //
