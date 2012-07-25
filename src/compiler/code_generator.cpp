@@ -468,9 +468,10 @@ llvm::Value* CodeGenerator::CreateEq( const Expression& l,
         return m_LLVMBuilder.CreateFCmpOEQ( l.CodeGen( *this ),
                                             r.CodeGen( *this ) );
     else if( l.GetReturnType() == Type::STRING )
-        return m_Runtime.CreateStringEqualCall( l.CodeGen( *this ),
-                                                r.CodeGen( *this ),
-                                                m_LLVMBuilder );
+        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_EQUAL,
+                                            {l.CodeGen( *this ),
+                                             r.CodeGen( *this )},
+                                            m_LLVMBuilder );
     assert( false && "Trying to compare unhandled type" );
     return nullptr;
 }
@@ -485,9 +486,10 @@ llvm::Value* CodeGenerator::CreateNeq( const Expression& l,
         return m_LLVMBuilder.CreateFCmpONE( l.CodeGen( *this ),
                                            r.CodeGen( *this ) );
     else if( l.GetReturnType() == Type::STRING )
-        return m_Runtime.CreateStringNotEqualCall( l.CodeGen( *this ),
-                                                   r.CodeGen( *this ),
-                                                   m_LLVMBuilder );
+        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_NOTEQUAL,
+                                            {l.CodeGen( *this ),
+                                             r.CodeGen( *this )},
+                                            m_LLVMBuilder );
     assert( false && "Trying to compare unhandled type" );
     return nullptr;
 }
@@ -560,9 +562,10 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
     else if( l.GetReturnType() == Type::STRING )
     {
         /// todo garbage collection!
-        return m_Runtime.CreateStringConcatCall( l.CodeGen( *this ),
-                                                 r.CodeGen( *this ),
-                                                 m_LLVMBuilder );
+        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_CONCAT,
+                                            {l.CodeGen( *this ),
+                                             r.CodeGen( *this )},
+                                            m_LLVMBuilder );
     }
 
     assert( false && "Trying to Add unhandled types" );
@@ -719,10 +722,10 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
     return string;
 }
 
-llvm::Constant* CodeGenerator::CreateArray( 
+llvm::Constant* CodeGenerator::CreateArray(
                                         const std::vector<GenericValue>& value )
 {
-    assert( !value.empty() && 
+    assert( !value.empty() &&
             "Trying to create an array constant of zero size" );
     std::vector<llvm::Constant*> array_data;
     array_data.reserve( value.size() );
@@ -732,7 +735,7 @@ llvm::Constant* CodeGenerator::CreateArray(
     llvm::Type* type = m_Runtime.GetLLVMType( value[0].GetType() );
 
     return llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( type ),
-                                     array_data ); 
+                                     array_data );
 }
 
 //
