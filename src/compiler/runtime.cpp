@@ -48,6 +48,35 @@ namespace JoeLang
 namespace Compiler
 {
 
+/// TODO find this automatically
+const std::map<Type, Runtime::TypeInformation> Runtime::s_TypeInformationMap =
+{
+#if defined(ARCH_X86_64)
+    {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
+    {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
+    {Type::STRING, {ReturnType::DEFAULT, ParamType::EXPAND}}
+#elif defined(ARCH_I686)
+    {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
+    {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
+    {Type::STRING, {ReturnType::INTEGER, ParamType::POINTER}}
+#endif
+};
+
+const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
+{
+    {RuntimeFunction::STRING_EQUAL,    {"String_Equal",
+                                        Type::BOOL,   {Type::STRING,
+                                                       Type::STRING}}},
+    {RuntimeFunction::STRING_NOTEQUAL, {"String_NotEqual",
+                                        Type::BOOL,   {Type::STRING,
+                                                       Type::STRING}}},
+    {RuntimeFunction::STRING_CONCAT,   {"String_Concat",
+                                        Type::STRING, {Type::STRING,
+                                                       Type::STRING}}},
+    {RuntimeFunction::STRING_DESTROY,  {"String_Destroy",
+                                        Type::VOID,   {Type::STRING}}},
+};
+
 Runtime::Runtime()
     :m_LLVMContext( llvm::getGlobalContext() )
 {
@@ -60,21 +89,20 @@ Runtime::Runtime()
                                                m_LLVMContext );
     assert( m_RuntimeModule && "Couldn't parse runtime library" );
 
-
-    m_StringEqualFunction = m_RuntimeModule->getFunction( "String_Equal" );
-    assert( m_StringEqualFunction && "Can't find String_Equal in runtime" );
-    m_StringNotEqualFunction = m_RuntimeModule->getFunction( "String_NotEqual");
-    assert( m_StringNotEqualFunction &&
-           "Can't find String_NotEqual in runtime" );
-    m_StringConcatFunction = m_RuntimeModule->getFunction( "String_Concat" );
-    assert( m_StringConcatFunction && "Can't find String_Concat in runtime" );
+    for( const auto& function_info : s_FunctionInfos )
+    {
+        m_Functions[function_info.first] =
+                     m_RuntimeModule->getFunction( function_info.second.name );
+        assert( m_Functions[function_info.first] &&
+                "Couldn't find function in runtime" );
+    }
 
 #if defined( ARCH_X86_64 )
     m_StringType = llvm::cast<llvm::StructType>(
-                                    m_StringConcatFunction->getReturnType() );
+                m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() );
 
     assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
-                                m_StringConcatFunction->getReturnType() ) ) );
+                m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
 #elif defined( ARCH_I686 )
     m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
 #else
@@ -83,8 +111,7 @@ Runtime::Runtime()
     m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
                                                {size_type, char_ptr_type} );
 #endif
-    assert( m_StringType &&
-            "Can't find String type" );
+    assert( m_StringType && "Can't find String type" );
     /// TODO make assertions about string type;
 }
 
@@ -102,6 +129,24 @@ llvm::Module* Runtime::GetModule()
     return m_RuntimeModule;
 }
 
+llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
+                                         std::vector<llvm::Value*> params,
+                                         llvm::IRBuilder<>& builder ) const
+{
+    const FunctionInfo& info = s_FunctionInfos.at(function);
+    assert( params.size() == info.paramTypes.size() &&
+            "Calling a function with the wrong number of params" );
+    std::vector<ParamValue> param_values;
+    param_values.reserve( params.size() );
+    for( int i = 0; i < params.size(); ++i )
+        param_values.push_back( {params[i], info.paramTypes[i]} );
+
+    return CreateCall( m_Functions.at(function),
+                       info.returnType,
+                       param_values,
+                       builder );
+}
+
 //
 // String functions
 //
@@ -109,19 +154,11 @@ llvm::Value* Runtime::CreateStringEqualCall( llvm::Value* lhs,
                                              llvm::Value* rhs,
                                              llvm::IRBuilder<>& builder ) const
 {
-#if defined(ARCH_I686)
-    return CreateCall( m_StringEqualFunction,
-                       ReturnType::DEFAULT,
-                       { {lhs, ParamType::POINTER},
-                         {rhs, ParamType::POINTER} },
+    return CreateCall( m_Functions.at(RuntimeFunction::STRING_EQUAL),
+                       Type::BOOL,
+                       { {lhs, Type::STRING},
+                         {rhs, Type::STRING} },
                        builder );
-#elif defined(ARCH_X86_64)
-    return CreateCall( m_StringEqualFunction,
-                       ReturnType::DEFAULT,
-                       { {lhs, ParamType::EXPAND},
-                         {rhs, ParamType::EXPAND} },
-                       builder );
-#endif
 }
 
 llvm::Value* Runtime::CreateStringNotEqualCall(
@@ -129,39 +166,31 @@ llvm::Value* Runtime::CreateStringNotEqualCall(
                                             llvm::Value* rhs,
                                             llvm::IRBuilder<>& builder ) const
 {
-#if defined(ARCH_I686)
-    return CreateCall( m_StringNotEqualFunction,
-                       ReturnType::DEFAULT,
-                       { {lhs, ParamType::POINTER},
-                         {rhs, ParamType::POINTER} },
+    return CreateCall( m_Functions.at(RuntimeFunction::STRING_NOTEQUAL),
+                       Type::BOOL,
+                       { {lhs, Type::STRING},
+                         {rhs, Type::STRING} },
                        builder );
-#elif defined(ARCH_X86_64)
-    return CreateCall( m_StringNotEqualFunction,
-                       ReturnType::DEFAULT,
-                       { {lhs, ParamType::EXPAND},
-                         {rhs, ParamType::EXPAND} },
-                       builder );
-#endif
 }
 
 llvm::Value* Runtime::CreateStringConcatCall( llvm::Value* lhs,
                                               llvm::Value* rhs,
                                               llvm::IRBuilder<>& builder ) const
 {
-    /// TODO find this manually
-#if defined(ARCH_I686)
-    return CreateCall( m_StringConcatFunction,
-                       ReturnType::INTEGER,
-                       { {lhs, ParamType::POINTER},
-                         {rhs, ParamType::POINTER} },
+    return CreateCall( m_Functions.at(RuntimeFunction::STRING_CONCAT),
+                       Type::STRING,
+                       { {lhs, Type::STRING},
+                         {rhs, Type::STRING} },
                        builder );
-#elif defined(ARCH_X86_64)
-    return CreateCall( m_StringConcatFunction,
-                       ReturnType::DEFAULT,
-                       { {lhs, ParamType::EXPAND},
-                         {rhs, ParamType::EXPAND} },
+}
+
+llvm::Value* Runtime::CreateStringDestroyCall( llvm::Value* string,
+                                               llvm::IRBuilder<>& builder ) const
+{
+    return CreateCall( m_Functions.at(RuntimeFunction::STRING_DESTROY),
+                       Type::VOID,
+                       { {string, Type::STRING} },
                        builder );
-#endif
 }
 
 //
@@ -198,7 +227,7 @@ llvm::Type* Runtime::GetLLVMType(
 }
 
 llvm::Value* Runtime::CreateCall( llvm::Function* function,
-                                  ReturnType return_type,
+                                  Type return_type,
                                   const std::vector<ParamValue>& param_types,
                                   llvm::IRBuilder<>& builder ) const
 {
@@ -206,7 +235,8 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
 
     for( auto param_type : param_types )
     {
-        switch( param_type.param_type )
+        ParamType pass_type = s_TypeInformationMap.at(param_type.type).passType;
+        switch( pass_type )
         {
         case ParamType::DEFAULT:
         {
@@ -231,10 +261,13 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
         case ParamType::POINTER:
         {
             // Store it and send pointer
-
             llvm::Value* ptr = builder.CreateAlloca( m_StringType );
             builder.CreateStore( param_type.value, ptr );
             params.push_back( ptr );
+            break;
+        }
+        case ParamType::IGNORE:
+        {
             break;
         }
         }
@@ -242,9 +275,10 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
 
     llvm::Value* call = builder.CreateCall( function, params );
 
-    switch( return_type )
+    switch( s_TypeInformationMap.at(return_type).returnType )
     {
     case ReturnType::DEFAULT:
+    case ReturnType::IGNORE:
         return call;
     case ReturnType::POINTER:
         assert( false && "Complete me" );
@@ -262,6 +296,7 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
                                                          ptr_type );
         return builder.CreateLoad( string_ptr );
     }
+
     assert( false && "How did you get here?" );
     return nullptr;
 }

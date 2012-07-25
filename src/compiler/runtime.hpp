@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include <llvm/IRBuilder.h>
@@ -59,6 +60,14 @@ enum class Type;
 namespace Compiler
 {
 
+enum class RuntimeFunction
+{
+    STRING_EQUAL,
+    STRING_NOTEQUAL,
+    STRING_CONCAT,
+    STRING_DESTROY,
+};
+
 class Runtime
 {
 public:
@@ -68,6 +77,9 @@ public:
     llvm::LLVMContext&  GetLLVMContext();
     llvm::Module*       GetModule();
 
+    llvm::Value*        CreateRuntimeCall( RuntimeFunction function,
+                                           std::vector<llvm::Value*> params,
+                                           llvm::IRBuilder<>& builder ) const;
     //
     // String functions
     //
@@ -83,6 +95,9 @@ public:
                                            llvm::Value* lhs,
                                            llvm::Value* rhs,
                                            llvm::IRBuilder<>& builder) const;
+    llvm::Value*        CreateStringDestroyCall(
+                                           llvm::Value* string,
+                                           llvm::IRBuilder<>& builder ) const;
 
     llvm::Type*         GetLLVMType(
                         Type base_type,
@@ -93,6 +108,7 @@ private:
         DEFAULT, /// return the type as it is
         POINTER, /// return by hidden first poiner argument
         INTEGER, /// return by casting into an integer
+        IGNORE,  /// Ignore this value (used for void)
     };
 
     enum class ParamType
@@ -100,16 +116,30 @@ private:
         DEFAULT, /// Pass this param as it is
         EXPAND,  /// Expand this struct param
         POINTER, /// Pass this param by pointer
+        IGNORE,  /// Ignore this value (used for void)
     };
 
     struct ParamValue
     {
         llvm::Value* value;
-        ParamType    param_type;
+        Type         type;
+    };
+
+    struct TypeInformation
+    {
+        ReturnType   returnType;
+        ParamType    passType;
+    };
+
+    struct FunctionInfo
+    {
+        const std::string name;
+        Type returnType;
+        const std::vector<Type> paramTypes;
     };
 
     llvm::Value*        CreateCall( llvm::Function* function,
-                                    ReturnType return_type,
+                                    Type return_type,
                                     const std::vector<ParamValue>& param_types,
                                     llvm::IRBuilder<>& builder ) const;
 
@@ -118,12 +148,14 @@ private:
     llvm::Module*       m_RuntimeModule;
 
     llvm::StructType*   m_StringType;
-    ParamType           m_StringPassType;
-    ReturnType          m_StringReturnType;
 
-    llvm::Function*     m_StringEqualFunction;
-    llvm::Function*     m_StringNotEqualFunction;
-    llvm::Function*     m_StringConcatFunction;
+    std::map<RuntimeFunction, llvm::Function*> m_Functions;
+
+    const static
+    std::map<Type, TypeInformation> s_TypeInformationMap;
+
+    const static
+    std::map<RuntimeFunction, FunctionInfo> s_FunctionInfos;
 };
 
 } // namespace Compiler
