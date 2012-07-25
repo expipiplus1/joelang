@@ -562,10 +562,13 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
     else if( l.GetReturnType() == Type::STRING )
     {
         /// todo garbage collection!
-        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_CONCAT,
-                                            {l.CodeGen( *this ),
-                                             r.CodeGen( *this )},
-                                            m_LLVMBuilder );
+        llvm::Value* ret = m_Runtime.CreateRuntimeCall(
+                                                RuntimeFunction::STRING_CONCAT,
+                                                {l.CodeGen( *this ),
+                                                 r.CodeGen( *this )},
+                                                m_LLVMBuilder );
+        // add object to stack to be destroyed
+        return ret;
     }
 
     assert( false && "Trying to Add unhandled types" );
