@@ -67,6 +67,11 @@ Type GetCommonType( Type t1, Type t2 )
             return Type::UNKNOWN_TYPE;
     }
 
+    if( t1 == Type::ARRAY )
+    {
+        return Type::UNKNOWN_TYPE;
+    }
+
     for( Type t : promotion_ordering )
         if( t1 == t || t2 == t )
             return t;
