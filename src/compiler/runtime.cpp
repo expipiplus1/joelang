@@ -138,7 +138,7 @@ llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
             "Calling a function with the wrong number of params" );
     std::vector<ParamValue> param_values;
     param_values.reserve( params.size() );
-    for( int i = 0; i < params.size(); ++i )
+    for( unsigned i = 0; i < params.size(); ++i )
         param_values.push_back( {params[i], info.paramTypes[i]} );
 
     return CreateCall( m_Functions.at(function),
