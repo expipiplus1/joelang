@@ -148,52 +148,6 @@ llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
 }
 
 //
-// String functions
-//
-llvm::Value* Runtime::CreateStringEqualCall( llvm::Value* lhs,
-                                             llvm::Value* rhs,
-                                             llvm::IRBuilder<>& builder ) const
-{
-    return CreateCall( m_Functions.at(RuntimeFunction::STRING_EQUAL),
-                       Type::BOOL,
-                       { {lhs, Type::STRING},
-                         {rhs, Type::STRING} },
-                       builder );
-}
-
-llvm::Value* Runtime::CreateStringNotEqualCall(
-                                            llvm::Value* lhs,
-                                            llvm::Value* rhs,
-                                            llvm::IRBuilder<>& builder ) const
-{
-    return CreateCall( m_Functions.at(RuntimeFunction::STRING_NOTEQUAL),
-                       Type::BOOL,
-                       { {lhs, Type::STRING},
-                         {rhs, Type::STRING} },
-                       builder );
-}
-
-llvm::Value* Runtime::CreateStringConcatCall( llvm::Value* lhs,
-                                              llvm::Value* rhs,
-                                              llvm::IRBuilder<>& builder ) const
-{
-    return CreateCall( m_Functions.at(RuntimeFunction::STRING_CONCAT),
-                       Type::STRING,
-                       { {lhs, Type::STRING},
-                         {rhs, Type::STRING} },
-                       builder );
-}
-
-llvm::Value* Runtime::CreateStringDestroyCall( llvm::Value* string,
-                                               llvm::IRBuilder<>& builder ) const
-{
-    return CreateCall( m_Functions.at(RuntimeFunction::STRING_DESTROY),
-                       Type::VOID,
-                       { {string, Type::STRING} },
-                       builder );
-}
-
-//
 // Misc
 //
 

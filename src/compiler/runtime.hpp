@@ -80,24 +80,6 @@ public:
     llvm::Value*        CreateRuntimeCall( RuntimeFunction function,
                                            std::vector<llvm::Value*> params,
                                            llvm::IRBuilder<>& builder ) const;
-    //
-    // String functions
-    //
-    llvm::Value*        CreateStringEqualCall(
-                                           llvm::Value* lhs,
-                                           llvm::Value* rhs,
-                                           llvm::IRBuilder<>& builder) const;
-    llvm::Value*        CreateStringNotEqualCall(
-                                           llvm::Value* lhs,
-                                           llvm::Value* rhs,
-                                           llvm::IRBuilder<>& builder) const;
-    llvm::Value*        CreateStringConcatCall(
-                                           llvm::Value* lhs,
-                                           llvm::Value* rhs,
-                                           llvm::IRBuilder<>& builder) const;
-    llvm::Value*        CreateStringDestroyCall(
-                                           llvm::Value* string,
-                                           llvm::IRBuilder<>& builder ) const;
 
     llvm::Type*         GetLLVMType(
                         Type base_type,
