@@ -706,7 +706,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            data_constant,
                                            "string_data" );
 
-    /// TODO get size better than this
+    // u32 here because that's what's used in string for size
     llvm::Constant* size_constant = CreateInteger( value.size(), Type::U32 );
 
     llvm::Constant* data_pointer = llvm::ConstantExpr::getGetElementPtr(
