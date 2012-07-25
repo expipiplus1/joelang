@@ -81,6 +81,10 @@ int main( int argc, char** argv )
 
     JoeLang::Effect* e = context.CreateEffectFromFile( "test.jfx" );
 
+    //
+    // Flush std::cerr (it's used for dumping the module)
+    //
+    std::cerr.flush();
     if( e )
     {
         const JoeLang::Technique* t = e->GetNamedTechnique( "t1" );
