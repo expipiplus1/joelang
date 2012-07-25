@@ -65,6 +65,8 @@ GenericValue::GenericValue( Type type )
     case Type::ARRAY:
         new(&m_ArrayValue) std::vector<GenericValue>;
         break;
+    default:
+        break;
     }
 }
 
@@ -74,6 +76,8 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
 
     switch( g.m_Type )
     {
+    case Type::UNKNOWN_TYPE:
+        break;
     case Type::BOOL:
         m_BoolValue = g.m_BoolValue;
         break;
@@ -205,13 +209,13 @@ GenericValue::GenericValue( std::string string_value )
 
 GenericValue::GenericValue( std::vector<GenericValue> array_value )
     :m_Type( Type::ARRAY )
-    ,m_ArrayValue( std::move(string_value) )
+    ,m_ArrayValue( std::move(array_value) )
 {
 #ifndef NDEBUG
     if( !m_ArrayValue.empty() )
     {
         Type t = m_ArrayValue[0].m_Type;
-        for( auto i = m_ArrayValue.begin()+1; i < m_ArrayValue.end; ++i )
+        for( auto i = m_ArrayValue.begin()+1; i < m_ArrayValue.end(); ++i )
         {
             assert( i->m_Type == t && 
                     "GenericValue given array with mismatched types" );
@@ -360,7 +364,7 @@ const std::vector<GenericValue>& GenericValue::GetArray() const
 void GenericValue::FreeData()
 {
     using std::string;
-    using std::vector<GenericValue>;
+    using std::vector;
 
     switch( m_Type )
     {
@@ -369,6 +373,8 @@ void GenericValue::FreeData()
         break;
     case Type::STRING:
         m_StringValue.~string();
+        break;
+    default:
         break;
     }
 

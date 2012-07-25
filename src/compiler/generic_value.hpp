@@ -108,7 +108,7 @@ public:
     jl_float           GetFloat() const;
     jl_double          GetDouble() const;
     const std::string& GetString() const;
-    const std::vector<GenericValue> GetArray() const;
+    const std::vector<GenericValue>& GetArray() const;
 
 private:
     /**
@@ -132,7 +132,7 @@ private:
         jl_float    m_FloatValue;
         jl_double   m_DoubleValue;
         std::string m_StringValue;
-        std::vector<GenericValue> m_Array;
+        std::vector<GenericValue> m_ArrayValue;
     };
 };
 
