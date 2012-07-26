@@ -567,6 +567,7 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
                                                 {l.CodeGen( *this ),
                                                  r.CodeGen( *this )},
                                                 m_LLVMBuilder );
+
         // add object to stack to be destroyed
         return ret;
     }

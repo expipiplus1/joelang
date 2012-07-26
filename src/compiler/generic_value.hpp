@@ -81,7 +81,7 @@ public:
     explicit
     GenericValue( jl_double double_value );
     explicit
-    GenericValue( jl_string string_value );
+    GenericValue( jl_string&& string_value );
     explicit
     GenericValue( std::string string_value );
     explicit

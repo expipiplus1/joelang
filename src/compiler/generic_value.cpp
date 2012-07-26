@@ -195,10 +195,14 @@ GenericValue::GenericValue( jl_double double_value )
 {
 }
 
-GenericValue::GenericValue( jl_string string_value )
+GenericValue::GenericValue( jl_string&& string_value )
     :m_Type( Type::STRING )
-    ,m_StringValue( string_value.data, string_value.size )
+    ,m_StringValue( reinterpret_cast<const char*>(string_value.data),
+                    string_value.size )
 {
+    delete[] string_value.data;
+    string_value.size = 0;
+    string_value.data = nullptr;
 }
 
 GenericValue::GenericValue( std::string string_value )
@@ -217,7 +221,7 @@ GenericValue::GenericValue( std::vector<GenericValue> array_value )
         Type t = m_ArrayValue[0].m_Type;
         for( auto i = m_ArrayValue.begin()+1; i < m_ArrayValue.end(); ++i )
         {
-            assert( i->m_Type == t && 
+            assert( i->m_Type == t &&
                     "GenericValue given array with mismatched types" );
         }
     }

@@ -128,10 +128,10 @@ AssignmentExpression::~AssignmentExpression()
 {
 }
 
-void AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_Assignee->ResolveIdentifiers( sema );
-    m_AssignedExpression->ResolveIdentifiers( sema );
+    return m_Assignee->ResolveIdentifiers( sema ) &&
+           m_AssignedExpression->ResolveIdentifiers( sema );
 }
 
 bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
@@ -346,11 +346,11 @@ ConditionalExpression::~ConditionalExpression()
 {
 }
 
-void ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_Condition->ResolveIdentifiers( sema );
-    m_TrueExpression->ResolveIdentifiers( sema );
-    m_FalseExpression->ResolveIdentifiers( sema );
+    return m_Condition->ResolveIdentifiers( sema ) &&
+           m_TrueExpression->ResolveIdentifiers( sema ) &&
+           m_FalseExpression->ResolveIdentifiers( sema );
 }
 
 bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
@@ -501,10 +501,10 @@ BinaryOperatorExpression::~BinaryOperatorExpression()
 {
 }
 
-void BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_LeftSide->ResolveIdentifiers( sema );
-    m_RightSide->ResolveIdentifiers( sema );
+    return m_LeftSide->ResolveIdentifiers( sema ) &&
+           m_RightSide->ResolveIdentifiers( sema );
 }
 
 bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
@@ -1297,9 +1297,9 @@ CastExpression::~CastExpression()
 {
 }
 
-void CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_Expression->ResolveIdentifiers( sema );
+    return m_Expression->ResolveIdentifiers( sema );
 }
 
 bool CastExpression::PerformSema( SemaAnalyzer& sema )
@@ -1409,9 +1409,9 @@ UnaryExpression::~UnaryExpression()
 {
 }
 
-void UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_Expression->ResolveIdentifiers( sema );
+    return m_Expression->ResolveIdentifiers( sema );
 }
 
 bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
@@ -1575,9 +1575,9 @@ PostfixExpression::~PostfixExpression()
 {
 }
 
-void PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    m_Expression->ResolveIdentifiers( sema );
+    return m_Expression->ResolveIdentifiers( sema );
 }
 
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
@@ -1712,11 +1712,15 @@ IdentifierExpression::~IdentifierExpression()
 {
 }
 
-void IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
     m_Variable = sema.GetVariable( m_Identifier );
     if( !m_Variable )
+    {
         sema.Error( "Undeclared variable: " + m_Identifier );
+        return false;
+    }
+    return true;
 }
 
 llvm::Value* IdentifierExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1814,8 +1818,9 @@ LiteralExpression::LiteralExpression( TokenTy sub_class_id )
 {
 }
 
-void LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
+    return true;
 }
 
 bool LiteralExpression::PerformSema( SemaAnalyzer& sema )

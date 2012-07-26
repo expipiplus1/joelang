@@ -76,19 +76,22 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     m_IsGlobal = sema.InGlobalScope();
 
+    bool can_init = false;
+
     // Cast the initializer to the right type
     if( m_Initializer )
     {
-        m_Initializer->ResolveIdentifiers( sema );
-        m_Initializer = CastExpression::Create( decl_specs.GetType(),
-                                                std::move( m_Initializer ) );
-        m_Initializer->PerformSema( sema );
+        if( m_Initializer->ResolveIdentifiers( sema ) )
+        {
+            m_Initializer = CastExpression::Create( decl_specs.GetType(),
+                                                    std::move( m_Initializer ) );
+            can_init = m_Initializer->PerformSema( sema );
 
-        assert( m_Initializer->GetReturnType() == decl_specs.GetType() &&
-                "Trying to initialize a variable with mismatched types" );
+            assert( m_Initializer->GetReturnType() == decl_specs.GetType() &&
+                    "Trying to initialize a variable with mismatched types" );
+        }
     }
 
-    bool can_init = true;
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() &&
         !m_Initializer )
@@ -104,7 +107,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // Evaluate the initializer
     GenericValue initializer;
-    if( m_Initializer )
+    if( m_Initializer && can_init )
         initializer = sema.EvaluateExpression( *m_Initializer );
 
     Type base_type = decl_specs.GetType();

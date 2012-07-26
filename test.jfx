@@ -1,4 +1,6 @@
-const string hello = "Hello",
+const string foo = "foo" + "bar";
+
+/*const string hello = "Hello",
              world = "World",
              hello_world = hello + ", " + world + "!";
 const unsigned twenty = 20ul;
@@ -36,3 +38,4 @@ technique t1
         my_floating_state = one + 2;
     }
 }
+*/

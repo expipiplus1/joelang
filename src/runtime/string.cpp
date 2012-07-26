@@ -46,14 +46,48 @@ jl_string String_Concat( jl_string a, jl_string b )
 {
     jl_string ret;
     ret.size = a.size + b.size;
-    char* data = new char[ret.size];
+    jl_u8* data = new jl_u8[ret.size];
     memcpy( data, a.data, a.size );
     memcpy( data + a.size, b.data, b.size );
     ret.data = data;
     return ret;
 }
 
+/*
+void String_Copy( jl_string& to, const jl_string& from )
+{
+    to = String_Concat( to, to );
+    String_Destroy( to );
+    to.size = from.size;
+    jl_u8* data = new jl_u8[to.size];
+    memcpy( data, from.data, from.size );
+    to.data = data;
+}
+
+void String_Move( jl_string& to, jl_string&& from )
+{
+    auto s    = to.size;
+    to.size   = from.size;
+    from.size = s;
+
+    auto d    = to.data;
+    to.data   = from.data;
+    from.data = d;
+}
+*/
+
+jl_string String_Create( jl_u32 size, const jl_u8* data )
+{
+    jl_string ret;
+    ret.size = size;
+    jl_u8* ret_data = new jl_u8[ret.size];
+    memcpy( ret_data, data, ret.size );
+    ret.data = data;
+    return ret;
+}
+
 void String_Destroy( jl_string a )
 {
-    delete[] a.data;
+    if( a.data )
+        delete[] a.data;
 }

@@ -50,7 +50,7 @@ using jl_double = double;
 struct jl_string
 {
     jl_u32 size;
-    const char* data;
+    const jl_u8* data;
 };
 
 }

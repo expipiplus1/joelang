@@ -100,7 +100,7 @@ public:
       * in sema.
       */
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) = 0;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) = 0;
 
     /**
       * Performs type checking and things.
@@ -212,7 +212,7 @@ public:
     ~AssignmentExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     /**
       * For expressions such as 'a += b' this is inteerpreted as 'a = a+b', with
@@ -285,7 +285,7 @@ public:
     ~ConditionalExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -374,7 +374,7 @@ public:
     ~BinaryOperatorExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -773,7 +773,7 @@ public:
     ~CastExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -848,7 +848,7 @@ public:
     ~UnaryExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -901,7 +901,7 @@ public:
     ~PostfixExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -983,7 +983,7 @@ public:
     ~IdentifierExpression();
 
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     Type GetReturnType() const override;
@@ -1048,7 +1048,7 @@ public:
       * Does nothing
       */
     virtual
-    void ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     /**
       * Does nothing
