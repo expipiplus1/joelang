@@ -73,6 +73,8 @@ const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
     {RuntimeFunction::STRING_CONCAT,   {"String_Concat",
                                         Type::STRING, {Type::STRING,
                                                        Type::STRING}}},
+    {RuntimeFunction::STRING_COPY,     {"String_Copy",
+                                        Type::STRING, {Type::STRING}}},
     {RuntimeFunction::STRING_DESTROY,  {"String_Destroy",
                                         Type::VOID,   {Type::STRING}}},
 };

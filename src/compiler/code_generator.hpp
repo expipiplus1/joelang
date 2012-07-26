@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <stack>
 #include <string>
 #include <memory>
 #include <vector>
@@ -194,10 +195,17 @@ public:
                                    const Expression& e );
 
 private:
-    Runtime&        m_Runtime;
+    /**
+      * Destroys the temporay strings created in evaluating the expression
+      */
+    void DestroyTemporaries();
 
-    llvm::Module*                   m_LLVMModule;
-    llvm::IRBuilder<>               m_LLVMBuilder;
+    std::stack<llvm::Value*> m_Temporaries;
+
+    Runtime&                 m_Runtime;
+
+    llvm::Module*            m_LLVMModule;
+    llvm::IRBuilder<>        m_LLVMBuilder;
     std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
 };
 

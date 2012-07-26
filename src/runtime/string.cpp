@@ -53,17 +53,17 @@ jl_string String_Concat( jl_string a, jl_string b )
     return ret;
 }
 
-/*
-void String_Copy( jl_string& to, const jl_string& from )
+jl_string String_Copy( jl_string from )
 {
-    to = String_Concat( to, to );
-    String_Destroy( to );
-    to.size = from.size;
-    jl_u8* data = new jl_u8[to.size];
+    jl_string ret;
+    ret.size = from.size;
+    jl_u8* data = new jl_u8[ret.size];
     memcpy( data, from.data, from.size );
-    to.data = data;
+    ret.data = data;
+    return ret;
 }
 
+/*
 void String_Move( jl_string& to, jl_string&& from )
 {
     auto s    = to.size;

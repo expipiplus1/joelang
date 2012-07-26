@@ -65,6 +65,7 @@ enum class RuntimeFunction
     STRING_EQUAL,
     STRING_NOTEQUAL,
     STRING_CONCAT,
+    STRING_COPY,
     STRING_DESTROY,
 };
 

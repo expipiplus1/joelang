@@ -40,9 +40,9 @@ bool String_NotEqual( jl_string a, jl_string b );
 
 jl_string String_Concat( jl_string a, jl_string b );
 
-/*
-void String_Copy( jl_string& to, const jl_string& from );
+jl_string String_Copy( jl_string from );
 
+/*
 void String_Move( jl_string& to, jl_string&& from );
 */
 

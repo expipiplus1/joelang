@@ -32,6 +32,7 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
+#include <stack>
 #include <string>
 #include <utility>
 #include <vector>
@@ -229,6 +230,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     /// TODO is this really necessary?
     assert( expression.IsConst() &&
             "Trying to evaluate a non-const expression" );
+    assert( m_Temporaries.empty() && "Leftover temporaries" );
 
     /// Todo overload for get type from expression
     llvm::Type* t = m_Runtime.GetLLVMType( expression.GetUnderlyingType(),
@@ -266,7 +268,18 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     // Generate the code from the expression
     //
     llvm::Value* v = expression.CodeGen( *this );
+    /// TODO arrays of strings
+    if( expression.GetReturnType() == Type::STRING )
+    {
+        assert( expression.GetArrayExtents().size() == 0 &&
+                "Todo arrays of strings" );
+        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY,
+                                         {v},
+                                         m_LLVMBuilder );
+    }
+    DestroyTemporaries();
     assert( v && "Invalid expression llvm::Value*" );
+    assert( m_Temporaries.empty() && "Leftover temporaries" );
 
     //
     // Set it as the return value for the function
@@ -561,14 +574,12 @@ llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
                                         r.CodeGen( *this ) );
     else if( l.GetReturnType() == Type::STRING )
     {
-        /// todo garbage collection!
         llvm::Value* ret = m_Runtime.CreateRuntimeCall(
                                                 RuntimeFunction::STRING_CONCAT,
                                                 {l.CodeGen( *this ),
                                                  r.CodeGen( *this )},
                                                 m_LLVMBuilder );
-
-        // add object to stack to be destroyed
+        m_Temporaries.push( ret );
         return ret;
     }
 
@@ -787,6 +798,18 @@ void CodeGenerator::CreateVariableAssignment( const Expression& variable,
     llvm::Value* assigned_value = e.CodeGen( *this );
     m_LLVMBuilder.CreateStore( assigned_value,
                                variable.CodeGenPointerTo( *this ) );
+}
+
+void CodeGenerator::DestroyTemporaries()
+{
+    while( !m_Temporaries.empty() )
+    {
+        llvm::Value* v = m_Temporaries.top();
+        m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_DESTROY,
+                                     {v},
+                                     m_LLVMBuilder );
+        m_Temporaries.pop();
+    }
 }
 
 } // namespace Compiler
