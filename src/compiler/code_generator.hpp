@@ -198,7 +198,13 @@ private:
     /**
       * Destroys the temporay strings created in evaluating the expression
       */
-    void DestroyTemporaries();
+    void CreateDestroyTemporaryCalls();
+
+    /**
+      * Create an anonymous llvm function taking no arguments
+      */
+    void* CreateFunctionPtrFromExpression( const Expression& expression,
+                                           std::string name = "" );
 
     std::stack<llvm::Value*> m_Temporaries;
 

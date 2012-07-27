@@ -110,53 +110,11 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const Expression& expression,
         const std::string& name )
 {
-    llvm::Type* t = m_Runtime.GetLLVMType( state.GetType() );
-    assert( t && "trying to get the type of an unhandled JoeLang::Type" );
+    /// TODO assigning arrays
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
 
-    //
-    // create a function prototype which takes no arguments!
-    //
-    llvm::FunctionType* prototype = llvm::FunctionType::get(
-                                        t,
-                                        std::vector<llvm::Type*>(),
-                                        false );
-    assert( prototype && "Error generating empty function prototype" );
-
-    //
-    // create an anonymous function
-    //
-    llvm::Function* function = llvm::Function::Create(
-                                                prototype,
-                                                llvm::Function::ExternalLinkage,
-                                                name,
-                                                m_LLVMModule );
-    assert( function && "Error generating llvm function" );
-
-    llvm::BasicBlock* body = llvm::BasicBlock::Create(
-                                                    m_Runtime.GetLLVMContext(),
-                                                    "entry",
-                                                    function );
-    m_LLVMBuilder.SetInsertPoint( body );
-
-    //
-    // Generate the code from the expression
-    //
-    llvm::Value* v = expression.CodeGen( *this );
-    assert( v && "Invalid expression llvm::Value*" );
-
-    //
-    // set it as the return value for the function
-    //
-    m_LLVMBuilder.CreateRet( v );
-    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
-            "Function in stateassignment not valid" );
-
-    //
-    // Get the function pointer
-    //
-    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
+    void* function_ptr = CreateFunctionPtrFromExpression( expression, name );
 
     //
     // Cast to the appropriate type
@@ -228,71 +186,15 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
 GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 {
     /// TODO is this really necessary?
-    assert( expression.IsConst() &&
-            "Trying to evaluate a non-const expression" );
+    //assert( expression.IsConst() &&
+            //"Trying to evaluate a non-const expression" );
     assert( m_Temporaries.empty() && "Leftover temporaries" );
-
-    /// Todo overload for get type from expression
-    llvm::Type* t = m_Runtime.GetLLVMType( expression.GetUnderlyingType(),
-                                           expression.GetArrayExtents() );
-    assert( t && "trying to get the type of an unhandled JoeLang::Type" );
 
     auto insert_point = m_LLVMBuilder.saveAndClearIP();
 
-    //
-    // create a function prototype which takes no arguments!
-    //
-    llvm::FunctionType* prototype = llvm::FunctionType::get(
-                                        t,
-                                        std::vector<llvm::Type*>(),
-                                        false );
-    assert( prototype && "Error generating empty function prototype" );
-
-    //
-    // create an anonymous function
-    //
-    llvm::Function* function = llvm::Function::Create(
-                                                prototype,
-                                                llvm::Function::PrivateLinkage,
-                                                "TemporaryEvaluation",
-                                                m_LLVMModule );
-    assert( function && "Error generating llvm function" );
-
-    llvm::BasicBlock* body = llvm::BasicBlock::Create(
-                                                    m_Runtime.GetLLVMContext(),
-                                                    "",
-                                                    function );
-    m_LLVMBuilder.SetInsertPoint( body );
-
-    //
-    // Generate the code from the expression
-    //
-    llvm::Value* v = expression.CodeGen( *this );
-    /// TODO arrays of strings
-    if( expression.GetReturnType() == Type::STRING )
-    {
-        assert( expression.GetArrayExtents().size() == 0 &&
-                "Todo arrays of strings" );
-        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY,
-                                         {v},
-                                         m_LLVMBuilder );
-    }
-    DestroyTemporaries();
-    assert( v && "Invalid expression llvm::Value*" );
-    assert( m_Temporaries.empty() && "Leftover temporaries" );
-
-    //
-    // Set it as the return value for the function
-    //
-    m_LLVMBuilder.CreateRet( v );
-    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
-            "Function not valid" );
-
-    //
-    // Evaluate the function
-    //
-    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
-
+    void* function_ptr = CreateFunctionPtrFromExpression(
+                                                        expression,
+                                                        "TemporaryEvaluation" );
     //
     // Extract the result
     //
@@ -800,7 +702,7 @@ void CodeGenerator::CreateVariableAssignment( const Expression& variable,
                                variable.CodeGenPointerTo( *this ) );
 }
 
-void CodeGenerator::DestroyTemporaries()
+void CodeGenerator::CreateDestroyTemporaryCalls()
 {
     while( !m_Temporaries.empty() )
     {
@@ -810,6 +712,74 @@ void CodeGenerator::DestroyTemporaries()
                                      m_LLVMBuilder );
         m_Temporaries.pop();
     }
+}
+
+void* CodeGenerator::CreateFunctionPtrFromExpression(
+                                                const Expression& expression,
+                                                std::string name )
+{
+    assert( m_Temporaries.empty() && "Leftover temporaries" );
+
+    /// Todo overload for get type from expression
+    llvm::Type* return_type = m_Runtime.GetLLVMType(
+                                                expression.GetUnderlyingType(),
+                                                expression.GetArrayExtents() );
+    assert( return_type &&
+            "Trying to get the type of an unhandled JoeLang::Type" );
+
+    //
+    // create a function prototype which takes no arguments!
+    //
+    llvm::FunctionType* prototype = llvm::FunctionType::get(
+                                        return_type,
+                                        std::vector<llvm::Type*>(),
+                                        false );
+    assert( prototype && "Error generating empty function prototype" );
+
+    //
+    // create an anonymous function
+    //
+    llvm::Function* function = llvm::Function::Create(
+                                                prototype,
+                                                llvm::Function::ExternalLinkage,
+                                                std::move(name),
+                                                m_LLVMModule );
+    assert( function && "Error generating llvm function" );
+
+    llvm::BasicBlock* body = llvm::BasicBlock::Create(
+                                                    m_Runtime.GetLLVMContext(),
+                                                    "entry",
+                                                    function );
+    m_LLVMBuilder.SetInsertPoint( body );
+
+    //
+    // Generate the code from the expression
+    //
+    llvm::Value* v = expression.CodeGen( *this );
+    /// TODO arrays of strings
+    if( expression.GetReturnType() == Type::STRING )
+    {
+        assert( expression.GetArrayExtents().size() == 0 &&
+                "Todo arrays of strings" );
+        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY,
+                                         {v},
+                                         m_LLVMBuilder );
+    }
+    CreateDestroyTemporaryCalls();
+    assert( v && "Invalid expression llvm::Value*" );
+    assert( m_Temporaries.empty() && "Leftover temporaries" );
+
+    //
+    // Set it as the return value for the function
+    //
+    m_LLVMBuilder.CreateRet( v );
+    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
+            "Function not valid" );
+
+    //
+    // Evaluate the function
+    //
+    return m_LLVMExecutionEngine->getPointerToFunction(function);
 }
 
 } // namespace Compiler

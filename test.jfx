@@ -11,10 +11,13 @@ int b[12],
     c[23],
     d[(1+4+twentyone)%6];
 
+const string e = (a=0)+twentyone == 21 ? "foo" : "bar";
+
 technique t1
 {
     pass p0
     {
+        my_string_state = e;
         my_bool_state = a;
         my_bool_state = a &= 3;
         my_bool_state = a &= 0xf00;
