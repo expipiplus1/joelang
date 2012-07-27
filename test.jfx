@@ -30,7 +30,7 @@ technique t1
         my_int_state = b[b[b[0]+=1]+1];
         my_bool_state = hello_world == "Hello, World!";
         my_string_state = hello + ", " + world + "!";
-        //my_string_state = a == 0 ? "foo" : "bar";
+        my_string_state = a == 0 ? hello : "bar";
     }
 
     pass p2

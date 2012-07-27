@@ -122,63 +122,82 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     StateAssignmentBase* sa;
     switch( state.GetType() )
     {
-        case Type::BOOL:
-            sa = new StateAssignment<jl_bool>
-             ( static_cast<const State<bool>&>(state),
-               reinterpret_cast<bool(*)()>(function_ptr) );
-            break;
-        case Type::FLOAT:
-            sa = new StateAssignment<jl_float>
-             ( static_cast<const State<jl_float>&>(state),
-               reinterpret_cast<jl_float(*)()>(function_ptr) );
-            break;
-        case Type::DOUBLE:
-            sa = new StateAssignment<jl_double>
-             ( static_cast<const State<jl_double>&>(state),
-               reinterpret_cast<jl_double(*)()>(function_ptr) );
-            break;
-        case Type::I8:
-            sa = new StateAssignment<jl_i8>
-             ( static_cast<const State<jl_i8>&>(state),
-               reinterpret_cast<jl_i8(*)()>(function_ptr) );
-            break;
-        case Type::I16:
-            sa = new StateAssignment<jl_i16>
-             ( static_cast<const State<jl_i16>&>(state),
-               reinterpret_cast<jl_i16(*)()>(function_ptr) );
-            break;
-        case Type::I32:
-            sa = new StateAssignment<jl_i32>
-             ( static_cast<const State<jl_i32>&>(state),
-               reinterpret_cast<jl_i32(*)()>(function_ptr) );
-            break;
-        case Type::I64:
-            sa = new StateAssignment<jl_i64>
-             ( static_cast<const State<jl_i64>&>(state),
-               reinterpret_cast<jl_i64(*)()>(function_ptr) );
-            break;
-        case Type::U8:
-            sa = new StateAssignment<jl_u8>
-             ( static_cast<const State<jl_u8>&>(state),
-               reinterpret_cast<jl_u8(*)()>(function_ptr) );
-            break;
-        case Type::U16:
-            sa = new StateAssignment<jl_u16>
-             ( static_cast<const State<jl_u16>&>(state),
-               reinterpret_cast<jl_u16(*)()>(function_ptr) );
-            break;
-        case Type::U32:
-            sa = new StateAssignment<jl_u32>
-             ( static_cast<const State<jl_u32>&>(state),
-               reinterpret_cast<jl_u32(*)()>(function_ptr) );
-            break;
-        case Type::U64:
-            sa = new StateAssignment<jl_u64>
-             ( static_cast<const State<jl_u64>&>(state),
-               reinterpret_cast<jl_u64(*)()>(function_ptr) );
-            break;
-        default:
-            sa = nullptr;
+    case Type::BOOL:
+        sa = new StateAssignment<jl_bool>
+         ( static_cast<const State<bool>&>(state),
+           reinterpret_cast<bool(*)()>(function_ptr) );
+        break;
+    case Type::FLOAT:
+        sa = new StateAssignment<jl_float>
+         ( static_cast<const State<jl_float>&>(state),
+           reinterpret_cast<jl_float(*)()>(function_ptr) );
+        break;
+    case Type::DOUBLE:
+        sa = new StateAssignment<jl_double>
+         ( static_cast<const State<jl_double>&>(state),
+           reinterpret_cast<jl_double(*)()>(function_ptr) );
+        break;
+    case Type::I8:
+        sa = new StateAssignment<jl_i8>
+         ( static_cast<const State<jl_i8>&>(state),
+           reinterpret_cast<jl_i8(*)()>(function_ptr) );
+        break;
+    case Type::I16:
+        sa = new StateAssignment<jl_i16>
+         ( static_cast<const State<jl_i16>&>(state),
+           reinterpret_cast<jl_i16(*)()>(function_ptr) );
+        break;
+    case Type::I32:
+        sa = new StateAssignment<jl_i32>
+         ( static_cast<const State<jl_i32>&>(state),
+           reinterpret_cast<jl_i32(*)()>(function_ptr) );
+        break;
+    case Type::I64:
+        sa = new StateAssignment<jl_i64>
+         ( static_cast<const State<jl_i64>&>(state),
+           reinterpret_cast<jl_i64(*)()>(function_ptr) );
+        break;
+    case Type::U8:
+        sa = new StateAssignment<jl_u8>
+         ( static_cast<const State<jl_u8>&>(state),
+           reinterpret_cast<jl_u8(*)()>(function_ptr) );
+        break;
+    case Type::U16:
+        sa = new StateAssignment<jl_u16>
+         ( static_cast<const State<jl_u16>&>(state),
+           reinterpret_cast<jl_u16(*)()>(function_ptr) );
+        break;
+    case Type::U32:
+        sa = new StateAssignment<jl_u32>
+         ( static_cast<const State<jl_u32>&>(state),
+           reinterpret_cast<jl_u32(*)()>(function_ptr) );
+        break;
+    case Type::U64:
+        sa = new StateAssignment<jl_u64>
+         ( static_cast<const State<jl_u64>&>(state),
+           reinterpret_cast<jl_u64(*)()>(function_ptr) );
+        break;
+    case Type::STRING:
+    {
+        // Cast from string to std::string and destroy original
+        const auto ToString = [function_ptr]()
+                                 {
+                                    jl_string s =
+                                          reinterpret_cast<jl_string(*)()>(
+                                                              function_ptr)();
+                                    std::string ret(
+                                          reinterpret_cast<const char*>(s.data),
+                                          s.size);
+                                   delete[] s.data;
+                                   return ret;
+                                 };
+        sa = new StateAssignment<std::string>(
+                 static_cast<const State<std::string>&>(state),
+                 ToString );
+        break;
+    }
+    default:
+        sa = nullptr;
     }
     return std::unique_ptr<StateAssignmentBase>( sa );
 }
