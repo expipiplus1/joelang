@@ -235,8 +235,7 @@ Type SubscriptOperator::GetUnderlyingType(
                                         const Expression_up& expression ) const
 {
     assert( expression && "SubscriptOperator given an null expression" );
-    assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return expression->GetUnderlyingType();
 }
 
 const std::vector<unsigned>& SubscriptOperator::GetArrayExtents(
