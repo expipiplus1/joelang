@@ -289,8 +289,6 @@ bool SemaAnalyzer::InGlobalScope() const
 
 GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
 {
-    assert( expression.IsConst() &&
-            "Trying to evaluate a non-const expression" );
     return m_CodeGenerator.EvaluateExpression( expression );
 }
 
