@@ -114,7 +114,9 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
 
-    void* function_ptr = CreateFunctionPtrFromExpression( expression, name );
+    llvm::Function* function = CreateFunctionPtrFromExpression( expression, 
+                                                                name );
+    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
     // Cast to the appropriate type
@@ -211,9 +213,11 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 
     auto insert_point = m_LLVMBuilder.saveAndClearIP();
 
-    void* function_ptr = CreateFunctionPtrFromExpression(
+    llvm::Function* function = CreateFunctionPtrFromExpression(
                                                         expression,
                                                         "TemporaryEvaluation" );
+    void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
+
     //
     // Extract the result
     //
@@ -263,7 +267,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 
     /// Cant remove the function because it trashes global variables...
     //m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
-    //function->removeFromParent();
+    //function->eraseFromParent();
     //delete function;
     m_LLVMBuilder.restoreIP( insert_point );
 
@@ -638,7 +642,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            *m_LLVMModule,
                                            array_type,
                                            true,
-                                           llvm::GlobalVariable::CommonLinkage,
+                                           llvm::GlobalVariable::ExternalWeakLinkage,
                                            data_constant,
                                            "string_data" );
 
@@ -733,7 +737,7 @@ void CodeGenerator::CreateDestroyTemporaryCalls()
     }
 }
 
-void* CodeGenerator::CreateFunctionPtrFromExpression(
+llvm::Function* CodeGenerator::CreateFunctionPtrFromExpression(
                                                 const Expression& expression,
                                                 std::string name )
 {
@@ -795,10 +799,7 @@ void* CodeGenerator::CreateFunctionPtrFromExpression(
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function not valid" );
 
-    //
-    // Evaluate the function
-    //
-    return m_LLVMExecutionEngine->getPointerToFunction(function);
+    return function;
 }
 
 } // namespace Compiler

@@ -203,8 +203,9 @@ private:
     /**
       * Create an anonymous llvm function taking no arguments
       */
-    void* CreateFunctionPtrFromExpression( const Expression& expression,
-                                           std::string name = "" );
+    llvm::Function* CreateFunctionPtrFromExpression( 
+                                                const Expression& expression,
+                                                std::string name = "" );
 
     std::stack<llvm::Value*> m_Temporaries;
 
