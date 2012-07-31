@@ -96,7 +96,8 @@ bool IsIntegral( Type t )
 bool IsFloatingPoint( Type t )
 {
     return t == Type::DOUBLE ||
-           t == Type::FLOAT;
+           t == Type::FLOAT ||
+           t == Type::FLOAT4;
 }
 
 bool IsSigned( Type t )
@@ -136,27 +137,32 @@ Type GetVectorBaseType( Type t )
     return Type::UNKNOWN;
 }
 
+
+
 std::size_t SizeOf( Type t )
 {
-    if( t == Type::DOUBLE ||
-        t == Type::U64 ||
-        t == Type::I64 )
+    switch( t )
+    {
+    case Type::FLOAT4:
+        return 16;
+    case Type::DOUBLE:
+    case Type::U64:
+    case Type::I64:
         return 8;
-
-    if( t == Type::FLOAT ||
-        t == Type::U32 ||
-        t == Type::I32 )
+    case Type::FLOAT:
+    case Type::U32:
+    case Type::I32:
         return 4;
-
-    if( t == Type::U16 ||
-        t == Type::I16 )
+    case Type::U16:
+    case Type::I16:
         return 2;
-
-    if( t == Type::U8 ||
-        t == Type::I8 ||
-        t == Type::BOOL )
+    case Type::U8:
+    case Type::I8:
+    case Type::BOOL:
         return 1;
-
+    default:
+        assert( false && "Trying to get the size of an unhandled type" );
+    }
     return 0;
 }
 
