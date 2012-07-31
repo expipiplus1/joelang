@@ -91,10 +91,9 @@ public:
 
     llvm::Constant* CodeGen( CodeGenerator& code_gen ) const;
 
-    /**
-      * \returns The type of this genericvalue
-      */
     Type GetType() const;
+    Type GetUnderlyingType() const;
+    std::vector<unsigned> GetArrayExtents() const;
 
     jl_bool            GetBool() const;
     jl_i8              GetI8() const;

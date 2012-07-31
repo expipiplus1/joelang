@@ -2509,11 +2509,6 @@ bool CharacterLiteralExpression::UnquoteAndUnescapeChar(
                                                 char& unescaped_char )
 {
     if( string.size() < 3 )
-        return false;
-    if( *string.begin() != '\'' )
-        return false;
-    if( *string.rbegin() != '\'' )
-        return false;
 
     if( string[1] == '\\' )
     {

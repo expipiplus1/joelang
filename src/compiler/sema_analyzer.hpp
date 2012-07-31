@@ -49,6 +49,7 @@ class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 class GenericValue;
+class Initializer;
 class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
@@ -171,10 +172,16 @@ public:
       * \param expression
       *   The expression to evaluate
       * \returns the llvm genericvalue containing the expression's result
-      *
-      * This function asserts that expression is const
       */
     GenericValue EvaluateExpression( const Expression& expression );
+
+    /**
+      * Evaluates an initializer using llvm
+      * \param initializer
+      *   The initializer to evaluate
+      * \returns the llvm genericvalue containing the initializer's result
+      */
+    GenericValue EvaluateInitializer( const Initializer& initializer );
 
     /**
       * Resolves identifiers, folds constants and casts to the requested type

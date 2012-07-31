@@ -73,6 +73,7 @@ public:
         InitDeclarator,
         Declarator,
         ArraySpecifier,
+        Initializer,
 
         PassDefinition,
         PassDeclarationOrIdentifier,

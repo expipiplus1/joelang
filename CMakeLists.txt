@@ -60,6 +60,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/definition.hpp
                         src/compiler/tokens/expression.cpp
                         src/compiler/tokens/expression.hpp
+                        src/compiler/tokens/initializer.cpp
+                        src/compiler/tokens/initializer.hpp
                         src/compiler/tokens/operator.cpp
                         src/compiler/tokens/operator.hpp
                         src/compiler/tokens/state_assignment_statement.cpp

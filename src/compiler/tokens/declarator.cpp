@@ -41,6 +41,7 @@
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/internal/type_properties.hpp>
 
@@ -54,7 +55,7 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
-                                Expression_up initializer )
+                                std::unique_ptr<Initializer> initializer )
     :Token( TokenTy::InitDeclarator )
     ,m_Declarator( std::move(declarator) )
     ,m_Initializer( std::move(initializer) )
@@ -78,19 +79,13 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     bool can_init = false;
 
+    Type base_type = decl_specs.GetType();
+    const std::vector<unsigned>& array_extents =
+                                        m_Declarator->GetArrayDimensionSizes();
+
     // Cast the initializer to the right type
     if( m_Initializer )
-    {
-        if( m_Initializer->ResolveIdentifiers( sema ) )
-        {
-            m_Initializer = CastExpression::Create( decl_specs.GetType(),
-                                                    std::move( m_Initializer ) );
-            can_init = m_Initializer->PerformSema( sema );
-
-            assert( m_Initializer->GetReturnType() == decl_specs.GetType() &&
-                    "Trying to initialize a variable with mismatched types" );
-        }
-    }
+        can_init = m_Initializer->PerformSema( sema, base_type );
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() &&
@@ -108,14 +103,16 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     // Evaluate the initializer
     GenericValue initializer;
     if( m_Initializer && can_init )
-        initializer = sema.EvaluateExpression( *m_Initializer );
-
-    Type base_type = decl_specs.GetType();
-    const std::vector<unsigned>& array_dimension_sizes =
-                                        m_Declarator->GetArrayDimensionSizes();
+    {
+        initializer = sema.EvaluateInitializer( *m_Initializer );
+        assert( initializer.GetUnderlyingType() == base_type && 
+                "Trying to initialize variable with wrong underlying type" );
+        assert( initializer.GetArrayExtents() == array_extents &&
+                "Trying to initialize variable with wrong array extents" );
+    }
 
     m_Variable = std::make_shared<Variable>( base_type,
-                                             array_dimension_sizes,
+                                             array_extents,
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
                                              std::move(initializer),
@@ -126,7 +123,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     sema.DeclareVariable( m_Declarator->GetIdentifier(), m_Variable );
 
     //
-    // CodeGen
+    // CodeGen the variable because sema may depend on it later on
     //
     m_Variable->CodeGen( sema.GetCodeGenerator() );
 }
@@ -149,8 +146,8 @@ bool InitDeclarator::Parse( Parser& parser,
     }
 
     // We've seen an equals sign so parse the initializer
-    Expression_up initializer;
-    if( !parser.Expect<AssignmentExpression>( initializer ) )
+    std::unique_ptr<Initializer> initializer;
+    if( !parser.Expect<Initializer>( initializer ) )
         return false;
 
     token.reset( new InitDeclarator( std::move(declarator),
@@ -242,6 +239,7 @@ ArraySpecifier::~ArraySpecifier()
 
 void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
 {
+    m_Expression->ResolveIdentifiers( sema );
     if( !IsIntegral( m_Expression->GetReturnType() ) )
         sema.Error( "Can't create array with non-integer dimension" );
     m_Expression = CastExpression::Create( Type::I64,
