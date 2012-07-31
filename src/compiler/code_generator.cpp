@@ -114,7 +114,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
 
-    llvm::Function* function = CreateFunctionPtrFromExpression( expression, 
+    llvm::Function* function = CreateFunctionPtrFromExpression( expression,
                                                                 name );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
@@ -268,7 +268,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     /// Cant remove the function because it trashes global variables...
     //m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
     //function->eraseFromParent();
-    //delete function;
+
     m_LLVMBuilder.restoreIP( insert_point );
 
     return ret;
@@ -629,36 +629,39 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
     //
     // Set up the globalvariable holding the characters in an array
     //
-    llvm::ArrayType* array_type = llvm::ArrayType::get(
-                                         m_Runtime.GetLLVMType( Type::U8 ),
-                                         value.size() );
-    std::vector<llvm::Constant*> characters;
-    for( char c : value )
-        characters.push_back( CreateInteger( c, Type::U8 ) );
-    llvm::Constant* data_constant = llvm::ConstantArray::get(
-                                                        array_type,
-                                                        characters );
-    llvm::GlobalVariable* data_array = new llvm::GlobalVariable(
-                                           *m_LLVMModule,
-                                           array_type,
-                                           true,
-                                           llvm::GlobalVariable::ExternalWeakLinkage,
-                                           data_constant,
-                                           "string_data" );
 
     // u32 here because that's what's used in string for size
     llvm::Constant* size_constant = CreateInteger( value.size(), Type::U32 );
 
-    llvm::Constant* data_pointer = llvm::ConstantExpr::getGetElementPtr(
-                                            data_array,
-                                            std::vector<llvm::Constant*>
-                                              {CreateInteger( 0, Type::U32 ),
-                                               CreateInteger( 0, Type::U32 )} );
+    llvm::ArrayType* array_type = llvm::ArrayType::get(
+                                         m_Runtime.GetLLVMType( Type::U8 ),
+                                         value.size() );
+
+    std::vector<llvm::Constant*> characters;
+    for( char c : value )
+        characters.push_back( CreateInteger( c, Type::U8 ) );
+
+    llvm::Constant* data_constant = llvm::ConstantArray::get( array_type,
+                                                              characters );
+
+    llvm::GlobalVariable* data_array = new llvm::GlobalVariable(
+                                           *m_LLVMModule,
+                                           array_type,
+                                           true,
+                                           llvm::GlobalVariable::CommonLinkage,
+                                           data_constant,
+                                           "string_data" );
+
+    llvm::Constant *zero = CreateInteger( 0, Type::U32 );
+    llvm::Constant* args[] = { zero, zero };
+    llvm::Constant* data_ptr =
+                    llvm::ConstantExpr::getInBoundsGetElementPtr( data_array,
+                                                                  args );
 
     llvm::Constant* string = llvm::ConstantStruct::get(
-          llvm::dyn_cast<llvm::StructType>(m_Runtime.GetLLVMType(Type::STRING)),
+          llvm::cast<llvm::StructType>(m_Runtime.GetLLVMType(Type::STRING)),
           std::vector<llvm::Constant*>
-            {size_constant, data_pointer} );
+            {size_constant, data_ptr} );
     return string;
 }
 
@@ -698,12 +701,14 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
         init = initializer.CodeGen( *this );
     else
         init = llvm::Constant::getNullValue( t );
-    return new llvm::GlobalVariable( *m_LLVMModule,
+    llvm::GlobalVariable* ret = new llvm::GlobalVariable(
+                                     *m_LLVMModule,
                                      t,
                                      is_const,
                                      llvm::GlobalVariable::CommonLinkage,
                                      init,
                                      name );
+    return ret;
 }
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
