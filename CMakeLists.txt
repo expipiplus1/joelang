@@ -50,6 +50,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/terminal_types.hpp
                         src/compiler/variable.cpp
                         src/compiler/variable.hpp
+                        src/compiler/tokens/assignment_operator.cpp
+                        src/compiler/tokens/assignment_operator.hpp
                         src/compiler/tokens/declaration_specifier.cpp
                         src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp
@@ -64,8 +66,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/initializer.hpp
                         src/compiler/tokens/literal_expression.cpp
                         src/compiler/tokens/literal_expression.hpp
-                        src/compiler/tokens/operator.cpp
-                        src/compiler/tokens/operator.hpp
+                        src/compiler/tokens/postfix_operator.cpp
+                        src/compiler/tokens/postfix_operator.hpp
                         src/compiler/tokens/state_assignment_statement.cpp
                         src/compiler/tokens/state_assignment_statement.hpp
                         src/compiler/tokens/token.cpp

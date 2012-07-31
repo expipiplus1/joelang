@@ -44,8 +44,9 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
+#include <compiler/tokens/assignment_operator.hpp>
 #include <compiler/tokens/literal_expression.hpp>
-#include <compiler/tokens/operator.hpp>
+#include <compiler/tokens/postfix_operator.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

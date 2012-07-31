@@ -55,54 +55,6 @@ class Parser;
 class SemaAnalyzer;
 
 /**
-  * \class AssignmentOperator
-  * \ingroup Tokens
-  * \brief matches an assignment operator
-  *
-  * AssignmentExpression = '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' |
-  *                        '>>=' | '&=' | '^=' | '|='
-  */
-class AssignmentOperator : public JoeLang::Compiler::Token
-{
-public:
-    /** \enum Op
-      *   An enum for any kind of assignment operator **/
-    enum class Op
-    {
-        EQUALS,
-        SHL_EQUALS,
-        SHR_EQUALS,
-        AND_EQUALS,
-        XOR_EQUALS,
-        OR_EQUALS,
-        PLUS_EQUALS,
-        MINUS_EQUALS,
-        MULTIPLY_EQUALS,
-        DIVIDE_EQUALS,
-        MODULO_EQUALS,
-    };
-
-    /**
-      * \param assignment_operator
-      *   The operator
-      */
-    AssignmentOperator( Op assignment_operator );
-    virtual
-    ~AssignmentOperator();
-
-    Op GetOp() const;
-
-    virtual
-    void Print( int depth ) const;
-
-    static
-    bool Parse( Parser& parser,
-                std::unique_ptr<AssignmentOperator>& token );
-private:
-    Op m_Operator;
-};
-
-/**
   * \defgroup PostfixOperators
   * \ingroup Tokens
   */

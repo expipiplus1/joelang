@@ -34,7 +34,7 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/tokens/operator.hpp>
+#include <compiler/tokens/assignment_operator.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/types.hpp>
 
@@ -61,6 +61,7 @@ namespace JoeLang
         typedef std::shared_ptr<Expression> Expression_sp;
         class GenericValue;
         class Parser;
+        class PostfixOperator;
         class SemaAnalyzer;
         class Variable;
 

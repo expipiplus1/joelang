@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "operator.hpp"
+#include "postfix_operator.hpp"
 
 #include <cassert>
 #include <iostream>
@@ -49,62 +49,6 @@ namespace JoeLang
 {
 namespace Compiler
 {
-
-//------------------------------------------------------------------------------
-// AssignmentOperator
-//------------------------------------------------------------------------------
-
-AssignmentOperator::AssignmentOperator( Op op )
-    :Token( TokenTy::AssignmentOperator )
-    ,m_Operator(op)
-{
-}
-
-AssignmentOperator::~AssignmentOperator()
-{
-}
-
-void AssignmentOperator::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "assignment_op" << std::endl;
-}
-
-AssignmentOperator::Op AssignmentOperator::GetOp() const
-{
-    return m_Operator;
-}
-
-bool AssignmentOperator::Parse( Parser& parser,
-                                std::unique_ptr<AssignmentOperator>& token )
-{
-    // A vector of terminals for assignment operators and their Op enumerants
-    static const std::vector< std::pair<TerminalType, Op> >
-           s_assignment_operator_terminals =
-    {
-        { TerminalType::EQUALS,             Op::EQUALS },
-        { TerminalType::PLUS_EQUALS,        Op::PLUS_EQUALS },
-        { TerminalType::MINUS_EQUALS,       Op::MINUS_EQUALS },
-        { TerminalType::MULTIPLY_EQUALS,    Op::MULTIPLY_EQUALS },
-        { TerminalType::DIVIDE_EQUALS,      Op::DIVIDE_EQUALS },
-        { TerminalType::MODULO_EQUALS,      Op::MODULO_EQUALS },
-        { TerminalType::LEFT_SHIFT_EQUALS,  Op::SHL_EQUALS },
-        { TerminalType::RIGHT_SHIFT_EQUALS, Op::SHR_EQUALS },
-        { TerminalType::AND_EQUALS,         Op::AND_EQUALS },
-        { TerminalType::INCLUSIVE_OR_EQUALS, Op::OR_EQUALS },
-        { TerminalType::EXCLUSIVE_OR_EQUALS, Op::XOR_EQUALS }
-    };
-
-    // Try and match any of these operators
-    for( const auto& p : s_assignment_operator_terminals )
-        if( parser.ExpectTerminal( p.first ) )
-        {
-            token.reset( new AssignmentOperator( p.second ) );
-            return true;
-        }
-    return false;
-}
 
 //------------------------------------------------------------------------------
 // PostfixOperator
