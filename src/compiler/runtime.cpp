@@ -168,6 +168,10 @@ llvm::Type* Runtime::GetLLVMType(
         t = llvm::Type::getIntNTy( m_LLVMContext, SizeOf(base_type)*8 );
     else if( base_type == Type::STRING )
         t = m_StringType;
+    else if( IsVectorType( base_type ) )
+        t = llvm::VectorType::get(
+                                  GetLLVMType( GetVectorBaseType( base_type ) ),
+                                  GetVectorSize( base_type ) );
     else
     {
         assert( false && "Trying to get the llvm::Type of an unhandled Type" );

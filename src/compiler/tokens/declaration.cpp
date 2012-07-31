@@ -394,6 +394,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
     // Sort the type specifiers to ease combination
     std::sort( type_specs.begin(), type_specs.end() );
 
+    /// TODO do this in a better way
     for( auto ts : type_specs )
     {
         switch( ts )
@@ -417,6 +418,13 @@ Type VariableListOrFunctionDefinition::DeduceType(
                 sema.Error( "Can't combine float with other type" +
                             GetTypeString( type ) );
             type = Type::FLOAT;
+            has_type = true;
+            break;
+        case TypeSpecifier::TypeSpec::FLOAT4:
+            if( has_type )
+                sema.Error( "Can't combine float4 with other type" +
+                            GetTypeString( type ) );
+            type = Type::FLOAT4;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::DOUBLE:

@@ -96,7 +96,7 @@ private:
   * \brief A class to hold one type specifier
   *
   * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
-  *                 | 'double' | 'signed' | 'unsigned' | 'string'
+  *                 | 'float4' | 'double' | 'signed' | 'unsigned' | 'string'
   */
 class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
@@ -107,6 +107,7 @@ public:
         VOID,
         STRING,
         FLOAT,
+        FLOAT4,
         DOUBLE,
         BOOL,
         CHAR,

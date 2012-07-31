@@ -52,6 +52,18 @@ bool IsIntegral( Type t );
 
 bool IsSigned( Type t );
 
+bool IsVectorType( Type t );
+
+/**
+  * This asserts that t is a vector type
+  */
+unsigned GetVectorSize( Type t );
+
+/**
+  * This asserts that t is a vector type
+  */
+Type GetVectorBaseType( Type t );
+
 /**
   * \param t
   *   The type to get the size of

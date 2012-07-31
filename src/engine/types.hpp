@@ -62,6 +62,8 @@ enum class Type
 
     // Floating point types
     FLOAT,
+    FLOAT4,
+
     DOUBLE,
 
     // String types

@@ -140,6 +140,7 @@ bool TypeSpecifier::Parse( Parser& parser,
         { TerminalType::TYPE_SIGNED,   TypeSpec::SIGNED   },
         { TerminalType::TYPE_UNSIGNED, TypeSpec::UNSIGNED },
         { TerminalType::TYPE_FLOAT,    TypeSpec::FLOAT    },
+        { TerminalType::TYPE_FLOAT4,   TypeSpec::FLOAT4   },
         { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
         { TerminalType::TYPE_STRING,   TypeSpec::STRING   }
     };

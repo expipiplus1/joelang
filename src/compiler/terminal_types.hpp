@@ -155,6 +155,7 @@ enum class TerminalType
     TYPE_INT,
     TYPE_LONG,
     TYPE_FLOAT,
+    TYPE_FLOAT4,
     TYPE_DOUBLE,
     TYPE_SIGNED,
     TYPE_UNSIGNED,

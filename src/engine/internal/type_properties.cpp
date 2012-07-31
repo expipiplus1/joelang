@@ -107,6 +107,35 @@ bool IsSigned( Type t )
            t == Type::I8;
 }
 
+bool IsVectorType( Type t )
+{
+    return t == Type::FLOAT4;
+}
+
+unsigned GetVectorSize( Type t )
+{
+    switch( t )
+    {
+    case Type::FLOAT4:
+        return 4;
+    default:
+        assert( false && "Trying to get the vector size of a non-vector type" );
+    }
+    return 0;
+}
+
+Type GetVectorBaseType( Type t )
+{
+    switch( t )
+    {
+    case Type::FLOAT4:
+        return Type::FLOAT;
+    default:
+        assert( false && "Trying to get the vector base of a non-vector type" );
+    }
+    return Type::UNKNOWN;
+}
+
 std::size_t SizeOf( Type t )
 {
     if( t == Type::DOUBLE ||
