@@ -49,9 +49,7 @@ Pass::Pass( std::string name )
 {
 }
 
-Pass::Pass(
-        std::string name,
-        StateAssignmentVector state_assignments )
+Pass::Pass( std::string name, StateAssignmentVector state_assignments )
     :m_Name( std::move(name) )
     ,m_StateAssignments( std::move(state_assignments) )
 {
