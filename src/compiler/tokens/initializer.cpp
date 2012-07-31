@@ -152,6 +152,21 @@ const std::vector<std::unique_ptr<Initializer> >&
     return m_SubInitializers;
 }
 
+bool Initializer::CanReduceToExpression()
+{
+    return !IsExpression() &&
+           m_SubInitializers.size() == 1 &&
+           m_SubInitializers[0]->IsExpression();
+}
+
+void Initializer::ReduceToExpression()
+{
+    assert( CanReduceToExpression() &&
+            "Trying to reduce an unreducable initializer" );
+    m_Expression = std::move(m_SubInitializers[0]->m_Expression);
+    m_SubInitializers.clear();
+}
+
 void Initializer::Print( int depth ) const
 {
     assert( false && "complete me" );

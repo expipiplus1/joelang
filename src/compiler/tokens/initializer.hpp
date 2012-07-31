@@ -107,6 +107,18 @@ public:
     const std::vector<std::unique_ptr<Initializer> >&
                                                      GetSubInitializers() const;
 
+    /**
+      * \returns true if this is a list containing a single expression
+      */
+    bool CanReduceToExpression();
+
+    /**
+      * Reduces an initializer list containing a single expression to an
+      * initializer list representing that expression
+      * This asserts that this is a list containing a single expression
+      */
+    void ReduceToExpression();
+
     virtual
     void Print( int depth ) const override;
 

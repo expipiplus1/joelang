@@ -80,6 +80,15 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     const std::vector<unsigned>& array_extents =
                                         m_Declarator->GetArrayDimensionSizes();
 
+    //
+    // Allow initializing a variable with a single value in braces for
+    // example: 'int a = {1};'
+    //
+    if( array_extents.empty() &&
+        m_Initializer &&
+        m_Initializer->CanReduceToExpression() )
+        m_Initializer->ReduceToExpression();
+
     // Cast the initializer to the right type
     if( m_Initializer )
         can_init &= m_Initializer->PerformSema( sema, base_type );
