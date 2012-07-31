@@ -122,6 +122,7 @@ public:
         CastExpression,
         UnaryExpression,
         PostfixExpression,
+        TypeConstructorExpression,
         IdentifierExpression,
 
         IntegerLiteralExpression,

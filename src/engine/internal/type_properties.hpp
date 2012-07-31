@@ -65,6 +65,11 @@ unsigned GetVectorSize( Type t );
 Type GetVectorBaseType( Type t );
 
 /**
+  * This asserts that t is not Type::UNKNOWN
+  */
+unsigned GetNumElementsInType( Type t );
+
+/**
   * \param t
   *   The type to get the size of
   * \returns the number of bytes used to store a t

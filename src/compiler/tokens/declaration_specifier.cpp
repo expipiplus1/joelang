@@ -34,6 +34,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
@@ -124,6 +125,27 @@ void TypeSpecifier::Print( int depth ) const
 TypeSpecifier::TypeSpec TypeSpecifier::GetSpecifier() const
 {
     return m_TypeSpec;
+}
+
+Type TypeSpecifier::GetType() const
+{
+    const static std::map<TypeSpec, Type> type_map =
+    {
+        { TypeSpec::VOID,     Type::VOID   },
+        { TypeSpec::BOOL,     Type::BOOL   },
+        { TypeSpec::CHAR,     Type::I8     },
+        { TypeSpec::SHORT,    Type::I16    },
+        { TypeSpec::INT,      Type::I32    },
+        { TypeSpec::LONG,     Type::I64    },
+        { TypeSpec::SIGNED,   Type::I32    },
+        { TypeSpec::UNSIGNED, Type::U32    },
+        { TypeSpec::FLOAT,    Type::FLOAT  },
+        { TypeSpec::FLOAT4,   Type::FLOAT4 },
+        { TypeSpec::DOUBLE,   Type::DOUBLE },
+        { TypeSpec::STRING,   Type::STRING }
+    };
+
+    return type_map.at( m_TypeSpec );
 }
 
 bool TypeSpecifier::Parse( Parser& parser,

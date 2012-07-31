@@ -16,7 +16,7 @@ const string e = (a=0)+twentyone == 21 ? "foo" : "bar";
 
 float f = {1};
 
-float4 my_vec;// = float4((a+1)/(a+1), 4, 3*(2.0+1), 0x10);
+float4 my_vec ;//= float4((a+1)/(a+1), 4, 3*(2.0+1), 0x10);
 
 technique t1
 {

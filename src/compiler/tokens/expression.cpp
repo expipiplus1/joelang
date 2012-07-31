@@ -29,6 +29,7 @@
 
 #include "expression.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <memory>
@@ -44,6 +45,7 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/assignment_operator.hpp>
+#include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/binary_operator_expression.hpp>
 #include <compiler/tokens/literal_expression.hpp>
 #include <compiler/tokens/postfix_operator.hpp>
@@ -846,8 +848,9 @@ bool PostfixExpression::Parse( Parser& parser,
                                Expression_up& token )
 {
     // Try and parse the primary expression
-    Expression_up primary_expression;
-    if( !parser.Expect<PrimaryExpression>( primary_expression ) )
+    Expression_up type_constructor_expression;
+    if( !parser.Expect<TypeConstructorExpression>(
+                                                 type_constructor_expression ) )
         return false;
 
     // try and parse all the postfix operators
@@ -856,7 +859,7 @@ bool PostfixExpression::Parse( Parser& parser,
     CHECK_PARSER;
 
     // set ret to just the primary expression
-    Expression_up ret = std::move( primary_expression );
+    Expression_up ret = std::move( type_constructor_expression );
 
     // If we have any postfix operators create a new postfix expression with the
     // last one and the operator
@@ -873,6 +876,144 @@ bool PostfixExpression::classof( const Expression* e )
 }
 
 bool PostfixExpression::classof( const PostfixExpression* e )
+{
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// TypeConstructorExpression
+//------------------------------------------------------------------------------
+
+TypeConstructorExpression::TypeConstructorExpression(
+                                         Type type,
+                                         std::vector<Expression_up> arguments )
+    :Expression( TokenTy::TypeConstructorExpression )
+    ,m_Type( type )
+    ,m_Arguments( std::move(arguments) )
+{
+#if !defined(NDEBUG)
+    assert( type != Type::UNKNOWN &&
+            "TypeConstructorExpression given an unknown type" );
+    for( const auto& argument : m_Arguments )
+        assert( argument && "TypeConstructorExpression given a null argument" );
+#endif
+}
+
+TypeConstructorExpression::~TypeConstructorExpression()
+{
+}
+
+bool TypeConstructorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+{
+    bool ret = true;
+    for( const auto& argument : m_Arguments )
+        ret &= argument->ResolveIdentifiers( sema );
+    return ret;
+}
+
+bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
+{
+    unsigned num_desired_elements = GetNumElementsInType( m_Type );
+    unsigned num_elements = 0;
+    /// todo flatten expression here
+    for( const auto& argument : m_Arguments )
+    {
+        const std::vector<unsigned>& array_extents =
+                                                    argument->GetArrayExtents();
+        unsigned n = 1;
+        for( unsigned a : array_extents )
+            n *= a;
+        num_elements += n;
+    }
+
+    if( num_elements != num_desired_elements )
+        sema.Error( "Wrong number of elements in constructor" );
+
+    assert( false && "complete me" );
+    return false;
+}
+
+llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
+{
+    assert( false && "complete me" );
+    return nullptr;
+}
+
+Type TypeConstructorExpression::GetReturnType() const
+{
+    return m_Type;
+}
+
+Type TypeConstructorExpression::GetUnderlyingType() const
+{
+    return m_Type;
+}
+
+const std::vector<unsigned>& TypeConstructorExpression::GetArrayExtents() const
+{
+    static const std::vector<unsigned> empty = {};
+    return empty;
+}
+
+bool TypeConstructorExpression::IsConst() const
+{
+    for( const auto& argument : m_Arguments )
+        if( !argument->IsConst() )
+            return false;
+    return true;
+}
+
+bool TypeConstructorExpression::IsLValue() const
+{
+    return false;
+}
+
+void TypeConstructorExpression::Print( int depth ) const
+{
+}
+
+bool TypeConstructorExpression::Parse( Parser& parser,
+                               Expression_up& token )
+{
+    // Try and parse the primary expression
+    if( parser.Expect<PrimaryExpression>( token ) )
+        return true;
+    CHECK_PARSER;
+
+    std::unique_ptr<TypeSpecifier> type_specifier;
+    if( !parser.Expect<TypeSpecifier>(type_specifier) )
+        return false;
+
+    //
+    // match opening bracket or brace
+    //
+    bool round_brackets = parser.ExpectTerminal( TerminalType::OPEN_ROUND );
+    if( !round_brackets &&
+        !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
+        return false;
+
+    std::vector<Expression_up> arguments;
+    parser.ExpectListOf<AssignmentExpression, TerminalType::COMMA>( arguments );
+    CHECK_PARSER;
+
+    //
+    // match closing bracket or brace
+    //
+    if( !parser.ExpectTerminal( round_brackets ? TerminalType::CLOSE_ROUND
+                                               : TerminalType::CLOSE_BRACE ) )
+        return false;
+
+    Type type = type_specifier->GetType();
+    token.reset( new TypeConstructorExpression( type, std::move(arguments) ) );
+    return true;
+}
+
+bool TypeConstructorExpression::classof( const Expression* e )
+{
+    return e->GetSubClassID() == TokenTy::TypeConstructorExpression;
+}
+
+bool TypeConstructorExpression::classof( const TypeConstructorExpression* e )
 {
     return true;
 }

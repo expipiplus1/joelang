@@ -137,7 +137,31 @@ Type GetVectorBaseType( Type t )
     return Type::UNKNOWN;
 }
 
-
+unsigned GetNumElementsInType( Type t )
+{
+    switch( t )
+    {
+    case Type::FLOAT4:
+        return 4;
+    case Type::U64:
+    case Type::I64:
+    case Type::U32:
+    case Type::I32:
+    case Type::U16:
+    case Type::I16:
+    case Type::U8:
+    case Type::I8:
+    case Type::BOOL:
+    case Type::FLOAT:
+    case Type::DOUBLE:
+    case Type::STRING:
+        return 1;
+    default:
+        assert( false &&
+                "Trying to get the number of elements in an unhandled type" );
+    }
+    return 0;
+}
 
 std::size_t SizeOf( Type t )
 {

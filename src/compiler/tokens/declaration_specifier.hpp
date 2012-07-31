@@ -128,6 +128,8 @@ public:
 
     TypeSpec GetSpecifier() const;
 
+    Type GetType() const;
+
     static
     bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
 

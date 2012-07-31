@@ -42,6 +42,9 @@ enum class Type
     // Unknown type
     UNKNOWN,
 
+    // void
+    VOID,
+
     //Any array
     ARRAY,
 
@@ -67,10 +70,7 @@ enum class Type
     DOUBLE,
 
     // String types
-    STRING,
-
-    // void
-    VOID
+    STRING
 };
 
 using jl_bool   = bool;

@@ -462,7 +462,7 @@ private:
   * \ingroup Expressions
   * \brief Matches a postfix expression
   *
-  * PostfixExpression = PrimaryExpression ( PostfixOperator )*
+  * PostfixExpression = TypeConstructorExpression ( PostfixOperator )*
   */
 class PostfixExpression : public JoeLang::Compiler::Expression
 {
@@ -514,6 +514,68 @@ public:
 private:
     Expression_up m_Expression;
     std::unique_ptr<PostfixOperator> m_PostfixOperator;
+};
+
+/**
+  * \class TypeConstructorExpression
+  * \ingroup Expressions
+  * \brief Matches a type constructor and arguments
+  *
+  * TypeConstructorExpression = PrimaryExpression
+  *                           | TypeSpecifier ArgumentListOperator
+  *                           | TypeSpecifier '{' ( AssignmentExpression
+  *                                           (',' AssignmentExpression)* )? '}'
+  */
+class TypeConstructorExpression : public JoeLang::Compiler::Expression
+{
+public:
+    /**
+      * This asserts type isn't Type::UNKNOWN and that the arguments are not
+      * null.
+      */
+    TypeConstructorExpression( Type type,
+                               std::vector<Expression_up> arguments );
+    virtual
+    ~TypeConstructorExpression();
+
+    virtual
+    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema ) override;
+
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    Type GetReturnType() const override;
+
+    virtual
+    Type GetUnderlyingType() const override;
+
+    virtual
+    const std::vector<unsigned>& GetArrayExtents() const override;
+
+    virtual
+    bool IsConst() const override;
+
+    virtual
+    bool IsLValue() const override;
+
+    virtual
+    void Print( int depth ) const;
+
+    static
+    bool Parse( Parser& parser,
+                Expression_up& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const TypeConstructorExpression* e );
+private:
+    Type                       m_Type;
+    std::vector<Expression_up> m_Arguments;
 };
 
 /**
