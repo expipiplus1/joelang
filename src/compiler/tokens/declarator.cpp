@@ -239,6 +239,7 @@ ArraySpecifier::~ArraySpecifier()
 
 void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
 {
+    m_Expression->ResolveIdentifiers( sema );
     if( !IsIntegral( m_Expression->GetReturnType() ) )
         sema.Error( "Can't create array with non-integer dimension" );
     m_Expression = CastExpression::Create( Type::I64,
