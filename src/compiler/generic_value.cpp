@@ -216,7 +216,7 @@ GenericValue::GenericValue( std::vector<GenericValue> array_value )
     ,m_ArrayValue( std::move(array_value) )
 {
 #ifndef NDEBUG
-    assert( !m_ArrayValue.empty() && 
+    assert( !m_ArrayValue.empty() &&
             "GenericValue given an empty array value" );
     /// TODO verify that the values are of the same extents and types
 #endif
@@ -287,8 +287,9 @@ std::vector<unsigned> GenericValue::GetArrayExtents() const
         assert( !m_ArrayValue.empty() &&
                 "Trying to get the array extents of an empty array "
                 "genericvalue" );
-        std::vector<unsigned> ret = {m_ArrayValue.size()};
-        const std::vector<unsigned>& sub_extents = 
+        std::vector<unsigned> ret =
+                               { static_cast<unsigned>( m_ArrayValue.size() ) };
+        const std::vector<unsigned>& sub_extents =
                                               m_ArrayValue[0].GetArrayExtents();
         ret.insert( ret.end(), sub_extents.begin(), sub_extents.end() );
         return ret;
