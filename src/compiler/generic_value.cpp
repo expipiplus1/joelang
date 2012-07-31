@@ -216,15 +216,9 @@ GenericValue::GenericValue( std::vector<GenericValue> array_value )
     ,m_ArrayValue( std::move(array_value) )
 {
 #ifndef NDEBUG
-    if( !m_ArrayValue.empty() )
-    {
-        Type t = m_ArrayValue[0].m_Type;
-        for( auto i = m_ArrayValue.begin()+1; i < m_ArrayValue.end(); ++i )
-        {
-            assert( i->m_Type == t &&
-                    "GenericValue given array with mismatched types" );
-        }
-    }
+    assert( !m_ArrayValue.empty() && 
+            "GenericValue given an empty array value" );
+    /// TODO verify that the values are of the same extents and types
 #endif
 }
 
@@ -272,6 +266,34 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
 Type GenericValue::GetType() const
 {
     return m_Type;
+}
+
+Type GenericValue::GetUnderlyingType() const
+{
+    if( m_Type == Type::ARRAY )
+    {
+        assert( !m_ArrayValue.empty() &&
+                "Trying to get the underlying type of an empty array "
+                "genericvalue" );
+        return m_ArrayValue[0].GetUnderlyingType();
+    }
+    return m_Type;
+}
+
+std::vector<unsigned> GenericValue::GetArrayExtents() const
+{
+    if( m_Type == Type::ARRAY )
+    {
+        assert( !m_ArrayValue.empty() &&
+                "Trying to get the array extents of an empty array "
+                "genericvalue" );
+        std::vector<unsigned> ret = {m_ArrayValue.size()};
+        const std::vector<unsigned>& sub_extents = 
+                                              m_ArrayValue[0].GetArrayExtents();
+        ret.insert( ret.end(), sub_extents.begin(), sub_extents.end() );
+        return ret;
+    }
+    return {};
 }
 
 jl_bool GenericValue::GetBool() const

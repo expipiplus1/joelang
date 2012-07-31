@@ -37,6 +37,8 @@
 
 namespace JoeLang
 {
+enum class Type;
+
 namespace Compiler
 {
 class ArraySpecifier;
@@ -46,6 +48,7 @@ class DeclSpecs;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
+class Initializer;
 class Parser;
 class SemaAnalyzer;
 class Variable;
@@ -62,7 +65,7 @@ class InitDeclarator : public JoeLang::Compiler::Token
 public:
     /** This constructor asserts on a null direct_declarator **/
     InitDeclarator  ( std::unique_ptr<Declarator> declarator,
-                      Expression_up initializer = nullptr );
+                      std::unique_ptr<Initializer> initializer = nullptr );
     virtual
     ~InitDeclarator ();
 
@@ -93,10 +96,10 @@ public:
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
 private:
-    std::unique_ptr<Declarator> m_Declarator;
-    Expression_up m_Initializer;
-    std::shared_ptr<Variable>   m_Variable;
-    bool                        m_IsGlobal;
+    std::unique_ptr<Declarator>  m_Declarator;
+    std::unique_ptr<Initializer> m_Initializer;
+    std::shared_ptr<Variable>    m_Variable;
+    bool                         m_IsGlobal;
 };
 
 /**
@@ -196,7 +199,6 @@ public:
 private:
     Expression_up m_Expression;
 };
-
 
 } // namespace Compiler
 } // namespace JoeLang

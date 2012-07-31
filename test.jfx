@@ -7,9 +7,9 @@ int a = 6l + 1;
 
 const float twentyone = twenty + 1;
 
-int b[12],
-    c[23],
-    d[(1+4+twentyone)%6];
+int b[1],// = {8},
+    c[2],
+    d[a];
 
 const string e = (a=0)+twentyone == 21 ? "foo" : "bar";
 

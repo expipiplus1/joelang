@@ -43,6 +43,7 @@
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <engine/context.hpp>
 #include <engine/state.hpp>
@@ -290,6 +291,16 @@ bool SemaAnalyzer::InGlobalScope() const
 GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
 {
     return m_CodeGenerator.EvaluateExpression( expression );
+}
+
+GenericValue SemaAnalyzer::EvaluateInitializer( const Initializer& initializer )
+{
+    if( initializer.IsExpression() )
+        return EvaluateExpression( initializer.GetExpression() );
+    else
+        assert( false );
+    assert( false );
+    return GenericValue();
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )
