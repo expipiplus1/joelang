@@ -48,13 +48,13 @@ namespace Compiler
 {
 
 Variable::Variable( Type base_type,
-                    std::vector<unsigned> array_dimension_sizes,
+                    std::vector<unsigned> array_extents,
                     bool is_const,
                     bool is_global,
                     GenericValue initializer,
                     std::string name )
     :m_Type( base_type )
-    ,m_ArrayDimensionSizes( std::move(array_dimension_sizes) )
+    ,m_ArrayExtents( std::move(array_extents) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
     ,m_Initializer( std::move(initializer) )
@@ -63,8 +63,13 @@ Variable::Variable( Type base_type,
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
     if( m_IsConst || m_Initializer.GetType() != Type::UNKNOWN_TYPE )
-        assert( m_Initializer.GetType() == base_type &&
-                "Trying to initialize a const variable with the wrong type" );
+    {
+        assert( m_Initializer.GetUnderlyingType() == base_type &&
+                "Trying to initialize a variable with the wrong type" );
+        assert( m_Initializer.GetArrayExtents() == m_ArrayExtents &&
+                "Trying to initializer a variable with an incorrect array "
+                "size" );
+    }
 }
 
 void Variable::CodeGen( CodeGenerator& code_gen )
@@ -73,7 +78,7 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     if( m_IsGlobal )
     {
         m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,
-                                                       m_ArrayDimensionSizes,
+                                                       m_ArrayExtents,
                                                        m_IsConst,
                                                        m_Initializer,
                                                        m_Name );
@@ -91,7 +96,7 @@ llvm::Value* Variable::GetLLVMPointer() const
 
 Type Variable::GetType() const
 {
-    return m_ArrayDimensionSizes.size() == 0 ? m_Type : Type::ARRAY;
+    return m_ArrayExtents.size() == 0 ? m_Type : Type::ARRAY;
 }
 
 Type Variable::GetUnderlyingType() const
@@ -101,7 +106,7 @@ Type Variable::GetUnderlyingType() const
 
 const std::vector<unsigned>& Variable::GetArrayExtents() const
 {
-    return m_ArrayDimensionSizes;
+    return m_ArrayExtents;
 }
 
 bool Variable::IsConst() const

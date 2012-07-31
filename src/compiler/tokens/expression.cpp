@@ -255,6 +255,25 @@ llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
     return m_AssigneePtr->CodeGen( code_gen );
 }
 
+llvm::Value* AssignmentExpression::CodeGenPointerTo(
+                                                  CodeGenerator& code_gen) const
+{
+    assert( m_AssigneePtr &&
+            "Trying to codegen an assignmentexpression with null assigneeptr" );
+    switch( m_AssignmentOperator )
+    {
+    case Op::EQUALS:
+        code_gen.CreateVariableAssignment( *m_AssigneePtr,
+                                           *m_AssignedExpression );
+        break;
+    default:
+        assert( false && "unhandled assignment operator" );
+    }
+
+    // Return the new value of the variable
+    return m_AssigneePtr->CodeGenPointerTo( code_gen );
+}
+
 Type AssignmentExpression::GetReturnType() const
 {
     return m_AssigneePtr->GetReturnType();

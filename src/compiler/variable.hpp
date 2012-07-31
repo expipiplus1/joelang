@@ -65,7 +65,7 @@ public:
       * an initializer
       */
     Variable( Type type,
-              std::vector<unsigned> array_dimension_sizes,
+              std::vector<unsigned> array_extents,
               bool is_const,
               bool is_global = false,
               GenericValue initializer = GenericValue(),
@@ -86,7 +86,7 @@ public:
 
 private:
     Type m_Type;
-    std::vector<unsigned> m_ArrayDimensionSizes;
+    std::vector<unsigned> m_ArrayExtents;
     bool m_IsConst;
     bool m_IsGlobal;
     GenericValue m_Initializer;

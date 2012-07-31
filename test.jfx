@@ -8,8 +8,8 @@ int a = 6l + 1;
 const float twentyone = twenty + 1;
 
 const int d_size = a;
-int b[2],// = {8},
-    c[2],
+int b[2],
+    c[2] = {8, 9},
     d[d_size];
 
 const string e = (a=0)+twentyone == 21 ? "foo" : "bar";
@@ -39,5 +39,8 @@ technique t1
         my_floating_state = 2 + twentyone == 23.0f;
         my_string_state = "Hello, World!";
         my_floating_state = one + 2;
+        my_int_state = c[0];
+        my_int_state = (b = c)[1];
     }
 }
+

@@ -216,6 +216,8 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     llvm::Function* function = CreateFunctionPtrFromExpression(
                                                         expression,
                                                         "TemporaryEvaluation" );
+    // Make this function private
+    function->setLinkage( llvm::GlobalVariable::PrivateLinkage );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
@@ -675,10 +677,10 @@ llvm::Constant* CodeGenerator::CreateArray(
     for( const auto& g : value )
         array_data.push_back( g.CodeGen( *this ) );
 
-    llvm::Type* type = m_Runtime.GetLLVMType( value[0].GetType() );
+    llvm::ArrayType* type = llvm::ArrayType::get( array_data[0]->getType(),
+                                                  value.size() );
 
-    return llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( type ),
-                                     array_data );
+    return llvm::ConstantArray::get( type, array_data );
 }
 
 //
@@ -692,9 +694,12 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 const GenericValue& initializer,
                                 const std::string& name )
 {
-    assert( ( type == initializer.GetType() ||
-              initializer.GetType() == Type::UNKNOWN_TYPE ) &&
+    assert( ( initializer.GetType() == Type::UNKNOWN_TYPE &&
+              type == initializer.GetUnderlyingType() ) ||
             "Initializer type mismatch" );
+    assert( ( initializer.GetType() == Type::UNKNOWN_TYPE ||
+              array_extents == initializer.GetArrayExtents() ) &&
+            "Initializer array extents mismatch" );
     llvm::Type* t = m_Runtime.GetLLVMType( type, array_extents );
     llvm::Constant* init;
     if( initializer.GetType() != Type::UNKNOWN_TYPE )

@@ -71,13 +71,10 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
-    /// TODO support array initializers
     // Resolve things in the declarator
-    m_Declarator->PerformSema( sema );
+    bool can_init = m_Declarator->PerformSema( sema );
 
     m_IsGlobal = sema.InGlobalScope();
-
-    bool can_init = false;
 
     Type base_type = decl_specs.GetType();
     const std::vector<unsigned>& array_extents =
@@ -85,7 +82,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // Cast the initializer to the right type
     if( m_Initializer )
-        can_init = m_Initializer->PerformSema( sema, base_type );
+        can_init &= m_Initializer->PerformSema( sema, base_type );
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() &&
@@ -105,17 +102,21 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     if( m_Initializer && can_init )
     {
         initializer = sema.EvaluateInitializer( *m_Initializer );
-        assert( initializer.GetUnderlyingType() == base_type && 
+        assert( initializer.GetUnderlyingType() == base_type &&
                 "Trying to initialize variable with wrong underlying type" );
-        assert( initializer.GetArrayExtents() == array_extents &&
-                "Trying to initialize variable with wrong array extents" );
+        if( initializer.GetArrayExtents() != array_extents )
+        {
+            sema.Error( "Trying to initialize variable with wrong array extents" );
+            can_init = false;
+        }
     }
 
     m_Variable = std::make_shared<Variable>( base_type,
                                              array_extents,
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
-                                             std::move(initializer),
+                                             can_init ? std::move(initializer)
+                                                      : GenericValue(),
                                              m_Declarator->GetIdentifier() );
     // If we can't initialize this for whatever reason, sema will have been
     // notified, so just pretend that this is non-const for the sake of later
@@ -171,8 +172,9 @@ Declarator::~Declarator()
 {
 }
 
-void Declarator::PerformSema( SemaAnalyzer& sema )
+bool Declarator::PerformSema( SemaAnalyzer& sema )
 {
+    bool ret = true;
     for( auto& array_specifier : m_ArraySpecifiers )
     {
         // This ensures it's const
@@ -181,9 +183,13 @@ void Declarator::PerformSema( SemaAnalyzer& sema )
                                             *array_specifier->GetExpression() );
         jl_i64 size = g.GetI64();
         if( size <= 0 )
+        {
             sema.Error( "Can't create an array with a non-positive dimension" );
+            ret = false;
+        }
         m_ArrayExtents.push_back( size );
     }
+    return ret;
 }
 
 void Declarator::Print( int depth ) const

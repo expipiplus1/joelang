@@ -298,9 +298,15 @@ GenericValue SemaAnalyzer::EvaluateInitializer( const Initializer& initializer )
     if( initializer.IsExpression() )
         return EvaluateExpression( initializer.GetExpression() );
     else
-        assert( false );
-    assert( false );
-    return GenericValue();
+    {
+        const std::vector<std::unique_ptr<Initializer> >& sub_initializers =
+                                               initializer.GetSubInitializers();
+        std::vector<GenericValue> sub_values;
+        sub_values.reserve( sub_initializers.size() );
+        for( const auto& sub_initializer : sub_initializers )
+            sub_values.push_back( EvaluateInitializer( *sub_initializer ) );
+        return GenericValue( sub_values );
+    }
 }
 
 void SemaAnalyzer::Error( const std::string& error_message )

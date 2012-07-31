@@ -125,7 +125,7 @@ public:
       * \param sema
       *   The SemaAnalyzer which contains the symbol table and things
       */
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     virtual
     void Print( int depth ) const override;

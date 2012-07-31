@@ -78,7 +78,7 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
     {
         // If this is a single expression try and cast it to the desired type
         m_Expression->ResolveIdentifiers( sema );
-        m_Expression = CastExpression::Create( desired_type, 
+        m_Expression = CastExpression::Create( desired_type,
                                                std::move(m_Expression) );
         bool ret = m_Expression->PerformSema( sema );
         m_ArrayExtents = m_Expression->GetArrayExtents();
@@ -96,11 +96,11 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
             return false;
         }
 
-        if( std::adjacent_find( m_SubInitializers.begin(), 
+        if( std::adjacent_find( m_SubInitializers.begin(),
                                 m_SubInitializers.end(),
-                                [](const std::unique_ptr<Initializer>& a, 
+                                [](const std::unique_ptr<Initializer>& a,
                                    const std::unique_ptr<Initializer>& b)
-                                { return a->GetArrayExtents() != 
+                                { return a->GetArrayExtents() !=
                                          b->GetArrayExtents(); } ) !=
             m_SubInitializers.end() )
         {
@@ -116,11 +116,11 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
             ret &= sub_init->PerformSema( sema, desired_type );
         }
 
-        const std::vector<unsigned> sub_array_extents = 
+        const std::vector<unsigned> sub_array_extents =
                                         m_SubInitializers[0]->GetArrayExtents();
         m_ArrayExtents.reserve( 1 + sub_array_extents.size() );
-        m_ArrayExtents = {m_SubInitializers.size()};
-        m_ArrayExtents.insert( m_ArrayExtents.end(), 
+        m_ArrayExtents = { static_cast<unsigned>( m_SubInitializers.size() ) };
+        m_ArrayExtents.insert( m_ArrayExtents.end(),
                                sub_array_extents.begin(),
                                sub_array_extents.end() );
         return ret;
@@ -139,9 +139,17 @@ bool Initializer::IsExpression() const
 
 const Expression& Initializer::GetExpression() const
 {
-    assert( m_Expression && 
+    assert( m_Expression &&
             "Trying to get the expression of a non-expression Initializer" );
     return *m_Expression;
+}
+
+const std::vector<std::unique_ptr<Initializer> >&
+                                         Initializer::GetSubInitializers() const
+{
+    assert( !m_SubInitializers.empty() &&
+            "Trying to get the sub initializers of an expression initializer" );
+    return m_SubInitializers;
 }
 
 void Initializer::Print( int depth ) const

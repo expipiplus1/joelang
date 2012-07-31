@@ -100,6 +100,13 @@ public:
       */
     const Expression& GetExpression() const;
 
+    /**
+      * This asserts that m_SubInitializers is not empty
+      * \returns the sub initializers
+      */
+    const std::vector<std::unique_ptr<Initializer> >&
+                                                     GetSubInitializers() const;
+
     virtual
     void Print( int depth ) const override;
 

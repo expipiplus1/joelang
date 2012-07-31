@@ -224,7 +224,10 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
     Type GetReturnType() const override;
