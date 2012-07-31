@@ -380,14 +380,14 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     m_Condition = CastExpression::Create( Type::BOOL, std::move(m_Condition) );
 
     Type t = GetReturnType();
-    if( t == Type::UNKNOWN_TYPE )
+    if( t == Type::UNKNOWN )
     {
         good = false;
 
         // If both of the sub expressions are fine, then we know the problem's
         // here, so report it
-        if( m_TrueExpression->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_FalseExpression->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_TrueExpression->GetReturnType() != Type::UNKNOWN &&
+            m_FalseExpression->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Incompatable operand types in conditional expression "+
                         GetTypeString( m_TrueExpression->GetReturnType() ) +
                         " and " +
@@ -533,14 +533,14 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 
     Type t = GetCommonType( m_RightSide->GetReturnType(),
                             m_LeftSide->GetReturnType() );
-    if( t == Type::UNKNOWN_TYPE )
+    if( t == Type::UNKNOWN )
     {
         good = false;
 
         // If both of the sub expressions are fine, then we know the problem's
         // here
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operands to binary operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -848,8 +848,8 @@ bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operand types to to inclusive or operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -917,8 +917,8 @@ bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operand types to to exclusive or operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -984,8 +984,8 @@ bool AndExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operand types to to and operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -1144,8 +1144,8 @@ bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operand types to to shift operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -1259,8 +1259,8 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
     if( !IsIntegral(t) )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN_TYPE &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN_TYPE )
+        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
+            m_RightSide->GetReturnType() != Type::UNKNOWN )
             sema.Error( "Invalid operand types to to modulo operator: " +
                         GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
                         GetTypeString( m_RightSide->GetReturnType() ) );
@@ -1327,14 +1327,14 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
 
     Type t = m_Expression->GetReturnType();
 
-    if( m_CastType == Type::UNKNOWN_TYPE )
+    if( m_CastType == Type::UNKNOWN )
     {
         good = false;
         sema.Error( "Can't cast to an unknown type" );
     }
     else if( m_CastType == Type::STRING )
         if( t != Type::STRING &&
-            t != Type::UNKNOWN_TYPE )
+            t != Type::UNKNOWN )
         {
             good = false;
             sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
@@ -1495,7 +1495,7 @@ Type UnaryExpression::GetReturnType() const
         return Type::BOOL;
     }
     assert( false && "unreachable" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 Type UnaryExpression::GetUnderlyingType() const
@@ -1760,14 +1760,14 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
 Type IdentifierExpression::GetReturnType() const
 {
     if( !m_Variable )
-        return Type::UNKNOWN_TYPE;
+        return Type::UNKNOWN;
     return m_Variable->GetType();
 }
 
 Type IdentifierExpression::GetUnderlyingType() const
 {
     if( !m_Variable )
-        return Type::UNKNOWN_TYPE;
+        return Type::UNKNOWN;
     return m_Variable->GetUnderlyingType();
 }
 

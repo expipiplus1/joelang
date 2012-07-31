@@ -62,7 +62,7 @@ Variable::Variable( Type base_type,
 {
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
-    if( m_IsConst || m_Initializer.GetType() != Type::UNKNOWN_TYPE )
+    if( m_IsConst || m_Initializer.GetType() != Type::UNKNOWN )
     {
         assert( m_Initializer.GetUnderlyingType() == base_type &&
                 "Trying to initialize a variable with the wrong type" );

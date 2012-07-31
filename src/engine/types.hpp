@@ -40,7 +40,7 @@ namespace JoeLang
 enum class Type
 {
     // Unknown type
-    UNKNOWN_TYPE,
+    UNKNOWN,
 
     //Any array
     ARRAY,
@@ -94,7 +94,7 @@ private:
             ? Type::FLOAT
             : sizeof(T) == 8
                 ? Type::DOUBLE
-                : Type::UNKNOWN_TYPE;
+                : Type::UNKNOWN;
     }
 
     static constexpr
@@ -108,7 +108,7 @@ private:
                     ? Type::U32
                     : sizeof(T) == 8
                         ? Type::U64
-                        : Type::UNKNOWN_TYPE;
+                        : Type::UNKNOWN;
     }
 
     static constexpr
@@ -122,7 +122,7 @@ private:
                     ? Type::I32
                     : sizeof(T) == 8
                         ? Type::I64
-                        : Type::UNKNOWN_TYPE;
+                        : Type::UNKNOWN;
     }
 
     static constexpr
@@ -144,7 +144,7 @@ private:
                         ? Type::STRING
                         :std::is_integral<T>::value
                             ? GetIntegralType()
-                            : Type::UNKNOWN_TYPE;
+                            : Type::UNKNOWN;
     }
 
 public:

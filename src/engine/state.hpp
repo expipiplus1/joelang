@@ -62,7 +62,7 @@ private:
 template<typename T>
 class State : public StateBase
 {
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a state with an unhandled type" );
 public:
     State() = delete;

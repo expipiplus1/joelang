@@ -321,14 +321,14 @@ Type ArgumentListOperator::GetReturnType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 Type ArgumentListOperator::GetUnderlyingType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 const std::vector<unsigned>& ArgumentListOperator::GetArrayExtents(
@@ -426,14 +426,14 @@ Type MemberAccessOperator::GetReturnType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 Type MemberAccessOperator::GetUnderlyingType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 const std::vector<unsigned>& MemberAccessOperator::GetArrayExtents(
@@ -509,14 +509,14 @@ Type IncrementOrDecrementOperator::GetReturnType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 Type IncrementOrDecrementOperator::GetUnderlyingType(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 const std::vector<unsigned>& IncrementOrDecrementOperator::GetArrayExtents(

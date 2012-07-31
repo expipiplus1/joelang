@@ -694,15 +694,15 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 const GenericValue& initializer,
                                 const std::string& name )
 {
-    assert( ( initializer.GetType() == Type::UNKNOWN_TYPE &&
+    assert( ( initializer.GetType() == Type::UNKNOWN &&
               type == initializer.GetUnderlyingType() ) ||
             "Initializer type mismatch" );
-    assert( ( initializer.GetType() == Type::UNKNOWN_TYPE ||
+    assert( ( initializer.GetType() == Type::UNKNOWN ||
               array_extents == initializer.GetArrayExtents() ) &&
             "Initializer array extents mismatch" );
     llvm::Type* t = m_Runtime.GetLLVMType( type, array_extents );
     llvm::Constant* init;
-    if( initializer.GetType() != Type::UNKNOWN_TYPE )
+    if( initializer.GetType() != Type::UNKNOWN )
         init = initializer.CodeGen( *this );
     else
         init = llvm::Constant::getNullValue( t );

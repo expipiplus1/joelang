@@ -58,7 +58,7 @@ public:
 template<typename T>
 class StateAssignment : public StateAssignmentBase
 {
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a StateAssignment with an unhandled type" );
 public:
     StateAssignment( const State<T>& state, std::function<T()> getter );
@@ -82,7 +82,7 @@ private:
 template<typename T>
 class ConstStateAssignment : public StateAssignmentBase
 {
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN_TYPE,
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a ConstStateAssignment with unhandled type" );
 public:
     ConstStateAssignment( const State<T>& state, T value );

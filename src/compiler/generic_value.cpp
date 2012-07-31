@@ -44,12 +44,12 @@ namespace Compiler
 {
 
 GenericValue::GenericValue()
-    :m_Type( Type::UNKNOWN_TYPE )
+    :m_Type( Type::UNKNOWN )
 {
 }
 
 GenericValue::GenericValue( const GenericValue& g )
-    :m_Type( Type::UNKNOWN_TYPE )
+    :m_Type( Type::UNKNOWN )
 {
     *this = g;
 }
@@ -76,7 +76,7 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
 
     switch( g.m_Type )
     {
-    case Type::UNKNOWN_TYPE:
+    case Type::UNKNOWN:
         break;
     case Type::BOOL:
         m_BoolValue = g.m_BoolValue;
@@ -405,7 +405,7 @@ void GenericValue::FreeData()
         break;
     }
 
-    m_Type = Type::UNKNOWN_TYPE;
+    m_Type = Type::UNKNOWN;
 }
 
 } // namespace Compiler

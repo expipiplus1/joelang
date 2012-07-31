@@ -64,12 +64,12 @@ Type GetCommonType( Type t1, Type t2 )
         if( t2 == Type::STRING )
             return Type::STRING;
         else
-            return Type::UNKNOWN_TYPE;
+            return Type::UNKNOWN;
     }
 
     if( t1 == Type::ARRAY )
     {
-        return Type::UNKNOWN_TYPE;
+        return Type::UNKNOWN;
     }
 
     for( Type t : promotion_ordering )
@@ -77,7 +77,7 @@ Type GetCommonType( Type t1, Type t2 )
             return t;
 
     assert( false && "Trying to get the common type of unknown types" );
-    return Type::UNKNOWN_TYPE;
+    return Type::UNKNOWN;
 }
 
 bool IsIntegral( Type t )
@@ -155,7 +155,7 @@ const std::string& GetTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =
     {
-        { Type::UNKNOWN_TYPE, "unknown type" },
+        { Type::UNKNOWN, "unknown type" },
         { Type::DOUBLE,       "double" },
         { Type::FLOAT,        "float" },
         { Type::U64,          "u64" },
