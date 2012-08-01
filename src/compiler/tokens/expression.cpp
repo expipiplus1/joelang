@@ -284,6 +284,11 @@ const std::vector<unsigned>& AssignmentExpression::GetArrayExtents() const
     return m_AssigneePtr->GetArrayExtents();
 }
 
+bool AssignmentExpression::IsLValue() const
+{
+    return true;
+}
+
 bool AssignmentExpression::IsConst() const
 {
     return false;
@@ -503,6 +508,7 @@ CastExpression::CastExpression( Type cast_type,
     ,m_CastType( cast_type )
     ,m_Expression( std::move(expression) )
 {
+    assert( m_Expression && "CastExpression given a null expression" );
 }
 
 CastExpression::~CastExpression()
@@ -520,23 +526,48 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
 
     Type t = m_Expression->GetReturnType();
 
-    if( m_CastType == Type::UNKNOWN )
-    {
-        good = false;
-        sema.Error( "Can't cast to an unknown type" );
-    }
-    else if( m_CastType == Type::STRING )
-        if( t != Type::STRING &&
-            t != Type::UNKNOWN )
+    if( t != Type::UNKNOWN )
+    { 
+        if( t == Type::STRING && m_CastType != Type::STRING )
         {
             good = false;
-            sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
+            sema.Error( "Can't cast string to " + GetTypeString( m_CastType ) );
         }
-
-    if( t == Type::STRING && m_CastType != Type::STRING )
-    {
-        good = false;
-        sema.Error( "Can't cast string to " + GetTypeString( m_CastType ) );
+        else if( m_CastType == Type::UNKNOWN )
+        {
+            // Can't cast to unknown type
+            good = false;
+            sema.Error( "Can't cast to an unknown type" );
+        }
+        else if( m_CastType == Type::STRING )
+        {
+            // Can only cast string to string
+            if( t != Type::STRING )
+            {
+                good = false;
+                sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
+            }
+        }
+        else if( IsScalarType( m_CastType ) )
+        {
+            // All scalar types are compatible nothing to check
+        }
+        else if( IsVectorType( m_CastType ) )
+        {
+            // Can only cast same size vectors
+            // But all vector types are compatible
+            if( GetVectorSize( m_CastType ) != GetVectorSize( t ) )
+            {
+                good = false;
+                sema.Error( "Can't cast " + GetTypeString( t ) + " to " + 
+                            GetTypeString( m_CastType ) );
+            }
+        }
+        else
+        {
+            std::cout << GetTypeString( m_CastType ) << std::endl;
+            assert( false && "Casting to an unhandled type" );
+        }
     }
 
     good &= m_Expression->PerformSema( sema );
@@ -585,14 +616,30 @@ bool CastExpression::Parse( Parser& parser, Expression_up& token )
     return parser.Expect<UnaryExpression>( token );
 }
 
-Expression_up CastExpression::Create(
-                                  Type cast_type,
-                                  Expression_up cast_expression )
+Expression_up CastExpression::Create( Type cast_type,
+                                      Expression_up cast_expression )
 {
     if( cast_expression->GetReturnType() == cast_type )
         return cast_expression;
     return Expression_up( new CastExpression( cast_type,
                                               std::move(cast_expression) ) );
+}
+
+Expression_up CastExpression::CreateBaseTypeCast( 
+                                                Type cast_type,
+                                                Expression_up cast_expression )
+{
+    Type expression_type = cast_expression->GetReturnType();
+    if( IsScalarType( expression_type ) )
+        return Create( cast_type, std::move(cast_expression) );
+
+    assert( IsVectorType( expression_type ) && 
+            "Unhandled type in CreateBaseTypeCase" );
+
+    // Find the correct cast_type
+    return Create( GetVectorType( cast_type, 
+                                  GetNumElementsInType( expression_type ) ),
+                   std::move(cast_expression) );
 }
 
 bool CastExpression::classof( const Expression* e )
@@ -929,16 +976,33 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     // Verify that all the parameters can be converted into the correct base
     // type
     //
+    for( auto& argument : m_Arguments )
+        argument = CastExpression::CreateBaseTypeCast( GetElementType( m_Type ),
+                                                       std::move(argument) );
 
+    bool ret = true;
 
-    assert( false && "complete me" );
-    return false;
+    for( const auto& argument : m_Arguments )
+        ret &= argument->PerformSema( sema );
+
+    return ret;
 }
 
 llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( false && "complete me" );
-    return nullptr;
+    if( IsVectorType( m_Type ) )
+    {
+        return code_gen.CreateVectorConstructor( m_Type, m_Arguments );
+    }
+    else
+    {
+        assert( IsScalarType( m_Type ) && 
+                "Trying to construct an unhandled type" );
+        assert( m_Arguments.size() == 1 &&
+                "Trying to construct scalar type with wrong number of "
+                "arguments" );
+        return code_gen.CreateScalarConstructor( m_Type, *m_Arguments[0] );
+    }
 }
 
 Type TypeConstructorExpression::GetReturnType() const

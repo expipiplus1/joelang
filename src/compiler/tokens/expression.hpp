@@ -243,6 +243,9 @@ public:
     bool IsConst() const override;
 
     virtual
+    bool IsLValue() const override;
+
+    virtual
     void Print( int depth ) const;
 
     static
@@ -339,6 +342,7 @@ private:
 class CastExpression : public JoeLang::Compiler::Expression
 {
 public:
+    /** This asserts that expression is not null **/
     explicit
     CastExpression( Type cast_type,
                     Expression_up expression );
@@ -375,6 +379,13 @@ public:
 
     static
     Expression_up Create( Type cast_type, Expression_up cast_expression );
+
+    /**
+      * Casts vectors to a different base type, preserving size
+      */
+    static
+    Expression_up CreateBaseTypeCast( Type base_type, 
+                                      Expression_up cast_expression );
 
     static
     bool classof( const Expression* e );

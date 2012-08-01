@@ -87,6 +87,16 @@ public:
 
     GenericValue EvaluateExpression( const Expression& expression );
 
+    // Type construction
+    /** This asserts that all the arguments are not null **/
+    llvm::Value* CreateVectorConstructor( 
+                                  Type type, 
+                                  const std::vector<Expression_up>& arguments );
+
+    llvm::Value* CreateScalarConstructor( Type type, 
+                                          const Expression& argument );
+                            
+
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, Type type );
 
