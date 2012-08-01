@@ -80,6 +80,26 @@ Type GetCommonType( Type t1, Type t2 )
     return Type::UNKNOWN;
 }
 
+Type GetVectorType( Type base, unsigned size )
+{
+    //TODO do this in a better way
+    switch( base )
+    {
+    case Type::FLOAT:
+        switch( size )
+        {
+        case 4:
+            return Type::FLOAT4;
+        default:
+            assert( false && 
+                    "Trying to get the vector type of an unhandled size" );
+        }
+    default:
+        assert( false && "Trying to get the vector type of an unhandled base" );
+    }
+    return Type::UNKNOWN;
+}
+
 bool IsIntegral( Type t )
 {
     return t == Type::BOOL ||
@@ -113,6 +133,11 @@ bool IsVectorType( Type t )
     return t == Type::FLOAT4;
 }
 
+bool IsScalarType( Type t )
+{
+    return GetNumElementsInType( t ) == 1 && !IsVectorType( t );
+}
+
 unsigned GetVectorSize( Type t )
 {
     switch( t )
@@ -125,16 +150,17 @@ unsigned GetVectorSize( Type t )
     return 0;
 }
 
-Type GetVectorBaseType( Type t )
+Type GetElementType( Type t )
 {
+    assert( t != Type::ARRAY && "Trying to get the base type of Type::ARRAY" );
+
     switch( t )
     {
     case Type::FLOAT4:
         return Type::FLOAT;
     default:
-        assert( false && "Trying to get the vector base of a non-vector type" );
+        return t;
     }
-    return Type::UNKNOWN;
 }
 
 unsigned GetNumElementsInType( Type t )

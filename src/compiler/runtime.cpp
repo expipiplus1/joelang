@@ -170,7 +170,7 @@ llvm::Type* Runtime::GetLLVMType(
         t = m_StringType;
     else if( IsVectorType( base_type ) )
         t = llvm::VectorType::get(
-                                  GetLLVMType( GetVectorBaseType( base_type ) ),
+                                  GetLLVMType( GetElementType( base_type ) ),
                                   GetVectorSize( base_type ) );
     else
     {

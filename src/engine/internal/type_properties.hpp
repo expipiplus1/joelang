@@ -46,6 +46,8 @@ namespace Compiler
   */
 Type GetCommonType( Type t1, Type t2 );
 
+Type GetVectorType( Type base, unsigned size );
+
 bool IsFloatingPoint( Type t );
 
 bool IsIntegral( Type t );
@@ -54,15 +56,14 @@ bool IsSigned( Type t );
 
 bool IsVectorType( Type t );
 
+bool IsScalarType( Type t );
+
 /**
   * This asserts that t is a vector type
   */
 unsigned GetVectorSize( Type t );
 
-/**
-  * This asserts that t is a vector type
-  */
-Type GetVectorBaseType( Type t );
+Type GetElementType( Type t );
 
 /**
   * This asserts that t is not Type::UNKNOWN

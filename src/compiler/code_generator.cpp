@@ -37,6 +37,8 @@
 #include <utility>
 #include <vector>
 
+#include <intrin.h>
+
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
 #include <llvm/GlobalVariable.h>
@@ -219,6 +221,8 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     // Make this function private
     function->setLinkage( llvm::GlobalVariable::PrivateLinkage );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
+    
+    function->dump();
 
     //
     // Extract the result
@@ -256,6 +260,20 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::FLOAT:
         ret = GenericValue( reinterpret_cast<jl_float(*)()>(function_ptr)() );
         break;
+    case Type::FLOAT4:
+        {
+            struct float4
+            {
+                float x,y,z,w;
+            };
+            __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
+            float4* f = reinterpret_cast<float4*>(&m);
+            std::cout << f->x << " " <<
+                         f->y << " " <<
+                         f->z << " " <<
+                         f->w << std::endl;
+            break;
+        }
     case Type::DOUBLE:
         ret = GenericValue( reinterpret_cast<jl_double(*)()>(function_ptr)() );
         break;
@@ -274,6 +292,66 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     m_LLVMBuilder.restoreIP( insert_point );
 
     return ret;
+}
+
+//
+// Type Construction
+//
+
+llvm::Value* CodeGenerator::CreateVectorConstructor(
+                                   Type type,
+                                   const std::vector<Expression_up>& arguments )
+{
+#if !defined(NDEBUG)
+    for( const auto& argument : arguments )
+        assert( argument && "CreateVectorTypeConstructor given null argument" );
+    assert( IsVectorType( type ) && 
+            "CreateVectorTypeConstructor given non-vector type" );
+#endif
+    llvm::Value* ret = llvm::UndefValue::get( 
+                                                m_Runtime.GetLLVMType( type ) );
+    // Loop over all the arguments inserting as many elements as necessary
+    unsigned p = 0;
+    for( const auto& argument : arguments )
+    {
+        llvm::Value* argument_value = argument->CodeGen( *this );
+        if( IsVectorType( argument->GetReturnType() ) )
+        { 
+            for( unsigned i = 0; 
+                 i < GetNumElementsInType( argument->GetReturnType() );
+                 ++i )
+            {
+                llvm::Value* new_element = m_LLVMBuilder.CreateExtractElement(
+                        argument_value,
+                        CreateInteger( i, Type::U32 ) );
+                ret = m_LLVMBuilder.CreateInsertElement( 
+                                                ret, 
+                                                new_element,
+                                                CreateInteger( p, Type::U32 ) );
+                ++p;
+            }
+        }
+        else
+        {
+            assert( IsScalarType( argument->GetReturnType() ) &&
+                    "Trying to use an unhandled type in vector constructor" );
+            ret = m_LLVMBuilder.CreateInsertElement( 
+                                                ret, 
+                                                argument_value,
+                                                CreateInteger( p, Type::U32 ) );
+            ++p;
+        }
+    }
+    assert( p == GetNumElementsInType( type ) && 
+            "constructing a vector with an incorrect number of elements" );
+    return ret;
+}
+
+llvm::Value* CodeGenerator::CreateScalarConstructor( 
+                                                    Type type,
+                                                    const Expression& argument )
+{
+    return argument.CodeGen( *this ); 
 }
 
 //
