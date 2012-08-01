@@ -74,8 +74,8 @@ StateAssignmentStatement::~StateAssignmentStatement()
 void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
     // create a scope for the enumerants
-    /// TODO create some scope raii
-    sema.EnterScope();
+    SemaAnalyzer::ScopeHolder scope( sema );
+    scope.Enter();
 
     // Try and get the state to which we are assigning
     m_State = sema.GetState( m_Identifier );
@@ -94,7 +94,8 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
         m_Expression->PerformSema( sema );
     }
 
-    sema.LeaveScope();
+    // best to be explicit about these things
+    scope.Leave();
 }
 
 std::unique_ptr<StateAssignmentBase>

@@ -337,5 +337,29 @@ CodeGenerator& SemaAnalyzer::GetCodeGenerator()
     return m_CodeGenerator;
 }
 
+SemaAnalyzer::ScopeHolder::ScopeHolder( SemaAnalyzer& sema )
+    :m_Sema( sema )
+    ,m_InScope( false )
+{
+}
+
+SemaAnalyzer::ScopeHolder::~ScopeHolder()
+{
+    if( m_InScope )
+        Leave();
+}
+
+void SemaAnalyzer::ScopeHolder::Enter()
+{
+    m_Sema.EnterScope();
+    m_InScope = true;
+}
+
+void SemaAnalyzer::ScopeHolder::Leave()
+{
+    m_Sema.LeaveScope();
+    m_InScope = false;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

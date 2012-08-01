@@ -153,16 +153,6 @@ public:
     std::shared_ptr<Variable> GetVariable( const std::string& identifier );
 
     /**
-      * Creates a new scope on the scope stack
-      */
-    void EnterScope();
-
-    /**
-      * Pops the innermost scope from the stack
-      */
-    void LeaveScope();
-
-    /**
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;
@@ -219,11 +209,42 @@ public:
       * \returns the CodeGenerator object
       */
     CodeGenerator& GetCodeGenerator();
+
+    /**
+      * \class ScopeHolder
+      * A class to hold onto a scope and make sure it's released
+      */
+    class ScopeHolder
+    {
+    public:
+        explicit
+        ScopeHolder( SemaAnalyzer& sema );
+        ScopeHolder(const ScopeHolder&) = delete;
+        const ScopeHolder& operator=(const ScopeHolder&) = delete;
+        ~ScopeHolder();
+
+        void Enter();
+        void Leave();
+    private:
+        SemaAnalyzer& m_Sema;
+        bool          m_InScope;
+    };
+    friend ScopeHolder;
 private:
     struct SymbolMaps
     {
         std::map<std::string, std::shared_ptr<Variable> > m_Variables;
     };
+
+    /**
+      * Creates a new scope on the scope stack
+      */
+    void EnterScope();
+
+    /**
+      * Pops the innermost scope from the stack
+      */
+    void LeaveScope();
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
 
