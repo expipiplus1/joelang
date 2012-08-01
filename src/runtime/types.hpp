@@ -32,6 +32,8 @@
 #include <stdint.h>
 #include <cstring>
 
+#include <joemath/joemath.hpp>
+
 extern "C"
 {
 
@@ -45,6 +47,7 @@ using jl_u16    = uint16_t;
 using jl_u32    = uint32_t;
 using jl_u64    = uint64_t;
 using jl_float  = float;
+using jl_float4 = JoeMath::float4;
 using jl_double = double;
 
 struct jl_string

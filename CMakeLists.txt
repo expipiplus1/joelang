@@ -90,15 +90,15 @@ add_custom_target( copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
 add_dependencies( joelang copy_files )
 
 set( runtime_sources src/runtime/string.cpp
-                     src/runtime/string.hpp 
+                     src/runtime/string.hpp
                      src/runtime/types.hpp )
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
     COMMAND clang++ -O4 -std=c++11 -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    DEPENDS ${runtime_sources} )    
+    DEPENDS ${runtime_sources} )
 
-add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc" 
+add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc"
                                    SOURCES ${runtime_sources} )
 add_dependencies( joelang compile_runtime )
 

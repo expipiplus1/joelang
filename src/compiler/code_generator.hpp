@@ -89,13 +89,13 @@ public:
 
     // Type construction
     /** This asserts that all the arguments are not null **/
-    llvm::Value* CreateVectorConstructor( 
-                                  Type type, 
+    llvm::Value* CreateVectorConstructor(
+                                  Type type,
                                   const std::vector<Expression_up>& arguments );
 
-    llvm::Value* CreateScalarConstructor( Type type, 
+    llvm::Value* CreateScalarConstructor( Type type,
                                           const Expression& argument );
-                            
+
 
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, Type type );
@@ -153,13 +153,26 @@ public:
       * Create the llvm::Value representing a floating point value
       * \param value
       *   The value with which to create the float
-      * \param is_double
-      *   Whether this is a double precision float
+      * \param type
+      *   The type of floating point number
       * \returns the llvm::Value representing the float
       *
       * This will assert if type isn't a floating point type
       */
     llvm::Constant* CreateFloating( double value, Type type );
+
+    /**
+      * Create the llvm::Value representing a floating point vector
+      * \param value
+      *   The vector of values with which to create the vector
+      * \param type
+      *   The type of vector
+      * \returns the llvm::Value representing the float vector
+      *
+      * This will assert if type isn't a floating point vector type
+      */
+    llvm::Constant* CreateFloatingVector( const std::vector<double>& value,
+                                          Type type );
 
     /**
       * Create the llvm::Value representing a string struct
@@ -213,7 +226,7 @@ private:
     /**
       * Create an anonymous llvm function taking no arguments
       */
-    llvm::Function* CreateFunctionPtrFromExpression( 
+    llvm::Function* CreateFunctionPtrFromExpression(
                                                 const Expression& expression,
                                                 std::string name = "" );
 

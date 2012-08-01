@@ -34,6 +34,8 @@
 #include <engine/effect.hpp>
 #include <engine/state.hpp>
 
+#include <joemath/joemath.hpp>
+
 int main( int argc, char** argv )
 {
     JoeLang::Context context;
@@ -74,10 +76,23 @@ int main( int argc, char** argv )
                                 nullptr,
                                 nullptr );
 
+    JoeLang::State<JoeMath::float4> my_float4_state(
+      "my_float4_state",
+      std::map<std::string,JoeMath::float4>({{"ones", JoeMath::float4{1,1,1,1}},
+                                             {"zeroes", JoeMath::float4(0)}}) );
+    my_float4_state.SetCallbacks( [](JoeMath::float4 v) -> void
+                                  {std::cout << "setting my_float4_state to "
+                                             << v.x() << " " << v.y() << " "
+                                             << v.z() << " " << v.w()
+                                             << std::endl;},
+                                nullptr,
+                                nullptr );
+
     context.AddState( &my_state );
     context.AddState( &my_int_state );
     context.AddState( &my_bool_state );
     context.AddState( &my_string_state );
+    context.AddState( &my_float4_state );
 
     JoeLang::Effect* e = context.CreateEffectFromFile( "test.jfx" );
 

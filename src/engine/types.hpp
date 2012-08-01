@@ -33,6 +33,8 @@
 #include <string>
 #include <type_traits>
 
+#include <joemath/joemath.hpp>
+
 namespace JoeLang
 {
 
@@ -84,6 +86,7 @@ using jl_u32    = std::uint32_t;
 using jl_u64    = std::uint64_t;
 using jl_float  = float;
 using jl_double = double;
+using jl_float4 = JoeMath::float4;
 
 template<typename T>
 struct JoeLangType
@@ -136,17 +139,27 @@ private:
     }
 
     static constexpr
+    Type GetVectorType()
+    {
+        return   std::is_same<JoeMath::float4,T>::value
+               ? Type::FLOAT4
+               : Type::UNKNOWN;
+    }
+
+    static constexpr
     Type GetType()
     {
-        return std::is_floating_point<T>::value
+        return    JoeMath::is_vector<T>::value
+                ? GetVectorType()
+                : std::is_floating_point<T>::value
                 ? GetFloatingPointType()
                 : std::is_same<bool,T>::value
-                    ? Type::BOOL
-                    : std::is_same<std::string,T>::value
-                        ? Type::STRING
-                        :std::is_integral<T>::value
-                            ? GetIntegralType()
-                            : Type::UNKNOWN;
+                ? Type::BOOL
+                : std::is_same<std::string,T>::value
+                ? Type::STRING
+                :std::is_integral<T>::value
+                ? GetIntegralType()
+                : Type::UNKNOWN;
     }
 
 public:

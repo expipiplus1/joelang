@@ -37,7 +37,7 @@
 #include <utility>
 #include <vector>
 
-#include <intrin.h>
+#include <x86intrin.h>
 
 #include <llvm/BasicBlock.h>
 #include <llvm/Function.h>
@@ -136,6 +136,21 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
          ( static_cast<const State<jl_float>&>(state),
            reinterpret_cast<jl_float(*)()>(function_ptr) );
         break;
+    case Type::FLOAT4:
+    {
+        // TODO move this function to llvm
+        std::function<jl_float4()> wrapper = [function_ptr]()
+        {
+            __m128 r;
+            r = reinterpret_cast<__m128(*)()>(function_ptr)();
+            jl_float4* f = reinterpret_cast<jl_float4*>(&r);
+            return *f;
+        };
+        sa = new StateAssignment<jl_float4>
+         ( static_cast<const State<jl_float4>&>(state),
+           wrapper );
+        break;
+    }
     case Type::DOUBLE:
         sa = new StateAssignment<jl_double>
          ( static_cast<const State<jl_double>&>(state),
@@ -201,6 +216,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         break;
     }
     default:
+        assert( false && "Generating a stateassignment of unhandled type" );
         sa = nullptr;
     }
     return std::unique_ptr<StateAssignmentBase>( sa );
@@ -221,7 +237,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     // Make this function private
     function->setLinkage( llvm::GlobalVariable::PrivateLinkage );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
-    
+
     function->dump();
 
     //
@@ -262,16 +278,8 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
         break;
     case Type::FLOAT4:
         {
-            struct float4
-            {
-                float x,y,z,w;
-            };
             __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
-            float4* f = reinterpret_cast<float4*>(&m);
-            std::cout << f->x << " " <<
-                         f->y << " " <<
-                         f->z << " " <<
-                         f->w << std::endl;
+            ret = GenericValue( *reinterpret_cast<jl_float4*>(&m) );
             break;
         }
     case Type::DOUBLE:
@@ -305,10 +313,10 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
 #if !defined(NDEBUG)
     for( const auto& argument : arguments )
         assert( argument && "CreateVectorTypeConstructor given null argument" );
-    assert( IsVectorType( type ) && 
+    assert( IsVectorType( type ) &&
             "CreateVectorTypeConstructor given non-vector type" );
 #endif
-    llvm::Value* ret = llvm::UndefValue::get( 
+    llvm::Value* ret = llvm::UndefValue::get(
                                                 m_Runtime.GetLLVMType( type ) );
     // Loop over all the arguments inserting as many elements as necessary
     unsigned p = 0;
@@ -316,16 +324,16 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
     {
         llvm::Value* argument_value = argument->CodeGen( *this );
         if( IsVectorType( argument->GetReturnType() ) )
-        { 
-            for( unsigned i = 0; 
+        {
+            for( unsigned i = 0;
                  i < GetNumElementsInType( argument->GetReturnType() );
                  ++i )
             {
                 llvm::Value* new_element = m_LLVMBuilder.CreateExtractElement(
                         argument_value,
                         CreateInteger( i, Type::U32 ) );
-                ret = m_LLVMBuilder.CreateInsertElement( 
-                                                ret, 
+                ret = m_LLVMBuilder.CreateInsertElement(
+                                                ret,
                                                 new_element,
                                                 CreateInteger( p, Type::U32 ) );
                 ++p;
@@ -335,23 +343,23 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
         {
             assert( IsScalarType( argument->GetReturnType() ) &&
                     "Trying to use an unhandled type in vector constructor" );
-            ret = m_LLVMBuilder.CreateInsertElement( 
-                                                ret, 
+            ret = m_LLVMBuilder.CreateInsertElement(
+                                                ret,
                                                 argument_value,
                                                 CreateInteger( p, Type::U32 ) );
             ++p;
         }
     }
-    assert( p == GetNumElementsInType( type ) && 
+    assert( p == GetNumElementsInType( type ) &&
             "constructing a vector with an incorrect number of elements" );
     return ret;
 }
 
-llvm::Value* CodeGenerator::CreateScalarConstructor( 
+llvm::Value* CodeGenerator::CreateScalarConstructor(
                                                     Type type,
                                                     const Expression& argument )
 {
-    return argument.CodeGen( *this ); 
+    return argument.CodeGen( *this );
 }
 
 //
@@ -698,9 +706,26 @@ llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
 llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )
 {
     assert( IsFloatingPoint( type ) &&
-            "Trying to create a floating point constant of non-floating type" );
+            "Trying to create a floating constant of non-floating type" );
     return llvm::ConstantFP::get( m_Runtime.GetLLVMType( type ),
                                   value );
+}
+
+llvm::Constant* CodeGenerator::CreateFloatingVector(
+                                               const std::vector<double>& value,
+                                               Type type )
+{
+    assert( IsFloatingPoint( type ) &&
+            "Trying to create a floating constant of non-floating type" );
+    assert( IsVectorType( type ) &&
+            "Trying to create a vector constant of non-vector type" );
+    assert( value.size() == GetVectorSize( type ) &&
+            "Wrong number of values to construct vector constant" );
+    std::vector<llvm::Constant*> data;
+    data.reserve( value.size() );
+    for( double d : value )
+        data.push_back( CreateFloating( d, GetElementType( type ) ) );
+    return llvm::ConstantVector::get( data );
 }
 
 llvm::Constant* CodeGenerator::CreateString( const std::string& value )

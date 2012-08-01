@@ -108,6 +108,9 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
     case Type::FLOAT:
         m_FloatValue = g.m_FloatValue;
         break;
+    case Type::FLOAT4:
+        m_Float4Value = g.m_Float4Value;
+        break;
     case Type::DOUBLE:
         m_DoubleValue = g.m_DoubleValue;
         break;
@@ -189,6 +192,12 @@ GenericValue::GenericValue( jl_float  float_value  )
 {
 }
 
+GenericValue::GenericValue( jl_float4 float4_value  )
+    :m_Type( Type::FLOAT4 )
+    ,m_Float4Value( float4_value )
+{
+}
+
 GenericValue::GenericValue( jl_double double_value )
     :m_Type( Type::DOUBLE )
     ,m_DoubleValue( double_value )
@@ -251,6 +260,11 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
         return code_gen.CreateInteger( m_U64Value, Type::U64 );
     case Type::FLOAT:
         return code_gen.CreateFloating( m_FloatValue, Type::FLOAT );
+    case Type::FLOAT4:
+    {
+        std::vector<double> values( &m_Float4Value[0], &m_Float4Value[0]+4 );
+        return code_gen.CreateFloatingVector( values, Type::FLOAT4 );
+    }
     case Type::DOUBLE:
         return code_gen.CreateFloating( m_DoubleValue, Type::DOUBLE );
     case Type::STRING:
@@ -365,6 +379,13 @@ jl_float GenericValue::GetFloat() const
     assert( m_Type == Type::FLOAT &&
             "Trying to get the float value from a non-float GenericValue" );
     return m_FloatValue;
+}
+
+jl_float4 GenericValue::GetFloat4() const
+{
+    assert( m_Type == Type::FLOAT4 &&
+            "Trying to get the float4 value from a non-float GenericValue" );
+    return m_Float4Value;
 }
 
 jl_double GenericValue::GetDouble() const

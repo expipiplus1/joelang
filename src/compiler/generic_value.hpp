@@ -79,6 +79,8 @@ public:
     explicit
     GenericValue( jl_float  float_value  );
     explicit
+    GenericValue( jl_float4 float4_value );
+    explicit
     GenericValue( jl_double double_value );
     explicit
     GenericValue( jl_string&& string_value );
@@ -105,6 +107,7 @@ public:
     jl_u32             GetU32() const;
     jl_u64             GetU64() const;
     jl_float           GetFloat() const;
+    jl_float4          GetFloat4() const;
     jl_double          GetDouble() const;
     const std::string& GetString() const;
     const std::vector<GenericValue>& GetArray() const;
@@ -129,6 +132,7 @@ private:
         jl_u32      m_U32Value;
         jl_u64      m_U64Value;
         jl_float    m_FloatValue;
+        jl_float4   m_Float4Value;
         jl_double   m_DoubleValue;
         std::string m_StringValue;
         std::vector<GenericValue> m_ArrayValue;

@@ -1,6 +1,4 @@
-float4 v = float4(1,2,3,4);
-
-/*const string hello = "Hello",
+const string hello = "Hello",
              world = "World",
              hello_world = hello + ", " + world + "!";
 const unsigned twenty = float(20ul);
@@ -54,6 +52,6 @@ technique t1
         //my_floating_state = my_vec[0];
         //my_int_state = w;
         my_bool_state = 1 == int(1.1);
+        my_float4_state = my_vec;
     }
 }
-*/
