@@ -227,7 +227,15 @@ GenericValue::GenericValue( std::vector<GenericValue> array_value )
 #ifndef NDEBUG
     assert( !m_ArrayValue.empty() &&
             "GenericValue given an empty array value" );
-    /// TODO verify that the values are of the same extents and types
+    const std::vector<unsigned>& extents = m_ArrayValue[0].GetArrayExtents();
+    Type underlying_type = m_ArrayValue[0].GetUnderlyingType();
+    for( unsigned i = 1; i < m_ArrayValue.size(); ++i )
+    {
+        assert( underlying_type == m_ArrayValue[i].GetUnderlyingType() &&
+                "Array genericvalue created with mismatched types" );
+        assert( extents == m_ArrayValue[i].GetArrayExtents() &&
+                "Array genericvalue created with mismatched array extents" );
+    }
 #endif
 }
 
