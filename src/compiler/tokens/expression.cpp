@@ -233,6 +233,7 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
+    /// TODO stop this performing m_AssigneePtr twice
     assert( m_AssigneePtr &&
             "Trying to codegen an assignmentexpression with null assigneeptr" );
     switch( m_AssignmentOperator )
@@ -913,21 +914,22 @@ bool TypeConstructorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 {
+    //
+    // Verify that we have the correct number of parameters for this type
+    //
     unsigned num_desired_elements = GetNumElementsInType( m_Type );
     unsigned num_elements = 0;
-    /// todo flatten expression here
     for( const auto& argument : m_Arguments )
-    {
-        const std::vector<unsigned>& array_extents =
-                                                    argument->GetArrayExtents();
-        unsigned n = 1;
-        for( unsigned a : array_extents )
-            n *= a;
-        num_elements += n;
-    }
+        num_elements += GetNumElementsInType( argument->GetReturnType() );
 
     if( num_elements != num_desired_elements )
         sema.Error( "Wrong number of elements in constructor" );
+
+    //
+    // Verify that all the parameters can be converted into the correct base
+    // type
+    //
+
 
     assert( false && "complete me" );
     return false;
