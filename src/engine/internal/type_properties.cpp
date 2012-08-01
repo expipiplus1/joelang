@@ -91,7 +91,7 @@ Type GetVectorType( Type base, unsigned size )
         case 4:
             return Type::FLOAT4;
         default:
-            assert( false && 
+            assert( false &&
                     "Trying to get the vector type of an unhandled size" );
         }
     default:

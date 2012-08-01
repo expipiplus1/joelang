@@ -32,6 +32,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <vector>
 
 #include <engine/types.hpp>
 
@@ -51,6 +52,9 @@ public:
     ~StateBase();
 
     const std::string& GetName() const;
+
+    virtual
+    std::vector<std::string> GetEnumerantNames() const = 0;
 
     virtual
     Type GetType() const = 0;
@@ -78,6 +82,9 @@ public:
     void SetState( T value ) const;
     void ResetState() const;
     bool ValidateState() const;
+
+    virtual
+    std::vector<std::string> GetEnumerantNames() const override;
 
     virtual
     Type GetType() const override;

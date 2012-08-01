@@ -555,7 +555,11 @@ bool IsValidIdentifier( const std::string& identifier )
 {
     return identifier.size() != 0 &&
            ReadIdentifier( identifier.begin(), identifier.end() ) ==
-                                                              identifier.size();
+                                                          identifier.size() &&
+           std::none_of( g_keywordTerminals.begin(), g_keywordTerminals.end(),
+                         [&identifier]
+                         (const std::pair<TerminalType, LiteralTerminal>& t )
+                         {return t.second.matched_string == identifier;} );
 }
 
 bool IsHexDigit( char c )

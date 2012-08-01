@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <engine/types.hpp>
 
@@ -90,6 +91,16 @@ template<typename T>
 bool State<T>::ValidateState() const
 {
     return m_ValidateCallback();
+}
+
+template<typename T>
+std::vector<std::string> State<T>::GetEnumerantNames() const
+{
+    std::vector<std::string> ret;
+    ret.reserve( m_Enumerations.size() );
+    for( const auto& e : m_Enumerations )
+        ret.push_back( e.first );
+    return std::move(ret);
 }
 
 template<typename T>

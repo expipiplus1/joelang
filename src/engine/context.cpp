@@ -43,6 +43,7 @@
 #include <engine/state.hpp>
 #include <compiler/effect_factory.hpp>
 #include <compiler/runtime.hpp>
+#include <compiler/terminal_types.hpp>
 
 namespace JoeLang
 {
@@ -57,11 +58,17 @@ Context::~Context()
 
 bool Context::AddState( StateBase* state )
 {
+    assert( state && "Context given a null state" );
+
+    // todo report error here
     for( const auto s : m_States )
         if( s->GetName() == state->GetName() )
             return false;
 
-    //TODO Check for invalid state enumerants
+    for( const std::string& name : state->GetEnumerantNames() )
+        if( !Compiler::IsValidIdentifier( name ) )
+            return false;
+
     m_States.push_back( state );
     return true;
 }
