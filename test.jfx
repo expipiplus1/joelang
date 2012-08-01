@@ -20,7 +20,7 @@ float4 my_vec = float4((a+1)/(a+1), 4, 3*(2.0+1), 0x10);
 
 int t = 0;
 int q = 1;
-//int w = (t+=2)+=q;
+int w = (t+=2)+=q;
 
 technique t1
 {
@@ -50,7 +50,9 @@ technique t1
         my_int_state = c[0];
         my_int_state = (b = c)[1];
         //my_floating_state = my_vec[0];
-        //my_int_state = w;
+        my_int_state = q;
+        my_int_state = t;
+        my_int_state = w;
         my_bool_state = 1 == int(1.1);
         my_float4_state = my_vec;
     }

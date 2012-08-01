@@ -824,7 +824,7 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
-void CodeGenerator::CreateVariableAssignment( const Expression& variable,
+llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
                                               const Expression& e )
 {
     assert( variable.IsLValue() &&
@@ -836,6 +836,7 @@ void CodeGenerator::CreateVariableAssignment( const Expression& variable,
     llvm::Value* assigned_value = e.CodeGen( *this );
     m_LLVMBuilder.CreateStore( assigned_value,
                                variable.CodeGenPointerTo( *this ) );
+    return m_LLVMBuilder.CreateLoad( variable.CodeGenPointerTo( *this ) );
 }
 
 void CodeGenerator::CreateDestroyTemporaryCalls()

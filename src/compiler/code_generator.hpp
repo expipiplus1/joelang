@@ -214,7 +214,7 @@ public:
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
-    void CreateVariableAssignment( const Expression& variable,
+    llvm::Value* CreateAssignment( const Expression& variable,
                                    const Expression& e );
 
 private:

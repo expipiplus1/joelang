@@ -147,6 +147,12 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Trying to assign to a Const expression" );
     }
 
+    // Assuming that we can assign to the same as ReturnType;
+    m_AssignedExpression = CastExpression::Create(
+                                              m_Assignee->GetReturnType(),
+                                              std::move(m_AssignedExpression) );
+    good &= m_AssignedExpression->PerformSema( sema );
+
     switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
@@ -222,50 +228,28 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
         m_AssignmentOperator = Op::EQUALS;
         break;
     }
-    // Assuming that we can assign to the same as ReturnType;
-    m_AssignedExpression = CastExpression::Create(
-                                              m_AssigneePtr->GetReturnType(),
-                                              std::move(m_AssignedExpression) );
-    good &= m_AssignedExpression->PerformSema( sema );
 
     return good;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    /// TODO stop this performing m_AssigneePtr twice
     assert( m_AssigneePtr &&
             "Trying to codegen an assignmentexpression with null assigneeptr" );
     switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
-        code_gen.CreateVariableAssignment( *m_AssigneePtr,
-                                           *m_AssignedExpression );
+        return code_gen.CreateAssignment( *m_AssigneePtr,
+                                          *m_AssignedExpression );
         break;
     default:
         assert( false && "unhandled assignment operator" );
     }
-
-    // Return the new value of the variable
-    return m_AssigneePtr->CodeGen( code_gen );
 }
 
 llvm::Value* AssignmentExpression::CodeGenPointerTo(
                                                   CodeGenerator& code_gen) const
 {
-    assert( m_AssigneePtr &&
-            "Trying to codegen an assignmentexpression with null assigneeptr" );
-    switch( m_AssignmentOperator )
-    {
-    case Op::EQUALS:
-        code_gen.CreateVariableAssignment( *m_AssigneePtr,
-                                           *m_AssignedExpression );
-        break;
-    default:
-        assert( false && "unhandled assignment operator" );
-    }
-
-    // Return the new value of the variable
     return m_AssigneePtr->CodeGenPointerTo( code_gen );
 }
 
@@ -527,7 +511,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     Type t = m_Expression->GetReturnType();
 
     if( t != Type::UNKNOWN )
-    { 
+    {
         if( t == Type::STRING && m_CastType != Type::STRING )
         {
             good = false;
@@ -559,7 +543,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
             if( GetVectorSize( m_CastType ) != GetVectorSize( t ) )
             {
                 good = false;
-                sema.Error( "Can't cast " + GetTypeString( t ) + " to " + 
+                sema.Error( "Can't cast " + GetTypeString( t ) + " to " +
                             GetTypeString( m_CastType ) );
             }
         }
@@ -625,7 +609,7 @@ Expression_up CastExpression::Create( Type cast_type,
                                               std::move(cast_expression) ) );
 }
 
-Expression_up CastExpression::CreateBaseTypeCast( 
+Expression_up CastExpression::CreateBaseTypeCast(
                                                 Type cast_type,
                                                 Expression_up cast_expression )
 {
@@ -633,11 +617,11 @@ Expression_up CastExpression::CreateBaseTypeCast(
     if( IsScalarType( expression_type ) )
         return Create( cast_type, std::move(cast_expression) );
 
-    assert( IsVectorType( expression_type ) && 
+    assert( IsVectorType( expression_type ) &&
             "Unhandled type in CreateBaseTypeCase" );
 
     // Find the correct cast_type
-    return Create( GetVectorType( cast_type, 
+    return Create( GetVectorType( cast_type,
                                   GetNumElementsInType( expression_type ) ),
                    std::move(cast_expression) );
 }
@@ -996,7 +980,7 @@ llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
     }
     else
     {
-        assert( IsScalarType( m_Type ) && 
+        assert( IsScalarType( m_Type ) &&
                 "Trying to construct an unhandled type" );
         assert( m_Arguments.size() == 1 &&
                 "Trying to construct scalar type with wrong number of "
