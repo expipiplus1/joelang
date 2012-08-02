@@ -238,8 +238,6 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     function->setLinkage( llvm::GlobalVariable::PrivateLinkage );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
-    function->dump();
-
     //
     // Extract the result
     //

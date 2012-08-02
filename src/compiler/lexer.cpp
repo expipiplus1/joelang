@@ -134,13 +134,17 @@ TerminalType Lexer::ReadKeywordTerminal( TerminalType terminal,
 
     // Check that this terminal isn't also matched by something longer
     for( const auto& c: g_keywordTerminals )
-        if( c.second.matched_string.size() >
-                                        terminal_reader.matched_string.size() &&
+        if( c.second.matched_string.size() > chars_read &&
             ( more_chars_read = c.second.Read( m_Position, m_String.end() ) ) )
         {
-            string = std::string( m_Position, m_Position + more_chars_read );
-            return c.first;
+            chars_read = more_chars_read;
+            terminal = c.first;
         }
+
+    // Check that we're not reading the first part of an identifier
+    if( m_Position + chars_read < m_String.end() &&
+        IsDigitOrNonDigit( *(m_Position+chars_read) ) )
+        return TerminalType::UNKNOWN_CHARACTER;
 
     // fill up the string
     string = std::string( m_Position, m_Position + chars_read );

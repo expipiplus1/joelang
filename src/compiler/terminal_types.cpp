@@ -218,6 +218,9 @@ std::size_t LiteralTerminal::Read( std::string::const_iterator begin,
                                    std::string::const_iterator end ) const
 {
     assert( end >= begin && "begin is past end" );
+    // Check that there is room for this literal
+    // And that it matches
+    // And that it matches the whole word (if there's room)
     if( std::size_t(end - begin) < matched_string.size() ||
         !std::equal( matched_string.begin(), matched_string.end(), begin ) )
         return 0;

@@ -524,6 +524,18 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
             good = false;
             sema.Error( "Can't cast to an unknown type" );
         }
+        else if( m_CastType == Type::ARRAY )
+        {
+            // Can't cast to an array type
+            good = false;
+            sema.Error( "Can't cast to an array type" );
+        }
+        else if( t == Type::ARRAY )
+        {
+            // Can't cast from an array type
+            good = false;
+            sema.Error( "Can't cast from an array type" );
+        }
         else if( m_CastType == Type::STRING )
         {
             // Can only cast string to string

@@ -2,11 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 project( joelang )
 
+set(joemath_INCLUDE_DIRS /c/Users/jhermasz/projects/joemath/include)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -msse")
 
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
 link_directories( ${LLVM_LIBRARY_DIRS} )
+
+include_directories( ${joemath_INCLUDE_DIRS} )
 
 add_executable( joelang src/joelang.cpp
                         src/engine/context.cpp
@@ -95,7 +98,7 @@ set( runtime_sources src/runtime/string.cpp
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIRS} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
 add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc"

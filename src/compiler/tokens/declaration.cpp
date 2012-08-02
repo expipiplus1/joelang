@@ -401,49 +401,49 @@ Type VariableListOrFunctionDefinition::DeduceType(
         {
         case TypeSpecifier::TypeSpec::VOID:
             if( has_type )
-                sema.Error( "Can't combine void with other type" +
+                sema.Error( "Can't combine void with other type " +
                             GetTypeString( type ) );
             type = Type::VOID;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::STRING:
             if( has_type )
-                sema.Error( "Can't combine string with other type" +
+                sema.Error( "Can't combine string with other type " +
                             GetTypeString( type ) );
             type = Type::STRING;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::FLOAT:
             if( has_type )
-                sema.Error( "Can't combine float with other type" +
+                sema.Error( "Can't combine float with other type " +
                             GetTypeString( type ) );
             type = Type::FLOAT;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::FLOAT4:
             if( has_type )
-                sema.Error( "Can't combine float4 with other type" +
+                sema.Error( "Can't combine float4 with other type " +
                             GetTypeString( type ) );
             type = Type::FLOAT4;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::DOUBLE:
             if( has_type )
-                sema.Error( "Can't combine double with other type" +
+                sema.Error( "Can't combine double with other type " +
                             GetTypeString( type ) );
             type = Type::DOUBLE;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::BOOL:
             if( has_type )
-                sema.Error( "Can't combine bool with other type" +
+                sema.Error( "Can't combine bool with other type " +
                             GetTypeString( type ) );
             type = Type::BOOL;
             has_type = true;
             break;
         case TypeSpecifier::TypeSpec::CHAR:
             if( has_type )
-                sema.Error( "Can't combine char with other type" +
+                sema.Error( "Can't combine char with other type " +
                             GetTypeString( type ) );
             // Types are signed by default
             type = Type::I8;
@@ -451,7 +451,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
             break;
         case TypeSpecifier::TypeSpec::SHORT:
             if( has_type )
-                sema.Error( "Can't combine short with other type" +
+                sema.Error( "Can't combine short with other type " +
                             GetTypeString( type ) );
             // Types are signed by default
             type = Type::I16;
@@ -462,7 +462,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
             {
                 if( !IsIntegral( type ) ||
                     type == Type::BOOL )
-                    sema.Error( "Can't combine int with other type" +
+                    sema.Error( "Can't combine int with other type " +
                             GetTypeString( type ) );
                 // Don't change the type
             }
@@ -479,7 +479,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
                     type == Type::BOOL ||
                     type == Type::I8 ||
                     type == Type::I16 )
-                    sema.Error( "Can't combine long with other type" +
+                    sema.Error( "Can't combine long with other type " +
                                 GetTypeString( type ) );
             }
             has_type = true;
@@ -490,7 +490,7 @@ Type VariableListOrFunctionDefinition::DeduceType(
             {
                 if( !IsIntegral( type ) ||
                     type == Type::BOOL )
-                    sema.Error( "Can't combine signed with other type" +
+                    sema.Error( "Can't combine signed with other type " +
                                 GetTypeString( type ) );
                 // Types are signed by default, no need to make them signed
             }

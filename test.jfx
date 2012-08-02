@@ -22,6 +22,8 @@ int t = 0;
 int q = 1;
 int w = (t+=2)+=q;
 
+const string strings[2] = {"foo", "bar"+"bar"};
+
 technique t1
 {
     pass p0
