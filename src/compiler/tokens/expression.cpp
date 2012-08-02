@@ -244,6 +244,7 @@ llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
         break;
     default:
         assert( false && "unhandled assignment operator" );
+        return nullptr;
     }
 }
 
