@@ -40,6 +40,7 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
+#include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
@@ -234,67 +235,6 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 
     token.reset( new Declarator( std::move(identifier),
                                  std::move(array_specifiers) ) );
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// ArraySpecifier
-//------------------------------------------------------------------------------
-
-ArraySpecifier::ArraySpecifier( Expression_up expression )
-    :Token( TokenTy::ArraySpecifier )
-    ,m_Expression( std::move( expression ) )
-{
-    assert( m_Expression && "ArraySpecifier given a null expression" );
-}
-
-ArraySpecifier::~ArraySpecifier()
-{
-}
-
-void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
-{
-    m_Expression->ResolveIdentifiers( sema );
-    if( !IsIntegral( m_Expression->GetReturnType() ) )
-        sema.Error( "Can't create array with non-integer dimension" );
-    m_Expression = CastExpression::Create( Type::I64,
-                                           std::move(m_Expression) );
-    m_Expression->PerformSema( sema );
-    if( !m_Expression->IsConst() )
-        sema.Error( "Can't create array with non-const dimension" );
-}
-
-Expression_up ArraySpecifier::GetExpression()
-{
-    return std::move(m_Expression);
-}
-
-void ArraySpecifier::Print( int depth ) const
-{
-}
-
-bool ArraySpecifier::Parse( Parser& parser,
-                            std::unique_ptr<ArraySpecifier>& token )
-{
-    // Opening square bracket
-    if( !parser.ExpectTerminal( TerminalType::OPEN_SQUARE ) )
-        return false;
-
-    Expression_up expression;
-    if( !parser.Expect<Expression>( expression ) )
-    {
-        parser.Error( "No expression in array specifier" );
-        return false;
-    }
-
-    if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
-    {
-        //TODO things like here non fatal error, assume the closing bracket
-        parser.Error( "']' missing in array specifier" );
-        return false;
-    }
-
-    token.reset( new ArraySpecifier( std::move(expression) ) );
     return true;
 }
 

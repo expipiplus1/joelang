@@ -61,6 +61,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp
                         src/compiler/tokens/declaration.hpp
+                        src/compiler/tokens/declarator_specifier.cpp
+                        src/compiler/tokens/declarator_specifier.hpp
                         src/compiler/tokens/declarator.cpp
                         src/compiler/tokens/declarator.hpp
                         src/compiler/tokens/definition.cpp

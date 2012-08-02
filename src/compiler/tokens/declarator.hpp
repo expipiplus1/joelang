@@ -157,48 +157,5 @@ private:
     std::vector<unsigned>   m_ArrayExtents;
 };
 
-/**
-  * \class ArraySpecifier
-  * \ingroup Tokens
-  * \brief Matches a ArraySpecifier
-  *
-  * ArraySpecifier = '[' Expression ']'
-  */
-class ArraySpecifier : public JoeLang::Compiler::Token
-{
-public:
-    ArraySpecifier    ( Expression_up expression );
-    virtual
-    ~ArraySpecifier   ();
-
-    /**
-      * Performs semantic ananysis on the declarator
-      * \param sema
-      *   The SemaAnalyzer which contains the symbol table and things
-      */
-    void PerformSema( SemaAnalyzer& sema );
-
-    Expression_up GetExpression();
-
-    virtual
-    void Print( int depth ) const override;
-
-    /**
-      * Parses an array specifier
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \return
-      *   true upon parsing successfully
-      *   false if the parse failed
-      */
-    static
-    bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
-
-private:
-    Expression_up m_Expression;
-};
-
 } // namespace Compiler
 } // namespace JoeLang
