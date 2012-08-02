@@ -166,8 +166,14 @@ void PassDeclaration::PerformSema( SemaAnalyzer& sema )
     // Only declare it if it's not an anonymous pass
     if( !m_Name.empty() )
         sema.DeclarePass( m_Name, std::move(m_Definition) );
-    else if( sema.InGlobalScope() )
-        sema.Error( "Declaring an anonymous pass in global scope" );
+    else
+    {
+        if( sema.InGlobalScope() )
+            sema.Error( "Declaring an anonymous pass in global scope" );
+        // We haven't given the pass to sema, so it must have sema performed on
+        // it now
+        m_Definition->PerformSema( sema );
+    }
 }
 
 const std::string& PassDeclaration::GetName() const
