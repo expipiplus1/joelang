@@ -138,7 +138,7 @@ public:
     const std::string& GetIdentifier() const;
 
     /** \returns a vector of the sizes of the array dimensions **/
-    const std::vector<unsigned>& GetArrayDimensionSizes() const;
+    const std::vector<unsigned>& GetArrayExtents() const;
 
     /**
       * Parses a direct declarator
