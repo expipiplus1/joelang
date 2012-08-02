@@ -28,6 +28,10 @@ pass p0;
 
 int func(int);
 
+int func2(bool b, volatile float f[2])
+{
+};
+
 technique t1
 {
     p0;

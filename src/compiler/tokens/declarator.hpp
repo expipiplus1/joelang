@@ -44,6 +44,8 @@ namespace Compiler
 class ArraySpecifier;
 typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
+class CompoundStatement;
+typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class Declarator;
 class DeclSpecs;
 class Expression;
@@ -117,9 +119,11 @@ class Declarator : public JoeLang::Compiler::Token
 public:
     using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
 
+    /** If given a function_body it asserts that it has a function specifier **/
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
-                    ArraySpecifierVector array_specifiers );
+                    ArraySpecifierVector array_specifiers,
+                    CompoundStatement_up compound_statement );
     virtual
     ~Declarator   ();
 
@@ -159,6 +163,7 @@ private:
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
+    CompoundStatement_up m_FunctionBody;
 };
 
 } // namespace Compiler

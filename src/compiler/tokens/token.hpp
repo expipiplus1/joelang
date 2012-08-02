@@ -99,6 +99,7 @@ public:
 
         FunctionSpecifier,
         Parameter,
+        CompoundStatement,
 
         AssignmentOperator,
 

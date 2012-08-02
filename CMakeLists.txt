@@ -57,6 +57,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/assignment_operator.hpp
                         src/compiler/tokens/binary_operator_expression.cpp
                         src/compiler/tokens/binary_operator_expression.hpp
+                        src/compiler/tokens/compound_statement.cpp
+                        src/compiler/tokens/compound_statement.hpp
                         src/compiler/tokens/declaration_specifier.cpp
                         src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp
