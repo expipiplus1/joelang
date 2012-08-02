@@ -103,7 +103,11 @@ std::unique_ptr<StateAssignmentBase>
                                                  CodeGenerator& code_gen,
                                                  const std::string& name ) const
 {
+    assert( m_State && 
+            "Trying to generate a state assignment without a state" );
+
     Type t = m_State->GetType();
+
     assert( m_Expression->GetReturnType() == t &&
             "Trying to create a state assignment with mismatched types" );
 
@@ -163,6 +167,7 @@ std::unique_ptr<StateAssignmentBase>
                           new ConstStateAssignment<jl_float>(
                                  static_cast<const State<jl_float>&>(*m_State),
                                  v.GetFloat() ) );
+        /// TODO put float4 here
         case Type::DOUBLE:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_double>(
