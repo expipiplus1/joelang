@@ -41,6 +41,7 @@ enum class Type;
 
 namespace Compiler
 {
+typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -70,6 +71,18 @@ public:
 
     virtual
     void Print( int depth ) const override;
+
+    /**
+      * Extracts the values from a list of array specifiers
+      * \param specifiers
+      *   The array specifiers
+      * \param sema
+      *   The semantic analyzer used to evaluate the expression
+      */
+    static
+    ArrayExtents GetArrayExtents(
+                std::vector<std::unique_ptr<ArraySpecifier> >& specifiers,
+                SemaAnalyzer& sema );
 
     /**
       * Parses an array specifier

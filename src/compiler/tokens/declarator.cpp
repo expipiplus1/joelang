@@ -204,20 +204,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema )
     bool ret = true;
     if( m_FunctionSpecifier )
         ret &= m_FunctionSpecifier->PerformSema( sema );
-    for( auto& array_specifier : m_ArraySpecifiers )
-    {
-        // This ensures it's const
-        array_specifier->PerformSema( sema );
-        GenericValue g = sema.EvaluateExpression(
-                                            *array_specifier->GetExpression() );
-        jl_i64 size = g.GetI64();
-        if( size <= 0 )
-        {
-            sema.Error( "Can't create an array with a non-positive dimension" );
-            ret = false;
-        }
-        m_ArrayExtents.push_back( size );
-    }
+    m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
     return ret;
 }
 

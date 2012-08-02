@@ -35,6 +35,7 @@
 #include <vector>
 
 #include <compiler/parser.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -81,6 +82,25 @@ Expression_up ArraySpecifier::GetExpression()
 
 void ArraySpecifier::Print( int depth ) const
 {
+}
+
+ArrayExtents ArraySpecifier::GetArrayExtents(
+            std::vector<std::unique_ptr<ArraySpecifier> >& specifiers,
+            SemaAnalyzer& sema )
+{
+    ArrayExtents ret;
+    for( auto& array_specifier : specifiers )
+    {
+        // This ensures it's const
+        array_specifier->PerformSema( sema );
+        GenericValue g = sema.EvaluateExpression(
+                                            *array_specifier->GetExpression() );
+        jl_i64 size = g.GetI64();
+        if( size <= 0 )
+            sema.Error( "Can't create an array with a non-positive dimension" );
+        ret.push_back( size );
+    }
+    return ret;
 }
 
 bool ArraySpecifier::Parse( Parser& parser,
