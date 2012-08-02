@@ -39,6 +39,7 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
+#include <compiler/tokens/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -116,7 +117,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // If this isn't const it can't be a string
     if( !decl_specs.IsConst() &&
-        decl_specs.GetType() == Type::STRING )
+        base_type == Type::STRING )
         sema.Error( "Variables of type string must be const" );
 
     // Evaluate the initializer
@@ -187,12 +188,18 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
-                        Declarator::ArraySpecifierVector array_specifiers )
+                        Declarator::ArraySpecifierVector array_specifiers,
+                        CompoundStatement_up function_body )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
+    ,m_FunctionBody( std::move(function_body) )
 {
+    if( m_FunctionBody )
+        assert( m_FunctionSpecifier &&
+                "Declarator given a function definition without a function "
+                "specifier" );
 }
 
 Declarator::~Declarator()
@@ -237,9 +244,18 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
+    CompoundStatement_up compound_statement;
+
+    if( function_specifier )
+        // If we have a function specifier look for a compound statement
+        parser.Expect<CompoundStatement>( compound_statement );
+
+    CHECK_PARSER;
+
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
-                                 std::move(array_specifiers) ) );
+                                 std::move(array_specifiers),
+                                 std::move(compound_statement) ) );
     return true;
 }
 

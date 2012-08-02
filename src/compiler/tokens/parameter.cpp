@@ -87,6 +87,23 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Can't declare variables of void type" );
         return false;
     }
+    m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifers, sema );
+
+    if( m_ArrayExtents.empty() &&
+        m_DefaultValue &&
+        m_DefaultValue->CanReduceToExpression() )
+        m_DefaultValue->ReduceToExpression();
+
+    if( m_DefaultValue )
+        m_DefaultValue->PerformSema( sema, base_type );
+
+    if( !decl_specs.IsConst() &&
+        base_type == Type::STRING )
+        sema.Error( "Variables of type string must be const" );
+
+    if( m_DefaultValue &&
+        m_DefaultValue->GetArrayExtents() != m_ArrayExtents )
+        sema.Error( "Default parameter value has mismatching array extents" );
 
     return true;
 }

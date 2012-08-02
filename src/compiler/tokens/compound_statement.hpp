@@ -30,75 +30,44 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
-enum class Type;
-
 namespace Compiler
 {
-class ArraySpecifier;
-typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
-class DeclarationSpecifier;
-class Initializer;
-typedef std::unique_ptr<Initializer> Initializer_up;
+class CompoundStatement;
+typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class Parser;
 class SemaAnalyzer;
 
 /**
-  * \class Parameter
+  * \class CompoundStatement
   * \ingroup Tokens
-  * \brief Matches a Parameter
+  * \brief Matches a CompoundStatement
   *
-  * Parameter = DeclarationSpecifier+
-  *              ( identifier (ArraySpecifier)* ('=' Initializer)? )?
+  * CompoundStatement = '{' '}'
   */
-class Parameter : public JoeLang::Compiler::Token
+class CompoundStatement : public JoeLang::Compiler::Token
 {
 public:
-    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
-    using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
-
-    /** This asserts that there is at least one declaration specifier. **/
-    Parameter    ( DeclSpecsVector decl_specs,
-                   std::string identifier,
-                   ArraySpecifierVector array_specifiers,
-                   Initializer_up default_value );
+    CompoundStatement    ();
     virtual
-    ~Parameter   ();
+    ~CompoundStatement   ();
 
-    bool PerformSema( SemaAnalyzer& sema );
+    void PerformSema( SemaAnalyzer& sema );
 
     virtual
     void Print( int depth ) const override;
 
-    /**
-      * Parses a parameter declaration
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \return
-      *   true upon parsing successfully
-      *   false if the parse failed
-      */
     static
-    bool Parse ( Parser& parser, std::unique_ptr<Parameter>& token );
+    bool Parse ( Parser& parser, CompoundStatement_up& token );
 
 private:
-    DeclSpecsVector      m_DeclarationSpecifiers;
-    std::string          m_Identifier;
-    ArraySpecifierVector m_ArraySpecifers;
-    Initializer_up       m_DefaultValue;
-
-    // This is filled during performsema
-    ArrayExtents         m_ArrayExtents;
 };
+
 
 } // namespace Compiler
 } // namespace JoeLang

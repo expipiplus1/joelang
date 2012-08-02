@@ -154,6 +154,9 @@ const std::vector<std::unique_ptr<Initializer> >&
 
 bool Initializer::CanReduceToExpression()
 {
+    /// TODO this needs to always return true because default param arguments
+    /// can be arrays, and need to be expressions
+
     return !IsExpression() &&
            m_SubInitializers.size() == 1 &&
            m_SubInitializers[0]->IsExpression();
