@@ -184,7 +184,8 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             if( has_type )
             {
                 if( !IsIntegral( type ) ||
-                    type == Type::BOOL )
+                    type == Type::BOOL ||
+                    type == Type::I32 )
                     sema.Error( "Can't combine int with other type " +
                             GetTypeString( type ) );
                 // Don't change the type
