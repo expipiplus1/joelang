@@ -18,15 +18,13 @@ float f = {int(1)};
 
 float4 my_vec = float4((a+1)/(a+1), 4, 3*(2.0+1), 0x10);
 
-int t = 0;
+int t{0};
 int q = 1;
 int w = (t+=2)+=q;
 
 const string strings[2] = {"foo", "bar"+"bar"};
 
 pass p0;
-
-int br = (1);
 
 //void func();
 

@@ -163,7 +163,10 @@ bool InitDeclarator::Parse( Parser& parser,
     if( !parser.Expect<Declarator>( declarator ) )
         return false;
 
-    if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
+    // If we don't see an equals sign, it may be a brace initializer, but we
+    // want to leave the brace to be parsed by Initializer (a little dirty)
+    if( !parser.ExpectTerminal( TerminalType::EQUALS ) &&
+        !parser.PeekTerminal( TerminalType::OPEN_BRACE ) )
     {
         token.reset( new InitDeclarator( std::move(declarator) ) );
         return true;

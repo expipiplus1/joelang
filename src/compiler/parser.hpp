@@ -78,6 +78,13 @@ public:
 
 
     /**
+      * Function to try to match a terminal but not consume it
+      * \returns true if the next terminal is terminal_type
+      * \param terminal_type
+      *   The terminal type to look for
+      */
+    bool PeekTerminal       ( TerminalType terminal_type );
+    /**
       * Function to try to match a terminal
       * \returns true if we have consumed a terminal
       * \param terminal_type
