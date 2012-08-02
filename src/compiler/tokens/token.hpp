@@ -56,6 +56,11 @@ namespace Compiler
   * Parser and a reference to a pointer to the token type. Parse should return
   * true if the token was parsed successfully, otherwise false. It should also
   * return a pointer to the successfully parsed token or nullptr in token
+  *
+  * Most Tokens have three states: Parsed, the token has been generated from
+  * parsing the stream from the lexer; Analyzed, the token has undergone
+  * semantic analysis (this should only happen once); CodeGened, the token has
+  * generated some instructions to llvm (this should only happen once).
   */
 
 /**
