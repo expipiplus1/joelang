@@ -116,7 +116,7 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
             ret &= sub_init->PerformSema( sema, desired_type );
         }
 
-        const std::vector<unsigned> sub_array_extents =
+        const ArrayExtents sub_array_extents =
                                         m_SubInitializers[0]->GetArrayExtents();
         m_ArrayExtents.reserve( 1 + sub_array_extents.size() );
         m_ArrayExtents = { static_cast<unsigned>( m_SubInitializers.size() ) };
@@ -127,7 +127,7 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
     }
 }
 
-const std::vector<unsigned>& Initializer::GetArrayExtents() const
+const ArrayExtents& Initializer::GetArrayExtents() const
 {
     return m_ArrayExtents;
 }

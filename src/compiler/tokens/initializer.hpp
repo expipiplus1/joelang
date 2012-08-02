@@ -40,6 +40,7 @@ enum class Type;
 
 namespace Compiler
 {
+typedef std::vector<unsigned> ArrayExtents;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
@@ -87,7 +88,7 @@ public:
       */
     bool PerformSema( SemaAnalyzer& sema, Type desired_type );
 
-    const std::vector<unsigned>& GetArrayExtents() const;
+    const ArrayExtents& GetArrayExtents() const;
 
     /**
       * \returns true if this initializer represents just an expression
@@ -138,7 +139,7 @@ public:
 private:
     std::vector<std::unique_ptr<Initializer> > m_SubInitializers;
     Expression_up                              m_Expression;
-    std::vector<unsigned>                      m_ArrayExtents;
+    ArrayExtents                               m_ArrayExtents;
 };
 
 } // namespace Compiler

@@ -42,6 +42,7 @@ namespace llvm
 namespace JoeLang
 {
 
+typedef std::vector<unsigned> ArrayExtents;
 enum class Type;
 
 namespace Compiler
@@ -95,7 +96,7 @@ public:
 
     Type GetType() const;
     Type GetUnderlyingType() const;
-    std::vector<unsigned> GetArrayExtents() const;
+    ArrayExtents GetArrayExtents() const;
 
     jl_bool            GetBool() const;
     jl_i8              GetI8() const;

@@ -790,7 +790,7 @@ llvm::Constant* CodeGenerator::CreateArray(
 
 llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 Type type,
-                                std::vector<unsigned> array_extents,
+                                ArrayExtents array_extents,
                                 bool is_const,
                                 const GenericValue& initializer,
                                 const std::string& name )

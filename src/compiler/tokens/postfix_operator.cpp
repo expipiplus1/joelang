@@ -138,7 +138,7 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    const std::vector<unsigned> extents = expression->GetArrayExtents();
+    const ArrayExtents extents = expression->GetArrayExtents();
     assert( extents.size() != 0 && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
@@ -169,7 +169,7 @@ llvm::Value* SubscriptOperator::CodeGenPointerTo(
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
 {
     assert( expression && "SubscriptOperator given an null expression" );
-    const std::vector<unsigned>& array_extents = expression->GetArrayExtents();
+    const ArrayExtents& array_extents = expression->GetArrayExtents();
     if( array_extents.size() > 1 )
         return Type::ARRAY;
     return expression->GetUnderlyingType();
@@ -182,7 +182,7 @@ Type SubscriptOperator::GetUnderlyingType(
     return expression->GetUnderlyingType();
 }
 
-const std::vector<unsigned>& SubscriptOperator::GetArrayExtents(
+const ArrayExtents& SubscriptOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     return m_ArrayExtents;
@@ -275,11 +275,11 @@ Type ArgumentListOperator::GetUnderlyingType(
     return Type::UNKNOWN;
 }
 
-const std::vector<unsigned>& ArgumentListOperator::GetArrayExtents(
+const ArrayExtents& ArgumentListOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    const static std::vector<unsigned> empty;
+    const static ArrayExtents empty;
     return empty;
 }
 
@@ -380,11 +380,11 @@ Type MemberAccessOperator::GetUnderlyingType(
     return Type::UNKNOWN;
 }
 
-const std::vector<unsigned>& MemberAccessOperator::GetArrayExtents(
+const ArrayExtents& MemberAccessOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    const static std::vector<unsigned> empty;
+    const static ArrayExtents empty;
     return empty;
 }
 
@@ -463,11 +463,11 @@ Type IncrementOrDecrementOperator::GetUnderlyingType(
     return Type::UNKNOWN;
 }
 
-const std::vector<unsigned>& IncrementOrDecrementOperator::GetArrayExtents(
+const ArrayExtents& IncrementOrDecrementOperator::GetArrayExtents(
                                         const Expression_up& expression ) const
 {
     assert( false && "Complete me" );
-    const static std::vector<unsigned> empty;
+    const static ArrayExtents empty;
     return empty;
 }
 

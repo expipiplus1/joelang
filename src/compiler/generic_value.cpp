@@ -227,7 +227,7 @@ GenericValue::GenericValue( std::vector<GenericValue> array_value )
 #ifndef NDEBUG
     assert( !m_ArrayValue.empty() &&
             "GenericValue given an empty array value" );
-    const std::vector<unsigned>& extents = m_ArrayValue[0].GetArrayExtents();
+    const ArrayExtents& extents = m_ArrayValue[0].GetArrayExtents();
     Type underlying_type = m_ArrayValue[0].GetUnderlyingType();
     for( unsigned i = 1; i < m_ArrayValue.size(); ++i )
     {
@@ -302,17 +302,15 @@ Type GenericValue::GetUnderlyingType() const
     return m_Type;
 }
 
-std::vector<unsigned> GenericValue::GetArrayExtents() const
+ArrayExtents GenericValue::GetArrayExtents() const
 {
     if( m_Type == Type::ARRAY )
     {
         assert( !m_ArrayValue.empty() &&
                 "Trying to get the array extents of an empty array "
                 "genericvalue" );
-        std::vector<unsigned> ret =
-                               { static_cast<unsigned>( m_ArrayValue.size() ) };
-        const std::vector<unsigned>& sub_extents =
-                                              m_ArrayValue[0].GetArrayExtents();
+        ArrayExtents ret = { static_cast<unsigned>( m_ArrayValue.size() ) };
+        const ArrayExtents& sub_extents = m_ArrayValue[0].GetArrayExtents();
         ret.insert( ret.end(), sub_extents.begin(), sub_extents.end() );
         return ret;
     }

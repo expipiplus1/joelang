@@ -48,7 +48,7 @@ namespace Compiler
 {
 
 Variable::Variable( Type base_type,
-                    std::vector<unsigned> array_extents,
+                    ArrayExtents array_extents,
                     bool is_const,
                     bool is_global,
                     GenericValue initializer,
@@ -104,7 +104,7 @@ Type Variable::GetUnderlyingType() const
     return m_Type;
 }
 
-const std::vector<unsigned>& Variable::GetArrayExtents() const
+const ArrayExtents& Variable::GetArrayExtents() const
 {
     return m_ArrayExtents;
 }

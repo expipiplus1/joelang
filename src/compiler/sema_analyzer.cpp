@@ -233,7 +233,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
     {
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
                                                         v.second.GetType(),
-                                                        std::vector<unsigned>(),
+                                                        ArrayExtents{},
                                                         true,
                                                         true,
                                                         std::move(v.second),

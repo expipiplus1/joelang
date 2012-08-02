@@ -153,9 +153,8 @@ llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
 // Misc
 //
 
-llvm::Type* Runtime::GetLLVMType(
-                              Type base_type,
-                              const std::vector<unsigned>& array_extents ) const
+llvm::Type* Runtime::GetLLVMType( Type base_type,
+                                  const ArrayExtents& array_extents ) const
 {
     llvm::Type* t;
     if( base_type == Type::DOUBLE )

@@ -166,7 +166,7 @@ Type BinaryOperatorExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-const std::vector<unsigned>& BinaryOperatorExpression::GetArrayExtents() const
+const ArrayExtents& BinaryOperatorExpression::GetArrayExtents() const
 {
     // Can't binary op between two arrays
     assert( m_LeftSide->GetArrayExtents().size() == 0 &&

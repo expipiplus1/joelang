@@ -264,7 +264,7 @@ Type AssignmentExpression::GetUnderlyingType() const
     return m_AssigneePtr->GetUnderlyingType();
 }
 
-const std::vector<unsigned>& AssignmentExpression::GetArrayExtents() const
+const ArrayExtents& AssignmentExpression::GetArrayExtents() const
 {
     return m_AssigneePtr->GetArrayExtents();
 }
@@ -414,7 +414,7 @@ Type ConditionalExpression::GetUnderlyingType() const
                           m_FalseExpression->GetUnderlyingType() );
 }
 
-const std::vector<unsigned>& ConditionalExpression::GetArrayExtents() const
+const ArrayExtents& ConditionalExpression::GetArrayExtents() const
 {
     // The array extents should be the same between the two sides
     return m_TrueExpression->GetArrayExtents();
@@ -589,7 +589,7 @@ Type CastExpression::GetUnderlyingType() const
     return m_CastType;
 }
 
-const std::vector<unsigned>& CastExpression::GetArrayExtents() const
+const ArrayExtents& CastExpression::GetArrayExtents() const
 {
     return m_Expression->GetArrayExtents();
 }
@@ -740,7 +740,7 @@ Type UnaryExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-const std::vector<unsigned>& UnaryExpression::GetArrayExtents() const
+const ArrayExtents& UnaryExpression::GetArrayExtents() const
 {
     assert( m_Expression->GetArrayExtents().size() == 0 &&
             "Unary Expression given an array" );
@@ -865,7 +865,7 @@ Type PostfixExpression::GetUnderlyingType() const
     return m_PostfixOperator->GetUnderlyingType( m_Expression );
 }
 
-const std::vector<unsigned>& PostfixExpression::GetArrayExtents() const
+const ArrayExtents& PostfixExpression::GetArrayExtents() const
 {
     return m_PostfixOperator->GetArrayExtents( m_Expression );
 }
@@ -1012,9 +1012,9 @@ Type TypeConstructorExpression::GetUnderlyingType() const
     return m_Type;
 }
 
-const std::vector<unsigned>& TypeConstructorExpression::GetArrayExtents() const
+const ArrayExtents& TypeConstructorExpression::GetArrayExtents() const
 {
-    static const std::vector<unsigned> empty = {};
+    static const ArrayExtents empty = {};
     return empty;
 }
 
@@ -1165,7 +1165,7 @@ Type IdentifierExpression::GetUnderlyingType() const
     return m_Variable->GetUnderlyingType();
 }
 
-const std::vector<unsigned>& IdentifierExpression::GetArrayExtents() const
+const ArrayExtents& IdentifierExpression::GetArrayExtents() const
 {
     assert( m_Variable &&
             "Trying to get the array extents of an unresolved identifier" );

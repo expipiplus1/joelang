@@ -47,6 +47,7 @@ enum class Type;
 namespace Compiler
 {
 
+typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -96,7 +97,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const = 0;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents(
+    const ArrayExtents& GetArrayExtents(
                                     const Expression_up& expression) const = 0;
 
     virtual
@@ -158,7 +159,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents(
+    const ArrayExtents& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     virtual
@@ -174,8 +175,8 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
 private:
-    Expression_up           m_IndexExpression;
-    std::vector<unsigned>   m_ArrayExtents;
+    Expression_up  m_IndexExpression;
+    ArrayExtents   m_ArrayExtents;
 };
 
 /**
@@ -210,7 +211,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents(
+    const ArrayExtents& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     /** \returns false **/
@@ -261,7 +262,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents(
+    const ArrayExtents& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     virtual
@@ -311,7 +312,7 @@ public:
     Type GetUnderlyingType( const Expression_up& expression ) const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents(
+    const ArrayExtents& GetArrayExtents(
                             const Expression_up& expression ) const override;
 
     /** \returns false **/

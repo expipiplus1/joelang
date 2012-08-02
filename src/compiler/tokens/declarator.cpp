@@ -91,8 +91,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     m_IsGlobal = sema.InGlobalScope();
 
-    const std::vector<unsigned>& array_extents =
-                                        m_Declarator->GetArrayExtents();
+    const ArrayExtents& array_extents = m_Declarator->GetArrayExtents();
 
     //
     // Allow initializing a variable with a single value in braces for
@@ -231,7 +230,7 @@ const std::string& Declarator::GetIdentifier() const
     return m_Identifier;
 }
 
-const std::vector<unsigned>& Declarator::GetArrayExtents() const
+const ArrayExtents& Declarator::GetArrayExtents() const
 {
     return m_ArrayExtents;
 }

@@ -49,6 +49,8 @@ namespace llvm
 
 namespace JoeLang
 {
+    typedef std::vector<unsigned> ArrayExtents;
+
     enum class Type;
 
     namespace Compiler
@@ -147,7 +149,7 @@ public:
       * \returns the array extents of this expression's return type
       */
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const = 0;
+    const ArrayExtents& GetArrayExtents() const = 0;
 
     /**
       * \returns true if the Expression represents a l-value
@@ -237,7 +239,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -307,7 +309,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -365,7 +367,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -384,7 +386,7 @@ public:
       * Casts vectors to a different base type, preserving size
       */
     static
-    Expression_up CreateBaseTypeCast( Type base_type, 
+    Expression_up CreateBaseTypeCast( Type base_type,
                                       Expression_up cast_expression );
 
     static
@@ -447,7 +449,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -503,7 +505,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -565,7 +567,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -638,7 +640,7 @@ public:
     Type GetUnderlyingType() const override;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override;
+    const ArrayExtents& GetArrayExtents() const override;
 
     /** \returns true **/
     virtual

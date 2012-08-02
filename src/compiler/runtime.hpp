@@ -60,6 +60,8 @@ enum class Type;
 namespace Compiler
 {
 
+typedef std::vector<unsigned> ArrayExtents;
+
 enum class RuntimeFunction
 {
     STRING_EQUAL,
@@ -84,7 +86,7 @@ public:
 
     llvm::Type*         GetLLVMType(
                         Type base_type,
-                        const std::vector<unsigned>& array_extents = {} ) const;
+                        const ArrayExtents& array_extents = {} ) const;
 private:
     enum class ReturnType
     {

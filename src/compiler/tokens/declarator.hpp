@@ -42,6 +42,7 @@ enum class Type;
 namespace Compiler
 {
 class ArraySpecifier;
+typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class Declarator;
 class DeclSpecs;
@@ -138,7 +139,7 @@ public:
     const std::string& GetIdentifier() const;
 
     /** \returns a vector of the sizes of the array dimensions **/
-    const std::vector<unsigned>& GetArrayExtents() const;
+    const ArrayExtents& GetArrayExtents() const;
 
     /**
       * Parses a direct declarator
@@ -154,10 +155,10 @@ public:
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
 private:
-    std::string             m_Identifier;
-    FunctionSpecifier_up    m_FunctionSpecifier;
-    ArraySpecifierVector    m_ArraySpecifiers;
-    std::vector<unsigned>   m_ArrayExtents;
+    std::string          m_Identifier;
+    FunctionSpecifier_up m_FunctionSpecifier;
+    ArraySpecifierVector m_ArraySpecifiers;
+    ArrayExtents         m_ArrayExtents;
 };
 
 } // namespace Compiler

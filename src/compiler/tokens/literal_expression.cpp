@@ -75,9 +75,9 @@ Type LiteralExpression::GetUnderlyingType() const
     return GetReturnType();
 }
 
-const std::vector<unsigned>& LiteralExpression::GetArrayExtents() const
+const ArrayExtents& LiteralExpression::GetArrayExtents() const
 {
-    const static std::vector<unsigned> empty;
+    const static ArrayExtents empty;
     return empty;
 }
 

@@ -134,7 +134,7 @@ public:
     Type GetUnderlyingType() const override final;
 
     virtual
-    const std::vector<unsigned>& GetArrayExtents() const override final;
+    const ArrayExtents& GetArrayExtents() const override final;
 
     virtual
     bool IsConst() const override;

@@ -65,7 +65,7 @@ public:
       * an initializer
       */
     Variable( Type type,
-              std::vector<unsigned> array_extents,
+              ArrayExtents array_extents,
               bool is_const,
               bool is_global = false,
               GenericValue initializer = GenericValue(),
@@ -79,14 +79,14 @@ public:
 
     Type GetUnderlyingType() const;
 
-    const std::vector<unsigned>& GetArrayExtents() const;
+    const ArrayExtents& GetArrayExtents() const;
 
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
 private:
     Type m_Type;
-    std::vector<unsigned> m_ArrayExtents;
+    ArrayExtents m_ArrayExtents;
     bool m_IsConst;
     bool m_IsGlobal;
     GenericValue m_Initializer;
