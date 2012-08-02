@@ -163,7 +163,11 @@ PassDeclaration::~PassDeclaration()
 
 void PassDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-    sema.DeclarePass( m_Name, std::move(m_Definition) );
+    // Only declare it if it's not an anonymous pass
+    if( !m_Name.empty() )
+        sema.DeclarePass( m_Name, std::move(m_Definition) );
+    else if( sema.InGlobalScope() )
+        sema.Error( "Declaring an anonymous pass in global scope" );
 }
 
 const std::string& PassDeclaration::GetName() const
@@ -179,6 +183,11 @@ bool PassDeclaration::HasDefinition() const
 const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 {
     return m_Definition;
+}
+
+std::unique_ptr<PassDefinition> PassDeclaration::TakeDefinition()
+{
+    return std::move(m_Definition);
 }
 
 void PassDeclaration::Print( int depth ) const
@@ -206,10 +215,9 @@ bool PassDeclaration::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::PASS ) )
         return false;
 
-    // TODO diagnostic about anonymous passes
+    // Allow anonymous passes
     std::string name;
-    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
-        return false;
+    parser.ExpectTerminal( TerminalType::IDENTIFIER, name );
 
     // If we have a semicolon here, this pass doesn't have a definition
     if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
@@ -264,8 +272,11 @@ TechniqueDeclaration::~TechniqueDeclaration()
 void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     sema.DeclareTechnique( m_Name );
+    SemaAnalyzer::ScopeHolder scope( sema );
+    scope.Enter();
     for( auto& p : m_Passes )
         p->PerformSema( sema );
+    scope.Leave();
 }
 
 const std::string& TechniqueDeclaration::GetName() const
@@ -300,9 +311,9 @@ bool TechniqueDeclaration::Parse( Parser& parser,
         return false;
 
     // Parse the technique's name into name
+    // Don't worry if there isn't a name, techniques can be anonymous
     std::string name;
-    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, name ) )
-        return false;
+    parser.ExpectTerminal( TerminalType::IDENTIFIER, name );
 
     // Technique Declarations always have a definition
 

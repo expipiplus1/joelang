@@ -165,7 +165,19 @@ void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
     if( m_Declaration )
     {
         m_Declaration->PerformSema( sema );
-        m_DefinitionRef = sema.GetPass( m_Declaration->GetName() );
+        if( !m_Declaration->GetName().empty() )
+            // If this declaration has a name it will have declared itself with
+            // sema and we must pick up the shared pointer from there
+            // TODO passes with the same name
+            m_DefinitionRef = sema.GetPass( m_Declaration->GetName() );
+        else
+        {
+            assert( m_Declaration->GetDefinition() && 
+                    "Anonymous pass without a definition" );
+            // This pass doesn't have a name so construct the shared_ptr here
+            m_DefinitionRef = std::make_shared<std::unique_ptr<PassDefinition> >
+                                            ( m_Declaration->TakeDefinition() );
+        }
     }
     else
     {

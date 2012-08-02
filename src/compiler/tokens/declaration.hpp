@@ -196,6 +196,9 @@ public:
     /** \returns this pass declaration's definition if it has one, otherwise
       * nullptr **/
     const std::unique_ptr<PassDefinition>&  GetDefinition   () const;
+    /** \returns this pass declaration's definition if it has one, otherwise
+      * nullptr **/
+    std::unique_ptr<PassDefinition>         TakeDefinition  ();
 
     /**
       * Parses a pass declaration
