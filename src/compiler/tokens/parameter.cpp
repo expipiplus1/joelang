@@ -42,6 +42,7 @@
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
@@ -52,10 +53,10 @@ namespace Compiler
 // Parameter
 //------------------------------------------------------------------------------
 
-Parameter::Parameter    ( DeclSpecsVector decl_specs,
-                          std::string identifier,
-                          ArraySpecifierVector array_specifiers,
-                          Initializer_up default_value )
+Parameter::Parameter ( DeclSpecsVector decl_specs,
+                       std::string identifier,
+                       ArraySpecifierVector array_specifiers,
+                       Initializer_up default_value )
 :Token( TokenTy::Parameter )
 ,m_DeclarationSpecifiers( std::move(decl_specs) )
 ,m_Identifier( std::move(identifier) )
@@ -72,7 +73,22 @@ Parameter::~Parameter()
 
 bool Parameter::PerformSema( SemaAnalyzer& sema )
 {
-    return false;
+    DeclSpecs decl_specs;
+    decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
+
+    Type base_type = decl_specs.GetType();
+    if( base_type == Type::UNKNOWN )
+    {
+        sema.Error( "No type in declaration specifier" );
+        return false;
+    }
+    else if( base_type == Type::VOID )
+    {
+        sema.Error( "Can't declare variables of void type" );
+        return false;
+    }
+
+    return true;
 }
 
 void Parameter::Print( int depth ) const

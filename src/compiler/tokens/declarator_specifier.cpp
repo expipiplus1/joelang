@@ -132,7 +132,7 @@ bool FunctionSpecifier::PerformSema( SemaAnalyzer& sema )
     bool good = true;
     for( auto& p : m_Parameters )
         good &= p->PerformSema( sema );
-    return false;
+    return good;
 }
 
 void FunctionSpecifier::Print( int depth ) const
