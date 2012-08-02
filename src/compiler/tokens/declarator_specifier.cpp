@@ -32,11 +32,13 @@
 #include <cassert>
 #include <memory>
 #include <utility>
+#include <vector>
 
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/parameter.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/internal/type_properties.hpp>
 
@@ -103,6 +105,52 @@ bool ArraySpecifier::Parse( Parser& parser,
     }
 
     token.reset( new ArraySpecifier( std::move(expression) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// FunctionSpecifier
+//------------------------------------------------------------------------------
+
+FunctionSpecifier::FunctionSpecifier(
+                           std::vector<std::unique_ptr<Parameter> > parameters )
+    :Token( TokenTy::FunctionSpecifier )
+    ,m_Parameters( std::move(parameters) )
+{
+#if !defined(NDEBUG)
+    for( const auto& p : parameters )
+        assert( p && "FunctionSpecifier given null parameter" );
+#endif
+}
+
+FunctionSpecifier::~FunctionSpecifier()
+{
+}
+
+void FunctionSpecifier::PerformSema( SemaAnalyzer& sema )
+{
+    assert( false );
+}
+
+void FunctionSpecifier::Print( int depth ) const
+{
+}
+
+bool FunctionSpecifier::Parse( Parser& parser,
+                            std::unique_ptr<FunctionSpecifier>& token )
+{
+    // Opening round bracket
+    if( !parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
+        return false;
+
+    std::vector<std::unique_ptr<Parameter> > parameters;
+    parser.ExpectListOf<Parameter, TerminalType::COMMA>( parameters );
+    CHECK_PARSER;
+
+    if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
+        return false;
+
+    token.reset( new FunctionSpecifier( std::move(parameters) ) );
     return true;
 }
 

@@ -41,38 +41,44 @@ enum class Type;
 
 namespace Compiler
 {
+class ArraySpecifier;
 class CodeGenerator;
+class DeclarationSpecifier;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
-class Parameter;
 class Parser;
 class SemaAnalyzer;
 
 /**
-  * \class ArraySpecifier
+  * \class Parameter
   * \ingroup Tokens
-  * \brief Matches a ArraySpecifier
+  * \brief Matches a Parameter
   *
-  * ArraySpecifier = '[' Expression ']'
+  * Parameter = DeclarationSpecifier+
+                 ( identifier (ArraySpecifier)* ('=' AssignmentExpression)? )?
   */
-class ArraySpecifier : public JoeLang::Compiler::Token
+class Parameter : public JoeLang::Compiler::Token
 {
 public:
-    /** This asserts that expression is not null **/
-    ArraySpecifier    ( Expression_up expression );
+    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
+    using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
+
+    /** This asserts that there is at least one declaration specifier. **/
+    Parameter    ( DeclSpecsVector decl_specs,
+                   std::string identifier,
+                   ArraySpecifierVector array_specifiers,
+                   Expression_up default_value );
     virtual
-    ~ArraySpecifier   ();
+    ~Parameter   ();
 
     void PerformSema( SemaAnalyzer& sema );
-
-    Expression_up GetExpression();
 
     virtual
     void Print( int depth ) const override;
 
     /**
-      * Parses an array specifier
+      * Parses a parameter declaration
       * \param parser
       *   The current Parser
       * \param token
@@ -82,47 +88,13 @@ public:
       *   false if the parse failed
       */
     static
-    bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
+    bool Parse ( Parser& parser, std::unique_ptr<Parameter>& token );
 
 private:
-    Expression_up m_Expression;
-};
-
-/**
-  * \class FunctionSpecifier
-  * \ingroup Tokens
-  * \brief Matches a FunctionSpecifier
-  *
-  * FunctionSpecifier = '(' (Parameter(,Parameter)*)? ')'
-  */
-class FunctionSpecifier : public JoeLang::Compiler::Token
-{
-public:
-    /** This asserts that no parameter is null **/
-    FunctionSpecifier    ( std::vector<std::unique_ptr<Parameter>> parameters );
-    virtual
-    ~FunctionSpecifier   ();
-
-    void PerformSema( SemaAnalyzer& sema );
-
-    virtual
-    void Print( int depth ) const override;
-
-    /**
-      * Parses a function specifier
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \return
-      *   true upon parsing successfully
-      *   false if the parse failed
-      */
-    static
-    bool Parse ( Parser& parser, std::unique_ptr<FunctionSpecifier>& token );
-
-private:
-    std::vector<std::unique_ptr<Parameter> > m_Parameters;
+    DeclSpecsVector      m_DeclarationSpecifiers;
+    std::string          m_Identifier;
+    ArraySpecifierVector m_ArraySpecifers;
+    Expression_up        m_DefaultValue;
 };
 
 } // namespace Compiler

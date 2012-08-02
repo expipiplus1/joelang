@@ -97,6 +97,9 @@ public:
         Declaration_Start = EmptyDeclaration,
         Declaration_End = FunctionDefinition,
 
+        FunctionSpecifier,
+        Parameter,
+
         AssignmentOperator,
 
         SubscriptOperator,

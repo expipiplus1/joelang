@@ -48,6 +48,8 @@ class DeclSpecs;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
+class FunctionSpecifier;
+typedef std::unique_ptr<FunctionSpecifier> FunctionSpecifier_up;
 class Initializer;
 class Parser;
 class SemaAnalyzer;
@@ -107,8 +109,7 @@ private:
   * \ingroup Tokens
   * \brief Matches a Declarator with a param list or array specifiers or nothing
   *
-  * Declarator = identifier ( ( '(' ParamList ')' )
-  *                         | ( ArraySpecifier* ) )
+  * Declarator = identifier FunctionSpecifier? ArraySpecifier*
   */
 class Declarator : public JoeLang::Compiler::Token
 {
@@ -116,6 +117,7 @@ public:
     using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
 
     Declarator    ( std::string identifier,
+                    FunctionSpecifier_up function_specifier,
                     ArraySpecifierVector array_specifiers );
     virtual
     ~Declarator   ();
@@ -153,6 +155,7 @@ public:
 
 private:
     std::string             m_Identifier;
+    FunctionSpecifier_up    m_FunctionSpecifier;
     ArraySpecifierVector    m_ArraySpecifiers;
     std::vector<unsigned>   m_ArrayExtents;
 };

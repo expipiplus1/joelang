@@ -604,18 +604,6 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     //
     Type type = DeduceType( std::move(type_specs), sema );
 
-    if( type == Type::UNKNOWN )
-    {
-        sema.Error( "No type in declaration specifier" );
-        // No point in declaring things with no type
-        return;
-    }
-    else if( type == Type::VOID )
-    {
-        sema.Error( "Can't declare variables of void type" );
-        return;
-    }
-
     DeclSpecs decl_specs( is_const, type );
 
     for( const auto& declarator : m_Declarators )

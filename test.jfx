@@ -26,6 +26,10 @@ const string strings[2] = {"foo", "bar"+"bar"};
 
 pass p0;
 
+int br = (1);
+
+//void func();
+
 technique t1
 {
     p0;

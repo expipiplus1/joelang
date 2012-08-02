@@ -72,12 +72,25 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
+    Type base_type = decl_specs.GetType();
+
+    if( base_type == Type::UNKNOWN )
+    {
+        sema.Error( "No type in declaration specifier" );
+        // No point in declaring things with no type
+        return;
+    }
+    else if( base_type == Type::VOID )
+    {
+        sema.Error( "Can't declare variables of void type" );
+        return;
+    }
+
     // Resolve things in the declarator
     bool can_init = m_Declarator->PerformSema( sema );
 
     m_IsGlobal = sema.InGlobalScope();
 
-    Type base_type = decl_specs.GetType();
     const std::vector<unsigned>& array_extents =
                                         m_Declarator->GetArrayDimensionSizes();
 
@@ -171,9 +184,11 @@ bool InitDeclarator::Parse( Parser& parser,
 //------------------------------------------------------------------------------
 
 Declarator::Declarator( std::string identifier,
+                        FunctionSpecifier_up function_specifier,
                         Declarator::ArraySpecifierVector array_specifiers )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
+    ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
 {
 }
@@ -223,17 +238,16 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
-    // Is this a function declarator?
-    if( parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
-    {
-        parser.Error( "Functions not implemented yet" );
-    }
+    std::unique_ptr<FunctionSpecifier> function_specifier;
+    parser.Expect<FunctionSpecifier>( function_specifier );
+    CHECK_PARSER;
 
     ArraySpecifierVector array_specifiers;
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
     token.reset( new Declarator( std::move(identifier),
+                                 std::move(function_specifier),
                                  std::move(array_specifiers) ) );
     return true;
 }
