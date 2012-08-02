@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
@@ -40,8 +41,10 @@ enum class Type;
 namespace Compiler
 {
 
+class DeclarationSpecifier;
+enum class TypeSpec;
 class Parser;
-
+class SemaAnalyzer;
 
 /**
   * \class DeclSpecs
@@ -51,11 +54,18 @@ class Parser;
 class DeclSpecs
 {
 public:
-    DeclSpecs( bool is_const, Type type );
+    DeclSpecs();
+
+    void AnalyzeDeclSpecs(
+        const std::vector<std::unique_ptr<DeclarationSpecifier> >& decl_specs,
+        SemaAnalyzer& sema );
 
     bool IsConst() const;
     Type GetType() const;
 
+    static
+    Type DeduceType( std::vector<TypeSpec> type_specs,
+                     SemaAnalyzer& sema );
 private:
     bool m_IsConst;
     Type m_Type;
@@ -90,6 +100,21 @@ public:
 private:
 };
 
+enum class TypeSpec
+{
+    VOID,
+    STRING,
+    FLOAT,
+    FLOAT4,
+    DOUBLE,
+    BOOL,
+    CHAR,
+    SHORT,
+    INT,
+    LONG,
+    SIGNED,
+    UNSIGNED
+};
 /**
   * \class TypeSpecifier
   * \ingroup Tokens
@@ -102,21 +127,7 @@ class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
     // the ordering here is imporant for VariableDeclarationList::PerformSema
-    enum class TypeSpec
-    {
-        VOID,
-        STRING,
-        FLOAT,
-        FLOAT4,
-        DOUBLE,
-        BOOL,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        SIGNED,
-        UNSIGNED
-    };
+
 
     explicit
     TypeSpecifier( TypeSpec type_spec );

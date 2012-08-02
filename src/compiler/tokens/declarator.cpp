@@ -203,6 +203,8 @@ Declarator::~Declarator()
 bool Declarator::PerformSema( SemaAnalyzer& sema )
 {
     bool ret = true;
+    if( m_FunctionSpecifier )
+        ret &= m_FunctionSpecifier->PerformSema( sema );
     for( auto& array_specifier : m_ArraySpecifiers )
     {
         // This ensures it's const

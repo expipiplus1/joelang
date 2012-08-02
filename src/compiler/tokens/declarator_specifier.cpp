@@ -127,9 +127,12 @@ FunctionSpecifier::~FunctionSpecifier()
 {
 }
 
-void FunctionSpecifier::PerformSema( SemaAnalyzer& sema )
+bool FunctionSpecifier::PerformSema( SemaAnalyzer& sema )
 {
-    assert( false );
+    bool good = true;
+    for( auto& p : m_Parameters )
+        good &= p->PerformSema( sema );
+    return false;
 }
 
 void FunctionSpecifier::Print( int depth ) const

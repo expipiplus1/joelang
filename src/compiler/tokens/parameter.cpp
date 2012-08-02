@@ -40,7 +40,7 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -55,7 +55,7 @@ namespace Compiler
 Parameter::Parameter    ( DeclSpecsVector decl_specs,
                           std::string identifier,
                           ArraySpecifierVector array_specifiers,
-                          Expression_up default_value )
+                          Initializer_up default_value )
 :Token( TokenTy::Parameter )
 ,m_DeclarationSpecifiers( std::move(decl_specs) )
 ,m_Identifier( std::move(identifier) )
@@ -70,8 +70,9 @@ Parameter::~Parameter()
 {
 }
 
-void Parameter::PerformSema( SemaAnalyzer& sema )
+bool Parameter::PerformSema( SemaAnalyzer& sema )
 {
+    return false;
 }
 
 void Parameter::Print( int depth ) const
@@ -86,7 +87,7 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
 
     std::string identifier;
     ArraySpecifierVector array_specifiers;
-    Expression_up default_value;
+    Initializer_up default_value;
 
     parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier );
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
@@ -96,7 +97,7 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
     // if we also match an '='
     if( !identifier.empty() &&
         parser.ExpectTerminal( TerminalType::EQUALS ) &&
-        !parser.Expect<AssignmentExpression>( default_value ) )
+        !parser.Expect<Initializer>( default_value ) )
         return false;
 
     token.reset( new Parameter( std::move(decl_specs),

@@ -29,11 +29,15 @@
 
 #include "declaration_specifier.hpp"
 
+#include <algorithm>
 #include <memory>
 
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
+#include <engine/internal/type_properties.hpp>
 #include <engine/types.hpp>
 
 namespace JoeLang
@@ -45,10 +49,51 @@ namespace Compiler
 // DeclSpecs
 //------------------------------------------------------------------------------
 
-DeclSpecs::DeclSpecs( bool is_const, Type type )
-    :m_IsConst( is_const )
-    ,m_Type( type )
+DeclSpecs::DeclSpecs()
+    :m_IsConst( false )
+    ,m_Type( Type::UNKNOWN )
 {
+}
+
+void DeclSpecs::AnalyzeDeclSpecs(
+        const std::vector<std::unique_ptr<DeclarationSpecifier> >& decl_specs,
+        SemaAnalyzer& sema )
+{
+    std::vector<TypeSpec> type_specs;
+    m_IsConst = false;
+
+    for( const auto& t : decl_specs )
+    {
+        if( isa<TypeQualifier>(t) )
+        {
+            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
+            switch( type_qual->GetQualifier() )
+            {
+            case TypeQualifier::TypeQual::CONST:
+                m_IsConst = true;
+                break;
+            case TypeQualifier::TypeQual::VOLATILE:
+                sema.Warning( "volatile specfier ignored in declaration" );
+                break;
+            }
+        }
+        else if( isa<TypeSpecifier>(t) )
+        {
+            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
+            type_specs.push_back( type_spec->GetSpecifier() );
+        }
+        else if( isa<StorageClassSpecifier>(t) )
+        {
+            //StorageClassSpecifier* storage_class =
+                    //static_cast<StorageClassSpecifier*>( t.get() );
+            sema.Error( "TODO, handle storage class specifiers" );
+        }
+    }
+
+    //
+    // Get the type from the specifiers
+    //
+    m_Type = DeduceType( std::move(type_specs), sema );
 }
 
 /// TODO rename to has const specifier
@@ -60,6 +105,147 @@ bool DeclSpecs::IsConst() const
 Type DeclSpecs::GetType() const
 {
     return m_Type;
+}
+
+Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
+                            SemaAnalyzer& sema )
+{
+    bool is_signed = false;
+    bool has_type = false;
+    Type type;
+
+    // Sort the type specifiers to ease combination
+    std::sort( type_specs.begin(), type_specs.end() );
+
+    /// TODO do this in a better way
+    for( auto ts : type_specs )
+    {
+        switch( ts )
+        {
+        case TypeSpec::VOID:
+            if( has_type )
+                sema.Error( "Can't combine void with other type " +
+                            GetTypeString( type ) );
+            type = Type::VOID;
+            has_type = true;
+            break;
+        case TypeSpec::STRING:
+            if( has_type )
+                sema.Error( "Can't combine string with other type " +
+                            GetTypeString( type ) );
+            type = Type::STRING;
+            has_type = true;
+            break;
+        case TypeSpec::FLOAT:
+            if( has_type )
+                sema.Error( "Can't combine float with other type " +
+                            GetTypeString( type ) );
+            type = Type::FLOAT;
+            has_type = true;
+            break;
+        case TypeSpec::FLOAT4:
+            if( has_type )
+                sema.Error( "Can't combine float4 with other type " +
+                            GetTypeString( type ) );
+            type = Type::FLOAT4;
+            has_type = true;
+            break;
+        case TypeSpec::DOUBLE:
+            if( has_type )
+                sema.Error( "Can't combine double with other type " +
+                            GetTypeString( type ) );
+            type = Type::DOUBLE;
+            has_type = true;
+            break;
+        case TypeSpec::BOOL:
+            if( has_type )
+                sema.Error( "Can't combine bool with other type " +
+                            GetTypeString( type ) );
+            type = Type::BOOL;
+            has_type = true;
+            break;
+        case TypeSpec::CHAR:
+            if( has_type )
+                sema.Error( "Can't combine char with other type " +
+                            GetTypeString( type ) );
+            // Types are signed by default
+            type = Type::I8;
+            has_type = true;
+            break;
+        case TypeSpec::SHORT:
+            if( has_type )
+                sema.Error( "Can't combine short with other type " +
+                            GetTypeString( type ) );
+            // Types are signed by default
+            type = Type::I16;
+            has_type = true;
+            break;
+        case TypeSpec::INT:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine int with other type " +
+                            GetTypeString( type ) );
+                // Don't change the type
+            }
+            else
+            {
+                type = Type::I32;
+                has_type = true;
+            }
+            break;
+        case TypeSpec::LONG:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL ||
+                    type == Type::I8 ||
+                    type == Type::I16 )
+                    sema.Error( "Can't combine long with other type " +
+                                GetTypeString( type ) );
+            }
+            has_type = true;
+            type = Type::I64;
+            break;
+        case TypeSpec::SIGNED:
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine signed with other type " +
+                                GetTypeString( type ) );
+                // Types are signed by default, no need to make them signed
+            }
+            else
+            {
+                has_type = true;
+                type = Type::I32;
+            }
+            is_signed = true;
+            break;
+        case TypeSpec::UNSIGNED:
+            if( is_signed )
+                sema.Error( "Declaration can't be signed and unsigned" );
+            if( has_type )
+            {
+                if( !IsIntegral( type ) ||
+                    type == Type::BOOL )
+                    sema.Error( "Can't combine unsigned with other type: " +
+                                GetTypeString( type ) );
+                else
+                    type = MakeUnsigned( type );
+            }
+            else
+            {
+                has_type = true;
+                type = Type::U32;
+            }
+            break;
+        }
+    }
+
+    return type;
 }
 
 //------------------------------------------------------------------------------
@@ -122,7 +308,7 @@ void TypeSpecifier::Print( int depth ) const
 {
 }
 
-TypeSpecifier::TypeSpec TypeSpecifier::GetSpecifier() const
+TypeSpec TypeSpecifier::GetSpecifier() const
 {
     return m_TypeSpec;
 }

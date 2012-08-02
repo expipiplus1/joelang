@@ -44,9 +44,8 @@ namespace Compiler
 class ArraySpecifier;
 class CodeGenerator;
 class DeclarationSpecifier;
-class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
+class Initializer;
+typedef std::unique_ptr<Initializer> Initializer_up;
 class Parser;
 class SemaAnalyzer;
 
@@ -56,7 +55,7 @@ class SemaAnalyzer;
   * \brief Matches a Parameter
   *
   * Parameter = DeclarationSpecifier+
-                 ( identifier (ArraySpecifier)* ('=' AssignmentExpression)? )?
+                 ( identifier (ArraySpecifier)* ('=' Initializer)? )?
   */
 class Parameter : public JoeLang::Compiler::Token
 {
@@ -68,11 +67,11 @@ public:
     Parameter    ( DeclSpecsVector decl_specs,
                    std::string identifier,
                    ArraySpecifierVector array_specifiers,
-                   Expression_up default_value );
+                   Initializer_up default_value );
     virtual
     ~Parameter   ();
 
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     virtual
     void Print( int depth ) const override;
@@ -94,7 +93,7 @@ private:
     DeclSpecsVector      m_DeclarationSpecifiers;
     std::string          m_Identifier;
     ArraySpecifierVector m_ArraySpecifers;
-    Expression_up        m_DefaultValue;
+    Initializer_up       m_DefaultValue;
 };
 
 } // namespace Compiler

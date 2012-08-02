@@ -336,10 +336,6 @@ public:
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<VariableListOrFunctionDefinition>& token );
-
-    static
-    Type DeduceType( std::vector<TypeSpecifier::TypeSpec> type_specs,
-                     SemaAnalyzer& sema );
 };
 
 /**

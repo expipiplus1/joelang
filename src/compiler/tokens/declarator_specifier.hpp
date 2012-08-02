@@ -103,7 +103,7 @@ public:
     virtual
     ~FunctionSpecifier   ();
 
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     virtual
     void Print( int depth ) const override;
