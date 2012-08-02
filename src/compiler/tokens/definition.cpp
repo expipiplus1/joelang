@@ -132,13 +132,14 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     assert( m_DefinitionRef && "Trying to generate a pass with no definition" );
     assert( *m_DefinitionRef && "Trying to generate an undefined pass" );
 
+    const std::string& name = IsIdentifier() ? m_Identifier
+                                             : m_Declaration->GetName();
     std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& s : (*m_DefinitionRef)->GetStateAssignments() )
         state_assignments.push_back( s->GenerateStateAssignment(
                                                  code_gen,
-                                                 m_Declaration->GetName() ) );
-    return Pass( IsIdentifier() ? m_Identifier : m_Declaration->GetName(),
-                 std::move(state_assignments) );
+                                                 name ) );
+    return Pass( name, std::move(state_assignments) );
 }
 
 void PassDeclarationOrIdentifier::Print( int depth ) const
@@ -172,7 +173,7 @@ void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
             m_DefinitionRef = sema.GetPass( m_Declaration->GetName() );
         else
         {
-            assert( m_Declaration->GetDefinition() && 
+            assert( m_Declaration->GetDefinition() &&
                     "Anonymous pass without a definition" );
             // This pass doesn't have a name so construct the shared_ptr here
             m_DefinitionRef = std::make_shared<std::unique_ptr<PassDefinition> >
