@@ -24,15 +24,11 @@ int w = (t+=2)+=q;
 
 const string strings[2] = {"foo", "bar"+"bar"};
 
+pass p0;
+
 technique t1
 {
-    pass p0
-    {
-        my_string_state = e;
-        my_bool_state = a;
-        my_bool_state = a &= 3;
-        my_bool_state = a &= 0xf00;
-    }
+    p0;
 
     pass p1
     {
@@ -58,4 +54,12 @@ technique t1
         my_bool_state = 1 == int(1.1);
         my_float4_state = my_vec;
     }
+}
+
+pass p0
+{
+    my_string_state = e;
+    my_bool_state = a;
+    my_bool_state = a &= 3;
+    my_bool_state = a &= 0xf00;
 }
