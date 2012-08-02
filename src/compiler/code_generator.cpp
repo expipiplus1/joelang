@@ -104,7 +104,7 @@ void CodeGenerator::GenerateCode(
     }
     llvm_execution_engine = std::move( m_LLVMExecutionEngine );
 
-    m_LLVMModule->dump();
+    //m_LLVMModule->dump();
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
