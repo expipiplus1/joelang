@@ -95,12 +95,14 @@ void CodeGenerator::GenerateCode(
                     static_cast<TechniqueDeclaration&>( *declaration.get() );
             techniques.push_back( t.GenerateTechnique( *this ) );
         }
+        /* // The variables have already been codegened in sema
         else if( isa<VariableDeclarationList>(declaration) )
         {
             VariableDeclarationList& v =
                     static_cast<VariableDeclarationList&>( *declaration.get() );
             v.CodeGen( *this );
         }
+        */
     }
     llvm_execution_engine = std::move( m_LLVMExecutionEngine );
 
@@ -116,8 +118,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     assert( expression.GetReturnType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
 
-    llvm::Function* function = CreateFunctionPtrFromExpression( expression,
-                                                                name );
+    llvm::Function* function = CreateFunctionFromExpression( expression, name );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
@@ -231,7 +232,7 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 
     auto insert_point = m_LLVMBuilder.saveAndClearIP();
 
-    llvm::Function* function = CreateFunctionPtrFromExpression(
+    llvm::Function* function = CreateFunctionFromExpression(
                                                         expression,
                                                         "TemporaryEvaluation" );
     // Make this function private
@@ -849,7 +850,7 @@ void CodeGenerator::CreateDestroyTemporaryCalls()
     }
 }
 
-llvm::Function* CodeGenerator::CreateFunctionPtrFromExpression(
+llvm::Function* CodeGenerator::CreateFunctionFromExpression(
                                                 const Expression& expression,
                                                 std::string name )
 {

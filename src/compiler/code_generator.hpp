@@ -227,7 +227,7 @@ private:
     /**
       * Create an anonymous llvm function taking no arguments
       */
-    llvm::Function* CreateFunctionPtrFromExpression(
+    llvm::Function* CreateFunctionFromExpression(
                                                 const Expression& expression,
                                                 std::string name = "" );
 
