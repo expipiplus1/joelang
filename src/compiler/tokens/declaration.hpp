@@ -369,8 +369,6 @@ public:
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
-    void CodeGen( CodeGenerator& code_gen ) const;
-
 private:
     DeclSpecsVector m_DeclSpecs;
     DeclaratorVector m_Declarators;
