@@ -35,9 +35,11 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/initializer.hpp>
@@ -105,12 +107,20 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->GetArrayExtents() != m_ArrayExtents )
         sema.Error( "Default parameter value has mismatching array extents" );
 
+    m_Variable = std::make_shared<Variable>( base_type,
+                                             m_ArrayExtents,
+                                             decl_specs.IsConst(),
+                                             false, //Isn't global
+                                             true,  //Is a param
+                                             GenericValue(),
+                                             m_Identifier );
     return true;
 }
 
 void Parameter::Declare( SemaAnalyzer& sema ) const
 {
-    assert( false && "complete me" );
+    assert( m_Variable && "Trying to declare a parameter without a variable" );
+    sema.DeclareVariable( m_Identifier, m_Variable );
 }
 
 void Parameter::Print( int depth ) const

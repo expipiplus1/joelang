@@ -51,12 +51,14 @@ Variable::Variable( Type base_type,
                     ArrayExtents array_extents,
                     bool is_const,
                     bool is_global,
+                    bool is_parameter,
                     GenericValue initializer,
                     std::string name )
     :m_Type( base_type )
     ,m_ArrayExtents( std::move(array_extents) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
+    ,m_IsParameter( is_parameter )
     ,m_Initializer( std::move(initializer) )
     ,m_Name( std::move(name) )
 {

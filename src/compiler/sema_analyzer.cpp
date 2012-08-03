@@ -39,6 +39,7 @@
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/function.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -234,8 +235,9 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
                                                         v.second.GetType(),
                                                         ArrayExtents{},
-                                                        true,
-                                                        true,
+                                                        true, //Is const
+                                                        true, //Is global
+                                                        false,//Isn't a param
                                                         std::move(v.second),
                                                         v.first );
         variable->CodeGen( m_CodeGenerator );
@@ -247,7 +249,7 @@ void SemaAnalyzer::DeclareVariable( const std::string& identifier,
                                     std::shared_ptr<Variable> value )
 {
     bool inserted = m_SymbolStack.rbegin()->m_Variables.insert(
-            std::make_pair( identifier, std::move(value) ) ).second;
+                        std::make_pair( identifier, std::move(value) ) ).second;
 
     if( !inserted )
         Error( "Duplicate definition of variable: " + identifier );
@@ -258,8 +260,8 @@ void SemaAnalyzer::DeclareVariable( const std::string& identifier,
              ++it )
         {
             if( it->m_Variables.find( identifier ) != it->m_Variables.end() )
-                Warning( "Declaration of \'" + identifier +
-                         "\' shadows previous declaration" );
+                Warning( "Declaration of '" + identifier +
+                         "' shadows previous declaration" );
         }
     }
 }
@@ -275,6 +277,28 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
         if( v != it->m_Variables.end() )
             return v->second;
     }
+    return nullptr;
+}
+
+void SemaAnalyzer::DeclareFunction( Function_sp function )
+{
+    const std::string& name = function->GetIdentifier();
+    const auto& duplicate = m_Functions.find( name );
+    if( duplicate != m_Functions.end() )
+    {
+        // If there are duplicate functions with this name check for overloads
+        // and things
+        assert( false && "complete me" );
+    }
+
+    m_Functions.insert( std::make_pair( name, std::move(function) ) );
+}
+
+Function_sp SemaAnalyzer::GetFunction( const std::string& identifier ) const
+{
+    const auto& i = m_Functions.find( identifier );
+    if( i != m_Functions.end() )
+        return i->second;
     return nullptr;
 }
 
@@ -351,6 +375,7 @@ SemaAnalyzer::ScopeHolder::~ScopeHolder()
 
 void SemaAnalyzer::ScopeHolder::Enter()
 {
+    assert( !m_InScope && "Entering a scope twice" );
     m_Sema.EnterScope();
     m_InScope = true;
 }

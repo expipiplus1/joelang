@@ -30,10 +30,9 @@ int func(int);
 
 void vunc();
 
-int func2(bool b, float f[2])
+int func2()
 {
 }
-
 
 technique t1
 {

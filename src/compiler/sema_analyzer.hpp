@@ -49,6 +49,8 @@ class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 class GenericValue;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class Initializer;
 class PassDefinition;
 class TechniqueDefinition;
@@ -153,6 +155,22 @@ public:
     std::shared_ptr<Variable> GetVariable( const std::string& identifier );
 
     /**
+      * Declares a function
+      * \param function
+      *   The function object
+      */
+    void DeclareFunction( Function_sp function );
+
+    /**
+      * \param identifier
+      *   The name of the function
+      * \returns the Function associated with the identifier, or nullptr if
+      *   there is no Function with that name
+      * \todo function overloading
+      */
+    Function_sp GetFunction( const std::string& identifier ) const;
+
+    /**
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;
@@ -247,9 +265,12 @@ private:
     void LeaveScope();
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
+    using FunctionMap = std::map< std::string, Function_sp >;
 
     PassDefinitionMap        m_PassDefinitions;
     std::vector<std::string> m_Techniques;
+
+    FunctionMap              m_Functions;
 
     std::vector<SymbolMaps>  m_SymbolStack;
 

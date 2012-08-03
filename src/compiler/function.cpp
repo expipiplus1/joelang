@@ -29,13 +29,22 @@
 
 #include "function.hpp"
 
+#include <string>
+#include <utility>
+
 namespace JoeLang
 {
 namespace Compiler
 {
 
-Function::Function()
+Function::Function( std::string identifier )
+    :m_Identifier( std::move( identifier ) )
 {
+}
+
+const std::string& Function::GetIdentifier() const
+{
+    return m_Identifier;
 }
 
 void Function::CodeGen( CodeGenerator& code_gen )

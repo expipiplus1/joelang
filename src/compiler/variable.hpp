@@ -68,6 +68,7 @@ public:
               ArrayExtents array_extents,
               bool is_const,
               bool is_global = false,
+              bool is_parameter = false,
               GenericValue initializer = GenericValue(),
               std::string name = "" );
 
@@ -89,10 +90,13 @@ private:
     ArrayExtents m_ArrayExtents;
     bool m_IsConst;
     bool m_IsGlobal;
+    bool m_IsParameter;
     GenericValue m_Initializer;
     std::string m_Name;
 
     /// TODO handle non global variables
+    /// This holds the pointer to the variable, or the llvm::Value* representing
+    /// The argument if it's an argument once it's been codegened
     llvm::Value* m_LLVMPointer = nullptr;
 };
 

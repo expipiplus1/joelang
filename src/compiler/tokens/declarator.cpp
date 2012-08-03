@@ -131,6 +131,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                              array_extents,
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
+                                             false, // Isn't a parameter
                                              can_init ? std::move(initializer)
                                                       : GenericValue(),
                                              m_Declarator->GetIdentifier() );
@@ -221,7 +222,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
     {
         sema.Error( "No type in declaration specifier" );
         // No point in declaring things with no type
-        ret = false;;
+        ret = false;
     }
     else if( base_type == Type::VOID &&
              !IsFunctionDeclarator() )
@@ -231,9 +232,10 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         ret = false;;
     }
 
+    m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
+
     if( m_FunctionSpecifier )
         ret &= m_FunctionSpecifier->PerformSema( sema );
-    m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
     
     if( base_type == Type::VOID &&
         !m_ArrayExtents.empty() )

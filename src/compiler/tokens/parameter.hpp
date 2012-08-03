@@ -49,6 +49,8 @@ class Initializer;
 typedef std::unique_ptr<Initializer> Initializer_up;
 class Parser;
 class SemaAnalyzer;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class Parameter
@@ -104,6 +106,7 @@ private:
 
     // This is filled during performsema
     ArrayExtents         m_ArrayExtents;
+    Variable_sp          m_Variable;
 };
 
 } // namespace Compiler

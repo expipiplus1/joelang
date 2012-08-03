@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <memory>
+#include <string>
 
 namespace JoeLang
 {
@@ -46,10 +46,14 @@ class CodeGenerator;
 class Function
 {
 public:
-    Function();
+    explicit
+    Function( std::string identifier );
+
+    const std::string& GetIdentifier() const;
 
     void CodeGen( CodeGenerator& code_gen );
 private:
+    std::string m_Identifier;
 };
 
 } // namespace Compiler
