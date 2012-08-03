@@ -104,7 +104,7 @@ set( runtime_sources src/runtime/string.cpp
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIRS} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 -I/opt/local/include/gcc48/c++ -L/opt/local/lib/gcc48 -I/opt/local/include/gcc48/c++/x86_64-apple-darwin11 -I${joemath_INCLUDE_DIRS} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
 add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc"
