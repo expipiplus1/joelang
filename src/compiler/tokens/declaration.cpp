@@ -446,6 +446,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 
 void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 {
+    //The variables have already been codegened in performsema
 }
 
 //------------------------------------------------------------------------------
