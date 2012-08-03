@@ -44,8 +44,6 @@ namespace Compiler
 class ArraySpecifier;
 typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
-class CompoundStatement;
-typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class Declarator;
 class DeclSpecs;
 class Expression;
@@ -88,6 +86,11 @@ public:
     void Print( int depth ) const override;
 
     /**
+      * \returns true if declarator is a function declarator
+      */
+    bool IsFunctionDeclarator() const;
+
+    /**
       * Parses a declarator
       * \param parser
       *   The current Parser
@@ -122,8 +125,7 @@ public:
     /** If given a function_body it asserts that it has a function specifier **/
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
-                    ArraySpecifierVector array_specifiers,
-                    CompoundStatement_up compound_statement );
+                    ArraySpecifierVector array_specifiers );
     virtual
     ~Declarator   ();
 
@@ -136,6 +138,8 @@ public:
 
     virtual
     void Print( int depth ) const override;
+
+    bool IsFunctionDeclarator() const;
 
     /**
       * \returns the identifier
@@ -163,7 +167,6 @@ private:
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
-    CompoundStatement_up m_FunctionBody;
 };
 
 } // namespace Compiler

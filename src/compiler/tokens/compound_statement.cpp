@@ -72,6 +72,7 @@ bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
+    token.reset( new CompoundStatement() );
     return true;
 }
 

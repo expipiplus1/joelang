@@ -41,6 +41,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/tokens/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator.hpp>
 #include <compiler/tokens/definition.hpp>
@@ -375,21 +376,32 @@ bool VariableListOrFunctionDefinition::Parse(
     if( !parser.ExpectSequenceOf<DeclarationSpecifier>( decl_specs ) )
         return false;
 
-    // If we see a semicolon after the declaration without a declarator
-    if( parser.ExpectTerminal( TerminalType::SEMICOLON ) )
-    {
-        // TODO This could also be a warning and return an empty
-        // VariableDeclarationList
-        parser.Error( "declaration without a declarator" );
-        return false;
-    }
-    CHECK_PARSER;
-
     // Try and parse some declarators
     DeclaratorVector declarators;
     if( !parser.ExpectListOf<InitDeclarator, TerminalType::COMMA>(
                                                                  declarators ) )
         return false;
+
+    if( declarators.empty() )
+    {
+        parser.Error( "Declaration without a declarator" );
+        return false;
+    }
+
+    CompoundStatement_up function_body;
+
+    if( declarators.size() == 1 &&
+        declarators[0]->IsFunctionDeclarator() &&
+        parser.Expect<CompoundStatement>( function_body ) )
+    {
+        // If there was only one declarator and it's a function declarator and
+        // there's a compound statement then we have a function definiton;
+        token.reset( new FunctionDefinition( std::move(decl_specs),
+                                             std::move(declarators[0]),
+                                             std::move(function_body) ) );
+        return true;
+    }
+    CHECK_PARSER;
 
     // variable declarations must end in a semicolon
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
@@ -440,15 +452,32 @@ void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 // FunctionDefinition
 //------------------------------------------------------------------------------
 
-FunctionDefinition::FunctionDefinition()
+FunctionDefinition::FunctionDefinition( DeclSpecsVector decl_specs,
+                                        InitDeclarator_up declarator,
+                                        CompoundStatement_up body )
     :VariableListOrFunctionDefinition( TokenTy::FunctionDefinition )
+    ,m_DeclarationSpecifiers( std::move(decl_specs) )
+    ,m_Declarator( std::move(declarator) )
+    ,m_Body( std::move(body) )
 {
+#if !defined(NDEBUG)
+    assert( !m_DeclarationSpecifiers.empty() && 
+            "FunctionDefinition given no decl specs" );
+    for( const auto& d : m_DeclarationSpecifiers )
+        assert( d && "FunctionDefinition given a null declaration specifier" );
+    assert( m_Declarator && "FunctionDefinition given a null declarator" );
+    assert( m_Body && "FunctionDefinition given a null body" );
+#endif
 }
 
 FunctionDefinition::~FunctionDefinition()
 {
 }
 
+void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
+{
+    assert( false && "complete me" );
+}
 
 } // namespace Compiler
 } // namespace JoeLang

@@ -39,7 +39,6 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
-#include <compiler/tokens/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -73,6 +72,8 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
+    // todo, move this logic into Declarator
+
     Type base_type = decl_specs.GetType();
 
     if( base_type == Type::UNKNOWN )
@@ -129,7 +130,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                 "Trying to initialize variable with wrong underlying type" );
         if( initializer.GetArrayExtents() != array_extents )
         {
-            sema.Error( "Trying to initialize variable with wrong array extents" );
+            sema.Error( "Trying to initialize variable with wrong array "
+                        "extents" );
             can_init = false;
         }
     }
@@ -156,12 +158,24 @@ void InitDeclarator::Print( int depth ) const
 {
 }
 
+bool InitDeclarator::IsFunctionDeclarator() const
+{
+    return m_Declarator->IsFunctionDeclarator();
+}
+
 bool InitDeclarator::Parse( Parser& parser,
                             std::unique_ptr<InitDeclarator>& token )
 {
     std::unique_ptr<Declarator> declarator;
     if( !parser.Expect<Declarator>( declarator ) )
         return false;
+
+    if( declarator->IsFunctionDeclarator() )
+    {
+        // If this is a function declarator, don't try and parse an initializer
+        token.reset( new InitDeclarator( std::move(declarator) ) );
+        return true;
+    }
 
     // If we don't see an equals sign, it may be a brace initializer, but we
     // want to leave the brace to be parsed by Initializer (a little dirty)
@@ -188,18 +202,12 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
-                        Declarator::ArraySpecifierVector array_specifiers,
-                        CompoundStatement_up function_body )
+                        Declarator::ArraySpecifierVector array_specifiers )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
-    ,m_FunctionBody( std::move(function_body) )
 {
-    if( m_FunctionBody )
-        assert( m_FunctionSpecifier &&
-                "Declarator given a function definition without a function "
-                "specifier" );
 }
 
 Declarator::~Declarator()
@@ -229,6 +237,11 @@ const ArrayExtents& Declarator::GetArrayExtents() const
     return m_ArrayExtents;
 }
 
+bool Declarator::IsFunctionDeclarator() const
+{
+    return static_cast<bool>(m_FunctionSpecifier);
+}
+
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 {
     // Parse an identifier
@@ -244,18 +257,9 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
-    CompoundStatement_up compound_statement;
-
-    if( function_specifier )
-        // If we have a function specifier look for a compound statement
-        parser.Expect<CompoundStatement>( compound_statement );
-
-    CHECK_PARSER;
-
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
-                                 std::move(array_specifiers),
-                                 std::move(compound_statement) ) );
+                                 std::move(array_specifiers) ) );
     return true;
 }
 
