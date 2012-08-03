@@ -155,6 +155,12 @@ bool FunctionSpecifier::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+void FunctionSpecifier::DeclareParameters( SemaAnalyzer& sema )
+{
+    for( const auto& p : m_Parameters )
+        p->Declare( sema );
+}
+
 void FunctionSpecifier::Print( int depth ) const
 {
 }

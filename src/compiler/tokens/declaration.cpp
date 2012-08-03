@@ -397,7 +397,7 @@ bool VariableListOrFunctionDefinition::Parse(
         // If there was only one declarator and it's a function declarator and
         // there's a compound statement then we have a function definiton;
         token.reset( new FunctionDefinition( std::move(decl_specs),
-                                             std::move(declarators[0]),
+                                             declarators[0]->TakeDeclarator(),
                                              std::move(function_body) ) );
         return true;
     }
@@ -453,7 +453,7 @@ void VariableDeclarationList::CodeGen( CodeGenerator& code_gen ) const
 //------------------------------------------------------------------------------
 
 FunctionDefinition::FunctionDefinition( DeclSpecsVector decl_specs,
-                                        InitDeclarator_up declarator,
+                                        Declarator_up declarator,
                                         CompoundStatement_up body )
     :VariableListOrFunctionDefinition( TokenTy::FunctionDefinition )
     ,m_DeclarationSpecifiers( std::move(decl_specs) )
@@ -466,6 +466,8 @@ FunctionDefinition::FunctionDefinition( DeclSpecsVector decl_specs,
     for( const auto& d : m_DeclarationSpecifiers )
         assert( d && "FunctionDefinition given a null declaration specifier" );
     assert( m_Declarator && "FunctionDefinition given a null declarator" );
+    assert( m_Declarator->IsFunctionDeclarator() && 
+            "FunctionDefinition given a non-function declarator" );
     assert( m_Body && "FunctionDefinition given a null body" );
 #endif
 }
@@ -476,7 +478,23 @@ FunctionDefinition::~FunctionDefinition()
 
 void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
 {
-    assert( false && "complete me" );
+    DeclSpecs decl_specs;
+    decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
+
+    // This will register the function with sema and verify that it's all ok
+    m_Declarator->PerformSema( sema, decl_specs );
+
+    SemaAnalyzer::ScopeHolder scope( sema );
+    scope.Enter();
+
+    // Register the variables with sema
+    m_Declarator->DeclareFunctionParameters( sema );
+
+    // Pass the return type to sema for generating the return statements
+    m_Body->PerformSema( sema, 
+                         decl_specs.GetType(), 
+                         m_Declarator->GetArrayExtents() );
+    scope.Leave();
 }
 
 } // namespace Compiler

@@ -45,6 +45,7 @@ class ArraySpecifier;
 typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class Declarator;
+using Declarator_up = std::unique_ptr<Declarator>;
 class DeclSpecs;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -84,6 +85,10 @@ public:
 
     virtual
     void Print( int depth ) const override;
+
+    /** This asserts that there is no initializer, we don't want to every split
+      * a declarator from its initializer **/
+    Declarator_up TakeDeclarator();
 
     /**
       * \returns true if declarator is a function declarator
@@ -133,8 +138,16 @@ public:
       * Performs semantic ananysis on the declarator
       * \param sema
       *   The SemaAnalyzer which contains the symbol table and things
+      * \param decl_specs
+      *   The declaration specifiers associated with this Declarator
       */
-    bool PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
+
+    /**
+      * Registers the names and types of the function parameters with sema
+      * This assers that this declarator is a Function declarator
+      */
+    void DeclareFunctionParameters( SemaAnalyzer& sema ) const;
 
     virtual
     void Print( int depth ) const override;

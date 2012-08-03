@@ -72,28 +72,19 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
-    // todo, move this logic into Declarator
+    // Resolve things in the declarator
+    bool can_init = m_Declarator->PerformSema( sema, decl_specs );
 
     Type base_type = decl_specs.GetType();
-
-    if( base_type == Type::UNKNOWN )
-    {
-        sema.Error( "No type in declaration specifier" );
-        // No point in declaring things with no type
-        return;
-    }
-    else if( base_type == Type::VOID )
-    {
-        sema.Error( "Can't declare variables of void type" );
-        return;
-    }
-
-    // Resolve things in the declarator
-    bool can_init = m_Declarator->PerformSema( sema );
-
+    const ArrayExtents& array_extents = m_Declarator->GetArrayExtents();
     m_IsGlobal = sema.InGlobalScope();
 
-    const ArrayExtents& array_extents = m_Declarator->GetArrayExtents();
+    if( m_Declarator->IsFunctionDeclarator() )
+    {
+        // This is given to sema in Declarator because it can't have an 
+        // initializer
+        return;
+    }
 
     //
     // Allow initializing a variable with a single value in braces for
@@ -158,6 +149,12 @@ void InitDeclarator::Print( int depth ) const
 {
 }
 
+Declarator_up InitDeclarator::TakeDeclarator()
+{
+    assert( !m_Initializer && "Taking a declarator away from its initializer" );
+    return std::move(m_Declarator);
+}
+
 bool InitDeclarator::IsFunctionDeclarator() const
 {
     return m_Declarator->IsFunctionDeclarator();
@@ -214,13 +211,43 @@ Declarator::~Declarator()
 {
 }
 
-bool Declarator::PerformSema( SemaAnalyzer& sema )
+bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
 {
     bool ret = true;
+
+    Type base_type = decl_specs.GetType();
+
+    if( base_type == Type::UNKNOWN )
+    {
+        sema.Error( "No type in declaration specifier" );
+        // No point in declaring things with no type
+        ret = false;;
+    }
+    else if( base_type == Type::VOID &&
+             !IsFunctionDeclarator() )
+    {
+        // If this is of void type and isn't a function
+        sema.Error( "Can't declare variables of void type" );
+        ret = false;;
+    }
+
     if( m_FunctionSpecifier )
         ret &= m_FunctionSpecifier->PerformSema( sema );
     m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
+    
+    if( base_type == Type::VOID &&
+        !m_ArrayExtents.empty() )
+        sema.Error( "Can't return an array of void type" );
+
     return ret;
+}
+
+void Declarator::DeclareFunctionParameters( SemaAnalyzer& sema ) const
+{
+    assert( IsFunctionDeclarator() && 
+            "Trying to declare function parameters for a non function "
+            "declarator" );
+    m_FunctionSpecifier->DeclareParameters( sema );
 }
 
 void Declarator::Print( int depth ) const

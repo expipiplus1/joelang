@@ -50,6 +50,8 @@ typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class DeclarationSpecifier;
 class InitDeclarator;
 using InitDeclarator_up = std::unique_ptr<InitDeclarator>;
+class Declarator;
+using Declarator_up = std::unique_ptr<Declarator>;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -390,7 +392,7 @@ public:
     /** This asserts that there is at least one declaration specifier and that
       * neither declarator or body are null **/
     FunctionDefinition( DeclSpecsVector decl_specs,
-                        InitDeclarator_up declarator,
+                        Declarator_up declarator,
                         CompoundStatement_up body );
     virtual
     ~FunctionDefinition();
@@ -402,7 +404,7 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 private:
     DeclSpecsVector m_DeclarationSpecifiers;
-    InitDeclarator_up m_Declarator;
+    Declarator_up m_Declarator;
     CompoundStatement_up m_Body;
 };
 

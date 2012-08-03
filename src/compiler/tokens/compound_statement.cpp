@@ -55,7 +55,9 @@ CompoundStatement::~CompoundStatement()
 {
 }
 
-void CompoundStatement::PerformSema( SemaAnalyzer& sema )
+void CompoundStatement::PerformSema( SemaAnalyzer& sema,
+                                     Type return_base_type,
+                                     const ArrayExtents& return_array_extents )
 {
     assert( false && "Complete me" );
 }

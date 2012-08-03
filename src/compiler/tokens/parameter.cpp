@@ -108,6 +108,11 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
     return true;
 }
 
+void Parameter::Declare( SemaAnalyzer& sema ) const
+{
+    assert( false && "complete me" );
+}
+
 void Parameter::Print( int depth ) const
 {
 }

@@ -30,13 +30,17 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
+enum class Type;
+
 namespace Compiler
 {
+using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class CompoundStatement;
 typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
@@ -57,7 +61,9 @@ public:
     virtual
     ~CompoundStatement   ();
 
-    void PerformSema( SemaAnalyzer& sema );
+    void PerformSema( SemaAnalyzer& sema,
+                      Type return_base_type,
+                      const ArrayExtents& return_array_extents );
 
     virtual
     void Print( int depth ) const override;
