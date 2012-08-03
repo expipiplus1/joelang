@@ -440,7 +440,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     DeclSpecs decl_specs;
     decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema );
 
-    for( const auto& declarator : m_Declarators )
+    for( const InitDeclarator_up& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );
 }
 
