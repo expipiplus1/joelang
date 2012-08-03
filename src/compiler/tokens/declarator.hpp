@@ -44,9 +44,8 @@ namespace Compiler
 class ArraySpecifier;
 typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
-class CompoundStatement;
-typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class Declarator;
+using Declarator_up = std::unique_ptr<Declarator>;
 class DeclSpecs;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -87,6 +86,15 @@ public:
     virtual
     void Print( int depth ) const override;
 
+    /** This asserts that there is no initializer, we don't want to every split
+      * a declarator from its initializer **/
+    Declarator_up TakeDeclarator();
+
+    /**
+      * \returns true if declarator is a function declarator
+      */
+    bool IsFunctionDeclarator() const;
+
     /**
       * Parses a declarator
       * \param parser
@@ -122,8 +130,7 @@ public:
     /** If given a function_body it asserts that it has a function specifier **/
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
-                    ArraySpecifierVector array_specifiers,
-                    CompoundStatement_up compound_statement );
+                    ArraySpecifierVector array_specifiers );
     virtual
     ~Declarator   ();
 
@@ -131,11 +138,21 @@ public:
       * Performs semantic ananysis on the declarator
       * \param sema
       *   The SemaAnalyzer which contains the symbol table and things
+      * \param decl_specs
+      *   The declaration specifiers associated with this Declarator
       */
-    bool PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
+
+    /**
+      * Registers the names and types of the function parameters with sema
+      * This assers that this declarator is a Function declarator
+      */
+    void DeclareFunctionParameters( SemaAnalyzer& sema ) const;
 
     virtual
     void Print( int depth ) const override;
+
+    bool IsFunctionDeclarator() const;
 
     /**
       * \returns the identifier
@@ -163,7 +180,6 @@ private:
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
-    CompoundStatement_up m_FunctionBody;
 };
 
 } // namespace Compiler

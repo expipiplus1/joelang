@@ -118,6 +118,11 @@ public:
 
     bool PerformSema( SemaAnalyzer& sema );
 
+    /**
+      * Registers the parameters as variables with sema
+      */
+    void DeclareParameters( SemaAnalyzer& sema );
+
     virtual
     void Print( int depth ) const override;
 

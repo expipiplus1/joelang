@@ -45,8 +45,13 @@ namespace Compiler
 {
 
 class CodeGenerator;
+class CompoundStatement;
+typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class DeclarationSpecifier;
 class InitDeclarator;
+using InitDeclarator_up = std::unique_ptr<InitDeclarator>;
+class Declarator;
+using Declarator_up = std::unique_ptr<Declarator>;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -359,10 +364,10 @@ public:
     ~VariableDeclarationList();
 
     virtual
-    void Print( int depth ) const;
+    void Print( int depth ) const override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema );
+    void PerformSema( SemaAnalyzer& sema ) override;
 
     void CodeGen( CodeGenerator& code_gen ) const;
 
@@ -382,9 +387,25 @@ class FunctionDefinition :
                     public JoeLang::Compiler::VariableListOrFunctionDefinition
 {
 public:
-    FunctionDefinition();
+    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
+
+    /** This asserts that there is at least one declaration specifier and that
+      * neither declarator or body are null **/
+    FunctionDefinition( DeclSpecsVector decl_specs,
+                        Declarator_up declarator,
+                        CompoundStatement_up body );
     virtual
     ~FunctionDefinition();
+
+    virtual
+    void Print( int depth ) const override{};
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema ) override;
+private:
+    DeclSpecsVector m_DeclarationSpecifiers;
+    Declarator_up m_Declarator;
+    CompoundStatement_up m_Body;
 };
 
 

@@ -74,6 +74,12 @@ public:
 
     bool PerformSema( SemaAnalyzer& sema );
 
+    /**
+      * Register the parameter with sema, this requires that we are already in
+      * the function's scope
+      */
+    void Declare( SemaAnalyzer& sema ) const;
+
     virtual
     void Print( int depth ) const override;
 

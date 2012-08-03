@@ -39,7 +39,6 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
-#include <compiler/tokens/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -73,26 +72,19 @@ InitDeclarator::~InitDeclarator()
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                   const DeclSpecs& decl_specs )
 {
-    Type base_type = decl_specs.GetType();
-
-    if( base_type == Type::UNKNOWN )
-    {
-        sema.Error( "No type in declaration specifier" );
-        // No point in declaring things with no type
-        return;
-    }
-    else if( base_type == Type::VOID )
-    {
-        sema.Error( "Can't declare variables of void type" );
-        return;
-    }
-
     // Resolve things in the declarator
-    bool can_init = m_Declarator->PerformSema( sema );
+    bool can_init = m_Declarator->PerformSema( sema, decl_specs );
 
+    Type base_type = decl_specs.GetType();
+    const ArrayExtents& array_extents = m_Declarator->GetArrayExtents();
     m_IsGlobal = sema.InGlobalScope();
 
-    const ArrayExtents& array_extents = m_Declarator->GetArrayExtents();
+    if( m_Declarator->IsFunctionDeclarator() )
+    {
+        // This is given to sema in Declarator because it can't have an 
+        // initializer
+        return;
+    }
 
     //
     // Allow initializing a variable with a single value in braces for
@@ -129,7 +121,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                 "Trying to initialize variable with wrong underlying type" );
         if( initializer.GetArrayExtents() != array_extents )
         {
-            sema.Error( "Trying to initialize variable with wrong array extents" );
+            sema.Error( "Trying to initialize variable with wrong array "
+                        "extents" );
             can_init = false;
         }
     }
@@ -156,12 +149,30 @@ void InitDeclarator::Print( int depth ) const
 {
 }
 
+Declarator_up InitDeclarator::TakeDeclarator()
+{
+    assert( !m_Initializer && "Taking a declarator away from its initializer" );
+    return std::move(m_Declarator);
+}
+
+bool InitDeclarator::IsFunctionDeclarator() const
+{
+    return m_Declarator->IsFunctionDeclarator();
+}
+
 bool InitDeclarator::Parse( Parser& parser,
                             std::unique_ptr<InitDeclarator>& token )
 {
     std::unique_ptr<Declarator> declarator;
     if( !parser.Expect<Declarator>( declarator ) )
         return false;
+
+    if( declarator->IsFunctionDeclarator() )
+    {
+        // If this is a function declarator, don't try and parse an initializer
+        token.reset( new InitDeclarator( std::move(declarator) ) );
+        return true;
+    }
 
     // If we don't see an equals sign, it may be a brace initializer, but we
     // want to leave the brace to be parsed by Initializer (a little dirty)
@@ -188,31 +199,55 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
-                        Declarator::ArraySpecifierVector array_specifiers,
-                        CompoundStatement_up function_body )
+                        Declarator::ArraySpecifierVector array_specifiers )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
-    ,m_FunctionBody( std::move(function_body) )
 {
-    if( m_FunctionBody )
-        assert( m_FunctionSpecifier &&
-                "Declarator given a function definition without a function "
-                "specifier" );
 }
 
 Declarator::~Declarator()
 {
 }
 
-bool Declarator::PerformSema( SemaAnalyzer& sema )
+bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
 {
     bool ret = true;
+
+    Type base_type = decl_specs.GetType();
+
+    if( base_type == Type::UNKNOWN )
+    {
+        sema.Error( "No type in declaration specifier" );
+        // No point in declaring things with no type
+        ret = false;;
+    }
+    else if( base_type == Type::VOID &&
+             !IsFunctionDeclarator() )
+    {
+        // If this is of void type and isn't a function
+        sema.Error( "Can't declare variables of void type" );
+        ret = false;;
+    }
+
     if( m_FunctionSpecifier )
         ret &= m_FunctionSpecifier->PerformSema( sema );
     m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
+    
+    if( base_type == Type::VOID &&
+        !m_ArrayExtents.empty() )
+        sema.Error( "Can't return an array of void type" );
+
     return ret;
+}
+
+void Declarator::DeclareFunctionParameters( SemaAnalyzer& sema ) const
+{
+    assert( IsFunctionDeclarator() && 
+            "Trying to declare function parameters for a non function "
+            "declarator" );
+    m_FunctionSpecifier->DeclareParameters( sema );
 }
 
 void Declarator::Print( int depth ) const
@@ -227,6 +262,11 @@ const std::string& Declarator::GetIdentifier() const
 const ArrayExtents& Declarator::GetArrayExtents() const
 {
     return m_ArrayExtents;
+}
+
+bool Declarator::IsFunctionDeclarator() const
+{
+    return static_cast<bool>(m_FunctionSpecifier);
 }
 
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
@@ -244,18 +284,9 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
-    CompoundStatement_up compound_statement;
-
-    if( function_specifier )
-        // If we have a function specifier look for a compound statement
-        parser.Expect<CompoundStatement>( compound_statement );
-
-    CHECK_PARSER;
-
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
-                                 std::move(array_specifiers),
-                                 std::move(compound_statement) ) );
+                                 std::move(array_specifiers) ) );
     return true;
 }
 
