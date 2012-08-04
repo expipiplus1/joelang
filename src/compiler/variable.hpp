@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
 
 namespace llvm
@@ -64,8 +65,7 @@ public:
       * This constructor asserts if the varible is const and hasn't been given
       * an initializer
       */
-    Variable( Type type,
-              ArrayExtents array_extents,
+    Variable( CompleteType type,
               bool is_const,
               bool is_global = false,
               bool is_parameter = false,
@@ -76,18 +76,15 @@ public:
 
     llvm::Value* GetLLVMPointer() const;
 
-    Type GetType() const;
+    const CompleteType& GetType() const;
 
     Type GetUnderlyingType() const;
-
-    const ArrayExtents& GetArrayExtents() const;
 
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
 private:
-    Type m_Type;
-    ArrayExtents m_ArrayExtents;
+    CompleteType m_Type;
     bool m_IsConst;
     bool m_IsGlobal;
     bool m_IsParameter;

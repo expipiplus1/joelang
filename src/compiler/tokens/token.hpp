@@ -102,8 +102,9 @@ public:
         Parameter,
 
         CompoundStatement,
+        ReturnStatement,
         Statement_Start = CompoundStatement,
-        Statement_End = CompoundStatement,
+        Statement_End = ReturnStatement,
 
         AssignmentOperator,
 

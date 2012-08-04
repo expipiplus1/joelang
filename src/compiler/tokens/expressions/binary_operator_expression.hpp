@@ -127,6 +127,9 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override final;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     /// \returns GetReturnType
@@ -195,8 +198,11 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     /**
-      * \returns Type::BOOL
+      * \returns CompleteType( Type::BOOL )
       */
+    virtual
+    CompleteType GetType() const override;
+
     virtual
     Type GetReturnType() const override;
 
@@ -235,6 +241,9 @@ public:
     /**
       * Returns bool
       */
+    virtual
+    CompleteType GetType() const override;
+
     virtual
     Type GetReturnType() const override;
 
@@ -365,6 +374,9 @@ public:
       * \returns Type::BOOL
       */
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     static
@@ -396,6 +408,9 @@ public:
     /**
       * \returns Type::BOOL
       */
+    virtual
+    CompleteType GetType() const override;
+
     virtual
     Type GetReturnType() const override;
 

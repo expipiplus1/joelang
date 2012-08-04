@@ -33,9 +33,7 @@
 #include <string>
 #include <vector>
 
-#include <llvm/Type.h>
-#include <llvm/DerivedTypes.h>
-
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <engine/types.hpp>
 
@@ -45,7 +43,7 @@ namespace JoeLang
 namespace Compiler
 {
 
-Type GetCommonType( Type t1, Type t2 )
+CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
 {
     const static std::vector<Type> promotion_ordering =
     {
@@ -62,45 +60,106 @@ Type GetCommonType( Type t1, Type t2 )
         Type::BOOL
     };
 
-    if( t1 == Type::STRING )
+    if( t1.GetArrayExtents() != t2.GetArrayExtents() )
+        return CompleteType();
+
+    // If they are array types they have to have identical types (no implicit
+    // conversion of arrays)
+    if( t1.IsArrayType() )
     {
-        if( t2 == Type::STRING )
-            return Type::STRING;
+        if( t1.GetBaseType() == t2.GetBaseType() )
+            return t1;
         else
-            return Type::UNKNOWN;
+            return CompleteType();
     }
 
-    if( t1 == Type::ARRAY )
+    // Can't convert a vector into a scalar
+    if( IsVectorType( t1.GetBaseType() ) != IsVectorType( t2.GetBaseType() ) )
+        return CompleteType();
+
+    // Vectors have to be the same size
+    if( GetNumElementsInType( t1.GetBaseType() ) !=
+                                      GetNumElementsInType( t2.GetBaseType() ) )
+        return CompleteType();
+
+    if( t1.GetBaseType() == Type::STRING )
     {
-        return Type::UNKNOWN;
+        if( t2.GetBaseType() == Type::STRING )
+            return t1;
+        else
+            return CompleteType();
     }
+
+    Type t1_scalar_type = GetScalarType( t1.GetBaseType() );
+    Type t2_scalar_type = GetScalarType( t2.GetBaseType() );
+    Type common_scalar_type = Type::UNKNOWN;
 
     for( Type t : promotion_ordering )
-        if( t1 == t || t2 == t )
-            return t;
+        if( t1_scalar_type == t || t2_scalar_type == t )
+        {
+            common_scalar_type = t;
+            break;
+        }
 
-    assert( false && "Trying to get the common type of unknown types" );
-    return Type::UNKNOWN;
+    if( IsScalarType( t1.GetBaseType() )  )
+        return CompleteType( common_scalar_type );
+
+    return CompleteType( GetVectorType( common_scalar_type,
+                                         GetVectorSize( t1.GetBaseType() ) ) );
 }
 
 Type GetVectorType( Type base, unsigned size )
 {
     //TODO do this in a better way
-    switch( base )
+    switch( size )
     {
-    case Type::FLOAT:
-        switch( size )
+    case 4:
+        switch( base )
         {
-        case 4:
+        case Type::FLOAT:
             return Type::FLOAT4;
         default:
             assert( false &&
-                    "Trying to get the vector type of an unhandled size" );
+                    "Trying to get the vector type of an unhandled base" );
         }
     default:
-        assert( false && "Trying to get the vector type of an unhandled base" );
+        assert( false && "Trying to get the vector type of an unhandled size" );
     }
     return Type::UNKNOWN;
+}
+
+Type GetScalarType( Type t )
+{
+    switch( t )
+    {
+    case Type::BOOL:
+        return Type::BOOL;
+    case Type::I8:
+        return Type::I8;
+    case Type::I16:
+        return Type::I16;
+    case Type::I32:
+        return Type::I32;
+    case Type::I64:
+        return Type::I64;
+    case Type::U8:
+        return Type::U8;
+    case Type::U16:
+        return Type::U16;
+    case Type::U32:
+        return Type::U32;
+    case Type::U64:
+        return Type::U64;
+    case Type::FLOAT:
+    case Type::FLOAT4:
+        return Type::FLOAT;
+    case Type::DOUBLE:
+        return Type::DOUBLE;
+    case Type::STRING:
+        return Type::STRING;
+    default:
+        return Type::UNKNOWN;
+    }
 }
 
 bool IsIntegral( Type t )

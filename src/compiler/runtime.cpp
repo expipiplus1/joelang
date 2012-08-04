@@ -41,6 +41,7 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include <engine/types.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
 
 namespace JoeLang
@@ -153,34 +154,39 @@ llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
 // Misc
 //
 
-llvm::Type* Runtime::GetLLVMType( Type base_type,
-                                  const ArrayExtents& array_extents ) const
+llvm::Type* Runtime::GetLLVMType( const CompleteType& type ) const
+{
+    llvm::Type* t = GetLLVMType( type.GetBaseType() );
+
+    for( auto extent = type.GetArrayExtents().rbegin();
+         extent != type.GetArrayExtents().rend();
+         ++extent )
+        t = llvm::ArrayType::get( t, *extent );
+
+    return t;
+}
+
+llvm::Type* Runtime::GetLLVMType( Type type ) const
 {
     llvm::Type* t;
-    if( base_type == Type::DOUBLE )
+    if( type == Type::DOUBLE )
         t = llvm::Type::getDoubleTy( m_LLVMContext );
-    else if( base_type == Type::FLOAT )
+    else if( type == Type::FLOAT )
         t = llvm::Type::getFloatTy( m_LLVMContext );
-    else if( base_type == Type::BOOL )
+    else if( type == Type::BOOL )
         t = llvm::Type::getInt1Ty( m_LLVMContext );
-    else if( IsIntegral( base_type ) )
-        t = llvm::Type::getIntNTy( m_LLVMContext, SizeOf(base_type)*8 );
-    else if( base_type == Type::STRING )
+    else if( IsIntegral( type ) )
+        t = llvm::Type::getIntNTy( m_LLVMContext, SizeOf(type)*8 );
+    else if( type == Type::STRING )
         t = m_StringType;
-    else if( IsVectorType( base_type ) )
-        t = llvm::VectorType::get(
-                                  GetLLVMType( GetElementType( base_type ) ),
-                                  GetVectorSize( base_type ) );
+    else if( IsVectorType( type ) )
+        t = llvm::VectorType::get( GetLLVMType( GetElementType( type ) ),
+                                   GetVectorSize( type ) );
     else
     {
         assert( false && "Trying to get the llvm::Type of an unhandled Type" );
         return nullptr;
     }
-
-    for( auto extent = array_extents.rbegin();
-         extent != array_extents.rend();
-         ++extent )
-        t = llvm::ArrayType::get( t, *extent );
 
     return t;
 }

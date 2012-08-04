@@ -30,6 +30,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 namespace JoeLang
 {
@@ -47,9 +48,9 @@ class CompleteType
 {
 public:
     CompleteType();
+    explicit
     CompleteType( Type base_type,
-                  ArrayExtents array_extents = {},
-                  bool is_const = false );
+                  ArrayExtents array_extents = {} );
 
     /**
       * This doesn't return the base type, for example this could return
@@ -61,10 +62,17 @@ public:
 
     const ArrayExtents& GetArrayExtents() const;
 
+    bool IsArrayType() const;
+
+    bool IsUnknown() const;
+
+    std::string GetString() const;
+
+    bool operator == ( const CompleteType& other );
+    bool operator != ( const CompleteType& other );
 private:
     Type         m_BaseType;
     ArrayExtents m_ArrayExtents;
-    bool         m_IsConst;
 };
 
 } // namespace Compiler

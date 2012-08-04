@@ -133,7 +133,7 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
                                                     std::move(m_IndexExpression) );
         good &= m_IndexExpression->PerformSema( sema );
     }
-    if( expression->GetReturnType() != Type::ARRAY )
+    if( !expression->GetType().IsArrayType() )
     {
         sema.Error( "Trying to index into a non-array" );
         return false;
@@ -164,6 +164,15 @@ llvm::Value* SubscriptOperator::CodeGenPointerTo(
     assert( expression && "SubscriptOperator given an null expression" );
     return code_gen.CreateArrayIndexPointerTo( *expression,
                                                *m_IndexExpression );
+}
+
+CompleteType SubscriptOperator::GetType( const Expression& expression ) const
+{
+    ArrayExtents array_extents = expression.GetType().GetArrayExtents();
+    if( !array_extents.empty() )
+        array_extents.resize( array_extents.size() - 1 );
+    return CompleteType( expression.GetType().GetBaseType(),
+                         std::move( array_extents ) );
 }
 
 Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
@@ -259,6 +268,12 @@ llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
 {
     assert( false && "complete me" );
     return nullptr;
+}
+
+CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return CompleteType();
 }
 
 Type ArgumentListOperator::GetReturnType(
@@ -366,6 +381,12 @@ llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
     return nullptr;
 }
 
+CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return CompleteType();
+}
+
 Type MemberAccessOperator::GetReturnType(
                                         const Expression_up& expression ) const
 {
@@ -447,6 +468,13 @@ llvm::Value* IncrementOrDecrementOperator::CodeGen(
 {
     assert( false && "complete me" );
     return nullptr;
+}
+
+CompleteType IncrementOrDecrementOperator::GetType(
+                                        const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return CompleteType();
 }
 
 Type IncrementOrDecrementOperator::GetReturnType(

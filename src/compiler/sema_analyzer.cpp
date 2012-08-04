@@ -248,7 +248,6 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
     {
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
                                                         v.second.GetType(),
-                                                        ArrayExtents{},
                                                         true, //Is const
                                                         true, //Is global
                                                         false,//Isn't a param

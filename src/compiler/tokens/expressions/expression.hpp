@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/types.hpp>
@@ -131,6 +132,12 @@ public:
       */
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const;
+
+    /**
+      * \returns the CompleteType which this expression evaluates to
+      */
+    virtual
+    CompleteType GetType() const = 0;
 
     /**
       * \returns the type which this expression evaluates to
@@ -233,6 +240,9 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -303,6 +313,9 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -346,7 +359,7 @@ class CastExpression : public JoeLang::Compiler::Expression
 public:
     /** This asserts that expression is not null **/
     explicit
-    CastExpression( Type cast_type,
+    CastExpression( CompleteType cast_type,
                     Expression_up expression );
     virtual
     ~CastExpression();
@@ -359,6 +372,9 @@ public:
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;
@@ -380,7 +396,11 @@ public:
                 Expression_up& token );
 
     static
-    Expression_up Create( Type cast_type, Expression_up cast_expression );
+    Expression_up Create( const CompleteType& cast_type,
+                          Expression_up expression );
+
+    static
+    Expression_up Create( Type cast_type, Expression_up expression );
 
     /**
       * Casts vectors to a different base type, preserving size
@@ -395,7 +415,7 @@ public:
     bool classof( const CastExpression* e );
 
 private:
-    Type m_CastType;
+    CompleteType m_CastType;
     Expression_up m_Expression;
 };
 
@@ -441,6 +461,9 @@ public:
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;
@@ -497,6 +520,9 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;
@@ -559,6 +585,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;
@@ -659,6 +688,9 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     void Print( int depth ) const;

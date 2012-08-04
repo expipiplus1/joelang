@@ -163,6 +163,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -228,6 +231,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -283,6 +289,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    CompleteType GetType() const override;
+
+    virtual
     Type GetReturnType() const override;
 
     virtual
@@ -320,6 +329,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;
@@ -373,6 +385,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
+    CompleteType GetType() const override;
 
     virtual
     Type GetReturnType() const override;

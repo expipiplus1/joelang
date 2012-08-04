@@ -127,8 +127,8 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         }
     }
 
-    m_Variable = std::make_shared<Variable>( base_type,
-                                             array_extents,
+    m_Variable = std::make_shared<Variable>( CompleteType( base_type,
+                                                           array_extents ),
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
                                              false, // Isn't a parameter
@@ -252,9 +252,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         // register the function with sema
         if( ret )
         {
-            CompleteType return_type( base_type,
-                                      m_ArrayExtents,
-                                      decl_specs.IsConst() );
+            CompleteType return_type( base_type, m_ArrayExtents );
             sema.DeclareFunction( m_Identifier,
                                   std::move(return_type),
                                   GetFunctionParameterTypes() );

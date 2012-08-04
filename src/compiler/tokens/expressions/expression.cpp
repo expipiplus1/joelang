@@ -254,6 +254,11 @@ llvm::Value* AssignmentExpression::CodeGenPointerTo(
     return m_AssigneePtr->CodeGenPointerTo( code_gen );
 }
 
+CompleteType AssignmentExpression::GetType() const
+{
+    return m_AssigneePtr->GetType();
+}
+
 Type AssignmentExpression::GetReturnType() const
 {
     return m_AssigneePtr->GetReturnType();
@@ -402,16 +407,22 @@ llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
                                   *m_FalseExpression );
 }
 
+CompleteType ConditionalExpression::GetType() const
+{
+    return GetCommonType( m_TrueExpression->GetType(),
+                          m_FalseExpression->GetType() );
+}
+
 Type ConditionalExpression::GetReturnType() const
 {
-    return GetCommonType( m_TrueExpression->GetReturnType(),
-                          m_FalseExpression->GetReturnType() );
+    return GetCommonType( m_TrueExpression->GetType(),
+                          m_FalseExpression->GetType() ).GetType();
 }
 
 Type ConditionalExpression::GetUnderlyingType() const
 {
-    return GetCommonType( m_TrueExpression->GetUnderlyingType(),
-                          m_FalseExpression->GetUnderlyingType() );
+    return GetCommonType( m_TrueExpression->GetType(),
+                          m_FalseExpression->GetType() ).GetBaseType();
 }
 
 const ArrayExtents& ConditionalExpression::GetArrayExtents() const
@@ -487,10 +498,10 @@ bool ConditionalExpression::classof( const ConditionalExpression* e )
 // CastExpression
 //------------------------------------------------------------------------------
 
-CastExpression::CastExpression( Type cast_type,
+CastExpression::CastExpression( CompleteType cast_type,
                                 Expression_up expression )
     :Expression( TokenTy::CastExpression )
-    ,m_CastType( cast_type )
+    ,m_CastType( std::move(cast_type) )
     ,m_Expression( std::move(expression) )
 {
     assert( m_Expression && "CastExpression given a null expression" );
@@ -507,24 +518,25 @@ bool CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 
 bool CastExpression::PerformSema( SemaAnalyzer& sema )
 {
+    // todo this in a better way
     bool good = true;
 
     Type t = m_Expression->GetReturnType();
 
     if( t != Type::UNKNOWN )
     {
-        if( t == Type::STRING && m_CastType != Type::STRING )
+        if( t == Type::STRING && m_CastType.GetType() != Type::STRING )
         {
             good = false;
-            sema.Error( "Can't cast string to " + GetTypeString( m_CastType ) );
+            sema.Error( "Can't cast string to " + m_CastType.GetString() );
         }
-        else if( m_CastType == Type::UNKNOWN )
+        else if( m_CastType.GetType() == Type::UNKNOWN )
         {
             // Can't cast to unknown type
             good = false;
             sema.Error( "Can't cast to an unknown type" );
         }
-        else if( m_CastType == Type::ARRAY )
+        else if( m_CastType.GetType() == Type::ARRAY )
         {
             // Can't cast to an array type
             good = false;
@@ -536,7 +548,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
             good = false;
             sema.Error( "Can't cast from an array type" );
         }
-        else if( m_CastType == Type::STRING )
+        else if( m_CastType.GetType() == Type::STRING )
         {
             // Can only cast string to string
             if( t != Type::STRING )
@@ -545,24 +557,24 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
                 sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
             }
         }
-        else if( IsScalarType( m_CastType ) )
+        else if( IsScalarType( m_CastType.GetType() ) )
         {
             // All scalar types are compatible nothing to check
         }
-        else if( IsVectorType( m_CastType ) )
+        else if( IsVectorType( m_CastType.GetType() ) )
         {
             // Can only cast same size vectors
             // But all vector types are compatible
-            if( GetVectorSize( m_CastType ) != GetVectorSize( t ) )
+            if( GetVectorSize( m_CastType.GetType() ) != GetVectorSize( t ) )
             {
                 good = false;
                 sema.Error( "Can't cast " + GetTypeString( t ) + " to " +
-                            GetTypeString( m_CastType ) );
+                            GetTypeString( m_CastType.GetType() ) );
             }
         }
         else
         {
-            std::cout << GetTypeString( m_CastType ) << std::endl;
+            std::cout << GetTypeString( m_CastType.GetType() ) << std::endl;
             assert( false && "Casting to an unhandled type" );
         }
     }
@@ -574,6 +586,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
 
 llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 {
+    /// todo casting arrays
     return code_gen.CreateCast( *m_Expression, m_CastType );
 }
 
@@ -581,17 +594,22 @@ Type CastExpression::GetReturnType() const
 {
     if( m_Expression->GetReturnType() == Type::ARRAY )
         return Type::ARRAY;
+    return m_CastType.GetType();
+}
+
+CompleteType CastExpression::GetType() const
+{
     return m_CastType;
 }
 
 Type CastExpression::GetUnderlyingType() const
 {
-    return m_CastType;
+    return m_CastType.GetBaseType();
 }
 
 const ArrayExtents& CastExpression::GetArrayExtents() const
 {
-    return m_Expression->GetArrayExtents();
+    return m_CastType.GetArrayExtents();
 }
 
 bool CastExpression::IsConst() const
@@ -614,12 +632,23 @@ bool CastExpression::Parse( Parser& parser, Expression_up& token )
 }
 
 Expression_up CastExpression::Create( Type cast_type,
-                                      Expression_up cast_expression )
+                                      Expression_up expression )
 {
-    if( cast_expression->GetReturnType() == cast_type )
-        return cast_expression;
+    if( expression->GetReturnType() == cast_type )
+        return expression;
+    return Expression_up( new CastExpression( CompleteType(cast_type),
+                                              std::move(expression) ) );
+}
+
+Expression_up CastExpression::Create( const CompleteType& cast_type,
+                                      Expression_up expression )
+{
+    // If this would be a null cast don't bother creating one
+    if( expression->GetType() == cast_type )
+        return expression;
+
     return Expression_up( new CastExpression( cast_type,
-                                              std::move(cast_expression) ) );
+                                              std::move(expression) ) );
 }
 
 Expression_up CastExpression::CreateBaseTypeCast(
@@ -714,6 +743,27 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
                 "Trying to generate code for unhandled unary operator" );
         return nullptr;
     }
+}
+
+CompleteType UnaryExpression::GetType() const
+{
+    /// Todo vector and matrix bool things
+
+    CompleteType t = m_Expression->GetType();
+
+    switch( m_Operator )
+    {
+    case Op::PLUS:
+    case Op::MINUS:
+    case Op::INCREMENT:
+    case Op::DECREMENT:
+    case Op::BITWISE_NOT:
+        return t;
+    case Op::LOGICAL_NOT:
+        return CompleteType( Type::BOOL );
+    }
+    assert( false && "unreachable" );
+    return CompleteType();
 }
 
 Type UnaryExpression::GetReturnType() const
@@ -853,6 +903,11 @@ llvm::Value* PostfixExpression::CodeGenPointerTo(
                                                 CodeGenerator& code_gen ) const
 {
     return m_PostfixOperator->CodeGenPointerTo( code_gen, m_Expression );
+}
+
+CompleteType PostfixExpression::GetType() const
+{
+    return m_PostfixOperator->GetType( *m_Expression );
 }
 
 Type PostfixExpression::GetReturnType() const
@@ -1000,6 +1055,12 @@ llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
                 "arguments" );
         return code_gen.CreateScalarConstructor( m_Type, *m_Arguments[0] );
     }
+}
+
+CompleteType TypeConstructorExpression::GetType() const
+{
+    /// todo constructing arrays
+    return CompleteType( m_Type );
 }
 
 Type TypeConstructorExpression::GetReturnType() const
@@ -1151,11 +1212,18 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
     return m_Variable->GetLLVMPointer();
 }
 
+CompleteType IdentifierExpression::GetType() const
+{
+    if( !m_Variable )
+        return CompleteType();
+    return m_Variable->GetType();
+}
+
 Type IdentifierExpression::GetReturnType() const
 {
     if( !m_Variable )
         return Type::UNKNOWN;
-    return m_Variable->GetType();
+    return m_Variable->GetType().GetBaseType();
 }
 
 Type IdentifierExpression::GetUnderlyingType() const
@@ -1169,7 +1237,7 @@ const ArrayExtents& IdentifierExpression::GetArrayExtents() const
 {
     assert( m_Variable &&
             "Trying to get the array extents of an unresolved identifier" );
-    return m_Variable->GetArrayExtents();
+    return m_Variable->GetType().GetArrayExtents();
 }
 
 bool IdentifierExpression::IsLValue() const

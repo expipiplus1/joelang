@@ -47,15 +47,13 @@ namespace JoeLang
 namespace Compiler
 {
 
-Variable::Variable( Type base_type,
-                    ArrayExtents array_extents,
+Variable::Variable( CompleteType type,
                     bool is_const,
                     bool is_global,
                     bool is_parameter,
                     GenericValue initializer,
                     std::string name )
-    :m_Type( base_type )
-    ,m_ArrayExtents( std::move(array_extents) )
+    :m_Type( std::move(type) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
     ,m_IsParameter( is_parameter )
@@ -64,13 +62,10 @@ Variable::Variable( Type base_type,
 {
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
-    if( m_IsConst || m_Initializer.GetType() != Type::UNKNOWN )
+    if( m_IsConst || !m_Initializer.GetType().IsUnknown() )
     {
-        assert( m_Initializer.GetUnderlyingType() == base_type &&
+        assert( m_Initializer.GetType() == m_Type &&
                 "Trying to initialize a variable with the wrong type" );
-        assert( m_Initializer.GetArrayExtents() == m_ArrayExtents &&
-                "Trying to initializer a variable with an incorrect array "
-                "size" );
     }
 }
 
@@ -80,7 +75,6 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     if( m_IsGlobal )
     {
         m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,
-                                                       m_ArrayExtents,
                                                        m_IsConst,
                                                        m_Initializer,
                                                        m_Name );
@@ -96,19 +90,14 @@ llvm::Value* Variable::GetLLVMPointer() const
     return m_LLVMPointer;
 }
 
-Type Variable::GetType() const
-{
-    return m_ArrayExtents.size() == 0 ? m_Type : Type::ARRAY;
-}
-
-Type Variable::GetUnderlyingType() const
+const CompleteType& Variable::GetType() const
 {
     return m_Type;
 }
 
-const ArrayExtents& Variable::GetArrayExtents() const
+Type Variable::GetUnderlyingType() const
 {
-    return m_ArrayExtents;
+    return m_Type.GetBaseType();
 }
 
 bool Variable::IsConst() const

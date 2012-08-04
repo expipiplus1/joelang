@@ -136,6 +136,7 @@ enum class TerminalType
     //
     TECHNIQUE,
     PASS,
+    RETURN,
 
     // Storage class specifiers
     STATIC,

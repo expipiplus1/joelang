@@ -53,15 +53,16 @@
 #include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
-#include <compiler/type_properties.hpp>
 #include <compiler/casting.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/runtime.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/variable.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <runtime/types.hpp>
 
 namespace JoeLang
@@ -316,7 +317,7 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
             "CreateVectorTypeConstructor given non-vector type" );
 #endif
     llvm::Value* ret = llvm::UndefValue::get(
-                                                m_Runtime.GetLLVMType( type ) );
+                                m_Runtime.GetLLVMType( CompleteType( type ) ) );
     // Loop over all the arguments inserting as many elements as necessary
     unsigned p = 0;
     for( const auto& argument : arguments )
@@ -365,52 +366,58 @@ llvm::Value* CodeGenerator::CreateScalarConstructor(
 // Cast Operators
 //
 
-llvm::Value* CodeGenerator::CreateCast( const Expression& e, Type type )
+llvm::Value* CodeGenerator::CreateCast( const Expression& e,
+                                        const CompleteType& type )
 {
-    Type         e_type = e.GetReturnType();
-    llvm::Value* e_code = e.CodeGen( *this );
+    /// todo make this better
 
-    if( !e_code )
+    const CompleteType& e_type  = e.GetType();
+    llvm::Value* e_value = e.CodeGen( *this );
+
+    assert( !type.IsArrayType() && "todo, casting to arrays" );
+    assert( !e_type.IsArrayType() && "todo, casting from arrays" );
+
+    if( !e_value )
         return nullptr;
 
     //
     // For a cast to bool, compare to zero
     //
-    if( type == Type::BOOL )
+    if( type.GetType() == Type::BOOL )
     {
-        if( IsFloatingPoint( e_type ) )
+        if( IsFloatingPoint( e_type.GetBaseType() ) )
             return m_LLVMBuilder.CreateFCmpOEQ(
-                        e_code,
-                        llvm::ConstantFP::getNullValue( e_code->getType() ) );
-        return m_LLVMBuilder.CreateIsNotNull( e_code );
+                        e_value,
+                        llvm::ConstantFP::getNullValue( e_value->getType() ) );
+        return m_LLVMBuilder.CreateIsNotNull( e_value );
     }
 
-    if( IsFloatingPoint( type ) )
+    if( IsFloatingPoint( type.GetBaseType() ) )
     {
-        if( IsFloatingPoint( e_type ) )
-            return m_LLVMBuilder.CreateFPCast( e_code,
+        if( IsFloatingPoint( e_type.GetBaseType() ) )
+            return m_LLVMBuilder.CreateFPCast( e_value,
                                                m_Runtime.GetLLVMType( type ) );
-        if( IsSigned( e_type ) )
-            return m_LLVMBuilder.CreateSIToFP( e_code,
+        if( IsSigned( e_type.GetBaseType() ) )
+            return m_LLVMBuilder.CreateSIToFP( e_value,
                                                m_Runtime.GetLLVMType( type ) );
-        return m_LLVMBuilder.CreateUIToFP( e_code,
+        return m_LLVMBuilder.CreateUIToFP( e_value,
                                            m_Runtime.GetLLVMType( type ) );
     }
 
-    assert( IsIntegral( type ) && "Type should be integral" );
-    if( IsIntegral( e_type ) )
+    assert( IsIntegral( type.GetBaseType() ) && "Type should be integral" );
+    if( IsIntegral( e_type.GetBaseType() ) )
     {
-        return m_LLVMBuilder.CreateIntCast( e_code,
+        return m_LLVMBuilder.CreateIntCast( e_value,
                                             m_Runtime.GetLLVMType( type ),
-                                            IsSigned( e_type ) );
+                                            IsSigned( e_type.GetBaseType() ) );
     }
 
-    assert( IsFloatingPoint( e_type ) && "e_type should be floating point" );
-    if( IsSigned( type ) )
-        return m_LLVMBuilder.CreateFPToSI( e_code,
+    assert( IsFloatingPoint( e_type.GetBaseType() ) && "e_type should be floating point" );
+    if( IsSigned( type.GetBaseType() ) )
+        return m_LLVMBuilder.CreateFPToSI( e_value,
                                            m_Runtime.GetLLVMType( type ) );
     else
-        return m_LLVMBuilder.CreateFPToUI( e_code,
+        return m_LLVMBuilder.CreateFPToUI( e_value,
                                            m_Runtime.GetLLVMType( type ) );
 }
 
@@ -576,7 +583,7 @@ llvm::Value* CodeGenerator::CreateShr( const Expression& l,
 llvm::Value* CodeGenerator::CreateAdd( const Expression& l,
                                        const Expression& r )
 {
-    assert( l.GetReturnType() == r.GetReturnType() &&
+    assert( l.GetType() == r.GetType() &&
             "Type mismatch in code gen for binary operator" );
     if( IsFloatingPoint( l.GetReturnType() ) )
         return m_LLVMBuilder.CreateFAdd( l.CodeGen( *this ),
@@ -790,21 +797,18 @@ llvm::Constant* CodeGenerator::CreateArray(
 //
 
 llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
-                                Type type,
-                                ArrayExtents array_extents,
+                                const CompleteType& type,
                                 bool is_const,
                                 const GenericValue& initializer,
                                 const std::string& name )
 {
-    assert( ( initializer.GetType() == Type::UNKNOWN &&
-              type == initializer.GetUnderlyingType() ) ||
+    assert( ( initializer.GetType().IsUnknown() ||
+              initializer.GetType() == type ) &&
             "Initializer type mismatch" );
-    assert( ( initializer.GetType() == Type::UNKNOWN ||
-              array_extents == initializer.GetArrayExtents() ) &&
-            "Initializer array extents mismatch" );
-    llvm::Type* t = m_Runtime.GetLLVMType( type, array_extents );
+
+    llvm::Type* t = m_Runtime.GetLLVMType( type );
     llvm::Constant* init;
-    if( initializer.GetType() != Type::UNKNOWN )
+    if( !initializer.GetType().IsUnknown() )
         init = initializer.CodeGen( *this );
     else
         init = llvm::Constant::getNullValue( t );
@@ -856,10 +860,7 @@ llvm::Function* CodeGenerator::CreateFunctionFromExpression(
 {
     assert( m_Temporaries.empty() && "Leftover temporaries" );
 
-    /// Todo overload for get type from expression
-    llvm::Type* return_type = m_Runtime.GetLLVMType(
-                                                expression.GetUnderlyingType(),
-                                                expression.GetArrayExtents() );
+    llvm::Type* return_type = m_Runtime.GetLLVMType( expression.GetType() );
     assert( return_type &&
             "Trying to get the type of an unhandled JoeLang::Type" );
 

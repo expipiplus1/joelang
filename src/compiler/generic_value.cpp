@@ -35,8 +35,9 @@
 #include <vector>
 
 #include <compiler/code_generator.hpp>
-#include <engine/types.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
@@ -285,9 +286,10 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
     return nullptr;
 }
 
-Type GenericValue::GetType() const
+CompleteType GenericValue::GetType() const
 {
-    return m_Type;
+    return CompleteType( GetUnderlyingType(),
+                         GetArrayExtents() );
 }
 
 Type GenericValue::GetUnderlyingType() const

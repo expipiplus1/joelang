@@ -42,12 +42,13 @@ namespace llvm
 namespace JoeLang
 {
 
-typedef std::vector<unsigned> ArrayExtents;
 enum class Type;
 
 namespace Compiler
 {
 
+using ArrayExtents = std::vector<unsigned>;
+class CompleteType;
 class CodeGenerator;
 
 class GenericValue
@@ -94,7 +95,7 @@ public:
 
     llvm::Constant* CodeGen( CodeGenerator& code_gen ) const;
 
-    Type GetType() const;
+    CompleteType GetType() const;
     Type GetUnderlyingType() const;
     ArrayExtents GetArrayExtents() const;
 

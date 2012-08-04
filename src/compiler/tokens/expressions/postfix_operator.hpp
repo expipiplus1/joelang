@@ -49,6 +49,7 @@ namespace Compiler
 
 typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
+class CompleteType;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 typedef std::shared_ptr<Expression> Expression_sp;
@@ -88,6 +89,9 @@ public:
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
                                    const Expression_up& expression );
+
+    virtual
+    CompleteType GetType( const Expression& expression ) const = 0;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const = 0;
@@ -153,6 +157,9 @@ public:
                                    const Expression_up& expression ) override;
 
     virtual
+    CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const override;
 
     virtual
@@ -203,6 +210,9 @@ public:
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression_up& expression ) override;
+
+    virtual
+    CompleteType GetType( const Expression& expression ) const override;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const override;
@@ -256,6 +266,9 @@ public:
                           const Expression_up& expression ) override;
 
     virtual
+    CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
     Type GetReturnType( const Expression_up& expression ) const override;
 
     virtual
@@ -304,6 +317,9 @@ public:
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression_up& expression ) override;
+
+    virtual
+    CompleteType GetType( const Expression& expression ) const override;
 
     virtual
     Type GetReturnType( const Expression_up& expression ) const override;

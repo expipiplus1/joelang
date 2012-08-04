@@ -38,14 +38,19 @@ enum class Type;
 namespace Compiler
 {
 
-class Expression;
+class CompleteType;
+
+// todo review all this mess
 
 /**
   * This returns the type according to the integer promotion rules
   */
-Type GetCommonType( Type t1, Type t2 );
+CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 );
 
 Type GetVectorType( Type base, unsigned size );
+
+/** Reduces vector types to their scalar types **/
+Type GetScalarType( Type t );
 
 bool IsFloatingPoint( Type t );
 

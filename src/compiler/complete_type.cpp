@@ -29,9 +29,12 @@
 
 #include "complete_type.hpp"
 
+#include <string>
+#include <sstream>
 #include <utility>
 #include <vector>
 
+#include <compiler/type_properties.hpp>
 #include <engine/types.hpp>
 
 namespace JoeLang
@@ -41,16 +44,13 @@ namespace Compiler
 
 CompleteType::CompleteType()
     :m_BaseType( Type::UNKNOWN )
-    ,m_IsConst( false )
 {
 }
 
 CompleteType::CompleteType( Type base_type,
-                            ArrayExtents array_extents,
-                            bool is_const )
+                            ArrayExtents array_extents )
     :m_BaseType( base_type )
     ,m_ArrayExtents( std::move(array_extents) )
-    ,m_IsConst( is_const )
 {
 }
 
@@ -69,6 +69,35 @@ Type CompleteType::GetBaseType() const
 const ArrayExtents& CompleteType::GetArrayExtents() const
 {
     return m_ArrayExtents;
+}
+
+bool CompleteType::IsArrayType() const
+{
+    return !m_ArrayExtents.empty();
+}
+
+bool CompleteType::IsUnknown() const
+{
+    return m_BaseType == Type::UNKNOWN;
+}
+
+std::string CompleteType::GetString() const
+{
+    std::stringstream string( GetTypeString( m_BaseType ) );
+    for( unsigned e : m_ArrayExtents )
+        string << "[" << e << "]";
+    return string.str();
+}
+
+bool CompleteType::operator == ( const CompleteType& other )
+{
+    return m_BaseType == other.m_BaseType &&
+           m_ArrayExtents == other.m_ArrayExtents;
+}
+
+bool CompleteType::operator != ( const CompleteType& other )
+{
+    return !operator==( other );
 }
 
 } // namespace Compiler

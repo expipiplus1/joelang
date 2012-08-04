@@ -82,19 +82,21 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO operands can't be arrays
     bool good = true;
 
-    Type t = GetCommonType( m_RightSide->GetReturnType(),
-                            m_LeftSide->GetReturnType() );
-    if( t == Type::UNKNOWN )
+    const CompleteType& left_type = m_LeftSide->GetType();
+    const CompleteType& right_type = m_RightSide->GetType();
+
+    CompleteType t = GetCommonType( left_type, right_type );
+    if( t.IsUnknown() )
     {
         good = false;
 
         // If both of the sub expressions are fine, then we know the problem's
         // here
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
             sema.Error( "Invalid operands to binary operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+                        left_type.GetString() + " and " +
+                        right_type.GetString() );
     }
     else
     {
@@ -155,10 +157,16 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 }
 
+CompleteType BinaryOperatorExpression::GetType() const
+{
+    return GetCommonType( m_LeftSide->GetType(),
+                          m_RightSide->GetType() );
+}
+
 Type BinaryOperatorExpression::GetReturnType() const
 {
-    return GetCommonType( m_LeftSide->GetReturnType(),
-                          m_RightSide->GetReturnType() );
+    return GetCommonType( m_LeftSide->GetType(),
+                          m_RightSide->GetType() ).GetType();
 }
 
 Type BinaryOperatorExpression::GetUnderlyingType() const
@@ -286,6 +294,12 @@ bool LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+CompleteType LogicalOrExpression::GetType() const
+{
+    /// todo vectors of bool
+    return CompleteType( Type::BOOL );
+}
+
 Type LogicalOrExpression::GetReturnType() const
 {
     return Type::BOOL;
@@ -343,6 +357,11 @@ bool LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
     good &= m_RightSide->PerformSema( sema );
 
     return good;
+}
+
+CompleteType LogicalAndExpression::GetType() const
+{
+    return CompleteType( Type::BOOL );
 }
 
 Type LogicalAndExpression::GetReturnType() const
@@ -592,6 +611,11 @@ EqualityExpression::~EqualityExpression()
 {
 }
 
+CompleteType EqualityExpression::GetType() const
+{
+    return CompleteType( Type::BOOL );
+}
+
 Type EqualityExpression::GetReturnType() const
 {
     return Type::BOOL;
@@ -636,6 +660,11 @@ RelationalExpression::RelationalExpression( Op operator_terminal,
 
 RelationalExpression::~RelationalExpression()
 {
+}
+
+CompleteType RelationalExpression::GetType() const
+{
+    return CompleteType( Type::BOOL );
 }
 
 Type RelationalExpression::GetReturnType() const

@@ -106,7 +106,7 @@ bool LiteralExpression::Parse( Parser& parser,
 std::unique_ptr<LiteralExpression> LiteralExpression::Create(
                                                          const GenericValue& v )
 {
-    switch( v.GetType() )
+    switch( v.GetUnderlyingType() )
     {
     case Type::BOOL:
         return std::unique_ptr<LiteralExpression>(
@@ -191,6 +191,49 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, GetReturnType() );
+}
+
+CompleteType IntegerLiteralExpression::GetType() const
+{
+    Type type;
+    switch( m_Suffix )
+    {
+    case Suffix::CHAR:
+        type = Type::I8;
+        break;
+    case Suffix::INT:
+        type = Type::I32;
+        break;
+    case Suffix::SHORT:
+        type = Type::I16;
+        break;
+    case Suffix::LONG:
+        type = Type::I64;
+        break;
+    case Suffix::UNSIGNED_CHAR:
+        type = Type::U8;
+        break;
+    case Suffix::UNSIGNED_INT:
+        type = Type::U32;
+        break;
+    case Suffix::UNSIGNED_SHORT:
+        type = Type::U16;
+        break;
+    case Suffix::UNSIGNED_LONG:
+        type = Type::U64;
+        break;
+    default:
+        type = m_Value <= jl_u64(std::numeric_limits<jl_i32>::max())
+                    ? Type::I32
+                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
+                        ? Type::U32
+                        : m_Value <= jl_u64(std::numeric_limits<jl_i64>::max())
+                            ? Type::I64
+                            : Type::U64;
+        break;
+    }
+
+    return CompleteType( type );
 }
 
 Type IntegerLiteralExpression::GetReturnType() const
@@ -395,6 +438,14 @@ llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
                                                                : Type::DOUBLE );
 }
 
+CompleteType FloatingLiteralExpression::GetType() const
+{
+    if( m_Suffix == Suffix::SINGLE )
+        return CompleteType( Type::FLOAT );
+    else
+        return CompleteType( Type::DOUBLE );
+}
+
 Type FloatingLiteralExpression::GetReturnType() const
 {
     if( m_Suffix == Suffix::SINGLE )
@@ -491,6 +542,11 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, Type::BOOL );
+}
+
+CompleteType BooleanLiteralExpression::GetType() const
+{
+    return CompleteType( Type::BOOL );
 }
 
 Type BooleanLiteralExpression::GetReturnType() const
@@ -613,6 +669,11 @@ llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateString( m_Value );
 }
 
+CompleteType StringLiteralExpression::GetType() const
+{
+    return CompleteType( Type::STRING );
+}
+
 Type StringLiteralExpression::GetReturnType() const
 {
     return Type::STRING;
@@ -710,6 +771,11 @@ llvm::Value* CharacterLiteralExpression::CodeGen(
                                                 CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, Type::I8 );
+}
+
+CompleteType CharacterLiteralExpression::GetType() const
+{
+    return CompleteType( Type::I8 );
 }
 
 Type CharacterLiteralExpression::GetReturnType() const

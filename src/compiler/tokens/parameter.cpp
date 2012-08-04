@@ -109,8 +109,8 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->GetArrayExtents() != array_extents )
         sema.Error( "Default parameter value has mismatching array extents" );
 
-    m_Variable = std::make_shared<Variable>( base_type,
-                                             array_extents,
+    m_Variable = std::make_shared<Variable>( CompleteType( base_type,
+                                                           array_extents ),
                                              decl_specs.IsConst(),
                                              false, //Isn't global
                                              true,  //Is a param
@@ -118,8 +118,7 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
                                              m_Identifier );
 
     m_Type = CompleteType( base_type,
-                           std::move(array_extents),
-                           decl_specs.IsConst() );
+                           std::move(array_extents) );
     return true;
 }
 

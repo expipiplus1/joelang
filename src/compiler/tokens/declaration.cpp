@@ -486,9 +486,9 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
     m_Declarator->DeclareFunctionParameters( sema );
 
     // Pass the return type to sema for generating the return statements
-    m_Body->PerformSema( sema, CompleteType( decl_specs.GetType(),
-                                             m_Declarator->GetArrayExtents(),
-                                             decl_specs.IsConst() ) );
+    m_Body->PerformSema( sema,
+                         CompleteType( decl_specs.GetType(),
+                                       m_Declarator->GetArrayExtents() ) );
     scope.Leave();
 
     sema.DefineFunction( m_Declarator->GetIdentifier(),

@@ -58,11 +58,12 @@ enum class Type;
 namespace Compiler
 {
 
-typedef std::vector<unsigned> ArrayExtents;
+using ArrayExtents = std::vector<unsigned>;
+class CompleteType;
 class DeclarationBase;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
+using Expression_up = std::unique_ptr<Expression>;
+using Expression_sp = std::shared_ptr<Expression>;
 class GenericValue;
 class Runtime;
 class TechniqueDeclaration;
@@ -99,7 +100,7 @@ public:
 
 
     // Cast Operators
-    llvm::Value* CreateCast( const Expression& e, Type type );
+    llvm::Value* CreateCast( const Expression& e, const CompleteType& type );
 
     // Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );
@@ -198,20 +199,16 @@ public:
       * Allocate a llvm::GlobalVariable for the current module
       * \param type
       *   The type of the global variable
-      * \param array_extents
-      *   The array dimensions (if any)
       * \param is_const
       *   Whether this is a const variable
       * \param initializer
       *   An optional value to initialize the variable with
       * \returns the llvm::GlobalVariable allocated
       */
-    llvm::GlobalVariable* CreateGlobalVariable(
-                     Type type,
-                     ArrayExtents array_extents,
-                     bool is_const,
-                     const GenericValue& initializer,
-                     const std::string& name );
+    llvm::GlobalVariable* CreateGlobalVariable( const CompleteType& type,
+                                                bool is_const,
+                                                const GenericValue& initializer,
+                                                const std::string& name );
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 

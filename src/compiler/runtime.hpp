@@ -61,6 +61,7 @@ namespace Compiler
 {
 
 typedef std::vector<unsigned> ArrayExtents;
+class CompleteType;
 
 enum class RuntimeFunction
 {
@@ -84,9 +85,8 @@ public:
                                            std::vector<llvm::Value*> params,
                                            llvm::IRBuilder<>& builder ) const;
 
-    llvm::Type*         GetLLVMType(
-                        Type base_type,
-                        const ArrayExtents& array_extents = {} ) const;
+    llvm::Type*         GetLLVMType( const CompleteType& type ) const;
+    llvm::Type*         GetLLVMType( Type type ) const;
 private:
     enum class ReturnType
     {
