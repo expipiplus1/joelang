@@ -84,8 +84,8 @@ bool TranslationUnit::Parse( Parser& parser,
 {
     // Parse all of the top level declarations in the file
     DeclarationVector declarations;
-    if( !parser.ExpectSequenceOf<DeclarationBase>( declarations ) )
-        return false;
+    parser.ExpectSequenceOf<DeclarationBase>( declarations );
+    CHECK_PARSER;
 
     // Make sure that there's nothing left
     if( !parser.ExpectTerminal( TerminalType::END_OF_INPUT ) )
