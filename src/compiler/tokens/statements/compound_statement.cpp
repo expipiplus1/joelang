@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <memory>
+#include <vector>
 
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
@@ -46,8 +47,9 @@ namespace Compiler
 // CompoundStatement
 //------------------------------------------------------------------------------
 
-CompoundStatement::CompoundStatement()
+CompoundStatement::CompoundStatement( std::vector<Statement_up> statements )
     :Statement( TokenTy::CompoundStatement )
+    ,m_Statements( std::move(statements) )
 {
 }
 
@@ -58,6 +60,7 @@ CompoundStatement::~CompoundStatement()
 void CompoundStatement::PerformSema( SemaAnalyzer& sema,
                                      const CompleteType& return_type )
 {
+
 }
 
 bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )
@@ -65,10 +68,14 @@ bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
         return false;
 
+    std::vector<Statement_up> statements;
+    parser.ExpectSequenceOf<Statement>( statements );
+    CHECK_PARSER;
+
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new CompoundStatement() );
+    token.reset( new CompoundStatement( std::move(statements) ) );
     return true;
 }
 

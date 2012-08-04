@@ -50,12 +50,12 @@ class SemaAnalyzer;
   * \ingroup Statements
   * \brief Matches a CompoundStatement
   *
-  * CompoundStatement = '{' '}'
+  * CompoundStatement = '{' Statement* '}'
   */
 class CompoundStatement : public JoeLang::Compiler::Statement
 {
 public:
-    CompoundStatement    ();
+    CompoundStatement    ( std::vector<Statement_up> statements );
     virtual
     ~CompoundStatement   ();
 
@@ -66,6 +66,7 @@ public:
     bool Parse ( Parser& parser, CompoundStatement_up& token );
 
 private:
+    std::vector<Statement_up> m_Statements;
 };
 
 
