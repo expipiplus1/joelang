@@ -32,10 +32,13 @@ void vunc();
 
 int func2()
 {
+    return 2;
 }
 
 int func2( float fa )
 {
+    f = 2;
+    return f;
 };
 
 bool func2( int fb )

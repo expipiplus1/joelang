@@ -87,6 +87,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/expressions/postfix_operator.hpp
                         src/compiler/tokens/statements/compound_statement.cpp
                         src/compiler/tokens/statements/compound_statement.hpp
+                        src/compiler/tokens/statements/expression_statement.cpp
+                        src/compiler/tokens/statements/expression_statement.hpp
                         src/compiler/tokens/statements/return_statement.cpp
                         src/compiler/tokens/statements/return_statement.hpp
                         src/compiler/tokens/statements/statement.cpp

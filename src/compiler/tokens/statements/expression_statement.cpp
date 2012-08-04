@@ -27,17 +27,17 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "statement.hpp"
+#include "expression_statement.hpp"
 
 #include <cassert>
 #include <memory>
 
-#include <compiler/casting.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
-#include <compiler/tokens/statements/compound_statement.hpp>
-#include <compiler/tokens/statements/expression_statement.hpp>
-#include <compiler/tokens/statements/return_statement.hpp>
-#include <compiler/tokens/token.hpp>
+#include <compiler/sema_analyzer.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
 {
@@ -45,45 +45,39 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// Statement
+// ExpressionStatement
 //------------------------------------------------------------------------------
 
-Statement::Statement( TokenTy sub_class_id )
-    :Token( sub_class_id )
+ExpressionStatement::ExpressionStatement( Expression_up expression )
+    :Statement( TokenTy::ExpressionStatement )
+    ,m_Expression( std::move(expression) )
+{
+    assert( m_Expression && "ExpressionStatement given a null expression" );
+}
+
+ExpressionStatement::~ExpressionStatement()
 {
 }
 
-Statement::~Statement()
+void ExpressionStatement::PerformSema( SemaAnalyzer& sema )
 {
+    m_Expression->ResolveIdentifiers( sema );
+    m_Expression->PerformSema( sema );
 }
 
-void Statement::Print( int depth ) const
+bool ExpressionStatement::Parse( Parser& parser, ExpressionStatement_up& token )
 {
-}
-
-bool Statement::Parse( Parser& parser, Statement_up& token )
-{
-    // Try and parse any kind of statement
-    std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf< CompoundStatement,
-                             ExpressionStatement,
-                             ReturnStatement >( t ) )
+    Expression_up expression;
+    if( !parser.Expect<Expression>( expression ) )
         return false;
 
-    assert( isa<Statement>( t ) && "Statement parsed a non-statement" );
-    token.reset( static_cast<Statement*>( t.release() ) );
-    return true;
-}
+    if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
+    {
+        parser.Error( "Expected ';' after expression" );
+        return false;
+    }
 
-bool Statement::classof( const Token* d )
-{
-    return d->GetSubClassID() >= TokenTy::Statement_Start &&
-           d->GetSubClassID() <= TokenTy::Statement_End;
-}
-
-bool Statement::classof( const Statement* d )
-{
-    // A Statement is always a Statement
+    token.reset( new ExpressionStatement( std::move(expression) ) );
     return true;
 }
 
