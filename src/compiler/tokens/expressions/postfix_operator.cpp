@@ -138,8 +138,8 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    const ArrayExtents extents = expression->GetArrayExtents();
-    assert( extents.size() != 0 && "Indexing into a non array" );
+    const ArrayExtents& extents = expression->GetType().GetArrayExtents();
+    assert( !extents.empty() && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
         unsigned index = sema.EvaluateExpression( *m_IndexExpression ).GetI64();
@@ -173,28 +173,6 @@ CompleteType SubscriptOperator::GetType( const Expression& expression ) const
         array_extents.resize( array_extents.size() - 1 );
     return CompleteType( expression.GetType().GetBaseType(),
                          std::move( array_extents ) );
-}
-
-Type SubscriptOperator::GetReturnType( const Expression_up& expression ) const
-{
-    assert( expression && "SubscriptOperator given an null expression" );
-    const ArrayExtents& array_extents = expression->GetArrayExtents();
-    if( array_extents.size() > 1 )
-        return Type::ARRAY;
-    return expression->GetUnderlyingType();
-}
-
-Type SubscriptOperator::GetUnderlyingType(
-                                        const Expression_up& expression ) const
-{
-    assert( expression && "SubscriptOperator given an null expression" );
-    return expression->GetUnderlyingType();
-}
-
-const ArrayExtents& SubscriptOperator::GetArrayExtents(
-                                        const Expression_up& expression ) const
-{
-    return m_ArrayExtents;
 }
 
 bool SubscriptOperator::IsConst( const Expression& expression ) const
@@ -274,28 +252,6 @@ CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
 {
     assert( false && "Complete me" );
     return CompleteType();
-}
-
-Type ArgumentListOperator::GetReturnType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-Type ArgumentListOperator::GetUnderlyingType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-const ArrayExtents& ArgumentListOperator::GetArrayExtents(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    const static ArrayExtents empty;
-    return empty;
 }
 
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
@@ -387,28 +343,6 @@ CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
     return CompleteType();
 }
 
-Type MemberAccessOperator::GetReturnType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-Type MemberAccessOperator::GetUnderlyingType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-const ArrayExtents& MemberAccessOperator::GetArrayExtents(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    const static ArrayExtents empty;
-    return empty;
-}
-
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst();
@@ -475,28 +409,6 @@ CompleteType IncrementOrDecrementOperator::GetType(
 {
     assert( false && "Complete me" );
     return CompleteType();
-}
-
-Type IncrementOrDecrementOperator::GetReturnType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-Type IncrementOrDecrementOperator::GetUnderlyingType(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    return Type::UNKNOWN;
-}
-
-const ArrayExtents& IncrementOrDecrementOperator::GetArrayExtents(
-                                        const Expression_up& expression ) const
-{
-    assert( false && "Complete me" );
-    const static ArrayExtents empty;
-    return empty;
 }
 
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const

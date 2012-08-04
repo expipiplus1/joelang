@@ -58,13 +58,24 @@ public:
       */
     Type GetType() const;
 
-    Type GetBaseType() const;
-
     const ArrayExtents& GetArrayExtents() const;
+
+    Type GetBaseType() const;
 
     bool IsArrayType() const;
 
     bool IsUnknown() const;
+
+    bool IsFloatingPoint() const;
+    bool IsIntegral() const;
+
+    bool IsVectorType() const;
+    bool IsScalarType() const;
+
+    bool IsSigned() const;
+
+    /** Returns the number of vector elements **/
+    unsigned GetNumElements() const;
 
     std::string GetString() const;
 

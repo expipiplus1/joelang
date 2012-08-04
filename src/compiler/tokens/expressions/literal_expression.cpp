@@ -70,17 +70,6 @@ bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
     return true;
 }
 
-Type LiteralExpression::GetUnderlyingType() const
-{
-    return GetReturnType();
-}
-
-const ArrayExtents& LiteralExpression::GetArrayExtents() const
-{
-    const static ArrayExtents empty;
-    return empty;
-}
-
 bool LiteralExpression::IsConst() const
 {
     return true;
@@ -190,7 +179,7 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_Value, GetReturnType() );
+    return code_gen.CreateInteger( m_Value, GetType().GetType() );
 }
 
 CompleteType IntegerLiteralExpression::GetType() const
@@ -234,37 +223,6 @@ CompleteType IntegerLiteralExpression::GetType() const
     }
 
     return CompleteType( type );
-}
-
-Type IntegerLiteralExpression::GetReturnType() const
-{
-    switch( m_Suffix )
-    {
-    case Suffix::CHAR:
-        return Type::I8;
-    case Suffix::INT:
-        return Type::I32;
-    case Suffix::SHORT:
-        return Type::I16;
-    case Suffix::LONG:
-        return Type::I64;
-    case Suffix::UNSIGNED_CHAR:
-        return Type::U8;
-    case Suffix::UNSIGNED_INT:
-        return Type::U32;
-    case Suffix::UNSIGNED_SHORT:
-        return Type::U16;
-    case Suffix::UNSIGNED_LONG:
-        return Type::U64;
-    default:
-        return m_Value <= jl_u64(std::numeric_limits<jl_i32>::max())
-                    ? Type::I32
-                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
-                        ? Type::U32
-                        : m_Value <= jl_u64(std::numeric_limits<jl_i64>::max())
-                            ? Type::I64
-                            : Type::U64;
-    }
 }
 
 GenericValue IntegerLiteralExpression::GetValue() const
@@ -446,14 +404,6 @@ CompleteType FloatingLiteralExpression::GetType() const
         return CompleteType( Type::DOUBLE );
 }
 
-Type FloatingLiteralExpression::GetReturnType() const
-{
-    if( m_Suffix == Suffix::SINGLE )
-        return Type::FLOAT;
-    else
-        return Type::DOUBLE;
-}
-
 GenericValue FloatingLiteralExpression::GetValue() const
 {
     switch( m_Suffix )
@@ -547,11 +497,6 @@ llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 CompleteType BooleanLiteralExpression::GetType() const
 {
     return CompleteType( Type::BOOL );
-}
-
-Type BooleanLiteralExpression::GetReturnType() const
-{
-    return Type::BOOL;
 }
 
 GenericValue BooleanLiteralExpression::GetValue() const
@@ -674,11 +619,6 @@ CompleteType StringLiteralExpression::GetType() const
     return CompleteType( Type::STRING );
 }
 
-Type StringLiteralExpression::GetReturnType() const
-{
-    return Type::STRING;
-}
-
 GenericValue StringLiteralExpression::GetValue() const
 {
     return GenericValue( m_Value );
@@ -776,11 +716,6 @@ llvm::Value* CharacterLiteralExpression::CodeGen(
 CompleteType CharacterLiteralExpression::GetType() const
 {
     return CompleteType( Type::I8 );
-}
-
-Type CharacterLiteralExpression::GetReturnType() const
-{
-    return Type::I8;
 }
 
 GenericValue CharacterLiteralExpression::GetValue() const

@@ -94,17 +94,6 @@ public:
     CompleteType GetType( const Expression& expression ) const = 0;
 
     virtual
-    Type GetReturnType( const Expression_up& expression ) const = 0;
-
-    /// todo make these all take references
-    virtual
-    Type GetUnderlyingType( const Expression_up& expression ) const = 0;
-
-    virtual
-    const ArrayExtents& GetArrayExtents(
-                                    const Expression_up& expression) const = 0;
-
-    virtual
     bool IsConst( const Expression& expression ) const = 0;
 
     /**
@@ -160,16 +149,6 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    Type GetReturnType( const Expression_up& expression ) const override;
-
-    virtual
-    Type GetUnderlyingType( const Expression_up& expression ) const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents(
-                            const Expression_up& expression ) const override;
-
-    virtual
     bool IsConst( const Expression& expression ) const override;
 
     virtual
@@ -213,16 +192,6 @@ public:
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
-
-    virtual
-    Type GetReturnType( const Expression_up& expression ) const override;
-
-    virtual
-    Type GetUnderlyingType( const Expression_up& expression ) const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents(
-                            const Expression_up& expression ) const override;
 
     /** \returns false **/
     virtual
@@ -269,16 +238,6 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    Type GetReturnType( const Expression_up& expression ) const override;
-
-    virtual
-    Type GetUnderlyingType( const Expression_up& expression ) const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents(
-                            const Expression_up& expression ) const override;
-
-    virtual
     bool IsConst( const Expression& expression ) const override;
 
     virtual
@@ -320,16 +279,6 @@ public:
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
-
-    virtual
-    Type GetReturnType( const Expression_up& expression ) const override;
-
-    virtual
-    Type GetUnderlyingType( const Expression_up& expression ) const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents(
-                            const Expression_up& expression ) const override;
 
     /** \returns false **/
     virtual

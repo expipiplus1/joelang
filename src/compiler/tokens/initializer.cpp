@@ -81,7 +81,7 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
         m_Expression = CastExpression::Create( desired_type,
                                                std::move(m_Expression) );
         bool ret = m_Expression->PerformSema( sema );
-        m_ArrayExtents = m_Expression->GetArrayExtents();
+        m_ArrayExtents = m_Expression->GetType().GetArrayExtents();
         return ret;
     }
     else

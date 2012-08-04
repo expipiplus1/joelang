@@ -130,16 +130,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    /// \returns GetReturnType
-    virtual
-    Type GetUnderlyingType() const override final;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override final;
-
-    virtual
     bool IsConst() const override;
 
     virtual
@@ -203,9 +193,6 @@ public:
     virtual
     CompleteType GetType() const override;
 
-    virtual
-    Type GetReturnType() const override;
-
     static
     bool Parse( Parser& parser,
                 Expression_up& token );
@@ -243,9 +230,6 @@ public:
       */
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
 
     static
     bool Parse( Parser& parser,
@@ -376,9 +360,6 @@ public:
     virtual
     CompleteType GetType() const override;
 
-    virtual
-    Type GetReturnType() const override;
-
     static
     bool Parse( Parser& parser, Expression_up& token );
 
@@ -410,9 +391,6 @@ public:
       */
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
 
     static
     bool Parse( Parser& parser,

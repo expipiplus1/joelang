@@ -61,14 +61,14 @@ Type CompleteType::GetType() const
     return m_BaseType;
 }
 
-Type CompleteType::GetBaseType() const
-{
-    return m_BaseType;
-}
-
 const ArrayExtents& CompleteType::GetArrayExtents() const
 {
     return m_ArrayExtents;
+}
+
+Type CompleteType::GetBaseType() const
+{
+    return m_BaseType;
 }
 
 bool CompleteType::IsArrayType() const
@@ -79,6 +79,36 @@ bool CompleteType::IsArrayType() const
 bool CompleteType::IsUnknown() const
 {
     return m_BaseType == Type::UNKNOWN;
+}
+
+bool CompleteType::IsFloatingPoint() const
+{
+    return Compiler::IsFloatingPoint( m_BaseType );
+}
+
+bool CompleteType::IsIntegral() const
+{
+    return Compiler::IsIntegral( m_BaseType );
+}
+
+bool CompleteType::IsVectorType() const
+{
+    return Compiler::IsVectorType( m_BaseType );
+}
+
+bool CompleteType::IsScalarType() const
+{
+    return Compiler::IsScalarType( m_BaseType );
+}
+
+bool CompleteType::IsSigned() const
+{
+    return Compiler::IsSigned( m_BaseType );
+}
+
+unsigned CompleteType::GetNumElements() const
+{
+    return Compiler::GetNumElementsInType( m_BaseType );
 }
 
 std::string CompleteType::GetString() const

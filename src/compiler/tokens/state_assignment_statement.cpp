@@ -108,7 +108,7 @@ std::unique_ptr<StateAssignmentBase>
 
     Type t = m_State->GetType();
 
-    assert( m_Expression->GetReturnType() == t &&
+    assert( m_Expression->GetType().GetType() == t &&
             "Trying to create a state assignment with mismatched types" );
 
     // If this is just a constant return a ConstStateAssignment

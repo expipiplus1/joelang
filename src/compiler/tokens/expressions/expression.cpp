@@ -149,7 +149,7 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 
     // Assuming that we can assign to the same as ReturnType;
     m_AssignedExpression = CastExpression::Create(
-                                              m_Assignee->GetReturnType(),
+                                              m_Assignee->GetType(),
                                               std::move(m_AssignedExpression) );
     good &= m_AssignedExpression->PerformSema( sema );
 
@@ -259,21 +259,6 @@ CompleteType AssignmentExpression::GetType() const
     return m_AssigneePtr->GetType();
 }
 
-Type AssignmentExpression::GetReturnType() const
-{
-    return m_AssigneePtr->GetReturnType();
-}
-
-Type AssignmentExpression::GetUnderlyingType() const
-{
-    return m_AssigneePtr->GetUnderlyingType();
-}
-
-const ArrayExtents& AssignmentExpression::GetArrayExtents() const
-{
-    return m_AssigneePtr->GetArrayExtents();
-}
-
 bool AssignmentExpression::IsLValue() const
 {
     return true;
@@ -369,19 +354,19 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 
     m_Condition = CastExpression::Create( Type::BOOL, std::move(m_Condition) );
 
-    Type t = GetReturnType();
-    if( t == Type::UNKNOWN )
+    const CompleteType& t = GetType();
+    if( t.IsUnknown() )
     {
         good = false;
 
         // If both of the sub expressions are fine, then we know the problem's
         // here, so report it
-        if( m_TrueExpression->GetReturnType() != Type::UNKNOWN &&
-            m_FalseExpression->GetReturnType() != Type::UNKNOWN )
+        if( !m_TrueExpression->GetType().IsUnknown() &&
+            !m_FalseExpression->GetType().IsUnknown() )
             sema.Error( "Incompatable operand types in conditional expression "+
-                        GetTypeString( m_TrueExpression->GetReturnType() ) +
+                        m_TrueExpression->GetType().GetString() +
                         " and " +
-                        GetTypeString( m_FalseExpression->GetReturnType() ) );
+                        m_FalseExpression->GetType().GetString() );
     }
     else
     {
@@ -411,24 +396,6 @@ CompleteType ConditionalExpression::GetType() const
 {
     return GetCommonType( m_TrueExpression->GetType(),
                           m_FalseExpression->GetType() );
-}
-
-Type ConditionalExpression::GetReturnType() const
-{
-    return GetCommonType( m_TrueExpression->GetType(),
-                          m_FalseExpression->GetType() ).GetType();
-}
-
-Type ConditionalExpression::GetUnderlyingType() const
-{
-    return GetCommonType( m_TrueExpression->GetType(),
-                          m_FalseExpression->GetType() ).GetBaseType();
-}
-
-const ArrayExtents& ConditionalExpression::GetArrayExtents() const
-{
-    // The array extents should be the same between the two sides
-    return m_TrueExpression->GetArrayExtents();
 }
 
 bool ConditionalExpression::IsConst() const
@@ -521,11 +488,11 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     // todo this in a better way
     bool good = true;
 
-    Type t = m_Expression->GetReturnType();
+    const CompleteType& t = m_Expression->GetType();
 
-    if( t != Type::UNKNOWN )
+    if( !t.IsUnknown() )
     {
-        if( t == Type::STRING && m_CastType.GetType() != Type::STRING )
+        if( t.GetType() == Type::STRING && m_CastType.GetType() != Type::STRING )
         {
             good = false;
             sema.Error( "Can't cast string to " + m_CastType.GetString() );
@@ -542,7 +509,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
             good = false;
             sema.Error( "Can't cast to an array type" );
         }
-        else if( t == Type::ARRAY )
+        else if( t.IsArrayType() )
         {
             // Can't cast from an array type
             good = false;
@@ -551,10 +518,10 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
         else if( m_CastType.GetType() == Type::STRING )
         {
             // Can only cast string to string
-            if( t != Type::STRING )
+            if( t.GetType() != Type::STRING )
             {
                 good = false;
-                sema.Error( "Can't cast " + GetTypeString( t ) + " to string" );
+                sema.Error( "Can't cast " + t.GetString() + " to string" );
             }
         }
         else if( IsScalarType( m_CastType.GetType() ) )
@@ -565,11 +532,11 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
         {
             // Can only cast same size vectors
             // But all vector types are compatible
-            if( GetVectorSize( m_CastType.GetType() ) != GetVectorSize( t ) )
+            if( m_CastType.GetNumElements() != t.GetNumElements() )
             {
                 good = false;
-                sema.Error( "Can't cast " + GetTypeString( t ) + " to " +
-                            GetTypeString( m_CastType.GetType() ) );
+                sema.Error( "Can't cast " + t.GetString() + " to " +
+                            m_CastType.GetString() );
             }
         }
         else
@@ -590,26 +557,9 @@ llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateCast( *m_Expression, m_CastType );
 }
 
-Type CastExpression::GetReturnType() const
-{
-    if( m_Expression->GetReturnType() == Type::ARRAY )
-        return Type::ARRAY;
-    return m_CastType.GetType();
-}
-
 CompleteType CastExpression::GetType() const
 {
     return m_CastType;
-}
-
-Type CastExpression::GetUnderlyingType() const
-{
-    return m_CastType.GetBaseType();
-}
-
-const ArrayExtents& CastExpression::GetArrayExtents() const
-{
-    return m_CastType.GetArrayExtents();
 }
 
 bool CastExpression::IsConst() const
@@ -634,7 +584,7 @@ bool CastExpression::Parse( Parser& parser, Expression_up& token )
 Expression_up CastExpression::Create( Type cast_type,
                                       Expression_up expression )
 {
-    if( expression->GetReturnType() == cast_type )
+    if( expression->GetType().GetType() == cast_type )
         return expression;
     return Expression_up( new CastExpression( CompleteType(cast_type),
                                               std::move(expression) ) );
@@ -655,7 +605,7 @@ Expression_up CastExpression::CreateBaseTypeCast(
                                                 Type cast_type,
                                                 Expression_up cast_expression )
 {
-    Type expression_type = cast_expression->GetReturnType();
+    Type expression_type = cast_expression->GetType().GetType();
     if( IsScalarType( expression_type ) )
         return Create( cast_type, std::move(cast_expression) );
 
@@ -704,13 +654,13 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO check that expression isn't an array
     bool good = true;
 
-    Type t = m_Expression->GetReturnType();
-    if( t == Type::STRING )
+    const CompleteType& t = m_Expression->GetType();
+    if( t.GetType() == Type::STRING )
     {
         good = false;
         sema.Error( "Invalid type to unary operator: string" );
     }
-    if( !IsIntegral( t ) &&
+    if( !t.IsIntegral() &&
         m_Operator == Op::BITWISE_NOT )
     {
         good = false;
@@ -764,37 +714,6 @@ CompleteType UnaryExpression::GetType() const
     }
     assert( false && "unreachable" );
     return CompleteType();
-}
-
-Type UnaryExpression::GetReturnType() const
-{
-    Type t = m_Expression->GetReturnType();
-
-    switch( m_Operator )
-    {
-    case Op::PLUS:
-    case Op::MINUS:
-    case Op::INCREMENT:
-    case Op::DECREMENT:
-    case Op::BITWISE_NOT:
-        return t;
-    case Op::LOGICAL_NOT:
-        return Type::BOOL;
-    }
-    assert( false && "unreachable" );
-    return Type::UNKNOWN;
-}
-
-Type UnaryExpression::GetUnderlyingType() const
-{
-    return GetReturnType();
-}
-
-const ArrayExtents& UnaryExpression::GetArrayExtents() const
-{
-    assert( m_Expression->GetArrayExtents().size() == 0 &&
-            "Unary Expression given an array" );
-    return m_Expression->GetArrayExtents();
 }
 
 bool UnaryExpression::IsConst() const
@@ -910,21 +829,6 @@ CompleteType PostfixExpression::GetType() const
     return m_PostfixOperator->GetType( *m_Expression );
 }
 
-Type PostfixExpression::GetReturnType() const
-{
-    return m_PostfixOperator->GetReturnType( m_Expression );
-}
-
-Type PostfixExpression::GetUnderlyingType() const
-{
-    return m_PostfixOperator->GetUnderlyingType( m_Expression );
-}
-
-const ArrayExtents& PostfixExpression::GetArrayExtents() const
-{
-    return m_PostfixOperator->GetArrayExtents( m_Expression );
-}
-
 bool PostfixExpression::IsConst() const
 {
     return m_PostfixOperator->IsConst( *m_Expression );
@@ -1019,7 +923,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     unsigned num_desired_elements = GetNumElementsInType( m_Type );
     unsigned num_elements = 0;
     for( const auto& argument : m_Arguments )
-        num_elements += GetNumElementsInType( argument->GetReturnType() );
+        num_elements += argument->GetType().GetNumElements();
 
     if( num_elements != num_desired_elements )
         sema.Error( "Wrong number of elements in constructor" );
@@ -1061,22 +965,6 @@ CompleteType TypeConstructorExpression::GetType() const
 {
     /// todo constructing arrays
     return CompleteType( m_Type );
-}
-
-Type TypeConstructorExpression::GetReturnType() const
-{
-    return m_Type;
-}
-
-Type TypeConstructorExpression::GetUnderlyingType() const
-{
-    return m_Type;
-}
-
-const ArrayExtents& TypeConstructorExpression::GetArrayExtents() const
-{
-    static const ArrayExtents empty = {};
-    return empty;
 }
 
 bool TypeConstructorExpression::IsConst() const
@@ -1217,27 +1105,6 @@ CompleteType IdentifierExpression::GetType() const
     if( !m_Variable )
         return CompleteType();
     return m_Variable->GetType();
-}
-
-Type IdentifierExpression::GetReturnType() const
-{
-    if( !m_Variable )
-        return Type::UNKNOWN;
-    return m_Variable->GetType().GetBaseType();
-}
-
-Type IdentifierExpression::GetUnderlyingType() const
-{
-    if( !m_Variable )
-        return Type::UNKNOWN;
-    return m_Variable->GetUnderlyingType();
-}
-
-const ArrayExtents& IdentifierExpression::GetArrayExtents() const
-{
-    assert( m_Variable &&
-            "Trying to get the array extents of an unresolved identifier" );
-    return m_Variable->GetType().GetArrayExtents();
 }
 
 bool IdentifierExpression::IsLValue() const

@@ -140,25 +140,6 @@ public:
     CompleteType GetType() const = 0;
 
     /**
-      * \returns the type which this expression evaluates to
-      */
-    virtual
-    Type GetReturnType() const = 0;
-
-    /**
-      * \returns the underling type of this expression, with array extents
-      *   removed
-      */
-    virtual
-    Type GetUnderlyingType() const = 0;
-
-    /**
-      * \returns the array extents of this expression's return type
-      */
-    virtual
-    const ArrayExtents& GetArrayExtents() const = 0;
-
-    /**
       * \returns true if the Expression represents a l-value
       * by default this returns false
       */
@@ -243,15 +224,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
-
-    virtual
     bool IsConst() const override;
 
     virtual
@@ -316,15 +288,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
-
-    virtual
     bool IsConst() const override;
 
     virtual
@@ -375,15 +338,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -466,15 +420,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
-
-    virtual
     bool IsConst() const override;
 
     virtual
@@ -524,14 +469,6 @@ public:
     virtual
     CompleteType GetType() const override;
 
-    virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -588,15 +525,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
 
     virtual
     bool IsConst() const override;
@@ -663,13 +591,7 @@ public:
     bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
-    Type GetUnderlyingType() const override;
-
-    virtual
-    const ArrayExtents& GetArrayExtents() const override;
+    CompleteType GetType() const override;
 
     /** \returns true **/
     virtual
@@ -688,9 +610,6 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
-
-    virtual
-    CompleteType GetType() const override;
 
     virtual
     void Print( int depth ) const;

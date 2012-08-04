@@ -94,14 +94,6 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override final;
 
-    /// \returns GetReturnType
-    virtual
-    Type GetUnderlyingType() const override final;
-
-    /// \returns {}
-    virtual
-    const ArrayExtents& GetArrayExtents() const override final;
-
     virtual
     bool IsConst() const override;
 
@@ -164,9 +156,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
 
     virtual
     GenericValue GetValue() const override;
@@ -234,9 +223,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
     GenericValue GetValue() const override;
 
     virtual
@@ -292,9 +278,6 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    Type GetReturnType() const override;
-
-    virtual
     GenericValue GetValue() const override;
 
     virtual
@@ -332,9 +315,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
 
     virtual
     GenericValue GetValue() const override;
@@ -388,9 +368,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    Type GetReturnType() const override;
 
     virtual
     void Print( int depth ) const;

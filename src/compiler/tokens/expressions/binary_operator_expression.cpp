@@ -163,27 +163,6 @@ CompleteType BinaryOperatorExpression::GetType() const
                           m_RightSide->GetType() );
 }
 
-Type BinaryOperatorExpression::GetReturnType() const
-{
-    return GetCommonType( m_LeftSide->GetType(),
-                          m_RightSide->GetType() ).GetType();
-}
-
-Type BinaryOperatorExpression::GetUnderlyingType() const
-{
-    return GetReturnType();
-}
-
-const ArrayExtents& BinaryOperatorExpression::GetArrayExtents() const
-{
-    // Can't binary op between two arrays
-    assert( m_LeftSide->GetArrayExtents().size() == 0 &&
-            "Binary operator left side is an array" );
-    assert( m_RightSide->GetArrayExtents().size() == 0 &&
-            "Binary operator right side is an array" );
-    return m_LeftSide->GetArrayExtents();
-}
-
 bool BinaryOperatorExpression::IsConst() const
 {
     return m_LeftSide->IsConst() &&
@@ -300,11 +279,6 @@ CompleteType LogicalOrExpression::GetType() const
     return CompleteType( Type::BOOL );
 }
 
-Type LogicalOrExpression::GetReturnType() const
-{
-    return Type::BOOL;
-}
-
 bool LogicalOrExpression::Parse( Parser& parser,
                                  Expression_up& token )
 {
@@ -364,11 +338,6 @@ CompleteType LogicalAndExpression::GetType() const
     return CompleteType( Type::BOOL );
 }
 
-Type LogicalAndExpression::GetReturnType() const
-{
-    return Type::BOOL;
-}
-
 bool LogicalAndExpression::Parse( Parser& parser,
                                   Expression_up& token )
 {
@@ -413,16 +382,16 @@ InclusiveOrExpression::~InclusiveOrExpression()
 bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
-    Type t = GetReturnType();
+    const CompleteType& t = GetType();
 
-    if( !IsIntegral(t) )
+    if( !t.IsIntegral() )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
             sema.Error( "Invalid operand types to to inclusive or operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
     }
     else
     {
@@ -481,17 +450,16 @@ ExclusiveOrExpression::~ExclusiveOrExpression()
 bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
+    const CompleteType& t = GetType();
 
-    Type t = GetReturnType();
-
-    if( !IsIntegral(t) )
+    if( !t.IsIntegral() )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
-            sema.Error( "Invalid operand types to to exclusive or operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
+            sema.Error( "Invalid operand types to to enclusive or operator: " +
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
     }
     else
     {
@@ -548,17 +516,16 @@ AndExpression::~AndExpression()
 bool AndExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
+    const CompleteType& t = GetType();
 
-    Type t = GetReturnType();
-
-    if( !IsIntegral(t) )
+    if( !t.IsIntegral() )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
             sema.Error( "Invalid operand types to to and operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
     }
     else
     {
@@ -616,11 +583,6 @@ CompleteType EqualityExpression::GetType() const
     return CompleteType( Type::BOOL );
 }
 
-Type EqualityExpression::GetReturnType() const
-{
-    return Type::BOOL;
-}
-
 bool EqualityExpression::Parse( Parser& parser,
                                 Expression_up& token )
 {
@@ -665,11 +627,6 @@ RelationalExpression::~RelationalExpression()
 CompleteType RelationalExpression::GetType() const
 {
     return CompleteType( Type::BOOL );
-}
-
-Type RelationalExpression::GetReturnType() const
-{
-    return Type::BOOL;
 }
 
 bool RelationalExpression::Parse( Parser& parser,
@@ -718,17 +675,16 @@ ShiftExpression::~ShiftExpression()
 bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
+    const CompleteType& t = GetType();
 
-    Type t = GetReturnType();
-
-    if( !IsIntegral(t) )
+    if( !t.IsIntegral() )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
             sema.Error( "Invalid operand types to to shift operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
     }
     else
     {
@@ -738,6 +694,7 @@ bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
 
     good &= m_LeftSide->PerformSema( sema );
     good &= m_RightSide->PerformSema( sema );
+
     return good;
 }
 
@@ -834,16 +791,16 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
 
     bool good = true;
 
-    Type t = GetReturnType();
+    const CompleteType& t = GetType();
 
-    if( !IsIntegral(t) )
+    if( !t.IsIntegral() )
     {
         good = false;
-        if( m_LeftSide->GetReturnType() != Type::UNKNOWN &&
-            m_RightSide->GetReturnType() != Type::UNKNOWN )
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
             sema.Error( "Invalid operand types to to modulo operator: " +
-                        GetTypeString( m_LeftSide->GetReturnType() ) + " and " +
-                        GetTypeString( m_RightSide->GetReturnType() ) );
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
     }
     else
     {
