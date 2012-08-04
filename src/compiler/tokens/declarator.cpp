@@ -44,7 +44,7 @@
 #include <compiler/tokens/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 
 namespace JoeLang
 {

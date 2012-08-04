@@ -35,7 +35,7 @@
 #include <utility>
 
 #include <engine/types.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>

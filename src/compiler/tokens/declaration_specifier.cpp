@@ -37,7 +37,7 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 #include <engine/types.hpp>
 
 namespace JoeLang

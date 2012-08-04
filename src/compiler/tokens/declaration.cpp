@@ -47,7 +47,7 @@
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
 

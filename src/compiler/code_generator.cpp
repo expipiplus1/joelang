@@ -53,7 +53,7 @@
 #include <engine/state.hpp>
 #include <engine/state_assignment.hpp>
 #include <engine/technique.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/runtime.hpp>

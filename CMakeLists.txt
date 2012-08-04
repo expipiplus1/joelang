@@ -27,8 +27,6 @@ add_executable( joelang src/joelang.cpp
                         src/engine/state.cpp
                         src/engine/state.hpp
                         src/engine/state-inl.hpp
-                        src/engine/internal/type_properties.cpp
-                        src/engine/internal/type_properties.hpp
                         src/compiler/casting.hpp
                         src/compiler/code_generator.cpp
                         src/compiler/code_generator.hpp
@@ -51,6 +49,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/symbol_table.hpp
                         src/compiler/terminal_types.cpp
                         src/compiler/terminal_types.hpp
+                        src/compiler/type_properties.cpp
+                        src/compiler/type_properties.hpp
                         src/compiler/variable.cpp
                         src/compiler/variable.hpp
                         src/compiler/tokens/assignment_operator.cpp

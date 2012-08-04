@@ -41,7 +41,7 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include <engine/types.hpp>
-#include <engine/internal/type_properties.hpp>
+#include <compiler/type_properties.hpp>
 
 namespace JoeLang
 {
