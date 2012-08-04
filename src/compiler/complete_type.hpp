@@ -29,65 +29,42 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
 #include <vector>
-
-#include <compiler/complete_type.hpp>
 
 namespace JoeLang
 {
+enum class Type;
 
 namespace Compiler
 {
 using ArrayExtents = std::vector<unsigned>;
-class CodeGenerator;
-class CompoundStatement;
-using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 
 /**
-  * \class Function
-  * \brief A class to handle functions
+  * \class CompleteType
+  * \brief A class to hold all the information a type could need
   */
-class Function
+class CompleteType
 {
 public:
-    Function( std::string identifier,
-              CompleteType base_return_type,
-              std::vector<CompleteType> parameter_types );
-
-    const std::string& GetIdentifier() const;
-
-    const CompleteType& GetReturnType() const;
+    CompleteType();
+    CompleteType( Type base_type,
+                  ArrayExtents array_extents = {},
+                  bool is_const = false );
 
     /**
-      * This asserts that the function is undefined
+      * This doesn't return the base type, for example this could return
+      * Type::ARRAY
       */
-    void SetDefinition( CompoundStatement_up definition );
+    Type GetType() const;
 
-    bool HasDefinition() const;
+    Type GetBaseType() const;
 
-    /**
-      * Generates a string for the function signature
-      */
-    std::string GetSignatureString() const;
+    const ArrayExtents& GetArrayExtents() const;
 
-    /**
-      * This doesn't check if types are const because one can't distinguish
-      * functions based on that
-      */
-    bool HasSameParameterTypes(
-                            const std::vector<CompleteType> other_types ) const;
-
-    void CodeGenDeclaration( CodeGenerator& code_gen );
-
-    void CodeGenDefinition( CodeGenerator& code_gen );
 private:
-    std::string m_Identifier;
-    CompleteType m_ReturnType;
-    std::vector<CompleteType> m_ParameterTypes;
-
-    CompoundStatement_up m_Definition;
+    Type         m_BaseType;
+    ArrayExtents m_ArrayExtents;
+    bool         m_IsConst;
 };
 
 } // namespace Compiler

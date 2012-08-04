@@ -35,6 +35,8 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
+
 namespace JoeLang
 {
 
@@ -47,6 +49,8 @@ namespace Compiler
 
 using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
+class CompoundStatement;
+using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
 class GenericValue;
@@ -159,24 +163,26 @@ public:
       * Declares a function
       * \param identifier
       *   The Identifier for the function
-      * \param base_type
-      *   The base return type for the function
-      * \param array_extents
-      *   The return ArrayExtents for the function
+      * \param return_type
+      *   The function's return type
       * \todo pass parameters in here
       */
     void DeclareFunction( std::string identifier,
-                          Type base_type,
-                          ArrayExtents array_extents );
+                          CompleteType return_type,
+                          std::vector<CompleteType> parameter_types );
 
     /**
+      * This asserts that it can find the required function
       * \param identifier
       *   The name of the function
-      * \returns the Function associated with the identifier, or nullptr if
-      *   there is no Function with that name
-      * \todo function overloading
+      * \param parameter_types
+      *   The parameter types of the function
+      * \param definition
+      *   The compound statement defining the function
       */
-    Function_sp GetFunction( const std::string& identifier ) const;
+    void DefineFunction( const std::string& identifier,
+                         const std::vector<CompleteType>& parameter_types,
+                         CompoundStatement_up definition );
 
     /**
       * \returns true if we are in the top scope
@@ -273,12 +279,16 @@ private:
     void LeaveScope();
 
     using PassDefinitionMap = std::map< std::string, PassDefinitionRef >;
-    using FunctionMap = std::map< std::string, Function_sp >;
+    /**
+      * The functionoverloads store a vector to all functions with the same name
+      */
+    using FunctionOverloadsMap = std::map< std::string,
+                                           std::vector<Function_sp> >;
 
     PassDefinitionMap        m_PassDefinitions;
     std::vector<std::string> m_Techniques;
 
-    FunctionMap              m_Functions;
+    FunctionOverloadsMap     m_FunctionOverloads;
 
     std::vector<SymbolMaps>  m_SymbolStack;
 

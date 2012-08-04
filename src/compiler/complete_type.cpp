@@ -27,68 +27,49 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "complete_type.hpp"
 
-#include <memory>
-#include <string>
+#include <utility>
 #include <vector>
 
-#include <compiler/complete_type.hpp>
+#include <engine/types.hpp>
 
 namespace JoeLang
 {
-
 namespace Compiler
 {
-using ArrayExtents = std::vector<unsigned>;
-class CodeGenerator;
-class CompoundStatement;
-using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 
-/**
-  * \class Function
-  * \brief A class to handle functions
-  */
-class Function
+CompleteType::CompleteType()
+    :m_BaseType( Type::UNKNOWN )
+    ,m_IsConst( false )
 {
-public:
-    Function( std::string identifier,
-              CompleteType base_return_type,
-              std::vector<CompleteType> parameter_types );
+}
 
-    const std::string& GetIdentifier() const;
+CompleteType::CompleteType( Type base_type,
+                            ArrayExtents array_extents,
+                            bool is_const )
+    :m_BaseType( base_type )
+    ,m_ArrayExtents( std::move(array_extents) )
+    ,m_IsConst( is_const )
+{
+}
 
-    const CompleteType& GetReturnType() const;
+Type CompleteType::GetType() const
+{
+    if( !m_ArrayExtents.empty() )
+        return Type::ARRAY;
+    return m_BaseType;
+}
 
-    /**
-      * This asserts that the function is undefined
-      */
-    void SetDefinition( CompoundStatement_up definition );
+Type CompleteType::GetBaseType() const
+{
+    return m_BaseType;
+}
 
-    bool HasDefinition() const;
-
-    /**
-      * Generates a string for the function signature
-      */
-    std::string GetSignatureString() const;
-
-    /**
-      * This doesn't check if types are const because one can't distinguish
-      * functions based on that
-      */
-    bool HasSameParameterTypes(
-                            const std::vector<CompleteType> other_types ) const;
-
-    void CodeGenDeclaration( CodeGenerator& code_gen );
-
-    void CodeGenDefinition( CodeGenerator& code_gen );
-private:
-    std::string m_Identifier;
-    CompleteType m_ReturnType;
-    std::vector<CompleteType> m_ParameterTypes;
-
-    CompoundStatement_up m_Definition;
-};
+const ArrayExtents& CompleteType::GetArrayExtents() const
+{
+    return m_ArrayExtents;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

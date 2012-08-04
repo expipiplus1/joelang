@@ -491,6 +491,10 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
                          decl_specs.GetType(), 
                          m_Declarator->GetArrayExtents() );
     scope.Leave();
+
+    sema.DefineFunction( m_Declarator->GetIdentifier(),
+                         m_Declarator->GetFunctionParameterTypes(),
+                         std::move(m_Body) );
 }
 
 } // namespace Compiler

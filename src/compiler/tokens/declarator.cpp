@@ -39,6 +39,7 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -242,6 +243,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         !m_ArrayExtents.empty() )
         sema.Error( "Can't have an array of void type" );
 
+
     if( m_FunctionSpecifier )
     {
         // If we are a function specifier we have to declare
@@ -250,7 +252,12 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         // register the function with sema
         if( ret )
         {
-            sema.DeclareFunction( m_Identifier, base_type, m_ArrayExtents );
+            CompleteType return_type( base_type,
+                                      m_ArrayExtents,
+                                      decl_specs.IsConst() );
+            sema.DeclareFunction( m_Identifier,
+                                  std::move(return_type),
+                                  GetFunctionParameterTypes() );
         }
     }
 
@@ -263,6 +270,15 @@ void Declarator::DeclareFunctionParameters( SemaAnalyzer& sema ) const
             "Trying to declare function parameters for a non function "
             "declarator" );
     m_FunctionSpecifier->DeclareParameters( sema );
+}
+
+std::vector<CompleteType> Declarator::GetFunctionParameterTypes() const
+{
+    assert( IsFunctionDeclarator() &&
+            "Trying to get function parameter types for a non-function "
+            "declarator" );
+
+    return m_FunctionSpecifier->GetParameterTypes();
 }
 
 void Declarator::Print( int depth ) const

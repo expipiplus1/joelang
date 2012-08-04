@@ -30,6 +30,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/casting.hpp
                         src/compiler/code_generator.cpp
                         src/compiler/code_generator.hpp
+                        src/compiler/complete_type.cpp
+                        src/compiler/complete_type.hpp
                         src/compiler/effect_factory.cpp
                         src/compiler/effect_factory.hpp
                         src/compiler/generic_value.cpp

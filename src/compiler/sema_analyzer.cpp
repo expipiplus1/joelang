@@ -38,9 +38,11 @@
 
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
+#include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
 #include <compiler/variable.hpp>
+#include <compiler/tokens/compound_statement.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/expression.hpp>
@@ -73,13 +75,25 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
     cst.PerformSema( *this );
     LeaveScope();
 
-    // Check for undefined things
+    //
+    // Check for undefined passes
+    //
     for( const auto& p : m_PassDefinitions )
     {
         // If this pass is referenced and not defined
         if( !p.second.unique() &&
             !(*p.second) )
-            Error( "Use of undefined pass " + p.first );
+            Error( "Use of undefined pass: " + p.first );
+    }
+
+    for( const auto& fo : m_FunctionOverloads )
+    {
+        // If the function is referenced and not defined
+        for( const auto& f : fo.second )
+            if( !f.unique() &&
+                !f->HasDefinition() )
+                Error( "Use of undefined function: " +
+                       f->GetSignatureString() );
     }
 
     // Return success or not
@@ -281,27 +295,44 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
 }
 
 void SemaAnalyzer::DeclareFunction( std::string identifier,
-                                    Type base_type,
-                                    ArrayExtents array_extents )
+                                    CompleteType return_type,
+                                    std::vector<CompleteType> parameter_types )
 {
-    /// TODO more than just check name
-    const auto& duplicate = m_Functions.find( identifier );
-    if( duplicate == m_Functions.end() )
-    {
-        // If we've not seen this before insert it
-        Function_sp function = std::make_shared<Function>( identifier,
-                                                           base_type,
-                                                           array_extents );
-        m_Functions.insert( std::make_pair( identifier, std::move(function) ) );
-    }
+    std::vector<Function_sp>& function_overloads =
+                                                m_FunctionOverloads[identifier];
+
+    for( const auto& f : function_overloads )
+        if( f->HasSameParameterTypes( parameter_types ) )
+            // If we already have this funciton, return
+            return;
+
+    function_overloads.push_back( std::make_shared<Function>(
+                                                 identifier,
+                                                 std::move(return_type),
+                                                 std::move(parameter_types) ) );
+    return;
 }
 
-Function_sp SemaAnalyzer::GetFunction( const std::string& identifier ) const
+void SemaAnalyzer::DefineFunction(
+                         const std::string& identifier,
+                         const std::vector<CompleteType>& parameter_types,
+                         CompoundStatement_up definition )
 {
-    const auto& i = m_Functions.find( identifier );
-    if( i != m_Functions.end() )
-        return i->second;
-    return nullptr;
+    const auto& i = m_FunctionOverloads.find( identifier );
+    assert( i != m_FunctionOverloads.end() &&
+            "Couldn't find function to define" );
+    Function_sp function;
+    for( const auto& f : i->second )
+        if( f->HasSameParameterTypes( parameter_types ) )
+        {
+            function = f;
+            break;
+        }
+    assert( function && "Couldn't find function overload to define" );
+    if( function->HasDefinition() )
+        Error( "Redefinition of function " + identifier );
+    else
+        function->SetDefinition( std::move(definition ) );
 }
 
 void SemaAnalyzer::EnterScope()

@@ -161,6 +161,14 @@ void FunctionSpecifier::DeclareParameters( SemaAnalyzer& sema )
         p->Declare( sema );
 }
 
+std::vector<CompleteType> FunctionSpecifier::GetParameterTypes() const
+{
+    std::vector<CompleteType> ret;
+    for( const auto& p : m_Parameters )
+        ret.push_back( p->GetType() );
+    return ret;
+}
+
 void FunctionSpecifier::Print( int depth ) const
 {
 }

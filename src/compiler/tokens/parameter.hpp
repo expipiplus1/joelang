@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -82,6 +83,8 @@ public:
       */
     void Declare( SemaAnalyzer& sema ) const;
 
+    const CompleteType& GetType() const;
+
     virtual
     void Print( int depth ) const override;
 
@@ -105,7 +108,7 @@ private:
     Initializer_up       m_DefaultValue;
 
     // This is filled during performsema
-    ArrayExtents         m_ArrayExtents;
+    CompleteType         m_Type;
     Variable_sp          m_Variable;
 };
 

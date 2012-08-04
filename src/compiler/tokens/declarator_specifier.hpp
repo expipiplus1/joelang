@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -122,6 +123,8 @@ public:
       * Registers the parameters as variables with sema
       */
     void DeclareParameters( SemaAnalyzer& sema );
+
+    std::vector<CompleteType> GetParameterTypes() const;
 
     virtual
     void Print( int depth ) const override;

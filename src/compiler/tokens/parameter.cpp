@@ -89,9 +89,11 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Can't declare variables of void type" );
         return false;
     }
-    m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifers, sema );
+    ArrayExtents array_extents =ArraySpecifier::GetArrayExtents(
+                                                               m_ArraySpecifers,
+                                                               sema );
 
-    if( m_ArrayExtents.empty() &&
+    if( array_extents.empty() &&
         m_DefaultValue &&
         m_DefaultValue->CanReduceToExpression() )
         m_DefaultValue->ReduceToExpression();
@@ -104,16 +106,20 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         sema.Error( "Variables of type string must be const" );
 
     if( m_DefaultValue &&
-        m_DefaultValue->GetArrayExtents() != m_ArrayExtents )
+        m_DefaultValue->GetArrayExtents() != array_extents )
         sema.Error( "Default parameter value has mismatching array extents" );
 
     m_Variable = std::make_shared<Variable>( base_type,
-                                             m_ArrayExtents,
+                                             array_extents,
                                              decl_specs.IsConst(),
                                              false, //Isn't global
                                              true,  //Is a param
                                              GenericValue(),
                                              m_Identifier );
+
+    m_Type = CompleteType( base_type,
+                           std::move(array_extents),
+                           decl_specs.IsConst() );
     return true;
 }
 
@@ -121,6 +127,12 @@ void Parameter::Declare( SemaAnalyzer& sema ) const
 {
     assert( m_Variable && "Trying to declare a parameter without a variable" );
     sema.DeclareVariable( m_Identifier, m_Variable );
+}
+
+const CompleteType& Parameter::GetType() const
+{
+    assert( m_Type.GetBaseType() != Type::UNKNOWN );
+    return m_Type;
 }
 
 void Parameter::Print( int depth ) const

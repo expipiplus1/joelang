@@ -34,6 +34,14 @@ int func2()
 {
 }
 
+int func2( float a )
+{
+};
+
+bool func2( int b )
+{
+}
+
 technique t1
 {
     p0;

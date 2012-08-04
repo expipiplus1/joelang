@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -149,6 +150,12 @@ public:
       * This assers that this declarator is a Function declarator
       */
     void DeclareFunctionParameters( SemaAnalyzer& sema ) const;
+
+    /**
+      * This asserts that this is a function declarator
+      * \returns the parameter types
+      */
+    std::vector<CompleteType> GetFunctionParameterTypes() const;
 
     virtual
     void Print( int depth ) const override;
