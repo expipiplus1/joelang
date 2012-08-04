@@ -42,7 +42,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/type_properties.hpp>

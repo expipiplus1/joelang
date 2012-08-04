@@ -41,7 +41,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
-#include <compiler/tokens/compound_statement.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator.hpp>
 #include <compiler/tokens/definition.hpp>

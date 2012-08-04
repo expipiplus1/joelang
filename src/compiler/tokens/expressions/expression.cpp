@@ -44,12 +44,12 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
-#include <compiler/tokens/assignment_operator.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
-#include <compiler/tokens/binary_operator_expression.hpp>
-#include <compiler/tokens/literal_expression.hpp>
-#include <compiler/tokens/postfix_operator.hpp>
 #include <compiler/tokens/token.hpp>
+#include <compiler/tokens/expressions/assignment_operator.hpp>
+#include <compiler/tokens/expressions/binary_operator_expression.hpp>
+#include <compiler/tokens/expressions/literal_expression.hpp>
+#include <compiler/tokens/expressions/postfix_operator.hpp>
 
 namespace JoeLang
 {

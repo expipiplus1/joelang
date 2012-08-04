@@ -40,7 +40,7 @@
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {

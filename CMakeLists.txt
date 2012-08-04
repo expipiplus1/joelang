@@ -55,12 +55,6 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/type_properties.hpp
                         src/compiler/variable.cpp
                         src/compiler/variable.hpp
-                        src/compiler/tokens/assignment_operator.cpp
-                        src/compiler/tokens/assignment_operator.hpp
-                        src/compiler/tokens/binary_operator_expression.cpp
-                        src/compiler/tokens/binary_operator_expression.hpp
-                        src/compiler/tokens/compound_statement.cpp
-                        src/compiler/tokens/compound_statement.hpp
                         src/compiler/tokens/declaration_specifier.cpp
                         src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp
@@ -71,24 +65,30 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/tokens/declarator.hpp
                         src/compiler/tokens/definition.cpp
                         src/compiler/tokens/definition.hpp
-                        src/compiler/tokens/expression.cpp
-                        src/compiler/tokens/expression.hpp
                         src/compiler/tokens/initializer.cpp
                         src/compiler/tokens/initializer.hpp
-                        src/compiler/tokens/literal_expression.cpp
-                        src/compiler/tokens/literal_expression.hpp
                         src/compiler/tokens/parameter.cpp
                         src/compiler/tokens/parameter.hpp
-                        src/compiler/tokens/postfix_operator.cpp
-                        src/compiler/tokens/postfix_operator.hpp
-                        src/compiler/tokens/statement.cpp
-                        src/compiler/tokens/statement.hpp
                         src/compiler/tokens/state_assignment_statement.cpp
                         src/compiler/tokens/state_assignment_statement.hpp
                         src/compiler/tokens/token.cpp
                         src/compiler/tokens/token.hpp
                         src/compiler/tokens/translation_unit.cpp
-                        src/compiler/tokens/translation_unit.hpp )
+                        src/compiler/tokens/translation_unit.hpp
+                        src/compiler/tokens/expressions/assignment_operator.cpp
+                        src/compiler/tokens/expressions/assignment_operator.hpp
+                        src/compiler/tokens/expressions/binary_operator_expression.cpp
+                        src/compiler/tokens/expressions/binary_operator_expression.hpp
+                        src/compiler/tokens/expressions/expression.cpp
+                        src/compiler/tokens/expressions/expression.hpp
+                        src/compiler/tokens/expressions/literal_expression.cpp
+                        src/compiler/tokens/expressions/literal_expression.hpp
+                        src/compiler/tokens/expressions/postfix_operator.cpp
+                        src/compiler/tokens/expressions/postfix_operator.hpp
+                        src/compiler/tokens/statements/compound_statement.cpp
+                        src/compiler/tokens/statements/compound_statement.hpp
+                        src/compiler/tokens/statements/statement.cpp
+                        src/compiler/tokens/statements/statement.hpp )
 
 #
 # Various custom commands

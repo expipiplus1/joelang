@@ -36,7 +36,7 @@
 #include <llvm/Type.h>
 #include <llvm/DerivedTypes.h>
 
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <engine/types.hpp>
 
 namespace JoeLang

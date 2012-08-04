@@ -42,10 +42,10 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
 #include <compiler/variable.hpp>
-#include <compiler/tokens/compound_statement.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <engine/context.hpp>

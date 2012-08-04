@@ -34,7 +34,7 @@
 
 #include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
-#include <compiler/tokens/compound_statement.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

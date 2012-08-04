@@ -40,8 +40,8 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
-#include <compiler/tokens/assignment_operator.hpp>
-#include <compiler/tokens/postfix_operator.hpp>
+#include <compiler/tokens/expressions/assignment_operator.hpp>
+#include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

@@ -34,7 +34,7 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
 
 //------------------------------------------------------------------------------

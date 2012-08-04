@@ -35,7 +35,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
-#include <compiler/tokens/statement.hpp>
+#include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
 {

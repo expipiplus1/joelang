@@ -36,7 +36,7 @@
 #include <utility>
 
 #include <compiler/complete_type.hpp>
-#include <compiler/tokens/compound_statement.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 
 namespace JoeLang
 {

@@ -34,7 +34,7 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/tokens/assignment_operator.hpp>
+#include <compiler/tokens/expressions/assignment_operator.hpp>
 #include <compiler/tokens/token.hpp>
 #include <engine/types.hpp>
 

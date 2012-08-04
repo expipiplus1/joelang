@@ -32,7 +32,7 @@
 #include <memory>
 #include <vector>
 
-#include <compiler/tokens/statement.hpp>
+#include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
 {

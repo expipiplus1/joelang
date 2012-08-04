@@ -38,7 +38,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
-#include <compiler/tokens/expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/parameter.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/type_properties.hpp>
