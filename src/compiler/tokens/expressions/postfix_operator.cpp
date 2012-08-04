@@ -138,7 +138,7 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    const ArrayExtents& extents = expression->GetType().GetArrayExtents();
+    const ArrayExtents extents = expression->GetType().GetArrayExtents();
     assert( !extents.empty() && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
