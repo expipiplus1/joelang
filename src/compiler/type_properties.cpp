@@ -42,6 +42,9 @@
 namespace JoeLang
 {
 
+namespace Compiler
+{
+
 Type GetCommonType( Type t1, Type t2 )
 {
     const static std::vector<Type> promotion_ordering =
@@ -259,4 +262,5 @@ const std::string& GetTypeString( Type t )
     return string_map.at(t);
 }
 
+} // namespace Compiler
 } // namespace JoeLang

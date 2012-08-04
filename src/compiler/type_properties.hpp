@@ -31,15 +31,14 @@
 
 #include <string>
 
-#include <engine/types.hpp>
-
 namespace JoeLang
 {
+enum class Type;
 
 namespace Compiler
 {
-    class Expression;
-}
+
+class Expression;
 
 /**
   * This returns the type according to the integer promotion rules
@@ -84,4 +83,5 @@ Type MakeUnsigned( Type t );
 
 const std::string& GetTypeString( Type t );
 
+} //namespace Compiler
 } // namespace JoeLang
