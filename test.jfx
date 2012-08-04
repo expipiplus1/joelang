@@ -39,7 +39,7 @@ int func2( float fa )
 {
     f = 2;
     return f;
-};
+}
 
 bool func2( int fb )
 {
@@ -58,7 +58,6 @@ technique t1
         my_string_state = hello + ", " + world + "!";
         my_string_state = a == 0 ? hello : "bar";
     }
-
     pass p2
     {
         my_floating_state = 2 + twentyone == 23.0f;
@@ -79,6 +78,6 @@ pass p0
 {
     my_string_state = e;
     my_bool_state = a;
-    my_bool_state = a &= 3;
+    my_bool_state = a |= 3;
     my_bool_state = a &= 0xf00;
 }

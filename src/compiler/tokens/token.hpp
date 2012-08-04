@@ -102,6 +102,7 @@ public:
         Parameter,
 
         CompoundStatement,
+        EmptyStatement,
         ExpressionStatement,
         ReturnStatement,
         Statement_Start = CompoundStatement,

@@ -27,18 +27,13 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "statement.hpp"
+#include "empty_statement.hpp"
 
-#include <cassert>
 #include <memory>
 
-#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
-#include <compiler/tokens/statements/compound_statement.hpp>
-#include <compiler/tokens/statements/empty_statement.hpp>
-#include <compiler/tokens/statements/expression_statement.hpp>
-#include <compiler/tokens/statements/return_statement.hpp>
-#include <compiler/tokens/token.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
 {
@@ -46,46 +41,28 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// Statement
+// EmptyStatement
 //------------------------------------------------------------------------------
 
-Statement::Statement( TokenTy sub_class_id )
-    :Token( sub_class_id )
+EmptyStatement::EmptyStatement()
+    :Statement( TokenTy::EmptyStatement )
 {
 }
 
-Statement::~Statement()
+EmptyStatement::~EmptyStatement()
 {
 }
 
-void Statement::Print( int depth ) const
+void EmptyStatement::PerformSema( SemaAnalyzer& sema )
 {
 }
 
-bool Statement::Parse( Parser& parser, Statement_up& token )
+bool EmptyStatement::Parse( Parser& parser, EmptyStatement_up& token )
 {
-    // Try and parse any kind of statement
-    std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf< CompoundStatement,
-                             EmptyStatement,
-                             ExpressionStatement,
-                             ReturnStatement >( t ) )
+    if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
         return false;
 
-    assert( isa<Statement>( t ) && "Statement parsed a non-statement" );
-    token.reset( static_cast<Statement*>( t.release() ) );
-    return true;
-}
-
-bool Statement::classof( const Token* d )
-{
-    return d->GetSubClassID() >= TokenTy::Statement_Start &&
-           d->GetSubClassID() <= TokenTy::Statement_End;
-}
-
-bool Statement::classof( const Statement* d )
-{
-    // A Statement is always a Statement
+    token.reset( new EmptyStatement() );
     return true;
 }
 
