@@ -45,9 +45,10 @@ enum class Type;
 namespace Compiler
 {
 
+using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
+using Expression_up = std::unique_ptr<Expression>;
 class GenericValue;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
@@ -156,10 +157,17 @@ public:
 
     /**
       * Declares a function
-      * \param function
-      *   The function object
+      * \param identifier
+      *   The Identifier for the function
+      * \param base_type
+      *   The base return type for the function
+      * \param array_extents
+      *   The return ArrayExtents for the function
+      * \todo pass parameters in here
       */
-    void DeclareFunction( Function_sp function );
+    void DeclareFunction( std::string identifier,
+                          Type base_type,
+                          ArrayExtents array_extents );
 
     /**
       * \param identifier

@@ -30,6 +30,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace JoeLang
 {
@@ -37,6 +38,7 @@ enum class Type;
 
 namespace Compiler
 {
+using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 
 /**
@@ -47,7 +49,9 @@ class Function
 {
 public:
     explicit
-    Function( std::string identifier );
+    Function( std::string identifier,
+              Type base_return_type,
+              ArrayExtents return_array_extents );
 
     const std::string& GetIdentifier() const;
 

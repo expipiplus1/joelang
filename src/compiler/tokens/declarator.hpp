@@ -135,7 +135,8 @@ public:
     ~Declarator   ();
 
     /**
-      * Performs semantic ananysis on the declarator
+      * Performs semantic ananysis on the declarator. This will declare this
+      * declarator to sema if it's a function.
       * \param sema
       *   The SemaAnalyzer which contains the symbol table and things
       * \param decl_specs

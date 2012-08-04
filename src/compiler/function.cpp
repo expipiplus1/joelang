@@ -37,7 +37,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-Function::Function( std::string identifier )
+Function::Function( std::string identifier,
+                    Type base_return_type,
+                    ArrayExtents return_array_extents )
     :m_Identifier( std::move( identifier ) )
 {
 }

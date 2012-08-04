@@ -81,10 +81,14 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     if( m_Declarator->IsFunctionDeclarator() )
     {
-        // This is given to sema in Declarator because it can't have an 
-        // initializer
+        // If this is a function declarator then handle everything in
+        // m_Declarator
         return;
     }
+
+    //
+    // Only initialization specific stuff below here
+    //
 
     //
     // Allow initializing a variable with a single value in braces for
@@ -106,11 +110,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         sema.Error( "Const variables must have an initializer" );
         can_init = false;
     }
-
-    // If this isn't const it can't be a string
-    if( !decl_specs.IsConst() &&
-        base_type == Type::STRING )
-        sema.Error( "Variables of type string must be const" );
 
     // Evaluate the initializer
     GenericValue initializer;
@@ -229,17 +228,31 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
     {
         // If this is of void type and isn't a function
         sema.Error( "Can't declare variables of void type" );
-        ret = false;;
+        ret = false;
     }
+
+    // If this isn't const it can't be a string
+    if( !decl_specs.IsConst() &&
+        base_type == Type::STRING )
+        sema.Error( "Variables of type string must be const" );
 
     m_ArrayExtents = ArraySpecifier::GetArrayExtents( m_ArraySpecifiers, sema );
 
-    if( m_FunctionSpecifier )
-        ret &= m_FunctionSpecifier->PerformSema( sema );
-    
     if( base_type == Type::VOID &&
         !m_ArrayExtents.empty() )
-        sema.Error( "Can't return an array of void type" );
+        sema.Error( "Can't have an array of void type" );
+
+    if( m_FunctionSpecifier )
+    {
+        // If we are a function specifier we have to declare
+        ret &= m_FunctionSpecifier->PerformSema( sema );
+        // If there was a problem parsing the function specifier then we can't
+        // register the function with sema
+        if( ret )
+        {
+            sema.DeclareFunction( m_Identifier, base_type, m_ArrayExtents );
+        }
+    }
 
     return ret;
 }

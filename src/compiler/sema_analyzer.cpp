@@ -280,18 +280,20 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
     return nullptr;
 }
 
-void SemaAnalyzer::DeclareFunction( Function_sp function )
+void SemaAnalyzer::DeclareFunction( std::string identifier,
+                                    Type base_type,
+                                    ArrayExtents array_extents )
 {
-    const std::string& name = function->GetIdentifier();
-    const auto& duplicate = m_Functions.find( name );
-    if( duplicate != m_Functions.end() )
+    /// TODO more than just check name
+    const auto& duplicate = m_Functions.find( identifier );
+    if( duplicate == m_Functions.end() )
     {
-        // If there are duplicate functions with this name check for overloads
-        // and things
-        assert( false && "complete me" );
+        // If we've not seen this before insert it
+        Function_sp function = std::make_shared<Function>( identifier,
+                                                           base_type,
+                                                           array_extents );
+        m_Functions.insert( std::make_pair( identifier, std::move(function) ) );
     }
-
-    m_Functions.insert( std::make_pair( name, std::move(function) ) );
 }
 
 Function_sp SemaAnalyzer::GetFunction( const std::string& identifier ) const
