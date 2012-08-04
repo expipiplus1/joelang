@@ -30,42 +30,50 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 
-#include <compiler/tokens/statement.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
-class CodeGenerator;
-class CompleteType;
-class CompoundStatement;
-typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
+
 class Parser;
 class SemaAnalyzer;
+class Statement;
+using Statement_up = std::unique_ptr<Statement>;
 
 /**
-  * \class CompoundStatement
-  * \ingroup Statements
-  * \brief Matches a CompoundStatement
-  *
-  * CompoundStatement = '{' '}'
+  * \defgroup Statements
+  * \ingroup Tokens
   */
-class CompoundStatement : public JoeLang::Compiler::Statement
+
+/**
+  * \class Statement
+  * \ingroup Statements
+  * \brief Matches any kind of statement
+  *
+  * Statement = CompoundStatement | ReturnStatement
+  */
+class Statement : public JoeLang::Compiler::Token
 {
 public:
-    CompoundStatement    ();
+    explicit
+    Statement    ( TokenTy sub_class_id );
     virtual
-    ~CompoundStatement   ();
+    ~Statement   ();
 
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type );
+    virtual
+    void Print( int depth ) const override;
 
     static
-    bool Parse ( Parser& parser, CompoundStatement_up& token );
+    bool Parse ( Parser& parser, Statement_up& token );
 
-private:
+    /** Used for casting **/
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Statement* d );
 };
 
 

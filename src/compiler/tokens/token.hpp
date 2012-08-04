@@ -73,6 +73,7 @@ class Token
 public:
     enum class TokenTy
     {
+        /// TODO better ordering of start and ends
         TranslationUnit,
 
         InitDeclarator,
@@ -99,7 +100,10 @@ public:
 
         FunctionSpecifier,
         Parameter,
+
         CompoundStatement,
+        Statement_Start = CompoundStatement,
+        Statement_End = CompoundStatement,
 
         AssignmentOperator,
 

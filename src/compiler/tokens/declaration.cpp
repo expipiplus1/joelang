@@ -80,9 +80,8 @@ bool DeclarationBase::Parse( Parser& parser,
                              EmptyDeclaration>( t ) )
         return false;
 
-    //TODO set up casting for every token
-    //assert( isa<DeclarationBase>( t ) &&
-            //"DeclarationBase parsed a non-declaration" );
+    assert( isa<DeclarationBase>( t ) &&
+            "DeclarationBase parsed a non-declaration" );
     // Cast it back to a DeclarationBase because ExpectAnyOf only returns Token*
     token.reset( static_cast<DeclarationBase*>( t.release() ) );
     return true;
@@ -487,9 +486,9 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
     m_Declarator->DeclareFunctionParameters( sema );
 
     // Pass the return type to sema for generating the return statements
-    m_Body->PerformSema( sema, 
-                         decl_specs.GetType(), 
-                         m_Declarator->GetArrayExtents() );
+    m_Body->PerformSema( sema, CompleteType( decl_specs.GetType(),
+                                             m_Declarator->GetArrayExtents(),
+                                             decl_specs.IsConst() ) );
     scope.Leave();
 
     sema.DefineFunction( m_Declarator->GetIdentifier(),

@@ -27,15 +27,15 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "compound_statement.hpp"
+#include "statement.hpp"
 
 #include <cassert>
 #include <memory>
 
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/terminal_types.hpp>
-#include <compiler/tokens/statement.hpp>
+#include <compiler/tokens/compound_statement.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
@@ -43,32 +43,43 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// CompoundStatement
+// Statement
 //------------------------------------------------------------------------------
 
-CompoundStatement::CompoundStatement()
-    :Statement( TokenTy::CompoundStatement )
+Statement::Statement( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
-CompoundStatement::~CompoundStatement()
+Statement::~Statement()
 {
 }
 
-void CompoundStatement::PerformSema( SemaAnalyzer& sema,
-                                     const CompleteType& return_type )
+void Statement::Print( int depth ) const
 {
 }
 
-bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )
+bool Statement::Parse( Parser& parser, Statement_up& token )
 {
-    if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
+    // Try and parse any kind of statement
+    std::unique_ptr<Token> t;
+    if( !parser.ExpectAnyOf< CompoundStatement >( t ) )
         return false;
 
-    if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
-        return false;
+    assert( isa<Statement>( t ) && "Statement parsed a non-statement" );
+    token.reset( static_cast<Statement*>( t.release() ) );
+    return true;
+}
 
-    token.reset( new CompoundStatement() );
+bool Statement::classof( const Token* d )
+{
+    return d->GetSubClassID() >= TokenTy::Statement_Start &&
+           d->GetSubClassID() <= TokenTy::Statement_End;
+}
+
+bool Statement::classof( const Statement* d )
+{
+    // A Statement is always a Statement
     return true;
 }
 
