@@ -49,7 +49,7 @@ class SemaAnalyzer;
 /**
   * \class ExpressionStatement
   * \ingroup Statements
-  * \brief Matches a Expression Statement
+  * \brief Matches an Expression Statement
   *
   * ExpressionStatement = Expression ';'
   */
