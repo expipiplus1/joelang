@@ -34,11 +34,11 @@ int func2()
 {
 }
 
-int func2( float a )
+int func2( float fa )
 {
 };
 
-bool func2( int b )
+bool func2( int fb )
 {
 }
 

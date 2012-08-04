@@ -303,8 +303,15 @@ void SemaAnalyzer::DeclareFunction( std::string identifier,
 
     for( const auto& f : function_overloads )
         if( f->HasSameParameterTypes( parameter_types ) )
-            // If we already have this funciton, return
+        {
+            // If we already have this funciton, make sure that we have the same
+            // return type
+            if( f->GetReturnType().GetBaseType() != return_type.GetBaseType() ||
+                f->GetReturnType().GetArrayExtents() !=
+                                                 return_type.GetArrayExtents() )
+                Error( "Functions differ only by return type " + identifier );
             return;
+        }
 
     function_overloads.push_back( std::make_shared<Function>(
                                                  identifier,
@@ -330,7 +337,7 @@ void SemaAnalyzer::DefineFunction(
         }
     assert( function && "Couldn't find function overload to define" );
     if( function->HasDefinition() )
-        Error( "Redefinition of function " + identifier );
+        Error( "Redefinition of function " + function->GetSignatureString() );
     else
         function->SetDefinition( std::move(definition ) );
 }
