@@ -35,6 +35,7 @@
 #include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
+#include <compiler/tokens/statements/return_statement.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -63,7 +64,8 @@ bool Statement::Parse( Parser& parser, Statement_up& token )
 {
     // Try and parse any kind of statement
     std::unique_ptr<Token> t;
-    if( !parser.ExpectAnyOf< CompoundStatement >( t ) )
+    if( !parser.ExpectAnyOf< CompoundStatement,
+                             ReturnStatement >( t ) )
         return false;
 
     assert( isa<Statement>( t ) && "Statement parsed a non-statement" );
