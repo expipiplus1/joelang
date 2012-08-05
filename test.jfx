@@ -35,14 +35,14 @@ int func2()
     return 2;
 }
 
-int func2( float fa )
+bool func2( float flo )
 {
-    f = 2;
-    return f;
+    return true;
 }
 
-bool func2( int fb )
+bool func2( int integer )
 {
+    return false;
 }
 
 technique t1
@@ -80,4 +80,5 @@ pass p0
     my_bool_state = a;
     my_bool_state = a |= 3;
     my_bool_state = a &= 0xf00;
+    my_floating_state = func2( 12 );
 }

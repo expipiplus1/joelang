@@ -276,35 +276,19 @@ bool ArgumentListOperator::Parse( Parser& parser,
         return false;
 
     // The vector to hold the expressions
-    ArgumentExpressionVector argument_expressions;
+    ArgumentExpressionVector arguments;
 
-    // The pointer to hold each argument as we parse
-    Expression_up argument;
-
-    // Try and parse the first argument
-    if( parser.Expect<AssignmentExpression>( argument ) )
-    {
-        // We parsed the first argument push it onto the vector
-        argument_expressions.push_back( std::move( argument ) );
-
-        // Each subsequent argument expects a comma
-        while( parser.ExpectTerminal( TerminalType::COMMA ) )
-        {
-            // If we've seen a comma we must have an expression to push
-            if( !parser.Expect<AssignmentExpression>( argument ) )
-                return false;
-            argument_expressions.push_back( std::move( argument ) );
-        }
-    }
-
-    // The lexer may be out of step
+    parser.ExpectListOf<AssignmentExpression, TerminalType::COMMA>( arguments );
     CHECK_PARSER;
 
     // parse closing )
     if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
+    {
+        parser.Error( "Expected closing ')' after argument list" );
         return false;
+    }
 
-    token.reset( new ArgumentListOperator( std::move(argument_expressions) ) );
+    token.reset( new ArgumentListOperator( std::move(arguments) ) );
     return true;
 }
 
