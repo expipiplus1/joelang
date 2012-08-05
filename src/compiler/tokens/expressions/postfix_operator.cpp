@@ -38,6 +38,7 @@
 #include <engine/types.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
+#include <compiler/function.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
@@ -122,10 +123,19 @@ SubscriptOperator::~SubscriptOperator()
 {
 }
 
-bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
-                                     const Expression& expression )
+bool SubscriptOperator::ResolveIdentifiers( SemaAnalyzer& sema,
+                                            Expression& expression )
 {
-    bool good = m_IndexExpression->ResolveIdentifiers( sema );
+    bool good = expression.ResolveIdentifiers( sema );
+    good &= m_IndexExpression->ResolveIdentifiers( sema );
+    return good;
+}
+
+bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
+                                     Expression& expression )
+{
+    bool good = true;
+    good &= expression.PerformSema( sema );
     if( good )
     {
         m_IndexExpression = CastExpression::Create( Type::I64,
@@ -215,13 +225,12 @@ bool SubscriptOperator::Parse( Parser& parser,
 // ArgumentListOperator
 //------------------------------------------------------------------------------
 
-ArgumentListOperator::ArgumentListOperator(
-        ArgumentExpressionVector argument_expressions )
+ArgumentListOperator::ArgumentListOperator( ArgumentExpressionVector arguments )
     :PostfixOperator( TokenTy::ArgumentListOperator )
-    ,m_ArgumentExpressions( std::move(argument_expressions) )
+    ,m_Arguments( std::move(arguments) )
 {
 #ifndef NDEBUG
-    for( const auto& e : m_ArgumentExpressions )
+    for( const auto& e : m_Arguments )
         assert( e && "ArgumentListOperator given a null argument expression" );
 #endif
 }
@@ -230,11 +239,61 @@ ArgumentListOperator::~ArgumentListOperator()
 {
 }
 
-bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
-                                        const Expression& expression )
+bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
+                                               Expression& expression )
 {
-    assert( false && "Complete me" );
-    return false;
+    // This doesn't resolve the identifier in expression because that will only
+    // func variables
+    bool good = true;
+    for( auto& a : m_Arguments )
+        good &= a->ResolveIdentifiers( sema );
+    return good;
+}
+
+bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
+                                        Expression& expression )
+{
+    //
+    // Try and sema all the arguments and get their types
+    //
+    std::vector<CompleteType> argument_types;
+    for( auto& a : m_Arguments )
+    {
+        a->PerformSema( sema );
+        argument_types.push_back( a->GetType() );
+    }
+
+    //
+    // Make sure we're being called on an IdentifierExpression
+    //
+    if( !isa<IdentifierExpression>( expression ) )
+    {
+        sema.Error( "Trying to call a non-function" );
+        // Can't really proceed without a function
+        return false;
+    }
+
+    const IdentifierExpression& identifier_expression =
+                           static_cast<const IdentifierExpression&>(expression);
+    const std::string& name = identifier_expression.GetIdentifier();
+
+    //
+    // Find the function to call
+    //
+    if( !sema.HasFunctionNamed( name ) )
+    {
+        sema.Error( "Calling undeclared function" + name );
+        return false;
+    }
+
+    m_Function = sema.GetFunctionOverload( name, argument_types );
+    if( !m_Function )
+    {
+        sema.Error( "Couldn't find compatible overload for " + name );
+        return false;
+    }
+
+    return true;
 }
 
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
@@ -246,8 +305,9 @@ llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
 
 CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
 {
-    assert( false && "Complete me" );
-    return CompleteType();
+    if( !m_Function )
+        return CompleteType();
+    return m_Function->GetReturnType();
 }
 
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
@@ -260,7 +320,7 @@ void ArgumentListOperator::Print( int depth ) const
     for( int i = 0; i < depth * 4; ++i )
         std::cout << " ";
     std::cout << "ArgumentListOperator\n";
-    for( const auto& i : m_ArgumentExpressions )
+    for( const auto& i : m_Arguments )
         i->Print( depth + 1 );
 }
 
@@ -302,9 +362,16 @@ MemberAccessOperator::~MemberAccessOperator()
 {
 }
 
+bool MemberAccessOperator::ResolveIdentifiers( SemaAnalyzer& sema,
+                                               Expression& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
 bool MemberAccessOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const Expression& expression )
+                                Expression& expression )
 {
     assert( false && "Complete me" );
     return false;
@@ -368,9 +435,15 @@ IncrementOrDecrementOperator::~IncrementOrDecrementOperator()
 {
 }
 
-bool IncrementOrDecrementOperator::PerformSema(
-                                SemaAnalyzer& sema,
-                                const Expression& expression )
+bool IncrementOrDecrementOperator::ResolveIdentifiers( SemaAnalyzer& sema,
+                                                       Expression& expression )
+{
+    assert( false && "Complete me" );
+    return false;
+}
+
+bool IncrementOrDecrementOperator::PerformSema( SemaAnalyzer& sema,
+                                                Expression& expression )
 {
     assert( false && "Complete me" );
     return false;

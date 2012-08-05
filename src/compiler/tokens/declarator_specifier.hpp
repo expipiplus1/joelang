@@ -46,7 +46,6 @@ typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
 class Parameter;
 class Parser;
 class SemaAnalyzer;

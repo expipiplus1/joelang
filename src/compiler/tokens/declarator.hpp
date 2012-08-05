@@ -50,7 +50,6 @@ using Declarator_up = std::unique_ptr<Declarator>;
 class DeclSpecs;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
 class FunctionSpecifier;
 typedef std::unique_ptr<FunctionSpecifier> FunctionSpecifier_up;
 class Initializer;

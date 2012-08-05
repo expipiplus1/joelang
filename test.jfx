@@ -72,6 +72,7 @@ technique t1
         my_bool_state = 1 == int(1.1);
         my_float4_state = my_vec;
     }
+
 }
 
 pass p0
@@ -80,5 +81,5 @@ pass p0
     my_bool_state = a;
     my_bool_state = a |= 3;
     my_bool_state = a &= 0xf00;
-    my_floating_state = func2( 12 );
+    my_floating_state = func2(2);
 }

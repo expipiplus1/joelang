@@ -185,6 +185,22 @@ public:
                          CompoundStatement_up definition );
 
     /**
+      * \returns true if there is at least one function with a matching name
+      */
+    bool HasFunctionNamed( const std::string& identifier ) const;
+
+    /**
+      * \param identifier
+      *   The name of the function
+      * \param argument_types
+      *   The types to try and match
+      * \returns The best function overload if there is on, otherwise nullptr
+      */
+    Function_sp GetFunctionOverload(
+                         const std::string& identifier,
+                         const std::vector<CompleteType> argument_types ) const;
+
+    /**
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;

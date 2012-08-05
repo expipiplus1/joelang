@@ -43,7 +43,6 @@ namespace Compiler
 typedef std::vector<unsigned> ArrayExtents;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
 class Parser;
 class SemaAnalyzer;
 

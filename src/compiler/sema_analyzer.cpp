@@ -341,6 +341,18 @@ void SemaAnalyzer::DefineFunction(
         function->SetDefinition( std::move(definition ) );
 }
 
+bool SemaAnalyzer::HasFunctionNamed( const std::string& identifier ) const
+{
+    return m_FunctionOverloads.find( identifier ) != m_FunctionOverloads.end();
+}
+
+Function_sp SemaAnalyzer::GetFunctionOverload(
+                          const std::string& identifier,
+                          const std::vector<CompleteType> argument_types ) const
+{
+    return nullptr;
+}
+
 void SemaAnalyzer::EnterScope()
 {
     m_SymbolStack.resize( m_SymbolStack.size() + 1 );

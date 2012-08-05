@@ -802,26 +802,23 @@ PostfixExpression::~PostfixExpression()
 
 bool PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    return m_Expression->ResolveIdentifiers( sema );
+    return m_PostfixOperator->ResolveIdentifiers( sema, *m_Expression );
 }
 
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-    good &= m_Expression->PerformSema( sema );
-    good &= m_PostfixOperator->PerformSema( sema, m_Expression );
-    return good;
+    return m_PostfixOperator->PerformSema( sema, *m_Expression );
 }
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    return m_PostfixOperator->CodeGen( code_gen, m_Expression );
+    return m_PostfixOperator->CodeGen( code_gen, *m_Expression );
 }
 
 llvm::Value* PostfixExpression::CodeGenPointerTo(
                                                 CodeGenerator& code_gen ) const
 {
-    return m_PostfixOperator->CodeGenPointerTo( code_gen, m_Expression );
+    return m_PostfixOperator->CodeGenPointerTo( code_gen, *m_Expression );
 }
 
 CompleteType PostfixExpression::GetType() const
@@ -1068,9 +1065,9 @@ bool PrimaryExpression::Parse( Parser& parser,
 IdentifierExpression::IdentifierExpression( std::string identifier )
     :Expression( TokenTy::IdentifierExpression )
     ,m_Identifier( std::move( identifier ) )
-    ,m_Variable( nullptr )
 {
-    assert( !m_Identifier.empty() );
+    assert( !m_Identifier.empty() &&
+            "IdentifierExpression given an empty identifier" );
 }
 
 IdentifierExpression::~IdentifierExpression()
@@ -1082,7 +1079,10 @@ bool IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
     m_Variable = sema.GetVariable( m_Identifier );
     if( !m_Variable )
     {
-        sema.Error( "Undeclared variable: " + m_Identifier );
+        if( sema.HasFunctionNamed( m_Identifier ) )
+            sema.Error( "Using function as variable " + m_Identifier );
+        else
+            sema.Error( "Undeclared variable: " + m_Identifier );
         return false;
     }
     return true;
@@ -1110,6 +1110,11 @@ CompleteType IdentifierExpression::GetType() const
     return m_Variable->GetType();
 }
 
+const std::string& IdentifierExpression::GetIdentifier() const
+{
+    return m_Identifier;
+}
+
 bool IdentifierExpression::IsLValue() const
 {
     return true;
@@ -1117,17 +1122,18 @@ bool IdentifierExpression::IsLValue() const
 
 bool IdentifierExpression::IsConst() const
 {
+    assert( m_Variable && "Trying to get constness of an unresolved variable" );
     return m_Variable->IsConst();
 }
 
 const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 {
+    assert( m_Variable && "Trying to get an unresolved variable" );
     return m_Variable;
 }
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
-    this->ResolveIdentifiers( sema );
     return bool(m_Variable);
 }
 

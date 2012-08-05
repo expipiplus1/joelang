@@ -61,12 +61,14 @@ namespace JoeLang
         class CodeGenerator;
         class Expression;
         typedef std::unique_ptr<Expression> Expression_up;
-        typedef std::shared_ptr<Expression> Expression_sp;
         class GenericValue;
+        class Function;
+        using Function_sp = std::shared_ptr<Function>;
         class Parser;
         class PostfixOperator;
         class SemaAnalyzer;
         class Variable;
+        using Variable_sp = std::shared_ptr<Variable>;
 
         class LiteralExpression;
     } // namespace Compiler
@@ -571,7 +573,13 @@ public:
 /**
   * \class IdentifierExpression
   * \ingroup Expressions
-  * \brief Matches an identifier
+  * \brief Matches an identifier for either a function or an variable
+  *
+  * An IdentifierExpression can match a variable or a function. Because
+  * functions can be overloaded it doesn't ask sema for the function, but
+  * instead just holds onto the identifier, for the ArgumentListOperator to deal
+  * with; If this is a function ArgumentListExpression must not call performsema
+  * on it;
   *
   * IdentifierExpression = identifier
   */
@@ -579,7 +587,7 @@ class IdentifierExpression : public JoeLang::Compiler::Expression
 {
 public:
     /**
-      * This constructor asserts on a null identifier
+      * This constructor asserts on an empty identifier
       * \param identifier
       *   The identifier
       */
@@ -589,6 +597,8 @@ public:
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
+
+    const std::string& GetIdentifier() const;
 
     virtual
     CompleteType GetType() const override;
@@ -623,8 +633,8 @@ public:
     static
     bool classof( const IdentifierExpression* e );
 private:
-    std::string                 m_Identifier;
-    std::shared_ptr<Variable>   m_Variable;
+    std::string m_Identifier;
+    Variable_sp m_Variable;
 };
 
 } // namespace Compiler

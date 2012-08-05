@@ -51,8 +51,9 @@ typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class CompleteType;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
+using Expression_up = std::unique_ptr<Expression>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
 
@@ -79,8 +80,11 @@ public:
     ~PostfixOperator();
 
     virtual
-    bool PerformSema( SemaAnalyzer& sema,
-                      const Expression& expression ) = 0;
+    bool ResolveIdentifiers( SemaAnalyzer& sema, Expression& expression ) = 0;
+
+    /** The postfix operator must performsema on the expression **/
+    virtual
+    bool PerformSema( SemaAnalyzer& sema, Expression& expression ) = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -103,8 +107,7 @@ public:
     bool IsLValue( const Expression& expression ) const;
 
     static
-    bool Parse( Parser& parser,
-                std::unique_ptr<PostfixOperator>& token );
+    bool Parse( Parser& parser, std::unique_ptr<PostfixOperator>& token );
 
     static
     bool classof( const Token* e );
@@ -133,8 +136,11 @@ public:
     ~SubscriptOperator();
 
     virtual
-    bool PerformSema( SemaAnalyzer& sema,
-                      const Expression& expression ) override;
+    bool ResolveIdentifiers( SemaAnalyzer& sema,
+                             Expression& expression ) override;
+
+    virtual
+    bool PerformSema( SemaAnalyzer& sema, Expression& expression ) override;
 
     //TODO pass expression as reference instead of pointer
     virtual
@@ -176,15 +182,19 @@ private:
 class ArgumentListOperator : public JoeLang::Compiler::PostfixOperator
 {
 public:
-    using ArgumentExpressionVector = std::vector< Expression_up >;
+    using ArgumentExpressionVector = std::vector<Expression_up>;
 
-    ArgumentListOperator( ArgumentExpressionVector argument_expressions );
+    ArgumentListOperator( ArgumentExpressionVector arguments );
     virtual
     ~ArgumentListOperator();
 
     virtual
+    bool ResolveIdentifiers( SemaAnalyzer& sema,
+                             Expression& expression ) override;
+
+    virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression& expression ) override;
+                      Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -204,7 +214,9 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<ArgumentListOperator>& token );
 private:
-    ArgumentExpressionVector m_ArgumentExpressions;
+    ArgumentExpressionVector m_Arguments;
+
+    Function_sp m_Function;
 };
 
 /**
@@ -227,8 +239,12 @@ public:
     ~MemberAccessOperator();
 
     virtual
+    bool ResolveIdentifiers( SemaAnalyzer& sema,
+                             Expression& expression ) override;
+
+    virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression& expression ) override;
+                      Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -271,7 +287,11 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression& expression ) override;
+                      Expression& expression ) override;
+
+    virtual
+    bool ResolveIdentifiers( SemaAnalyzer& sema,
+                             Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,

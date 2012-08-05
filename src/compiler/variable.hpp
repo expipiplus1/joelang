@@ -52,7 +52,6 @@ namespace Compiler
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
-typedef std::shared_ptr<Expression> Expression_sp;
 
 /**
   * \class Variable
