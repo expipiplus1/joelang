@@ -60,6 +60,8 @@ public:
 
     const CompleteType& GetReturnType() const;
 
+    const std::vector<CompleteType>& GetParameterTypes() const;
+
     /**
       * This asserts that the function is undefined
       */
@@ -72,10 +74,6 @@ public:
       */
     std::string GetSignatureString() const;
 
-    /**
-      * This doesn't check if types are const because one can't distinguish
-      * functions based on that
-      */
     bool HasSameParameterTypes(
                             const std::vector<CompleteType> other_types ) const;
 

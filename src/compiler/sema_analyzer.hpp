@@ -198,7 +198,7 @@ public:
       */
     Function_sp GetFunctionOverload(
                          const std::string& identifier,
-                         const std::vector<CompleteType> argument_types ) const;
+                         const std::vector<CompleteType> argument_types );
 
     /**
       * \returns true if we are in the top scope

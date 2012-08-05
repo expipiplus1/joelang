@@ -62,6 +62,11 @@ const CompleteType& Function::GetReturnType() const
     return m_ReturnType;
 }
 
+const std::vector<CompleteType>& Function::GetParameterTypes() const
+{
+    return m_ParameterTypes;
+}
+
 void Function::SetDefinition( CompoundStatement_up definition )
 {
     assert( !HasDefinition() && "Definining a function twice" );
@@ -82,17 +87,7 @@ std::string Function::GetSignatureString() const
 bool Function::HasSameParameterTypes(
                              const std::vector<CompleteType> other_types ) const
 {
-    // return false if there are different number of parameters
-    if( m_ParameterTypes.size() != other_types.size() )
-        return false;
-
-    // Compare without comparing const
-    return std::equal( m_ParameterTypes.begin(),
-                       m_ParameterTypes.end(),
-                       other_types.begin(),
-                       []( const CompleteType& t1, const CompleteType& t2 )
-                       {return t1.GetBaseType() == t2.GetBaseType() &&
-                               t1.GetArrayExtents() == t2.GetArrayExtents();} );
+    return other_types == m_ParameterTypes;
 }
 
 void Function::CodeGenDeclaration( CodeGenerator& code_gen )

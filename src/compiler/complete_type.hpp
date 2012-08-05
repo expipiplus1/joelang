@@ -79,8 +79,8 @@ public:
 
     std::string GetString() const;
 
-    bool operator == ( const CompleteType& other );
-    bool operator != ( const CompleteType& other );
+    bool operator == ( const CompleteType& other ) const;
+    bool operator != ( const CompleteType& other ) const;
 private:
     Type         m_BaseType;
     ArrayExtents m_ArrayExtents;

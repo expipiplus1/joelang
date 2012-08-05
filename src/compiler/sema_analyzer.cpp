@@ -30,6 +30,7 @@
 #include "sema_analyzer.hpp"
 
 #include <algorithm>
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <map>
@@ -41,6 +42,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -346,11 +348,108 @@ bool SemaAnalyzer::HasFunctionNamed( const std::string& identifier ) const
     return m_FunctionOverloads.find( identifier ) != m_FunctionOverloads.end();
 }
 
+namespace
+{
+/**
+  * If none match, this will keep them all
+  */
+void KeepOnlyMatching( std::vector<Function_sp>& functions,
+                       std::function<bool(const Function_sp&)> filter )
+{
+    bool any_match = false;
+    for( const auto& f : functions )
+        if( filter( f ) )
+        {
+            any_match = true;
+            break;
+        }
+
+    if( !any_match )
+        return;
+
+    auto doesnt_match = [&filter](const Function_sp& f)
+                        {return !filter(f);};
+    functions.erase( std::remove_if( functions.begin(),
+                                     functions.end(),
+                                     doesnt_match ),
+                     functions.end() );
+}
+}
+
 Function_sp SemaAnalyzer::GetFunctionOverload(
                           const std::string& identifier,
-                          const std::vector<CompleteType> argument_types ) const
+                          const std::vector<CompleteType> argument_types )
 {
-    return nullptr;
+    const auto& f = m_FunctionOverloads.find( identifier );
+    if( f == m_FunctionOverloads.end() )
+        return nullptr;
+
+    std::vector<Function_sp> potential_functions = f->second;
+    assert( !potential_functions.empty() &&
+            "No overloads for a function name" );
+
+    //
+    // Remove all functions that have the wrong number of parameters (except for
+    // default parameters)
+    //
+    auto has_different_num_args =
+        [&argument_types]( const Function_sp& f )
+        {
+            // todo default arguments
+            return f->GetParameterTypes().size() != argument_types.size();
+        };
+    potential_functions.erase( std::remove_if( potential_functions.begin(),
+                                               potential_functions.end(),
+                                               has_different_num_args ),
+                               potential_functions.end() );
+
+    if( potential_functions.empty() )
+        return nullptr;
+
+    for( unsigned i = 0; i < argument_types.size(); ++i )
+    {
+        //
+        // for each parameter
+        //
+
+        auto matches_exactly =
+                [i,&argument_types]( const Function_sp& f )
+                {
+                    return f->GetParameterTypes()[i] == argument_types[i];
+                };
+
+        KeepOnlyMatching( potential_functions, matches_exactly );
+
+        //
+        // Todo unsized arrays here
+        //
+
+        auto has_promotion =
+                [i,&argument_types]( const Function_sp& f )
+                {
+                    return GetCommonType( argument_types[i],
+                                          f->GetParameterTypes()[i] )
+                                                   == f->GetParameterTypes()[i];
+                };
+
+        KeepOnlyMatching( potential_functions, has_promotion );
+
+        //
+        // Todo implicit conversion here
+        //
+    }
+
+    if( potential_functions.size() > 1 )
+    {
+        /// todo print potential matches
+        Error( "Ambiguous function call" );
+        return nullptr;
+    }
+
+    if( potential_functions.empty() )
+        return nullptr;
+
+    return potential_functions[0];
 }
 
 void SemaAnalyzer::EnterScope()

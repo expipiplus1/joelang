@@ -119,13 +119,13 @@ std::string CompleteType::GetString() const
     return string.str();
 }
 
-bool CompleteType::operator == ( const CompleteType& other )
+bool CompleteType::operator == ( const CompleteType& other ) const
 {
     return m_BaseType == other.m_BaseType &&
            m_ArrayExtents == other.m_ArrayExtents;
 }
 
-bool CompleteType::operator != ( const CompleteType& other )
+bool CompleteType::operator != ( const CompleteType& other ) const
 {
     return !operator==( other );
 }
