@@ -1053,7 +1053,10 @@ bool PrimaryExpression::Parse( Parser& parser,
     if( !parser.Expect<Expression>( token ) )
         return false;
     if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
+    {
+        parser.Error( "Expected closing ')' in primary expression" );
         return false;
+    }
 
     return true;
 }
