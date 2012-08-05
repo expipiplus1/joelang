@@ -67,6 +67,10 @@ public:
 
     const std::vector<CompleteType>& GetParameterTypes() const;
 
+    std::size_t GetNumParams() const;
+
+    llvm::Function* GetLLVMFunction() const;
+
     /**
       * This asserts that the function is undefined
       */

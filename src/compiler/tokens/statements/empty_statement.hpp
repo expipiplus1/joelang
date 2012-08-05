@@ -59,6 +59,9 @@ public:
 
     void PerformSema( SemaAnalyzer& sema );
 
+    virtual
+    void CodeGen( CodeGenerator& code_gen ) override;
+
     static
     bool Parse ( Parser& parser, EmptyStatement_up& token );
 };

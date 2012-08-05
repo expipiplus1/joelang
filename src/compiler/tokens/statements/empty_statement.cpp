@@ -29,6 +29,7 @@
 
 #include "empty_statement.hpp"
 
+#include <cassert>
 #include <memory>
 
 #include <compiler/parser.hpp>
@@ -54,6 +55,10 @@ EmptyStatement::~EmptyStatement()
 }
 
 void EmptyStatement::PerformSema( SemaAnalyzer& sema )
+{
+}
+
+void EmptyStatement::CodeGen( CodeGenerator& code_gen )
 {
 }
 

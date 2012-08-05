@@ -60,7 +60,21 @@ CompoundStatement::~CompoundStatement()
 void CompoundStatement::PerformSema( SemaAnalyzer& sema,
                                      const CompleteType& return_type )
 {
+    // todo loads of stuff here
+    // including, verify correct return type,
+    // split into llvm compatible basic blocks
+}
 
+void CompoundStatement::CodeGen( CodeGenerator& code_gen )
+{
+    assert( false && "Complete me" );
+}
+
+void CompoundStatement::CodeGenStatements( CodeGenerator& code_gen )
+{
+    assert( m_Statements.size() == 1 && "todo things" );
+    for( auto& s : m_Statements )
+        s->CodeGen( code_gen );
 }
 
 bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )

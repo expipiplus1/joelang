@@ -32,6 +32,7 @@
 #include <cassert>
 #include <memory>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
@@ -70,6 +71,11 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
     m_Expression = CastExpression::Create( return_type,
                                            std::move(m_Expression) );
     m_Expression->PerformSema( sema );
+}
+
+void ReturnStatement::CodeGen( CodeGenerator& code_gen )
+{
+    code_gen.CreateReturnStatement( m_Expression );
 }
 
 bool ReturnStatement::Parse( Parser& parser, ReturnStatement_up& token )

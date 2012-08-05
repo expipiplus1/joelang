@@ -64,6 +64,7 @@
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <runtime/types.hpp>
 
 namespace JoeLang
@@ -424,7 +425,8 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e,
                                             IsSigned( e_type.GetBaseType() ) );
     }
 
-    assert( IsFloatingPoint( e_type.GetBaseType() ) && "e_type should be floating point" );
+    assert( IsFloatingPoint( e_type.GetBaseType() ) &&
+            "e_type should be floating point" );
     if( IsSigned( type.GetBaseType() ) )
         return m_LLVMBuilder.CreateFPToSI( e_value,
                                            m_Runtime.GetLLVMType( type ) );
@@ -640,7 +642,8 @@ llvm::Value* CodeGenerator::CreateMul( const Expression& l,
         return m_LLVMBuilder.CreateFMul( l.CodeGen( *this ),
                                          r.CodeGen( *this ) );
     else
-        return m_LLVMBuilder.CreateMul( l.CodeGen( *this ), r.CodeGen( *this ) );
+        return m_LLVMBuilder.CreateMul( l.CodeGen( *this ),
+                                        r.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateDiv( const Expression& l,
@@ -705,6 +708,26 @@ llvm::Value* CodeGenerator::CreateArrayIndexPointerTo( const Expression& array,
                                     array.CodeGenPointerTo( *this ),
                                     0, 0 );
     return m_LLVMBuilder.CreateGEP( array_ptr, index.CodeGen( *this ) );
+}
+
+//
+// Statements
+//
+
+void CodeGenerator::CreateReturnStatement( const Expression_up& expression )
+{
+    if( expression )
+    {
+        llvm::Value* v = expression->CodeGen( *this );
+        if( expression->GetType().IsVoid() )
+            m_LLVMBuilder.CreateRetVoid();
+        else
+            m_LLVMBuilder.CreateRet( v );
+    }
+    else
+    {
+        m_LLVMBuilder.CreateRetVoid();
+    }
 }
 
 //
@@ -883,6 +906,44 @@ llvm::Function* CodeGenerator::CreateFunctionDeclaration(
                                                 m_LLVMModule );
     assert( function && "Error generating llvm function" );
     return function;
+}
+
+void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
+                                              const CompoundStatement_up& body )
+{
+    assert( function && "Trying to define a null function" );
+    assert( body && "Trying to define function with a null body" );
+
+    llvm::BasicBlock* llvm_body = llvm::BasicBlock::Create(
+                                                     m_Runtime.GetLLVMContext(),
+                                                     "entry",
+                                                     function );
+
+    m_LLVMBuilder.SetInsertPoint( llvm_body );
+
+    body->CodeGenStatements( *this );
+}
+
+llvm::Value* CodeGenerator::CreateFunctionCall(
+                                   const Function_sp& function,
+                                   const std::vector<Expression_up>& arguments )
+{
+#if !defined(NDEBUG)
+    assert( function && "Trying to codegen a null function" );
+    for( const auto& a : arguments )
+        assert( a && "Trying to codegen a null argument" );
+#endif
+    std::vector<llvm::Value*> llvm_arguments;
+    llvm_arguments.reserve( function->GetNumParams() );
+    for( unsigned i = 0; i < function->GetNumParams(); ++i )
+        if( i < arguments.size() )
+            llvm_arguments.push_back( arguments[i]->CodeGen( *this ) );
+        // TODO default arguments
+        //else
+            //llvm_argumens.push_back(
+                               //function->GetDefaultArgument->CodeGen( *this ) );
+    return m_LLVMBuilder.CreateCall( function->GetLLVMFunction(),
+                                     std::move(llvm_arguments) );
 }
 
 void CodeGenerator::CreateDestroyTemporaryCalls()

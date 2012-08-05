@@ -69,6 +69,17 @@ const std::vector<CompleteType>& Function::GetParameterTypes() const
     return m_ParameterTypes;
 }
 
+std::size_t Function::GetNumParams() const
+{
+    return m_ParameterTypes.size();
+}
+
+llvm::Function* Function::GetLLVMFunction() const
+{
+    assert( m_LLVMFunction && "Trying to get an undeclared function" );
+    return m_LLVMFunction;
+}
+
 void Function::SetDefinition( CompoundStatement_up definition )
 {
     assert( !HasDefinition() && "Definining a function twice" );
@@ -103,6 +114,8 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
 {
     assert( m_LLVMFunction &&
             "Trying to generate a definition without a declaration" );
+    code_gen.CreateFunctionDefinition( m_LLVMFunction,
+                                       m_Definition );
 }
 
 } // namespace Compiler

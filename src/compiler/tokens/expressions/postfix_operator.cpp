@@ -299,8 +299,7 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
                                             const Expression& expression )
 {
-    assert( false && "complete me" );
-    return nullptr;
+    return code_gen.CreateFunctionCall( m_Function, m_Arguments );
 }
 
 CompleteType ArgumentListOperator::GetType( const Expression& expression ) const

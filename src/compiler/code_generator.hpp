@@ -60,6 +60,8 @@ namespace Compiler
 
 using ArrayExtents = std::vector<unsigned>;
 class CompleteType;
+class CompoundStatement;
+using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 class DeclarationBase;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
@@ -140,6 +142,10 @@ public:
 
     llvm::Value* CreateArrayIndexPointerTo( const Expression& array,
                                             const Expression& index );
+
+    // Statements
+    /** Expression can be null **/
+    void CreateReturnStatement( const Expression_up& expression );
 
     /**
       * Create the llvm::Value representing an integer
@@ -232,6 +238,19 @@ public:
                              const std::string& identifier,
                              const CompleteType& return_type,
                              const std::vector<CompleteType>& parameter_types );
+
+    /**
+      * Define a function
+      */
+    void CreateFunctionDefinition( llvm::Function* function,
+                                   const CompoundStatement_up& body );
+    /**
+      * Create a call to the specified function. This asserts that neither
+      * function or any of args are null. This also fills in default arguments
+      */
+    llvm::Value* CreateFunctionCall(
+                                  const Function_sp& function,
+                                  const std::vector<Expression_up>& arguments );
 private:
     /**
       * Destroys the temporay strings created in evaluating the expression

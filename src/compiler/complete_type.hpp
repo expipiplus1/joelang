@@ -65,6 +65,7 @@ public:
     bool IsArrayType() const;
 
     bool IsUnknown() const;
+    bool IsVoid() const;
 
     bool IsFloatingPoint() const;
     bool IsIntegral() const;

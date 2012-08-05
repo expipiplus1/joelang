@@ -88,7 +88,7 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
             Error( "Use of undefined pass: " + p.first );
     }
 
-    for( const auto& fo : m_FunctionOverloads )
+    for( auto& fo : m_FunctionOverloads )
     {
         // If the function is referenced and not defined
         for( const auto& f : fo.second )
@@ -96,6 +96,11 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
                 !f->HasDefinition() )
                 Error( "Use of undefined function: " +
                        f->GetSignatureString() );
+        // Remove unused functions
+        fo.second.erase( std::remove_if( fo.second.begin(), fo.second.end(),
+                                  [](const Function_sp& f)
+                                  { return f.unique(); } ),
+                         fo.second.end() );
     }
 
     // Return success or not

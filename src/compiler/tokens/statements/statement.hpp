@@ -38,6 +38,7 @@ namespace JoeLang
 namespace Compiler
 {
 
+class CodeGenerator;
 class Parser;
 class SemaAnalyzer;
 class Statement;
@@ -62,6 +63,9 @@ public:
     Statement    ( TokenTy sub_class_id );
     virtual
     ~Statement   ();
+
+    virtual
+    void CodeGen( CodeGenerator& code_gen ) = 0;
 
     virtual
     void Print( int depth ) const override;

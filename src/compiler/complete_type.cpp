@@ -81,6 +81,11 @@ bool CompleteType::IsUnknown() const
     return m_BaseType == Type::UNKNOWN;
 }
 
+bool CompleteType::IsVoid() const
+{
+    return m_BaseType == Type::VOID;
+}
+
 bool CompleteType::IsFloatingPoint() const
 {
     return Compiler::IsFloatingPoint( m_BaseType );

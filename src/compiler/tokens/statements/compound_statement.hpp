@@ -62,6 +62,15 @@ public:
     void PerformSema( SemaAnalyzer& sema,
                       const CompleteType& return_type );
 
+    virtual
+    void CodeGen( CodeGenerator& code_gen ) override;
+
+    /**
+      * This will send the instructions to llvm
+      * It requires that we are already inserting into a basic block
+      */
+    void CodeGenStatements( CodeGenerator& code_gen );
+
     static
     bool Parse ( Parser& parser, CompoundStatement_up& token );
 
