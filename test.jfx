@@ -82,5 +82,4 @@ pass p0
     my_bool_state = a |= 3;
     my_bool_state = a &= 0xf00;
     my_floating_state = func2(2);
-    my_floating_state = func2(2.0f);
 }

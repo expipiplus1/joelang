@@ -201,6 +201,11 @@ public:
                          const std::vector<CompleteType> argument_types );
 
     /**
+      * \returns a big list of all the functions
+      */
+    std::vector<Function_sp> GetFunctions() const;
+
+    /**
       * \returns true if we are in the top scope
       */
     bool InGlobalScope() const;

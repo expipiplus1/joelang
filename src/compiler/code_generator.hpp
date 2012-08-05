@@ -63,7 +63,8 @@ class CompleteType;
 class DeclarationBase;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
-using Expression_sp = std::shared_ptr<Expression>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class GenericValue;
 class Runtime;
 class TechniqueDeclaration;
@@ -77,10 +78,11 @@ public:
     CodeGenerator( Runtime& runtime );
     ~CodeGenerator();
 
-    void GenerateCode(
-                const TranslationUnit& ast,
-                std::vector<Technique>& techniques,
-                std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine );
+    void GenerateFunctions( const std::vector<Function_sp>& functions );
+
+    std::vector<Technique> GenerateTechniques( const TranslationUnit& ast );
+
+    std::unique_ptr<llvm::ExecutionEngine> TakeExecutionEngine();
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,

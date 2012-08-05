@@ -65,7 +65,9 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     std::vector<Technique> techniques;
     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 
-    code_generator.GenerateCode( ast, techniques, llvm_execution_engine );
+    code_generator.GenerateFunctions( sema.GetFunctions() );
+    techniques = code_generator.GenerateTechniques( ast );
+    llvm_execution_engine = code_generator.TakeExecutionEngine();
 
     return std::unique_ptr<Effect>( new Effect(
                                            std::move(techniques),

@@ -83,11 +83,16 @@ CodeGenerator::~CodeGenerator()
 {
 }
 
-void CodeGenerator::GenerateCode(
-                 const TranslationUnit& ast,
-                 std::vector<Technique>& techniques,
-                 std::unique_ptr<llvm::ExecutionEngine>& llvm_execution_engine )
+void CodeGenerator::GenerateFunctions(
+                                     const std::vector<Function_sp>& functions )
 {
+
+}
+
+std::vector<Technique> CodeGenerator::GenerateTechniques(
+                                                    const TranslationUnit& ast )
+{
+    std::vector<Technique> techniques;
     for( const auto& declaration : ast.GetDeclarations() )
     {
         if( isa<TechniqueDeclaration>(declaration) )
@@ -96,18 +101,16 @@ void CodeGenerator::GenerateCode(
                     static_cast<TechniqueDeclaration&>( *declaration.get() );
             techniques.push_back( t.GenerateTechnique( *this ) );
         }
-        /* // The variables have already been codegened in sema
-        else if( isa<VariableDeclarationList>(declaration) )
-        {
-            VariableDeclarationList& v =
-                    static_cast<VariableDeclarationList&>( *declaration.get() );
-            v.CodeGen( *this );
-        }
-        */
     }
-    llvm_execution_engine = std::move( m_LLVMExecutionEngine );
 
     //m_LLVMModule->dump();
+
+    return std::move(techniques);
+}
+
+std::unique_ptr<llvm::ExecutionEngine> CodeGenerator::TakeExecutionEngine()
+{
+    return std::move( m_LLVMExecutionEngine );
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(

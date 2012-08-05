@@ -452,6 +452,14 @@ Function_sp SemaAnalyzer::GetFunctionOverload(
     return potential_functions[0];
 }
 
+std::vector<Function_sp> SemaAnalyzer::GetFunctions() const
+{
+    std::vector<Function_sp> ret;
+    for( const auto& i : m_FunctionOverloads )
+        ret.insert( ret.end(), i.second.begin(), i.second.end() );
+    return ret;
+}
+
 void SemaAnalyzer::EnterScope()
 {
     m_SymbolStack.resize( m_SymbolStack.size() + 1 );

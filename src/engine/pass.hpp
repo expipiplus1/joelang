@@ -33,6 +33,8 @@
 #include <string>
 #include <vector>
 
+#include <engine/state_assignment.hpp>
+
 namespace JoeLang
 {
 
@@ -44,8 +46,8 @@ public:
     using StateAssignmentVector =
                              std::vector<std::unique_ptr<StateAssignmentBase> >;
     Pass();
-    Pass( Pass&& p ) = default;
-    Pass& operator = ( Pass&& p ) = default;
+    Pass( Pass&& ) = default;
+    Pass& operator = ( Pass&& ) = default;
     explicit
     Pass( std::string name );
     Pass( std::string name,
