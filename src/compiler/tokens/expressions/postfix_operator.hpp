@@ -80,15 +80,15 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression_up& expression ) = 0;
+                      const Expression& expression ) = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
-                          const Expression_up& expression ) = 0;
+                          const Expression& expression ) = 0;
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
-                                   const Expression_up& expression );
+                                   const Expression& expression );
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;
@@ -134,16 +134,16 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression_up& expression ) override;
+                      const Expression& expression ) override;
 
     //TODO pass expression as reference instead of pointer
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
-                          const Expression_up& expression ) override;
+                          const Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
-                                   const Expression_up& expression ) override;
+                                   const Expression& expression ) override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -184,11 +184,11 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression_up& expression ) override;
+                      const Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
-                          const Expression_up& expression ) override;
+                          const Expression& expression ) override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -228,11 +228,11 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression_up& expression ) override;
+                      const Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
-                          const Expression_up& expression ) override;
+                          const Expression& expression ) override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -271,11 +271,11 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      const Expression_up& expression ) override;
+                      const Expression& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
-                          const Expression_up& expression ) override;
+                          const Expression& expression ) override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;

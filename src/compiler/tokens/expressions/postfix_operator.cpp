@@ -80,9 +80,8 @@ bool PostfixOperator::Parse( Parser& parser,
     return true;
 }
 
-llvm::Value* PostfixOperator::CodeGenPointerTo(
-                                            CodeGenerator& code_gen,
-                                            const Expression_up& expression )
+llvm::Value* PostfixOperator::CodeGenPointerTo( CodeGenerator& code_gen,
+                                                const Expression& expression )
 {
     assert( false && "complete me" );
     return nullptr;
@@ -124,7 +123,7 @@ SubscriptOperator::~SubscriptOperator()
 }
 
 bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
-                                     const Expression_up& expression )
+                                     const Expression& expression )
 {
     bool good = m_IndexExpression->ResolveIdentifiers( sema );
     if( good )
@@ -133,12 +132,12 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
                                                     std::move(m_IndexExpression) );
         good &= m_IndexExpression->PerformSema( sema );
     }
-    if( !expression->GetType().IsArrayType() )
+    if( !expression.GetType().IsArrayType() )
     {
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    const ArrayExtents extents = expression->GetType().GetArrayExtents();
+    const ArrayExtents extents = expression.GetType().GetArrayExtents();
     assert( !extents.empty() && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
@@ -151,18 +150,16 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
-                                         const Expression_up& expression )
+                                         const Expression& expression )
 {
-    assert( expression && "SubscriptOperator given an null expression" );
-    return code_gen.CreateArrayIndex( *expression, *m_IndexExpression );
+    return code_gen.CreateArrayIndex( expression, *m_IndexExpression );
 }
 
 llvm::Value* SubscriptOperator::CodeGenPointerTo(
                                             CodeGenerator& code_gen,
-                                            const Expression_up& expression )
+                                            const Expression& expression )
 {
-    assert( expression && "SubscriptOperator given an null expression" );
-    return code_gen.CreateArrayIndexPointerTo( *expression,
+    return code_gen.CreateArrayIndexPointerTo( expression,
                                                *m_IndexExpression );
 }
 
@@ -233,16 +230,15 @@ ArgumentListOperator::~ArgumentListOperator()
 {
 }
 
-bool ArgumentListOperator::PerformSema(
-                                SemaAnalyzer& sema,
-                                const Expression_up& expression )
+bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
+                                        const Expression& expression )
 {
     assert( false && "Complete me" );
     return false;
 }
 
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
-                                            const Expression_up& expression )
+                                            const Expression& expression )
 {
     assert( false && "complete me" );
     return nullptr;
@@ -308,14 +304,14 @@ MemberAccessOperator::~MemberAccessOperator()
 
 bool MemberAccessOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const Expression_up& expression )
+                                const Expression& expression )
 {
     assert( false && "Complete me" );
     return false;
 }
 
 llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
-                                            const Expression_up& expression )
+                                            const Expression& expression )
 {
     assert( false && "complete me" );
     return nullptr;
@@ -374,7 +370,7 @@ IncrementOrDecrementOperator::~IncrementOrDecrementOperator()
 
 bool IncrementOrDecrementOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                const Expression_up& expression )
+                                const Expression& expression )
 {
     assert( false && "Complete me" );
     return false;
@@ -382,7 +378,7 @@ bool IncrementOrDecrementOperator::PerformSema(
 
 llvm::Value* IncrementOrDecrementOperator::CodeGen(
                                                CodeGenerator& code_gen,
-                                               const Expression_up& expression )
+                                               const Expression& expression )
 {
     assert( false && "complete me" );
     return nullptr;
