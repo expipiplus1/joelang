@@ -217,6 +217,21 @@ public:
     llvm::Value* CreateAssignment( const Expression& variable,
                                    const Expression& e );
 
+    // Functions
+    /**
+      * Create the declaration for an llvm function
+      * \param identifier
+      *   The name of the function
+      * \param return_type
+      *   The function's return type
+      * \param parameter_types
+      *   The parameter_types
+      * \returns the llvm function
+      */
+    llvm::Function* CreateFunctionDeclaration(
+                             const std::string& identifier,
+                             const CompleteType& return_type,
+                             const std::vector<CompleteType>& parameter_types );
 private:
     /**
       * Destroys the temporay strings created in evaluating the expression

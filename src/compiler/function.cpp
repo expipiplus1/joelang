@@ -35,6 +35,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 
@@ -49,6 +50,7 @@ Function::Function( std::string identifier,
     :m_Identifier( std::move(identifier) )
     ,m_ReturnType( std::move(return_type) )
     ,m_ParameterTypes( std::move(parameter_types) )
+    ,m_LLVMFunction( nullptr )
 {
 }
 
@@ -92,12 +94,15 @@ bool Function::HasSameParameterTypes(
 
 void Function::CodeGenDeclaration( CodeGenerator& code_gen )
 {
-    assert( false );
+    m_LLVMFunction = code_gen.CreateFunctionDeclaration( m_Identifier,
+                                                         m_ReturnType,
+                                                         m_ParameterTypes );
 }
 
 void Function::CodeGenDefinition( CodeGenerator& code_gen )
 {
-    assert( false );
+    assert( m_LLVMFunction &&
+            "Trying to generate a definition without a declaration" );
 }
 
 } // namespace Compiler

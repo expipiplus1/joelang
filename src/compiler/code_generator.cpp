@@ -55,6 +55,7 @@
 #include <engine/technique.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/function.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/runtime.hpp>
 #include <compiler/type_properties.hpp>
@@ -86,7 +87,17 @@ CodeGenerator::~CodeGenerator()
 void CodeGenerator::GenerateFunctions(
                                      const std::vector<Function_sp>& functions )
 {
+    //
+    // First, declare all the functions
+    //
+    for( auto& f : functions )
+        f->CodeGenDeclaration( *this );
 
+    //
+    // Then define them
+    //
+    for( auto& f : functions )
+        f->CodeGenDefinition( *this );
 }
 
 std::vector<Technique> CodeGenerator::GenerateTechniques(
@@ -840,6 +851,38 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
     m_LLVMBuilder.CreateStore( assigned_value,
                                variable.CodeGenPointerTo( *this ) );
     return m_LLVMBuilder.CreateLoad( variable.CodeGenPointerTo( *this ) );
+}
+
+llvm::Function* CodeGenerator::CreateFunctionDeclaration(
+                              const std::string& identifier,
+                              const CompleteType& return_type,
+                              const std::vector<CompleteType>& parameter_types )
+{
+    llvm::Type* llvm_return_type = m_Runtime.GetLLVMType( return_type );
+    std::vector<llvm::Type*> llvm_parameter_types;
+    llvm_parameter_types.reserve( parameter_types.size() );
+    for( const auto& p : parameter_types )
+        llvm_parameter_types.push_back( m_Runtime.GetLLVMType( p ) );
+
+#if !defined(NDEBUG)
+    assert( llvm_return_type && "Couldn't get llvm return type" );
+    for( auto& t : llvm_parameter_types )
+        assert( t && "Couldn't get llvm parameter type" );
+#endif
+
+    llvm::FunctionType* prototype = llvm::FunctionType::get(
+                                                         llvm_return_type,
+                                                         llvm_parameter_types,
+                                                         false );
+    assert( prototype && "Error generating function prototype" );
+
+    llvm::Function* function = llvm::Function::Create(
+                                                prototype,
+                                                llvm::Function::ExternalLinkage,
+                                                identifier,
+                                                m_LLVMModule );
+    assert( function && "Error generating llvm function" );
+    return function;
 }
 
 void CodeGenerator::CreateDestroyTemporaryCalls()

@@ -182,6 +182,8 @@ llvm::Type* Runtime::GetLLVMType( Type type ) const
     else if( IsVectorType( type ) )
         t = llvm::VectorType::get( GetLLVMType( GetElementType( type ) ),
                                    GetVectorSize( type ) );
+    else if( type == Type::VOID )
+        t = llvm::Type::getVoidTy( m_LLVMContext );
     else
     {
         assert( false && "Trying to get the llvm::Type of an unhandled Type" );

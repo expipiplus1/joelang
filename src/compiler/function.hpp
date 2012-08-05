@@ -35,6 +35,11 @@
 
 #include <compiler/complete_type.hpp>
 
+namespace llvm
+{
+    class Function;
+}
+
 namespace JoeLang
 {
 
@@ -86,6 +91,8 @@ private:
     std::vector<CompleteType> m_ParameterTypes;
 
     CompoundStatement_up m_Definition;
+
+    llvm::Function* m_LLVMFunction;
 };
 
 } // namespace Compiler
