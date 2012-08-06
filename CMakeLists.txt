@@ -47,8 +47,6 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/runtime.hpp
                         src/compiler/sema_analyzer.cpp
                         src/compiler/sema_analyzer.hpp
-                        src/compiler/symbol_table.cpp
-                        src/compiler/symbol_table.hpp
                         src/compiler/terminal_types.cpp
                         src/compiler/terminal_types.hpp
                         src/compiler/type_properties.cpp
