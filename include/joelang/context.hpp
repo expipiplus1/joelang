@@ -55,6 +55,16 @@ public:
     Effect* CreateEffectFromString( const std::string& string );
     Effect* CreateEffectFromFile(   const std::string& file_name );
 
+    /**
+      * Registers a bunch of handy opengl states to be set during passes
+      */
+    void RegisterOpenGLStates();
+
+    /**
+      * Registers a bunch of handy opengl actions to be set during passes
+      */
+    void RegisterOpenGLActions();
+
     bool AddState( StateBase* state );
     const StateBase* GetNamedState( const std::string& name ) const;
     const std::vector<StateBase*>& GetStates() const;

@@ -39,11 +39,12 @@
 #include <utility>
 #include <vector>
 
-#include <joelang/effect.hpp>
-#include <joelang/state.hpp>
+#include <engine/opengl_states.hpp>
 #include <compiler/effect_factory.hpp>
 #include <compiler/runtime.hpp>
 #include <compiler/terminal_types.hpp>
+#include <joelang/effect.hpp>
+#include <joelang/state.hpp>
 
 namespace JoeLang
 {
@@ -54,6 +55,16 @@ Context::Context()
 
 Context::~Context()
 {
+}
+
+void Context::RegisterOpenGLStates()
+{
+    JoeLang::RegisterOpenGLStates( *this );
+}
+
+void Context::RegisterOpenGLActions()
+{
+    JoeLang::RegisterOpenGLActions( *this );
 }
 
 bool Context::AddState( StateBase* state )
@@ -92,7 +103,9 @@ Effect* Context::CreateEffectFromString( const std::string& string )
 Effect* Context::CreateEffectFromFile( const std::string& file_name )
 {
    std::ifstream file( file_name );
-   assert( file && "File error" );
+   // todo error reporting here
+   if( !file )
+       return nullptr;
 
    std::string string;
 
