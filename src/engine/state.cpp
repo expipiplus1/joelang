@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "state.hpp"
+#include <joelang/state.hpp>
 
 #include <string>
 #include <utility>

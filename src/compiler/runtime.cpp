@@ -40,7 +40,7 @@
 #include <llvm/Support/system_error.h>
 #include <llvm/Support/TargetSelect.h>
 
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
 

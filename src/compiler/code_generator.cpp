@@ -49,10 +49,10 @@
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
 
-#include <engine/context.hpp>
-#include <engine/state.hpp>
-#include <engine/state_assignment.hpp>
-#include <engine/technique.hpp>
+#include <joelang/context.hpp>
+#include <joelang/state.hpp>
+#include <joelang/state_assignment.hpp>
+#include <joelang/technique.hpp>
 #include <compiler/casting.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/function.hpp>

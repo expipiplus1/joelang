@@ -37,7 +37,7 @@
 #include <string>
 #include <utility>
 
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 #include <compiler/type_properties.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>

@@ -41,8 +41,8 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
-#include <engine/state.hpp>
-#include <engine/state_assignment.hpp>
+#include <joelang/state.hpp>
+#include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {

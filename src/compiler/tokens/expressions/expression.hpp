@@ -37,7 +37,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
 #include <compiler/tokens/token.hpp>
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 
 //------------------------------------------------------------------------------
 // Forward Declarations

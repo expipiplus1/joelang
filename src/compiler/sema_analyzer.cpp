@@ -50,8 +50,8 @@
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/translation_unit.hpp>
-#include <engine/context.hpp>
-#include <engine/state.hpp>
+#include <joelang/context.hpp>
+#include <joelang/state.hpp>
 
 namespace JoeLang
 {

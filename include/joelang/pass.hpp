@@ -33,30 +33,36 @@
 #include <string>
 #include <vector>
 
-#include <engine/technique.hpp>
-
-namespace llvm
-{
-    class ExecutionEngine;
-};
+#include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {
 
-class Effect
+class StateAssignmentBase;
+
+class Pass
 {
 public:
-    Effect() = default;
-    ~Effect();
-    Effect( std::vector<Technique> techniques,
-            std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
+    using StateAssignmentVector =
+                             std::vector<std::unique_ptr<StateAssignmentBase> >;
+    Pass();
+    Pass( Pass&& ) = default;
+    Pass& operator = ( Pass&& ) = default;
+    explicit
+    Pass( std::string name );
+    Pass( std::string name,
+          StateAssignmentVector state_assignments);
+    ~Pass();
 
-    const std::vector<Technique>& GetTechniques() const;
-    const Technique* GetNamedTechnique( const std::string& name ) const;
+    void SetState() const;
+    void ResetState() const;
+    bool Validate() const;
+
+    const std::string& GetName() const;
 
 private:
-    std::vector<Technique>                  m_Techniques;
-    std::unique_ptr<llvm::ExecutionEngine>  m_LLVMExecutionEngine;
+    std::string m_Name;
+    StateAssignmentVector m_StateAssignments;
 };
 
 } // namespace JoeLang

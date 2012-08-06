@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "pass.hpp"
+#include <joelang/pass.hpp>
 
 #include <cassert>
 #include <memory>
@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-#include <engine/state_assignment.hpp>
+#include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {

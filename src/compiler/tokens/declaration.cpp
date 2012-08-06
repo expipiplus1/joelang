@@ -48,8 +48,8 @@
 #include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/type_properties.hpp>
-#include <engine/state_assignment.hpp>
-#include <engine/technique.hpp>
+#include <joelang/state_assignment.hpp>
+#include <joelang/technique.hpp>
 
 namespace JoeLang
 {

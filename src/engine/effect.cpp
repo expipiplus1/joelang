@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "effect.hpp"
+#include <joelang/effect.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -36,7 +36,7 @@
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
-#include <engine/technique.hpp>
+#include <joelang/technique.hpp>
 
 namespace JoeLang
 {

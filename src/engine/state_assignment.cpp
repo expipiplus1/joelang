@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "state_assignment.hpp"
+#include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {

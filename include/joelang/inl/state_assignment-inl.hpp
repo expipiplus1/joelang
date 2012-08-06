@@ -29,11 +29,11 @@
 
 #pragma once
 
-#include "state_assignment.hpp"
+#include <joelang/state_assignment.hpp>
 
 #include <functional>
 
-#include <engine/state.hpp>
+#include <joelang/state.hpp>
 
 namespace JoeLang
 {

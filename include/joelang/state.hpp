@@ -29,40 +29,76 @@
 
 #pragma once
 
-#include <memory>
+#include <functional>
+#include <map>
 #include <string>
 #include <vector>
 
-#include <engine/state_assignment.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-class StateAssignmentBase;
+void DefaultStateResetCallback();
 
-class Pass
+bool DefaultStateValidateCallback();
+
+class StateBase
 {
 public:
-    using StateAssignmentVector =
-                             std::vector<std::unique_ptr<StateAssignmentBase> >;
-    Pass();
-    Pass( Pass&& ) = default;
-    Pass& operator = ( Pass&& ) = default;
     explicit
-    Pass( std::string name );
-    Pass( std::string name,
-          StateAssignmentVector state_assignments);
-    ~Pass();
-
-    void SetState() const;
-    void ResetState() const;
-    bool Validate() const;
+    StateBase( std::string name );
+    virtual
+    ~StateBase();
 
     const std::string& GetName() const;
 
+    virtual
+    std::vector<std::string> GetEnumerantNames() const = 0;
+
+    virtual
+    Type GetType() const = 0;
+
 private:
     std::string m_Name;
-    StateAssignmentVector m_StateAssignments;
+};
+
+template<typename T>
+class State : public StateBase
+{
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
+                   "Can't create a state with an unhandled type" );
+public:
+    State() = delete;
+    State( std::string name, std::map<std::string, T> enumerations = {} );
+    virtual
+    ~State();
+
+    void SetCallbacks( std::function<void(T)> set_callback,
+                       std::function<void()>  reset_callback,
+                       std::function<bool()>  validate_callback );
+
+    //TODO enable passing by reference for large Ts
+    void SetState( T value ) const;
+    void ResetState() const;
+    bool ValidateState() const;
+
+    virtual
+    std::vector<std::string> GetEnumerantNames() const override;
+
+    virtual
+    Type GetType() const override;
+
+    const std::map<std::string, T>& GetEnumerations() const;
+
+private:
+    std::map<std::string, T> m_Enumerations;
+
+    std::function<void(T)> m_SetCallback;
+    std::function<void()> m_ResetCallback;
+    std::function<bool()> m_ValidateCallback;
 };
 
 } // namespace JoeLang
+
+#include "inl/state-inl.hpp"

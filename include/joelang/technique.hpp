@@ -29,80 +29,27 @@
 
 #pragma once
 
-#include <functional>
+#include <string>
+#include <vector>
 
-#include <engine/types.hpp>
+#include <joelang/pass.hpp>
 
 namespace JoeLang
 {
 
-template<typename T>
-class State;
-
-class StateAssignmentBase
+class Technique
 {
 public:
-    virtual
-    ~StateAssignmentBase();
+    Technique() = default;
+    Technique( std::string name, std::vector<Pass> passes );
 
-    virtual
-    void SetState() const = 0;
+    const std::vector<Pass>& GetPasses() const;
 
-    virtual
-    void ResetState() const = 0;
-
-    virtual
-    bool ValidateState() const = 0;
-};
-
-template<typename T>
-class StateAssignment : public StateAssignmentBase
-{
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
-                   "Can't create a StateAssignment with an unhandled type" );
-public:
-    StateAssignment( const State<T>& state, std::function<T()> getter );
-    virtual
-    ~StateAssignment();
-
-    virtual
-    void SetState() const override;
-
-    virtual
-    void ResetState() const override;
-
-    virtual
-    bool ValidateState() const override;
+    const std::string& GetName() const;
 
 private:
-    const State<T>& m_State;
-    std::function<T()> m_Getter;
-};
-
-template<typename T>
-class ConstStateAssignment : public StateAssignmentBase
-{
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
-                   "Can't create a ConstStateAssignment with unhandled type" );
-public:
-    ConstStateAssignment( const State<T>& state, T value );
-    virtual
-    ~ConstStateAssignment();
-
-    virtual
-    void SetState() const override;
-
-    virtual
-    void ResetState() const override;
-
-    virtual
-    bool ValidateState() const override;
-
-private:
-    const State<T>& m_State;
-    T m_Value;
+    std::string m_Name;
+    std::vector<Pass> m_Passes;
 };
 
 } // namespace JoeLang
-
-#include "state_assignment-inl.hpp"

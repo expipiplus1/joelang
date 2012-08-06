@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include "state.hpp"
+#include <joelang/state.hpp>
 
 #include <functional>
 #include <map>
@@ -37,7 +37,7 @@
 #include <utility>
 #include <vector>
 
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

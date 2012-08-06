@@ -31,7 +31,7 @@
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 
-#include <engine/effect.hpp>
+#include <joelang/effect.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>

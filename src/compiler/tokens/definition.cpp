@@ -42,8 +42,8 @@
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/tokens/state_assignment_statement.hpp>
-#include <engine/pass.hpp>
-#include <engine/state_assignment.hpp>
+#include <joelang/pass.hpp>
+#include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {

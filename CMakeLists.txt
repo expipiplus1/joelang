@@ -2,31 +2,30 @@ cmake_minimum_required(VERSION 2.8)
 
 project( joelang )
 
-set(joemath_INCLUDE_DIRS /c/Users/jhermasz/projects/joemath/include)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-exceptions -std=c++11 -Wall -msse")
+set( joelang_CXX_FLAGS "-fno-exceptions -Wall -std=c++11 -msse" CACHE STRING "joelang compiler options" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS}" )
 
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
 link_directories( ${LLVM_LIBRARY_DIRS} )
 
-include_directories( ${joemath_INCLUDE_DIRS} )
+include_directories( ${joemath_INCLUDE_DIR} )
 
-add_executable( joelang src/joelang.cpp
+add_library( joelang    include/joelang/context.hpp
+                        include/joelang/effect.hpp
+                        include/joelang/pass.hpp
+                        include/joelang/state_assignment.hpp
+                        include/joelang/technique.hpp
+                        include/joelang/types.hpp
+                        include/joelang/state.hpp
+                        include/joelang/inl/state_assignment-inl.hpp
+                        include/joelang/inl/state-inl.hpp
                         src/engine/context.cpp
-                        src/engine/context.hpp
                         src/engine/effect.cpp
-                        src/engine/effect.hpp
                         src/engine/pass.cpp
-                        src/engine/pass.hpp
                         src/engine/state_assignment.cpp
-                        src/engine/state_assignment.hpp
-                        src/engine/state_assignment-inl.hpp
                         src/engine/technique.cpp
-                        src/engine/technique.hpp
-                        src/engine/types.hpp
                         src/engine/state.cpp
-                        src/engine/state.hpp
-                        src/engine/state-inl.hpp
                         src/compiler/casting.hpp
                         src/compiler/code_generator.cpp
                         src/compiler/code_generator.hpp
@@ -114,7 +113,7 @@ set( runtime_sources src/runtime/string.cpp
 
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 -I/opt/local/include/gcc48/c++ -L/opt/local/lib/gcc48 -I/opt/local/include/gcc48/c++/x86_64-apple-darwin11 -I${joemath_INCLUDE_DIRS} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
 add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc"
@@ -126,12 +125,12 @@ add_dependencies( joelang compile_runtime )
 #
 
 llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader )
-set( joelang_libraries ${REQ_LLVM_LIBRARIES} )
+set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 
-set( joelang_include_directories ${joelang_SOURCE_DIR}/src )
-target_link_libraries( joelang ${joelang_libraries} )
-include_directories( ${joelang_include_directories} )
+list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
+target_link_libraries( joelang ${joelang_LIBS} )
+include_directories( ${joelang_INCLUDE_DIRS} )
 
 #
 # add a target to generate API documentation with Doxygen

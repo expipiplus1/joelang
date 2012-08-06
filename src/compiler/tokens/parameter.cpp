@@ -44,7 +44,7 @@
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

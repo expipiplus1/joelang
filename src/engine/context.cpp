@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "context.hpp"
+#include <joelang/context.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -39,8 +39,8 @@
 #include <utility>
 #include <vector>
 
-#include <engine/effect.hpp>
-#include <engine/state.hpp>
+#include <joelang/effect.hpp>
+#include <joelang/state.hpp>
 #include <compiler/effect_factory.hpp>
 #include <compiler/runtime.hpp>
 #include <compiler/terminal_types.hpp>

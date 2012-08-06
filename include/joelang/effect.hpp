@@ -29,76 +29,34 @@
 
 #pragma once
 
-#include <functional>
-#include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include <engine/types.hpp>
+#include <joelang/technique.hpp>
+
+namespace llvm
+{
+    class ExecutionEngine;
+};
 
 namespace JoeLang
 {
 
-void DefaultStateResetCallback();
-
-bool DefaultStateValidateCallback();
-
-class StateBase
+class Effect
 {
 public:
-    explicit
-    StateBase( std::string name );
-    virtual
-    ~StateBase();
+    Effect() = default;
+    ~Effect();
+    Effect( std::vector<Technique> techniques,
+            std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
 
-    const std::string& GetName() const;
-
-    virtual
-    std::vector<std::string> GetEnumerantNames() const = 0;
-
-    virtual
-    Type GetType() const = 0;
+    const std::vector<Technique>& GetTechniques() const;
+    const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
-    std::string m_Name;
-};
-
-template<typename T>
-class State : public StateBase
-{
-    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
-                   "Can't create a state with an unhandled type" );
-public:
-    State() = delete;
-    State( std::string name, std::map<std::string, T> enumerations = {} );
-    virtual
-    ~State();
-
-    void SetCallbacks( std::function<void(T)> set_callback,
-                       std::function<void()>  reset_callback,
-                       std::function<bool()>  validate_callback );
-
-    //TODO enable passing by reference for large Ts
-    void SetState( T value ) const;
-    void ResetState() const;
-    bool ValidateState() const;
-
-    virtual
-    std::vector<std::string> GetEnumerantNames() const override;
-
-    virtual
-    Type GetType() const override;
-
-    const std::map<std::string, T>& GetEnumerations() const;
-
-private:
-    std::map<std::string, T> m_Enumerations;
-
-    std::function<void(T)> m_SetCallback;
-    std::function<void()> m_ResetCallback;
-    std::function<bool()> m_ValidateCallback;
+    std::vector<Technique>                  m_Techniques;
+    std::unique_ptr<llvm::ExecutionEngine>  m_LLVMExecutionEngine;
 };
 
 } // namespace JoeLang
-
-#include "state-inl.hpp"

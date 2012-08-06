@@ -37,7 +37,7 @@
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

@@ -27,13 +27,13 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "technique.hpp"
+#include <joelang/technique.hpp>
 
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <engine/pass.hpp>
+#include <joelang/pass.hpp>
 
 namespace JoeLang
 {

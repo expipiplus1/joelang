@@ -38,7 +38,7 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/type_properties.hpp>
-#include <engine/types.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
