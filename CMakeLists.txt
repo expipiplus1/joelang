@@ -22,6 +22,8 @@ add_library( joelang    include/joelang/context.hpp
                         include/joelang/inl/state-inl.hpp
                         src/engine/context.cpp
                         src/engine/effect.cpp
+                        src/engine/opengl_states.cpp
+                        src/engine/opengl_states.hpp
                         src/engine/pass.cpp
                         src/engine/state_assignment.cpp
                         src/engine/technique.cpp
@@ -96,6 +98,11 @@ add_library( joelang    include/joelang/context.hpp
                         src/compiler/tokens/statements/statement.hpp )
 
 #
+# Test executable
+#
+add_executable( joelang_test src/joelang.cpp )
+
+#
 # Various custom commands
 #
 
@@ -104,19 +111,19 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.jfx ${CMAKE_CURRENT_BINARY_DIR}/test.jfx
     MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/test.jfx )
 
-add_custom_target( copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
-add_dependencies( joelang copy_files )
+add_custom_target( joelang_copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
+add_dependencies( joelang joelang_copy_files )
 
 set( runtime_sources src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )
 
 add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc
+    OUTPUT ${CMAKE_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
-add_custom_target( compile_runtime DEPENDS "${PROJECT_BINARY_DIR}/runtime.bc"
+add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
                                    SOURCES ${runtime_sources} )
 add_dependencies( joelang compile_runtime )
 
