@@ -118,9 +118,13 @@ set( runtime_sources src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )
 
+if( APPLE )
+    set( CLANG_FLAGS -I/opt/local/include/gcc48/c++ -I/opt/local/include/gcc48/c++/x86_64-apple-darwin11 )
+endif()
+
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
+    COMMAND clang++ -O4 -std=c++11 ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
 add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
