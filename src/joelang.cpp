@@ -43,18 +43,14 @@ int main( int argc, char** argv )
     JoeLang::State<int> my_int_state( "my_int_state" );
     my_int_state.SetCallbacks( [](int v) -> void
                                  {std::cout << "setting my_int_state to "
-                                            << v << std::endl;},
-                               nullptr,
-                               nullptr );
+                                            << v << std::endl;} );
 
     JoeLang::State<float> my_state( "my_floating_state",
-                                    std::map<std::string,float>({{"one", 1},
-                                                                 {"two", 2}}) );
+                                    std::map<std::string,float>({{"one", 1}, {"two", 2}}) );
+
     my_state.SetCallbacks( [](float v) -> void
                              {std::cout << "setting my_floating_state to "
-                                        << v << std::endl;},
-                           nullptr,
-                           nullptr );
+                                        << v << std::endl;} );
 
     JoeLang::State<bool> my_bool_state(
                                 "my_bool_state",
@@ -62,9 +58,7 @@ int main( int argc, char** argv )
                                                             {"off", false}}) );
     my_bool_state.SetCallbacks( [](bool v) -> void
                                   {std::cout << "setting my_bool_state to "
-                                             << v << std::endl;},
-                                nullptr,
-                                nullptr );
+                                             << v << std::endl;} );
 
     JoeLang::State<std::string> my_string_state(
                     "my_string_state",
@@ -72,9 +66,7 @@ int main( int argc, char** argv )
                                                          "string_enumerant"}}));
     my_string_state.SetCallbacks( [](std::string v) -> void
                                   {std::cout << "setting my_string_state to "
-                                             << v << std::endl;},
-                                nullptr,
-                                nullptr );
+                                             << v << std::endl;} );
 
     JoeLang::State<JoeMath::float4> my_float4_state(
       "my_float4_state",
@@ -84,9 +76,7 @@ int main( int argc, char** argv )
                                   {std::cout << "setting my_float4_state to "
                                              << v.x() << " " << v.y() << " "
                                              << v.z() << " " << v.w()
-                                             << std::endl;},
-                                nullptr,
-                                nullptr );
+                                             << std::endl;} );
 
     context.AddState( &my_state );
     context.AddState( &my_int_state );
