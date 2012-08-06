@@ -74,9 +74,9 @@ public:
     virtual
     ~State();
 
-    void SetCallbacks( std::function<void(T)> set_callback,
-                       std::function<void()>  reset_callback,
-                       std::function<bool()>  validate_callback );
+    void SetCallbacks( std::function<void(T)> set_callback = nullptr,
+                       std::function<void()>  reset_callback = nullptr,
+                       std::function<bool()>  validate_callback = nullptr );
 
     //TODO enable passing by reference for large Ts
     void SetState( T value ) const;
