@@ -103,7 +103,7 @@ std::unique_ptr<StateAssignmentBase>
                                                  CodeGenerator& code_gen,
                                                  const std::string& name ) const
 {
-    assert( m_State && 
+    assert( m_State &&
             "Trying to generate a state assignment without a state" );
 
     Type t = m_State->GetType();
@@ -167,7 +167,11 @@ std::unique_ptr<StateAssignmentBase>
                           new ConstStateAssignment<jl_float>(
                                  static_cast<const State<jl_float>&>(*m_State),
                                  v.GetFloat() ) );
-        /// TODO put float4 here
+        case Type::FLOAT4:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_float4>(
+                                 static_cast<const State<jl_float4>&>(*m_State),
+                                 v.GetFloat4() ) );
         case Type::DOUBLE:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_double>(
