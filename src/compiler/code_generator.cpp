@@ -389,10 +389,18 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e,
 
     assert( !type.IsArrayType() && "todo, casting to arrays" );
     assert( !e_type.IsArrayType() && "todo, casting from arrays" );
+    assert( !e_type.IsUnknown() && !type.IsUnknown() &&
+            "Can't cast an unknown type" );
 
     if( !e_value )
         return nullptr;
 
+    if( type.IsVoid() )
+    {
+        assert( e_type.IsVoid() && "Can only cast void to void" );
+        // we've already codegened it
+        return nullptr;
+    }
     //
     // For a cast to bool, compare to zero
     //
@@ -921,7 +929,7 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
 
     m_LLVMBuilder.SetInsertPoint( llvm_body );
 
-    assert( body->AlwaysReturns() && 
+    assert( body->AlwaysReturns() &&
             "Generating code for a statement which doesn't always return" );
 
     body->CodeGen( *this );
