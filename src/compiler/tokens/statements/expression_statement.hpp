@@ -61,7 +61,12 @@ public:
     virtual
     ~ExpressionStatement   ();
 
-    void PerformSema( SemaAnalyzer& sema );
+    virtual
+    bool AlwaysReturns() const override;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema, 
+                      const CompleteType& return_type ) override;
 
     virtual
     void CodeGen( CodeGenerator& code_gen ) override;

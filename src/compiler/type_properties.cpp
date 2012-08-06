@@ -302,9 +302,10 @@ const std::string& GetTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =
     {
-        { Type::UNKNOWN, "unknown type" },
+        { Type::UNKNOWN,      "unknown type" },
         { Type::DOUBLE,       "double" },
         { Type::FLOAT,        "float" },
+        { Type::FLOAT4,       "float4" },
         { Type::U64,          "u64" },
         { Type::I64,          "i64" },
         { Type::U32,          "u32" },
@@ -316,6 +317,7 @@ const std::string& GetTypeString( Type t )
         { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
         { Type::ARRAY,        "array" },
+        { Type::VOID,         "void" },
     };
 
     return string_map.at(t);

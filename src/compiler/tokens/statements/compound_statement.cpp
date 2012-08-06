@@ -36,7 +36,9 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
+#include <compiler/tokens/statements/return_statement.hpp>
 
 namespace JoeLang
 {
@@ -57,22 +59,63 @@ CompoundStatement::~CompoundStatement()
 {
 }
 
-void CompoundStatement::PerformSema( SemaAnalyzer& sema,
+bool CompoundStatement::AlwaysReturns() const
+{
+    //
+    // This assumes that we've performed sema on this object and have dropped
+    // Statements after the return statement
+    //
+    return (*m_Statements.rbegin())->AlwaysReturns(); 
+}
+
+void CompoundStatement::PerformSemaAsFunction( SemaAnalyzer& sema,
+                                               const CompleteType& return_type )
+                                              
+{
+    PerformSemaCommon( sema, return_type, true );
+}
+
+void CompoundStatement::PerformSema( SemaAnalyzer& sema, 
                                      const CompleteType& return_type )
 {
-    // todo loads of stuff here
-    // including, verify correct return type,
-    // split into llvm compatible basic blocks
+    // Create the scope for this statement
+    SemaAnalyzer::ScopeHolder scope( sema );
+    scope.Enter(); 
+
+    PerformSemaCommon( sema, return_type, false );
+
+    scope.Leave();
+}
+
+void CompoundStatement::PerformSemaCommon( SemaAnalyzer& sema,
+                                           const CompleteType& return_type,
+                                           bool must_return )
+{
+    for( auto& statement : m_Statements )
+        statement->PerformSema( sema, return_type );
+
+    // Remove all statements after the first returning one
+    for( unsigned i = 0; i < m_Statements.size(); ++i )
+        if( m_Statements[i]->AlwaysReturns() &&
+            i != m_Statements.size() - 1 )
+        {
+            sema.Warning( "Statements will never be executed" );
+            m_Statements.erase( m_Statements.begin()+i+1, m_Statements.end() );
+            break;
+        }
+
+    if( must_return )
+    {
+        if( return_type.IsVoid() &&
+            !AlwaysReturns() )
+            m_Statements.emplace_back( new ReturnStatement( nullptr ) );
+        if( !AlwaysReturns() )
+            sema.Error( "Function doesn't always return" );
+    }
 }
 
 void CompoundStatement::CodeGen( CodeGenerator& code_gen )
 {
-    assert( false && "Complete me" );
-}
-
-void CompoundStatement::CodeGenStatements( CodeGenerator& code_gen )
-{
-    assert( m_Statements.size() == 1 && "todo things" );
     for( auto& s : m_Statements )
         s->CodeGen( code_gen );
 }

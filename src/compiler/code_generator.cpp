@@ -921,7 +921,10 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
 
     m_LLVMBuilder.SetInsertPoint( llvm_body );
 
-    body->CodeGenStatements( *this );
+    assert( body->AlwaysReturns() && 
+            "Generating code for a statement which doesn't always return" );
+
+    body->CodeGen( *this );
 }
 
 llvm::Value* CodeGenerator::CreateFunctionCall(

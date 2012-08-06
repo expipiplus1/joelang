@@ -59,13 +59,21 @@ ReturnStatement::~ReturnStatement()
 {
 }
 
+bool ReturnStatement::AlwaysReturns() const
+{
+    return true;
+}
+
 void ReturnStatement::PerformSema( SemaAnalyzer& sema,
                                    const CompleteType& return_type )
 {
     // If we need a return value make sure we have one
-    if( !m_Expression &&
-        return_type.GetBaseType() != Type::VOID )
-        sema.Error( "No return expression in function returning non-void" );
+    if( !m_Expression )
+    {
+        if( return_type.GetBaseType() != Type::VOID )
+            sema.Error( "No return expression in function returning non-void" );
+        return;
+    }
 
     // Cast the return type to what we want if this fails, sema will know
     m_Expression = CastExpression::Create( return_type,

@@ -54,7 +54,13 @@ EmptyStatement::~EmptyStatement()
 {
 }
 
-void EmptyStatement::PerformSema( SemaAnalyzer& sema )
+bool EmptyStatement::AlwaysReturns() const
+{
+    return false;
+}
+
+void EmptyStatement::PerformSema( SemaAnalyzer& sema,
+                                  const CompleteType& return_type )
 {
 }
 

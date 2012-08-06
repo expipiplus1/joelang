@@ -59,7 +59,13 @@ ExpressionStatement::~ExpressionStatement()
 {
 }
 
-void ExpressionStatement::PerformSema( SemaAnalyzer& sema )
+bool ExpressionStatement::AlwaysReturns() const
+{
+    return false;
+}
+
+void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
+                                       const CompleteType& return_type )
 {
     m_Expression->ResolveIdentifiers( sema );
     m_Expression->PerformSema( sema );

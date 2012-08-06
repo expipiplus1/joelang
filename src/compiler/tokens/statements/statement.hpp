@@ -39,6 +39,7 @@ namespace Compiler
 {
 
 class CodeGenerator;
+class CompleteType;
 class Parser;
 class SemaAnalyzer;
 class Statement;
@@ -64,6 +65,18 @@ public:
     virtual
     ~Statement   ();
 
+    /**
+      * \returns true if this statement will always return from the function
+      */
+    virtual
+    bool AlwaysReturns() const = 0;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema, const CompleteType& return_type ) = 0;
+
+    /**
+      *
+      */
     virtual
     void CodeGen( CodeGenerator& code_gen ) = 0;
 

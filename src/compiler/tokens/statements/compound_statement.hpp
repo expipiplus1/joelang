@@ -59,22 +59,27 @@ public:
     virtual
     ~CompoundStatement   ();
 
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type );
+    virtual
+    bool AlwaysReturns() const override;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema, 
+                      const CompleteType& return_type ) override;
+
+    void PerformSemaAsFunction( SemaAnalyzer& sema,
+                                const CompleteType& return_type );
 
     virtual
     void CodeGen( CodeGenerator& code_gen ) override;
-
-    /**
-      * This will send the instructions to llvm
-      * It requires that we are already inserting into a basic block
-      */
-    void CodeGenStatements( CodeGenerator& code_gen );
 
     static
     bool Parse ( Parser& parser, CompoundStatement_up& token );
 
 private:
+    void PerformSemaCommon( SemaAnalyzer& sema,
+                            const CompleteType& return_type,
+                            bool must_return );
+
     std::vector<Statement_up> m_Statements;
 };
 
