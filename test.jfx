@@ -1,8 +1,4 @@
-void f()
-{
-    return f();
-}
-/*const string hello = "Hello",
+const string hello = "Hello",
              world = "World",
              hello_world = hello + ", " + world + "!";
 const unsigned twenty = float(20ul);
@@ -88,4 +84,3 @@ pass p0
     my_floating_state = func2(2);
     my_floating_state = func2(2.0f);
 }
-*/

@@ -55,6 +55,8 @@ add_executable( joelang src/joelang.cpp
                         src/compiler/type_properties.hpp
                         src/compiler/variable.cpp
                         src/compiler/variable.hpp
+                        src/compiler/tokens/compile_statement.cpp
+                        src/compiler/tokens/compile_statement.hpp
                         src/compiler/tokens/declaration_specifier.cpp
                         src/compiler/tokens/declaration_specifier.hpp
                         src/compiler/tokens/declaration.cpp

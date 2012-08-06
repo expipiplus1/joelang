@@ -134,9 +134,11 @@ const std::map<TerminalType, FunctionalTerminal> g_literalTerminals =
 //
 const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 {
-    { TerminalType::TECHNIQUE,     { "technique", "" } },
-    { TerminalType::PASS,          { "pass",      "" } },
-    { TerminalType::RETURN,        { "return",      "" } },
+    { TerminalType::TECHNIQUE,     { "technique",    "" } },
+    { TerminalType::PASS,          { "pass",         "" } },
+    { TerminalType::PIXEL_SHADER,  { "PixelShader",  "" } },
+    { TerminalType::VERTEX_SHADER, { "VertexShader", "" } },
+    { TerminalType::RETURN,        { "return",       "" } },
 
     //
     // Type qualifiers

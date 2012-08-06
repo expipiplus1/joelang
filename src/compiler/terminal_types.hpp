@@ -136,6 +136,8 @@ enum class TerminalType
     //
     TECHNIQUE,
     PASS,
+    PIXEL_SHADER,
+    VERTEX_SHADER,
     RETURN,
 
     // Storage class specifiers

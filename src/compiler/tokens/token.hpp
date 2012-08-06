@@ -118,6 +118,7 @@ public:
         PostfixOperator_End = IncrementOrDecrementOperator,
 
         StateAssignmentStatement,
+        CompileStatement,
 
         AssignmentExpression,
         ConditionalExpression,
