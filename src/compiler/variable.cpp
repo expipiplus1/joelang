@@ -64,15 +64,14 @@ Variable::Variable( CompleteType type,
     // Or that if it has an initializer it's the correct type
     assert( !m_Type.IsUnknown() && 
             "Trying to construct a variable of unknown type" );
-    if( !m_IsParameter &&
-        ( m_IsConst || !m_Initializer.GetType().IsUnknown() ) )
-    {
-        assert( !m_Initializer.GetType().IsUnknown() &&
-                "No initializer on a const variable" );
-
-        assert( m_Initializer.GetType() == m_Type &&
-                "Trying to initialize a variable with the wrong type" );
-    }
+    assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
+            "Parameters can't have initializers" );
+    assert( ( !m_IsConst || m_IsParameter ||
+              !m_Initializer.GetType().IsUnknown() ) &&
+            "Const variables must have an initializer or be a parameter" );
+    assert( ( m_Initializer.GetType().IsUnknown() ||
+              m_Initializer.GetType() == type ) &&
+            "Trying to initialize a variable with the wrong type" );
 }
 
 void Variable::CodeGen( CodeGenerator& code_gen )
