@@ -73,7 +73,7 @@ void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
 
 void ExpressionStatement::CodeGen( CodeGenerator& code_gen )
 {
-    assert( false && "Complete me" );
+    m_Expression->CodeGen( code_gen );
 }
 
 bool ExpressionStatement::Parse( Parser& parser, ExpressionStatement_up& token )

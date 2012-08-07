@@ -44,10 +44,14 @@
 #include <llvm/GlobalVariable.h>
 #include <llvm/IRBuilder.h>
 #include <llvm/Module.h>
+#include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
+#include <llvm/Transforms/IPO.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/Target/TargetData.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
@@ -76,9 +80,25 @@ CodeGenerator::CodeGenerator( Runtime& runtime )
     :m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
-    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
+    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule,
+                                                              nullptr,
+                                                              nullptr,
+                                                              llvm::CodeGenOpt::Aggressive,
+                                                              false ) )
+    ,m_LLVMFunctionPassManager( new llvm::FunctionPassManager( m_LLVMModule ) )
+    ,m_LLVMModulePassManager( new llvm::PassManager() )
 {
     assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
+
+    llvm::PassManagerBuilder pass_manager_builder;
+    pass_manager_builder.OptLevel = 3;
+    pass_manager_builder.Inliner = llvm::createFunctionInliningPass();
+    pass_manager_builder.populateFunctionPassManager(
+                                                   *m_LLVMFunctionPassManager );
+    pass_manager_builder.populateModulePassManager(
+                                                   *m_LLVMModulePassManager );
+
+    m_LLVMFunctionPassManager->doInitialization();
 }
 
 CodeGenerator::~CodeGenerator()
@@ -115,6 +135,8 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
         }
     }
 
+    OptimizeModule();
+
     m_LLVMModule->dump();
 
     return std::move(techniques);
@@ -135,6 +157,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
             "Type mismatch in state assignment code gen" );
 
     llvm::Function* function = CreateFunctionFromExpression( expression, name );
+    OptimizeFunction( *function );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
@@ -309,8 +332,8 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     }
 
     /// Cant remove the function because it trashes global variables...
-    //m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
-    //function->eraseFromParent();
+    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
+    function->eraseFromParent();
 
     m_LLVMBuilder.restoreIP( insert_point );
 
@@ -801,11 +824,11 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            *m_LLVMModule,
                                            array_type,
                                            true,
-                                           llvm::GlobalVariable::CommonLinkage,
+                                           llvm::GlobalVariable::PrivateLinkage,
                                            data_constant,
                                            "string_data" );
 
-    llvm::Constant *zero = CreateInteger( 0, Type::U32 );
+    llvm::Constant* zero = CreateInteger( 0, Type::U32 );
     llvm::Constant* args[] = { zero, zero };
     llvm::Constant* data_ptr =
                     llvm::ConstantExpr::getInBoundsGetElementPtr( data_array,
@@ -813,8 +836,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
 
     llvm::Constant* string = llvm::ConstantStruct::get(
           llvm::cast<llvm::StructType>(m_Runtime.GetLLVMType(Type::STRING)),
-          std::vector<llvm::Constant*>
-            {size_constant, data_ptr} );
+          std::vector<llvm::Constant*> {size_constant, data_ptr} );
     return string;
 }
 
@@ -858,9 +880,10 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                      *m_LLVMModule,
                                      t,
                                      is_const,
-                                     llvm::GlobalVariable::CommonLinkage,
+                                     llvm::GlobalVariable::PrivateLinkage,
                                      init,
                                      name );
+    ret->setUnnamedAddr( true );
     return ret;
 }
 
@@ -1055,6 +1078,18 @@ llvm::Function* CodeGenerator::CreateFunctionFromExpression(
             "Function not valid" );
 
     return function;
+}
+
+void CodeGenerator::OptimizeFunction( llvm::Function& function )
+{
+    m_LLVMFunctionPassManager->run( function );
+}
+
+void CodeGenerator::OptimizeModule()
+{
+    assert( m_LLVMModule && "Trying to optimize a null module" );
+
+    m_LLVMModulePassManager->run( *m_LLVMModule );
 }
 
 } // namespace Compiler

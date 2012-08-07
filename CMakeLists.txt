@@ -140,7 +140,8 @@ add_dependencies( joelang compile_runtime )
 # Linking
 #
 
-llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader )
+#llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipa ipo linker )
+llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipo )
 set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 

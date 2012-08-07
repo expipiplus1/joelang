@@ -41,8 +41,10 @@ namespace llvm
     class ExecutionEngine;
     struct GenericValue;
     class GlobalVariable;
+    class FunctionPassManager;
     class LLVMContext;
     class Module;
+    class PassManager;
 }
 
 namespace JoeLang
@@ -272,13 +274,25 @@ private:
                                                 const Expression& expression,
                                                 std::string name = "" );
 
+    /**
+      * Runs some optimizations on the function
+      */
+    void OptimizeFunction( llvm::Function& function );
+
+    /**
+      * Runs some optimizations on the module
+      */
+    void OptimizeModule();
+
     std::stack<llvm::Value*> m_Temporaries;
 
     Runtime&                 m_Runtime;
 
     llvm::Module*            m_LLVMModule;
     llvm::IRBuilder<>        m_LLVMBuilder;
-    std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
+    std::unique_ptr<llvm::ExecutionEngine>     m_LLVMExecutionEngine;
+    std::unique_ptr<llvm::FunctionPassManager> m_LLVMFunctionPassManager;
+    std::unique_ptr<llvm::PassManager>         m_LLVMModulePassManager;
 };
 
 } // namespace Compiler

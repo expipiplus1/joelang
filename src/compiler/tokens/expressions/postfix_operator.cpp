@@ -235,25 +235,17 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
                                                Expression& expression )
 {
     // This doesn't resolve the identifier in expression because that will only
-    // func variables
+    // find variables
     bool good = true;
     for( auto& a : m_Arguments )
         good &= a->ResolveIdentifiers( sema );
-    return good;
-}
 
-bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
-                                        Expression& expression )
-{
     //
-    // Try and sema all the arguments and get their types
+    // Find the function to call
     //
     std::vector<CompleteType> argument_types;
     for( auto& a : m_Arguments )
-    {
-        a->PerformSema( sema );
         argument_types.push_back( a->GetType() );
-    }
 
     //
     // Make sure we're being called on an IdentifierExpression
@@ -269,9 +261,6 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
                            static_cast<const IdentifierExpression&>(expression);
     const std::string& name = identifier_expression.GetIdentifier();
 
-    //
-    // Find the function to call
-    //
     if( !sema.HasFunctionNamed( name ) )
     {
         sema.Error( "Calling undeclared function" + name );
@@ -285,7 +274,18 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
         return false;
     }
 
-    return true;
+    return good;
+}
+
+bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
+                                        Expression& expression )
+{
+    bool good = true;
+
+    for( auto& a : m_Arguments )
+        good &= a->PerformSema( sema );
+
+    return good;
 }
 
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
