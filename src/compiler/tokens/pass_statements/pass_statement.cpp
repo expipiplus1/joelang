@@ -27,17 +27,16 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "compile_statement.hpp"
+#include "pass_statement.hpp"
 
 #include <cassert>
 #include <memory>
-#include <string>
 #include <utility>
 
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/terminal_types.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/pass_statements/compile_statement.hpp>
+#include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
 
 namespace JoeLang
 {
@@ -45,39 +44,39 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// CompileStatement
+// PassStatement
 //------------------------------------------------------------------------------
-CompileStatement::CompileStatement( ShaderDomain domain,
-                                    std::string identifier,
-                                    std::vector<Expression_up> arguments )
-    :Token( TokenTy::CompileStatement )
-    ,m_Domain( domain )
-    ,m_Identifier( std::move(identifier) )
-    ,m_Arguments( std::move(arguments) )
-{
-#if !defined(NDEBUG)
-    assert( !m_Identifier.empty() &&
-            "Trying to create a CompileStatement with an empty function name" );
-    for( const auto& a : m_Arguments )
-        assert( a && "CompileStatement given a null argument" );
-#endif
-}
-
-CompileStatement::~CompileStatement()
+PassStatement::PassStatement( TokenTy sub_class_id )
+    :Token( sub_class_id )
 {
 }
 
-void CompileStatement::PerformSema( SemaAnalyzer& sema )
+PassStatement::~PassStatement()
 {
 }
 
-void CompileStatement::Print( int depth ) const
+bool PassStatement::Parse( Parser& parser, PassStatement_up& token )
 {
+    std::unique_ptr<Token> t;
+    if( !parser.ExpectAnyOf< StateAssignmentStatement,
+                             CompileStatement >( t ) )
+        return false;
+
+    assert( isa<PassStatement>( t ) && 
+            "PassStatement parsed a non PassStatement" );
+    token.reset( static_cast<PassStatement*>( t.release() ) );
+    return true;
 }
 
-bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
+bool PassStatement::classof( const Token* t )
 {
-    return false;
+    return t->GetSubClassID() >= TokenTy::PassStatement_Start &&
+           t->GetSubClassID() <= TokenTy::PassStatement_End;
+}
+
+bool PassStatement::classof( const PassStatement* p )
+{
+    return true;
 }
 
 } // namespace Compiler

@@ -119,6 +119,8 @@ public:
 
         StateAssignmentStatement,
         CompileStatement,
+        PassStatement_Start = StateAssignmentStatement,
+        PassStatement_End = CompileStatement,
 
         AssignmentExpression,
         ConditionalExpression,

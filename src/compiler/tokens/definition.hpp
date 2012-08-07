@@ -44,11 +44,16 @@ namespace Compiler
 {
 
 class CodeGenerator;
+class CompileStatement;
+using CompileStatement_up = std::unique_ptr<CompileStatement>;
 class SemaAnalyzer;
 class Parser;
 class PassDeclaration;
-class PassDeclarationOrIdentifier;
+class PassDeclarationOrIdentifier; 
+class PassStatement;
+using PassStatement_up = std::unique_ptr<PassStatement>;
 class StateAssignmentStatement;
+using StateAssignmentStatement_up = std::unique_ptr<StateAssignmentStatement>;
 
 /**
   * \class PassDefinition
@@ -60,15 +65,17 @@ class StateAssignmentStatement;
 class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
-    using StateAssignStmtVector =
-                    std::vector< std::unique_ptr<StateAssignmentStatement> >;
+    using PassStatementVector = std::vector<PassStatement_up>;
+    using StateAssignStmtVector = std::vector<StateAssignmentStatement_up>;
+    using CompileStatementVector = std::vector<CompileStatement_up>;
 
     /**
-      * \param state_assignments
-      *   A vector of the StateAssignmentStatements belonging to this pass
-      * This constructor asserts on any null StateAssignmentStatements
+      * \param statements
+      *   A vector of the PassStatements belonging to this pass
+      * This constructor asserts on any null StateAssignmentStatements or 
+      * null CompileStatements
       */
-    PassDefinition  ( StateAssignStmtVector state_assignments );
+    PassDefinition  ( PassStatementVector statements );
 
     virtual
     ~PassDefinition ();
@@ -103,6 +110,7 @@ public:
 
 private:
     StateAssignStmtVector   m_StateAssignments;
+    CompileStatementVector  m_CompileStatements;
 };
 
 /**

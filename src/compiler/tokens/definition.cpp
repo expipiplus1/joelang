@@ -36,12 +36,15 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/sema_analyzer.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
-#include <compiler/tokens/state_assignment_statement.hpp>
+#include <compiler/tokens/pass_statements/pass_statement.hpp>
+#include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
+#include <compiler/tokens/pass_statements/compile_statement.hpp>
 #include <joelang/pass.hpp>
 #include <joelang/state_assignment.hpp>
 
@@ -54,13 +57,28 @@ namespace Compiler
 // PassDefinition
 //------------------------------------------------------------------------------
 
-PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
+PassDefinition::PassDefinition( PassStatementVector statements )
     :Token( TokenTy::PassDefinition )
-    ,m_StateAssignments( std::move(state_assignments) )
 {
+    for( auto& s : statements )
+    {
+        //
+        // Split the statements into state assignments and compile directives
+        //
+        if( isa<StateAssignmentStatement>( s ) )
+            m_StateAssignments.emplace_back( 
+                        static_cast<StateAssignmentStatement*>( s.release() ) );
+        else if( isa<CompileStatement>( s ) )
+            m_CompileStatements.emplace_back( 
+                        static_cast<CompileStatement*>( s.release() ) );
+        else
+            assert( false && "Unhandled type of PassStatement" );
+    }
 #ifndef NDEBUG
     for( const auto& s : m_StateAssignments )
         assert( s && "null StateAssignmentStatement given to PassDefinition" );
+    for( const auto& s : m_CompileStatements )
+        assert( s && "null CompileStatement given to PassDefinition" );
 #endif
 }
 
@@ -93,9 +111,9 @@ bool PassDefinition::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
         return false;
 
-    // Parse some StateAssignmentStatements
-    StateAssignStmtVector state_assignments;
-    parser.ExpectSequenceOf<StateAssignmentStatement>( state_assignments );
+    // Parse some StateAssignmentStatements or CompileStatementss
+    PassStatementVector statements;
+    parser.ExpectSequenceOf<PassStatement>( statements );
     // The parser may have advanced the lexer too far
     CHECK_PARSER;
 
@@ -103,7 +121,7 @@ bool PassDefinition::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new PassDefinition( std::move(state_assignments) ) );
+    token.reset( new PassDefinition( std::move(statements) ) );
     return true;
 }
 

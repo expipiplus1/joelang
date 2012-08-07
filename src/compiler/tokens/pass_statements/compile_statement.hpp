@@ -31,80 +31,69 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include <compiler/tokens/token.hpp>
+#include <compiler/tokens/pass_statements/pass_statement.hpp>
 
 namespace JoeLang
 {
-
-class StateAssignmentBase;
-class StateBase;
 
 namespace Compiler
 {
 
 class CodeGenerator;
+class CompileStatement;
+using CompileStatement_up = std::unique_ptr<CompileStatement>;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
+using Expression_up = std::unique_ptr<Expression>;
 class Parser;
 class SemaAnalyzer;
 
 /**
-  * \class StateAssignmentStatement
+  * \class CompileStatement
   * \ingroup Tokens
-  * \brief Matches a state assignment statement
+  * \brief Matches a shader compile statement
   *
-  * StateAssignmentStatement = identifier '=' Expression ';'
+  * CompileStatement = ('vertexshader' | 'pixelshader') '='
+  *                                                   'compile' FunctionCall ';'
   */
-class StateAssignmentStatement : public JoeLang::Compiler::Token
+class CompileStatement : public JoeLang::Compiler::PassStatement
 {
 public:
+    enum class ShaderDomain
+    {
+        VERTEX,
+        FRAGMENT
+    };
+
     /**
-      * This constructor will assert on a null expression or empty identifier
+      * This asserts that identifier is not empty and that none of the arguments
+      * are null
+      * \param domain
+      *   The domain of the shader
       * \param identifier
-      *   The identifier for the State to assign
-      * \param expression
-      *   The expression to assign to the State
+      *   The function identifier
+      * \param arguments
+      *   The arguments to the functions
       */
-    StateAssignmentStatement( std::string identifier,
-                              Expression_up expression );
+    CompileStatement( ShaderDomain domain,
+                      std::string identifier,
+                      std::vector<Expression_up> arguments );
     virtual
-    ~StateAssignmentStatement();
+    ~CompileStatement();
 
     void PerformSema( SemaAnalyzer& sema );
 
-    std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
-                                                CodeGenerator& code_gen,
-                                                const std::string& name ) const;
+    virtual
+    void Print( int depth ) const;
 
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual void Print( int depth ) const;
-
-    /**
-      * Parses a state assignment statement
-      * \param parser
-      *   The current Parser
-      * \param token
-      *   The returned token on a successful parse
-      * \return
-      *   true upon parsing successfully,
-      *   false if the parse failed
-      */
-    static bool Parse( Parser& parser,
-                       std::unique_ptr<StateAssignmentStatement>& token );
+    static
+    bool Parse( Parser& parser, CompileStatement_up& token );
 
 private:
-    /** The identifier for the state to be assigned to **/
+    ShaderDomain m_Domain;
     std::string m_Identifier;
-    /** The expression to assign to the state **/
-    Expression_up m_Expression;
-
-    /** The State being set by this assignment **/
-    const StateBase* m_State = nullptr;
+    std::vector<Expression_up> m_Arguments;
 };
 
 } // namespace Compiler

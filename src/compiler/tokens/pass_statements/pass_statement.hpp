@@ -30,8 +30,6 @@
 #pragma once
 
 #include <memory>
-#include <string>
-#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
@@ -41,59 +39,32 @@ namespace JoeLang
 namespace Compiler
 {
 
-class CodeGenerator;
-class CompileStatement;
-using CompileStatement_up = std::unique_ptr<CompileStatement>;
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
+class PassStatement;
+using PassStatement_up = std::unique_ptr<PassStatement>;
 class Parser;
-class SemaAnalyzer;
 
 /**
-  * \class CompileStatement
+  * \class PassStatement
   * \ingroup Tokens
-  * \brief Matches a shader compile statement
+  * \brief Matches any kind of pass statement
   *
-  * CompileStatement = ('vertexshader' | 'pixelshader') '='
-  *                                                   'compile' FunctionCall ';'
+  * PassStatement =   StateAssignmentStatement
+  *                 | CompileStatement
   */
-class CompileStatement : public JoeLang::Compiler::Token
+class PassStatement : public JoeLang::Compiler::Token
 {
 public:
-    enum class ShaderDomain
-    {
-        VERTEX,
-        FRAGMENT
-    };
-
-    /**
-      * This asserts that identifier is not empty and that none of the arguments
-      * are null
-      * \param domain
-      *   The domain of the shader
-      * \param identifier
-      *   The function identifier
-      * \param arguments
-      *   The arguments to the functions
-      */
-    CompileStatement( ShaderDomain domain,
-                      std::string identifier,
-                      std::vector<Expression_up> arguments );
+    PassStatement( TokenTy sub_class_id );
     virtual
-    ~CompileStatement();
-
-    void PerformSema( SemaAnalyzer& sema );
-
-    virtual
-    void Print( int depth ) const;
+    ~PassStatement();
 
     static
-    bool Parse( Parser& parser, CompileStatement_up& token );
+    bool Parse( Parser& parser, PassStatement_up& token );
 
-private:
-    ShaderDomain m_Domain;
-    std::string m_Identifier;
-    std::vector<Expression_up> m_Arguments;
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassStatement* t);
 };
 
 } // namespace Compiler

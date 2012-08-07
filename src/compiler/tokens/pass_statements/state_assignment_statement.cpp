@@ -55,7 +55,7 @@ namespace Compiler
 StateAssignmentStatement::StateAssignmentStatement(
                                     std::string identifier,
                                     Expression_up expression )
-    :Token( TokenTy::StateAssignmentStatement )
+    :PassStatement( TokenTy::StateAssignmentStatement )
     ,m_Identifier( std::move(identifier) )
     ,m_Expression( std::move(expression) )
 {
