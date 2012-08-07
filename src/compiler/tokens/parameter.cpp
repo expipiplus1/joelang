@@ -131,8 +131,14 @@ void Parameter::Declare( SemaAnalyzer& sema ) const
 
 const CompleteType& Parameter::GetType() const
 {
-    assert( m_Type.GetBaseType() != Type::UNKNOWN );
+    assert( !m_Type.IsUnknown() && "Trying to get uninitialized parameters" );
     return m_Type;
+}
+
+const Variable_sp& Parameter::GetVariable() const
+{
+    assert( m_Variable && "Trying to get an uninitialized variable" );
+    return m_Variable;
 }
 
 void Parameter::Print( int depth ) const

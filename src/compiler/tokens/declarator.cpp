@@ -102,7 +102,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // Cast the initializer to the right type
     if( m_Initializer )
-        can_init &= m_Initializer->PerformSema( sema, 
+        can_init &= m_Initializer->PerformSema( sema,
                                                 CompleteType( base_type,
                                                               array_extents ) );
 
@@ -266,7 +266,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
 
 void Declarator::DeclareFunctionParameters( SemaAnalyzer& sema ) const
 {
-    assert( IsFunctionDeclarator() && 
+    assert( IsFunctionDeclarator() &&
             "Trying to declare function parameters for a non function "
             "declarator" );
     m_FunctionSpecifier->DeclareParameters( sema );
@@ -279,6 +279,11 @@ std::vector<CompleteType> Declarator::GetFunctionParameterTypes() const
             "declarator" );
 
     return m_FunctionSpecifier->GetParameterTypes();
+}
+
+std::vector<Variable_sp> Declarator::GetFunctionParameters() const
+{
+    return m_FunctionSpecifier->GetParameters();
 }
 
 void Declarator::Print( int depth ) const

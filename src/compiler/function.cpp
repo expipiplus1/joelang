@@ -37,6 +37,7 @@
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 
 namespace JoeLang
@@ -80,6 +81,17 @@ llvm::Function* Function::GetLLVMFunction() const
     return m_LLVMFunction;
 }
 
+void Function::SetParameters( std::vector<Variable_sp> parameters )
+{
+    m_Parameters = std::move(parameters);
+    assert( m_Parameters.size() == m_ParameterTypes.size() );
+#if !defined(NDEBUG)
+    for( unsigned i = 0; i < m_Parameters.size(); ++i )
+        assert( m_Parameters[i]->GetType() == m_ParameterTypes[i] &&
+                "Mismatching parameter types" );
+#endif
+}
+
 void Function::SetDefinition( CompoundStatement_up definition )
 {
     assert( !HasDefinition() && "Definining a function twice" );
@@ -98,7 +110,7 @@ std::string Function::GetSignatureString() const
 }
 
 bool Function::HasSameParameterTypes(
-                             const std::vector<CompleteType> other_types ) const
+                            const std::vector<CompleteType>& other_types ) const
 {
     return other_types == m_ParameterTypes;
 }
@@ -114,6 +126,17 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
 {
     assert( m_LLVMFunction &&
             "Trying to generate a definition without a declaration" );
+    assert( m_Parameters.size() == m_ParameterTypes.size() &&
+            "Parameter type vector size mismatch" );
+    //
+    // codegen the parameters
+    //
+    code_gen.BindFunctionParameters( m_LLVMFunction, m_Parameters );
+
+
+    //
+    // codegen the body
+    //
     code_gen.CreateFunctionDefinition( m_LLVMFunction,
                                        m_Definition );
 }

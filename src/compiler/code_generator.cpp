@@ -866,6 +866,10 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 {
+    // If this is a const param, we can use the value it was passed with,
+    // otherwise it will have been alloc
+    if( variable.IsConst() && variable.IsParameter() )
+        return variable.GetLLVMPointer();
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
@@ -933,6 +937,28 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
             "Generating code for a statement which doesn't always return" );
 
     body->CodeGen( *this );
+}
+
+void CodeGenerator::BindFunctionParameters(
+                                    llvm::Function* function,
+                                    std::vector<Variable_sp>& parameters ) const
+{
+    assert( function->arg_size() == parameters.size() &&
+            "mismatch in the number of parameters to function" );
+
+    auto arg_iterator = function->arg_begin();
+    for( unsigned i = 0; i < parameters.size(); ++i, ++arg_iterator )
+    {
+        assert( arg_iterator != function->arg_end() &&
+                "llvm arg iterator overrun" );
+        assert( arg_iterator->getType() == m_Runtime.GetLLVMType(
+                                                   parameters[i]->GetType() ) &&
+                "Type mismatch in function parameters" );
+
+        parameters[i]->SetParameterPointer( arg_iterator );
+    }
+    assert( arg_iterator == function->arg_end() &&
+            "llvm arg iterator underrun" );
 }
 
 llvm::Value* CodeGenerator::CreateFunctionCall(

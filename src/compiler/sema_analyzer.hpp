@@ -61,6 +61,7 @@ class PassDefinition;
 class TechniqueDefinition;
 class TranslationUnit;
 class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class SemaAnalyzer
@@ -149,7 +150,7 @@ public:
       *   The variable object
       */
     void DeclareVariable( const std::string& identifier,
-                          std::shared_ptr<Variable> variable );
+                          Variable_sp variable );
 
     /**
       * \param identifier
@@ -175,13 +176,14 @@ public:
       * This asserts that it can find the required function
       * \param identifier
       *   The name of the function
-      * \param parameter_types
-      *   The parameter types of the function
+      * \param parameters
+      *   The parameters of the function, the types of these are used to find
+      *   the function
       * \param definition
       *   The compound statement defining the function
       */
     void DefineFunction( const std::string& identifier,
-                         const std::vector<CompleteType>& parameter_types,
+                         const std::vector<Variable_sp>& parameters,
                          CompoundStatement_up definition );
 
     /**
@@ -286,7 +288,7 @@ public:
 private:
     struct SymbolMaps
     {
-        std::map<std::string, std::shared_ptr<Variable> > m_Variables;
+        std::map<std::string, Variable_sp> m_Variables;
     };
 
     /**

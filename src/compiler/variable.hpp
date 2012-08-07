@@ -39,6 +39,7 @@
 namespace llvm
 {
     class Value;
+    class Argument;
 }
 
 namespace JoeLang
@@ -73,6 +74,8 @@ public:
 
     void CodeGen( CodeGenerator& code_gen );
 
+    void SetParameterPointer( llvm::Argument* parameter_pointer );
+
     llvm::Value* GetLLVMPointer() const;
 
     const CompleteType& GetType() const;
@@ -82,6 +85,8 @@ public:
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
+    bool IsParameter() const;
+
 private:
     CompleteType m_Type;
     bool m_IsConst;
@@ -90,7 +95,6 @@ private:
     GenericValue m_Initializer;
     std::string m_Name;
 
-    /// TODO handle non global variables
     /// This holds the pointer to the variable, or the llvm::Value* representing
     /// The argument if it's an argument once it's been codegened
     llvm::Value* m_LLVMPointer = nullptr;

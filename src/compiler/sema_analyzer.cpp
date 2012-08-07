@@ -328,12 +328,17 @@ void SemaAnalyzer::DeclareFunction( std::string identifier,
 
 void SemaAnalyzer::DefineFunction(
                          const std::string& identifier,
-                         const std::vector<CompleteType>& parameter_types,
+                         const std::vector<Variable_sp>& parameters,
                          CompoundStatement_up definition )
 {
     const auto& i = m_FunctionOverloads.find( identifier );
     assert( i != m_FunctionOverloads.end() &&
             "Couldn't find function to define" );
+    std::vector<CompleteType> parameter_types( parameters.size() );
+    std::transform( parameters.begin(),
+                    parameters.end(),
+                    parameter_types.begin(),
+                    [](const Variable_sp& v){return v->GetType();} );
     Function_sp function;
     for( const auto& f : i->second )
         if( f->HasSameParameterTypes( parameter_types ) )
@@ -345,7 +350,10 @@ void SemaAnalyzer::DefineFunction(
     if( function->HasDefinition() )
         Error( "Redefinition of function " + function->GetSignatureString() );
     else
+    {
         function->SetDefinition( std::move(definition ) );
+        function->SetParameters( parameters );
+    }
 }
 
 bool SemaAnalyzer::HasFunctionNamed( const std::string& identifier ) const

@@ -49,6 +49,8 @@ using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class Function
@@ -59,7 +61,7 @@ class Function
 public:
     Function( std::string identifier,
               CompleteType base_return_type,
-              std::vector<CompleteType> parameter_types );
+              std::vector<CompleteType> parameters );
 
     const std::string& GetIdentifier() const;
 
@@ -70,6 +72,11 @@ public:
     std::size_t GetNumParams() const;
 
     llvm::Function* GetLLVMFunction() const;
+
+    /**
+      * This asserts that the parameter types match
+      */
+    void SetParameters( std::vector<Variable_sp> parameters );
 
     /**
       * This asserts that the function is undefined
@@ -84,7 +91,7 @@ public:
     std::string GetSignatureString() const;
 
     bool HasSameParameterTypes(
-                            const std::vector<CompleteType> other_types ) const;
+                           const std::vector<CompleteType>& other_types ) const;
 
     void CodeGenDeclaration( CodeGenerator& code_gen );
 
@@ -93,6 +100,7 @@ private:
     std::string m_Identifier;
     CompleteType m_ReturnType;
     std::vector<CompleteType> m_ParameterTypes;
+    std::vector<Variable_sp>  m_Parameters;
 
     CompoundStatement_up m_Definition;
 

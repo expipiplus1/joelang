@@ -49,6 +49,8 @@ typedef std::unique_ptr<Expression> Expression_up;
 class Parameter;
 class Parser;
 class SemaAnalyzer;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class ArraySpecifier
@@ -124,6 +126,8 @@ public:
     void DeclareParameters( SemaAnalyzer& sema );
 
     std::vector<CompleteType> GetParameterTypes() const;
+
+    std::vector<Variable_sp>  GetParameters() const;
 
     virtual
     void Print( int depth ) const override;

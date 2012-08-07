@@ -169,6 +169,14 @@ std::vector<CompleteType> FunctionSpecifier::GetParameterTypes() const
     return ret;
 }
 
+std::vector<Variable_sp> FunctionSpecifier::GetParameters() const
+{
+    std::vector<Variable_sp> ret;
+    for( const auto& p : m_Parameters )
+        ret.push_back( p->GetVariable() );
+    return ret;
+}
+
 void FunctionSpecifier::Print( int depth ) const
 {
 }

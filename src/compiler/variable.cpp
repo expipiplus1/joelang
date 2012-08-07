@@ -35,7 +35,9 @@
 #include <utility>
 #include <vector>
 
+#include <llvm/Argument.h>
 #include <llvm/GlobalVariable.h>
+#include <llvm/Value.h>
 
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
@@ -59,10 +61,11 @@ Variable::Variable( CompleteType type,
     ,m_IsParameter( is_parameter )
     ,m_Initializer( std::move(initializer) )
     ,m_Name( std::move(name) )
+    ,m_LLVMPointer( nullptr )
 {
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
-    assert( !m_Type.IsUnknown() && 
+    assert( !m_Type.IsUnknown() &&
             "Trying to construct a variable of unknown type" );
     assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
             "Parameters can't have initializers" );
@@ -90,6 +93,15 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     }
 }
 
+void Variable::SetParameterPointer( llvm::Argument* parameter_pointer )
+{
+    assert( !m_LLVMPointer && "setting an already set llvm pointer" );
+    assert( IsParameter() &&
+            "setting the parameter for a non-parameter variable" );
+    assert( parameter_pointer && "Trying to set a null parameter" );
+    m_LLVMPointer = parameter_pointer;
+}
+
 llvm::Value* Variable::GetLLVMPointer() const
 {
     return m_LLVMPointer;
@@ -108,6 +120,11 @@ Type Variable::GetUnderlyingType() const
 bool Variable::IsConst() const
 {
     return m_IsConst;
+}
+
+bool Variable::IsParameter() const
+{
+    return m_IsParameter;
 }
 
 } // namespace Compiler

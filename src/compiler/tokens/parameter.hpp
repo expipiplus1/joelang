@@ -85,6 +85,8 @@ public:
 
     const CompleteType& GetType() const;
 
+    const Variable_sp& GetVariable() const;
+
     virtual
     void Print( int depth ) const override;
 

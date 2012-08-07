@@ -455,12 +455,12 @@ FunctionDefinition::FunctionDefinition( DeclSpecsVector decl_specs,
     ,m_Body( std::move(body) )
 {
 #if !defined(NDEBUG)
-    assert( !m_DeclarationSpecifiers.empty() && 
+    assert( !m_DeclarationSpecifiers.empty() &&
             "FunctionDefinition given no decl specs" );
     for( const auto& d : m_DeclarationSpecifiers )
         assert( d && "FunctionDefinition given a null declaration specifier" );
     assert( m_Declarator && "FunctionDefinition given a null declarator" );
-    assert( m_Declarator->IsFunctionDeclarator() && 
+    assert( m_Declarator->IsFunctionDeclarator() &&
             "FunctionDefinition given a non-function declarator" );
     assert( m_Body && "FunctionDefinition given a null body" );
 #endif
@@ -486,13 +486,13 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
 
     // Pass the return type to sema for generating the return statements
     m_Body->PerformSemaAsFunction( sema,
-                                   CompleteType( 
+                                   CompleteType(
                                             decl_specs.GetType(),
                                             m_Declarator->GetArrayExtents() ) );
     scope.Leave();
 
     sema.DefineFunction( m_Declarator->GetIdentifier(),
-                         m_Declarator->GetFunctionParameterTypes(),
+                         m_Declarator->GetFunctionParameters(),
                          std::move(m_Body) );
 }
 

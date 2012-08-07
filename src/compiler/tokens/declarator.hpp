@@ -43,19 +43,20 @@ enum class Type;
 namespace Compiler
 {
 class ArraySpecifier;
-typedef std::vector<unsigned> ArrayExtents;
+using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class Declarator;
 using Declarator_up = std::unique_ptr<Declarator>;
 class DeclSpecs;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
+using Expression_up = std::unique_ptr<Expression>;
 class FunctionSpecifier;
-typedef std::unique_ptr<FunctionSpecifier> FunctionSpecifier_up;
+using FunctionSpecifier_up = std::unique_ptr<FunctionSpecifier>;
 class Initializer;
 class Parser;
 class SemaAnalyzer;
 class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class InitDeclarator
@@ -155,6 +156,12 @@ public:
       * \returns the parameter types
       */
     std::vector<CompleteType> GetFunctionParameterTypes() const;
+
+    /**
+      * This asserts that this is a function declarator
+      * \returns the parameters
+      */
+    std::vector<Variable_sp> GetFunctionParameters() const;
 
     virtual
     void Print( int depth ) const override;
