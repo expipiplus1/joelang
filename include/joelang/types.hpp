@@ -35,6 +35,9 @@
 
 #include <joemath/joemath.hpp>
 
+// windows.h may have defined VOID
+#undef VOID
+
 namespace JoeLang
 {
 
