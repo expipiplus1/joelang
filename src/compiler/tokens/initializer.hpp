@@ -40,6 +40,7 @@ enum class Type;
 
 namespace Compiler
 {
+class CompleteType;
 typedef std::vector<unsigned> ArrayExtents;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -52,7 +53,7 @@ class SemaAnalyzer;
   * \brief Matches an initializer list
   *
   * Initializer = AssignmentExpression
-  *             | '{' ( AssignmentExpression ',' )* AssignmentExpression? '}'
+  *             | '{' AssignmentExpression ( ',' AssignmentExpression )* '}'
   */
 class Initializer : public JoeLang::Compiler::Token
 {
@@ -85,7 +86,7 @@ public:
       *   The underlying type of the initializer
       * \returns true if this is a valid initializer list
       */
-    bool PerformSema( SemaAnalyzer& sema, Type desired_type );
+    bool PerformSema( SemaAnalyzer& sema, const CompleteType& desired_type );
 
     const ArrayExtents& GetArrayExtents() const;
 

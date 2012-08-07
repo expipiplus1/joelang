@@ -102,7 +102,9 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // Cast the initializer to the right type
     if( m_Initializer )
-        can_init &= m_Initializer->PerformSema( sema, base_type );
+        can_init &= m_Initializer->PerformSema( sema, 
+                                                CompleteType( base_type,
+                                                              array_extents ) );
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() &&

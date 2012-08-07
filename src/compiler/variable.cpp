@@ -62,8 +62,14 @@ Variable::Variable( CompleteType type,
 {
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
-    if( m_IsConst || !m_Initializer.GetType().IsUnknown() )
+    assert( !m_Type.IsUnknown() && 
+            "Trying to construct a variable of unknown type" );
+    if( !m_IsParameter &&
+        ( m_IsConst || !m_Initializer.GetType().IsUnknown() ) )
     {
+        assert( !m_Initializer.GetType().IsUnknown() &&
+                "No initializer on a const variable" );
+
         assert( m_Initializer.GetType() == m_Type &&
                 "Trying to initialize a variable with the wrong type" );
     }

@@ -99,7 +99,8 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->ReduceToExpression();
 
     if( m_DefaultValue )
-        m_DefaultValue->PerformSema( sema, base_type );
+        m_DefaultValue->PerformSema( sema, CompleteType( base_type,
+                                                         array_extents ) );
 
     if( !decl_specs.IsConst() &&
         base_type == Type::STRING )
