@@ -84,9 +84,6 @@ public:
 
     void PerformSema( SemaAnalyzer& sema );
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser, CompileStatement_up& token );
 

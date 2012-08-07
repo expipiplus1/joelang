@@ -262,10 +262,6 @@ DeclarationSpecifier::~DeclarationSpecifier()
 {
 }
 
-void DeclarationSpecifier::Print( int depth ) const
-{
-}
-
 bool DeclarationSpecifier::Parse( Parser& parser,
                                   std::unique_ptr<DeclarationSpecifier>& token )
 {
@@ -302,10 +298,6 @@ TypeSpecifier::TypeSpecifier( TypeSpec t )
 }
 
 TypeSpecifier::~TypeSpecifier()
-{
-}
-
-void TypeSpecifier::Print( int depth ) const
 {
 }
 
@@ -388,10 +380,6 @@ TypeQualifier::~TypeQualifier()
 {
 }
 
-void TypeQualifier::Print( int depth ) const
-{
-}
-
 TypeQualifier::TypeQual TypeQualifier::GetQualifier() const
 {
     return m_TypeQual;
@@ -437,10 +425,6 @@ StorageClassSpecifier::StorageClassSpecifier( StorageClass storage_class )
 }
 
 StorageClassSpecifier::~StorageClassSpecifier()
-{
-}
-
-void StorageClassSpecifier::Print( int depth ) const
 {
 }
 

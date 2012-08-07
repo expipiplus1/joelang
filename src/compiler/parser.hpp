@@ -51,9 +51,6 @@ public:
     Parser();
     ~Parser();
 
-    /** Prints the CST **/
-    void                                    Print() const;
-
     /** Tries to parse the string
       * \param string
       *   The string to parse

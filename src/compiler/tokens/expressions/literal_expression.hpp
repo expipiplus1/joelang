@@ -160,9 +160,6 @@ public:
     virtual
     GenericValue GetValue() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<IntegerLiteralExpression>& token );
@@ -225,9 +222,6 @@ public:
     virtual
     GenericValue GetValue() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<FloatingLiteralExpression>& token );
@@ -280,9 +274,6 @@ public:
     virtual
     GenericValue GetValue() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<BooleanLiteralExpression>& token );
@@ -318,9 +309,6 @@ public:
 
     virtual
     GenericValue GetValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     const std::string& GetString() const;
 
@@ -368,9 +356,6 @@ public:
 
     virtual
     CompleteType GetType() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     virtual
     GenericValue GetValue() const override;

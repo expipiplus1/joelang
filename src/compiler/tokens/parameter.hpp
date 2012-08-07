@@ -87,9 +87,6 @@ public:
 
     const Variable_sp& GetVariable() const;
 
-    virtual
-    void Print( int depth ) const override;
-
     /**
       * Parses a parameter declaration
       * \param parser

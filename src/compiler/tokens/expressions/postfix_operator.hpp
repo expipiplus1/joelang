@@ -160,9 +160,6 @@ public:
     virtual
     bool IsLValue( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
@@ -206,9 +203,6 @@ public:
     /** \returns false **/
     virtual
     bool IsConst( const Expression& expression ) const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -256,9 +250,6 @@ public:
     virtual
     bool IsConst( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<MemberAccessOperator>& token );
@@ -303,9 +294,6 @@ public:
     /** \returns false **/
     virtual
     bool IsConst( const Expression& expression ) const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,

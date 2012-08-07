@@ -161,9 +161,6 @@ public:
     virtual
     ~Token();
 
-    virtual
-    void Print( int depth ) const = 0;
-
     /** Used for casting **/
     TokenTy GetSubClassID() const;
     /** Used for casting **/

@@ -231,9 +231,6 @@ public:
     virtual
     bool IsLValue() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 Expression_up& token );
@@ -292,9 +289,6 @@ public:
     virtual
     bool IsConst() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 Expression_up& token );
@@ -343,9 +337,6 @@ public:
 
     virtual
     bool IsConst() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -424,9 +415,6 @@ public:
     virtual
     bool IsConst() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 Expression_up& token );
@@ -477,9 +465,6 @@ public:
 
     virtual
     bool IsLValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -533,9 +518,6 @@ public:
 
     virtual
     bool IsLValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -620,9 +602,6 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,

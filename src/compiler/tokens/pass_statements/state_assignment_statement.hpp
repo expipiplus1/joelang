@@ -78,13 +78,6 @@ public:
                                                 const std::string& name ) const;
 
     /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual void Print( int depth ) const;
-
-    /**
       * Parses a state assignment statement
       * \param parser
       *   The current Parser

@@ -120,9 +120,6 @@ public:
       */
     void ReduceToExpression();
 
-    virtual
-    void Print( int depth ) const override;
-
     /**
       * Parses an initializer list
       * \param parser

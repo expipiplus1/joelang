@@ -84,9 +84,6 @@ public:
       */
     void PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
 
-    virtual
-    void Print( int depth ) const override;
-
     /** This asserts that there is no initializer, we don't want to every split
       * a declarator from its initializer **/
     Declarator_up TakeDeclarator();
@@ -162,9 +159,6 @@ public:
       * \returns the parameters
       */
     std::vector<Variable_sp> GetFunctionParameters() const;
-
-    virtual
-    void Print( int depth ) const override;
 
     bool IsFunctionDeclarator() const;
 

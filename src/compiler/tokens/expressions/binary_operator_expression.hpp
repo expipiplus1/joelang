@@ -132,9 +132,6 @@ public:
     virtual
     bool IsConst() const override;
 
-    virtual
-    void Print( int depth ) const;
-
     /**
       * Function to parse a left associative expression
       * \tparam ExpressionType

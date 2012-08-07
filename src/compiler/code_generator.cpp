@@ -115,7 +115,7 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
         }
     }
 
-    //m_LLVMModule->dump();
+    m_LLVMModule->dump();
 
     return std::move(techniques);
 }

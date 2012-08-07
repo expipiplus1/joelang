@@ -49,7 +49,7 @@ using CompileStatement_up = std::unique_ptr<CompileStatement>;
 class SemaAnalyzer;
 class Parser;
 class PassDeclaration;
-class PassDeclarationOrIdentifier; 
+class PassDeclarationOrIdentifier;
 class PassStatement;
 using PassStatement_up = std::unique_ptr<PassStatement>;
 class StateAssignmentStatement;
@@ -72,7 +72,7 @@ public:
     /**
       * \param statements
       *   A vector of the PassStatements belonging to this pass
-      * This constructor asserts on any null StateAssignmentStatements or 
+      * This constructor asserts on any null StateAssignmentStatements or
       * null CompileStatements
       */
     PassDefinition  ( PassStatementVector statements );
@@ -84,14 +84,6 @@ public:
       * Performs semantic analysis on all the stateassignments
       */
     void PerformSema( SemaAnalyzer& sema );
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void                    Print   ( int depth ) const;
 
     const StateAssignStmtVector& GetStateAssignments() const;
 
@@ -148,14 +140,6 @@ public:
       * \returns the generated Pass
       */
     Pass GeneratePass( CodeGenerator& code_gen ) const;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void    Print   ( int depth ) const override;
 
     /**
       * Resolves the identifier or performs sema on the pass

@@ -80,10 +80,6 @@ Expression_up ArraySpecifier::GetExpression()
     return std::move(m_Expression);
 }
 
-void ArraySpecifier::Print( int depth ) const
-{
-}
-
 ArrayExtents ArraySpecifier::GetArrayExtents(
             std::vector<std::unique_ptr<ArraySpecifier> >& specifiers,
             SemaAnalyzer& sema )
@@ -175,10 +171,6 @@ std::vector<Variable_sp> FunctionSpecifier::GetParameters() const
     for( const auto& p : m_Parameters )
         ret.push_back( p->GetVariable() );
     return ret;
-}
-
-void FunctionSpecifier::Print( int depth ) const
-{
 }
 
 bool FunctionSpecifier::Parse( Parser& parser,

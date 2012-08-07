@@ -169,15 +169,6 @@ bool BinaryOperatorExpression::IsConst() const
            m_RightSide->IsConst();
 }
 
-void BinaryOperatorExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "binary_operator" << std::endl;
-    m_LeftSide->Print( depth + 1 );
-    m_RightSide->Print( depth + 1 );
-}
-
 template< typename TokenType, typename SubTokenType >
 bool BinaryOperatorExpression::ParseLeftAssociative( Parser& parser,
                                   Expression_up& token,

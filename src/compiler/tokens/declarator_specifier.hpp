@@ -71,9 +71,6 @@ public:
 
     Expression_up GetExpression();
 
-    virtual
-    void Print( int depth ) const override;
-
     /**
       * Extracts the values from a list of array specifiers
       * \param specifiers
@@ -128,9 +125,6 @@ public:
     std::vector<CompleteType> GetParameterTypes() const;
 
     std::vector<Variable_sp>  GetParameters() const;
-
-    virtual
-    void Print( int depth ) const override;
 
     /**
       * Parses a function specifier

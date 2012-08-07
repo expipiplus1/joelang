@@ -269,16 +269,6 @@ bool AssignmentExpression::IsConst() const
     return false;
 }
 
-void AssignmentExpression::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Assignment Expression\n";
-
-    m_AssigneePtr->Print( depth + 1 );
-    m_AssignedExpression->Print( depth + 1 );
-}
-
 bool AssignmentExpression::Parse( Parser& parser,
                                   Expression_up& token )
 {
@@ -405,17 +395,6 @@ bool ConditionalExpression::IsConst() const
            m_TrueExpression->IsConst() &&
            m_FalseExpression->IsConst();
 
-}
-
-void ConditionalExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Conditional Expression\n";
-
-    m_Condition->Print( depth + 1 );
-    m_TrueExpression->Print( depth + 1 );
-    m_FalseExpression->Print( depth + 1 );
 }
 
 bool ConditionalExpression::Parse( Parser& parser,
@@ -567,13 +546,6 @@ bool CastExpression::IsConst() const
     return m_Expression->IsConst();
 }
 
-void CastExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Cast Expression\n";
-}
-
 bool CastExpression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO implement c-style casts
@@ -723,14 +695,6 @@ bool UnaryExpression::IsConst() const
            m_Operator != Op::DECREMENT;
 }
 
-void UnaryExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Unary Expression\n";
-    m_Expression->Print( depth + 1 );
-}
-
 bool UnaryExpression::Parse( Parser& parser,
                              Expression_up& token )
 {
@@ -834,15 +798,6 @@ bool PostfixExpression::IsConst() const
 bool PostfixExpression::IsLValue() const
 {
     return m_PostfixOperator->IsLValue( *m_Expression );
-}
-
-void PostfixExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Postfix Expression\n";
-    m_Expression->Print( depth + 1 );
-    m_PostfixOperator->Print( depth + 1 );
 }
 
 bool PostfixExpression::Parse( Parser& parser,
@@ -975,10 +930,6 @@ bool TypeConstructorExpression::IsConst() const
 bool TypeConstructorExpression::IsLValue() const
 {
     return false;
-}
-
-void TypeConstructorExpression::Print( int depth ) const
-{
 }
 
 bool TypeConstructorExpression::Parse( Parser& parser,
@@ -1135,13 +1086,6 @@ const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
     return bool(m_Variable);
-}
-
-void IdentifierExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Identifier << "\n";
 }
 
 bool IdentifierExpression::Parse( Parser& parser,

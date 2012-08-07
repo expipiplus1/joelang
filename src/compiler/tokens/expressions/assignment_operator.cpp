@@ -57,13 +57,6 @@ AssignmentOperator::~AssignmentOperator()
 {
 }
 
-void AssignmentOperator::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "assignment_op" << std::endl;
-}
-
 AssignmentOperator::Op AssignmentOperator::GetOp() const
 {
     return m_Operator;

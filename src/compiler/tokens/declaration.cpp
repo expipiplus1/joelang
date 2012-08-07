@@ -116,13 +116,6 @@ void EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
 {
 }
 
-void EmptyDeclaration::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Empty Declaration\n";
-}
-
 bool EmptyDeclaration::Parse( Parser& parser,
                               std::unique_ptr<EmptyDeclaration>& token )
 {
@@ -193,24 +186,6 @@ const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 std::unique_ptr<PassDefinition> PassDeclaration::TakeDefinition()
 {
     return std::move(m_Definition);
-}
-
-void PassDeclaration::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-
-    std::cout << "Pass: " << ( m_Name.size() ? m_Name : "Unnamed" ) << "\n";
-    if( m_Definition )
-    {
-        m_Definition->Print( depth + 1);
-    }
-    else
-    {
-        for( int i = 0; i < depth * 4; ++i )
-            std::cout << " ";
-        std::cout << "No definition\n";
-    }
 }
 
 bool PassDeclaration::Parse( Parser& parser,
@@ -296,16 +271,6 @@ Technique TechniqueDeclaration::GenerateTechnique(
     for( const auto& p : m_Passes )
         passes.push_back( p->GeneratePass( code_gen ) );
     return Technique( m_Name, std::move(passes) );
-}
-
-void TechniqueDeclaration::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-
-    std::cout << "Technique: " << (m_Name.size() ? m_Name : "Unnamed") << "\n";
-    for( const auto& p : m_Passes )
-        p->Print( depth + 1 );
 }
 
 bool TechniqueDeclaration::Parse( Parser& parser,
@@ -426,10 +391,6 @@ VariableDeclarationList::VariableDeclarationList( DeclSpecsVector decl_specs,
 }
 
 VariableDeclarationList::~VariableDeclarationList()
-{
-}
-
-void VariableDeclarationList::Print( int depth ) const
 {
 }
 

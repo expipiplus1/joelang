@@ -73,7 +73,7 @@ Initializer::~Initializer()
 {
 }
 
-bool Initializer::PerformSema( SemaAnalyzer& sema, 
+bool Initializer::PerformSema( SemaAnalyzer& sema,
                                const CompleteType& desired_type )
 {
     if( m_Expression )
@@ -170,11 +170,6 @@ void Initializer::ReduceToExpression()
             "Trying to reduce an unreducable initializer" );
     m_Expression = std::move(m_SubInitializers[0]->m_Expression);
     m_SubInitializers.clear();
-}
-
-void Initializer::Print( int depth ) const
-{
-    assert( false && "complete me" );
 }
 
 bool Initializer::Parse( Parser& parser, std::unique_ptr<Initializer>& token )

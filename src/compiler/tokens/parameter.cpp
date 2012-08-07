@@ -141,10 +141,6 @@ const Variable_sp& Parameter::GetVariable() const
     return m_Variable;
 }
 
-void Parameter::Print( int depth ) const
-{
-}
-
 bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
 {
     DeclSpecsVector decl_specs;

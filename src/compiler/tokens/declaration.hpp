@@ -128,14 +128,6 @@ public:
     void PerformSema( SemaAnalyzer& sema ) override;
 
     /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print          ( int depth ) const override;
-
-    /**
       * Parses an empty declaration
       * \param parser
       *   The current Parser
@@ -185,14 +177,6 @@ public:
       */
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void    Print   ( int depth ) const override;
 
     /** \returns this pass's name **/
     const std::string&                      GetName         () const;
@@ -277,14 +261,6 @@ public:
     Technique GenerateTechnique( CodeGenerator& code_gen ) const;
 
     /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print( int depth ) const;
-
-    /**
       * Parses a technique declaration
       * \param parser
       *   The current Parser
@@ -364,9 +340,6 @@ public:
     ~VariableDeclarationList();
 
     virtual
-    void Print( int depth ) const override;
-
-    virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
 private:
@@ -394,9 +367,6 @@ public:
                         CompoundStatement_up body );
     virtual
     ~FunctionDefinition();
-
-    virtual
-    void Print( int depth ) const override{};
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;

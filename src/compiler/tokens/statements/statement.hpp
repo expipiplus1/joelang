@@ -80,9 +80,6 @@ public:
     virtual
     void CodeGen( CodeGenerator& code_gen ) = 0;
 
-    virtual
-    void Print( int depth ) const override;
-
     static
     bool Parse ( Parser& parser, Statement_up& token );
 

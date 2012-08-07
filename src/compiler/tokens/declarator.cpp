@@ -148,10 +148,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     m_Variable->CodeGen( sema.GetCodeGenerator() );
 }
 
-void InitDeclarator::Print( int depth ) const
-{
-}
-
 Declarator_up InitDeclarator::TakeDeclarator()
 {
     assert( !m_Initializer && "Taking a declarator away from its initializer" );
@@ -284,10 +280,6 @@ std::vector<CompleteType> Declarator::GetFunctionParameterTypes() const
 std::vector<Variable_sp> Declarator::GetFunctionParameters() const
 {
     return m_FunctionSpecifier->GetParameters();
-}
-
-void Declarator::Print( int depth ) const
-{
 }
 
 const std::string& Declarator::GetIdentifier() const

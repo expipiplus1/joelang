@@ -194,14 +194,6 @@ std::unique_ptr<StateAssignmentBase>
                                              name + "_" + m_Identifier );
 }
 
-void StateAssignmentStatement::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "State Assignment to " << m_Identifier << "\n";
-    m_Expression->Print( depth + 1 );
-}
-
 bool StateAssignmentStatement::Parse(
                               Parser& parser,
                               std::unique_ptr<StateAssignmentStatement>& token )

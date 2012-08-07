@@ -256,13 +256,6 @@ GenericValue IntegerLiteralExpression::GetValue() const
     }
 }
 
-void IntegerLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Value << "\n";
-}
-
 bool IntegerLiteralExpression::ParseInteger( std::string string,
                                              jl_u64& value,
                                              Suffix& suffix )
@@ -415,13 +408,6 @@ GenericValue FloatingLiteralExpression::GetValue() const
     }
 }
 
-void FloatingLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Value << "\n";
-}
-
 bool FloatingLiteralExpression::ParseFloat( std::string string,
                                             double& value,
                                             Suffix& suffix )
@@ -502,13 +488,6 @@ CompleteType BooleanLiteralExpression::GetType() const
 GenericValue BooleanLiteralExpression::GetValue() const
 {
     return GenericValue( jl_bool(m_Value) );
-}
-
-void BooleanLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << std::boolalpha << m_Value << std::noboolalpha << "\n";
 }
 
 bool BooleanLiteralExpression::Parse(
@@ -624,13 +603,6 @@ GenericValue StringLiteralExpression::GetValue() const
     return GenericValue( m_Value );
 }
 
-void StringLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << '\"' << m_Value << "\"\n";
-}
-
 const std::string& StringLiteralExpression::GetString() const
 {
     return m_Value;
@@ -721,13 +693,6 @@ CompleteType CharacterLiteralExpression::GetType() const
 GenericValue CharacterLiteralExpression::GetValue() const
 {
     return GenericValue( jl_i8(m_Value) );
-}
-
-void CharacterLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << '\'' << m_Value << '\'' << "\n";
 }
 
 bool CharacterLiteralExpression::Parse(

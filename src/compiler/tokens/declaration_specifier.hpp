@@ -86,9 +86,6 @@ public:
     virtual
     ~DeclarationSpecifier();
 
-    virtual
-    void Print( int depth ) const override;
-
     static
     bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifier>& token );
 
@@ -134,9 +131,6 @@ public:
     virtual
     ~TypeSpecifier();
 
-    virtual
-    void Print( int depth ) const override;
-
     TypeSpec GetSpecifier() const;
 
     Type GetType() const;
@@ -173,9 +167,6 @@ public:
     virtual
     ~TypeQualifier();
 
-    virtual
-    void Print( int depth ) const override;
-
     TypeQual GetQualifier() const;
 
     static
@@ -211,9 +202,6 @@ public:
     StorageClassSpecifier( StorageClass type_spec );
     virtual
     ~StorageClassSpecifier();
-
-    virtual
-    void Print( int depth ) const override;
 
     static
     bool Parse( Parser& parser, std::unique_ptr<StorageClassSpecifier>& token );

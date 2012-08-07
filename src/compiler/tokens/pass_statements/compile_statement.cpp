@@ -71,10 +71,6 @@ void CompileStatement::PerformSema( SemaAnalyzer& sema )
 {
 }
 
-void CompileStatement::Print( int depth ) const
-{
-}
-
 bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
 {
     const static std::map<TerminalType, ShaderDomain> s_TerminamDomainMap =
@@ -121,8 +117,8 @@ bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
         return false;
 
-    token.reset( new CompileStatement( domain, 
-                                       std::move(identifier), 
+    token.reset( new CompileStatement( domain,
+                                       std::move(identifier),
                                        std::move(arguments) ) );
     return true;
 }

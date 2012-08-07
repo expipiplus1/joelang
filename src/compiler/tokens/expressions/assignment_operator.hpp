@@ -80,9 +80,6 @@ public:
 
     Op GetOp() const;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<AssignmentOperator>& token );

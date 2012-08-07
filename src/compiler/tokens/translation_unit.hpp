@@ -74,14 +74,6 @@ public:
       */
     void PerformSema( SemaAnalyzer& sema );
 
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print( int depth = 0 ) const override;
-
     /** \returns The top level declarations of this translation unit **/
     const DeclarationVector& GetDeclarations() const;
 

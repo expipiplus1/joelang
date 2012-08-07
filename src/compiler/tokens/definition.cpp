@@ -66,10 +66,10 @@ PassDefinition::PassDefinition( PassStatementVector statements )
         // Split the statements into state assignments and compile directives
         //
         if( isa<StateAssignmentStatement>( s ) )
-            m_StateAssignments.emplace_back( 
+            m_StateAssignments.emplace_back(
                         static_cast<StateAssignmentStatement*>( s.release() ) );
         else if( isa<CompileStatement>( s ) )
-            m_CompileStatements.emplace_back( 
+            m_CompileStatements.emplace_back(
                         static_cast<CompileStatement*>( s.release() ) );
         else
             assert( false && "Unhandled type of PassStatement" );
@@ -90,12 +90,6 @@ void PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
     for( auto& s : m_StateAssignments )
         s->PerformSema( sema );
-}
-
-void PassDefinition::Print( int depth ) const
-{
-    for( const auto& s: m_StateAssignments )
-        s->Print( depth );
 }
 
 const PassDefinition::StateAssignStmtVector&
@@ -158,25 +152,6 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
                                                  code_gen,
                                                  name ) );
     return Pass( name, std::move(state_assignments) );
-}
-
-void PassDeclarationOrIdentifier::Print( int depth ) const
-{
-    if( m_DefinitionRef &&
-        *m_DefinitionRef )
-    {
-        (*m_DefinitionRef)->Print( depth );
-    }
-    else if( IsIdentifier() )
-    {
-        for( int i = 0; i < depth * 4; ++i )
-            std::cout << " ";
-        std::cout << m_Identifier;
-    }
-    else
-    {
-        m_Declaration->Print( depth );
-    }
 }
 
 void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )

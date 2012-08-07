@@ -193,14 +193,6 @@ bool SubscriptOperator::IsLValue( const Expression& expression ) const
     return true;
 }
 
-void SubscriptOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "SubscriptOperator\n";
-    m_IndexExpression->Print( depth + 1 );
-}
-
 bool SubscriptOperator::Parse( Parser& parser,
                                std::unique_ptr<SubscriptOperator>& token )
 {
@@ -314,15 +306,6 @@ bool ArgumentListOperator::IsConst( const Expression& expression ) const
     return false;
 }
 
-void ArgumentListOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "ArgumentListOperator\n";
-    for( const auto& i : m_Arguments )
-        i->Print( depth + 1 );
-}
-
 bool ArgumentListOperator::Parse( Parser& parser,
                                   std::unique_ptr<ArgumentListOperator>& token )
 {
@@ -394,16 +377,6 @@ bool MemberAccessOperator::IsConst( const Expression& expression ) const
     return expression.IsConst();
 }
 
-void MemberAccessOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << ".\n";
-    for( int i = 0; i < depth * 4 + 4; ++i )
-        std::cout << " ";
-    std::cout << m_Identifier << std::endl;
-}
-
 bool MemberAccessOperator::Parse( Parser& parser,
                                   std::unique_ptr<MemberAccessOperator>& token )
 {
@@ -466,13 +439,6 @@ CompleteType IncrementOrDecrementOperator::GetType(
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const
 {
     return false;
-}
-
-void IncrementOrDecrementOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << (m_Operator == Op::INCREMENT ? "++" : "--") << std::endl;
 }
 
 bool IncrementOrDecrementOperator::Parse(
