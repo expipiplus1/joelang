@@ -12,6 +12,8 @@ if( WIN32 )
     set( joelang_LIBRARY_DIRS ${LLVM_LIBRARY_DIRS} CACHE STRING "LLVM library dirs for windows" )
 endif()
 
+find_package(                       OpenGL      REQUIRED )
+
 include_directories( ${joemath_INCLUDE_DIR} )
 
 add_library( joelang include/joelang/context.hpp
@@ -106,6 +108,7 @@ add_library( joelang include/joelang/context.hpp
 # Test executable
 #
 add_executable( joelang_test src/joelang.cpp )
+target_link_libraries( joelang_test joelang ${OPENGL_LIBRARY} )
 
 #
 # Various custom commands
