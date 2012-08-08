@@ -19,6 +19,7 @@ include_directories( ${joemath_INCLUDE_DIR} )
 add_library( joelang include/joelang/context.hpp
                      include/joelang/effect.hpp
                      include/joelang/pass.hpp
+                     include/joelang/program.hpp
                      include/joelang/state_assignment.hpp
                      include/joelang/technique.hpp
                      include/joelang/types.hpp
@@ -30,6 +31,7 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/opengl_states.cpp
                      src/engine/opengl_states.hpp
                      src/engine/pass.cpp
+                     src/engine/program.cpp
                      src/engine/state_assignment.cpp
                      src/engine/technique.cpp
                      src/engine/state.cpp
@@ -53,6 +55,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/runtime.hpp
                      src/compiler/sema_analyzer.cpp
                      src/compiler/sema_analyzer.hpp
+                     src/compiler/shader_writer.cpp
+                     src/compiler/shader_writer.hpp
                      src/compiler/terminal_types.cpp
                      src/compiler/terminal_types.hpp
                      src/compiler/type_properties.cpp
