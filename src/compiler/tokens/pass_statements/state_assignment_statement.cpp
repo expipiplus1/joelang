@@ -221,5 +221,15 @@ bool StateAssignmentStatement::Parse(
     return true;
 }
 
+bool StateAssignmentStatement::classof( const Token* t )
+{
+    return t->GetSubClassID() == TokenTy::StateAssignmentStatement;
+}
+
+bool StateAssignmentStatement::classof( const StateAssignmentStatement* t )
+{
+    return true;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

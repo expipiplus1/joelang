@@ -91,6 +91,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<TranslationUnit>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const TranslationUnit* d );
 private:
     /** The vector of all the top level declarations **/
     DeclarationVector m_Declarations;

@@ -100,6 +100,10 @@ public:
     static bool             Parse   ( Parser&                          parser,
                                       std::unique_ptr<PassDefinition>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassDefinition* d );
 private:
     StateAssignStmtVector   m_StateAssignments;
     CompileStatementVector  m_CompileStatements;
@@ -173,6 +177,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<PassDeclarationOrIdentifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassDeclarationOrIdentifier* d );
 private:
     /** This pass declaration's identifier if it has one, otherwise "" **/
     std::string                      m_Identifier;

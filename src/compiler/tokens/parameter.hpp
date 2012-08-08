@@ -100,6 +100,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Parameter>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Parameter* d );
 private:
     DeclSpecsVector      m_DeclarationSpecifiers;
     std::string          m_Identifier;

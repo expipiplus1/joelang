@@ -342,6 +342,10 @@ public:
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const VariableDeclarationList* d );
 private:
     DeclSpecsVector m_DeclSpecs;
     DeclaratorVector m_Declarators;
@@ -370,6 +374,11 @@ public:
 
     virtual
     void PerformSema( SemaAnalyzer& sema ) override;
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const FunctionDefinition* d );
 private:
     DeclSpecsVector m_DeclarationSpecifiers;
     Declarator_up m_Declarator;

@@ -87,6 +87,10 @@ public:
     static
     bool Parse( Parser& parser, CompileStatement_up& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const CompileStatement* t);
 private:
     ShaderDomain m_Domain;
     std::string m_Identifier;

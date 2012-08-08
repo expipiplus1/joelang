@@ -98,6 +98,10 @@ bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
     if( !parser.ExpectTerminal( TerminalType::EQUALS ) )
         return false;
 
+    // Parse 'compile'
+    if( !parser.ExpectTerminal( TerminalType::COMPILE ) )
+        return false;
+
     std::string identifier;
     // Parse the function identifier
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
@@ -122,6 +126,17 @@ bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
                                        std::move(arguments) ) );
     return true;
 }
+
+bool CompileStatement::classof( const Token* t )
+{
+    return t->GetSubClassID() == TokenTy::CompileStatement;
+}
+
+bool CompileStatement::classof( const CompileStatement* t )
+{
+    return true;
+}
+
 
 } // namespace Compiler
 } // namespace JoeLang

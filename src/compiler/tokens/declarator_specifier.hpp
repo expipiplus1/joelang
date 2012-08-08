@@ -96,6 +96,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const ArraySpecifier* d );
 private:
     Expression_up m_Expression;
 };
@@ -139,6 +143,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<FunctionSpecifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const FunctionSpecifier* d );
 private:
     std::vector<std::unique_ptr<Parameter> > m_Parameters;
 };

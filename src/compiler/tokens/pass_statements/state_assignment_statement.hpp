@@ -90,6 +90,10 @@ public:
     static bool Parse( Parser& parser,
                        std::unique_ptr<StateAssignmentStatement>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const StateAssignmentStatement* t);
 private:
     /** The identifier for the state to be assigned to **/
     std::string m_Identifier;

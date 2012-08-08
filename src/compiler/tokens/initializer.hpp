@@ -133,6 +133,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Initializer>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Initializer* d );
 private:
     std::vector<std::unique_ptr<Initializer> > m_SubInitializers;
     Expression_up                              m_Expression;

@@ -63,7 +63,7 @@ public:
     bool AlwaysReturns() const override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema, 
+    void PerformSema( SemaAnalyzer& sema,
                       const CompleteType& return_type ) override;
 
     void PerformSemaAsFunction( SemaAnalyzer& sema,
@@ -75,6 +75,10 @@ public:
     static
     bool Parse ( Parser& parser, CompoundStatement_up& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const CompoundStatement* d );
 private:
     void PerformSemaCommon( SemaAnalyzer& sema,
                             const CompleteType& return_type,

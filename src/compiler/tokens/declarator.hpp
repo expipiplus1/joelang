@@ -106,6 +106,10 @@ public:
     static
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const InitDeclarator* d );
 private:
     std::unique_ptr<Declarator>  m_Declarator;
     std::unique_ptr<Initializer> m_Initializer;
@@ -183,6 +187,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Declarator* d );
 private:
     std::string          m_Identifier;
     FunctionSpecifier_up m_FunctionSpecifier;
