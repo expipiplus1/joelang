@@ -35,11 +35,6 @@
 
 #include <joelang/technique.hpp>
 
-namespace llvm
-{
-    class ExecutionEngine;
-};
-
 namespace JoeLang
 {
 
@@ -48,15 +43,13 @@ class Effect
 public:
     Effect() = default;
     ~Effect();
-    Effect( std::vector<Technique> techniques,
-            std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine );
+    Effect( std::vector<Technique> techniques );
 
     const std::vector<Technique>& GetTechniques() const;
     const Technique* GetNamedTechnique( const std::string& name ) const;
 
 private:
     std::vector<Technique>                  m_Techniques;
-    std::unique_ptr<llvm::ExecutionEngine>  m_LLVMExecutionEngine;
 };
 
 } // namespace JoeLang

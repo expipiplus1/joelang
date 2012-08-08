@@ -87,8 +87,6 @@ public:
 
     std::vector<Technique> GenerateTechniques( const TranslationUnit& ast );
 
-    std::unique_ptr<llvm::ExecutionEngine> TakeExecutionEngine();
-
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
                                                  const Expression& expression,

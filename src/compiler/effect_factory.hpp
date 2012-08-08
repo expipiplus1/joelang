@@ -32,7 +32,9 @@
 #include <memory>
 #include <vector>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/runtime.hpp>
+#include <compiler/sema_analyzer.hpp>
 
 namespace JoeLang
 {
@@ -54,6 +56,8 @@ public:
 private:
     const Context& m_Context;
     Runtime        m_Runtime;
+    CodeGenerator  m_CodeGenerator;
+    SemaAnalyzer   m_SemaAnalyzer;
 };
 
 } // namespace Compiler

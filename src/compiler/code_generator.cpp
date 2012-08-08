@@ -143,11 +143,6 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
     return std::move(techniques);
 }
 
-std::unique_ptr<llvm::ExecutionEngine> CodeGenerator::TakeExecutionEngine()
-{
-    return std::move( m_LLVMExecutionEngine );
-}
-
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         const StateBase& state,
         const Expression& expression,
@@ -1121,8 +1116,6 @@ void CodeGenerator::OptimizeFunction( llvm::Function& function )
 void CodeGenerator::OptimizeModule()
 {
     assert( m_LLVMModule && "Trying to optimize a null module" );
-
-    m_LLVMModule->dump();
 
     m_LLVMModulePassManager->run( *m_LLVMModule );
 }

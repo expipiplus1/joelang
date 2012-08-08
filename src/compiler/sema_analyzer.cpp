@@ -104,11 +104,6 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
                                          [](const Function_sp& f)
                                          {return !f->HasDefinition();} ),
                          fo.second.end() );
-
-        //fo.second.erase( std::remove_if( fo.second.begin(), fo.second.end(),
-                                  //[](const Function_sp& f)
-                                  //{ return f.unique(); } ),
-                         //fo.second.end() );
     }
 
     // Return success or not
