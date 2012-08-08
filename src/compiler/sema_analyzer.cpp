@@ -90,12 +90,20 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 
     for( auto& fo : m_FunctionOverloads )
     {
-        // If the function is referenced and not defined
+        // error If the function is referenced and not defined
         for( const auto& f : fo.second )
             if( !f.unique() &&
                 !f->HasDefinition() )
                 Error( "Use of undefined function: " +
                        f->GetSignatureString() );
+
+        //
+        // remove all functions without definitions
+        //
+        fo.second.erase( std::remove_if( fo.second.begin(), fo.second.end(),
+                                         [](const Function_sp& f)
+                                         {return !f->HasDefinition();} ),
+                         fo.second.end() );
 
         //fo.second.erase( std::remove_if( fo.second.begin(), fo.second.end(),
                                   //[](const Function_sp& f)
