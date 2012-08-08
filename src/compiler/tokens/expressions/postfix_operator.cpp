@@ -136,12 +136,10 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
 {
     bool good = true;
     good &= expression.PerformSema( sema );
-    if( good )
-    {
-        m_IndexExpression = CastExpression::Create( Type::I64,
-                                                    std::move(m_IndexExpression) );
-        good &= m_IndexExpression->PerformSema( sema );
-    }
+    m_IndexExpression = CastExpression::Create( Type::I64,
+                                                std::move(m_IndexExpression) );
+    good &= m_IndexExpression->PerformSema( sema );
+
     if( !expression.GetType().IsArrayType() )
     {
         sema.Error( "Trying to index into a non-array" );
