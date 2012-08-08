@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace JoeLang
 {
 
@@ -38,6 +40,11 @@ public:
     Program();
     ~Program();
 
+    void Compile();
+
+    bool IsCompiled() const;
+
+    const std::string& GetString() const;
 private:
 };
 
