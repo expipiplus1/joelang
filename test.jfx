@@ -9,7 +9,7 @@ const float twentyone = twenty + 1;
 
 const int d_size = a;
 int b[2],
-    c[2] = {8, 9},
+    c[2],// = {8, 9},
     d[d_size];
 
 const string e = (a=0)+twentyone == 21 ? "foo" : "bar";
@@ -22,7 +22,7 @@ int t{0};
 int q = 1;
 int w = (t+=2)+=q;
 
-const string strings[2] = {"foo", "bar"+"bar"};
+//const string strings[2] = {"foo", "bar"+"bar"};
 
 pass p0;
 
