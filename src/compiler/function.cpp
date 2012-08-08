@@ -138,6 +138,7 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
     // codegen the body
     //
     code_gen.CreateFunctionDefinition( m_LLVMFunction,
+                                       m_Parameters,
                                        m_Definition );
 }
 

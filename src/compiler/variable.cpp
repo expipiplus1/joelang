@@ -102,6 +102,16 @@ void Variable::SetParameterPointer( llvm::Argument* parameter_pointer )
     m_LLVMPointer = parameter_pointer;
 }
 
+void Variable::ReplaceParameterPointer( llvm::Value* pointer )
+{
+    assert( m_LLVMPointer && "Trying to replace a null parameter" );
+    assert( m_IsParameter &&
+            "Trying to replace the parameter on a non-parameter" );
+    assert( pointer && "Trying to replace parameter with a null pointer" );
+    m_LLVMPointer = pointer;
+    m_IsParameter = false;
+}
+
 llvm::Value* Variable::GetLLVMPointer() const
 {
     return m_LLVMPointer;

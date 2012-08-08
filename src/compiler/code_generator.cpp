@@ -80,7 +80,7 @@ CodeGenerator::CodeGenerator( Runtime& runtime )
     :m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
-    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( 
+    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT(
                                                    m_LLVMModule,
                                                    nullptr,
                                                    nullptr,
@@ -895,9 +895,18 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 {
     // If this is a const param, we can use the value it was passed with,
     // otherwise it will have been alloc
-    if( variable.IsConst() && variable.IsParameter() )
-        return variable.GetLLVMPointer();
+    assert( ( !variable.IsParameter() || variable.IsConst() ) &&
+            "Trying to read a non-const parameter as a variable" );
+    if( variable.IsParameter() )
+        return CreateParameterRead( variable );
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
+}
+
+llvm::Value* CodeGenerator::CreateParameterRead( const Variable& parameter )
+{
+    assert( parameter.IsParameter() &&
+            "Creating a parameter read from a non-parameter" );
+    return parameter.GetLLVMPointer();
 }
 
 llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
@@ -947,11 +956,15 @@ llvm::Function* CodeGenerator::CreateFunctionDeclaration(
     return function;
 }
 
-void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
-                                              const CompoundStatement_up& body )
+void CodeGenerator::CreateFunctionDefinition(
+                                     llvm::Function* function,
+                                     const std::vector<Variable_sp>& parameters,
+                                     const CompoundStatement_up& body )
 {
     assert( function && "Trying to define a null function" );
     assert( body && "Trying to define function with a null body" );
+    assert( parameters.size() == function->arg_size() &&
+            "Function parameter size mismatch" );
 
     llvm::BasicBlock* llvm_body = llvm::BasicBlock::Create(
                                                      m_Runtime.GetLLVMContext(),
@@ -959,6 +972,20 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
                                                      function );
 
     m_LLVMBuilder.SetInsertPoint( llvm_body );
+
+    // Allocate space for the parameters if they are not const
+    for( const auto& p : parameters )
+    {
+        assert( p->IsParameter() &&
+                "non-parameter in function parameter list" );
+        if( !p->IsConst() )
+        {
+            llvm::Value* v = m_LLVMBuilder.CreateAlloca( m_Runtime.GetLLVMType(
+                                                               p->GetType() ) );
+            m_LLVMBuilder.CreateStore( CreateParameterRead( *p ), v );
+            p->ReplaceParameterPointer( v );
+        }
+    }
 
     assert( body->AlwaysReturns() &&
             "Generating code for a statement which doesn't always return" );
@@ -1094,6 +1121,8 @@ void CodeGenerator::OptimizeFunction( llvm::Function& function )
 void CodeGenerator::OptimizeModule()
 {
     assert( m_LLVMModule && "Trying to optimize a null module" );
+
+    m_LLVMModule->dump();
 
     m_LLVMModulePassManager->run( *m_LLVMModule );
 }

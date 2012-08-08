@@ -223,6 +223,8 @@ public:
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
+    llvm::Value* CreateParameterRead( const Variable& parameter );
+
     llvm::Value* CreateAssignment( const Expression& variable,
                                    const Expression& e );
 
@@ -246,6 +248,7 @@ public:
       * Define a function
       */
     void CreateFunctionDefinition( llvm::Function* function,
+                                   const std::vector<Variable_sp>& parameters,
                                    const CompoundStatement_up& body );
 
     /**
