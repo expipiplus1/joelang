@@ -30,9 +30,9 @@
 #include <iostream>
 #include <string>
 
-#include <engine/context.hpp>
-#include <engine/effect.hpp>
-#include <engine/state.hpp>
+#include <joelang/context.hpp>
+#include <joelang/effect.hpp>
+#include <joelang/state.hpp>
 
 #include <joemath/joemath.hpp>
 
