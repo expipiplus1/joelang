@@ -80,11 +80,12 @@ CodeGenerator::CodeGenerator( Runtime& runtime )
     :m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
-    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule,
-                                                              nullptr,
-                                                              nullptr,
-                                                              llvm::CodeGenOpt::Aggressive,
-                                                              false ) )
+    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( 
+                                                   m_LLVMModule,
+                                                   nullptr,
+                                                   nullptr,
+                                                   llvm::CodeGenOpt::Aggressive,
+                                                   false ) )
     ,m_LLVMFunctionPassManager( new llvm::FunctionPassManager( m_LLVMModule ) )
     ,m_LLVMModulePassManager( new llvm::PassManager() )
 {
@@ -157,7 +158,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
             "Type mismatch in state assignment code gen" );
 
     llvm::Function* function = CreateFunctionFromExpression( expression, name );
-    OptimizeFunction( *function );
     void* function_ptr = m_LLVMExecutionEngine->getPointerToFunction(function);
 
     //
@@ -883,7 +883,11 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                      llvm::GlobalVariable::PrivateLinkage,
                                      init,
                                      name );
-    ret->setUnnamedAddr( true );
+    //
+    // The adderss of non const variables is important because we can modify
+    // them from outside
+    //
+    ret->setUnnamedAddr( is_const );
     return ret;
 }
 
@@ -960,6 +964,7 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
             "Generating code for a statement which doesn't always return" );
 
     body->CodeGen( *this );
+    OptimizeFunction( *function );
 }
 
 void CodeGenerator::BindFunctionParameters(
@@ -1077,6 +1082,7 @@ llvm::Function* CodeGenerator::CreateFunctionFromExpression(
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function not valid" );
 
+    OptimizeFunction( *function );
     return function;
 }
 
