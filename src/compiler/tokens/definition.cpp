@@ -172,6 +172,7 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     //
 
     std::vector<Shader> shaders;
+    shaders.reserve( (*m_DefinitionRef)->GetCompileStatements().size() );
     for( const auto& c : (*m_DefinitionRef)->GetCompileStatements() )
         shaders.emplace_back( c->GetEntryFunction() );
 
