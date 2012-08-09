@@ -261,7 +261,7 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
 
     if( !sema.HasFunctionNamed( name ) )
     {
-        sema.Error( "Calling undeclared function" + name );
+        sema.Error( "Calling undeclared function " + name );
         return false;
     }
 
