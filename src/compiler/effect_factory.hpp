@@ -48,8 +48,8 @@ namespace Compiler
 class EffectFactory
 {
 public:
+    explicit
     EffectFactory( const Context& context );
-    ~EffectFactory() = default;
 
     std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
 

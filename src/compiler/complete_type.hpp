@@ -48,9 +48,7 @@ class CompleteType
 {
 public:
     CompleteType();
-    explicit
-    CompleteType( Type base_type,
-                  ArrayExtents array_extents = {} );
+    CompleteType( Type base_type, ArrayExtents array_extents = {} );
 
     /**
       * This doesn't return the base type, for example this could return

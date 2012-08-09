@@ -48,9 +48,6 @@ class TranslationUnit;
 class Parser
 {
 public:
-    Parser();
-    ~Parser();
-
     /** Tries to parse the string
       * \param string
       *   The string to parse

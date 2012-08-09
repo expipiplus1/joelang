@@ -40,10 +40,6 @@
 namespace JoeLang
 {
 
-Pass::Pass()
-{
-}
-
 Pass::Pass( std::string name )
     :m_Name( std::move(name) )
 {
@@ -57,10 +53,6 @@ Pass::Pass( std::string name, StateAssignmentVector state_assignments )
     for( const auto& sa : m_StateAssignments )
         assert( sa && "null state assignment given to Pass" );
 #endif
-}
-
-Pass::~Pass()
-{
 }
 
 void Pass::SetState() const

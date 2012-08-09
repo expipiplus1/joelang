@@ -118,10 +118,6 @@ Runtime::Runtime()
     /// TODO make assertions about string type;
 }
 
-Runtime::~Runtime()
-{
-}
-
 llvm::LLVMContext& Runtime::GetLLVMContext()
 {
     return m_LLVMContext;

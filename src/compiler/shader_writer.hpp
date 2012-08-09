@@ -44,10 +44,6 @@ namespace Compiler
 class ShaderWriter
 {
 public:
-    ShaderWriter();
-    ~ShaderWriter();
-
-
 private:
 };
 

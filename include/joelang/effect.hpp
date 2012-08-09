@@ -42,7 +42,7 @@ class Effect
 {
 public:
     Effect() = default;
-    ~Effect();
+    explicit
     Effect( std::vector<Technique> techniques );
 
     const std::vector<Technique>& GetTechniques() const;

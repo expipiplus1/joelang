@@ -50,7 +50,6 @@ public:
       *   The string for the whole proprocessed soruce file
       */
                  Lexer           ( std::string string );
-                 ~Lexer          () = default;
 
     /**
       * This function advances the stream by one token if terminal_type is the

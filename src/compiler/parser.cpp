@@ -43,14 +43,6 @@ namespace JoeLang
 namespace Compiler
 {
 
-Parser::Parser()
-{
-}
-
-Parser::~Parser()
-{
-}
-
 bool Parser::Parse ( const std::string& string )
 {
     // Set up the lexer

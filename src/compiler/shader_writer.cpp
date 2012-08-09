@@ -36,13 +36,5 @@ namespace JoeLang
 namespace Compiler
 {
 
-ShaderWriter::ShaderWriter()
-{
-}
-
-ShaderWriter::~ShaderWriter()
-{
-}
-
 } // namespace Compiler
 } // namespace JoeLang

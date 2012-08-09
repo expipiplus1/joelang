@@ -45,14 +45,11 @@ class Pass
 public:
     using StateAssignmentVector =
                              std::vector<std::unique_ptr<StateAssignmentBase> >;
-    Pass();
-    Pass( Pass&& ) = default;
-    Pass& operator = ( Pass&& ) = default;
+    Pass() = default;
     explicit
     Pass( std::string name );
     Pass( std::string name,
           StateAssignmentVector state_assignments);
-    ~Pass();
 
     void SetState() const;
     void ResetState() const;
