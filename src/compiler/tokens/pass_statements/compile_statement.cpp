@@ -96,6 +96,13 @@ void CompileStatement::PerformSema( SemaAnalyzer& sema )
     for( const auto& a : m_Arguments )
         argument_types.push_back( a->GetType() );
 
+    if( !sema.HasFunctionNamed( m_Identifier ) )
+    {
+        sema.Error( "Trying to compile an undeclared function: " +
+                    m_Identifier );
+        return;
+    }
+
     Function_sp function = sema.GetFunctionOverload( m_Identifier,
                                                      argument_types );
 
