@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -30,74 +30,39 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <vector>
-
-#include <compiler/tokens/pass_statements/pass_statement.hpp>
-#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
 
+enum class ShaderDomain;
+
 namespace Compiler
 {
 
-class CodeGenerator;
-class CompileStatement;
-using CompileStatement_up = std::unique_ptr<CompileStatement>;
-class EntryFunction;
-using EntryFunction_sp = std::shared_ptr<EntryFunction>;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
-class Parser;
-class SemaAnalyzer;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 
 /**
-  * \class CompileStatement
-  * \ingroup Tokens
-  * \brief Matches a shader compile statement
-  *
-  * CompileStatement = ('vertexshader' | 'pixelshader') '='
-  *                                                   'compile' FunctionCall ';'
+  * \class EntryFunction
+  * \brief A class to handle shader entry functions
+  * \note This is quite different from Function
   */
-class CompileStatement : public JoeLang::Compiler::PassStatement
+class EntryFunction
 {
 public:
-    /**
-      * This asserts that identifier is not empty and that none of the arguments
-      * are null
-      * \param domain
-      *   The domain of the shader
-      * \param identifier
-      *   The function identifier
-      * \param arguments
-      *   The arguments to the functions
-      */
-    CompileStatement( ShaderDomain domain,
-                      std::string identifier,
-                      std::vector<Expression_up> arguments );
-    virtual
-    ~CompileStatement();
+    EntryFunction( ShaderDomain domain,
+                   Function_sp function,
+                   std::vector<Expression_up> parameters );
 
     ShaderDomain GetDomain() const;
 
-    const EntryFunction_sp& GetEntryFunction() const;
-
-    void PerformSema( SemaAnalyzer& sema );
-
-    static
-    bool Parse( Parser& parser, CompileStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const CompileStatement* t);
 private:
-    ShaderDomain m_Domain;
-    std::string m_Identifier;
-    std::vector<Expression_up> m_Arguments;
-
-    EntryFunction_sp m_EntryFunction;
+    ShaderDomain               m_Domain;
+    Function_sp                m_Function;
+    std::vector<Expression_up> m_Parameters;
 };
 
 } // namespace Compiler

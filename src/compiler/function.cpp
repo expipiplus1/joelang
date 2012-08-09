@@ -34,6 +34,7 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>

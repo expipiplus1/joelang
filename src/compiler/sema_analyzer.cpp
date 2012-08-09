@@ -106,6 +106,7 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
                          fo.second.end() );
     }
 
+    // Todo, reset state here
     // Return success or not
     return m_Good;
 }

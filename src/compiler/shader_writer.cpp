@@ -29,12 +29,36 @@
 
 #include "shader_writer.hpp"
 
+#include <memory>
 #include <string>
+
+#include <compiler/entry_function.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
+
+std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
+{
+    // todo, I'm sure that there's something missing here...
+
+    if( entry_function.GetDomain() == ShaderDomain::FRAGMENT )
+        return  "#version 150\n"
+                "out vec4 output_color;\n"
+                "void main()\n"
+                "{\n"
+                "   output_color = vec4(0.44, 0.85, 0.29, 1.0);\n"
+                "}\n";
+    else
+        return  "#version 150\n"
+                "in vec4 position;\n"
+                "void main()\n"
+                "{\n"
+                "   gl_Position = position;\n"
+                "}\n";
+}
 
 } // namespace Compiler
 } // namespace JoeLang

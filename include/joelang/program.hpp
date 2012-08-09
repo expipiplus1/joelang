@@ -40,7 +40,7 @@ class Program
 {
 public:
     explicit
-    Program( std::vector<Shader> shaders );
+    Program( std::vector<Shader> shaders = {} );
     Program( const Program& ) = delete;
     Program( Program&& other );
     Program& operator=( const Program& ) = delete;
@@ -48,6 +48,16 @@ public:
     ~Program();
 
     void Swap( Program& other );
+
+    /**
+      * Bind the program with OpenGL
+      */
+    void Bind() const;
+
+    /**
+      * Unbind the program from OpenGL
+      */
+    void Unbind() const;
 
     void Compile();
 

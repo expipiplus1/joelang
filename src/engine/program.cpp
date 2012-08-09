@@ -69,8 +69,27 @@ void Program::Swap( Program& other )
     std::swap( m_Object, other.m_Object );
 }
 
+void Program::Bind() const
+{
+    glUseProgram( m_Object );
+}
+
+void Program::Unbind() const
+{
+    glUseProgram( 0 );
+}
+
 void Program::Compile()
 {
+    //
+    // Don't recompile if we have an object
+    //
+    if( m_Object )
+        return;
+
+    for( Shader& shader : m_Shaders )
+        shader.Compile();
+
     m_Object = glCreateProgram();
     assert( m_Object && "Error creating OpenGL program" );
 

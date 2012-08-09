@@ -34,15 +34,21 @@
 #include <string>
 #include <utility>
 
+#include <compiler/complete_type.hpp>
+#include <compiler/entry_function.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
+
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 
 //------------------------------------------------------------------------------
 // CompileStatement
@@ -67,8 +73,43 @@ CompileStatement::~CompileStatement()
 {
 }
 
+ShaderDomain CompileStatement::GetDomain() const
+{
+    return m_Domain;
+}
+
+const EntryFunction_sp& CompileStatement::GetEntryFunction() const
+{
+    assert( m_EntryFunction && "Trying to get a null entryfunction" );
+    return m_EntryFunction;
+}
+
 void CompileStatement::PerformSema( SemaAnalyzer& sema )
 {
+    assert( !m_EntryFunction && "About to overrite a non-null entryfunction" );
+
+    //
+    // Find out which function we're using as the entry
+    //
+    std::vector<CompleteType> argument_types;
+    argument_types.reserve( m_Arguments.size() );
+    for( const auto& a : m_Arguments )
+        argument_types.push_back( a->GetType() );
+
+    Function_sp function = sema.GetFunctionOverload( m_Identifier,
+                                                     argument_types );
+
+    if( !function )
+    {
+        sema.Error( "Couldn't find compatible overload for " + m_Identifier );
+        return;
+    }
+
+    m_EntryFunction.reset( new EntryFunction( m_Domain,
+                                              std::move(function),
+                                              std::move(m_Arguments) ) );
+
+    return;
 }
 
 bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )

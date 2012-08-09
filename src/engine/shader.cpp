@@ -31,19 +31,33 @@
 
 #include <cassert>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 
 #include <GL/GLee.h>
+
+#include <compiler/entry_function.hpp>
+#include <compiler/shader_writer.hpp>
 
 namespace JoeLang
 {
 
 Shader::Shader( ShaderDomain domain, std::string source )
     :m_Source( std::move(source) )
+    ,m_Object( 0 )
     ,m_Domain( domain )
 {
 }
+
+Shader::Shader( std::shared_ptr<Compiler::EntryFunction> entry_function )
+    :m_EntryFunction( std::move(entry_function) )
+    ,m_Object( 0 )
+{
+    assert( m_EntryFunction && "Null EntryFunction given to Shader" );
+    m_Domain = m_EntryFunction->GetDomain();
+}
+
 
 Shader::Shader( Shader&& other )
     :m_Object( 0 )
@@ -78,6 +92,23 @@ void Shader::Compile()
         { ShaderDomain::VERTEX,   GL_VERTEX_SHADER   },
         { ShaderDomain::FRAGMENT, GL_FRAGMENT_SHADER }
     };
+
+    //
+    // Don't recompile if we already have an object
+    //
+    if( m_Object )
+        return;
+
+    //
+    // Generate the glsl
+    //
+    Compiler::ShaderWriter shader_writer;
+    assert( m_EntryFunction && "Generating glsl for a null entryfunction" );
+    m_Source = shader_writer.GenerateGLSL( *m_EntryFunction );
+
+    //
+    // Compile the glsl
+    //
     glDeleteShader(m_Object);
     m_Object = glCreateShader( domain_map.at(m_Domain) );
     assert( m_Object && "Couldn't create shader object" );

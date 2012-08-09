@@ -87,6 +87,8 @@ public:
 
     const StateAssignStmtVector& GetStateAssignments() const;
 
+    const CompileStatementVector& GetCompileStatements() const;
+
     /**
       * Parses a pass definition
       * \param parser

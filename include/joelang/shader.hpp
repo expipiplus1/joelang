@@ -29,10 +29,17 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
+#include <vector>
 
 namespace JoeLang
 {
+
+namespace Compiler
+{
+    class EntryFunction;
+};
 
 enum class ShaderDomain
 {
@@ -57,16 +64,24 @@ public:
 
     const std::string& GetString() const;
 
+    /// Used internally by joelang
+    /// This asserts on a null pointer
+    explicit
+    Shader( std::shared_ptr<Compiler::EntryFunction> entry_function );
+
     friend class Program;
 private:
+    /// The compile statement as seen in the joelang source
+    std::shared_ptr<Compiler::EntryFunction> m_EntryFunction;
+
     /// The glsl source of the shader
     std::string m_Source;
 
-    /// The shader domain
-    ShaderDomain m_Domain;
-
     /// The OpenGL shader object
     unsigned m_Object = 0;
+
+    /// The shader domain
+    ShaderDomain m_Domain;
 };
 
 } // namespace JoeLang

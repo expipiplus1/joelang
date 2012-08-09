@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,39 +27,33 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "entry_function.hpp"
 
+#include <cassert>
 #include <memory>
-#include <string>
+#include <utility>
 #include <vector>
 
-#include <joelang/program.hpp>
-#include <joelang/state_assignment.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
-
-class StateAssignmentBase;
-
-class Pass
+namespace Compiler
 {
-public:
-    using StateAssignmentVector =
-                             std::vector<std::unique_ptr<StateAssignmentBase> >;
-    Pass( std::string name = "",
-          StateAssignmentVector state_assignments = {},
-          Program program = Program() );
 
-    void SetState() const;
-    void ResetState() const;
-    bool Validate() const;
+EntryFunction::EntryFunction( ShaderDomain domain,
+                              Function_sp function,
+                              std::vector<Expression_up> parameters )
+    :m_Domain( domain )
+    ,m_Function( std::move(function) )
+    ,m_Parameters( std::move(parameters) )
+{
+}
 
-    const std::string& GetName() const;
+ShaderDomain EntryFunction::GetDomain() const
+{
+    return m_Domain;
+}
 
-private:
-    std::string           m_Name;
-    StateAssignmentVector m_StateAssignments;
-    Program               m_Program;
-};
-
+} // namespace Compiler
 } // namespace JoeLang

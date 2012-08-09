@@ -47,6 +47,7 @@ EffectFactory::EffectFactory( const Context& context )
     :m_Context( context )
     ,m_CodeGenerator( m_Runtime )
     ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
+    ,m_ShaderWriter()
 {
 }
 

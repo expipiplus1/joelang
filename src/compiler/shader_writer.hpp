@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 
 namespace JoeLang
@@ -37,6 +38,8 @@ namespace JoeLang
 namespace Compiler
 {
 
+class EntryFunction;
+
 /**
   * \class ShaderWriter
   * \brief A class to walk over an ast and generate a glsl shader
@@ -44,6 +47,7 @@ namespace Compiler
 class ShaderWriter
 {
 public:
+    std::string GenerateGLSL( const EntryFunction& entry_function );
 private:
 };
 

@@ -44,6 +44,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/complete_type.hpp
                      src/compiler/effect_factory.cpp
                      src/compiler/effect_factory.hpp
+                     src/compiler/entry_function.cpp
+                     src/compiler/entry_function.hpp
                      src/compiler/generic_value.cpp
                      src/compiler/generic_value.hpp
                      src/compiler/function.cpp

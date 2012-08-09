@@ -46,6 +46,8 @@
 #include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
 #include <compiler/tokens/pass_statements/compile_statement.hpp>
 #include <joelang/pass.hpp>
+#include <joelang/program.hpp>
+#include <joelang/shader.hpp>
 #include <joelang/state_assignment.hpp>
 
 namespace JoeLang
@@ -90,12 +92,20 @@ void PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
     for( auto& s : m_StateAssignments )
         s->PerformSema( sema );
+    for( auto& c : m_CompileStatements )
+        c->PerformSema( sema );
 }
 
 const PassDefinition::StateAssignStmtVector&
                                     PassDefinition::GetStateAssignments() const
 {
     return m_StateAssignments;
+}
+
+const PassDefinition::CompileStatementVector&
+                                    PassDefinition::GetCompileStatements() const
+{
+    return m_CompileStatements;
 }
 
 bool PassDefinition::Parse( Parser& parser,
@@ -146,12 +156,38 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 
     const std::string& name = IsIdentifier() ? m_Identifier
                                              : m_Declaration->GetName();
+
+    //
+    // Create the state assignments from this pass
+    //
+
     std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& s : (*m_DefinitionRef)->GetStateAssignments() )
-        state_assignments.push_back( s->GenerateStateAssignment(
-                                                 code_gen,
-                                                 name ) );
-    return Pass( name, std::move(state_assignments) );
+        state_assignments.push_back( s->GenerateStateAssignment( code_gen,
+                                                                 name ) );
+
+
+    //
+    // Create a shader for every compile statement in the pass
+    //
+
+    std::vector<Shader> shaders;
+    for( const auto& c : (*m_DefinitionRef)->GetCompileStatements() )
+        shaders.emplace_back( c->GetEntryFunction() );
+
+    //
+    // Create a Program for the pass from all the shaders
+    //
+
+    Program program( std::move(shaders) );
+
+    //
+    // Compile the program
+    //
+    // todo, how to report errors here?
+    program.Compile();
+
+    return Pass( name, std::move(state_assignments), std::move(program) );
 }
 
 void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )

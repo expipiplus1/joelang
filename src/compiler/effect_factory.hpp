@@ -35,6 +35,7 @@
 #include <compiler/code_generator.hpp>
 #include <compiler/runtime.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 
 namespace JoeLang
 {
@@ -58,6 +59,7 @@ private:
     Runtime        m_Runtime;
     CodeGenerator  m_CodeGenerator;
     SemaAnalyzer   m_SemaAnalyzer;
+    ShaderWriter   m_ShaderWriter;
 };
 
 } // namespace Compiler
