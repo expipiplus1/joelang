@@ -29,7 +29,9 @@
 
 #pragma once
 
-#include <string>
+#include <vector>
+
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
@@ -37,15 +39,23 @@ namespace JoeLang
 class Program
 {
 public:
-    Program();
+    explicit
+    Program( std::vector<Shader> shaders );
+    Program( const Program& ) = delete;
+    Program( Program&& other );
+    Program& operator=( const Program& ) = delete;
+    Program& operator=( Program&& other );
     ~Program();
+
+    void Swap( Program& other );
 
     void Compile();
 
     bool IsCompiled() const;
-
-    const std::string& GetString() const;
 private:
+    std::vector<Shader> m_Shaders;
+
+    unsigned m_Object;
 };
 
 } // namespace JoeLang

@@ -27,70 +27,78 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/program.hpp>
+#include <joelang/shader.hpp>
 
 #include <cassert>
+#include <map>
+#include <string>
 #include <utility>
-#include <vector>
 
 #include <GL/GLee.h>
-
-#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
 
-Program::Program( std::vector<Shader> shaders )
-    :m_Shaders( std::move(shaders) )
-    ,m_Object( 0 )
+Shader::Shader( ShaderDomain domain, std::string source )
+    :m_Source( std::move(source) )
+    ,m_Domain( domain )
 {
 }
 
-Program::Program( Program&& other )
+Shader::Shader( Shader&& other )
     :m_Object( 0 )
 {
     Swap( other );
 }
 
-Program& Program::operator=( Program&& other )
+Shader& Shader::operator=( Shader&& other )
 {
     Swap( other );
     return *this;
 }
 
-Program::~Program()
+Shader::~Shader()
 {
-    glDeleteProgram( m_Object );
+    glDeleteShader(m_Object);
 }
 
-void Program::Swap( Program& other )
+void Shader::Swap( Shader& other )
 {
-    std::swap( m_Shaders, other.m_Shaders );
+    if( &other == this )
+        return;
+    std::swap( m_Source, other.m_Source );
+    std::swap( m_Domain, other.m_Domain );
     std::swap( m_Object, other.m_Object );
 }
 
-void Program::Compile()
+void Shader::Compile()
 {
-    m_Object = glCreateProgram();
-    assert( m_Object && "Error creating OpenGL program" );
-
-    for( const Shader& s : m_Shaders )
-        glAttachShader( m_Object, s.m_Object);
-
-    glLinkProgram( m_Object );
+    const static std::map<ShaderDomain, GLenum> domain_map =
+    {
+        { ShaderDomain::VERTEX,   GL_VERTEX_SHADER   },
+        { ShaderDomain::FRAGMENT, GL_FRAGMENT_SHADER }
+    };
+    glDeleteShader(m_Object);
+    m_Object = glCreateShader( domain_map.at(m_Domain) );
+    assert( m_Object && "Couldn't create shader object" );
+    const char* c = m_Source.c_str();
+    glShaderSource( m_Object, 1, &c, NULL );
+    glCompileShader( m_Object );
 
     GLint status;
-    // todo report context error here
-    glGetProgramiv( m_Object, GL_LINK_STATUS, &status );
-    assert( status != GL_FALSE && "Error linking program" );
-
-    for( const Shader& s : m_Shaders )
-        glDetachShader( m_Object, s.m_Object );
+    glGetShaderiv( m_Object, GL_COMPILE_STATUS, &status );
+    // todo report error with context
+    assert( status != GL_FALSE && "Error Creating shader" );
 }
 
-bool Program::IsCompiled() const
+bool Shader::IsCompiled() const
 {
     return m_Object;
+}
+
+const std::string& Shader::GetString() const
+{
+    return m_Source;
 }
 
 } // namespace JoeLang

@@ -27,70 +27,46 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/program.hpp>
+#pragma once
 
-#include <cassert>
-#include <utility>
-#include <vector>
-
-#include <GL/GLee.h>
-
-#include <joelang/shader.hpp>
+#include <string>
 
 namespace JoeLang
 {
 
-Program::Program( std::vector<Shader> shaders )
-    :m_Shaders( std::move(shaders) )
-    ,m_Object( 0 )
+enum class ShaderDomain
 {
-}
+    VERTEX,
+    FRAGMENT
+};
 
-Program::Program( Program&& other )
-    :m_Object( 0 )
+class Shader
 {
-    Swap( other );
-}
+public:
+    Shader( ShaderDomain domain, std::string source );
+    Shader( const Shader& ) = delete;
+    Shader( Shader&& other );
+    Shader& operator=( const Shader& ) = delete;
+    Shader& operator=( Shader&& other );
+    ~Shader();
+    void Swap( Shader& other );
 
-Program& Program::operator=( Program&& other )
-{
-    Swap( other );
-    return *this;
-}
+    void Compile();
 
-Program::~Program()
-{
-    glDeleteProgram( m_Object );
-}
+    bool IsCompiled() const;
 
-void Program::Swap( Program& other )
-{
-    std::swap( m_Shaders, other.m_Shaders );
-    std::swap( m_Object, other.m_Object );
-}
+    const std::string& GetString() const;
 
-void Program::Compile()
-{
-    m_Object = glCreateProgram();
-    assert( m_Object && "Error creating OpenGL program" );
+    friend class Program;
+private:
+    /// The glsl source of the shader
+    std::string m_Source;
 
-    for( const Shader& s : m_Shaders )
-        glAttachShader( m_Object, s.m_Object);
+    /// The shader domain
+    ShaderDomain m_Domain;
 
-    glLinkProgram( m_Object );
-
-    GLint status;
-    // todo report context error here
-    glGetProgramiv( m_Object, GL_LINK_STATUS, &status );
-    assert( status != GL_FALSE && "Error linking program" );
-
-    for( const Shader& s : m_Shaders )
-        glDetachShader( m_Object, s.m_Object );
-}
-
-bool Program::IsCompiled() const
-{
-    return m_Object;
-}
+    /// The OpenGL shader object
+    unsigned m_Object = 0;
+};
 
 } // namespace JoeLang
