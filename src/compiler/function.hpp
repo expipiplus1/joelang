@@ -96,6 +96,8 @@ public:
     void CodeGenDeclaration( CodeGenerator& code_gen );
 
     void CodeGenDefinition( CodeGenerator& code_gen );
+
+    void Write( ShaderWriter& shader_writer ) const;
 private:
     std::string m_Identifier;
     CompleteType m_ReturnType;

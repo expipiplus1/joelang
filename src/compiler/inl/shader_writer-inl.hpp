@@ -29,65 +29,26 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include "../shader_writer.hpp"
+
+#include <sstream>
+#include <type_traits>
+
+#include <compiler/complete_type.hpp>
+#include <compiler/tokens/statements/statement.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
-enum class Type;
-
 namespace Compiler
 {
 
-using ArrayExtents = std::vector<unsigned>;
-class ShaderWriter;
-
-/**
-  * \class CompleteType
-  * \brief A class to hold all the information a type could need
-  */
-class CompleteType
+template<typename T>
+ShaderWriter& ShaderWriter::operator << ( const T& value )
 {
-public:
-    CompleteType();
-    CompleteType( Type base_type, ArrayExtents array_extents = {} );
-
-    /**
-      * This doesn't return the base type, for example this could return
-      * Type::ARRAY
-      */
-    Type GetType() const;
-
-    const ArrayExtents& GetArrayExtents() const;
-
-    Type GetBaseType() const;
-
-    bool IsArrayType() const;
-
-    bool IsUnknown() const;
-    bool IsVoid() const;
-
-    bool IsFloatingPoint() const;
-    bool IsIntegral() const;
-
-    bool IsVectorType() const;
-    bool IsScalarType() const;
-
-    bool IsSigned() const;
-
-    /** Returns the number of vector elements **/
-    unsigned GetNumElements() const;
-
-    std::string GetString() const;
-
-    void Write( ShaderWriter& shader_writer ) const;
-
-    bool operator == ( const CompleteType& other ) const;
-    bool operator != ( const CompleteType& other ) const;
-private:
-    Type         m_BaseType;
-    ArrayExtents m_ArrayExtents;
-};
+    m_Shader << value;
+    return *this;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

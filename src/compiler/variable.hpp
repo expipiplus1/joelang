@@ -87,6 +87,8 @@ public:
 
     const CompleteType& GetType() const;
 
+    const std::string& GetName() const;
+
     Type GetUnderlyingType() const;
 
     /** \returns true if this variable is const **/

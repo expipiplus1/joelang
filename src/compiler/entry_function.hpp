@@ -53,11 +53,13 @@ using Function_sp = std::shared_ptr<Function>;
 class EntryFunction
 {
 public:
+    /** This asserts that function isn't null **/
     EntryFunction( ShaderDomain domain,
                    Function_sp function,
                    std::vector<Expression_up> parameters );
 
     ShaderDomain GetDomain() const;
+    const Function& GetFunction() const;
 
 private:
     ShaderDomain               m_Domain;

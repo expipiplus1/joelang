@@ -136,6 +136,12 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const;
 
     /**
+      * Writes this expression to the shader
+      */
+    virtual
+    void Write( ShaderWriter& shader_writer ) const;
+
+    /**
       * \returns the CompleteType which this expression evaluates to
       */
     virtual
@@ -223,6 +229,9 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -284,6 +293,9 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -331,6 +343,9 @@ public:
 
     virtual
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;
@@ -410,6 +425,9 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -455,6 +473,9 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;
@@ -509,6 +530,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;
@@ -581,6 +605,9 @@ public:
     bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     const std::string& GetIdentifier() const;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;

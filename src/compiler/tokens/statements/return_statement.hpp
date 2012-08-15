@@ -71,6 +71,9 @@ public:
     virtual
     void CodeGen( CodeGenerator& code_gen ) override;
 
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
     static
     bool Parse ( Parser& parser, ReturnStatement_up& token );
 

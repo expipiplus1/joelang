@@ -35,6 +35,7 @@
 
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
@@ -65,22 +66,22 @@ bool CompoundStatement::AlwaysReturns() const
     // This assumes that we've performed sema on this object and have dropped
     // Statements after the return statement
     //
-    return (*m_Statements.rbegin())->AlwaysReturns(); 
+    return (*m_Statements.rbegin())->AlwaysReturns();
 }
 
 void CompoundStatement::PerformSemaAsFunction( SemaAnalyzer& sema,
                                                const CompleteType& return_type )
-                                              
+
 {
     PerformSemaCommon( sema, return_type, true );
 }
 
-void CompoundStatement::PerformSema( SemaAnalyzer& sema, 
+void CompoundStatement::PerformSema( SemaAnalyzer& sema,
                                      const CompleteType& return_type )
 {
     // Create the scope for this statement
     SemaAnalyzer::ScopeHolder scope( sema );
-    scope.Enter(); 
+    scope.Enter();
 
     PerformSemaCommon( sema, return_type, false );
 
@@ -118,6 +119,20 @@ void CompoundStatement::CodeGen( CodeGenerator& code_gen )
 {
     for( auto& s : m_Statements )
         s->CodeGen( code_gen );
+}
+
+void CompoundStatement::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "{";
+    shader_writer.NewLine();
+    shader_writer.PushIndentation();
+
+    for( const auto& statement : m_Statements )
+        shader_writer << *statement;
+
+    shader_writer.PopIndentation();
+    shader_writer.NewLine();
+    shader_writer << "}";
 }
 
 bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )

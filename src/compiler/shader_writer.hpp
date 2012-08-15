@@ -30,7 +30,10 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
+#include <sstream>
+#include <type_traits>
 
 namespace JoeLang
 {
@@ -38,7 +41,18 @@ namespace JoeLang
 namespace Compiler
 {
 
+class CompleteType;
 class EntryFunction;
+class Expression;
+class Function;
+class PostfixOperator;
+class Statement;
+
+enum class IdentifierType
+{
+    VARIABLE,
+    FUNCTION
+};
 
 /**
   * \class ShaderWriter
@@ -48,8 +62,68 @@ class ShaderWriter
 {
 public:
     std::string GenerateGLSL( const EntryFunction& entry_function );
+
+    void WriteFunction( const Function& function );
+
+    ShaderWriter& operator<<( const CompleteType& value );
+    ShaderWriter& operator<<( const Expression& value );
+    ShaderWriter& operator<<( const PostfixOperator& value );
+    ShaderWriter& operator<<( const Statement& value );
+
+    template<typename T>
+    ShaderWriter& operator<<( const T& value );
+
+    void PushIndentation();
+    /** This asserts that m_Indentation is > 0 **/
+    void PopIndentation();
+
+    /** Writes '\n' to the shader **/
+    void NewLine( unsigned num_lines = 1 );
+
+    /**
+      * This will mangle an identifier to ensure that there are no conflicts
+      * Variables are suffixed with "_"
+      * Functions are suffixed with "_f"
+      * \param identifier
+      *   The identifier to mangle
+      * \param identifier_type
+      *   What kind of identifier this is
+      * \returns the mangled identifier
+      */
+    static
+    std::string Mangle( const std::string& identifier,
+                        IdentifierType identifier_type );
 private:
+    void GenerateFragmentShader( const EntryFunction& entry_function );
+
+    /** Writes #version 150 to the shader **/
+    void WriteGLSLVersion();
+
+    /** Writes all the output varyings **/
+    void WriteOutputVariables( const EntryFunction& entry_function );
+
+    /** Writes main(){...} **/
+    void WriteMainFunction( const EntryFunction& entry_function );
+
+    /**
+      * The shader under construction
+      */
+    std::stringstream m_Shader;
+
+    /**
+      * The current indentation
+      */
+    unsigned m_Indentation = 0;
+
+    /**
+      * The set of function signatures that we've processed
+      */
+    std::set<std::string> m_FunctionSignatures;
+
+    const static std::string s_GLSLVersion;
 };
 
 } // namespace Compiler
 } // namespace JoeLang
+
+#include "inl/shader_writer-inl.hpp"

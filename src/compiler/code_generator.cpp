@@ -138,8 +138,6 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
 
     OptimizeModule();
 
-    m_LLVMModule->dump();
-
     return std::move(techniques);
 }
 

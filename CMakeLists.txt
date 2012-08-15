@@ -67,6 +67,7 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/type_properties.hpp
                      src/compiler/variable.cpp
                      src/compiler/variable.hpp
+                     src/compiler/inl/shader_writer-inl.hpp
                      src/compiler/tokens/declaration_specifier.cpp
                      src/compiler/tokens/declaration_specifier.hpp
                      src/compiler/tokens/declaration.cpp

@@ -68,6 +68,11 @@ void EmptyStatement::CodeGen( CodeGenerator& code_gen )
 {
 }
 
+void EmptyStatement::Write( ShaderWriter& shader_writer ) const
+{
+    // glsl doesn't support empty statements
+}
+
 bool EmptyStatement::Parse( Parser& parser, EmptyStatement_up& token )
 {
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )

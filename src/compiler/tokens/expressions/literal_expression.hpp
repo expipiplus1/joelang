@@ -155,6 +155,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -217,6 +220,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -269,6 +275,9 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
@@ -303,6 +312,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;
@@ -353,6 +365,9 @@ public:
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType() const override;

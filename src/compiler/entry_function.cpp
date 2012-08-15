@@ -48,11 +48,17 @@ EntryFunction::EntryFunction( ShaderDomain domain,
     ,m_Function( std::move(function) )
     ,m_Parameters( std::move(parameters) )
 {
+    assert( m_Function && "EntryFunction given a null function" );
 }
 
 ShaderDomain EntryFunction::GetDomain() const
 {
     return m_Domain;
+}
+
+const Function& EntryFunction::GetFunction() const
+{
+    return *m_Function;
 }
 
 } // namespace Compiler

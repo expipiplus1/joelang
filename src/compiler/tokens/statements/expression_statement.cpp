@@ -35,6 +35,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
@@ -74,6 +75,11 @@ void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
 void ExpressionStatement::CodeGen( CodeGenerator& code_gen )
 {
     m_Expression->CodeGen( code_gen );
+}
+
+void ExpressionStatement::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << *m_Expression << ";";
 }
 
 bool ExpressionStatement::Parse( Parser& parser, ExpressionStatement_up& token )

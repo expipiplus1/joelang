@@ -122,6 +122,11 @@ const CompleteType& Variable::GetType() const
     return m_Type;
 }
 
+const std::string& Variable::GetName() const
+{
+    return m_Name;
+}
+
 Type Variable::GetUnderlyingType() const
 {
     return m_Type.GetBaseType();

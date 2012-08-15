@@ -38,6 +38,7 @@
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 
@@ -141,6 +142,36 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
     code_gen.CreateFunctionDefinition( m_LLVMFunction,
                                        m_Parameters,
                                        m_Definition );
+}
+
+void Function::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_ReturnType << " " <<
+                     ShaderWriter::Mangle( m_Identifier,
+                                           IdentifierType::FUNCTION ) <<
+                     "(";
+
+    bool first = true;
+    for( const auto& parameter : m_Parameters )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
+        if( parameter->IsConst() )
+            shader_writer << "const" << " ";
+        // todo more attributes
+        shader_writer << parameter->GetType() << " " <<
+                         ShaderWriter::Mangle( parameter->GetName(),
+                                               IdentifierType::VARIABLE );
+    }
+
+    shader_writer << ")";
+    shader_writer.NewLine();
+
+    shader_writer << static_cast<Statement&>(*m_Definition);
+
+    shader_writer.NewLine(2);
 }
 
 } // namespace Compiler

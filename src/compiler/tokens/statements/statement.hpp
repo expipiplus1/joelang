@@ -42,6 +42,7 @@ class CodeGenerator;
 class CompleteType;
 class Parser;
 class SemaAnalyzer;
+class ShaderWriter;
 class Statement;
 using Statement_up = std::unique_ptr<Statement>;
 
@@ -79,6 +80,9 @@ public:
       */
     virtual
     void CodeGen( CodeGenerator& code_gen ) = 0;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const = 0;
 
     static
     bool Parse ( Parser& parser, Statement_up& token );

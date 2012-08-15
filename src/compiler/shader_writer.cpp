@@ -29,10 +29,18 @@
 
 #include "shader_writer.hpp"
 
+#include <cassert>
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <sstream>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/entry_function.hpp>
+#include <compiler/function.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/shader.hpp>
 
 namespace JoeLang
@@ -40,17 +48,14 @@ namespace JoeLang
 namespace Compiler
 {
 
+const std::string ShaderWriter::s_GLSLVersion = "150";
+
 std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
 {
     // todo, I'm sure that there's something missing here...
 
     if( entry_function.GetDomain() == ShaderDomain::FRAGMENT )
-        return  "#version 150\n"
-                "out vec4 output_color;\n"
-                "void main()\n"
-                "{\n"
-                "   output_color = vec4(0.44, 0.85, 0.29, 1.0);\n"
-                "}\n";
+        GenerateFragmentShader( entry_function );
     else
         return  "#version 150\n"
                 "in vec4 position;\n"
@@ -58,6 +63,121 @@ std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
                 "{\n"
                 "   gl_Position = position;\n"
                 "}\n";
+
+    std::string ret = m_Shader.str();
+
+    // reset things
+    m_FunctionSignatures.clear();
+    m_Shader.str("");
+
+    assert( m_Indentation == 0 && "Unmatched indentations" );
+
+    return ret;
+}
+
+void ShaderWriter::WriteFunction( const Function& function )
+{
+    const std::string& signature = function.GetSignatureString();
+    if( m_FunctionSignatures.find( signature ) != m_FunctionSignatures.end() )
+        return;
+    m_FunctionSignatures.insert( function.GetSignatureString() );
+    function.Write( *this );
+}
+
+void ShaderWriter::PushIndentation()
+{
+    ++m_Indentation;
+}
+
+void ShaderWriter::PopIndentation()
+{
+    assert( m_Indentation > 0 && "Trying to pop 0 indentation" );
+    --m_Indentation;
+}
+
+std::string ShaderWriter::Mangle( const std::string& identifier,
+                                  IdentifierType identifier_type )
+{
+    const static std::map<IdentifierType, std::string> suffix_map
+    {
+        { IdentifierType::VARIABLE, "_"  },
+        { IdentifierType::FUNCTION, "_f" }
+    };
+    return identifier + suffix_map.at(identifier_type);
+}
+
+ShaderWriter& ShaderWriter::operator << ( const CompleteType& value )
+{
+    value.Write( *this );
+    return *this;
+}
+
+ShaderWriter& ShaderWriter::operator << ( const PostfixOperator& value )
+{
+    value.Write( *this );
+    return *this;
+}
+
+ShaderWriter& ShaderWriter::operator << ( const Expression& value )
+{
+    value.Write( *this );
+    return *this;
+}
+
+ShaderWriter& ShaderWriter::operator << ( const Statement& value )
+{
+    value.Write( *this );
+    return *this;
+}
+
+void ShaderWriter::GenerateFragmentShader(
+                                           const EntryFunction& entry_function )
+{
+    WriteGLSLVersion();
+
+    WriteOutputVariables( entry_function);
+
+    WriteFunction( entry_function.GetFunction() );
+
+    WriteMainFunction( entry_function );
+}
+
+void ShaderWriter::WriteGLSLVersion()
+{
+    m_Shader << "#version " << s_GLSLVersion;
+    NewLine(2);
+}
+
+void ShaderWriter::WriteOutputVariables( const EntryFunction& entry_function )
+{
+    // todo
+    m_Shader << "out vec4 output_color;";
+    NewLine(2);
+}
+
+void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
+{
+    m_Shader << "void main()";
+    NewLine();
+    m_Shader << "{";
+    PushIndentation();
+    NewLine();
+
+
+
+    PopIndentation();
+    NewLine();
+    m_Shader << "}";
+    NewLine();
+}
+
+void ShaderWriter::NewLine( unsigned num_lines )
+{
+    const std::string indent = "    ";
+    for( unsigned i = 0; i < num_lines; ++i )
+        m_Shader << '\n';
+    for( unsigned i = 0; i < m_Indentation; ++i )
+        m_Shader << indent;
 }
 
 } // namespace Compiler

@@ -36,6 +36,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
@@ -86,6 +87,14 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
 void ReturnStatement::CodeGen( CodeGenerator& code_gen )
 {
     code_gen.CreateReturnStatement( m_Expression );
+}
+
+void ReturnStatement::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "return";
+    if( m_Expression )
+        shader_writer << " " << *m_Expression;
+    shader_writer << ";";
 }
 
 bool ReturnStatement::Parse( Parser& parser, ReturnStatement_up& token )

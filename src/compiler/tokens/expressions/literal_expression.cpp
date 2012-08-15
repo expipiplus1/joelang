@@ -43,6 +43,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -180,6 +181,11 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, GetType().GetType() );
+}
+
+void IntegerLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_Value;
 }
 
 CompleteType IntegerLiteralExpression::GetType() const
@@ -389,6 +395,13 @@ llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
                                                                : Type::DOUBLE );
 }
 
+void FloatingLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    assert( m_Suffix == Suffix::SINGLE &&
+            "todo shader writer warning instead of assert" );
+    shader_writer << m_Value << ( m_Suffix == Suffix::SINGLE ? "f" : "" );
+}
+
 CompleteType FloatingLiteralExpression::GetType() const
 {
     if( m_Suffix == Suffix::SINGLE )
@@ -478,6 +491,11 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, Type::BOOL );
+}
+
+void BooleanLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << ( m_Value ? "true" : "false" );
 }
 
 CompleteType BooleanLiteralExpression::GetType() const
@@ -593,6 +611,11 @@ llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateString( m_Value );
 }
 
+void StringLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "todo send error or warning" );
+}
+
 CompleteType StringLiteralExpression::GetType() const
 {
     return CompleteType( Type::STRING );
@@ -683,6 +706,11 @@ llvm::Value* CharacterLiteralExpression::CodeGen(
                                                 CodeGenerator& code_gen ) const
 {
     return code_gen.CreateInteger( m_Value, Type::I8 );
+}
+
+void CharacterLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "'" << m_Value << "'";
 }
 
 CompleteType CharacterLiteralExpression::GetType() const

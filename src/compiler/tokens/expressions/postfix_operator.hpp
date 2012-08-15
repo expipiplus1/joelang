@@ -56,6 +56,7 @@ class Function;
 using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
+class ShaderWriter;
 
 /**
   * \defgroup PostfixOperators
@@ -93,6 +94,9 @@ public:
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
                                    const Expression& expression );
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const;
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;

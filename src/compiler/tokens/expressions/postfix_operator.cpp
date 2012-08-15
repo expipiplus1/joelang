@@ -88,6 +88,10 @@ llvm::Value* PostfixOperator::CodeGenPointerTo( CodeGenerator& code_gen,
     return nullptr;
 }
 
+void PostfixOperator::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "complete me" );
+}
 
 bool PostfixOperator::IsLValue( const Expression& expression ) const
 {

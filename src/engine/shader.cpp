@@ -35,6 +35,8 @@
 #include <string>
 #include <utility>
 
+#include <iostream>
+
 #include <GL/GLee.h>
 
 #include <compiler/entry_function.hpp>
@@ -105,6 +107,8 @@ void Shader::Compile()
     Compiler::ShaderWriter shader_writer;
     assert( m_EntryFunction && "Generating glsl for a null entryfunction" );
     m_Source = shader_writer.GenerateGLSL( *m_EntryFunction );
+
+    std::cout << m_Source;
 
     //
     // Compile the glsl

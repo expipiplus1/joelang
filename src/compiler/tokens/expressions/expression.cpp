@@ -42,6 +42,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
@@ -78,6 +79,11 @@ llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
 {
     assert( false && "Complete me" );
     return nullptr;
+}
+
+void Expression::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "completeme");
 }
 
 bool Expression::Parse( Parser& parser, Expression_up& token )
@@ -254,6 +260,12 @@ llvm::Value* AssignmentExpression::CodeGenPointerTo(
     return m_AssigneePtr->CodeGenPointerTo( code_gen );
 }
 
+void AssignmentExpression::Write( ShaderWriter& shader_writer ) const
+{
+    // Todo this isn't right, need to handle += and friends properly
+    shader_writer << *m_AssigneePtr << " = " << *m_AssignedExpression;
+}
+
 CompleteType AssignmentExpression::GetType() const
 {
     return m_AssigneePtr->GetType();
@@ -380,6 +392,12 @@ llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateSelect( *m_Condition,
                                   *m_TrueExpression,
                                   *m_FalseExpression );
+}
+
+void ConditionalExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "(" << *m_Condition << " ? " << *m_TrueExpression <<
+                                            " : " << *m_FalseExpression << ")";
 }
 
 CompleteType ConditionalExpression::GetType() const
@@ -536,6 +554,11 @@ llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateCast( *m_Expression, m_CastType );
 }
 
+void CastExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_CastType << "(" << *m_Expression << ")";
+}
+
 CompleteType CastExpression::GetType() const
 {
     return m_CastType;
@@ -667,6 +690,20 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 }
 
+void UnaryExpression::Write( ShaderWriter& shader_writer ) const
+{
+    static const std::map<Op, std::string> op_string_map =
+    {
+        { Op::PLUS,        "+" },
+        { Op::MINUS,       "-" },
+        { Op::INCREMENT,   "++" },
+        { Op::DECREMENT,   "--" },
+        { Op::BITWISE_NOT, "~" },
+        { Op::LOGICAL_NOT, "!" }
+    };
+    shader_writer << "(" << op_string_map.at(m_Operator) << *m_Expression << ")";
+}
+
 CompleteType UnaryExpression::GetType() const
 {
     /// Todo vector and matrix bool things
@@ -783,6 +820,11 @@ llvm::Value* PostfixExpression::CodeGenPointerTo(
                                                 CodeGenerator& code_gen ) const
 {
     return m_PostfixOperator->CodeGenPointerTo( code_gen, *m_Expression );
+}
+
+void PostfixExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "(" << *m_Expression << *m_PostfixOperator << ")";
 }
 
 CompleteType PostfixExpression::GetType() const
@@ -911,6 +953,21 @@ llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
                 "arguments" );
         return code_gen.CreateScalarConstructor( m_Type, *m_Arguments[0] );
     }
+}
+
+void TypeConstructorExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << CompleteType(m_Type) << "(";
+    bool first = true;
+    for( const auto& argument : m_Arguments )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
+        shader_writer << *argument;
+    }
+    shader_writer << ")";
 }
 
 CompleteType TypeConstructorExpression::GetType() const
@@ -1052,6 +1109,14 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
     assert( m_Variable &&
             "Trying to generate code for an unresolved variable" );
     return m_Variable->GetLLVMPointer();
+}
+
+void IdentifierExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << ShaderWriter::Mangle(
+                     m_Identifier,
+                     static_cast<bool>(m_Variable) ? IdentifierType::VARIABLE
+                                                   : IdentifierType::FUNCTION );
 }
 
 CompleteType IdentifierExpression::GetType() const
