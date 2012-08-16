@@ -260,6 +260,9 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         }
     }
 
+    if( m_Semantic )
+        m_Semantic->PerformSema( sema );
+
     return ret;
 }
 

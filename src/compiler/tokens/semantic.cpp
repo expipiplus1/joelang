@@ -34,6 +34,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -63,6 +64,34 @@ Semantic::~Semantic()
 
 void Semantic::PerformSema( SemaAnalyzer& sema )
 {
+    //
+    // If we don't have an index we have no work to do here
+    //
+    if( !m_IndexExpression )
+        return;
+
+    if( !m_IndexExpression->ResolveIdentifiers( sema ) )
+        return;
+
+    m_IndexExpression = CastExpression::Create( CompleteType( Type::I32 ),
+                                                std::move(m_IndexExpression) );
+
+    if( !m_IndexExpression->PerformSema( sema ) )
+        return;
+
+    if( !m_IndexExpression->IsConst() )
+    {
+        sema.Error( "Index in an semantic index must be const" );
+        return;
+    }
+
+    int index = sema.EvaluateExpression( *m_IndexExpression ).GetI32();
+    if( index < 0 )
+    {
+        sema.Error( "Semantic index must be non-negative" );
+        return;
+    }
+    m_Index = index;
 }
 
 bool Semantic::Parse( Parser& parser, Semantic_up& token )
@@ -84,10 +113,7 @@ bool Semantic::Parse( Parser& parser, Semantic_up& token )
     if( parser.ExpectTerminal( TerminalType::OPEN_SQUARE ) )
     {
         if( !parser.Expect<Expression>( index_expression ) )
-        {
-            parser.Error( "Expected semantic index expression" );
             return false;
-        }
         if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
         {
             parser.Error( "Expected closing square bracket on semantic index" );
