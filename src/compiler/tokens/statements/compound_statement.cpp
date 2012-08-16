@@ -124,11 +124,13 @@ void CompoundStatement::CodeGen( CodeGenerator& code_gen )
 void CompoundStatement::Write( ShaderWriter& shader_writer ) const
 {
     shader_writer << "{";
-    shader_writer.NewLine();
     shader_writer.PushIndentation();
 
     for( const auto& statement : m_Statements )
+    {
+        shader_writer.NewLine();
         shader_writer << *statement;
+    }
 
     shader_writer.PopIndentation();
     shader_writer.NewLine();
