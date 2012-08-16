@@ -130,12 +130,11 @@ ShaderWriter& ShaderWriter::operator << ( const Statement& value )
     return *this;
 }
 
-void ShaderWriter::GenerateFragmentShader(
-                                           const EntryFunction& entry_function )
+void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
 
-    WriteOutputVariables( entry_function);
+    WriteOutputVariables( entry_function );
 
     WriteFunction( entry_function.GetFunction() );
 
@@ -163,12 +162,29 @@ void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
     PushIndentation();
     NewLine();
 
-
+    //
+    // Write a call the the entry function and sort out all the output variables
+    //
+    // todo hidden varyings
+    *this << "output_color = " << 
+             Mangle( entry_function.GetFunction().GetIdentifier(),
+                     IdentifierType::FUNCTION ) <<
+             "(";
+    bool first = true;
+    for( const auto& argument : entry_function.GetParameters() )
+    {
+        if( !first )
+            *this << ", ";
+        else
+            first = false;
+        *this << *argument;
+    }
+    *this << ");";
 
     PopIndentation();
     NewLine();
     m_Shader << "}";
-    NewLine();
+    NewLine(2);
 }
 
 void ShaderWriter::NewLine( unsigned num_lines )
