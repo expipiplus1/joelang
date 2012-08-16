@@ -51,7 +51,13 @@ namespace Compiler
 
 DeclSpecs::DeclSpecs()
     :m_IsConst( false )
-    ,m_Type( Type::UNKNOWN )
+    ,m_IsUniform( false )
+    ,m_IsVarying( false )
+    ,m_IsStatic ( false )
+    ,m_IsExtern ( false )
+    ,m_IsIn     ( false )
+    ,m_IsOut    ( false )
+    ,m_Type   ( Type::UNKNOWN )
 {
 }
 
@@ -66,8 +72,8 @@ void DeclSpecs::AnalyzeDeclSpecs(
     {
         if( isa<TypeQualifier>(t) )
         {
-            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
-            switch( type_qual->GetQualifier() )
+            TypeQualifier& type_qual = static_cast<TypeQualifier&>( *t.get() );
+            switch( type_qual.GetQualifier() )
             {
             case TypeQualifier::TypeQual::CONST:
                 m_IsConst = true;
@@ -79,16 +85,46 @@ void DeclSpecs::AnalyzeDeclSpecs(
         }
         else if( isa<TypeSpecifier>(t) )
         {
-            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
-            type_specs.push_back( type_spec->GetSpecifier() );
+            TypeSpecifier& type_spec = static_cast<TypeSpecifier&>( *t.get() );
+            type_specs.push_back( type_spec.GetSpecifier() );
         }
         else if( isa<StorageClassSpecifier>(t) )
         {
-            //StorageClassSpecifier* storage_class =
-                    //static_cast<StorageClassSpecifier*>( t.get() );
-            sema.Error( "TODO, handle storage class specifiers" );
+            StorageClassSpecifier& storage_class =
+                    static_cast<StorageClassSpecifier&>( *t.get() );
+            switch( storage_class.GetStorageClass() )
+            {
+            case StorageClass::UNIFORM:
+                m_IsUniform = true;
+                break;
+            case StorageClass::VARYING:
+                m_IsVarying = true;
+                break;
+            case StorageClass::STATIC:
+                m_IsStatic = true;
+                break;
+            case StorageClass::EXTERN:
+                m_IsExtern = true;
+                break;
+            case StorageClass::IN:
+                m_IsIn = true;
+                break;
+            case StorageClass::OUT:
+                m_IsOut = true;
+                break;
+            case StorageClass::INOUT:
+                m_IsIn = true;
+                m_IsOut = true;
+                break;
+            }
         }
     }
+
+    //
+    // If it has no in, out or inout specifiers it is in by default
+    //
+    if( !m_IsIn && !m_IsOut )
+        m_IsIn = true;
 
     //
     // Get the type from the specifiers
@@ -428,15 +464,23 @@ StorageClassSpecifier::~StorageClassSpecifier()
 {
 }
 
+StorageClass StorageClassSpecifier::GetStorageClass() const
+{
+    return m_StorageClass;
+}
+
 bool StorageClassSpecifier::Parse( Parser& parser,
                            std::unique_ptr<StorageClassSpecifier>& token )
 {
     const static std::vector<std::pair<TerminalType, StorageClass> > sc_map =
     {
-        { TerminalType::STATIC,     StorageClass::STATIC   },
-        { TerminalType::EXTERN,     StorageClass::EXTERN   },
-        { TerminalType::UNIFORM,    StorageClass::UNIFORM  },
-        { TerminalType::VARYING,    StorageClass::VARYING  }
+        { TerminalType::STATIC,  StorageClass::STATIC   },
+        { TerminalType::EXTERN,  StorageClass::EXTERN   },
+        { TerminalType::UNIFORM, StorageClass::UNIFORM  },
+        { TerminalType::VARYING, StorageClass::VARYING  },
+        { TerminalType::IN,      StorageClass::IN       },
+        { TerminalType::OUT,     StorageClass::OUT      },
+        { TerminalType::INOUT,   StorageClass::INOUT    }
     };
 
     for( auto p : sc_map )

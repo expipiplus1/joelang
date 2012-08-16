@@ -142,19 +142,21 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     { TerminalType::RETURN,        { "return",        "" } },
 
     //
-    // Type qualifiers
-    //
-    { TerminalType::CONST,         { "const",     "" } },
-    { TerminalType::VOLATILE,      { "volatile",  "" } },
-
-    //
     // Storage class specifiers
     //
     { TerminalType::STATIC,        { "static",    "" } },
     { TerminalType::EXTERN,        { "extern",    "" } },
     { TerminalType::UNIFORM,       { "uniform",   "" } },
     { TerminalType::VARYING,       { "varying",   "" } },
+    { TerminalType::IN,            { "in",        "" } },
+    { TerminalType::OUT,           { "out",       "" } },
+    { TerminalType::INOUT,         { "inout",     "" } },
 
+    //
+    // Type qualifiers
+    //
+    { TerminalType::CONST,         { "const",     "" } },
+    { TerminalType::VOLATILE,      { "volatile",  "" } },
 
     //
     // Types

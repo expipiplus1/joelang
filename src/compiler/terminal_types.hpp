@@ -146,6 +146,9 @@ enum class TerminalType
     EXTERN,
     UNIFORM,
     VARYING,
+    IN,
+    OUT,
+    INOUT,
 
     // Type Qualifiers
     CONST,

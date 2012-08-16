@@ -68,6 +68,12 @@ public:
                      SemaAnalyzer& sema );
 private:
     bool m_IsConst;
+    bool m_IsUniform;
+    bool m_IsVarying;
+    bool m_IsStatic;
+    bool m_IsExtern;
+    bool m_IsIn;
+    bool m_IsOut;
     Type m_Type;
 };
 
@@ -180,6 +186,17 @@ private:
     TypeQual m_TypeQual;
 };
 
+enum class StorageClass
+{
+    STATIC,
+    EXTERN,
+    UNIFORM,
+    VARYING,
+    IN,
+    OUT,
+    INOUT
+};
+
 /**
   * \class StorageClassSpecifier
   * \ingroup Tokens
@@ -190,18 +207,12 @@ private:
 class StorageClassSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
-    enum class StorageClass
-    {
-        STATIC,
-        EXTERN,
-        UNIFORM,
-        VARYING
-    };
-
     explicit
     StorageClassSpecifier( StorageClass type_spec );
     virtual
     ~StorageClassSpecifier();
+
+    StorageClass GetStorageClass() const;
 
     static
     bool Parse( Parser& parser, std::unique_ptr<StorageClassSpecifier>& token );

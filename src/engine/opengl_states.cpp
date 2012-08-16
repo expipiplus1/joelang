@@ -132,13 +132,13 @@ void RegisterOpenGLStates( Context& context )
 
     /*
     static
-    State<uint2> blend_equation_separate( "blend_equation_separate", 
+    State<uint2> blend_equation_separate( "blend_equation_separate",
                                          blend_equation_enumerants );
     blend_equation_separate.SetCallbacks( [](uint2 v)->void
                                           {glBlendEquationSeparate(v.x(), v.y());},
                                           []()->void
                                           {glBlendEquation(GL_FUNC_ADD, GL_FUNC_ADD);} );
-                                           
+
     static
     State<uint2> blend_func( "blend_func", blend_func_enumerants );
     blend_func.SetCallbacks( [](uint2 v)->void
@@ -151,7 +151,7 @@ void RegisterOpenGLStates( Context& context )
     blend_func_separate.SetCallbacks( [](uint4 v)->void
                                       {glBlendFuncSeparate(v.x(), v.y(), v.z(), v.w());},
                                       []()->void
-                                      {glBlendFuncSeparate(GL_ONE, GL_ZERO, 
+                                      {glBlendFuncSeparate(GL_ONE, GL_ZERO,
                                                            GL_ONE, GL_ZERO);} );
     */
 
@@ -185,7 +185,8 @@ void RegisterOpenGLActions( Context& context )
     clear.SetCallbacks( [](u32 v)->void
                         {glClear(v);} );
 
-    assert( context.AddState( &clear ) && "Error adding opengl action" );
+    bool good = context.AddState( &clear );
+    assert( good && "Error adding opengl action" );
 }
 
 } // namespace JoeLang

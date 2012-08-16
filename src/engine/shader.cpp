@@ -108,7 +108,7 @@ void Shader::Compile()
     assert( m_EntryFunction && "Generating glsl for a null entryfunction" );
     m_Source = shader_writer.GenerateGLSL( *m_EntryFunction );
 
-    std::cout << m_Source;
+    std::cout << m_Source << std::endl;
 
     //
     // Compile the glsl
