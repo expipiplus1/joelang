@@ -30,6 +30,7 @@
 #include "semantic.hpp"
 
 #include <cassert>
+#include <map>
 #include <memory>
 #include <string>
 #include <utility>
@@ -62,8 +63,20 @@ Semantic::~Semantic()
 {
 }
 
+bool Semantic::HasIndex() const
+{
+    return static_cast<bool>( m_IndexExpression );
+}
+
 void Semantic::PerformSema( SemaAnalyzer& sema )
 {
+    const static std::map<std::string, SemanticType> semantic_type_map =
+    {
+        { "POSITION", SemanticType::POSITION },
+        { "DEPTH",    SemanticType::DEPTH    },
+        { "COLOR",    SemanticType::COLOR    },
+    };
+
     //
     // If we don't have an index we have no work to do here
     //
@@ -92,6 +105,23 @@ void Semantic::PerformSema( SemaAnalyzer& sema )
         return;
     }
     m_Index = index;
+
+    //
+    // Try and find a build in semantic
+    //
+    const auto& s = semantic_type_map.find( m_String );
+    if( s == semantic_type_map.end() )
+    {
+        m_SemanticType = SemanticType::CUSTOM;
+        //
+        // Check that there is no index on this
+        // todo index for color and attr
+        if( HasIndex() )
+            sema.Error( "Can't have an index with built in semantic " +
+                        m_String );
+    }
+    else
+        m_SemanticType = s->second;
 }
 
 bool Semantic::Parse( Parser& parser, Semantic_up& token )

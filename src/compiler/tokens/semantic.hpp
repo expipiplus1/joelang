@@ -46,6 +46,14 @@ class SemaAnalyzer;
 class Semantic;
 using Semantic_up = std::unique_ptr<Semantic>;
 
+enum class SemanticType
+{
+    CUSTOM,
+    POSITION,
+    DEPTH,
+    COLOR,
+};
+
 /**
   * \class Semantic
   * \ingroup Tokens
@@ -60,6 +68,8 @@ public:
     Semantic  ( std::string string, Expression_up index_expression = nullptr );
     virtual
     ~Semantic ();
+
+    bool HasIndex() const;
 
     /**
       * Performs semantic analysis on the semantic
@@ -79,6 +89,7 @@ private:
     Expression_up m_IndexExpression;
 
     unsigned      m_Index;
+    SemanticType  m_SemanticType;
 };
 
 } // namespace Compiler
