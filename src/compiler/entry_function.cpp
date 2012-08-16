@@ -61,5 +61,10 @@ const Function& EntryFunction::GetFunction() const
     return *m_Function;
 }
 
+const std::vector<Expression_up>& EntryFunction::GetParameters() const
+{
+    return m_Parameters;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

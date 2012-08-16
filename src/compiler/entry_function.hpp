@@ -59,7 +59,10 @@ public:
                    std::vector<Expression_up> parameters );
 
     ShaderDomain GetDomain() const;
+
     const Function& GetFunction() const;
+    
+    const std::vector<Expression_up>& GetParameters() const;
 
 private:
     ShaderDomain               m_Domain;
