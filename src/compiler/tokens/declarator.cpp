@@ -40,12 +40,13 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
+#include <compiler/tokens/semantic.hpp>
 #include <compiler/tokens/token.hpp>
-#include <compiler/type_properties.hpp>
 
 namespace JoeLang
 {
@@ -198,11 +199,13 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
-                        Declarator::ArraySpecifierVector array_specifiers )
+                        Declarator::ArraySpecifierVector array_specifiers,
+                        Semantic_up semantic )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
+    ,m_Semantic( std::move(semantic) )
 {
 }
 
@@ -304,17 +307,31 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
+    //
+    // optional function specifier
+    //
     std::unique_ptr<FunctionSpecifier> function_specifier;
     parser.Expect<FunctionSpecifier>( function_specifier );
     CHECK_PARSER;
 
+    //
+    // optional array specifier
+    //
     ArraySpecifierVector array_specifiers;
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
+    //
+    // optional semantic
+    //
+    Semantic_up semantic;
+    parser.Expect<Semantic>( semantic );
+    CHECK_PARSER;
+
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
-                                 std::move(array_specifiers) ) );
+                                 std::move(array_specifiers),
+                                 std::move(semantic) ) );
     return true;
 }
 

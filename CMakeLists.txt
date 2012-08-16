@@ -82,6 +82,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/initializer.hpp
                      src/compiler/tokens/parameter.cpp
                      src/compiler/tokens/parameter.hpp
+                     src/compiler/tokens/semantic.cpp
+                     src/compiler/tokens/semantic.hpp
                      src/compiler/tokens/token.cpp
                      src/compiler/tokens/token.hpp
                      src/compiler/tokens/translation_unit.cpp

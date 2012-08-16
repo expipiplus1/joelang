@@ -55,6 +55,8 @@ using FunctionSpecifier_up = std::unique_ptr<FunctionSpecifier>;
 class Initializer;
 class Parser;
 class SemaAnalyzer;
+class Semantic;
+using Semantic_up = std::unique_ptr<Semantic>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -122,7 +124,7 @@ private:
   * \ingroup Tokens
   * \brief Matches a Declarator with a param list or array specifiers or nothing
   *
-  * Declarator = identifier FunctionSpecifier? ArraySpecifier*
+  * Declarator = identifier FunctionSpecifier? ArraySpecifier* Semantic?
   */
 class Declarator : public JoeLang::Compiler::Token
 {
@@ -132,7 +134,8 @@ public:
     /** If given a function_body it asserts that it has a function specifier **/
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
-                    ArraySpecifierVector array_specifiers );
+                    ArraySpecifierVector array_specifiers,
+                    Semantic_up Semantic );
     virtual
     ~Declarator   ();
 
@@ -196,6 +199,7 @@ private:
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
+    Semantic_up          m_Semantic;
 };
 
 } // namespace Compiler
