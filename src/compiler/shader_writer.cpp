@@ -98,12 +98,12 @@ void ShaderWriter::PopIndentation()
 std::string ShaderWriter::Mangle( const std::string& identifier,
                                   IdentifierType identifier_type )
 {
-    const static std::map<IdentifierType, std::string> suffix_map
+    const static std::map<IdentifierType, std::string> prefix_map
     {
         { IdentifierType::VARIABLE, "_"  },
         { IdentifierType::FUNCTION, "_f" }
     };
-    return identifier + suffix_map.at(identifier_type);
+    return prefix_map.at(identifier_type) + identifier;
 }
 
 ShaderWriter& ShaderWriter::operator << ( const CompleteType& value )
@@ -166,7 +166,7 @@ void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
     // Write a call the the entry function and sort out all the output variables
     //
     // todo hidden varyings
-    *this << "output_color = " << 
+    *this << "output_color = " <<
              Mangle( entry_function.GetFunction().GetIdentifier(),
                      IdentifierType::FUNCTION ) <<
              "(";

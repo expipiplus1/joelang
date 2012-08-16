@@ -82,8 +82,8 @@ public:
 
     /**
       * This will mangle an identifier to ensure that there are no conflicts
-      * Variables are suffixed with "_"
-      * Functions are suffixed with "_f"
+      * Variables are prefixed  with "_"
+      * Functions are prefixed with "f_"
       * \param identifier
       *   The identifier to mangle
       * \param identifier_type
