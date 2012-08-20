@@ -56,7 +56,7 @@ const std::map<Type, Runtime::TypeInformation> Runtime::s_TypeInformationMap =
     {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
     {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
     {Type::STRING, {ReturnType::DEFAULT, ParamType::EXPAND}}
-#elif defined(ARCH_I686)
+#elif defined(ARCH_I386)
     {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
     {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
     {Type::STRING, {ReturnType::INTEGER, ParamType::POINTER}}
@@ -106,7 +106,7 @@ Runtime::Runtime()
 
     assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
                 m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
-#elif defined( ARCH_I686 )
+#elif defined( ARCH_I386 )
     m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
 #else
     llvm::Type* size_type = GetLLVMType( Type::U32 );
