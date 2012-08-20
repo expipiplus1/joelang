@@ -34,6 +34,7 @@
 #include <vector>
 
 #include <compiler/complete_type.hpp>
+#include <compiler/semantic.hpp>
 
 namespace llvm
 {
@@ -61,6 +62,7 @@ class Function
 public:
     Function( std::string identifier,
               CompleteType base_return_type,
+              Semantic semantic,
               std::vector<CompleteType> parameters );
 
     const std::string& GetIdentifier() const;
@@ -99,14 +101,15 @@ public:
 
     void Write( ShaderWriter& shader_writer ) const;
 private:
-    std::string m_Identifier;
-    CompleteType m_ReturnType;
+    std::string               m_Identifier;
+    CompleteType              m_ReturnType;
+    Semantic                  m_Semantic;
     std::vector<CompleteType> m_ParameterTypes;
     std::vector<Variable_sp>  m_Parameters;
 
-    CompoundStatement_up m_Definition;
+    CompoundStatement_up      m_Definition;
 
-    llvm::Function* m_LLVMFunction;
+    llvm::Function*           m_LLVMFunction;
 };
 
 } // namespace Compiler

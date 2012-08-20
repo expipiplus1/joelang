@@ -89,7 +89,7 @@ public:
 
         FunctionSpecifier,
         Parameter,
-        Semantic,
+        SemanticSpecifier,
 
         //
         // DeclarationSpecifiers

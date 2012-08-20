@@ -32,65 +32,46 @@
 #include <memory>
 #include <string>
 
-#include <compiler/tokens/token.hpp>
-
 namespace JoeLang
 {
 namespace Compiler
 {
 
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
-class Parser;
-class SemaAnalyzer;
-class Semantic;
-using Semantic_up = std::unique_ptr<Semantic>;
-
 enum class SemanticType
 {
+    NO_SEMANTIC,
+
     CUSTOM,
+
     POSITION,
     DEPTH,
     COLOR,
 };
 
-/**
-  * \class Semantic
-  * \ingroup Tokens
-  * \brief Matches a semantic
-  *
-  * Semantic =  ':' identifier ( '[' Expression ']' )
-  */
-class Semantic : public JoeLang::Compiler::Token
+class Semantic
 {
 public:
+    /** This initializes semantic to NO_SEMANTIC type **/
+    Semantic  ();
     /** This constructor asserts on an empty string **/
-    Semantic  ( std::string string, Expression_up index_expression = nullptr );
-    virtual
-    ~Semantic ();
+    explicit
+    Semantic  ( std::string string );
+    /** This constructor asserts on an empty string **/
+    Semantic  ( std::string string, unsigned index );
 
     bool HasIndex() const;
+    /** This asserts that we have an index **/
+    unsigned GetIndex() const;
 
-    /**
-      * Performs semantic analysis on the semantic
-      * This will resolve the index exprssion if there is one
-      */
-    void PerformSema( SemaAnalyzer& sema );
-
-    static
-    bool Parse       ( Parser& parser, Semantic_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const Semantic* d );
 private:
-    std::string   m_String;
-    Expression_up m_IndexExpression;
+    void DetermineType();
 
+    SemanticType  m_Type;
+    std::string   m_String;
+    bool          m_HasIndex;
     unsigned      m_Index;
-    SemanticType  m_SemanticType;
 };
+
 
 } // namespace Compiler
 } // namespace JoeLang

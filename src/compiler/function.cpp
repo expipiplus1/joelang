@@ -49,9 +49,11 @@ namespace Compiler
 
 Function::Function( std::string identifier,
                     CompleteType return_type,
+                    Semantic semantic,
                     std::vector<CompleteType> parameter_types )
     :m_Identifier( std::move(identifier) )
     ,m_ReturnType( std::move(return_type) )
+    ,m_Semantic( std::move(semantic) )
     ,m_ParameterTypes( std::move(parameter_types) )
     ,m_LLVMFunction( nullptr )
 {

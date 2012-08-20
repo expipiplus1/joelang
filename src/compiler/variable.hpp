@@ -35,6 +35,7 @@
 
 #include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/semantic.hpp>
 
 namespace llvm
 {
@@ -66,6 +67,7 @@ public:
       * an initializer
       */
     Variable( CompleteType type,
+              Semantic semantic,
               bool is_const,
               bool is_global = false,
               bool is_parameter = false,
@@ -87,6 +89,8 @@ public:
 
     const CompleteType& GetType() const;
 
+    const Semantic& GetSemantic() const;
+
     const std::string& GetName() const;
 
     Type GetUnderlyingType() const;
@@ -98,6 +102,7 @@ public:
 
 private:
     CompleteType m_Type;
+    Semantic m_Semantic;
     bool m_IsConst;
     bool m_IsGlobal;
     bool m_IsParameter;

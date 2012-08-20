@@ -56,7 +56,8 @@ class Initializer;
 class Parser;
 class SemaAnalyzer;
 class Semantic;
-using Semantic_up = std::unique_ptr<Semantic>;
+class SemanticSpecifier;
+using SemanticSpecifier_up = std::unique_ptr<SemanticSpecifier>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -135,7 +136,7 @@ public:
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
                     ArraySpecifierVector array_specifiers,
-                    Semantic_up Semantic );
+                    SemanticSpecifier_up semantic_specifier );
     virtual
     ~Declarator   ();
 
@@ -170,6 +171,11 @@ public:
     bool IsFunctionDeclarator() const;
 
     /**
+      * Returns the semantic
+      */
+    Semantic GetSemantic() const;
+
+    /**
       * \returns the identifier
       */
     const std::string& GetIdentifier() const;
@@ -199,7 +205,7 @@ private:
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
-    Semantic_up          m_Semantic;
+    SemanticSpecifier_up m_SemanticSpecifier;
 };
 
 } // namespace Compiler

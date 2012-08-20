@@ -259,6 +259,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
     {
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
                                                         v.second.GetType(),
+                                                        Semantic(),
                                                         true, //Is const
                                                         true, //Is global
                                                         false,//Isn't a param
@@ -306,6 +307,7 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
 
 void SemaAnalyzer::DeclareFunction( std::string identifier,
                                     CompleteType return_type,
+                                    Semantic semantic,
                                     std::vector<CompleteType> parameter_types )
 {
     std::vector<Function_sp>& function_overloads =
@@ -326,6 +328,7 @@ void SemaAnalyzer::DeclareFunction( std::string identifier,
     function_overloads.push_back( std::make_shared<Function>(
                                                  identifier,
                                                  std::move(return_type),
+                                                 std::move(semantic),
                                                  std::move(parameter_types) ) );
     return;
 }

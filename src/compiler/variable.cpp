@@ -50,12 +50,14 @@ namespace Compiler
 {
 
 Variable::Variable( CompleteType type,
+                    Semantic semantic,
                     bool is_const,
                     bool is_global,
                     bool is_parameter,
                     GenericValue initializer,
                     std::string name )
     :m_Type( std::move(type) )
+    ,m_Semantic( std::move(semantic) )
     ,m_IsConst( is_const )
     ,m_IsGlobal( is_global )
     ,m_IsParameter( is_parameter )

@@ -58,11 +58,13 @@ namespace Compiler
 Parameter::Parameter ( DeclSpecsVector decl_specs,
                        std::string identifier,
                        ArraySpecifierVector array_specifiers,
+                       SemanticSpecifier_up semantic_specifier,
                        Initializer_up default_value )
 :Token( TokenTy::Parameter )
 ,m_DeclarationSpecifiers( std::move(decl_specs) )
 ,m_Identifier( std::move(identifier) )
 ,m_ArraySpecifers( std::move(array_specifiers) )
+,m_SemanticSpecifier( std::move(semantic_specifier) )
 ,m_DefaultValue( std::move(default_value) )
 {
     assert( !m_DeclarationSpecifiers.empty() &&
@@ -110,8 +112,12 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->GetArrayExtents() != array_extents )
         sema.Error( "Default parameter value has mismatching array extents" );
 
+    Semantic semantic = m_SemanticSpecifier ? m_SemanticSpecifier->GetSemantic()
+                                            : Semantic();
+
     m_Variable = std::make_shared<Variable>( CompleteType( base_type,
                                                            array_extents ),
+                                             std::move(semantic),
                                              decl_specs.IsConst(),
                                              false, //Isn't global
                                              true,  //Is a param
@@ -155,6 +161,10 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
+    SemanticSpecifier_up semantic_specifier;
+    parser.Expect<SemanticSpecifier>( semantic_specifier );
+    CHECK_PARSER;
+
     // If we have an identifier we can look for an optional Expression (but only
     // if we also match an '='
     if( !identifier.empty() &&
@@ -165,6 +175,7 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
     token.reset( new Parameter( std::move(decl_specs),
                                 std::move(identifier),
                                 std::move(array_specifiers),
+                                std::move(semantic_specifier),
                                 std::move(default_value) ) );
     return true;
 }

@@ -37,6 +37,7 @@
 #include <compiler/parser.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/semantic.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/parameter.hpp>
@@ -188,6 +189,100 @@ bool FunctionSpecifier::Parse( Parser& parser,
         return false;
 
     token.reset( new FunctionSpecifier( std::move(parameters) ) );
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// SemanticSpecifier
+//------------------------------------------------------------------------------
+
+SemanticSpecifier::SemanticSpecifier( std::string string,
+                                      Expression_up index_expression )
+    :Token( TokenTy::SemanticSpecifier )
+    ,m_String( std::move(string) )
+    ,m_IndexExpression( std::move(index_expression) )
+{
+    assert( !m_String.empty() && "SemanticSpecifier given an empty string" );
+}
+
+SemanticSpecifier::~SemanticSpecifier()
+{
+}
+
+bool SemanticSpecifier::HasIndex() const
+{
+    return static_cast<bool>( m_IndexExpression );
+}
+
+Semantic SemanticSpecifier::GetSemantic() const
+{
+    if( HasIndex() )
+        return Semantic( m_String );
+    else
+        return Semantic( m_String, m_Index );
+}
+
+void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
+{
+    //
+    // If we don't have an index we have no work to do here
+    //
+    if( !m_IndexExpression )
+        return;
+
+    if( !m_IndexExpression->ResolveIdentifiers( sema ) )
+        return;
+
+    m_IndexExpression = CastExpression::Create( CompleteType( Type::I32 ),
+                                                std::move(m_IndexExpression) );
+
+    if( !m_IndexExpression->PerformSema( sema ) )
+        return;
+
+    if( !m_IndexExpression->IsConst() )
+    {
+        sema.Error( "Index in an semantic index must be const" );
+        return;
+    }
+
+    int index = sema.EvaluateExpression( *m_IndexExpression ).GetI32();
+    if( index < 0 )
+    {
+        sema.Error( "SemanticSpecifier index must be non-negative" );
+        return;
+    }
+    m_Index = index;
+}
+
+bool SemanticSpecifier::Parse( Parser& parser, SemanticSpecifier_up& token )
+{
+    if( !parser.ExpectTerminal( TerminalType::COLON ) )
+        return false;
+
+    std::string string;
+    if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, string ) )
+    {
+        parser.Error( "Expected semantic" );
+        return false;
+    }
+
+    //
+    // try and parse the optional index
+    //
+    Expression_up index_expression;
+    if( parser.ExpectTerminal( TerminalType::OPEN_SQUARE ) )
+    {
+        if( !parser.Expect<Expression>( index_expression ) )
+            return false;
+        if( !parser.ExpectTerminal( TerminalType::CLOSE_SQUARE ) )
+        {
+            parser.Error( "Expected closing square bracket on semantic index" );
+            return false;
+        }
+    }
+
+    token.reset( new SemanticSpecifier( std::move(string),
+                                        std::move(index_expression) ) );
     return true;
 }
 

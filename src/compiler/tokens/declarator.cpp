@@ -45,7 +45,6 @@
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
-#include <compiler/tokens/semantic.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -132,6 +131,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     m_Variable = std::make_shared<Variable>( CompleteType( base_type,
                                                            array_extents ),
+                                             m_Declarator->GetSemantic(),
                                              decl_specs.IsConst() && can_init,
                                              m_IsGlobal,
                                              false, // Isn't a parameter
@@ -200,12 +200,12 @@ bool InitDeclarator::Parse( Parser& parser,
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
                         Declarator::ArraySpecifierVector array_specifiers,
-                        Semantic_up semantic )
+                        SemanticSpecifier_up semantic_specifier )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
-    ,m_Semantic( std::move(semantic) )
+    ,m_SemanticSpecifier( std::move(semantic_specifier) )
 {
 }
 
@@ -244,6 +244,8 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         !m_ArrayExtents.empty() )
         sema.Error( "Can't have an array of void type" );
 
+    if( m_SemanticSpecifier )
+        m_SemanticSpecifier->PerformSema( sema );
 
     if( m_FunctionSpecifier )
     {
@@ -256,12 +258,10 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
             CompleteType return_type( base_type, m_ArrayExtents );
             sema.DeclareFunction( m_Identifier,
                                   std::move(return_type),
+                                  GetSemantic(),
                                   GetFunctionParameterTypes() );
         }
     }
-
-    if( m_Semantic )
-        m_Semantic->PerformSema( sema );
 
     return ret;
 }
@@ -303,6 +303,14 @@ bool Declarator::IsFunctionDeclarator() const
     return static_cast<bool>(m_FunctionSpecifier);
 }
 
+Semantic Declarator::GetSemantic() const
+{
+    if( m_SemanticSpecifier )
+        return m_SemanticSpecifier->GetSemantic();
+    else
+        return Semantic();
+}
+
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 {
     // Parse an identifier
@@ -327,14 +335,14 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     //
     // optional semantic
     //
-    Semantic_up semantic;
-    parser.Expect<Semantic>( semantic );
+    SemanticSpecifier_up semantic_specifier;
+    parser.Expect<SemanticSpecifier>( semantic_specifier );
     CHECK_PARSER;
 
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
                                  std::move(array_specifiers),
-                                 std::move(semantic) ) );
+                                 std::move(semantic_specifier) ) );
     return true;
 }
 

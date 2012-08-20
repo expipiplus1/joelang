@@ -36,6 +36,7 @@
 #include <vector>
 
 #include <compiler/complete_type.hpp>
+#include <compiler/semantic.hpp>
 
 namespace JoeLang
 {
@@ -166,10 +167,12 @@ public:
       *   The Identifier for the function
       * \param return_type
       *   The function's return type
-      * \todo pass parameters in here
+      * \param semantic
+      *   The function's semantic
       */
     void DeclareFunction( std::string identifier,
                           CompleteType return_type,
+                          Semantic semantic,
                           std::vector<CompleteType> parameter_types );
 
     /**
