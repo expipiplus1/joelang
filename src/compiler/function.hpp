@@ -96,6 +96,12 @@ public:
     std::vector<Function_sp> GetCallees() const;
 
     /**
+      * Returns all the variables referenced in this function
+      * this asserts that we have a definition
+      */
+    std::vector<Variable_sp> GetVariables() const;
+
+    /**
       * Generates a string for the function signature
       */
     std::string GetSignatureString() const;

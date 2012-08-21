@@ -114,6 +114,13 @@ std::vector<Function_sp> Function::GetCallees() const
     return m_Definition->GetCallees();
 }
 
+std::vector<Variable_sp> Function::GetVariables() const
+{
+    assert( m_Definition &&
+            "Trying to get the callees of a function without a definition" );
+    return m_Definition->GetVariables();
+}
+
 std::string Function::GetSignatureString() const
 {
     /// TODO do this properly
