@@ -63,6 +63,12 @@ public:
     bool AlwaysReturns() const override;
 
     virtual
+    std::vector<Function_sp> GetCallees() const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables() const override;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema,
                       const CompleteType& return_type ) override;
 

@@ -86,6 +86,18 @@ void Expression::Write( ShaderWriter& shader_writer ) const
     assert( false && "completeme");
 }
 
+std::vector<Function_sp> Expression::GetCallees() const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
+std::vector<Variable_sp> Expression::GetVariables() const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
 bool Expression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO comma sep expressions
@@ -269,6 +281,24 @@ void AssignmentExpression::Write( ShaderWriter& shader_writer ) const
 CompleteType AssignmentExpression::GetType() const
 {
     return m_AssigneePtr->GetType();
+}
+
+std::vector<Function_sp> AssignmentExpression::GetCallees() const
+{
+    assert( false && "Do assignment properly" );
+    auto ret = m_Assignee->GetCallees();
+    auto f   = m_AssignedExpression->GetCallees();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    return ret;
+}
+
+std::vector<Variable_sp> AssignmentExpression::GetVariables() const
+{
+    assert( false && "Do assignment properly" );
+    auto ret = m_Assignee->GetVariables();
+    auto f   = m_AssignedExpression->GetVariables();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    return ret;
 }
 
 bool AssignmentExpression::IsLValue() const

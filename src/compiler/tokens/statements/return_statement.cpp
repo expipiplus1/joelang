@@ -65,6 +65,22 @@ bool ReturnStatement::AlwaysReturns() const
     return true;
 }
 
+std::vector<Function_sp> ReturnStatement::GetCallees() const
+{
+    if( m_Expression )
+        return m_Expression->GetCallees();
+    else
+        return {};
+}
+
+std::vector<Variable_sp> ReturnStatement::GetVariables() const
+{
+    if( m_Expression )
+        return m_Expression->GetVariables();
+    else
+        return {};
+}
+
 void ReturnStatement::PerformSema( SemaAnalyzer& sema,
                                    const CompleteType& return_type )
 {

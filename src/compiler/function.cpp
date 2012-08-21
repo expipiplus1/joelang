@@ -107,6 +107,13 @@ bool Function::HasDefinition() const
     return static_cast<bool>(m_Definition);
 }
 
+std::vector<Function_sp> Function::GetCallees() const
+{
+    assert( m_Definition &&
+            "Trying to get the callees of a function without a definition" );
+    return m_Definition->GetCallees();
+}
+
 std::string Function::GetSignatureString() const
 {
     /// TODO do this properly

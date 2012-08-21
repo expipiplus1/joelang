@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <compiler/tokens/token.hpp>
 
@@ -40,11 +41,15 @@ namespace Compiler
 
 class CodeGenerator;
 class CompleteType;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
 class ShaderWriter;
 class Statement;
 using Statement_up = std::unique_ptr<Statement>;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \defgroup Statements
@@ -71,6 +76,18 @@ public:
       */
     virtual
     bool AlwaysReturns() const = 0;
+
+    /**
+      * Returns all the functions called by this statement
+      */
+    virtual
+    std::vector<Function_sp> GetCallees() const = 0;
+
+    /**
+      * Returns all the variables referenced by this statement
+      */
+    virtual
+    std::vector<Variable_sp> GetVariables() const = 0;
 
     virtual
     void PerformSema( SemaAnalyzer& sema, const CompleteType& return_type ) = 0;

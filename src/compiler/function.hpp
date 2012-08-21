@@ -50,6 +50,8 @@ using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -86,6 +88,12 @@ public:
     void SetDefinition( CompoundStatement_up definition );
 
     bool HasDefinition() const;
+
+    /**
+      * Returns all the functions called by this one.
+      * this asserts that we have a definition
+      */
+    std::vector<Function_sp> GetCallees() const;
 
     /**
       * Generates a string for the function signature

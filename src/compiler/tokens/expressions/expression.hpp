@@ -148,6 +148,18 @@ public:
     CompleteType GetType() const = 0;
 
     /**
+      * \returns the list of functions called by this expression
+      */
+    virtual
+    std::vector<Function_sp> GetCallees() const;
+
+    /**
+      * \returns the list of variables referenced by this expression
+      */
+    virtual
+    std::vector<Variable_sp> GetVariables() const;
+
+    /**
       * \returns true if the Expression represents a l-value
       * by default this returns false
       */
@@ -233,6 +245,12 @@ public:
 
     virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::vector<Function_sp> GetCallees() const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;

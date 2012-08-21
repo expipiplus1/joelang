@@ -59,6 +59,16 @@ bool EmptyStatement::AlwaysReturns() const
     return false;
 }
 
+std::vector<Function_sp> EmptyStatement::GetCallees() const
+{
+    return {};
+}
+
+std::vector<Variable_sp> EmptyStatement::GetVariables() const
+{
+    return {};
+}
+
 void EmptyStatement::PerformSema( SemaAnalyzer& sema,
                                   const CompleteType& return_type )
 {

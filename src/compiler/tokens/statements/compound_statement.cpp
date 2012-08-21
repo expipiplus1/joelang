@@ -69,9 +69,30 @@ bool CompoundStatement::AlwaysReturns() const
     return (*m_Statements.rbegin())->AlwaysReturns();
 }
 
+std::vector<Function_sp> CompoundStatement::GetCallees() const
+{
+    std::vector<Function_sp> ret;
+    for( const auto& s : m_Statements )
+    {
+        auto f = s->GetCallees();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    return ret;
+}
+
+std::vector<Variable_sp> CompoundStatement::GetVariables() const
+{
+    std::vector<Variable_sp> ret;
+    for( const auto& s : m_Statements )
+    {
+        auto f = s->GetVariables();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    return ret;
+}
+
 void CompoundStatement::PerformSemaAsFunction( SemaAnalyzer& sema,
                                                const CompleteType& return_type )
-
 {
     PerformSemaCommon( sema, return_type, true );
 }
