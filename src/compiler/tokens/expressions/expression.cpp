@@ -33,6 +33,7 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -86,13 +87,13 @@ void Expression::Write( ShaderWriter& shader_writer ) const
     assert( false && "completeme");
 }
 
-std::vector<Function_sp> Expression::GetCallees() const
+std::set<Function_sp> Expression::GetCallees() const
 {
     assert( false && "Complete me" );
     return {};
 }
 
-std::vector<Variable_sp> Expression::GetVariables() const
+std::set<Variable_sp> Expression::GetVariables() const
 {
     assert( false && "Complete me" );
     return {};
@@ -283,21 +284,21 @@ CompleteType AssignmentExpression::GetType() const
     return m_AssigneePtr->GetType();
 }
 
-std::vector<Function_sp> AssignmentExpression::GetCallees() const
+std::set<Function_sp> AssignmentExpression::GetCallees() const
 {
     assert( false && "Do assignment properly" );
     auto ret = m_Assignee->GetCallees();
     auto f   = m_AssignedExpression->GetCallees();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     return ret;
 }
 
-std::vector<Variable_sp> AssignmentExpression::GetVariables() const
+std::set<Variable_sp> AssignmentExpression::GetVariables() const
 {
     assert( false && "Do assignment properly" );
     auto ret = m_Assignee->GetVariables();
     auto f   = m_AssignedExpression->GetVariables();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     return ret;
 }
 
@@ -436,23 +437,23 @@ CompleteType ConditionalExpression::GetType() const
                           m_FalseExpression->GetType() );
 }
 
-std::vector<Function_sp> ConditionalExpression::GetCallees() const
+std::set<Function_sp> ConditionalExpression::GetCallees() const
 {
     auto ret = m_Condition->GetCallees();
     auto f   = m_TrueExpression->GetCallees();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     f = m_FalseExpression->GetCallees();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     return ret;
 }
 
-std::vector<Variable_sp> ConditionalExpression::GetVariables() const
+std::set<Variable_sp> ConditionalExpression::GetVariables() const
 {
     auto ret = m_Condition->GetVariables();
     auto f   = m_TrueExpression->GetVariables();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     f = m_FalseExpression->GetVariables();
-    ret.insert( ret.end(), f.begin(), f.end() );
+    ret.insert( f.begin(), f.end() );
     return ret;
 }
 
@@ -614,12 +615,12 @@ CompleteType CastExpression::GetType() const
     return m_CastType;
 }
 
-std::vector<Function_sp> CastExpression::GetCallees() const
+std::set<Function_sp> CastExpression::GetCallees() const
 {
     return m_Expression->GetCallees();
 }
 
-std::vector<Variable_sp> CastExpression::GetVariables() const
+std::set<Variable_sp> CastExpression::GetVariables() const
 {
     return m_Expression->GetVariables();
 }
@@ -785,12 +786,12 @@ CompleteType UnaryExpression::GetType() const
     return CompleteType();
 }
 
-std::vector<Function_sp> UnaryExpression::GetCallees() const
+std::set<Function_sp> UnaryExpression::GetCallees() const
 {
     return m_Expression->GetCallees();
 }
 
-std::vector<Variable_sp> UnaryExpression::GetVariables() const
+std::set<Variable_sp> UnaryExpression::GetVariables() const
 {
     return m_Expression->GetVariables();
 }
@@ -903,12 +904,12 @@ CompleteType PostfixExpression::GetType() const
     return m_PostfixOperator->GetType( *m_Expression );
 }
 
-std::vector<Function_sp> PostfixExpression::GetCallees() const
+std::set<Function_sp> PostfixExpression::GetCallees() const
 {
     return m_PostfixOperator->GetCallees( *m_Expression );
 }
 
-std::vector<Variable_sp> PostfixExpression::GetVariables() const
+std::set<Variable_sp> PostfixExpression::GetVariables() const
 {
     return m_PostfixOperator->GetVariables( *m_Expression );
 }
@@ -1057,24 +1058,24 @@ CompleteType TypeConstructorExpression::GetType() const
     return CompleteType( m_Type );
 }
 
-std::vector<Function_sp> TypeConstructorExpression::GetCallees() const
+std::set<Function_sp> TypeConstructorExpression::GetCallees() const
 {
-    std::vector<Function_sp> ret;
+    std::set<Function_sp> ret;
     for( const auto& a : m_Arguments )
     {
         auto f = a->GetCallees();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
     return ret;
 }
 
-std::vector<Variable_sp> TypeConstructorExpression::GetVariables() const
+std::set<Variable_sp> TypeConstructorExpression::GetVariables() const
 {
-    std::vector<Variable_sp> ret;
+    std::set<Variable_sp> ret;
     for( const auto& a : m_Arguments )
     {
         auto f = a->GetVariables();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
     return ret;
 }
@@ -1230,12 +1231,12 @@ CompleteType IdentifierExpression::GetType() const
     return m_Variable->GetType();
 }
 
-std::vector<Function_sp> IdentifierExpression::GetCallees() const
+std::set<Function_sp> IdentifierExpression::GetCallees() const
 {
     return {};
 }
 
-std::vector<Variable_sp> IdentifierExpression::GetVariables() const
+std::set<Variable_sp> IdentifierExpression::GetVariables() const
 {
     assert( m_Variable &&
             "Trying to get the variables of an unresolved identifier" );

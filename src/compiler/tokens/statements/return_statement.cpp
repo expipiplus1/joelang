@@ -65,7 +65,7 @@ bool ReturnStatement::AlwaysReturns() const
     return true;
 }
 
-std::vector<Function_sp> ReturnStatement::GetCallees() const
+std::set<Function_sp> ReturnStatement::GetCallees() const
 {
     if( m_Expression )
         return m_Expression->GetCallees();
@@ -73,7 +73,7 @@ std::vector<Function_sp> ReturnStatement::GetCallees() const
         return {};
 }
 
-std::vector<Variable_sp> ReturnStatement::GetVariables() const
+std::set<Variable_sp> ReturnStatement::GetVariables() const
 {
     if( m_Expression )
         return m_Expression->GetVariables();

@@ -32,6 +32,7 @@
 #include <cassert>
 #include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -42,6 +43,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -175,13 +177,13 @@ CompleteType SubscriptOperator::GetType( const Expression& expression ) const
                          std::move( array_extents ) );
 }
 
-std::vector<Function_sp> SubscriptOperator::GetCallees(
+std::set<Function_sp> SubscriptOperator::GetCallees(
                                             const Expression& expression ) const
 {
     return expression.GetCallees();
 }
 
-std::vector<Variable_sp> SubscriptOperator::GetVariables(
+std::set<Variable_sp> SubscriptOperator::GetVariables(
                                             const Expression& expression ) const
 {
     return expression.GetVariables();
@@ -308,9 +310,19 @@ llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
 
 void ArgumentListOperator::Write( ShaderWriter& shader_writer ) const
 {
-    assert( false && "complete me" );
-}
+    shader_writer << "(";
+    bool first = true;
+    for( const auto& a : m_Arguments )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
 
+        shader_writer << *a;
+    }
+    shader_writer << ")";
+}
 
 CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
 {
@@ -319,33 +331,33 @@ CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
     return m_Function->GetReturnType();
 }
 
-std::vector<Function_sp> ArgumentListOperator::GetCallees(
+std::set<Function_sp> ArgumentListOperator::GetCallees(
                                             const Expression& expression ) const
 {
     // The expression here is actually an identifier, which we don't want to dip
     // into because it thinks it's a variable
     assert( m_Function &&
             "Trying to get the Callees of an unresolved ArgumentListOperator" );
-    std::vector<Function_sp> ret;
+    std::set<Function_sp> ret;
     for( const auto& a : m_Arguments )
     {
         auto f = a->GetCallees();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
-    ret.push_back( m_Function );
+    ret.insert( m_Function );
     return ret;
 }
 
-std::vector<Variable_sp> ArgumentListOperator::GetVariables(
+std::set<Variable_sp> ArgumentListOperator::GetVariables(
                                             const Expression& expression ) const
 {
     // The expression here is actually an identifier, which we don't want to dip
     // into because it thinks it's a variable
-    std::vector<Variable_sp> ret;
+    std::set<Variable_sp> ret;
     for( const auto& a : m_Arguments )
     {
         auto f = a->GetVariables();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
     return ret;
 }
@@ -434,14 +446,14 @@ CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
     return CompleteType();
 }
 
-std::vector<Function_sp> MemberAccessOperator::GetCallees(
+std::set<Function_sp> MemberAccessOperator::GetCallees(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
     return {};
 }
 
-std::vector<Variable_sp> MemberAccessOperator::GetVariables(
+std::set<Variable_sp> MemberAccessOperator::GetVariables(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
@@ -525,14 +537,14 @@ CompleteType IncrementOrDecrementOperator::GetType(
     return CompleteType();
 }
 
-std::vector<Function_sp> IncrementOrDecrementOperator::GetCallees(
+std::set<Function_sp> IncrementOrDecrementOperator::GetCallees(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
     return {};
 }
 
-std::vector<Variable_sp> IncrementOrDecrementOperator::GetVariables(
+std::set<Variable_sp> IncrementOrDecrementOperator::GetVariables(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );

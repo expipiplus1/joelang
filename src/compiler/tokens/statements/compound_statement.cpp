@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <memory>
+#include <set>
 #include <vector>
 
 #include <compiler/parser.hpp>
@@ -69,24 +70,24 @@ bool CompoundStatement::AlwaysReturns() const
     return (*m_Statements.rbegin())->AlwaysReturns();
 }
 
-std::vector<Function_sp> CompoundStatement::GetCallees() const
+std::set<Function_sp> CompoundStatement::GetCallees() const
 {
-    std::vector<Function_sp> ret;
+    std::set<Function_sp> ret;
     for( const auto& s : m_Statements )
     {
         auto f = s->GetCallees();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
     return ret;
 }
 
-std::vector<Variable_sp> CompoundStatement::GetVariables() const
+std::set<Variable_sp> CompoundStatement::GetVariables() const
 {
-    std::vector<Variable_sp> ret;
+    std::set<Variable_sp> ret;
     for( const auto& s : m_Statements )
     {
         auto f = s->GetVariables();
-        ret.insert( ret.end(), f.begin(), f.end() );
+        ret.insert( f.begin(), f.end() );
     }
     return ret;
 }

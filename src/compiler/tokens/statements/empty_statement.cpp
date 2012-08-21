@@ -59,12 +59,12 @@ bool EmptyStatement::AlwaysReturns() const
     return false;
 }
 
-std::vector<Function_sp> EmptyStatement::GetCallees() const
+std::set<Function_sp> EmptyStatement::GetCallees() const
 {
     return {};
 }
 
-std::vector<Variable_sp> EmptyStatement::GetVariables() const
+std::set<Variable_sp> EmptyStatement::GetVariables() const
 {
     return {};
 }

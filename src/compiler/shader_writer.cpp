@@ -29,12 +29,15 @@
 
 #include "shader_writer.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <map>
 #include <memory>
 #include <set>
+#include <stack>
 #include <string>
 #include <sstream>
+#include <vector>
 
 #include <compiler/complete_type.hpp>
 #include <compiler/entry_function.hpp>
@@ -73,7 +76,6 @@ std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
     std::string ret = m_Shader.str();
 
     // reset things
-    m_FunctionSignatures.clear();
     m_Shader.str("");
 
     assert( m_Indentation == 0 && "Unmatched indentations" );
@@ -83,15 +85,6 @@ std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
         return ret;
     else
         return "";
-}
-
-void ShaderWriter::WriteFunction( const Function& function )
-{
-    const std::string& signature = function.GetSignatureString();
-    if( m_FunctionSignatures.find( signature ) != m_FunctionSignatures.end() )
-        return;
-    m_FunctionSignatures.insert( function.GetSignatureString() );
-    function.Write( *this );
 }
 
 void ShaderWriter::PushIndentation()
@@ -111,7 +104,7 @@ std::string ShaderWriter::Mangle( const std::string& identifier,
     const static std::map<IdentifierType, std::string> prefix_map
     {
         { IdentifierType::VARIABLE, "_"  },
-        { IdentifierType::FUNCTION, "_f" }
+        { IdentifierType::FUNCTION, "f_" }
     };
     return prefix_map.at(identifier_type) + identifier;
 }
@@ -144,9 +137,18 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
 
+    //
+    // Get all the functions used by this entry function
+    //
+    std::set<Function_sp> functions = GatherFunctions(
+                                          entry_function.GetFunctionPointer() );
+
     WriteOutputVariables( entry_function );
 
-    WriteFunction( entry_function.GetFunction() );
+    WriteFunctionDeclarations( functions );
+    NewLine();
+
+    WriteFunctionDefinitions( functions );
 
     WriteMainFunction( entry_function );
 }
@@ -155,6 +157,30 @@ void ShaderWriter::WriteGLSLVersion()
 {
     m_Shader << "#version " << s_GLSLVersion;
     NewLine(2);
+}
+
+void ShaderWriter::WriteFunctionDeclarations(
+                                         const std::set<Function_sp> functions )
+{
+#if !defined(NDEBUG)
+    for( const auto& f : functions )
+        assert( f && "Null function in WriteFunctionDeclarations" );
+#endif
+
+    for( const auto& f : functions )
+        f->WriteDeclaration( *this );
+}
+
+void ShaderWriter::WriteFunctionDefinitions(
+                                         const std::set<Function_sp> functions )
+{
+#if !defined(NDEBUG)
+    for( const auto& f : functions )
+        assert( f && "Null function in WriteFunctionDefinitions" );
+#endif
+
+    for( const auto& f : functions )
+        f->WriteDefinition( *this );
 }
 
 void ShaderWriter::WriteOutputVariables( const EntryFunction& entry_function )
@@ -195,6 +221,68 @@ void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
     NewLine();
     m_Shader << "}";
     NewLine(2);
+}
+
+std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
+{
+    assert( function && "GatherFunctions given null function" );
+
+    std::set<Function_sp> ret =
+    {
+        function
+    };
+
+    //
+    // Perform a dfs on the function tree
+    //
+    std::vector<Function_sp>               call_stack = { function };
+    std::stack< std::set<Function_sp> > expanded;
+    expanded.push( function->GetCallees() );
+
+    while( !expanded.empty() )
+    {
+        //
+        // If we've exhausted all of the expanded functions we can move up
+        //
+        if( expanded.top().empty() )
+        {
+            expanded.pop();
+            call_stack.pop_back();
+            continue;
+        }
+
+        //
+        // We still have functions at this level to explore explore the next one
+        //
+        Function_sp current = *expanded.top().begin();
+
+        const auto& f = std::find( call_stack.begin(), call_stack.end(),
+                                   current );
+        if( f != call_stack.end() )
+        {
+            //
+            // If this function is in the call stack, error because of recursion
+            //
+            Error( "Recursion in shader function: " +
+                   current->GetSignatureString() );
+            return {};
+        }
+
+
+        //
+        // Remove this function from the expanded function list
+        //
+        expanded.top().erase( expanded.top().begin() );
+
+        //
+        // Add this function to the call stack and expand it's children
+        //
+        ret.insert( current );
+        call_stack.push_back( current );
+        expanded.push( current->GetCallees() );
+    }
+
+    return ret;
 }
 
 void ShaderWriter::NewLine( unsigned num_lines )

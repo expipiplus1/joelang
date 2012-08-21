@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -93,13 +94,13 @@ public:
       * Returns all the functions called by this one.
       * this asserts that we have a definition
       */
-    std::vector<Function_sp> GetCallees() const;
+    std::set<Function_sp> GetCallees() const;
 
     /**
       * Returns all the variables referenced in this function
       * this asserts that we have a definition
       */
-    std::vector<Variable_sp> GetVariables() const;
+    std::set<Variable_sp> GetVariables() const;
 
     /**
       * Generates a string for the function signature
@@ -113,8 +114,13 @@ public:
 
     void CodeGenDefinition( CodeGenerator& code_gen );
 
-    void Write( ShaderWriter& shader_writer ) const;
+    void WriteDefinition( ShaderWriter& shader_writer ) const;
+
+    void WriteDeclaration( ShaderWriter& shader_writer ) const;
 private:
+    /** This will write the declaration sans the ';' **/
+    void WriteHeader( ShaderWriter& shader_writer ) const;
+
     std::string               m_Identifier;
     CompleteType              m_ReturnType;
     Semantic                  m_Semantic;

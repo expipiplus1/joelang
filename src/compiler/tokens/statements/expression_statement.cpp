@@ -65,12 +65,12 @@ bool ExpressionStatement::AlwaysReturns() const
     return false;
 }
 
-std::vector<Function_sp> ExpressionStatement::GetCallees() const
+std::set<Function_sp> ExpressionStatement::GetCallees() const
 {
     return m_Expression->GetCallees();
 }
 
-std::vector<Variable_sp> ExpressionStatement::GetVariables() const
+std::set<Variable_sp> ExpressionStatement::GetVariables() const
 {
     return m_Expression->GetVariables();
 }

@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -107,14 +108,14 @@ bool Function::HasDefinition() const
     return static_cast<bool>(m_Definition);
 }
 
-std::vector<Function_sp> Function::GetCallees() const
+std::set<Function_sp> Function::GetCallees() const
 {
     assert( m_Definition &&
             "Trying to get the callees of a function without a definition" );
     return m_Definition->GetCallees();
 }
 
-std::vector<Variable_sp> Function::GetVariables() const
+std::set<Variable_sp> Function::GetVariables() const
 {
     assert( m_Definition &&
             "Trying to get the callees of a function without a definition" );
@@ -160,7 +161,25 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
                                        m_Definition );
 }
 
-void Function::Write( ShaderWriter& shader_writer ) const
+void Function::WriteDeclaration( ShaderWriter& shader_writer ) const
+{
+    WriteHeader( shader_writer );
+    shader_writer << ";";
+    shader_writer.NewLine();
+}
+
+void Function::WriteDefinition( ShaderWriter& shader_writer ) const
+{
+    WriteHeader( shader_writer );
+
+    shader_writer.NewLine();
+
+    shader_writer << static_cast<Statement&>(*m_Definition);
+
+    shader_writer.NewLine(2);
+}
+
+void Function::WriteHeader( ShaderWriter& shader_writer ) const
 {
     shader_writer << m_ReturnType << " " <<
                      ShaderWriter::Mangle( m_Identifier,
@@ -183,12 +202,8 @@ void Function::Write( ShaderWriter& shader_writer ) const
     }
 
     shader_writer << ")";
-    shader_writer.NewLine();
-
-    shader_writer << static_cast<Statement&>(*m_Definition);
-
-    shader_writer.NewLine(2);
 }
+
 
 } // namespace Compiler
 } // namespace JoeLang

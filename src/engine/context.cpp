@@ -148,7 +148,8 @@ const std::function<void(std::string)>& Context::GetErrorCallback() const
 
 void Context::Error( const std::string& error_string ) const
 {
-    m_ErrorCallback( error_string );
+    if( m_ErrorCallback )
+        m_ErrorCallback( error_string );
 }
 
 } // namespace JoeLang

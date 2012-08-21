@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -107,14 +108,13 @@ public:
       * \returns the list of functions called by this operator
       */
     virtual
-    std::vector<Function_sp> GetCallees(
-                                       const Expression& expression ) const = 0;
+    std::set<Function_sp> GetCallees( const Expression& expression ) const = 0;
 
     /**
       * \returns the list of variables referenced by this operator
       */
     virtual
-    std::vector<Variable_sp> GetVariables(
+    std::set<Variable_sp> GetVariables(
                                        const Expression& expression ) const = 0;
 
     virtual
@@ -178,11 +178,11 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    std::vector<Function_sp> GetCallees(
+    std::set<Function_sp> GetCallees(
                                   const Expression& expression ) const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables(
+    std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
 
     virtual
@@ -244,11 +244,11 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    std::vector<Function_sp> GetCallees(
+    std::set<Function_sp> GetCallees(
                                   const Expression& expression ) const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables(
+    std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
 
     /** \returns false **/
@@ -311,11 +311,11 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    std::vector<Function_sp> GetCallees(
+    std::set<Function_sp> GetCallees(
                                   const Expression& expression ) const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables(
+    std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
 
     virtual
@@ -375,11 +375,11 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
-    std::vector<Function_sp> GetCallees(
+    std::set<Function_sp> GetCallees(
                                   const Expression& expression ) const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables(
+    std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
 
     /** \returns false **/

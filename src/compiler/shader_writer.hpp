@@ -34,6 +34,7 @@
 #include <string>
 #include <sstream>
 #include <type_traits>
+#include <vector>
 
 namespace JoeLang
 {
@@ -47,6 +48,7 @@ class CompleteType;
 class EntryFunction;
 class Expression;
 class Function;
+using Function_sp = std::shared_ptr<Function>;
 class PostfixOperator;
 class Statement;
 
@@ -107,12 +109,27 @@ private:
     /** Writes #version 150 to the shader **/
     void WriteGLSLVersion();
 
+    /** Writes all the function declarations **/
+    void WriteFunctionDeclarations( const std::set<Function_sp> functions );
+
+    /** Writes all the function definitions **/
+    void WriteFunctionDefinitions( const std::set<Function_sp> functions );
+
     /** Writes all the output varyings **/
     void WriteOutputVariables( const EntryFunction& entry_function );
 
     /** Writes main(){...} **/
     void WriteMainFunction( const EntryFunction& entry_function );
 
+    /**
+      * Gathers all the functions used by this function, checks for recursion
+      * too.
+      */
+    std::set<Function_sp> GatherFunctions( Function_sp function );
+
+    /**
+      * The context that this belongs to
+      */
     const Context& m_Context;
 
     /**
@@ -124,11 +141,6 @@ private:
       * The current indentation
       */
     unsigned m_Indentation = 0;
-
-    /**
-      * The set of function signatures that we've processed
-      */
-    std::set<std::string> m_FunctionSignatures;
 
     /**
       * This is false if Error has been called

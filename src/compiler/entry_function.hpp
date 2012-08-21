@@ -60,8 +60,9 @@ public:
 
     ShaderDomain GetDomain() const;
 
-    const Function& GetFunction() const;
-    
+    const Function&    GetFunction() const;
+    const Function_sp& GetFunctionPointer() const;
+
     const std::vector<Expression_up>& GetParameters() const;
 
 private:

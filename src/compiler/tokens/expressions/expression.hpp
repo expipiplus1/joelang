@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -151,13 +152,13 @@ public:
       * \returns the list of functions called by this expression
       */
     virtual
-    std::vector<Function_sp> GetCallees() const;
+    std::set<Function_sp> GetCallees() const;
 
     /**
       * \returns the list of variables referenced by this expression
       */
     virtual
-    std::vector<Variable_sp> GetVariables() const;
+    std::set<Variable_sp> GetVariables() const;
 
     /**
       * \returns true if the Expression represents a l-value
@@ -247,10 +248,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
@@ -317,10 +318,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
@@ -375,10 +376,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
@@ -461,10 +462,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
@@ -517,10 +518,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
 
     virtual
@@ -580,10 +581,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
@@ -661,10 +662,10 @@ public:
     CompleteType GetType() const override;
 
     virtual
-    std::vector<Function_sp> GetCallees() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    std::vector<Variable_sp> GetVariables() const override;
+    std::set<Variable_sp> GetVariables() const override;
 
     /** \returns true **/
     virtual

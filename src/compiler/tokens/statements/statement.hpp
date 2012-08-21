@@ -30,7 +30,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <set>
 
 #include <compiler/tokens/token.hpp>
 
@@ -81,13 +81,13 @@ public:
       * Returns all the functions called by this statement
       */
     virtual
-    std::vector<Function_sp> GetCallees() const = 0;
+    std::set<Function_sp> GetCallees() const = 0;
 
     /**
       * Returns all the variables referenced by this statement
       */
     virtual
-    std::vector<Variable_sp> GetVariables() const = 0;
+    std::set<Variable_sp> GetVariables() const = 0;
 
     virtual
     void PerformSema( SemaAnalyzer& sema, const CompleteType& return_type ) = 0;
