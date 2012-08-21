@@ -436,6 +436,26 @@ CompleteType ConditionalExpression::GetType() const
                           m_FalseExpression->GetType() );
 }
 
+std::vector<Function_sp> ConditionalExpression::GetCallees() const
+{
+    auto ret = m_Condition->GetCallees();
+    auto f   = m_TrueExpression->GetCallees();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    f = m_FalseExpression->GetCallees();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    return ret;
+}
+
+std::vector<Variable_sp> ConditionalExpression::GetVariables() const
+{
+    auto ret = m_Condition->GetVariables();
+    auto f   = m_TrueExpression->GetVariables();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    f = m_FalseExpression->GetVariables();
+    ret.insert( ret.end(), f.begin(), f.end() );
+    return ret;
+}
+
 bool ConditionalExpression::IsConst() const
 {
     /// TODO only check the taken select
@@ -592,6 +612,16 @@ void CastExpression::Write( ShaderWriter& shader_writer ) const
 CompleteType CastExpression::GetType() const
 {
     return m_CastType;
+}
+
+std::vector<Function_sp> CastExpression::GetCallees() const
+{
+    return m_Expression->GetCallees();
+}
+
+std::vector<Variable_sp> CastExpression::GetVariables() const
+{
+    return m_Expression->GetVariables();
 }
 
 bool CastExpression::IsConst() const
@@ -755,6 +785,17 @@ CompleteType UnaryExpression::GetType() const
     return CompleteType();
 }
 
+std::vector<Function_sp> UnaryExpression::GetCallees() const
+{
+    return m_Expression->GetCallees();
+}
+
+std::vector<Variable_sp> UnaryExpression::GetVariables() const
+{
+    return m_Expression->GetVariables();
+}
+
+
 bool UnaryExpression::IsConst() const
 {
     return m_Expression->IsConst() &&
@@ -860,6 +901,16 @@ void PostfixExpression::Write( ShaderWriter& shader_writer ) const
 CompleteType PostfixExpression::GetType() const
 {
     return m_PostfixOperator->GetType( *m_Expression );
+}
+
+std::vector<Function_sp> PostfixExpression::GetCallees() const
+{
+    return m_PostfixOperator->GetCallees( *m_Expression );
+}
+
+std::vector<Variable_sp> PostfixExpression::GetVariables() const
+{
+    return m_PostfixOperator->GetVariables( *m_Expression );
 }
 
 bool PostfixExpression::IsConst() const
@@ -1004,6 +1055,28 @@ CompleteType TypeConstructorExpression::GetType() const
 {
     /// todo constructing arrays
     return CompleteType( m_Type );
+}
+
+std::vector<Function_sp> TypeConstructorExpression::GetCallees() const
+{
+    std::vector<Function_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetCallees();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    return ret;
+}
+
+std::vector<Variable_sp> TypeConstructorExpression::GetVariables() const
+{
+    std::vector<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetVariables();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    return ret;
 }
 
 bool TypeConstructorExpression::IsConst() const
@@ -1151,9 +1224,22 @@ void IdentifierExpression::Write( ShaderWriter& shader_writer ) const
 
 CompleteType IdentifierExpression::GetType() const
 {
+    // todo should this assert
     if( !m_Variable )
         return CompleteType();
     return m_Variable->GetType();
+}
+
+std::vector<Function_sp> IdentifierExpression::GetCallees() const
+{
+    return {};
+}
+
+std::vector<Variable_sp> IdentifierExpression::GetVariables() const
+{
+    assert( m_Variable &&
+            "Trying to get the variables of an unresolved identifier" );
+    return { m_Variable };
 }
 
 const std::string& IdentifierExpression::GetIdentifier() const

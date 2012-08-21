@@ -184,6 +184,18 @@ CompleteType SubscriptOperator::GetType( const Expression& expression ) const
                          std::move( array_extents ) );
 }
 
+std::vector<Function_sp> SubscriptOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    return expression.GetCallees();
+}
+
+std::vector<Variable_sp> SubscriptOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    return expression.GetVariables();
+}
+
 bool SubscriptOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst() &&
@@ -303,6 +315,37 @@ CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
     return m_Function->GetReturnType();
 }
 
+std::vector<Function_sp> ArgumentListOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    // The expression here is actually an identifier, which we don't want to dip
+    // into because it thinks it's a variable
+    assert( m_Function &&
+            "Trying to get the Callees of an unresolved ArgumentListOperator" );
+    std::vector<Function_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetCallees();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    ret.push_back( m_Function );
+    return ret;
+}
+
+std::vector<Variable_sp> ArgumentListOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    // The expression here is actually an identifier, which we don't want to dip
+    // into because it thinks it's a variable
+    std::vector<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetVariables();
+        ret.insert( ret.end(), f.begin(), f.end() );
+    }
+    return ret;
+}
+
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
 {
     return false;
@@ -374,6 +417,20 @@ CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
     return CompleteType();
 }
 
+std::vector<Function_sp> MemberAccessOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
+std::vector<Variable_sp> MemberAccessOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst();
@@ -436,6 +493,20 @@ CompleteType IncrementOrDecrementOperator::GetType(
 {
     assert( false && "Complete me" );
     return CompleteType();
+}
+
+std::vector<Function_sp> IncrementOrDecrementOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
+std::vector<Variable_sp> IncrementOrDecrementOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
 }
 
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const

@@ -57,6 +57,8 @@ using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
 class ShaderWriter;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \defgroup PostfixOperators
@@ -95,11 +97,26 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
                                    const Expression& expression );
 
+    // todo make pure
     virtual
     void Write( ShaderWriter& shader_writer ) const;
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;
+
+    /**
+      * \returns the list of functions called by this operator
+      */
+    virtual
+    std::vector<Function_sp> GetCallees(
+                                       const Expression& expression ) const = 0;
+
+    /**
+      * \returns the list of variables referenced by this operator
+      */
+    virtual
+    std::vector<Variable_sp> GetVariables(
+                                       const Expression& expression ) const = 0;
 
     virtual
     bool IsConst( const Expression& expression ) const = 0;
@@ -159,6 +176,14 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
+    std::vector<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
+
+    virtual
     bool IsConst( const Expression& expression ) const override;
 
     virtual
@@ -208,6 +233,14 @@ public:
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::vector<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     /** \returns false **/
     virtual
@@ -262,6 +295,14 @@ public:
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
+    std::vector<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
+
+    virtual
     bool IsConst( const Expression& expression ) const override;
 
     static
@@ -309,6 +350,14 @@ public:
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::vector<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::vector<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     /** \returns false **/
     virtual
