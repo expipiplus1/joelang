@@ -287,6 +287,20 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
 bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
                                         Expression& expression )
 {
+    if( !m_Function )
+        return false;
+
+    std::vector<CompleteType> types = m_Function->GetParameterTypes();
+
+    assert( types.size() >= m_Arguments.size() && "Too many arguments" );
+
+    //
+    // Cast all the arguments
+    //
+    for( unsigned i = 0; i < m_Arguments.size(); ++i )
+        m_Arguments[i] = CastExpression::Create( types[i],
+                                                 std::move(m_Arguments[i]) );
+
     bool good = true;
 
     for( auto& a : m_Arguments )
