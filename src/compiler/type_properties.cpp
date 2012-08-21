@@ -323,6 +323,21 @@ const std::string& GetTypeString( Type t )
     return string_map.at(t);
 }
 
+bool HasGLSLType( Type t )
+{
+    const static std::set<Type> glsl_types =
+    {
+        Type::FLOAT,
+        Type::FLOAT4,
+        Type::U32,
+        Type::I32,
+        Type::BOOL,
+        Type::VOID,
+    };
+
+    return glsl_types.find( t ) != glsl_types.end();
+}
+
 const std::string& GetGLSLTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =

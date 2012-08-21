@@ -623,7 +623,7 @@ llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 
 void StringLiteralExpression::Write( ShaderWriter& shader_writer ) const
 {
-    assert( false && "todo send error or warning" );
+    shader_writer.Error( "GLSL doesn't support string literals" );
 }
 
 CompleteType StringLiteralExpression::GetType() const

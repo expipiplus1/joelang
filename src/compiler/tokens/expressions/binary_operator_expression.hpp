@@ -124,10 +124,19 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override final;
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override final;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override final;
 
     virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override final;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override final;
 
     virtual
     bool IsConst() const override;

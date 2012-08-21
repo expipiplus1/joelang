@@ -127,6 +127,12 @@ std::string CompleteType::GetString() const
 
 void CompleteType::Write( ShaderWriter& shader_writer ) const
 {
+    if( !HasGLSLType( m_BaseType ) )
+    {
+        shader_writer.Error( "Type " + GetTypeString( m_BaseType ) +
+                             " has no GLSL equivalent" );
+        return;
+    }
     shader_writer << GetGLSLTypeString( m_BaseType );
     for( unsigned extent : m_ArrayExtents )
         shader_writer << "[" << extent << "]";

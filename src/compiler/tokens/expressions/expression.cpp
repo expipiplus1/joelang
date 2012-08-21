@@ -82,23 +82,6 @@ llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
     return nullptr;
 }
 
-void Expression::Write( ShaderWriter& shader_writer ) const
-{
-    assert( false && "completeme");
-}
-
-std::set<Function_sp> Expression::GetCallees() const
-{
-    assert( false && "Complete me" );
-    return {};
-}
-
-std::set<Variable_sp> Expression::GetVariables() const
-{
-    assert( false && "Complete me" );
-    return {};
-}
-
 bool Expression::Parse( Parser& parser, Expression_up& token )
 {
     // TODO comma sep expressions

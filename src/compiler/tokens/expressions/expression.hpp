@@ -140,7 +140,7 @@ public:
       * Writes this expression to the shader
       */
     virtual
-    void Write( ShaderWriter& shader_writer ) const;
+    void Write( ShaderWriter& shader_writer ) const = 0;
 
     /**
       * \returns the CompleteType which this expression evaluates to
@@ -152,13 +152,13 @@ public:
       * \returns the list of functions called by this expression
       */
     virtual
-    std::set<Function_sp> GetCallees() const;
+    std::set<Function_sp> GetCallees() const = 0;
 
     /**
       * \returns the list of variables referenced by this expression
       */
     virtual
-    std::set<Variable_sp> GetVariables() const;
+    std::set<Variable_sp> GetVariables() const = 0;
 
     /**
       * \returns true if the Expression represents a l-value
