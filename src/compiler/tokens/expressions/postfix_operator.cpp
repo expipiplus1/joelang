@@ -81,24 +81,10 @@ bool PostfixOperator::Parse( Parser& parser,
     return true;
 }
 
-llvm::Value* PostfixOperator::CodeGenPointerTo( CodeGenerator& code_gen,
-                                                const Expression& expression )
-{
-    assert( false && "complete me" );
-    return nullptr;
-}
-
-void PostfixOperator::Write( ShaderWriter& shader_writer ) const
-{
-    assert( false && "complete me" );
-}
-
 bool PostfixOperator::IsLValue( const Expression& expression ) const
 {
     return false;
 }
-
-
 
 bool PostfixOperator::classof( const Token* e )
 {
@@ -173,6 +159,11 @@ llvm::Value* SubscriptOperator::CodeGenPointerTo(
 {
     return code_gen.CreateArrayIndexPointerTo( expression,
                                                *m_IndexExpression );
+}
+
+void SubscriptOperator::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "complete me" );
 }
 
 CompleteType SubscriptOperator::GetType( const Expression& expression ) const
@@ -308,6 +299,19 @@ llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
     return code_gen.CreateFunctionCall( m_Function, m_Arguments );
 }
 
+llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Can't get the pointer of a function call" );
+    return nullptr;
+}
+
+void ArgumentListOperator::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "complete me" );
+}
+
+
 CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
 {
     if( !m_Function )
@@ -411,6 +415,19 @@ llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
     return nullptr;
 }
 
+llvm::Value* MemberAccessOperator::CodeGenPointerTo(
+                                                  CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Complete me" );
+    return nullptr;
+}
+
+void MemberAccessOperator::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "complete me" );
+}
+
 CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
 {
     assert( false && "Complete me" );
@@ -486,6 +503,19 @@ llvm::Value* IncrementOrDecrementOperator::CodeGen(
 {
     assert( false && "complete me" );
     return nullptr;
+}
+
+llvm::Value* IncrementOrDecrementOperator::CodeGenPointerTo(
+                                                  CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Complete me" );
+    return nullptr;
+}
+
+void IncrementOrDecrementOperator::Write( ShaderWriter& shader_writer ) const
+{
+    assert( false && "complete me" );
 }
 
 CompleteType IncrementOrDecrementOperator::GetType(

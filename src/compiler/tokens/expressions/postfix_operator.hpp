@@ -95,11 +95,10 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
-                                   const Expression& expression );
+                                   const Expression& expression ) = 0;
 
-    // todo make pure
     virtual
-    void Write( ShaderWriter& shader_writer ) const;
+    void Write( ShaderWriter& shader_writer ) const = 0;
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;
@@ -173,6 +172,9 @@ public:
                                    const Expression& expression ) override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
@@ -230,6 +232,13 @@ public:
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression& expression ) override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -292,6 +301,13 @@ public:
                           const Expression& expression ) override;
 
     virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
 
     virtual
@@ -347,6 +363,13 @@ public:
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression& expression ) override;
+
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
