@@ -130,6 +130,11 @@ private:
       */
     std::set<std::string> m_FunctionSignatures;
 
+    /**
+      * This is false if Error has been called
+      */
+    bool m_Good = true;
+
     const static std::string s_GLSLVersion;
 };
 

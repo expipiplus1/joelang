@@ -78,7 +78,11 @@ std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
 
     assert( m_Indentation == 0 && "Unmatched indentations" );
 
-    return ret;
+    // return an empty string if we've had an error
+    if( m_Good )
+        return ret;
+    else
+        return "";
 }
 
 void ShaderWriter::WriteFunction( const Function& function )
@@ -139,6 +143,7 @@ ShaderWriter& ShaderWriter::operator << ( const Statement& value )
 void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
+
     WriteOutputVariables( entry_function );
 
     WriteFunction( entry_function.GetFunction() );
@@ -203,6 +208,7 @@ void ShaderWriter::NewLine( unsigned num_lines )
 
 void ShaderWriter::Error( const std::string& error_string )
 {
+    m_Good = false;
     m_Context.Error( error_string );
 }
 
