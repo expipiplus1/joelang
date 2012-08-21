@@ -37,6 +37,7 @@
 #include <vector>
 
 #include <compiler/casting.hpp>
+#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -174,7 +175,8 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     std::vector<Shader> shaders;
     shaders.reserve( (*m_DefinitionRef)->GetCompileStatements().size() );
     for( const auto& c : (*m_DefinitionRef)->GetCompileStatements() )
-        shaders.emplace_back( c->GetEntryFunction() );
+        shaders.push_back( Shader( code_gen.GetContext(),
+                                   c->GetEntryFunction() ) );
 
     //
     // Create a Program for the pass from all the shaders

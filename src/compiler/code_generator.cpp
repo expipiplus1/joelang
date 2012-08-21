@@ -76,8 +76,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-CodeGenerator::CodeGenerator( Runtime& runtime )
-    :m_Runtime( runtime )
+CodeGenerator::CodeGenerator( const Context& context, Runtime& runtime )
+    :m_Context( context )
+    ,m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
     ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT(
@@ -104,6 +105,11 @@ CodeGenerator::CodeGenerator( Runtime& runtime )
 
 CodeGenerator::~CodeGenerator()
 {
+}
+
+const Context& CodeGenerator::GetContext() const
+{
+    return m_Context;
 }
 
 void CodeGenerator::GenerateFunctions(

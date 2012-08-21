@@ -45,9 +45,10 @@ namespace Compiler
 
 EffectFactory::EffectFactory( const Context& context )
     :m_Context( context )
-    ,m_CodeGenerator( m_Runtime )
+    ,m_Runtime()
+    ,m_CodeGenerator( context, m_Runtime )
     ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
-    ,m_ShaderWriter()
+    ,m_ShaderWriter( m_Context )
 {
 }
 

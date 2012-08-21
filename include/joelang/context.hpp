@@ -71,6 +71,12 @@ public:
 
     void SetErrorCallback( std::function<void(std::string)> error_callback );
     const std::function<void(std::string)>& GetErrorCallback() const;
+
+    /**
+      * Sends the error message to m_ErrorCallback
+      * Used internally by JoeLang
+      */
+    void Error( const std::string& error_string ) const;
 private:
     std::vector<StateBase*>                     m_States;
     std::vector<std::unique_ptr<Effect> >       m_Effects;

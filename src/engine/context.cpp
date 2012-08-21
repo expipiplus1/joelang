@@ -146,4 +146,9 @@ const std::function<void(std::string)>& Context::GetErrorCallback() const
     return m_ErrorCallback;
 }
 
+void Context::Error( const std::string& error_string ) const
+{
+    m_ErrorCallback( error_string );
+}
+
 } // namespace JoeLang

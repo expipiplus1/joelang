@@ -41,6 +41,7 @@
 #include <compiler/function.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
+#include <joelang/context.hpp>
 #include <joelang/shader.hpp>
 
 namespace JoeLang
@@ -49,6 +50,11 @@ namespace Compiler
 {
 
 const std::string ShaderWriter::s_GLSLVersion = "150";
+
+ShaderWriter::ShaderWriter( const Context& context )
+    :m_Context( context )
+{
+}
 
 std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
 {
@@ -133,7 +139,6 @@ ShaderWriter& ShaderWriter::operator << ( const Statement& value )
 void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
-
     WriteOutputVariables( entry_function );
 
     WriteFunction( entry_function.GetFunction() );
@@ -194,6 +199,11 @@ void ShaderWriter::NewLine( unsigned num_lines )
         m_Shader << '\n';
     for( unsigned i = 0; i < m_Indentation; ++i )
         m_Shader << indent;
+}
+
+void ShaderWriter::Error( const std::string& error_string )
+{
+    m_Context.Error( error_string );
 }
 
 } // namespace Compiler

@@ -38,6 +38,8 @@
 namespace JoeLang
 {
 
+class Context;
+
 namespace Compiler
 {
 
@@ -61,6 +63,9 @@ enum class IdentifierType
 class ShaderWriter
 {
 public:
+    explicit
+    ShaderWriter( const Context& context );
+
     std::string GenerateGLSL( const EntryFunction& entry_function );
 
     void WriteFunction( const Function& function );
@@ -79,6 +84,9 @@ public:
 
     /** Writes '\n' to the shader **/
     void NewLine( unsigned num_lines = 1 );
+
+    /** Records an error while writing the shader **/
+    void Error( const std::string& error_string = "" );
 
     /**
       * This will mangle an identifier to ensure that there are no conflicts
@@ -104,6 +112,8 @@ private:
 
     /** Writes main(){...} **/
     void WriteMainFunction( const EntryFunction& entry_function );
+
+    const Context& m_Context;
 
     /**
       * The shader under construction

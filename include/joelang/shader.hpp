@@ -36,6 +36,8 @@
 namespace JoeLang
 {
 
+class Context;
+
 namespace Compiler
 {
     class EntryFunction;
@@ -50,7 +52,7 @@ enum class ShaderDomain
 class Shader
 {
 public:
-    Shader( ShaderDomain domain, std::string source );
+    Shader( const Context& context, ShaderDomain domain, std::string source );
     Shader( const Shader& ) = delete;
     Shader( Shader&& other );
     Shader& operator=( const Shader& ) = delete;
@@ -66,11 +68,14 @@ public:
 
     /// Used internally by joelang
     /// This asserts on a null pointer
-    explicit
-    Shader( std::shared_ptr<Compiler::EntryFunction> entry_function );
+    Shader( const Context& context,
+            std::shared_ptr<Compiler::EntryFunction> entry_function );
 
     friend class Program;
 private:
+    /// The context that this shader belongs to
+    const Context& m_Context;
+
     /// The compile statement as seen in the joelang source
     std::shared_ptr<Compiler::EntryFunction> m_EntryFunction;
 

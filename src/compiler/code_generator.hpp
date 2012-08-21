@@ -80,8 +80,10 @@ using Variable_sp = std::shared_ptr<Variable>;
 class CodeGenerator
 {
 public:
-    CodeGenerator( Runtime& runtime );
+    CodeGenerator( const Context& context, Runtime& runtime );
     ~CodeGenerator();
+
+    const Context& GetContext() const;
 
     void GenerateFunctions( const std::vector<Function_sp>& functions );
 
@@ -284,6 +286,8 @@ private:
       * Runs some optimizations on the module
       */
     void OptimizeModule();
+
+    const Context& m_Context;
 
     std::stack<llvm::Value*> m_Temporaries;
 
