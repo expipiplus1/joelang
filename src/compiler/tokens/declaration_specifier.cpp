@@ -40,6 +40,9 @@
 #include <compiler/type_properties.hpp>
 #include <joelang/types.hpp>
 
+
+#include <iostream>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -57,6 +60,7 @@ DeclSpecs::DeclSpecs()
     ,m_IsExtern ( false )
     ,m_IsIn     ( false )
     ,m_IsOut    ( false )
+    ,m_IsInline ( false )
     ,m_Type     ( Type::UNKNOWN )
 {
 }
@@ -65,8 +69,8 @@ void DeclSpecs::AnalyzeDeclSpecs(
                          const std::vector<DeclarationSpecifier_up>& decl_specs,
                          SemaAnalyzer& sema )
 {
+    std::cout << sizeof(DeclSpecs) << std::endl;
     std::vector<TypeSpec> type_specs;
-    m_IsConst = false;
 
     for( const auto& t : decl_specs )
     {
@@ -81,6 +85,9 @@ void DeclSpecs::AnalyzeDeclSpecs(
                 break;
             case TypeQualifier::VOLATILE:
                 sema.Warning( "volatile specfier ignored in declaration" );
+                break;
+            case TypeQualifier::INLINE:
+                m_IsInline = true;
                 break;
             }
         }
@@ -428,7 +435,8 @@ bool TypeQualifierSpecifier::Parse( Parser& parser,
     const static std::vector<std::pair<TerminalType, TypeQualifier> > qual_map =
     {
         { TerminalType::CONST,     TypeQualifier::CONST    },
-        { TerminalType::VOLATILE,  TypeQualifier::VOLATILE }
+        { TerminalType::VOLATILE,  TypeQualifier::VOLATILE },
+        { TerminalType::INLINE,    TypeQualifier::INLINE   }
     };
 
     for( auto p : qual_map )

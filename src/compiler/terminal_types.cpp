@@ -157,6 +157,7 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     //
     { TerminalType::CONST,         { "const",     "" } },
     { TerminalType::VOLATILE,      { "volatile",  "" } },
+    { TerminalType::INLINE,        { "inline",    "" } },
 
     //
     // Types

@@ -80,6 +80,8 @@ private:
     bool m_IsExtern;
     bool m_IsIn;
     bool m_IsOut;
+    bool m_IsInline;
+    bool dummy;
     Type m_Type;
 };
 
@@ -161,7 +163,8 @@ private:
 enum class TypeQualifier
 {
     CONST,
-    VOLATILE
+    VOLATILE,
+    INLINE // Not really a type qualifier, but is's ignored like volatile
 };
 
 /**
@@ -169,7 +172,7 @@ enum class TypeQualifier
   * \ingroup Tokens
   * \brief matches a type qualifier
   *
-  * TypeQualifierSpecifier = 'const' | 'volatile'
+  * TypeQualifierSpecifier = 'const' | 'volatile' | 'inline'
   */
 class TypeQualifierSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {

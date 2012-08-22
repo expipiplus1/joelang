@@ -153,6 +153,7 @@ enum class TerminalType
     // Type Qualifiers
     CONST,
     VOLATILE,
+    INLINE, // Not really a type qualifier but it's ignored just like volatile
 
     // Types
     TYPE_VOID,

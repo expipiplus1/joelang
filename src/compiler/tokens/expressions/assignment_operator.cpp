@@ -29,7 +29,6 @@
 
 #include "assignment_operator.hpp"
 
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
