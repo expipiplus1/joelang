@@ -51,6 +51,8 @@ class Function;
 using Function_sp = std::shared_ptr<Function>;
 class PostfixOperator;
 class Statement;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 enum class IdentifierType
 {
@@ -126,6 +128,12 @@ private:
       * too.
       */
     std::set<Function_sp> GatherFunctions( Function_sp function );
+
+    /**
+      * Gather all the variables used by any of the functions
+      */
+    std::set<Variable_sp> GatherVariables(
+                                       const std::set<Function_sp>& functions );
 
     /**
       * The context that this belongs to

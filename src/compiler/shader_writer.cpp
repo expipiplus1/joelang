@@ -285,6 +285,18 @@ std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
     return ret;
 }
 
+std::set<Variable_sp> ShaderWriter::GatherVariables(
+                                        const std::set<Function_sp>& functions )
+{
+    std::set<Variable_sp> ret;
+    for( const auto& f : functions )
+    {
+        std::set<Variable_sp> v = f->GetVariables();
+        ret.insert( v.begin(), v.end() );
+    }
+    return ret;
+}
+
 void ShaderWriter::NewLine( unsigned num_lines )
 {
     const std::string indent = "    ";
