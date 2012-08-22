@@ -68,10 +68,13 @@ public:
                          SemaAnalyzer& sema );
 
     void SetIsIn( bool is_in );
+    void SetIsUniform( bool is_uniform );
+    void SetIsVarying( bool is_varying );
 
     bool IsConst() const;
     bool IsUniform() const;
     bool IsVarying() const;
+    bool IsStatic() const;
     bool IsIn() const;
     bool IsOut() const;
     bool IsInline() const;

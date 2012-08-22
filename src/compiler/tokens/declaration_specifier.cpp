@@ -172,6 +172,16 @@ void DeclSpecs::SetIsIn( bool is_in )
     m_IsIn = is_in;
 }
 
+void DeclSpecs::SetIsUniform( bool is_uniform )
+{
+    m_IsUniform = is_uniform;
+}
+
+void DeclSpecs::SetIsVarying( bool is_varying )
+{
+    m_IsVarying = is_varying;
+}
+
 /// TODO rename to has const specifier
 bool DeclSpecs::IsConst() const
 {
@@ -186,6 +196,11 @@ bool DeclSpecs::IsUniform() const
 bool DeclSpecs::IsVarying() const
 {
     return m_IsVarying;
+}
+
+bool DeclSpecs::IsStatic() const
+{
+    return m_IsStatic;
 }
 
 bool DeclSpecs::IsIn() const

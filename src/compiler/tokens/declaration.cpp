@@ -403,6 +403,12 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     if( !decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema ) )
         return;
 
+    if( sema.InGlobalScope() &&
+        !decl_specs.IsStatic() &&
+        !decl_specs.IsVarying() )
+        // Globals are uniform by default
+        decl_specs.SetIsUniform( true );
+
     //
     // Check that
     //

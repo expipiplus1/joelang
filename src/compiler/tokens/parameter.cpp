@@ -91,7 +91,14 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
     //
     if( decl_specs.IsInline() )
         // Don't return here, this is a recoverable error
-        sema.Error( "Can't have an inline specifier on a parameter" );
+        sema.Error( "Can't have an 'inline' specifier on a parameter" );
+
+    if( decl_specs.IsStatic() )
+        sema.Error( "Can't have a 'static' specifier on a non-global "
+                    "variable" );
+
+    if( !decl_specs.IsUniform() )
+        decl_specs.SetIsVarying( true );
 
     if( !(decl_specs.IsIn() || decl_specs.IsOut() ) )
         // parameters are in by default
