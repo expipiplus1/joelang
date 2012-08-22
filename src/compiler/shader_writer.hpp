@@ -57,6 +57,8 @@ using Variable_sp = std::shared_ptr<Variable>;
 enum class IdentifierType
 {
     VARIABLE,
+    IN_VARYING,
+    OUT_VARYING,
     FUNCTION
 };
 
@@ -94,6 +96,8 @@ public:
     /**
       * This will mangle an identifier to ensure that there are no conflicts
       * Variables are prefixed  with "_"
+      * In varyings are prefixed with "i_"
+      * Out varyings are prefixed with "o_"
       * Functions are prefixed with "f_"
       * \param identifier
       *   The identifier to mangle
@@ -110,7 +114,12 @@ private:
     /** Writes #version 150 to the shader **/
     void WriteGLSLVersion();
 
-    void WriteInputVariables( const EntryFunction& entry_function,
+    /** Writes all the varyings which are input to the shader **/
+    void WriteInputVaryings( const EntryFunction& entry_function,
+                             const std::set<Variable_sp>& variables );
+
+    /** Writes all the varyings which are output from the shader **/
+    void WriteOutputVaryings( const EntryFunction& entry_function,
                               const std::set<Variable_sp>& variables );
 
     /** Writes all the function declarations **/

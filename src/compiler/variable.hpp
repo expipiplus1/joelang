@@ -102,6 +102,14 @@ public:
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
+    bool IsVarying() const;
+
+    bool IsUniform() const;
+
+    bool IsIn() const;
+
+    bool IsOut() const;
+
     bool IsParameter() const;
 
 private:

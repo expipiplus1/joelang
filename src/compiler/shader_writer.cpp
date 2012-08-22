@@ -42,6 +42,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/entry_function.hpp>
 #include <compiler/function.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/context.hpp>
@@ -103,8 +104,10 @@ std::string ShaderWriter::Mangle( const std::string& identifier,
 {
     const static std::map<IdentifierType, std::string> prefix_map
     {
-        { IdentifierType::VARIABLE, "_"  },
-        { IdentifierType::FUNCTION, "f_" }
+        { IdentifierType::VARIABLE,    "_"  },
+        { IdentifierType::IN_VARYING,  "i_"  },
+        { IdentifierType::OUT_VARYING, "o_"  },
+        { IdentifierType::FUNCTION,    "f_" }
     };
     return prefix_map.at(identifier_type) + identifier;
 }
@@ -143,7 +146,7 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
     //
     std::set<Variable_sp> variables = GatherVariables( functions );
 
-    WriteInputVariables( entry_function, variables );
+    WriteInputVaryings( entry_function, variables );
 
     WriteOutputVariables( entry_function );
 
@@ -161,21 +164,35 @@ void ShaderWriter::WriteGLSLVersion()
     NewLine(2);
 }
 
-void ShaderWriter::WriteInputVariables( const EntryFunction& entry_function,
-                                        const std::set<Variable_sp>& variables )
+void ShaderWriter::WriteInputVaryings( const EntryFunction& entry_function,
+                                       const std::set<Variable_sp>& variables )
 {
-    std::set<Variable_sp> input_variables;
+    std::set<Variable_sp> input_varyings;
+
+    //
+    // The entry function may return
+    //
 
     //
     // Add the inputs in the form of function parameters
     //
     for( const auto& v : entry_function.GetFunction().GetParameters() )
-    {
-        //
         // we only care about varying parameters
-        // todo uniforms
-        //
-        //if( v.
+        if( v->IsVarying() && v->IsIn() )
+            input_varyings.insert( v );
+
+    for( const auto& v : variables )
+        // Ignore the varying specifier if it's on a parameter to a
+        // non-top-level function
+        if( v->IsVarying() && v->IsIn() && !v->IsParameter() )
+            input_varyings.insert( v );
+
+    for( const auto& v : input_varyings )
+    {
+        // todo layout information here
+        *this << "in " << v->GetType() << " " <<
+                 Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+        NewLine();
     }
 }
 

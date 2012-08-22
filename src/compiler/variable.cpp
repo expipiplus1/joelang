@@ -180,6 +180,26 @@ bool Variable::IsConst() const
     return m_IsConst;
 }
 
+bool Variable::IsVarying() const
+{
+    return m_IsVarying;
+}
+
+bool Variable::IsUniform() const
+{
+    return m_IsUniform;
+}
+
+bool Variable::IsIn() const
+{
+    return m_IsIn;
+}
+
+bool Variable::IsOut() const
+{
+    return m_IsOut;
+}
+
 bool Variable::IsParameter() const
 {
     return m_IsParameter;
