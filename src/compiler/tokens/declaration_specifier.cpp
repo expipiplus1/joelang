@@ -62,10 +62,11 @@ DeclSpecs::DeclSpecs()
 {
 }
 
-void DeclSpecs::AnalyzeDeclSpecs(
+bool DeclSpecs::AnalyzeDeclSpecs(
                          const std::vector<DeclarationSpecifier_up>& decl_specs,
                          SemaAnalyzer& sema )
 {
+    bool good = true;
     std::vector<TypeSpec> type_specs;
 
     for( const auto& t : decl_specs )
@@ -124,22 +125,77 @@ void DeclSpecs::AnalyzeDeclSpecs(
         }
     }
 
-    //
-    // If it has no in, out or inout specifiers it is in by default
-    //
-    if( !m_IsIn && !m_IsOut )
-        m_IsIn = true;
+    if( m_IsUniform && m_IsVarying )
+    {
+        sema.Error( "Can't create a variable that's both uniform and varying" );
+        good = false;
+    }
+
+    if( m_IsVarying )
+    {
+        //
+        // If this is varying it must be declared with in, out or inout
+        //
+        if( !(m_IsIn || m_IsOut) )
+        {
+            sema.Error( "Varyings must have an 'in', 'out' or 'inout' "
+                        "specifier" );
+            good = false;
+        }
+    }
+
+    if( m_IsUniform )
+    {
+        if( m_IsIn || m_IsOut )
+        {
+            sema.Error( "Uniforms can't have an 'in', 'out' or 'inout' "
+                        "specifiers" );
+            good = false;
+        }
+    }
 
     //
     // Get the type from the specifiers
     //
     m_Type = DeduceType( std::move(type_specs), sema );
+
+    if( m_Type == Type::UNKNOWN )
+    {
+        good = false;
+    }
+
+    return good;
+}
+
+void DeclSpecs::SetIsIn( bool is_in )
+{
+    m_IsIn = is_in;
 }
 
 /// TODO rename to has const specifier
 bool DeclSpecs::IsConst() const
 {
     return m_IsConst;
+}
+
+bool DeclSpecs::IsUniform() const
+{
+    return m_IsUniform;
+}
+
+bool DeclSpecs::IsVarying() const
+{
+    return m_IsVarying;
+}
+
+bool DeclSpecs::IsIn() const
+{
+    return m_IsIn;
+}
+
+bool DeclSpecs::IsOut() const
+{
+    return m_IsOut;
 }
 
 Type DeclSpecs::GetType() const

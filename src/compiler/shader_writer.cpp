@@ -137,6 +137,14 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
     std::set<Function_sp> functions = GatherFunctions(
                                           entry_function.GetFunctionPointer() );
 
+    //
+    // Get all the variables used by the functions. We're interested in the
+    // inputs and outputs
+    //
+    std::set<Variable_sp> variables = GatherVariables( functions );
+
+    WriteInputVariables( entry_function, variables );
+
     WriteOutputVariables( entry_function );
 
     WriteFunctionDeclarations( functions );
@@ -151,6 +159,24 @@ void ShaderWriter::WriteGLSLVersion()
 {
     m_Shader << "#version " << s_GLSLVersion;
     NewLine(2);
+}
+
+void ShaderWriter::WriteInputVariables( const EntryFunction& entry_function,
+                                        const std::set<Variable_sp>& variables )
+{
+    std::set<Variable_sp> input_variables;
+
+    //
+    // Add the inputs in the form of function parameters
+    //
+    for( const auto& v : entry_function.GetFunction().GetParameters() )
+    {
+        //
+        // we only care about varying parameters
+        // todo uniforms
+        //
+        //if( v.
+    }
 }
 
 void ShaderWriter::WriteFunctionDeclarations(

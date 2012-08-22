@@ -110,6 +110,9 @@ private:
     /** Writes #version 150 to the shader **/
     void WriteGLSLVersion();
 
+    void WriteInputVariables( const EntryFunction& entry_function,
+                              const std::set<Variable_sp>& variables );
+
     /** Writes all the function declarations **/
     void WriteFunctionDeclarations( const std::set<Function_sp> functions );
 

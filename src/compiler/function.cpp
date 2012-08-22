@@ -86,6 +86,11 @@ llvm::Function* Function::GetLLVMFunction() const
     return m_LLVMFunction;
 }
 
+const std::vector<Variable_sp>& Function::GetParameters() const
+{
+    return m_Parameters;
+}
+
 void Function::SetParameters( std::vector<Variable_sp> parameters )
 {
     m_Parameters = std::move(parameters);

@@ -133,6 +133,10 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                                            array_extents ),
                                              m_Declarator->GetSemantic(),
                                              decl_specs.IsConst() && can_init,
+                                             decl_specs.IsUniform(),
+                                             decl_specs.IsVarying(),
+                                             decl_specs.IsIn(),
+                                             decl_specs.IsOut(),
                                              m_IsGlobal,
                                              false, // Isn't a parameter
                                              can_init ? std::move(initializer)

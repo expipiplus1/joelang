@@ -396,7 +396,16 @@ VariableDeclarationList::~VariableDeclarationList()
 void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
-    decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema );
+
+    //
+    // If the decl specs were no good we can't continue
+    //
+    if( !decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema ) )
+        return;
+
+    //
+    // Check that
+    //
 
     for( const InitDeclarator_up& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );

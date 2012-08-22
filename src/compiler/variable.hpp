@@ -64,15 +64,19 @@ class Variable
 public:
     /**
       * This constructor asserts if the varible is const and hasn't been given
-      * an initializer
+      * an initializer, and on a bunch of other things
       */
     Variable( CompleteType type,
               Semantic semantic,
               bool is_const,
-              bool is_global = false,
-              bool is_parameter = false,
-              GenericValue initializer = GenericValue(),
-              std::string name = "" );
+              bool is_uniform,
+              bool is_varying,
+              bool is_in,
+              bool is_out,
+              bool is_global,
+              bool is_parameter,
+              GenericValue initializer,
+              std::string name );
 
     void CodeGen( CodeGenerator& code_gen );
 
@@ -104,6 +108,10 @@ private:
     CompleteType m_Type;
     Semantic m_Semantic;
     bool m_IsConst;
+    bool m_IsUniform;
+    bool m_IsVarying;
+    bool m_IsIn;
+    bool m_IsOut;
     bool m_IsGlobal;
     bool m_IsParameter;
     GenericValue m_Initializer;

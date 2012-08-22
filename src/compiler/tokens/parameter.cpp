@@ -78,7 +78,21 @@ Parameter::~Parameter()
 bool Parameter::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
-    decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
+
+    //
+    // If there was a problem evaluating the declaration specifiers we can't
+    // continue
+    //
+    if( !decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema ) )
+        return false;
+
+    //
+    // Check some other things about the specifiers
+    //
+
+    if( !(decl_specs.IsIn() || decl_specs.IsOut() ) )
+        // parameters are in by default
+        decl_specs.SetIsIn( true );
 
     Type base_type = decl_specs.GetType();
     if( base_type == Type::UNKNOWN )
@@ -119,6 +133,10 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
                                                            array_extents ),
                                              std::move(semantic),
                                              decl_specs.IsConst(),
+                                             decl_specs.IsUniform(),
+                                             decl_specs.IsVarying(),
+                                             decl_specs.IsIn(),
+                                             decl_specs.IsOut(),
                                              false, //Isn't global
                                              true,  //Is a param
                                              GenericValue(),

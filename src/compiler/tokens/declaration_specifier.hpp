@@ -63,11 +63,18 @@ class DeclSpecs
 public:
     DeclSpecs();
 
-    void AnalyzeDeclSpecs(
+    bool AnalyzeDeclSpecs(
                          const std::vector<DeclarationSpecifier_up>& decl_specs,
                          SemaAnalyzer& sema );
 
+    void SetIsIn( bool is_in );
+
     bool IsConst() const;
+    bool IsUniform() const;
+    bool IsVarying() const;
+    bool IsIn() const;
+    bool IsOut() const;
+    bool IsInline() const;
     Type GetType() const;
 
     static

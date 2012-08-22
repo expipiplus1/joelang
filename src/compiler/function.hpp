@@ -79,6 +79,11 @@ public:
     llvm::Function* GetLLVMFunction() const;
 
     /**
+      * Get the parameter variables
+      */
+    const std::vector<Variable_sp>& GetParameters() const;
+
+    /**
       * This asserts that the parameter types match
       */
     void SetParameters( std::vector<Variable_sp> parameters );

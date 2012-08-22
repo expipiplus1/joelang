@@ -52,6 +52,10 @@ namespace Compiler
 Variable::Variable( CompleteType type,
                     Semantic semantic,
                     bool is_const,
+                    bool is_uniform,
+                    bool is_varying,
+                    bool is_in,
+                    bool is_out,
                     bool is_global,
                     bool is_parameter,
                     GenericValue initializer,
@@ -59,14 +63,20 @@ Variable::Variable( CompleteType type,
     :m_Type( std::move(type) )
     ,m_Semantic( std::move(semantic) )
     ,m_IsConst( is_const )
+    ,m_IsUniform( is_uniform )
+    ,m_IsVarying( is_varying )
+    ,m_IsIn( is_in )
+    ,m_IsOut( is_out )
     ,m_IsGlobal( is_global )
     ,m_IsParameter( is_parameter )
     ,m_Initializer( std::move(initializer) )
     ,m_Name( std::move(name) )
     ,m_LLVMPointer( nullptr )
 {
+    //
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
+    //
     assert( !m_Type.IsUnknown() &&
             "Trying to construct a variable of unknown type" );
     assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
@@ -77,6 +87,37 @@ Variable::Variable( CompleteType type,
     assert( ( m_Initializer.GetType().IsUnknown() ||
               m_Initializer.GetType() == type ) &&
             "Trying to initialize a variable with the wrong type" );
+
+    //
+    // assert that this is either in or out if it's a parameter or a varying
+    // (m_IsParameter || m_IsVarying) -> (m_IsIn || m_IsOut)
+    //
+    assert( (!m_IsVarying || (m_IsIn || m_IsOut)) &&
+            "Trying to make a varying that's not in or out" );
+    assert( (!m_IsParameter || (m_IsIn || m_IsOut)) &&
+            "Trying to make a parameter that's not in or out" );
+    assert( (!m_IsIn || (m_IsVarying || m_IsParameter)) &&
+            "Trying to make an in variable that's not a varying or parameter" );
+    assert( (!m_IsOut || (m_IsVarying || m_IsParameter)) &&
+            "Trying to make an out variable that's not a varying or "
+            "parameter" );
+
+    //
+    // assert that a uniform can't be in or out
+    // m_IsUniform -> !(m_IsIn || m_IsOut)
+    //
+    assert( (!m_IsUniform || !(m_IsIn || m_IsOut)) &&
+            "Trying to make a uniform variable that's in or out" );
+
+    //
+    // assert that a uniform is global or a parameter
+    // m_IsUniform -> (m_IsGlobal || m_IsParameter)
+    //
+    assert( (!m_IsUniform || (m_IsGlobal || m_IsParameter)) &&
+            "Trying to make a uniform variable that's not a global or "
+            "parameter" );
+
+    // todo handle const and constexpr properly
 }
 
 void Variable::CodeGen( CodeGenerator& code_gen )

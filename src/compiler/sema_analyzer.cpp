@@ -261,6 +261,10 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
                                                         v.second.GetType(),
                                                         Semantic(),
                                                         true, //Is const
+                                                        false, //Isn't uniform
+                                                        false, //Isn't varying
+                                                        false, //Isn't in
+                                                        false, //Isn't out
                                                         true, //Is global
                                                         false,//Isn't a param
                                                         std::move(v.second),
