@@ -131,6 +131,25 @@ bool DeclSpecs::AnalyzeDeclSpecs(
         good = false;
     }
 
+    if( m_IsStatic && m_IsUniform )
+    {
+        sema.Error( "Can't combine 'static' and 'uniform' specifiers" );
+        good = false;
+    }
+
+    if( m_IsStatic && m_IsVarying )
+    {
+        sema.Error( "Can't combine 'static' and 'varying' specifiers" );
+        good = false;
+    }
+
+    if( m_IsStatic && (m_IsIn || m_IsOut) )
+    {
+        sema.Error( "Can't have 'in', 'out' or 'inout' specifiers on a static "
+                    "variable" );
+        good = false;
+    }
+
     if( m_IsVarying )
     {
         //
