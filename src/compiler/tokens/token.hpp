@@ -97,7 +97,7 @@ public:
 
         DeclarationSpecifier_Start,
         TypeSpecifier,
-        TypeQualifier,
+        TypeQualifierSpecifier,
         StorageClassSpecifier,
         DeclarationSpecifier_End,
 

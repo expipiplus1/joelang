@@ -50,35 +50,36 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 DeclSpecs::DeclSpecs()
-    :m_IsConst( false )
+    :m_IsConst  ( false )
     ,m_IsUniform( false )
     ,m_IsVarying( false )
     ,m_IsStatic ( false )
     ,m_IsExtern ( false )
     ,m_IsIn     ( false )
     ,m_IsOut    ( false )
-    ,m_Type   ( Type::UNKNOWN )
+    ,m_Type     ( Type::UNKNOWN )
 {
 }
 
 void DeclSpecs::AnalyzeDeclSpecs(
-        const std::vector<std::unique_ptr<DeclarationSpecifier> >& decl_specs,
-        SemaAnalyzer& sema )
+                         const std::vector<DeclarationSpecifier_up>& decl_specs,
+                         SemaAnalyzer& sema )
 {
     std::vector<TypeSpec> type_specs;
     m_IsConst = false;
 
     for( const auto& t : decl_specs )
     {
-        if( isa<TypeQualifier>(t) )
+        if( isa<TypeQualifierSpecifier>(t) )
         {
-            TypeQualifier& type_qual = static_cast<TypeQualifier&>( *t.get() );
+            TypeQualifierSpecifier& type_qual =
+                               static_cast<TypeQualifierSpecifier&>( *t.get() );
             switch( type_qual.GetQualifier() )
             {
-            case TypeQualifier::TypeQual::CONST:
+            case TypeQualifier::CONST:
                 m_IsConst = true;
                 break;
-            case TypeQualifier::TypeQual::VOLATILE:
+            case TypeQualifier::VOLATILE:
                 sema.Warning( "volatile specfier ignored in declaration" );
                 break;
             }
@@ -91,7 +92,7 @@ void DeclSpecs::AnalyzeDeclSpecs(
         else if( isa<StorageClassSpecifier>(t) )
         {
             StorageClassSpecifier& storage_class =
-                    static_cast<StorageClassSpecifier&>( *t.get() );
+                                static_cast<StorageClassSpecifier&>( *t.get() );
             switch( storage_class.GetStorageClass() )
             {
             case StorageClass::UNIFORM:
@@ -303,7 +304,7 @@ bool DeclarationSpecifier::Parse( Parser& parser,
 {
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf<TypeSpecifier,
-                            TypeQualifier,
+                            TypeQualifierSpecifier,
                             StorageClassSpecifier>( t ) )
         return false;
 
@@ -403,49 +404,49 @@ bool TypeSpecifier::classof( const TypeSpecifier* d )
 }
 
 //------------------------------------------------------------------------------
-// TypeQualifier
+// TypeQualifierSpecifier
 //------------------------------------------------------------------------------
 
-TypeQualifier::TypeQualifier( TypeQual t )
-    :DeclarationSpecifier( TokenTy::TypeQualifier )
-    ,m_TypeQual( t )
+TypeQualifierSpecifier::TypeQualifierSpecifier( TypeQualifier t )
+    :DeclarationSpecifier( TokenTy::TypeQualifierSpecifier )
+    ,m_TypeQualifier( t )
 {
 }
 
-TypeQualifier::~TypeQualifier()
+TypeQualifierSpecifier::~TypeQualifierSpecifier()
 {
 }
 
-TypeQualifier::TypeQual TypeQualifier::GetQualifier() const
+TypeQualifier TypeQualifierSpecifier::GetQualifier() const
 {
-    return m_TypeQual;
+    return m_TypeQualifier;
 }
 
-bool TypeQualifier::Parse( Parser& parser,
-                           std::unique_ptr<TypeQualifier>& token )
+bool TypeQualifierSpecifier::Parse( Parser& parser,
+                                    TypeQualifierSpecifier_up& token )
 {
-    const static std::vector<std::pair<TerminalType, TypeQual> > qual_map =
+    const static std::vector<std::pair<TerminalType, TypeQualifier> > qual_map =
     {
-        { TerminalType::CONST,     TypeQual::CONST    },
-        { TerminalType::VOLATILE,  TypeQual::VOLATILE }
+        { TerminalType::CONST,     TypeQualifier::CONST    },
+        { TerminalType::VOLATILE,  TypeQualifier::VOLATILE }
     };
 
     for( auto p : qual_map )
         if( parser.ExpectTerminal( p.first ) )
         {
-            token.reset( new TypeQualifier( p.second ) );
+            token.reset( new TypeQualifierSpecifier( p.second ) );
             return true;
         }
 
     return false;
 }
 
-bool TypeQualifier::classof( const DeclarationSpecifier* d )
+bool TypeQualifierSpecifier::classof( const DeclarationSpecifier* d )
 {
-    return d->GetSubClassID() == TokenTy::TypeQualifier;
+    return d->GetSubClassID() == TokenTy::TypeQualifierSpecifier;
 }
 
-bool TypeQualifier::classof( const TypeQualifier* d )
+bool TypeQualifierSpecifier::classof( const TypeQualifierSpecifier* d )
 {
     return true;
 }

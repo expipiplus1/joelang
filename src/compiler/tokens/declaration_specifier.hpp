@@ -42,9 +42,16 @@ namespace Compiler
 {
 
 class DeclarationSpecifier;
-enum class TypeSpec;
+using DeclarationSpecifier_up = std::unique_ptr<DeclarationSpecifier>;
 class Parser;
 class SemaAnalyzer;
+class TypeQualifierSpecifier;
+using TypeQualifierSpecifier_up = std::unique_ptr<TypeQualifierSpecifier>;
+class TypeSpecifier;
+using TypeSpecifier_up = std::unique_ptr<TypeSpecifier>;
+class StorageClassSpecifier;
+using StorageClassSpecifier_up = std::unique_ptr<StorageClassSpecifier>;
+enum class TypeSpec;
 
 /**
   * \class DeclSpecs
@@ -57,15 +64,14 @@ public:
     DeclSpecs();
 
     void AnalyzeDeclSpecs(
-        const std::vector<std::unique_ptr<DeclarationSpecifier> >& decl_specs,
-        SemaAnalyzer& sema );
+                         const std::vector<DeclarationSpecifier_up>& decl_specs,
+                         SemaAnalyzer& sema );
 
     bool IsConst() const;
     Type GetType() const;
 
     static
-    Type DeduceType( std::vector<TypeSpec> type_specs,
-                     SemaAnalyzer& sema );
+    Type DeduceType( std::vector<TypeSpec> type_specs, SemaAnalyzer& sema );
 private:
     bool m_IsConst;
     bool m_IsUniform;
@@ -82,7 +88,9 @@ private:
   * \ingroup Tokens
   * \brief Matches any declaration specifier
   *
-  * DeclarationSpecifier = TypeSpecifier | TypeQualifier | StorageClassSpecifier
+  * DeclarationSpecifier = TypeSpecifier
+  *                      | TypeQualifierSpecifier
+  *                      | StorageClassSpecifier
   */
 class DeclarationSpecifier : public JoeLang::Compiler::Token
 {
@@ -93,7 +101,7 @@ public:
     ~DeclarationSpecifier();
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<DeclarationSpecifier>& token );
+    bool Parse( Parser& parser, DeclarationSpecifier_up& token );
 
     /** Used for casting **/
     static
@@ -103,6 +111,7 @@ public:
 private:
 };
 
+// The ordering here is imporant for VariableDeclarationList::PerformSema
 enum class TypeSpec
 {
     VOID,
@@ -129,9 +138,6 @@ enum class TypeSpec
 class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
-    // the ordering here is imporant for VariableDeclarationList::PerformSema
-
-
     explicit
     TypeSpecifier( TypeSpec type_spec );
     virtual
@@ -142,7 +148,7 @@ public:
     Type GetType() const;
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<TypeSpecifier>& token );
+    bool Parse( Parser& parser, TypeSpecifier_up& token );
 
     static
     bool classof( const DeclarationSpecifier* d );
@@ -152,38 +158,38 @@ private:
     TypeSpec m_TypeSpec;
 };
 
+enum class TypeQualifier
+{
+    CONST,
+    VOLATILE
+};
+
 /**
-  * \class TypeQualifier
+  * \class TypeQualifierSpecifier
   * \ingroup Tokens
   * \brief matches a type qualifier
   *
-  * TypeQualifier = 'const' | 'volatile'
+  * TypeQualifierSpecifier = 'const' | 'volatile'
   */
-class TypeQualifier : public JoeLang::Compiler::DeclarationSpecifier
+class TypeQualifierSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
 public:
-    enum class TypeQual
-    {
-        CONST,
-        VOLATILE
-    };
-
     explicit
-    TypeQualifier( TypeQual type_qual );
+    TypeQualifierSpecifier( TypeQualifier type_qual );
     virtual
-    ~TypeQualifier();
+    ~TypeQualifierSpecifier();
 
-    TypeQual GetQualifier() const;
+    TypeQualifier GetQualifier() const;
 
     static
-    bool Parse( Parser& parer, std::unique_ptr<TypeQualifier>& token );
+    bool Parse( Parser& parer, TypeQualifierSpecifier_up& token );
 
     static
     bool classof( const DeclarationSpecifier* d );
     static
-    bool classof( const TypeQualifier* d );
+    bool classof( const TypeQualifierSpecifier* d );
 private:
-    TypeQual m_TypeQual;
+    TypeQualifier m_TypeQualifier;
 };
 
 enum class StorageClass
@@ -215,7 +221,7 @@ public:
     StorageClass GetStorageClass() const;
 
     static
-    bool Parse( Parser& parser, std::unique_ptr<StorageClassSpecifier>& token );
+    bool Parse( Parser& parser, StorageClassSpecifier_up& token );
 
     static
     bool classof( const DeclarationSpecifier* d );
