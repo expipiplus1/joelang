@@ -198,6 +198,11 @@ bool DeclSpecs::IsOut() const
     return m_IsOut;
 }
 
+bool DeclSpecs::IsInline() const
+{
+    return m_IsInline;
+}
+
 Type DeclSpecs::GetType() const
 {
     return m_Type;

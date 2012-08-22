@@ -88,6 +88,12 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     }
 
     //
+    // This isn't a function declarator
+    //
+    if( decl_specs.IsInline() )
+        sema.Error( "Can only use the 'inline' specifier on functions" );
+
+    //
     // Only initialization specific stuff below here
     //
 

@@ -89,6 +89,9 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
     //
     // Check some other things about the specifiers
     //
+    if( decl_specs.IsInline() )
+        // Don't return here, this is a recoverable error
+        sema.Error( "Can't have an inline specifier on a parameter" );
 
     if( !(decl_specs.IsIn() || decl_specs.IsOut() ) )
         // parameters are in by default
