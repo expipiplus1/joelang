@@ -31,7 +31,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <set>
 #include <string>
@@ -572,7 +571,6 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
         }
         else
         {
-            std::cout << GetTypeString( m_CastType.GetType() ) << std::endl;
             assert( false && "Casting to an unhandled type" );
         }
     }

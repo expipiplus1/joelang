@@ -40,9 +40,6 @@
 #include <compiler/type_properties.hpp>
 #include <joelang/types.hpp>
 
-
-#include <iostream>
-
 namespace JoeLang
 {
 namespace Compiler
@@ -69,7 +66,6 @@ void DeclSpecs::AnalyzeDeclSpecs(
                          const std::vector<DeclarationSpecifier_up>& decl_specs,
                          SemaAnalyzer& sema )
 {
-    std::cout << sizeof(DeclSpecs) << std::endl;
     std::vector<TypeSpec> type_specs;
 
     for( const auto& t : decl_specs )

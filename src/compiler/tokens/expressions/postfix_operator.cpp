@@ -30,7 +30,6 @@
 #include "postfix_operator.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <set>
 #include <string>

@@ -30,7 +30,6 @@
 #include "state_assignment_statement.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>

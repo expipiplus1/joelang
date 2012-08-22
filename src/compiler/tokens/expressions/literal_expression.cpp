@@ -30,7 +30,6 @@
 #include "literal_expression.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>

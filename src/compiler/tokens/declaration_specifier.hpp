@@ -81,7 +81,6 @@ private:
     bool m_IsIn;
     bool m_IsOut;
     bool m_IsInline;
-    bool dummy;
     Type m_Type;
 };
 

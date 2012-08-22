@@ -30,7 +30,6 @@
 #include "binary_operator_expression.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <utility>
 
