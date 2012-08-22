@@ -76,7 +76,6 @@ public:
 
     ShaderWriter& operator<<( const CompleteType& value );
     ShaderWriter& operator<<( const Expression& value );
-    ShaderWriter& operator<<( const PostfixOperator& value );
     ShaderWriter& operator<<( const Statement& value );
 
     template<typename T>

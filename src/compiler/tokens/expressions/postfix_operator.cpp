@@ -162,7 +162,8 @@ llvm::Value* SubscriptOperator::CodeGenPointerTo(
                                                *m_IndexExpression );
 }
 
-void SubscriptOperator::Write( ShaderWriter& shader_writer ) const
+void SubscriptOperator::Write( ShaderWriter& shader_writer,
+                               const Expression& expression ) const
 {
     assert( false && "complete me" );
 }
@@ -321,9 +322,11 @@ llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
     return nullptr;
 }
 
-void ArgumentListOperator::Write( ShaderWriter& shader_writer ) const
+void ArgumentListOperator::Write( ShaderWriter& shader_writer,
+                                  const Expression& expression ) const
 {
-    shader_writer << "(";
+    shader_writer << expression <<
+                     "(";
     bool first = true;
     for( const auto& a : m_Arguments )
     {
@@ -448,7 +451,8 @@ llvm::Value* MemberAccessOperator::CodeGenPointerTo(
     return nullptr;
 }
 
-void MemberAccessOperator::Write( ShaderWriter& shader_writer ) const
+void MemberAccessOperator::Write( ShaderWriter& shader_writer,
+                                  const Expression& expression ) const
 {
     assert( false && "complete me" );
 }
@@ -538,7 +542,8 @@ llvm::Value* IncrementOrDecrementOperator::CodeGenPointerTo(
     return nullptr;
 }
 
-void IncrementOrDecrementOperator::Write( ShaderWriter& shader_writer ) const
+void IncrementOrDecrementOperator::Write( ShaderWriter& shader_writer,
+                                          const Expression& expression ) const
 {
     assert( false && "complete me" );
 }

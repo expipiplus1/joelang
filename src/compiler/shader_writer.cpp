@@ -115,12 +115,6 @@ ShaderWriter& ShaderWriter::operator << ( const CompleteType& value )
     return *this;
 }
 
-ShaderWriter& ShaderWriter::operator << ( const PostfixOperator& value )
-{
-    value.Write( *this );
-    return *this;
-}
-
 ShaderWriter& ShaderWriter::operator << ( const Expression& value )
 {
     value.Write( *this );

@@ -877,7 +877,7 @@ llvm::Value* PostfixExpression::CodeGenPointerTo(
 
 void PostfixExpression::Write( ShaderWriter& shader_writer ) const
 {
-    shader_writer << "(" << *m_Expression << *m_PostfixOperator << ")";
+    m_PostfixOperator->Write( shader_writer, *m_Expression );
 }
 
 CompleteType PostfixExpression::GetType() const

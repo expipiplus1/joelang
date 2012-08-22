@@ -99,7 +99,8 @@ public:
                                    const Expression& expression ) = 0;
 
     virtual
-    void Write( ShaderWriter& shader_writer ) const = 0;
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const = 0;
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;
@@ -172,7 +173,8 @@ public:
                                    const Expression& expression ) override;
 
     virtual
-    void Write( ShaderWriter& shader_writer ) const override;
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -238,7 +240,8 @@ public:
                                    const Expression& expression ) override;
 
     virtual
-    void Write( ShaderWriter& shader_writer ) const override;
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -305,7 +308,8 @@ public:
                                    const Expression& expression ) override;
 
     virtual
-    void Write( ShaderWriter& shader_writer ) const override;
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
@@ -369,7 +373,8 @@ public:
                                    const Expression& expression ) override;
 
     virtual
-    void Write( ShaderWriter& shader_writer ) const override;
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
 
     virtual
     CompleteType GetType( const Expression& expression ) const override;
