@@ -159,6 +159,12 @@ private:
                                        const std::set<Function_sp>& functions );
 
     /**
+      * Gather all the variables used in the parameters for the entry_function
+      */
+    std::set<Variable_sp> GatherParameterVariables( 
+                                            const EntryFunction& entry_function );
+
+    /**
       * The context that this belongs to
       */
     const Context& m_Context;

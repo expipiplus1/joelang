@@ -183,20 +183,26 @@ std::set<Variable_sp> ShaderWriter::WriteInputVaryings(
                                         const std::set<Variable_sp>& variables )
 {
     std::set<Variable_sp> input_varyings;
-
-    //
-    // Add the inputs in the form of function parameters
-    //
-    for( const auto& v : entry_function.GetFunction().GetParameters() )
-        // we only care about varying parameters
-        if( v->IsVarying() && v->IsIn() )
-            input_varyings.insert( v );
+    std::set<Variable_sp> input_parameters = GatherParameterVariables( 
+                                                               entry_function );
 
     for( const auto& v : variables )
         // Ignore the varying specifier if it's on a parameter to a
         // non-top-level function
         if( v->IsVarying() && v->IsIn() && !v->IsParameter() )
             input_varyings.insert( v );
+
+    for( const auto& v : input_parameters )
+        if( v->IsVarying() && v->IsIn() &&
+            input_varyings.find( v ) == input_varyings.end() )
+        {
+            // We only care about input varyings here,
+            // and only about ones which are not used elsewhere
+            // todo layout information here
+            *this << "in " << v->GetType() << " " <<
+                     Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+            NewLine();
+        }
 
     for( const auto& v : input_varyings )
     {
@@ -301,9 +307,18 @@ void ShaderWriter::WriteMainFunction(
     NewLine();
 
     //
-    // Copy all the in varyings to the global variables
+    // Gather all the input parameters
+    //
+    std::set<Variable_sp> input_parameters = GatherParameterVariables( 
+                                                               entry_function );
+
+    //
+    // Copy all the in varyings to the global variables except if they came from
+    // a parameter
     //
     for( const auto& v : input_variables )
+        // Dont allow input parameters, they ahve already been assigned to a
+        // local variable
         if( v->IsGlobal() )
         {
             *this << Mangle( v->GetName(), IdentifierType::VARIABLE ) <<
@@ -314,6 +329,18 @@ void ShaderWriter::WriteMainFunction(
 
     NewLine();
 
+    //
+    // Write all the input parameters
+    //
+    for( const auto& v : input_parameters )
+    {
+        *this << v->GetType() << " " <<
+                 Mangle( v->GetName(), IdentifierType::VARIABLE ) << " = " <<
+                 Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+        NewLine();
+    }
+
+    NewLine();
 
     //
     // Write a call the the entry function and sort out all the output variables
@@ -424,6 +451,18 @@ std::set<Variable_sp> ShaderWriter::GatherVariables(
     for( const auto& f : functions )
     {
         std::set<Variable_sp> v = f->GetVariables();
+        ret.insert( v.begin(), v.end() );
+    }
+    return ret;
+}
+
+std::set<Variable_sp> ShaderWriter::GatherParameterVariables(
+                                        const EntryFunction& entry_function )
+{
+    std::set<Variable_sp> ret;
+    for( const auto& p : entry_function.GetParameters() )
+    {
+        std::set<Variable_sp> v = p->GetVariables();
         ret.insert( v.begin(), v.end() );
     }
     return ret;
