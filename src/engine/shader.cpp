@@ -130,7 +130,18 @@ void Shader::Compile()
     GLint status;
     glGetShaderiv( m_Object, GL_COMPILE_STATUS, &status );
     // todo report error with context
-    assert( status != GL_FALSE && "Error Creating shader" );
+
+    if (status == GL_FALSE)
+    {
+        GLint info_log_length;
+        glGetShaderiv( m_Object, GL_INFO_LOG_LENGTH, &info_log_length );
+
+        GLchar *info_log = new GLchar[info_log_length + 1];
+        glGetShaderInfoLog( m_Object, info_log_length, NULL, info_log );
+
+        std::cerr << "Compile Error in shader: " << info_log << std::endl;
+        delete[] info_log;
+    }
 }
 
 bool Shader::IsCompiled() const
