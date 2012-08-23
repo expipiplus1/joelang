@@ -406,8 +406,10 @@ llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 
 void FloatingLiteralExpression::Write( ShaderWriter& shader_writer ) const
 {
-    assert( m_Suffix == Suffix::SINGLE &&
-            "todo shader writer warning instead of assert" );
+    // todo check double support
+    if( m_Suffix == Suffix::NONE )
+        shader_writer.Warning( "glsl doesn't support double, using float "
+                               "instead" );
     shader_writer << m_Value << ( m_Suffix == Suffix::SINGLE ? "f" : "" );
 }
 

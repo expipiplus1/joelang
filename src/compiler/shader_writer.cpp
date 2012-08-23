@@ -483,5 +483,11 @@ void ShaderWriter::Error( const std::string& error_string )
     m_Context.Error( error_string );
 }
 
+void ShaderWriter::Warning( const std::string& warning_string )
+{
+    // todo Context::Warning
+    m_Context.Error( "Warning: " + warning_string );
+}
+
 } // namespace Compiler
 } // namespace JoeLang

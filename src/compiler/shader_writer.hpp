@@ -95,6 +95,9 @@ public:
     /** Records an error while writing the shader **/
     void Error( const std::string& error_string = "" );
 
+    /** Records an warning while writing the shader **/
+    void Warning( const std::string& warning_string );
+
     /**
       * This will mangle an identifier to ensure that there are no conflicts
       * Variables are prefixed  with "_"
