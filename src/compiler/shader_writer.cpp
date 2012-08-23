@@ -59,6 +59,9 @@ const std::string ShaderWriter::s_GLSLVersion = "150";
 ShaderWriter::ShaderWriter( const Context& context )
     :m_Context( context )
 {
+    m_Shader.setf( std::ios_base::scientific );
+    m_Shader.setf( std::ios_base::boolalpha );
+    m_Shader.setf( std::ios_base::showpoint );
 }
 
 std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
@@ -183,7 +186,7 @@ std::set<Variable_sp> ShaderWriter::WriteInputVaryings(
                                         const std::set<Variable_sp>& variables )
 {
     std::set<Variable_sp> input_varyings;
-    std::set<Variable_sp> input_parameters = GatherParameterVariables( 
+    std::set<Variable_sp> input_parameters = GatherParameterVariables(
                                                                entry_function );
 
     for( const auto& v : variables )
@@ -309,7 +312,7 @@ void ShaderWriter::WriteMainFunction(
     //
     // Gather all the input parameters
     //
-    std::set<Variable_sp> input_parameters = GatherParameterVariables( 
+    std::set<Variable_sp> input_parameters = GatherParameterVariables(
                                                                entry_function );
 
     //
