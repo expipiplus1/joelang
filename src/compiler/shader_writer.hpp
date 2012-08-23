@@ -47,6 +47,7 @@ namespace Compiler
 class CompleteType;
 class EntryFunction;
 class Expression;
+class GenericValue;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
 class PostfixOperator;
@@ -79,6 +80,7 @@ public:
     ShaderWriter& operator<<( const CompleteType& value );
     ShaderWriter& operator<<( const Expression& value );
     ShaderWriter& operator<<( const Statement& value );
+    ShaderWriter& operator<<( const GenericValue& value );
 
     template<typename T>
     ShaderWriter& operator<<( const T& value );
@@ -122,14 +124,14 @@ private:
     void WriteOutputVaryings( const EntryFunction& entry_function,
                               const std::set<Variable_sp>& variables );
 
+    /** Writes all the global variables used by the shader **/
+    void WriteGlobalVariables( const std::set<Variable_sp>& variables );
+
     /** Writes all the function declarations **/
     void WriteFunctionDeclarations( const std::set<Function_sp> functions );
 
     /** Writes all the function definitions **/
     void WriteFunctionDefinitions( const std::set<Function_sp> functions );
-
-    /** Writes all the output varyings **/
-    void WriteOutputVariables( const EntryFunction& entry_function );
 
     /** Writes main(){...} **/
     void WriteMainFunction( const EntryFunction& entry_function );

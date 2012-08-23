@@ -108,6 +108,11 @@ public:
     std::set<Variable_sp> GetVariables() const;
 
     /**
+      * Returns this function's semantic
+      */
+    const Semantic& GetSemantic() const;
+
+    /**
       * Generates a string for the function signature
       */
     std::string GetSignatureString() const;

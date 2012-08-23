@@ -127,6 +127,11 @@ std::set<Variable_sp> Function::GetVariables() const
     return m_Definition->GetVariables();
 }
 
+const Semantic& Function::GetSemantic() const
+{
+    return m_Semantic;
+}
+
 std::string Function::GetSignatureString() const
 {
     /// TODO do this properly

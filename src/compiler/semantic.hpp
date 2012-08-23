@@ -59,6 +59,11 @@ public:
     /** This constructor asserts on an empty string **/
     Semantic  ( std::string string, unsigned index );
 
+    /**
+      * Returns true if this semantic represents a varying
+      */
+    bool IsVarying() const;
+
     bool HasIndex() const;
     /** This asserts that we have an index **/
     unsigned GetIndex() const;

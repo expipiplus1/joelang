@@ -41,6 +41,7 @@
 
 #include <compiler/complete_type.hpp>
 #include <compiler/entry_function.hpp>
+#include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
@@ -130,6 +131,12 @@ ShaderWriter& ShaderWriter::operator << ( const Statement& value )
     return *this;
 }
 
+ShaderWriter& ShaderWriter::operator << ( const GenericValue& value )
+{
+    value.Write( *this );
+    return *this;
+}
+
 void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
@@ -147,13 +154,18 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
     std::set<Variable_sp> variables = GatherVariables( functions );
 
     WriteInputVaryings( entry_function, variables );
+    NewLine();
+    WriteOutputVaryings( entry_function, variables );
+    NewLine();
 
-    WriteOutputVariables( entry_function );
+    WriteGlobalVariables( variables );
+    NewLine();
 
     WriteFunctionDeclarations( functions );
     NewLine();
 
     WriteFunctionDefinitions( functions );
+    NewLine();
 
     WriteMainFunction( entry_function );
 }
@@ -168,10 +180,6 @@ void ShaderWriter::WriteInputVaryings( const EntryFunction& entry_function,
                                        const std::set<Variable_sp>& variables )
 {
     std::set<Variable_sp> input_varyings;
-
-    //
-    // The entry function may return
-    //
 
     //
     // Add the inputs in the form of function parameters
@@ -194,6 +202,59 @@ void ShaderWriter::WriteInputVaryings( const EntryFunction& entry_function,
                  Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
         NewLine();
     }
+}
+
+void ShaderWriter::WriteOutputVaryings( const EntryFunction& entry_function,
+                                        const std::set<Variable_sp>& variables )
+{
+    std::set<Variable_sp> output_varyings;
+
+    //
+    // The entry function may have a varying semantic
+    //
+    if( entry_function.GetFunction().GetSemantic().IsVarying() )
+    {
+        // This isn't actually a variable, so just output it now
+        *this << "out " <<
+                 entry_function.GetFunction().GetReturnType() <<  " " <<
+                 Mangle( entry_function.GetFunction().GetIdentifier(),
+                         IdentifierType::OUT_VARYING ) <<  ";";
+        NewLine();
+    }
+
+    //
+    // Add the outputs in the form of function parameters
+    //
+    for( const auto& v : entry_function.GetFunction().GetParameters() )
+        // we only care about varying parameters
+        if( v->IsVarying() && v->IsOut() )
+            output_varyings.insert( v );
+
+    for( const auto& v : variables )
+        // Ignore the varying specifier if it's on a parameter to a
+        // non-top-level function
+        if( v->IsVarying() && v->IsOut() && !v->IsParameter() )
+            output_varyings.insert( v );
+
+    for( const auto& v : output_varyings )
+    {
+        // todo layout information here
+        *this << "out " <<
+                 v->GetType() << " " <<
+                 Mangle( v->GetName(), IdentifierType::OUT_VARYING ) << ";";
+        NewLine();
+    }
+}
+
+void ShaderWriter::WriteGlobalVariables(
+                                        const std::set<Variable_sp>& variables )
+{
+    for( const auto& v : variables )
+        if( v->IsGlobal() )
+        {
+            v->WriteDeclaration( *this );
+            NewLine();
+        }
 }
 
 void ShaderWriter::WriteFunctionDeclarations(
@@ -220,13 +281,6 @@ void ShaderWriter::WriteFunctionDefinitions(
         f->WriteDefinition( *this );
 }
 
-void ShaderWriter::WriteOutputVariables( const EntryFunction& entry_function )
-{
-    // todo
-    m_Shader << "out vec4 output_color;";
-    NewLine(2);
-}
-
 void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
 {
     m_Shader << "void main()";
@@ -238,11 +292,12 @@ void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
     //
     // Write a call the the entry function and sort out all the output variables
     //
-    // todo hidden varyings
-    *this << "output_color = " <<
-             Mangle( entry_function.GetFunction().GetIdentifier(),
-                     IdentifierType::FUNCTION ) <<
-             "(";
+    if( entry_function.GetFunction().GetSemantic().IsVarying() )
+        // If we have a varying semantic on this function write to the output
+        *this << Mangle( entry_function.GetFunction().GetIdentifier(),
+                         IdentifierType::OUT_VARYING ) << " = ";
+    *this << Mangle( entry_function.GetFunction().GetIdentifier(),
+                     IdentifierType::FUNCTION ) << "(";
     bool first = true;
     for( const auto& argument : entry_function.GetParameters() )
     {

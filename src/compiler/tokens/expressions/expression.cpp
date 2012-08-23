@@ -268,7 +268,7 @@ CompleteType AssignmentExpression::GetType() const
 
 std::set<Function_sp> AssignmentExpression::GetCallees() const
 {
-    assert( false && "Do assignment properly" );
+    //assert( false && "Do assignment properly" );
     auto ret = m_Assignee->GetCallees();
     auto f   = m_AssignedExpression->GetCallees();
     ret.insert( f.begin(), f.end() );
@@ -277,7 +277,7 @@ std::set<Function_sp> AssignmentExpression::GetCallees() const
 
 std::set<Variable_sp> AssignmentExpression::GetVariables() const
 {
-    assert( false && "Do assignment properly" );
+    //assert( false && "Do assignment properly" );
     auto ret = m_Assignee->GetVariables();
     auto f   = m_AssignedExpression->GetVariables();
     ret.insert( f.begin(), f.end() );

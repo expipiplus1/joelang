@@ -69,6 +69,13 @@ Semantic::Semantic  ( std::string string, unsigned index )
     DetermineType();
 }
 
+bool Semantic::IsVarying() const
+{
+    // all the built in semantics are varying
+    return m_Type != SemanticType::NO_SEMANTIC &&
+           m_Type != SemanticType::CUSTOM;
+}
+
 bool Semantic::HasIndex() const
 {
     return m_HasIndex;

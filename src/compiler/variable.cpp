@@ -42,6 +42,7 @@
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
@@ -136,6 +137,21 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     }
 }
 
+void Variable::WriteDeclaration( ShaderWriter& shader_writer ) const
+{
+    if( m_IsConst )
+        shader_writer << "const ";
+
+    shader_writer << m_Type << " " <<
+                     ShaderWriter::Mangle( m_Name,
+                                           IdentifierType::VARIABLE );
+
+    if( m_Initializer.GetUnderlyingType() != Type::UNKNOWN )
+        shader_writer << " = " << m_Initializer;
+
+    shader_writer << ";";
+}
+
 void Variable::SetParameterPointer( llvm::Argument* parameter_pointer )
 {
     assert( !m_LLVMPointer && "setting an already set llvm pointer" );
@@ -198,6 +214,11 @@ bool Variable::IsIn() const
 bool Variable::IsOut() const
 {
     return m_IsOut;
+}
+
+bool Variable::IsGlobal() const
+{
+    return m_IsGlobal;
 }
 
 bool Variable::IsParameter() const

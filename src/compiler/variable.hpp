@@ -80,6 +80,12 @@ public:
 
     void CodeGen( CodeGenerator& code_gen );
 
+    /**
+      * This will write the declaration as if it's an ordinary variable
+      * not varying or uniform or in or out
+      */
+    void WriteDeclaration( ShaderWriter& shader_writer ) const;
+
     void SetParameterPointer( llvm::Argument* parameter_pointer );
 
     /**
@@ -109,6 +115,8 @@ public:
     bool IsIn() const;
 
     bool IsOut() const;
+
+    bool IsGlobal() const;
 
     bool IsParameter() const;
 
