@@ -86,14 +86,7 @@ public:
       */
     void WriteDeclaration( ShaderWriter& shader_writer ) const;
 
-    void SetParameterPointer( llvm::Argument* parameter_pointer );
-
-    /**
-      * This asserts that m_LLVMPointer is not null, and that we are a parameter
-      * it replaces m_LLVMPointer with variable and makes sets m_IsParameter to
-      * false;
-      */
-    void ReplaceParameterPointer( llvm::Value* pointer );
+    void SetParameterPointer( llvm::Value* parameter_pointer );
 
     llvm::Value* GetLLVMPointer() const;
 

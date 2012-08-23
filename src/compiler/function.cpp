@@ -157,11 +157,6 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
             "Trying to generate a definition without a declaration" );
     assert( m_Parameters.size() == m_ParameterTypes.size() &&
             "Parameter type vector size mismatch" );
-    //
-    // codegen the parameters
-    //
-    code_gen.BindFunctionParameters( m_LLVMFunction, m_Parameters );
-
 
     //
     // codegen the body
@@ -204,7 +199,11 @@ void Function::WriteHeader( ShaderWriter& shader_writer ) const
         else
             first = false;
         if( parameter->IsConst() )
-            shader_writer << "const" << " ";
+            shader_writer << "const ";
+        if( parameter->IsIn() )
+            shader_writer << "in ";
+        if( parameter->IsOut() )
+            shader_writer << "out ";
         // todo more attributes
         shader_writer << parameter->GetType() << " " <<
                          ShaderWriter::Mangle( parameter->GetName(),

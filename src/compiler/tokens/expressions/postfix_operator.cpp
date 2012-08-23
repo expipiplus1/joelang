@@ -325,8 +325,8 @@ llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
 void ArgumentListOperator::Write( ShaderWriter& shader_writer,
                                   const Expression& expression ) const
 {
-    shader_writer << expression <<
-                     "(";
+    shader_writer << ShaderWriter::Mangle( m_Function->GetIdentifier(),
+                                           IdentifierType::FUNCTION ) << "(";
     bool first = true;
     for( const auto& a : m_Arguments )
     {

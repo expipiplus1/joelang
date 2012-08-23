@@ -1198,10 +1198,8 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
 
 void IdentifierExpression::Write( ShaderWriter& shader_writer ) const
 {
-    shader_writer << ShaderWriter::Mangle(
-                     m_Identifier,
-                     static_cast<bool>(m_Variable) ? IdentifierType::VARIABLE
-                                                   : IdentifierType::FUNCTION );
+    shader_writer << ShaderWriter::Mangle( m_Identifier,
+                                           IdentifierType::VARIABLE );
 }
 
 CompleteType IdentifierExpression::GetType() const

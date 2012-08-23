@@ -893,18 +893,7 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 {
     // If this is a const param, we can use the value it was passed with,
     // otherwise it will have been alloc
-    assert( ( !variable.IsParameter() || variable.IsConst() ) &&
-            "Trying to read a non-const parameter as a variable" );
-    if( variable.IsParameter() )
-        return CreateParameterRead( variable );
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
-}
-
-llvm::Value* CodeGenerator::CreateParameterRead( const Variable& parameter )
-{
-    assert( parameter.IsParameter() &&
-            "Creating a parameter read from a non-parameter" );
-    return parameter.GetLLVMPointer();
 }
 
 llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
@@ -971,47 +960,32 @@ void CodeGenerator::CreateFunctionDefinition(
 
     m_LLVMBuilder.SetInsertPoint( llvm_body );
 
-    // Allocate space for the parameters if they are not const
-    for( const auto& p : parameters )
+    auto arg_iterator = function->arg_begin();
+    for( unsigned i = 0; i < parameters.size(); ++i, ++arg_iterator )
     {
+        // todo in out and inout things
+        const Variable_sp& p = parameters[i];
+        assert( arg_iterator != function->arg_end() &&
+                "llvm arg iterator overrun" );
+        assert( arg_iterator->getType() == m_Runtime.GetLLVMType(
+                                                   p->GetType() ) &&
+                "Type mismatch in function parameters" );
         assert( p->IsParameter() &&
                 "non-parameter in function parameter list" );
-        if( !p->IsConst() )
-        {
-            llvm::Value* v = m_LLVMBuilder.CreateAlloca( m_Runtime.GetLLVMType(
-                                                               p->GetType() ) );
-            m_LLVMBuilder.CreateStore( CreateParameterRead( *p ), v );
-            p->ReplaceParameterPointer( v );
-        }
+
+        llvm::Value* v = m_LLVMBuilder.CreateAlloca( m_Runtime.GetLLVMType(
+                                                           p->GetType() ) );
+        m_LLVMBuilder.CreateStore( arg_iterator, v );
+        p->SetParameterPointer( v );
     }
+    assert( arg_iterator == function->arg_end() &&
+            "llvm arg iterator underrun" );
 
     assert( body->AlwaysReturns() &&
             "Generating code for a statement which doesn't always return" );
 
     body->CodeGen( *this );
     OptimizeFunction( *function );
-}
-
-void CodeGenerator::BindFunctionParameters(
-                                    llvm::Function* function,
-                                    std::vector<Variable_sp>& parameters ) const
-{
-    assert( function->arg_size() == parameters.size() &&
-            "mismatch in the number of parameters to function" );
-
-    auto arg_iterator = function->arg_begin();
-    for( unsigned i = 0; i < parameters.size(); ++i, ++arg_iterator )
-    {
-        assert( arg_iterator != function->arg_end() &&
-                "llvm arg iterator overrun" );
-        assert( arg_iterator->getType() == m_Runtime.GetLLVMType(
-                                                   parameters[i]->GetType() ) &&
-                "Type mismatch in function parameters" );
-
-        parameters[i]->SetParameterPointer( arg_iterator );
-    }
-    assert( arg_iterator == function->arg_end() &&
-            "llvm arg iterator underrun" );
 }
 
 llvm::Value* CodeGenerator::CreateFunctionCall(

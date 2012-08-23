@@ -252,12 +252,6 @@ public:
                                    const CompoundStatement_up& body );
 
     /**
-      * Creates the llvm arguments and sets them to the variables
-      */
-    void BindFunctionParameters( llvm::Function* function,
-                                 std::vector<Variable_sp>& parameters ) const;
-
-    /**
       * Create a call to the specified function. This asserts that neither
       * function or any of args are null. This also fills in default arguments
       */

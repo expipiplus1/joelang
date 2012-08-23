@@ -152,23 +152,13 @@ void Variable::WriteDeclaration( ShaderWriter& shader_writer ) const
     shader_writer << ";";
 }
 
-void Variable::SetParameterPointer( llvm::Argument* parameter_pointer )
+void Variable::SetParameterPointer( llvm::Value* parameter_pointer )
 {
     assert( !m_LLVMPointer && "setting an already set llvm pointer" );
     assert( IsParameter() &&
             "setting the parameter for a non-parameter variable" );
     assert( parameter_pointer && "Trying to set a null parameter" );
     m_LLVMPointer = parameter_pointer;
-}
-
-void Variable::ReplaceParameterPointer( llvm::Value* pointer )
-{
-    assert( m_LLVMPointer && "Trying to replace a null parameter" );
-    assert( m_IsParameter &&
-            "Trying to replace the parameter on a non-parameter" );
-    assert( pointer && "Trying to replace parameter with a null pointer" );
-    m_LLVMPointer = pointer;
-    m_IsParameter = false;
 }
 
 llvm::Value* Variable::GetLLVMPointer() const
