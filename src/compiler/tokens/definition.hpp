@@ -83,7 +83,7 @@ public:
     /**
       * Performs semantic analysis on all the stateassignments
       */
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     const StateAssignStmtVector& GetStateAssignments() const;
 
@@ -147,13 +147,8 @@ public:
       */
     Pass GeneratePass( CodeGenerator& code_gen ) const;
 
-    /**
-      * Resolves the identifier or performs sema on the pass
-      * \param sema
-      *   The semantic analyzer
-      */
     virtual
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     /** \returns if this token is an identifier for a pass **/
     bool                   IsIdentifier    () const;

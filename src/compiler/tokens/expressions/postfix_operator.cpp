@@ -247,6 +247,9 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
     for( auto& a : m_Arguments )
         good &= a->ResolveIdentifiers( sema );
 
+    if( !good )
+        return false;
+
     //
     // Find the function to call
     //

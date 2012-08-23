@@ -70,7 +70,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
+bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
     // create a scope for the enumerants
     SemaAnalyzer::ScopeHolder scope( sema );
@@ -79,22 +79,25 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     // Try and get the state to which we are assigning
     m_State = sema.GetState( m_Identifier );
     if( !m_State )
-        sema.Error( "Undeclared state: " + m_Identifier );
-    else
     {
-        sema.LoadStateEnumerants( *m_State );
-
-        m_Expression->ResolveIdentifiers( sema );
-
-        // only create the cast if we have a type to cast it to
-        m_Expression = CastExpression::Create( m_State->GetType(),
-                                               std::move(m_Expression) );
-
-        m_Expression->PerformSema( sema );
+        sema.Error( "Undeclared state: " + m_Identifier );
+        return false;
     }
+    sema.LoadStateEnumerants( *m_State );
+
+    if( !m_Expression->ResolveIdentifiers( sema ) )
+        return false;
+
+    m_Expression = CastExpression::Create( m_State->GetType(),
+                                           std::move(m_Expression) );
+
+    if( !m_Expression->PerformSema( sema ) )
+        return false;
 
     // best to be explicit about these things
     scope.Leave();
+
+    return true;
 }
 
 std::unique_ptr<StateAssignmentBase>

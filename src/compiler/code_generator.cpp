@@ -142,7 +142,7 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
     }
 
     OptimizeModule();
-
+    
     return std::move(techniques);
 }
 

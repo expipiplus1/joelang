@@ -111,8 +111,9 @@ EmptyDeclaration::~EmptyDeclaration()
 {
 }
 
-void EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
+bool EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
 {
+    return true;
 }
 
 bool EmptyDeclaration::Parse( Parser& parser,
@@ -152,7 +153,7 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
-void PassDeclaration::PerformSema( SemaAnalyzer& sema )
+bool PassDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     // Only declare it if it's not an anonymous pass
     if( !m_Name.empty() )
@@ -163,8 +164,9 @@ void PassDeclaration::PerformSema( SemaAnalyzer& sema )
             sema.Error( "Declaring an anonymous pass in global scope" );
         // We haven't given the pass to sema, so it must have sema performed on
         // it now
-        m_Definition->PerformSema( sema );
+        return m_Definition->PerformSema( sema );
     }
+    return true;
 }
 
 const std::string& PassDeclaration::GetName() const
@@ -248,14 +250,16 @@ TechniqueDeclaration::~TechniqueDeclaration()
 {
 }
 
-void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
+bool TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     sema.DeclareTechnique( m_Name );
     SemaAnalyzer::ScopeHolder scope( sema );
     scope.Enter();
+    bool good = true;
     for( auto& p : m_Passes )
-        p->PerformSema( sema );
+        good &= p->PerformSema( sema );
     scope.Leave();
+    return good;
 }
 
 const std::string& TechniqueDeclaration::GetName() const
@@ -393,7 +397,7 @@ VariableDeclarationList::~VariableDeclarationList()
 {
 }
 
-void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
+bool VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
 
@@ -401,7 +405,7 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     // If the decl specs were no good we can't continue
     //
     if( !decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema ) )
-        return;
+        return false;
 
     if( sema.InGlobalScope() &&
         !decl_specs.IsStatic() &&
@@ -412,9 +416,10 @@ void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     //
     // Check that
     //
-
+    
     for( const InitDeclarator_up& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -445,7 +450,7 @@ FunctionDefinition::~FunctionDefinition()
 {
 }
 
-void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
+bool FunctionDefinition::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
     decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
@@ -469,6 +474,7 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
     sema.DefineFunction( m_Declarator->GetIdentifier(),
                          m_Declarator->GetFunctionParameters(),
                          std::move(m_Body) );
+    return true;
 }
 
 } // namespace Compiler

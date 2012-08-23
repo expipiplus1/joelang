@@ -36,6 +36,7 @@
 
 #include <compiler/complete_type.hpp>
 #include <compiler/entry_function.hpp>
+#include <compiler/function.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -84,39 +85,77 @@ const EntryFunction_sp& CompileStatement::GetEntryFunction() const
     return m_EntryFunction;
 }
 
-void CompileStatement::PerformSema( SemaAnalyzer& sema )
+bool CompileStatement::ResolveIdentifiers( SemaAnalyzer& sema, 
+                                           Function_sp& function )
 {
-    assert( !m_EntryFunction && "About to overrite a non-null entryfunction" );
+    // This doesn't resolve the identifier in expression because that will only
+    // find variables
+    bool good = true;
+    for( auto& a : m_Arguments )
+        good &= a->ResolveIdentifiers( sema );
+
+    if( !good )
+        return false;
 
     //
-    // Find out which function we're using as the entry
+    // Find the function to call
     //
     std::vector<CompleteType> argument_types;
-    argument_types.reserve( m_Arguments.size() );
-    for( const auto& a : m_Arguments )
+    for( auto& a : m_Arguments )
         argument_types.push_back( a->GetType() );
 
     if( !sema.HasFunctionNamed( m_Identifier ) )
     {
-        sema.Error( "Trying to compile an undeclared function: " +
-                    m_Identifier );
-        return;
+        sema.Error( "Compiling undeclared function " + m_Identifier );
+        return false;
     }
 
-    Function_sp function = sema.GetFunctionOverload( m_Identifier,
-                                                     argument_types );
-
+    function = sema.GetFunctionOverload( m_Identifier, argument_types );
     if( !function )
     {
         sema.Error( "Couldn't find compatible overload for " + m_Identifier );
-        return;
+        return false;
     }
+
+    return good;
+}
+
+bool CompileStatement::PerformSema( SemaAnalyzer& sema )
+{
+    assert( !m_EntryFunction && "About to overrite a non-null entryfunction" );
+
+    //
+    // Resolve all the identifiers and bail if there was a problem
+    //
+    Function_sp function;
+    if( !ResolveIdentifiers( sema, function ) )
+        return false;
+
+    assert( function && "Performing Sema on a null function" );
+
+    std::vector<CompleteType> types = function->GetParameterTypes();
+
+    assert( types.size() >= m_Arguments.size() && "Too many arguments" );
+
+    //
+    // Cast all the arguments
+    //
+    for( unsigned i = 0; i < m_Arguments.size(); ++i )
+        m_Arguments[i] = CastExpression::Create( types[i],
+                                                 std::move(m_Arguments[i]) );
+
+    bool good = true;
+
+    for( auto& a : m_Arguments )
+        good &= a->PerformSema( sema );
+
+    if( !good )
+        return false;
 
     m_EntryFunction.reset( new EntryFunction( m_Domain,
                                               std::move(function),
                                               std::move(m_Arguments) ) );
-
-    return;
+    return true;
 }
 
 bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )

@@ -88,12 +88,14 @@ PassDefinition::~PassDefinition()
 {
 }
 
-void PassDefinition::PerformSema( SemaAnalyzer& sema )
+bool PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
     for( auto& s : m_StateAssignments )
-        s->PerformSema( sema );
+        good &= s->PerformSema( sema );
     for( auto& c : m_CompileStatements )
-        c->PerformSema( sema );
+        good &= c->PerformSema( sema );
+    return good;
 }
 
 const PassDefinition::StateAssignStmtVector&
@@ -192,11 +194,12 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     return Pass( name, std::move(state_assignments), std::move(program) );
 }
 
-void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
+bool PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
     if( m_Declaration )
     {
-        m_Declaration->PerformSema( sema );
+        good &= m_Declaration->PerformSema( sema );
         if( !m_Declaration->GetName().empty() )
             // If this declaration has a name it will have declared itself with
             // sema and we must pick up the shared pointer from there
@@ -219,6 +222,7 @@ void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
         else
             m_DefinitionRef = d;
     }
+    return good;
 }
 
 bool PassDeclarationOrIdentifier::IsIdentifier() const

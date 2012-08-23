@@ -49,6 +49,8 @@ class EntryFunction;
 using EntryFunction_sp = std::shared_ptr<EntryFunction>;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
 
@@ -83,7 +85,9 @@ public:
 
     const EntryFunction_sp& GetEntryFunction() const;
 
-    void PerformSema( SemaAnalyzer& sema );
+    bool ResolveIdentifiers( SemaAnalyzer& sema, Function_sp& function );
+
+    bool PerformSema( SemaAnalyzer& sema );
 
     static
     bool Parse( Parser& parser, CompileStatement_up& token );

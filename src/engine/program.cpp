@@ -101,7 +101,7 @@ void Program::Compile()
     GLint status;
     // todo report context error here
     glGetProgramiv( m_Object, GL_LINK_STATUS, &status );
-    assert( status != GL_FALSE && "Error linking program" );
+    //assert( status != GL_FALSE && "Error linking program" );
 
     for( const Shader& s : m_Shaders )
         glDetachShader( m_Object, s.m_Object );

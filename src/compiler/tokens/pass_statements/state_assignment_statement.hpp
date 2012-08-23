@@ -71,7 +71,7 @@ public:
     virtual
     ~StateAssignmentStatement();
 
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                 CodeGenerator& code_gen,
