@@ -116,13 +116,21 @@ private:
     /** Writes #version 150 to the shader **/
     void WriteGLSLVersion();
 
-    /** Writes all the varyings which are input to the shader **/
-    void WriteInputVaryings( const EntryFunction& entry_function,
-                             const std::set<Variable_sp>& variables );
+    /**
+      * Writes all the varyings which are input to the shader
+      * \returns the set of variables written
+      **/
+    std::set<Variable_sp> WriteInputVaryings(
+                                       const EntryFunction& entry_function,
+                                       const std::set<Variable_sp>& variables );
 
-    /** Writes all the varyings which are output from the shader **/
-    void WriteOutputVaryings( const EntryFunction& entry_function,
-                              const std::set<Variable_sp>& variables );
+    /**
+      * Writes all the varyings which are output from the shader
+      * \returns the set of variables written
+      **/
+    std::set<Variable_sp> WriteOutputVaryings(
+                                       const EntryFunction& entry_function,
+                                       const std::set<Variable_sp>& variables );
 
     /** Writes all the global variables used by the shader **/
     void WriteGlobalVariables( const std::set<Variable_sp>& variables );
@@ -134,7 +142,9 @@ private:
     void WriteFunctionDefinitions( const std::set<Function_sp> functions );
 
     /** Writes main(){...} **/
-    void WriteMainFunction( const EntryFunction& entry_function );
+    void WriteMainFunction( const EntryFunction& entry_function,
+                            const std::set<Variable_sp>& input_variables,
+                            const std::set<Variable_sp>& output_variables );
 
     /**
       * Gathers all the functions used by this function, checks for recursion

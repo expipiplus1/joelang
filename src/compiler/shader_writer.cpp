@@ -152,10 +152,12 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
     // inputs and outputs
     //
     std::set<Variable_sp> variables = GatherVariables( functions );
+    std::set<Variable_sp> input_variables;
+    std::set<Variable_sp> output_variables;
 
-    WriteInputVaryings( entry_function, variables );
+    input_variables = WriteInputVaryings( entry_function, variables );
     NewLine();
-    WriteOutputVaryings( entry_function, variables );
+    output_variables = WriteOutputVaryings( entry_function, variables );
     NewLine();
 
     WriteGlobalVariables( variables );
@@ -167,7 +169,7 @@ void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
     WriteFunctionDefinitions( functions );
     NewLine();
 
-    WriteMainFunction( entry_function );
+    WriteMainFunction( entry_function, input_variables, output_variables );
 }
 
 void ShaderWriter::WriteGLSLVersion()
@@ -176,8 +178,9 @@ void ShaderWriter::WriteGLSLVersion()
     NewLine(2);
 }
 
-void ShaderWriter::WriteInputVaryings( const EntryFunction& entry_function,
-                                       const std::set<Variable_sp>& variables )
+std::set<Variable_sp> ShaderWriter::WriteInputVaryings(
+                                        const EntryFunction& entry_function,
+                                        const std::set<Variable_sp>& variables )
 {
     std::set<Variable_sp> input_varyings;
 
@@ -202,9 +205,12 @@ void ShaderWriter::WriteInputVaryings( const EntryFunction& entry_function,
                  Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
         NewLine();
     }
+
+    return input_varyings;
 }
 
-void ShaderWriter::WriteOutputVaryings( const EntryFunction& entry_function,
+std::set<Variable_sp> ShaderWriter::WriteOutputVaryings(
+                                        const EntryFunction& entry_function,
                                         const std::set<Variable_sp>& variables )
 {
     std::set<Variable_sp> output_varyings;
@@ -244,6 +250,8 @@ void ShaderWriter::WriteOutputVaryings( const EntryFunction& entry_function,
                  Mangle( v->GetName(), IdentifierType::OUT_VARYING ) << ";";
         NewLine();
     }
+
+    return output_varyings;
 }
 
 void ShaderWriter::WriteGlobalVariables(
@@ -281,13 +289,31 @@ void ShaderWriter::WriteFunctionDefinitions(
         f->WriteDefinition( *this );
 }
 
-void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
+void ShaderWriter::WriteMainFunction(
+                                 const EntryFunction& entry_function,
+                                 const std::set<Variable_sp>& input_variables,
+                                 const std::set<Variable_sp>& output_variables )
 {
     m_Shader << "void main()";
     NewLine();
     m_Shader << "{";
     PushIndentation();
     NewLine();
+
+    //
+    // Copy all the in varyings to the global variables
+    //
+    for( const auto& v : input_variables )
+        if( v->IsGlobal() )
+        {
+            *this << Mangle( v->GetName(), IdentifierType::VARIABLE ) <<
+                     " = " <<
+                     Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+            NewLine();
+        }
+
+    NewLine();
+
 
     //
     // Write a call the the entry function and sort out all the output variables
@@ -308,6 +334,20 @@ void ShaderWriter::WriteMainFunction( const EntryFunction& entry_function )
         *this << *argument;
     }
     *this << ");";
+
+    NewLine();
+
+    //
+    // Copy all the global variables to their out variables
+    //
+    for( const auto& v : output_variables )
+        if( v->IsGlobal() )
+        {
+            *this << Mangle( v->GetName(), IdentifierType::OUT_VARYING ) <<
+                     " = " <<
+                     Mangle( v->GetName(), IdentifierType::VARIABLE ) << ";";
+            NewLine();
+        }
 
     PopIndentation();
     NewLine();
