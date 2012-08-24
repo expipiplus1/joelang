@@ -81,7 +81,7 @@ public:
       * \param decl_specs
       *   The declaration specifiers for this declarator
       */
-    void PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs );
+    void PerformSema( SemaAnalyzer& sema, DeclSpecs& decl_specs );
 
     virtual
     void Print( int depth ) const override;

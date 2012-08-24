@@ -53,7 +53,7 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// Declarator
+// InitDeclarator
 //------------------------------------------------------------------------------
 
 InitDeclarator::InitDeclarator( std::unique_ptr<Declarator> declarator,
@@ -71,7 +71,7 @@ InitDeclarator::~InitDeclarator()
 }
 
 void InitDeclarator::PerformSema( SemaAnalyzer& sema,
-                                  const DeclSpecs& decl_specs )
+                                  DeclSpecs& decl_specs )
 {
     // Resolve things in the declarator
     bool can_init = m_Declarator->PerformSema( sema, decl_specs );
@@ -110,6 +110,15 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     {
         sema.Error( "Const variables must have an initializer" );
         can_init = false;
+    }
+
+    // If the variable is in it has to be varying
+    if( decl_specs.IsIn() && !decl_specs.IsVarying() )
+    {
+        sema.Error( "'in' variables must be varying or a parameter to a top "
+                    "level function" );
+        decl_specs.SetIsVarying( true );
+        decl_specs.SetIsUniform( false );
     }
 
     // Evaluate the initializer
