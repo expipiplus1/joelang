@@ -30,6 +30,7 @@
 #include <joelang/program.hpp>
 
 #include <cassert>
+#include <iostream>
 #include <utility>
 #include <vector>
 
@@ -101,7 +102,18 @@ void Program::Compile()
     GLint status;
     // todo report context error here
     glGetProgramiv( m_Object, GL_LINK_STATUS, &status );
-    //assert( status != GL_FALSE && "Error linking program" );
+
+    if (status == GL_FALSE)
+    {
+        GLint info_log_length;
+        glGetProgramiv( m_Object, GL_INFO_LOG_LENGTH, &info_log_length );
+
+        GLchar *info_log = new GLchar[info_log_length + 1];
+        glGetProgramInfoLog( m_Object, info_log_length, NULL, info_log );
+
+        std::cerr << "Link Error in shader: " << info_log << std::endl;
+        delete[] info_log;
+    }
 
     for( const Shader& s : m_Shaders )
         glDetachShader( m_Object, s.m_Object );
