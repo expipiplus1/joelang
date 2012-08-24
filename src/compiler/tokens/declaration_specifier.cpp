@@ -50,43 +50,126 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 DeclSpecs::DeclSpecs()
-    :m_IsConst( false )
-    ,m_Type( Type::UNKNOWN )
+    :m_IsConst  ( false )
+    ,m_IsUniform( false )
+    ,m_IsVarying( false )
+    ,m_IsStatic ( false )
+    ,m_IsExtern ( false )
+    ,m_IsIn     ( false )
+    ,m_IsOut    ( false )
+    ,m_IsInline ( false )
+    ,m_Type     ( Type::UNKNOWN )
 {
 }
 
-void DeclSpecs::AnalyzeDeclSpecs(
-        const std::vector<std::unique_ptr<DeclarationSpecifier> >& decl_specs,
-        SemaAnalyzer& sema )
+bool DeclSpecs::AnalyzeDeclSpecs(
+                         const std::vector<DeclarationSpecifier_up>& decl_specs,
+                         SemaAnalyzer& sema )
 {
+    bool good = true;
     std::vector<TypeSpec> type_specs;
-    m_IsConst = false;
 
     for( const auto& t : decl_specs )
     {
-        if( isa<TypeQualifier>(t) )
+        if( isa<TypeQualifierSpecifier>(t) )
         {
-            TypeQualifier* type_qual = static_cast<TypeQualifier*>( t.get() );
-            switch( type_qual->GetQualifier() )
+            TypeQualifierSpecifier& type_qual =
+                               static_cast<TypeQualifierSpecifier&>( *t.get() );
+            switch( type_qual.GetQualifier() )
             {
-            case TypeQualifier::TypeQual::CONST:
+            case TypeQualifier::CONST:
                 m_IsConst = true;
                 break;
-            case TypeQualifier::TypeQual::VOLATILE:
+            case TypeQualifier::VOLATILE:
                 sema.Warning( "volatile specfier ignored in declaration" );
+                break;
+            case TypeQualifier::INLINE:
+                m_IsInline = true;
                 break;
             }
         }
         else if( isa<TypeSpecifier>(t) )
         {
-            TypeSpecifier* type_spec = static_cast<TypeSpecifier*>( t.get() );
-            type_specs.push_back( type_spec->GetSpecifier() );
+            TypeSpecifier& type_spec = static_cast<TypeSpecifier&>( *t.get() );
+            type_specs.push_back( type_spec.GetSpecifier() );
         }
         else if( isa<StorageClassSpecifier>(t) )
         {
-            //StorageClassSpecifier* storage_class =
-                    //static_cast<StorageClassSpecifier*>( t.get() );
-            sema.Error( "TODO, handle storage class specifiers" );
+            StorageClassSpecifier& storage_class =
+                                static_cast<StorageClassSpecifier&>( *t.get() );
+            switch( storage_class.GetStorageClass() )
+            {
+            case StorageClass::UNIFORM:
+                m_IsUniform = true;
+                break;
+            case StorageClass::VARYING:
+                m_IsVarying = true;
+                break;
+            case StorageClass::STATIC:
+                m_IsStatic = true;
+                break;
+            case StorageClass::EXTERN:
+                m_IsExtern = true;
+                break;
+            case StorageClass::IN:
+                m_IsIn = true;
+                break;
+            case StorageClass::OUT:
+                m_IsOut = true;
+                break;
+            case StorageClass::INOUT:
+                m_IsIn = true;
+                m_IsOut = true;
+                break;
+            }
+        }
+    }
+
+    if( m_IsUniform && m_IsVarying )
+    {
+        sema.Error( "Can't create a variable that's both uniform and varying" );
+        good = false;
+    }
+
+    if( m_IsStatic && m_IsUniform )
+    {
+        sema.Error( "Can't combine 'static' and 'uniform' specifiers" );
+        good = false;
+    }
+
+    if( m_IsStatic && m_IsVarying )
+    {
+        sema.Error( "Can't combine 'static' and 'varying' specifiers" );
+        good = false;
+    }
+
+    if( m_IsStatic && (m_IsIn || m_IsOut) )
+    {
+        sema.Error( "Can't have 'in', 'out' or 'inout' specifiers on a static "
+                    "variable" );
+        good = false;
+    }
+
+    if( m_IsVarying )
+    {
+        //
+        // If this is varying it must be declared with in, out or inout
+        //
+        if( !(m_IsIn || m_IsOut) )
+        {
+            sema.Error( "Varyings must have an 'in', 'out' or 'inout' "
+                        "specifier" );
+            good = false;
+        }
+    }
+
+    if( m_IsUniform )
+    {
+        if( m_IsIn || m_IsOut )
+        {
+            sema.Error( "Uniforms can't have an 'in', 'out' or 'inout' "
+                        "specifiers" );
+            good = false;
         }
     }
 
@@ -94,12 +177,64 @@ void DeclSpecs::AnalyzeDeclSpecs(
     // Get the type from the specifiers
     //
     m_Type = DeduceType( std::move(type_specs), sema );
+
+    if( m_Type == Type::UNKNOWN )
+    {
+        good = false;
+    }
+
+    return good;
+}
+
+void DeclSpecs::SetIsIn( bool is_in )
+{
+    m_IsIn = is_in;
+}
+
+void DeclSpecs::SetIsUniform( bool is_uniform )
+{
+    m_IsUniform = is_uniform;
+}
+
+void DeclSpecs::SetIsVarying( bool is_varying )
+{
+    m_IsVarying = is_varying;
 }
 
 /// TODO rename to has const specifier
 bool DeclSpecs::IsConst() const
 {
     return m_IsConst;
+}
+
+bool DeclSpecs::IsUniform() const
+{
+    return m_IsUniform;
+}
+
+bool DeclSpecs::IsVarying() const
+{
+    return m_IsVarying;
+}
+
+bool DeclSpecs::IsStatic() const
+{
+    return m_IsStatic;
+}
+
+bool DeclSpecs::IsIn() const
+{
+    return m_IsIn;
+}
+
+bool DeclSpecs::IsOut() const
+{
+    return m_IsOut;
+}
+
+bool DeclSpecs::IsInline() const
+{
+    return m_IsInline;
 }
 
 Type DeclSpecs::GetType() const
@@ -262,16 +397,12 @@ DeclarationSpecifier::~DeclarationSpecifier()
 {
 }
 
-void DeclarationSpecifier::Print( int depth ) const
-{
-}
-
 bool DeclarationSpecifier::Parse( Parser& parser,
                                   std::unique_ptr<DeclarationSpecifier>& token )
 {
     std::unique_ptr<Token> t;
     if( !parser.ExpectAnyOf<TypeSpecifier,
-                            TypeQualifier,
+                            TypeQualifierSpecifier,
                             StorageClassSpecifier>( t ) )
         return false;
 
@@ -302,10 +433,6 @@ TypeSpecifier::TypeSpecifier( TypeSpec t )
 }
 
 TypeSpecifier::~TypeSpecifier()
-{
-}
-
-void TypeSpecifier::Print( int depth ) const
 {
 }
 
@@ -375,53 +502,50 @@ bool TypeSpecifier::classof( const TypeSpecifier* d )
 }
 
 //------------------------------------------------------------------------------
-// TypeQualifier
+// TypeQualifierSpecifier
 //------------------------------------------------------------------------------
 
-TypeQualifier::TypeQualifier( TypeQual t )
-    :DeclarationSpecifier( TokenTy::TypeQualifier )
-    ,m_TypeQual( t )
+TypeQualifierSpecifier::TypeQualifierSpecifier( TypeQualifier t )
+    :DeclarationSpecifier( TokenTy::TypeQualifierSpecifier )
+    ,m_TypeQualifier( t )
 {
 }
 
-TypeQualifier::~TypeQualifier()
+TypeQualifierSpecifier::~TypeQualifierSpecifier()
 {
 }
 
-void TypeQualifier::Print( int depth ) const
+TypeQualifier TypeQualifierSpecifier::GetQualifier() const
 {
+    return m_TypeQualifier;
 }
 
-TypeQualifier::TypeQual TypeQualifier::GetQualifier() const
+bool TypeQualifierSpecifier::Parse( Parser& parser,
+                                    TypeQualifierSpecifier_up& token )
 {
-    return m_TypeQual;
-}
-
-bool TypeQualifier::Parse( Parser& parser,
-                           std::unique_ptr<TypeQualifier>& token )
-{
-    const static std::vector<std::pair<TerminalType, TypeQual> > qual_map =
+    const static std::vector<std::pair<TerminalType, TypeQualifier> > qual_map =
     {
-        { TerminalType::CONST,     TypeQual::CONST    },
-        { TerminalType::VOLATILE,  TypeQual::VOLATILE }
+        { TerminalType::CONST,     TypeQualifier::CONST    },
+        { TerminalType::VOLATILE,  TypeQualifier::VOLATILE },
+        { TerminalType::INLINE,    TypeQualifier::INLINE   }
     };
 
     for( auto p : qual_map )
         if( parser.ExpectTerminal( p.first ) )
         {
-            token.reset( new TypeQualifier( p.second ) );
+            token.reset( new TypeQualifierSpecifier( p.second ) );
             return true;
         }
 
     return false;
 }
 
-bool TypeQualifier::classof( const DeclarationSpecifier* d )
+bool TypeQualifierSpecifier::classof( const DeclarationSpecifier* d )
 {
-    return d->GetSubClassID() == TokenTy::TypeQualifier;
+    return d->GetSubClassID() == TokenTy::TypeQualifierSpecifier;
 }
 
-bool TypeQualifier::classof( const TypeQualifier* d )
+bool TypeQualifierSpecifier::classof( const TypeQualifierSpecifier* d )
 {
     return true;
 }
@@ -440,8 +564,9 @@ StorageClassSpecifier::~StorageClassSpecifier()
 {
 }
 
-void StorageClassSpecifier::Print( int depth ) const
+StorageClass StorageClassSpecifier::GetStorageClass() const
 {
+    return m_StorageClass;
 }
 
 bool StorageClassSpecifier::Parse( Parser& parser,
@@ -449,10 +574,13 @@ bool StorageClassSpecifier::Parse( Parser& parser,
 {
     const static std::vector<std::pair<TerminalType, StorageClass> > sc_map =
     {
-        { TerminalType::STATIC,     StorageClass::STATIC   },
-        { TerminalType::EXTERN,     StorageClass::EXTERN   },
-        { TerminalType::UNIFORM,    StorageClass::UNIFORM  },
-        { TerminalType::VARYING,    StorageClass::VARYING  }
+        { TerminalType::STATIC,  StorageClass::STATIC   },
+        { TerminalType::EXTERN,  StorageClass::EXTERN   },
+        { TerminalType::UNIFORM, StorageClass::UNIFORM  },
+        { TerminalType::VARYING, StorageClass::VARYING  },
+        { TerminalType::IN,      StorageClass::IN       },
+        { TerminalType::OUT,     StorageClass::OUT      },
+        { TerminalType::INOUT,   StorageClass::INOUT    }
     };
 
     for( auto p : sc_map )

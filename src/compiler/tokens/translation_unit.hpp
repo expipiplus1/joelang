@@ -74,14 +74,6 @@ public:
       */
     void PerformSema( SemaAnalyzer& sema );
 
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print( int depth = 0 ) const override;
-
     /** \returns The top level declarations of this translation unit **/
     const DeclarationVector& GetDeclarations() const;
 
@@ -99,6 +91,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<TranslationUnit>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const TranslationUnit* d );
 private:
     /** The vector of all the top level declarations **/
     DeclarationVector m_Declarations;

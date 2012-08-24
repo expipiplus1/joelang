@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -136,10 +137,28 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const;
 
     /**
+      * Writes this expression to the shader
+      */
+    virtual
+    void Write( ShaderWriter& shader_writer ) const = 0;
+
+    /**
       * \returns the CompleteType which this expression evaluates to
       */
     virtual
     CompleteType GetType() const = 0;
+
+    /**
+      * \returns the list of functions called by this expression
+      */
+    virtual
+    std::set<Function_sp> GetCallees() const = 0;
+
+    /**
+      * \returns the list of variables referenced by this expression
+      */
+    virtual
+    std::set<Variable_sp> GetVariables() const = 0;
 
     /**
       * \returns true if the Expression represents a l-value
@@ -223,16 +242,22 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
 
     virtual
     bool IsLValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -287,13 +312,19 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
-    bool IsConst() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    void Print( int depth ) const;
+    std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    bool IsConst() const override;
 
     static
     bool Parse( Parser& parser,
@@ -339,13 +370,19 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
-    bool IsConst() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    void Print( int depth ) const;
+    std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    bool IsConst() const override;
 
     static
     bool Parse( Parser& parser,
@@ -419,13 +456,19 @@ public:
     llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
-    bool IsConst() const override;
+    std::set<Function_sp> GetCallees() const override;
 
     virtual
-    void Print( int depth ) const;
+    std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    bool IsConst() const override;
 
     static
     bool Parse( Parser& parser,
@@ -469,7 +512,16 @@ public:
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
 
 
     virtual
@@ -477,9 +529,6 @@ public:
 
     virtual
     bool IsLValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -526,16 +575,22 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
 
     virtual
     bool IsConst() const override;
 
     virtual
     bool IsLValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -601,7 +656,16 @@ public:
     const std::string& GetIdentifier() const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
 
     /** \returns true **/
     virtual
@@ -620,9 +684,6 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,

@@ -88,5 +88,9 @@ Type MakeUnsigned( Type t );
 
 const std::string& GetTypeString( Type t );
 
+bool HasGLSLType( Type t );
+
+const std::string& GetGLSLTypeString( Type t );
+
 } //namespace Compiler
 } // namespace JoeLang

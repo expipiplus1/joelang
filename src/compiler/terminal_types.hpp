@@ -136,6 +136,7 @@ enum class TerminalType
     //
     TECHNIQUE,
     PASS,
+    COMPILE,
     PIXEL_SHADER,
     VERTEX_SHADER,
     RETURN,
@@ -145,10 +146,14 @@ enum class TerminalType
     EXTERN,
     UNIFORM,
     VARYING,
+    IN,
+    OUT,
+    INOUT,
 
     // Type Qualifiers
     CONST,
     VOLATILE,
+    INLINE, // Not really a type qualifier but it's ignored just like volatile
 
     // Types
     TYPE_VOID,

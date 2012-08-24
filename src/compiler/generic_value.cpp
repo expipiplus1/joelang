@@ -36,6 +36,7 @@
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/type_properties.hpp>
 #include <joelang/types.hpp>
 
@@ -284,6 +285,81 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
         assert( false && "Trying to codegen an unhandled type" );
     }
     return nullptr;
+}
+
+void GenericValue::Write( ShaderWriter& shader_writer ) const
+{
+    switch( m_Type )
+    {
+    case Type::BOOL:
+        shader_writer << m_BoolValue;
+        break;
+    case Type::I8:
+        shader_writer << m_I8Value;
+        break;
+    case Type::I16:
+        shader_writer << m_I16Value;
+        break;
+    case Type::I32:
+        shader_writer << m_I32Value;
+        break;
+    case Type::I64:
+        shader_writer << m_I64Value;
+        break;
+    case Type::U8:
+        shader_writer << m_U8Value;
+        break;
+    case Type::U16:
+        shader_writer << m_U16Value;
+        break;
+    case Type::U32:
+        shader_writer << m_U32Value;
+        break;
+    case Type::U64:
+        shader_writer << m_U64Value;
+        break;
+    case Type::FLOAT:
+        shader_writer << m_FloatValue << "f";
+        break;
+    case Type::FLOAT4:
+    {
+        shader_writer << GetGLSLTypeString( Type::FLOAT4 ) << "(";
+        bool first = true;
+        for( unsigned i = 0; i < 4; ++i )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+            shader_writer << m_Float4Value[i] << "f";
+        }
+        shader_writer << ")";
+        break;
+    }
+    case Type::DOUBLE:
+        shader_writer << m_DoubleValue << "d";
+        break;
+    case Type::STRING:
+        shader_writer << "\"" << m_StringValue << "\"";
+        break;
+    case Type::ARRAY:
+    {
+        shader_writer << GetGLSLTypeString(GetUnderlyingType()) << "[]" << "(";
+        bool first = true;
+        for( const GenericValue& g : m_ArrayValue )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+            shader_writer << g;
+        }
+        shader_writer << ")";
+        break;
+    }
+    default:
+        assert( false && "Trying to write an unhandled type" );
+    }
 }
 
 CompleteType GenericValue::GetType() const

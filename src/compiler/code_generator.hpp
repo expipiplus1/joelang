@@ -41,8 +41,10 @@ namespace llvm
     class ExecutionEngine;
     struct GenericValue;
     class GlobalVariable;
+    class FunctionPassManager;
     class LLVMContext;
     class Module;
+    class PassManager;
 }
 
 namespace JoeLang
@@ -72,19 +74,20 @@ class Runtime;
 class TechniqueDeclaration;
 class TranslationUnit;
 class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /// todo make this reusable
 class CodeGenerator
 {
 public:
-    CodeGenerator( Runtime& runtime );
+    CodeGenerator( const Context& context, Runtime& runtime );
     ~CodeGenerator();
+
+    const Context& GetContext() const;
 
     void GenerateFunctions( const std::vector<Function_sp>& functions );
 
     std::vector<Technique> GenerateTechniques( const TranslationUnit& ast );
-
-    std::unique_ptr<llvm::ExecutionEngine> TakeExecutionEngine();
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
@@ -220,6 +223,8 @@ public:
 
     llvm::Value* CreateVariableRead( const Variable& variable );
 
+    llvm::Value* CreateParameterRead( const Variable& parameter );
+
     llvm::Value* CreateAssignment( const Expression& variable,
                                    const Expression& e );
 
@@ -243,7 +248,9 @@ public:
       * Define a function
       */
     void CreateFunctionDefinition( llvm::Function* function,
+                                   const std::vector<Variable_sp>& parameters,
                                    const CompoundStatement_up& body );
+
     /**
       * Create a call to the specified function. This asserts that neither
       * function or any of args are null. This also fills in default arguments
@@ -264,13 +271,27 @@ private:
                                                 const Expression& expression,
                                                 std::string name = "" );
 
+    /**
+      * Runs some optimizations on the function
+      */
+    void OptimizeFunction( llvm::Function& function );
+
+    /**
+      * Runs some optimizations on the module
+      */
+    void OptimizeModule();
+
+    const Context& m_Context;
+
     std::stack<llvm::Value*> m_Temporaries;
 
     Runtime&                 m_Runtime;
 
     llvm::Module*            m_LLVMModule;
     llvm::IRBuilder<>        m_LLVMBuilder;
-    std::unique_ptr<llvm::ExecutionEngine> m_LLVMExecutionEngine;
+    std::unique_ptr<llvm::ExecutionEngine>     m_LLVMExecutionEngine;
+    std::unique_ptr<llvm::FunctionPassManager> m_LLVMFunctionPassManager;
+    std::unique_ptr<llvm::PassManager>         m_LLVMModulePassManager;
 };
 
 } // namespace Compiler

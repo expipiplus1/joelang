@@ -40,6 +40,7 @@ enum class Type;
 
 namespace Compiler
 {
+class CompleteType;
 typedef std::vector<unsigned> ArrayExtents;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
@@ -52,7 +53,7 @@ class SemaAnalyzer;
   * \brief Matches an initializer list
   *
   * Initializer = AssignmentExpression
-  *             | '{' ( AssignmentExpression ',' )* AssignmentExpression? '}'
+  *             | '{' AssignmentExpression ( ',' AssignmentExpression )* '}'
   */
 class Initializer : public JoeLang::Compiler::Token
 {
@@ -85,7 +86,7 @@ public:
       *   The underlying type of the initializer
       * \returns true if this is a valid initializer list
       */
-    bool PerformSema( SemaAnalyzer& sema, Type desired_type );
+    bool PerformSema( SemaAnalyzer& sema, const CompleteType& desired_type );
 
     const ArrayExtents& GetArrayExtents() const;
 
@@ -119,9 +120,6 @@ public:
       */
     void ReduceToExpression();
 
-    virtual
-    void Print( int depth ) const override;
-
     /**
       * Parses an initializer list
       * \param parser
@@ -135,6 +133,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Initializer>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Initializer* d );
 private:
     std::vector<std::unique_ptr<Initializer> > m_SubInitializers;
     Expression_up                              m_Expression;

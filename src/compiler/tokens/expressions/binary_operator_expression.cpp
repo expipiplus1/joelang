@@ -30,7 +30,6 @@
 #include "binary_operator_expression.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <utility>
 
@@ -39,6 +38,7 @@
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
@@ -157,25 +157,65 @@ llvm::Value* BinaryOperatorExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 }
 
+void BinaryOperatorExpression::Write( ShaderWriter& shader_writer ) const
+{
+    const static std::map<Op, std::string> op_string_map =
+    {
+        { Op::LOGICAL_OR,          "||" },
+        { Op::LOGICAL_AND,         "&&" },
+        { Op::OR,                  "|"  },
+        { Op::XOR,                 "^"  },
+        { Op::AND,                 "&"  },
+        { Op::EQUAL_TO,            "==" },
+        { Op::NOT_EQUAL_TO,        "!=" },
+        { Op::LESS_THAN,           "<"  },
+        { Op::GREATER_THAN,        ">"  },
+        { Op::LESS_THAN_EQUALS,    "<=" },
+        { Op::GREATER_THAN_EQUALS, ">=" },
+        { Op::LEFT_SHIFT,          "<<" },
+        { Op::RIGHT_SHIFT,         ">>" },
+        { Op::PLUS,                "+"  },
+        { Op::MINUS,               "-"  },
+        { Op::MULTIPLY,            "*"  },
+        { Op::DIVIDE,              "/"  },
+        { Op::MODULO,              "%"  }
+    };
+
+    shader_writer << "(" <<
+                     *m_LeftSide <<
+                     " " <<
+                     op_string_map.at( m_Operator ) <<
+                     " " <<
+                     *m_RightSide <<
+                     ")";
+}
+
 CompleteType BinaryOperatorExpression::GetType() const
 {
     return GetCommonType( m_LeftSide->GetType(),
                           m_RightSide->GetType() );
 }
 
+std::set<Function_sp> BinaryOperatorExpression::GetCallees() const
+{
+    std::set<Function_sp> ret = m_LeftSide->GetCallees();
+    std::set<Function_sp> f = m_RightSide->GetCallees();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
+std::set<Variable_sp> BinaryOperatorExpression::GetVariables() const
+{
+    std::set<Variable_sp> ret = m_LeftSide->GetVariables();
+    std::set<Variable_sp> f = m_RightSide->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
 bool BinaryOperatorExpression::IsConst() const
 {
     return m_LeftSide->IsConst() &&
            m_RightSide->IsConst();
-}
-
-void BinaryOperatorExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "binary_operator" << std::endl;
-    m_LeftSide->Print( depth + 1 );
-    m_RightSide->Print( depth + 1 );
 }
 
 template< typename TokenType, typename SubTokenType >

@@ -35,11 +35,14 @@
 #include <utility>
 #include <vector>
 
+#include <llvm/Argument.h>
 #include <llvm/GlobalVariable.h>
+#include <llvm/Value.h>
 
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
@@ -48,25 +51,74 @@ namespace Compiler
 {
 
 Variable::Variable( CompleteType type,
+                    Semantic semantic,
                     bool is_const,
+                    bool is_uniform,
+                    bool is_varying,
+                    bool is_in,
+                    bool is_out,
                     bool is_global,
                     bool is_parameter,
                     GenericValue initializer,
                     std::string name )
     :m_Type( std::move(type) )
+    ,m_Semantic( std::move(semantic) )
     ,m_IsConst( is_const )
+    ,m_IsUniform( is_uniform )
+    ,m_IsVarying( is_varying )
+    ,m_IsIn( is_in )
+    ,m_IsOut( is_out )
     ,m_IsGlobal( is_global )
     ,m_IsParameter( is_parameter )
     ,m_Initializer( std::move(initializer) )
     ,m_Name( std::move(name) )
+    ,m_LLVMPointer( nullptr )
 {
+    //
     // Assert that this has the correct initializer if this is const
     // Or that if it has an initializer it's the correct type
-    if( m_IsConst || !m_Initializer.GetType().IsUnknown() )
-    {
-        assert( m_Initializer.GetType() == m_Type &&
-                "Trying to initialize a variable with the wrong type" );
-    }
+    //
+    assert( !m_Type.IsUnknown() &&
+            "Trying to construct a variable of unknown type" );
+    assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
+            "Parameters can't have initializers" );
+    assert( ( !m_IsConst || m_IsParameter ||
+              !m_Initializer.GetType().IsUnknown() ) &&
+            "Const variables must have an initializer or be a parameter" );
+    assert( ( m_Initializer.GetType().IsUnknown() ||
+              m_Initializer.GetType() == type ) &&
+            "Trying to initialize a variable with the wrong type" );
+
+    //
+    // assert that this is either in or out if it's a parameter or a varying
+    // (m_IsParameter || m_IsVarying) -> (m_IsIn || m_IsOut)
+    //
+    assert( (!m_IsVarying || (m_IsIn || m_IsOut)) &&
+            "Trying to make a varying that's not in or out" );
+    assert( (!m_IsParameter || (m_IsIn || m_IsOut)) &&
+            "Trying to make a parameter that's not in or out" );
+    assert( (!m_IsIn || (m_IsVarying || m_IsParameter)) &&
+            "Trying to make an in variable that's not a varying or parameter" );
+    assert( (!m_IsOut || (m_IsVarying || m_IsParameter)) &&
+            "Trying to make an out variable that's not a varying or "
+            "parameter" );
+
+    //
+    // assert that a uniform can't be in or out
+    // m_IsUniform -> !(m_IsIn || m_IsOut)
+    //
+    assert( (!m_IsUniform || !(m_IsIn || m_IsOut)) &&
+            "Trying to make a uniform variable that's in or out" );
+
+    //
+    // assert that a uniform is global or a parameter
+    // m_IsUniform -> (m_IsGlobal || m_IsParameter)
+    //
+    assert( (!m_IsUniform || (m_IsGlobal || m_IsParameter)) &&
+            "Trying to make a uniform variable that's not a global or "
+            "parameter" );
+
+    // todo handle const and constexpr properly
 }
 
 void Variable::CodeGen( CodeGenerator& code_gen )
@@ -85,6 +137,30 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     }
 }
 
+void Variable::WriteDeclaration( ShaderWriter& shader_writer ) const
+{
+    if( m_IsConst )
+        shader_writer << "const ";
+
+    shader_writer << m_Type << " " <<
+                     ShaderWriter::Mangle( m_Name,
+                                           IdentifierType::VARIABLE );
+
+    if( m_Initializer.GetUnderlyingType() != Type::UNKNOWN )
+        shader_writer << " = " << m_Initializer;
+
+    shader_writer << ";";
+}
+
+void Variable::SetParameterPointer( llvm::Value* parameter_pointer )
+{
+    assert( !m_LLVMPointer && "setting an already set llvm pointer" );
+    assert( IsParameter() &&
+            "setting the parameter for a non-parameter variable" );
+    assert( parameter_pointer && "Trying to set a null parameter" );
+    m_LLVMPointer = parameter_pointer;
+}
+
 llvm::Value* Variable::GetLLVMPointer() const
 {
     return m_LLVMPointer;
@@ -95,6 +171,11 @@ const CompleteType& Variable::GetType() const
     return m_Type;
 }
 
+const std::string& Variable::GetName() const
+{
+    return m_Name;
+}
+
 Type Variable::GetUnderlyingType() const
 {
     return m_Type.GetBaseType();
@@ -103,6 +184,36 @@ Type Variable::GetUnderlyingType() const
 bool Variable::IsConst() const
 {
     return m_IsConst;
+}
+
+bool Variable::IsVarying() const
+{
+    return m_IsVarying;
+}
+
+bool Variable::IsUniform() const
+{
+    return m_IsUniform;
+}
+
+bool Variable::IsIn() const
+{
+    return m_IsIn;
+}
+
+bool Variable::IsOut() const
+{
+    return m_IsOut;
+}
+
+bool Variable::IsGlobal() const
+{
+    return m_IsGlobal;
+}
+
+bool Variable::IsParameter() const
+{
+    return m_IsParameter;
 }
 
 } // namespace Compiler

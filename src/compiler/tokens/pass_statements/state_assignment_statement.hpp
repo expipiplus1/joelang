@@ -32,7 +32,7 @@
 #include <memory>
 #include <string>
 
-#include <compiler/tokens/token.hpp>
+#include <compiler/tokens/pass_statements/pass_statement.hpp>
 
 namespace JoeLang
 {
@@ -56,7 +56,7 @@ class SemaAnalyzer;
   *
   * StateAssignmentStatement = identifier '=' Expression ';'
   */
-class StateAssignmentStatement : public JoeLang::Compiler::Token
+class StateAssignmentStatement : public JoeLang::Compiler::PassStatement
 {
 public:
     /**
@@ -71,18 +71,11 @@ public:
     virtual
     ~StateAssignmentStatement();
 
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                 CodeGenerator& code_gen,
                                                 const std::string& name ) const;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual void Print( int depth ) const;
 
     /**
       * Parses a state assignment statement
@@ -97,6 +90,10 @@ public:
     static bool Parse( Parser& parser,
                        std::unique_ptr<StateAssignmentStatement>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const StateAssignmentStatement* t);
 private:
     /** The identifier for the state to be assigned to **/
     std::string m_Identifier;

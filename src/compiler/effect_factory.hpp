@@ -32,7 +32,10 @@
 #include <memory>
 #include <vector>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/runtime.hpp>
+#include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 
 namespace JoeLang
 {
@@ -46,14 +49,17 @@ namespace Compiler
 class EffectFactory
 {
 public:
+    explicit
     EffectFactory( const Context& context );
-    ~EffectFactory() = default;
 
     std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
 
 private:
     const Context& m_Context;
     Runtime        m_Runtime;
+    CodeGenerator  m_CodeGenerator;
+    SemaAnalyzer   m_SemaAnalyzer;
+    ShaderWriter   m_ShaderWriter;
 };
 
 } // namespace Compiler

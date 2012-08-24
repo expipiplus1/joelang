@@ -8,99 +8,118 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS}" )
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
 link_directories( ${LLVM_LIBRARY_DIRS} )
+if( WIN32 )
+    set( joelang_LIBRARY_DIRS ${LLVM_LIBRARY_DIRS} CACHE STRING "LLVM library dirs for windows" )
+endif()
 
-include_directories( ${joemath_INCLUDE_DIR} )
+find_package(                       OpenGL      REQUIRED )
 
-add_library( joelang    include/joelang/context.hpp
-                        include/joelang/effect.hpp
-                        include/joelang/pass.hpp
-                        include/joelang/state_assignment.hpp
-                        include/joelang/technique.hpp
-                        include/joelang/types.hpp
-                        include/joelang/state.hpp
-                        include/joelang/inl/state_assignment-inl.hpp
-                        include/joelang/inl/state-inl.hpp
-                        src/engine/context.cpp
-                        src/engine/effect.cpp
-                        src/engine/opengl_states.cpp
-                        src/engine/opengl_states.hpp
-                        src/engine/pass.cpp
-                        src/engine/state_assignment.cpp
-                        src/engine/technique.cpp
-                        src/engine/state.cpp
-                        src/compiler/casting.hpp
-                        src/compiler/code_generator.cpp
-                        src/compiler/code_generator.hpp
-                        src/compiler/complete_type.cpp
-                        src/compiler/complete_type.hpp
-                        src/compiler/effect_factory.cpp
-                        src/compiler/effect_factory.hpp
-                        src/compiler/generic_value.cpp
-                        src/compiler/generic_value.hpp
-                        src/compiler/function.cpp
-                        src/compiler/function.hpp
-                        src/compiler/lexer.cpp
-                        src/compiler/lexer.hpp
-                        src/compiler/parser.cpp
-                        src/compiler/parser.hpp
-                        src/compiler/parser-inl.hpp
-                        src/compiler/runtime.cpp
-                        src/compiler/runtime.hpp
-                        src/compiler/sema_analyzer.cpp
-                        src/compiler/sema_analyzer.hpp
-                        src/compiler/terminal_types.cpp
-                        src/compiler/terminal_types.hpp
-                        src/compiler/type_properties.cpp
-                        src/compiler/type_properties.hpp
-                        src/compiler/variable.cpp
-                        src/compiler/variable.hpp
-                        src/compiler/tokens/compile_statement.cpp
-                        src/compiler/tokens/compile_statement.hpp
-                        src/compiler/tokens/declaration_specifier.cpp
-                        src/compiler/tokens/declaration_specifier.hpp
-                        src/compiler/tokens/declaration.cpp
-                        src/compiler/tokens/declaration.hpp
-                        src/compiler/tokens/declarator_specifier.cpp
-                        src/compiler/tokens/declarator_specifier.hpp
-                        src/compiler/tokens/declarator.cpp
-                        src/compiler/tokens/declarator.hpp
-                        src/compiler/tokens/definition.cpp
-                        src/compiler/tokens/definition.hpp
-                        src/compiler/tokens/initializer.cpp
-                        src/compiler/tokens/initializer.hpp
-                        src/compiler/tokens/parameter.cpp
-                        src/compiler/tokens/parameter.hpp
-                        src/compiler/tokens/state_assignment_statement.cpp
-                        src/compiler/tokens/state_assignment_statement.hpp
-                        src/compiler/tokens/token.cpp
-                        src/compiler/tokens/token.hpp
-                        src/compiler/tokens/translation_unit.cpp
-                        src/compiler/tokens/translation_unit.hpp
-                        src/compiler/tokens/expressions/assignment_operator.cpp
-                        src/compiler/tokens/expressions/assignment_operator.hpp
-                        src/compiler/tokens/expressions/binary_operator_expression.cpp
-                        src/compiler/tokens/expressions/binary_operator_expression.hpp
-                        src/compiler/tokens/expressions/expression.cpp
-                        src/compiler/tokens/expressions/expression.hpp
-                        src/compiler/tokens/expressions/literal_expression.cpp
-                        src/compiler/tokens/expressions/literal_expression.hpp
-                        src/compiler/tokens/expressions/postfix_operator.cpp
-                        src/compiler/tokens/expressions/postfix_operator.hpp
-                        src/compiler/tokens/statements/compound_statement.cpp
-                        src/compiler/tokens/statements/compound_statement.hpp
-                        src/compiler/tokens/statements/empty_statement.cpp
-                        src/compiler/tokens/statements/empty_statement.hpp
-                        src/compiler/tokens/statements/expression_statement.cpp
-                        src/compiler/tokens/statements/expression_statement.hpp
-                        src/compiler/tokens/statements/return_statement.cpp
-                        src/compiler/tokens/statements/return_statement.hpp
-                        src/compiler/tokens/statements/statement.cpp
-                        src/compiler/tokens/statements/statement.hpp )
+include_directories( ${joemath_INCLUDE_DIR} ${glee_INCLUDE_DIR} )
+
+add_library( joelang include/joelang/context.hpp
+                     include/joelang/effect.hpp
+                     include/joelang/pass.hpp
+                     include/joelang/program.hpp
+                     include/joelang/shader.hpp
+                     include/joelang/state_assignment.hpp
+                     include/joelang/technique.hpp
+                     include/joelang/types.hpp
+                     include/joelang/state.hpp
+                     include/joelang/inl/state_assignment-inl.hpp
+                     include/joelang/inl/state-inl.hpp
+                     src/engine/context.cpp
+                     src/engine/effect.cpp
+                     src/engine/opengl_states.cpp
+                     src/engine/opengl_states.hpp
+                     src/engine/pass.cpp
+                     src/engine/program.cpp
+                     src/engine/shader.cpp
+                     src/engine/state_assignment.cpp
+                     src/engine/technique.cpp
+                     src/engine/state.cpp
+                     src/compiler/casting.hpp
+                     src/compiler/code_generator.cpp
+                     src/compiler/code_generator.hpp
+                     src/compiler/complete_type.cpp
+                     src/compiler/complete_type.hpp
+                     src/compiler/effect_factory.cpp
+                     src/compiler/effect_factory.hpp
+                     src/compiler/entry_function.cpp
+                     src/compiler/entry_function.hpp
+                     src/compiler/generic_value.cpp
+                     src/compiler/generic_value.hpp
+                     src/compiler/function.cpp
+                     src/compiler/function.hpp
+                     src/compiler/lexer.cpp
+                     src/compiler/lexer.hpp
+                     src/compiler/parser.cpp
+                     src/compiler/parser.hpp
+                     src/compiler/parser-inl.hpp
+                     src/compiler/runtime.cpp
+                     src/compiler/runtime.hpp
+                     src/compiler/sema_analyzer.cpp
+                     src/compiler/sema_analyzer.hpp
+                     src/compiler/semantic.cpp
+                     src/compiler/semantic.hpp
+                     src/compiler/shader_writer.cpp
+                     src/compiler/shader_writer.hpp
+                     src/compiler/terminal_types.cpp
+                     src/compiler/terminal_types.hpp
+                     src/compiler/type_properties.cpp
+                     src/compiler/type_properties.hpp
+                     src/compiler/variable.cpp
+                     src/compiler/variable.hpp
+                     src/compiler/inl/shader_writer-inl.hpp
+                     src/compiler/tokens/declaration_specifier.cpp
+                     src/compiler/tokens/declaration_specifier.hpp
+                     src/compiler/tokens/declaration.cpp
+                     src/compiler/tokens/declaration.hpp
+                     src/compiler/tokens/declarator_specifier.cpp
+                     src/compiler/tokens/declarator_specifier.hpp
+                     src/compiler/tokens/declarator.cpp
+                     src/compiler/tokens/declarator.hpp
+                     src/compiler/tokens/definition.cpp
+                     src/compiler/tokens/definition.hpp
+                     src/compiler/tokens/initializer.cpp
+                     src/compiler/tokens/initializer.hpp
+                     src/compiler/tokens/parameter.cpp
+                     src/compiler/tokens/parameter.hpp
+                     src/compiler/tokens/token.cpp
+                     src/compiler/tokens/token.hpp
+                     src/compiler/tokens/translation_unit.cpp
+                     src/compiler/tokens/translation_unit.hpp
+                     src/compiler/tokens/expressions/assignment_operator.cpp
+                     src/compiler/tokens/expressions/assignment_operator.hpp
+                     src/compiler/tokens/expressions/binary_operator_expression.cpp
+                     src/compiler/tokens/expressions/binary_operator_expression.hpp
+                     src/compiler/tokens/expressions/expression.cpp
+                     src/compiler/tokens/expressions/expression.hpp
+                     src/compiler/tokens/expressions/literal_expression.cpp
+                     src/compiler/tokens/expressions/literal_expression.hpp
+                     src/compiler/tokens/expressions/postfix_operator.cpp
+                     src/compiler/tokens/expressions/postfix_operator.hpp
+                     src/compiler/tokens/pass_statements/compile_statement.cpp
+                     src/compiler/tokens/pass_statements/compile_statement.hpp
+                     src/compiler/tokens/pass_statements/pass_statement.cpp
+                     src/compiler/tokens/pass_statements/pass_statement.hpp
+                     src/compiler/tokens/pass_statements/state_assignment_statement.cpp
+                     src/compiler/tokens/pass_statements/state_assignment_statement.hpp
+                     src/compiler/tokens/statements/compound_statement.cpp
+                     src/compiler/tokens/statements/compound_statement.hpp
+                     src/compiler/tokens/statements/empty_statement.cpp
+                     src/compiler/tokens/statements/empty_statement.hpp
+                     src/compiler/tokens/statements/expression_statement.cpp
+                     src/compiler/tokens/statements/expression_statement.hpp
+                     src/compiler/tokens/statements/return_statement.cpp
+                     src/compiler/tokens/statements/return_statement.hpp
+                     src/compiler/tokens/statements/statement.cpp
+                     src/compiler/tokens/statements/statement.hpp )
 
 #
 # Test executable
 #
 add_executable( joelang_test src/joelang.cpp )
+target_link_libraries( joelang_test joelang ${OPENGL_LIBRARY} glee )
 
 #
 # Various custom commands
@@ -135,7 +154,8 @@ add_dependencies( joelang compile_runtime )
 # Linking
 #
 
-llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader )
+#llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipa ipo linker )
+llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipo )
 set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 

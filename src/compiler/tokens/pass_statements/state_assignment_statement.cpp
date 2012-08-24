@@ -30,7 +30,6 @@
 #include "state_assignment_statement.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
@@ -55,7 +54,7 @@ namespace Compiler
 StateAssignmentStatement::StateAssignmentStatement(
                                     std::string identifier,
                                     Expression_up expression )
-    :Token( TokenTy::StateAssignmentStatement )
+    :PassStatement( TokenTy::StateAssignmentStatement )
     ,m_Identifier( std::move(identifier) )
     ,m_Expression( std::move(expression) )
 {
@@ -71,7 +70,7 @@ StateAssignmentStatement::~StateAssignmentStatement()
 {
 }
 
-void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
+bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 {
     // create a scope for the enumerants
     SemaAnalyzer::ScopeHolder scope( sema );
@@ -80,22 +79,25 @@ void StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     // Try and get the state to which we are assigning
     m_State = sema.GetState( m_Identifier );
     if( !m_State )
-        sema.Error( "Undeclared state: " + m_Identifier );
-    else
     {
-        sema.LoadStateEnumerants( *m_State );
-
-        m_Expression->ResolveIdentifiers( sema );
-
-        // only create the cast if we have a type to cast it to
-        m_Expression = CastExpression::Create( m_State->GetType(),
-                                               std::move(m_Expression) );
-
-        m_Expression->PerformSema( sema );
+        sema.Error( "Undeclared state: " + m_Identifier );
+        return false;
     }
+    sema.LoadStateEnumerants( *m_State );
+
+    if( !m_Expression->ResolveIdentifiers( sema ) )
+        return false;
+
+    m_Expression = CastExpression::Create( m_State->GetType(),
+                                           std::move(m_Expression) );
+
+    if( !m_Expression->PerformSema( sema ) )
+        return false;
 
     // best to be explicit about these things
     scope.Leave();
+
+    return true;
 }
 
 std::unique_ptr<StateAssignmentBase>
@@ -194,14 +196,6 @@ std::unique_ptr<StateAssignmentBase>
                                              name + "_" + m_Identifier );
 }
 
-void StateAssignmentStatement::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "State Assignment to " << m_Identifier << "\n";
-    m_Expression->Print( depth + 1 );
-}
-
 bool StateAssignmentStatement::Parse(
                               Parser& parser,
                               std::unique_ptr<StateAssignmentStatement>& token )
@@ -226,6 +220,16 @@ bool StateAssignmentStatement::Parse(
 
     token.reset( new StateAssignmentStatement( std::move(identifier),
                                                std::move(expression) ) );
+    return true;
+}
+
+bool StateAssignmentStatement::classof( const Token* t )
+{
+    return t->GetSubClassID() == TokenTy::StateAssignmentStatement;
+}
+
+bool StateAssignmentStatement::classof( const StateAssignmentStatement* t )
+{
     return true;
 }
 

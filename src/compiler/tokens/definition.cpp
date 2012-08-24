@@ -30,19 +30,24 @@
 #include "definition.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <compiler/sema_analyzer.hpp>
+#include <compiler/casting.hpp>
+#include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
-#include <compiler/tokens/state_assignment_statement.hpp>
+#include <compiler/tokens/pass_statements/pass_statement.hpp>
+#include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
+#include <compiler/tokens/pass_statements/compile_statement.hpp>
 #include <joelang/pass.hpp>
+#include <joelang/program.hpp>
+#include <joelang/shader.hpp>
 #include <joelang/state_assignment.hpp>
 
 namespace JoeLang
@@ -54,13 +59,28 @@ namespace Compiler
 // PassDefinition
 //------------------------------------------------------------------------------
 
-PassDefinition::PassDefinition( StateAssignStmtVector state_assignments )
+PassDefinition::PassDefinition( PassStatementVector statements )
     :Token( TokenTy::PassDefinition )
-    ,m_StateAssignments( std::move(state_assignments) )
 {
+    for( auto& s : statements )
+    {
+        //
+        // Split the statements into state assignments and compile directives
+        //
+        if( isa<StateAssignmentStatement>( s ) )
+            m_StateAssignments.emplace_back(
+                        static_cast<StateAssignmentStatement*>( s.release() ) );
+        else if( isa<CompileStatement>( s ) )
+            m_CompileStatements.emplace_back(
+                        static_cast<CompileStatement*>( s.release() ) );
+        else
+            assert( false && "Unhandled type of PassStatement" );
+    }
 #ifndef NDEBUG
     for( const auto& s : m_StateAssignments )
         assert( s && "null StateAssignmentStatement given to PassDefinition" );
+    for( const auto& s : m_CompileStatements )
+        assert( s && "null CompileStatement given to PassDefinition" );
 #endif
 }
 
@@ -68,22 +88,26 @@ PassDefinition::~PassDefinition()
 {
 }
 
-void PassDefinition::PerformSema( SemaAnalyzer& sema )
+bool PassDefinition::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
     for( auto& s : m_StateAssignments )
-        s->PerformSema( sema );
-}
-
-void PassDefinition::Print( int depth ) const
-{
-    for( const auto& s: m_StateAssignments )
-        s->Print( depth );
+        good &= s->PerformSema( sema );
+    for( auto& c : m_CompileStatements )
+        good &= c->PerformSema( sema );
+    return good;
 }
 
 const PassDefinition::StateAssignStmtVector&
                                     PassDefinition::GetStateAssignments() const
 {
     return m_StateAssignments;
+}
+
+const PassDefinition::CompileStatementVector&
+                                    PassDefinition::GetCompileStatements() const
+{
+    return m_CompileStatements;
 }
 
 bool PassDefinition::Parse( Parser& parser,
@@ -93,9 +117,9 @@ bool PassDefinition::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::OPEN_BRACE ) )
         return false;
 
-    // Parse some StateAssignmentStatements
-    StateAssignStmtVector state_assignments;
-    parser.ExpectSequenceOf<StateAssignmentStatement>( state_assignments );
+    // Parse some StateAssignmentStatements or CompileStatementss
+    PassStatementVector statements;
+    parser.ExpectSequenceOf<PassStatement>( statements );
     // The parser may have advanced the lexer too far
     CHECK_PARSER;
 
@@ -103,7 +127,7 @@ bool PassDefinition::Parse( Parser& parser,
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
 
-    token.reset( new PassDefinition( std::move(state_assignments) ) );
+    token.reset( new PassDefinition( std::move(statements) ) );
     return true;
 }
 
@@ -134,38 +158,48 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 
     const std::string& name = IsIdentifier() ? m_Identifier
                                              : m_Declaration->GetName();
+
+    //
+    // Create the state assignments from this pass
+    //
+
     std::vector<std::unique_ptr<StateAssignmentBase> > state_assignments;
     for( const auto& s : (*m_DefinitionRef)->GetStateAssignments() )
-        state_assignments.push_back( s->GenerateStateAssignment(
-                                                 code_gen,
-                                                 name ) );
-    return Pass( name, std::move(state_assignments) );
+        state_assignments.push_back( s->GenerateStateAssignment( code_gen,
+                                                                 name ) );
+
+
+    //
+    // Create a shader for every compile statement in the pass
+    //
+
+    std::vector<Shader> shaders;
+    shaders.reserve( (*m_DefinitionRef)->GetCompileStatements().size() );
+    for( const auto& c : (*m_DefinitionRef)->GetCompileStatements() )
+        shaders.push_back( Shader( code_gen.GetContext(),
+                                   c->GetEntryFunction() ) );
+
+    //
+    // Create a Program for the pass from all the shaders
+    //
+
+    Program program( std::move(shaders) );
+
+    //
+    // Compile the program
+    //
+    // todo, how to report errors here?
+    program.Compile();
+
+    return Pass( name, std::move(state_assignments), std::move(program) );
 }
 
-void PassDeclarationOrIdentifier::Print( int depth ) const
+bool PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
 {
-    if( m_DefinitionRef &&
-        *m_DefinitionRef )
-    {
-        (*m_DefinitionRef)->Print( depth );
-    }
-    else if( IsIdentifier() )
-    {
-        for( int i = 0; i < depth * 4; ++i )
-            std::cout << " ";
-        std::cout << m_Identifier;
-    }
-    else
-    {
-        m_Declaration->Print( depth );
-    }
-}
-
-void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
-{
+    bool good = true;
     if( m_Declaration )
     {
-        m_Declaration->PerformSema( sema );
+        good &= m_Declaration->PerformSema( sema );
         if( !m_Declaration->GetName().empty() )
             // If this declaration has a name it will have declared itself with
             // sema and we must pick up the shared pointer from there
@@ -188,6 +222,7 @@ void PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
         else
             m_DefinitionRef = d;
     }
+    return good;
 }
 
 bool PassDeclarationOrIdentifier::IsIdentifier() const

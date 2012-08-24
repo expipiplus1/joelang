@@ -38,7 +38,9 @@ enum class Type;
 
 namespace Compiler
 {
+
 using ArrayExtents = std::vector<unsigned>;
+class ShaderWriter;
 
 /**
   * \class CompleteType
@@ -48,9 +50,7 @@ class CompleteType
 {
 public:
     CompleteType();
-    explicit
-    CompleteType( Type base_type,
-                  ArrayExtents array_extents = {} );
+    CompleteType( Type base_type, ArrayExtents array_extents = {} );
 
     /**
       * This doesn't return the base type, for example this could return
@@ -79,6 +79,8 @@ public:
     unsigned GetNumElements() const;
 
     std::string GetString() const;
+
+    void Write( ShaderWriter& shader_writer ) const;
 
     bool operator == ( const CompleteType& other ) const;
     bool operator != ( const CompleteType& other ) const;

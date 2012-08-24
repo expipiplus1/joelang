@@ -69,10 +69,9 @@ class State : public StateBase
     static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a state with an unhandled type" );
 public:
-    State() = delete;
     State( std::string name, std::map<std::string, T> enumerations = {} );
     virtual
-    ~State();
+    ~State() = default;
 
     void SetCallbacks( std::function<void(T)> set_callback = nullptr,
                        std::function<void()>  reset_callback = nullptr,

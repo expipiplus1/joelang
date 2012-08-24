@@ -65,15 +65,28 @@ public:
     bool AlwaysReturns() const override;
 
     virtual
-    void PerformSema( SemaAnalyzer& sema, 
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    void PerformSema( SemaAnalyzer& sema,
                       const CompleteType& return_type ) override;
 
     virtual
     void CodeGen( CodeGenerator& code_gen ) override;
 
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
     static
     bool Parse ( Parser& parser, ExpressionStatement_up& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const ExpressionStatement* d );
 private:
     Expression_up m_Expression;
 };

@@ -323,5 +323,38 @@ const std::string& GetTypeString( Type t )
     return string_map.at(t);
 }
 
+bool HasGLSLType( Type t )
+{
+    const static std::set<Type> glsl_types =
+    {
+        Type::FLOAT,
+        Type::FLOAT4,
+        Type::U32,
+        Type::I32,
+        Type::BOOL,
+        Type::VOID,
+    };
+
+    return glsl_types.find( t ) != glsl_types.end();
+}
+
+const std::string& GetGLSLTypeString( Type t )
+{
+    const static std::map<Type, std::string> string_map =
+    {
+        { Type::FLOAT,        "float" },
+        { Type::FLOAT4,       "vec4" },
+        { Type::U32,          "uint" },
+        { Type::I32,          "int" },
+        { Type::BOOL,         "bool" },
+        { Type::VOID,         "void" },
+    };
+
+    assert( string_map.find(t) != string_map.end() &&
+            "Trying to get a type not supported by glsl" );
+
+    return string_map.at(t);
+}
+
 } // namespace Compiler
 } // namespace JoeLang

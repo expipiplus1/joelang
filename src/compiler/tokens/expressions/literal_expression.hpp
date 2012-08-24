@@ -95,6 +95,12 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override final;
 
     virtual
+    std::set<Function_sp> GetCallees() const override final;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override final;
+
+    virtual
     bool IsConst() const override;
 
     virtual
@@ -155,13 +161,13 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
     GenericValue GetValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -220,13 +226,13 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
     GenericValue GetValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -275,13 +281,13 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
     GenericValue GetValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     static
     bool Parse( Parser& parser,
@@ -314,13 +320,13 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
     CompleteType GetType() const override;
 
     virtual
     GenericValue GetValue() const override;
-
-    virtual
-    void Print( int depth ) const;
 
     const std::string& GetString() const;
 
@@ -367,10 +373,10 @@ public:
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
-    CompleteType GetType() const override;
+    void Write( ShaderWriter& shader_writer ) const override;
 
     virtual
-    void Print( int depth ) const;
+    CompleteType GetType() const override;
 
     virtual
     GenericValue GetValue() const override;

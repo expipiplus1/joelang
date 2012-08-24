@@ -33,6 +33,7 @@
 #include <string>
 #include <vector>
 
+#include <joelang/program.hpp>
 #include <joelang/state_assignment.hpp>
 
 namespace JoeLang
@@ -45,14 +46,9 @@ class Pass
 public:
     using StateAssignmentVector =
                              std::vector<std::unique_ptr<StateAssignmentBase> >;
-    Pass();
-    Pass( Pass&& ) = default;
-    Pass& operator = ( Pass&& ) = default;
-    explicit
-    Pass( std::string name );
-    Pass( std::string name,
-          StateAssignmentVector state_assignments);
-    ~Pass();
+    Pass( std::string name = "",
+          StateAssignmentVector state_assignments = {},
+          Program program = Program() );
 
     void SetState() const;
     void ResetState() const;
@@ -61,8 +57,9 @@ public:
     const std::string& GetName() const;
 
 private:
-    std::string m_Name;
+    std::string           m_Name;
     StateAssignmentVector m_StateAssignments;
+    Program               m_Program;
 };
 
 } // namespace JoeLang

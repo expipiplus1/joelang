@@ -30,6 +30,7 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -56,6 +57,9 @@ class Function;
 using Function_sp = std::shared_ptr<Function>;
 class Parser;
 class SemaAnalyzer;
+class ShaderWriter;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \defgroup PostfixOperators
@@ -92,10 +96,27 @@ public:
 
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
-                                   const Expression& expression );
+                                   const Expression& expression ) = 0;
+
+    virtual
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const = 0;
 
     virtual
     CompleteType GetType( const Expression& expression ) const = 0;
+
+    /**
+      * \returns the list of functions called by this operator
+      */
+    virtual
+    std::set<Function_sp> GetCallees( const Expression& expression ) const = 0;
+
+    /**
+      * \returns the list of variables referenced by this operator
+      */
+    virtual
+    std::set<Variable_sp> GetVariables(
+                                       const Expression& expression ) const = 0;
 
     virtual
     bool IsConst( const Expression& expression ) const = 0;
@@ -152,7 +173,19 @@ public:
                                    const Expression& expression ) override;
 
     virtual
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::set<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     virtual
     bool IsConst( const Expression& expression ) const override;
@@ -160,12 +193,14 @@ public:
     virtual
     bool IsLValue( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<SubscriptOperator>& token );
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const SubscriptOperator* d );
 private:
     Expression_up  m_IndexExpression;
     ArrayExtents   m_ArrayExtents;
@@ -201,18 +236,36 @@ public:
                           const Expression& expression ) override;
 
     virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::set<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     /** \returns false **/
     virtual
     bool IsConst( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<ArgumentListOperator>& token );
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const ArgumentListOperator* d );
 private:
     ArgumentExpressionVector m_Arguments;
 
@@ -251,17 +304,35 @@ public:
                           const Expression& expression ) override;
 
     virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::set<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     virtual
     bool IsConst( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<MemberAccessOperator>& token );
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const MemberAccessOperator* d );
 private:
     std::string m_Identifier;
 };
@@ -298,18 +369,36 @@ public:
                           const Expression& expression ) override;
 
     virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
+                                   const Expression& expression ) override;
+
+    virtual
+    void Write( ShaderWriter& shader_writer,
+                const Expression& expression ) const override;
+
+    virtual
     CompleteType GetType( const Expression& expression ) const override;
+
+    virtual
+    std::set<Function_sp> GetCallees(
+                                  const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables(
+                                  const Expression& expression ) const override;
 
     /** \returns false **/
     virtual
     bool IsConst( const Expression& expression ) const override;
 
-    virtual
-    void Print( int depth ) const;
-
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<IncrementOrDecrementOperator>& token );
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const IncrementOrDecrementOperator* d );
 private:
     Op m_Operator;
 };

@@ -31,7 +31,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <utility>
@@ -41,12 +40,11 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
-#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator.hpp>
 #include <compiler/tokens/definition.hpp>
-#include <compiler/tokens/state_assignment_statement.hpp>
 #include <compiler/tokens/token.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/type_properties.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/technique.hpp>
@@ -113,15 +111,9 @@ EmptyDeclaration::~EmptyDeclaration()
 {
 }
 
-void EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
+bool EmptyDeclaration::PerformSema( SemaAnalyzer& sema )
 {
-}
-
-void EmptyDeclaration::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Empty Declaration\n";
+    return true;
 }
 
 bool EmptyDeclaration::Parse( Parser& parser,
@@ -161,7 +153,7 @@ PassDeclaration::~PassDeclaration()
 {
 }
 
-void PassDeclaration::PerformSema( SemaAnalyzer& sema )
+bool PassDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     // Only declare it if it's not an anonymous pass
     if( !m_Name.empty() )
@@ -172,8 +164,9 @@ void PassDeclaration::PerformSema( SemaAnalyzer& sema )
             sema.Error( "Declaring an anonymous pass in global scope" );
         // We haven't given the pass to sema, so it must have sema performed on
         // it now
-        m_Definition->PerformSema( sema );
+        return m_Definition->PerformSema( sema );
     }
+    return true;
 }
 
 const std::string& PassDeclaration::GetName() const
@@ -194,24 +187,6 @@ const std::unique_ptr<PassDefinition>& PassDeclaration::GetDefinition() const
 std::unique_ptr<PassDefinition> PassDeclaration::TakeDefinition()
 {
     return std::move(m_Definition);
-}
-
-void PassDeclaration::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-
-    std::cout << "Pass: " << ( m_Name.size() ? m_Name : "Unnamed" ) << "\n";
-    if( m_Definition )
-    {
-        m_Definition->Print( depth + 1);
-    }
-    else
-    {
-        for( int i = 0; i < depth * 4; ++i )
-            std::cout << " ";
-        std::cout << "No definition\n";
-    }
 }
 
 bool PassDeclaration::Parse( Parser& parser,
@@ -275,14 +250,16 @@ TechniqueDeclaration::~TechniqueDeclaration()
 {
 }
 
-void TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
+bool TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
 {
     sema.DeclareTechnique( m_Name );
     SemaAnalyzer::ScopeHolder scope( sema );
     scope.Enter();
+    bool good = true;
     for( auto& p : m_Passes )
-        p->PerformSema( sema );
+        good &= p->PerformSema( sema );
     scope.Leave();
+    return good;
 }
 
 const std::string& TechniqueDeclaration::GetName() const
@@ -297,16 +274,6 @@ Technique TechniqueDeclaration::GenerateTechnique(
     for( const auto& p : m_Passes )
         passes.push_back( p->GeneratePass( code_gen ) );
     return Technique( m_Name, std::move(passes) );
-}
-
-void TechniqueDeclaration::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-
-    std::cout << "Technique: " << (m_Name.size() ? m_Name : "Unnamed") << "\n";
-    for( const auto& p : m_Passes )
-        p->Print( depth + 1 );
 }
 
 bool TechniqueDeclaration::Parse( Parser& parser,
@@ -430,17 +397,29 @@ VariableDeclarationList::~VariableDeclarationList()
 {
 }
 
-void VariableDeclarationList::Print( int depth ) const
-{
-}
-
-void VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
+bool VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
-    decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema );
 
+    //
+    // If the decl specs were no good we can't continue
+    //
+    if( !decl_specs.AnalyzeDeclSpecs( m_DeclSpecs, sema ) )
+        return false;
+
+    if( sema.InGlobalScope() &&
+        !decl_specs.IsStatic() &&
+        !decl_specs.IsVarying() )
+        // Globals are uniform by default
+        decl_specs.SetIsUniform( true );
+
+    //
+    // Check that
+    //
+    
     for( const InitDeclarator_up& declarator : m_Declarators )
         declarator->PerformSema( sema, decl_specs );
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -456,12 +435,12 @@ FunctionDefinition::FunctionDefinition( DeclSpecsVector decl_specs,
     ,m_Body( std::move(body) )
 {
 #if !defined(NDEBUG)
-    assert( !m_DeclarationSpecifiers.empty() && 
+    assert( !m_DeclarationSpecifiers.empty() &&
             "FunctionDefinition given no decl specs" );
     for( const auto& d : m_DeclarationSpecifiers )
         assert( d && "FunctionDefinition given a null declaration specifier" );
     assert( m_Declarator && "FunctionDefinition given a null declarator" );
-    assert( m_Declarator->IsFunctionDeclarator() && 
+    assert( m_Declarator->IsFunctionDeclarator() &&
             "FunctionDefinition given a non-function declarator" );
     assert( m_Body && "FunctionDefinition given a null body" );
 #endif
@@ -471,7 +450,7 @@ FunctionDefinition::~FunctionDefinition()
 {
 }
 
-void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
+bool FunctionDefinition::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
     decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
@@ -487,14 +466,15 @@ void FunctionDefinition::PerformSema( SemaAnalyzer& sema )
 
     // Pass the return type to sema for generating the return statements
     m_Body->PerformSemaAsFunction( sema,
-                                   CompleteType( 
+                                   CompleteType(
                                             decl_specs.GetType(),
                                             m_Declarator->GetArrayExtents() ) );
     scope.Leave();
 
     sema.DefineFunction( m_Declarator->GetIdentifier(),
-                         m_Declarator->GetFunctionParameterTypes(),
+                         m_Declarator->GetFunctionParameters(),
                          std::move(m_Body) );
+    return true;
 }
 
 } // namespace Compiler

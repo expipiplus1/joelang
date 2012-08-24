@@ -58,11 +58,6 @@ State<T>::State( std::string name, std::map< std::string, T > enumerations )
 }
 
 template<typename T>
-State<T>::~State()
-{
-}
-
-template<typename T>
 void State<T>::SetCallbacks( std::function<void(T)> set_callback,
                              std::function<void()> reset_callback,
                              std::function<bool()> validate_callback )

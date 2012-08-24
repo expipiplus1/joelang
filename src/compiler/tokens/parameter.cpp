@@ -58,11 +58,13 @@ namespace Compiler
 Parameter::Parameter ( DeclSpecsVector decl_specs,
                        std::string identifier,
                        ArraySpecifierVector array_specifiers,
+                       SemanticSpecifier_up semantic_specifier,
                        Initializer_up default_value )
 :Token( TokenTy::Parameter )
 ,m_DeclarationSpecifiers( std::move(decl_specs) )
 ,m_Identifier( std::move(identifier) )
 ,m_ArraySpecifers( std::move(array_specifiers) )
+,m_SemanticSpecifier( std::move(semantic_specifier) )
 ,m_DefaultValue( std::move(default_value) )
 {
     assert( !m_DeclarationSpecifiers.empty() &&
@@ -76,7 +78,31 @@ Parameter::~Parameter()
 bool Parameter::PerformSema( SemaAnalyzer& sema )
 {
     DeclSpecs decl_specs;
-    decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema );
+
+    //
+    // If there was a problem evaluating the declaration specifiers we can't
+    // continue
+    //
+    if( !decl_specs.AnalyzeDeclSpecs( m_DeclarationSpecifiers, sema ) )
+        return false;
+
+    //
+    // Check some other things about the specifiers
+    //
+    if( decl_specs.IsInline() )
+        // Don't return here, this is a recoverable error
+        sema.Error( "Can't have an 'inline' specifier on a parameter" );
+
+    if( decl_specs.IsStatic() )
+        sema.Error( "Can't have a 'static' specifier on a non-global "
+                    "variable" );
+
+    if( !decl_specs.IsUniform() )
+        decl_specs.SetIsVarying( true );
+
+    if( !(decl_specs.IsIn() || decl_specs.IsOut() ) )
+        // parameters are in by default
+        decl_specs.SetIsIn( true );
 
     Type base_type = decl_specs.GetType();
     if( base_type == Type::UNKNOWN )
@@ -99,7 +125,8 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->ReduceToExpression();
 
     if( m_DefaultValue )
-        m_DefaultValue->PerformSema( sema, base_type );
+        m_DefaultValue->PerformSema( sema, CompleteType( base_type,
+                                                         array_extents ) );
 
     if( !decl_specs.IsConst() &&
         base_type == Type::STRING )
@@ -109,9 +136,17 @@ bool Parameter::PerformSema( SemaAnalyzer& sema )
         m_DefaultValue->GetArrayExtents() != array_extents )
         sema.Error( "Default parameter value has mismatching array extents" );
 
+    Semantic semantic = m_SemanticSpecifier ? m_SemanticSpecifier->GetSemantic()
+                                            : Semantic();
+
     m_Variable = std::make_shared<Variable>( CompleteType( base_type,
                                                            array_extents ),
+                                             std::move(semantic),
                                              decl_specs.IsConst(),
+                                             decl_specs.IsUniform(),
+                                             decl_specs.IsVarying(),
+                                             decl_specs.IsIn(),
+                                             decl_specs.IsOut(),
                                              false, //Isn't global
                                              true,  //Is a param
                                              GenericValue(),
@@ -130,12 +165,14 @@ void Parameter::Declare( SemaAnalyzer& sema ) const
 
 const CompleteType& Parameter::GetType() const
 {
-    assert( m_Type.GetBaseType() != Type::UNKNOWN );
+    assert( !m_Type.IsUnknown() && "Trying to get uninitialized parameters" );
     return m_Type;
 }
 
-void Parameter::Print( int depth ) const
+const Variable_sp& Parameter::GetVariable() const
 {
+    assert( m_Variable && "Trying to get an uninitialized variable" );
+    return m_Variable;
 }
 
 bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
@@ -152,6 +189,10 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
+    SemanticSpecifier_up semantic_specifier;
+    parser.Expect<SemanticSpecifier>( semantic_specifier );
+    CHECK_PARSER;
+
     // If we have an identifier we can look for an optional Expression (but only
     // if we also match an '='
     if( !identifier.empty() &&
@@ -162,6 +203,7 @@ bool Parameter::Parse( Parser& parser, std::unique_ptr<Parameter>& token )
     token.reset( new Parameter( std::move(decl_specs),
                                 std::move(identifier),
                                 std::move(array_specifiers),
+                                std::move(semantic_specifier),
                                 std::move(default_value) ) );
     return true;
 }

@@ -90,19 +90,23 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 
     for( auto& fo : m_FunctionOverloads )
     {
-        // If the function is referenced and not defined
+        // error If the function is referenced and not defined
         for( const auto& f : fo.second )
             if( !f.unique() &&
                 !f->HasDefinition() )
                 Error( "Use of undefined function: " +
                        f->GetSignatureString() );
-        // Remove unused functions
+
+        //
+        // remove all functions without definitions
+        //
         fo.second.erase( std::remove_if( fo.second.begin(), fo.second.end(),
-                                  [](const Function_sp& f)
-                                  { return f.unique(); } ),
+                                         [](const Function_sp& f)
+                                         {return !f->HasDefinition();} ),
                          fo.second.end() );
     }
 
+    // Todo, reset state here
     // Return success or not
     return m_Good;
 }
@@ -255,7 +259,12 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
     {
         std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
                                                         v.second.GetType(),
+                                                        Semantic(),
                                                         true, //Is const
+                                                        false, //Isn't uniform
+                                                        false, //Isn't varying
+                                                        false, //Isn't in
+                                                        false, //Isn't out
                                                         true, //Is global
                                                         false,//Isn't a param
                                                         std::move(v.second),
@@ -302,6 +311,7 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
 
 void SemaAnalyzer::DeclareFunction( std::string identifier,
                                     CompleteType return_type,
+                                    Semantic semantic,
                                     std::vector<CompleteType> parameter_types )
 {
     std::vector<Function_sp>& function_overloads =
@@ -322,18 +332,24 @@ void SemaAnalyzer::DeclareFunction( std::string identifier,
     function_overloads.push_back( std::make_shared<Function>(
                                                  identifier,
                                                  std::move(return_type),
+                                                 std::move(semantic),
                                                  std::move(parameter_types) ) );
     return;
 }
 
 void SemaAnalyzer::DefineFunction(
                          const std::string& identifier,
-                         const std::vector<CompleteType>& parameter_types,
+                         const std::vector<Variable_sp>& parameters,
                          CompoundStatement_up definition )
 {
     const auto& i = m_FunctionOverloads.find( identifier );
     assert( i != m_FunctionOverloads.end() &&
             "Couldn't find function to define" );
+    std::vector<CompleteType> parameter_types( parameters.size() );
+    std::transform( parameters.begin(),
+                    parameters.end(),
+                    parameter_types.begin(),
+                    [](const Variable_sp& v){return v->GetType();} );
     Function_sp function;
     for( const auto& f : i->second )
         if( f->HasSameParameterTypes( parameter_types ) )
@@ -345,7 +361,10 @@ void SemaAnalyzer::DefineFunction(
     if( function->HasDefinition() )
         Error( "Redefinition of function " + function->GetSignatureString() );
     else
+    {
         function->SetDefinition( std::move(definition ) );
+        function->SetParameters( parameters );
+    }
 }
 
 bool SemaAnalyzer::HasFunctionNamed( const std::string& identifier ) const

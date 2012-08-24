@@ -27,58 +27,45 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "compile_statement.hpp"
+#pragma once
 
-#include <cassert>
 #include <memory>
-#include <string>
-#include <utility>
 
-#include <compiler/parser.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/terminal_types.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/token.hpp>
 
 namespace JoeLang
 {
+
 namespace Compiler
 {
 
-//------------------------------------------------------------------------------
-// CompileStatement
-//------------------------------------------------------------------------------
-CompileStatement::CompileStatement( ShaderDomain domain,
-                                    std::string identifier,
-                                    std::vector<Expression_up> arguments )
-    :Token( TokenTy::CompileStatement )
-    ,m_Domain( domain )
-    ,m_Identifier( std::move(identifier) )
-    ,m_Arguments( std::move(arguments) )
-{
-#if !defined(NDEBUG)
-    assert( !m_Identifier.empty() &&
-            "Trying to create a CompileStatement with an empty function name" );
-    for( const auto& a : m_Arguments )
-        assert( a && "CompileStatement given a null argument" );
-#endif
-}
+class PassStatement;
+using PassStatement_up = std::unique_ptr<PassStatement>;
+class Parser;
 
-CompileStatement::~CompileStatement()
+/**
+  * \class PassStatement
+  * \ingroup Tokens
+  * \brief Matches any kind of pass statement
+  *
+  * PassStatement =   StateAssignmentStatement
+  *                 | CompileStatement
+  */
+class PassStatement : public JoeLang::Compiler::Token
 {
-}
+public:
+    PassStatement( TokenTy sub_class_id );
+    virtual
+    ~PassStatement();
 
-void CompileStatement::PerformSema( SemaAnalyzer& sema )
-{
-}
+    static
+    bool Parse( Parser& parser, PassStatement_up& token );
 
-void CompileStatement::Print( int depth ) const
-{
-}
-
-bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )
-{
-    return false;
-}
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassStatement* t);
+};
 
 } // namespace Compiler
 } // namespace JoeLang

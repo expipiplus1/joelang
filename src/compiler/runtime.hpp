@@ -34,8 +34,8 @@
 
 #include <llvm/IRBuilder.h>
 
-#ifdef __i686
-#define ARCH_I686
+#ifdef __i386
+#define ARCH_I386
 #elif __x86_64
 #define ARCH_X86_64
 #else
@@ -76,7 +76,6 @@ class Runtime
 {
 public:
     Runtime();
-    ~Runtime();
 
     llvm::LLVMContext&  GetLLVMContext();
     llvm::Module*       GetModule();

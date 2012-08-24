@@ -50,6 +50,7 @@ namespace Compiler
 using ArrayExtents = std::vector<unsigned>;
 class CompleteType;
 class CodeGenerator;
+class ShaderWriter;
 
 class GenericValue
 {
@@ -94,6 +95,7 @@ public:
     ~GenericValue();
 
     llvm::Constant* CodeGen( CodeGenerator& code_gen ) const;
+    void Write( ShaderWriter& shader_writer ) const;
 
     CompleteType GetType() const;
     Type GetUnderlyingType() const;

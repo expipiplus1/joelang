@@ -32,11 +32,15 @@
 #include <algorithm>
 #include <cassert>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/shader_writer.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 
 namespace JoeLang
@@ -46,9 +50,11 @@ namespace Compiler
 
 Function::Function( std::string identifier,
                     CompleteType return_type,
+                    Semantic semantic,
                     std::vector<CompleteType> parameter_types )
     :m_Identifier( std::move(identifier) )
     ,m_ReturnType( std::move(return_type) )
+    ,m_Semantic( std::move(semantic) )
     ,m_ParameterTypes( std::move(parameter_types) )
     ,m_LLVMFunction( nullptr )
 {
@@ -80,6 +86,22 @@ llvm::Function* Function::GetLLVMFunction() const
     return m_LLVMFunction;
 }
 
+const std::vector<Variable_sp>& Function::GetParameters() const
+{
+    return m_Parameters;
+}
+
+void Function::SetParameters( std::vector<Variable_sp> parameters )
+{
+    m_Parameters = std::move(parameters);
+    assert( m_Parameters.size() == m_ParameterTypes.size() );
+#if !defined(NDEBUG)
+    for( unsigned i = 0; i < m_Parameters.size(); ++i )
+        assert( m_Parameters[i]->GetType() == m_ParameterTypes[i] &&
+                "Mismatching parameter types" );
+#endif
+}
+
 void Function::SetDefinition( CompoundStatement_up definition )
 {
     assert( !HasDefinition() && "Definining a function twice" );
@@ -91,6 +113,25 @@ bool Function::HasDefinition() const
     return static_cast<bool>(m_Definition);
 }
 
+std::set<Function_sp> Function::GetCallees() const
+{
+    assert( m_Definition &&
+            "Trying to get the callees of a function without a definition" );
+    return m_Definition->GetCallees();
+}
+
+std::set<Variable_sp> Function::GetVariables() const
+{
+    assert( m_Definition &&
+            "Trying to get the callees of a function without a definition" );
+    return m_Definition->GetVariables();
+}
+
+const Semantic& Function::GetSemantic() const
+{
+    return m_Semantic;
+}
+
 std::string Function::GetSignatureString() const
 {
     /// TODO do this properly
@@ -98,7 +139,7 @@ std::string Function::GetSignatureString() const
 }
 
 bool Function::HasSameParameterTypes(
-                             const std::vector<CompleteType> other_types ) const
+                            const std::vector<CompleteType>& other_types ) const
 {
     return other_types == m_ParameterTypes;
 }
@@ -114,9 +155,64 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
 {
     assert( m_LLVMFunction &&
             "Trying to generate a definition without a declaration" );
+    assert( m_Parameters.size() == m_ParameterTypes.size() &&
+            "Parameter type vector size mismatch" );
+
+    //
+    // codegen the body
+    //
     code_gen.CreateFunctionDefinition( m_LLVMFunction,
+                                       m_Parameters,
                                        m_Definition );
 }
+
+void Function::WriteDeclaration( ShaderWriter& shader_writer ) const
+{
+    WriteHeader( shader_writer );
+    shader_writer << ";";
+    shader_writer.NewLine();
+}
+
+void Function::WriteDefinition( ShaderWriter& shader_writer ) const
+{
+    WriteHeader( shader_writer );
+
+    shader_writer.NewLine();
+
+    shader_writer << static_cast<Statement&>(*m_Definition);
+
+    shader_writer.NewLine(2);
+}
+
+void Function::WriteHeader( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_ReturnType << " " <<
+                     ShaderWriter::Mangle( m_Identifier,
+                                           IdentifierType::FUNCTION ) <<
+                     "(";
+
+    bool first = true;
+    for( const auto& parameter : m_Parameters )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
+        if( parameter->IsConst() )
+            shader_writer << "const ";
+        if( parameter->IsIn() )
+            shader_writer << "in ";
+        if( parameter->IsOut() )
+            shader_writer << "out ";
+        // todo more attributes
+        shader_writer << parameter->GetType() << " " <<
+                         ShaderWriter::Mangle( parameter->GetName(),
+                                               IdentifierType::VARIABLE );
+    }
+
+    shader_writer << ")";
+}
+
 
 } // namespace Compiler
 } // namespace JoeLang

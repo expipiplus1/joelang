@@ -81,7 +81,7 @@ public:
       *   The AstBuilder which contains the symbol table and things
       */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) = 0;
+    bool PerformSema( SemaAnalyzer& sema ) = 0;
 
     /**
       * Parses any top level declaration
@@ -118,22 +118,8 @@ public:
     virtual
     ~EmptyDeclaration   ();
 
-    /**
-      * Performs semantic ananysis on the declaration
-      * This function does nothing
-      * \param sema
-      *   The AstBuilder which contains the symbol table and things
-      */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print          ( int depth ) const override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     /**
       * Parses an empty declaration
@@ -178,21 +164,8 @@ public:
     virtual
     ~PassDeclaration();
 
-    /**
-      * Performs semantic ananysis on the declaration
-      * \param sema
-      *   The AstBuilder which contains the symbol table and things
-      */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void    Print   ( int depth ) const override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     /** \returns this pass's name **/
     const std::string&                      GetName         () const;
@@ -257,13 +230,8 @@ public:
     virtual
     ~TechniqueDeclaration();
 
-    /**
-      * Performs semantic ananysis on the declaration
-      * \param sema
-      *   The AstBuilder which contains the symbol table and things
-      */
     virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
     /** \returns this technique's name **/
     const std::string& GetName() const;
@@ -275,14 +243,6 @@ public:
       * \returns The technique
       */
     Technique GenerateTechnique( CodeGenerator& code_gen ) const;
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void Print( int depth ) const;
 
     /**
       * Parses a technique declaration
@@ -364,11 +324,12 @@ public:
     ~VariableDeclarationList();
 
     virtual
-    void Print( int depth ) const override;
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
-    virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
-
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const VariableDeclarationList* d );
 private:
     DeclSpecsVector m_DeclSpecs;
     DeclaratorVector m_Declarators;
@@ -396,10 +357,12 @@ public:
     ~FunctionDefinition();
 
     virtual
-    void Print( int depth ) const override{};
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
-    virtual
-    void PerformSema( SemaAnalyzer& sema ) override;
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const FunctionDefinition* d );
 private:
     DeclSpecsVector m_DeclarationSpecifiers;
     Declarator_up m_Declarator;

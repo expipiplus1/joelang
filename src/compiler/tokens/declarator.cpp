@@ -40,12 +40,12 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
-#include <compiler/type_properties.hpp>
 
 namespace JoeLang
 {
@@ -88,6 +88,12 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     }
 
     //
+    // This isn't a function declarator
+    //
+    if( decl_specs.IsInline() )
+        sema.Error( "Can only use the 'inline' specifier on functions" );
+
+    //
     // Only initialization specific stuff below here
     //
 
@@ -102,7 +108,9 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     // Cast the initializer to the right type
     if( m_Initializer )
-        can_init &= m_Initializer->PerformSema( sema, base_type );
+        can_init &= m_Initializer->PerformSema( sema,
+                                                CompleteType( base_type,
+                                                              array_extents ) );
 
     // If the variable is const, it must have an initializer
     if( decl_specs.IsConst() &&
@@ -138,7 +146,12 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
 
     m_Variable = std::make_shared<Variable>( CompleteType( base_type,
                                                            array_extents ),
+                                             m_Declarator->GetSemantic(),
                                              decl_specs.IsConst() && can_init,
+                                             decl_specs.IsUniform(),
+                                             decl_specs.IsVarying(),
+                                             decl_specs.IsIn(),
+                                             decl_specs.IsOut(),
                                              m_IsGlobal,
                                              false, // Isn't a parameter
                                              can_init ? std::move(initializer)
@@ -153,10 +166,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     // CodeGen the variable because sema may depend on it later on
     //
     m_Variable->CodeGen( sema.GetCodeGenerator() );
-}
-
-void InitDeclarator::Print( int depth ) const
-{
 }
 
 Declarator_up InitDeclarator::TakeDeclarator()
@@ -209,11 +218,13 @@ bool InitDeclarator::Parse( Parser& parser,
 
 Declarator::Declarator( std::string identifier,
                         FunctionSpecifier_up function_specifier,
-                        Declarator::ArraySpecifierVector array_specifiers )
+                        Declarator::ArraySpecifierVector array_specifiers,
+                        SemanticSpecifier_up semantic_specifier )
     :Token( TokenTy::Declarator )
     ,m_Identifier( std::move(identifier) )
     ,m_FunctionSpecifier( std::move(function_specifier) )
     ,m_ArraySpecifiers( std::move(array_specifiers) )
+    ,m_SemanticSpecifier( std::move(semantic_specifier) )
 {
 }
 
@@ -252,6 +263,8 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
         !m_ArrayExtents.empty() )
         sema.Error( "Can't have an array of void type" );
 
+    if( m_SemanticSpecifier )
+        m_SemanticSpecifier->PerformSema( sema );
 
     if( m_FunctionSpecifier )
     {
@@ -264,6 +277,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
             CompleteType return_type( base_type, m_ArrayExtents );
             sema.DeclareFunction( m_Identifier,
                                   std::move(return_type),
+                                  GetSemantic(),
                                   GetFunctionParameterTypes() );
         }
     }
@@ -273,7 +287,7 @@ bool Declarator::PerformSema( SemaAnalyzer& sema, const DeclSpecs& decl_specs )
 
 void Declarator::DeclareFunctionParameters( SemaAnalyzer& sema ) const
 {
-    assert( IsFunctionDeclarator() && 
+    assert( IsFunctionDeclarator() &&
             "Trying to declare function parameters for a non function "
             "declarator" );
     m_FunctionSpecifier->DeclareParameters( sema );
@@ -288,8 +302,9 @@ std::vector<CompleteType> Declarator::GetFunctionParameterTypes() const
     return m_FunctionSpecifier->GetParameterTypes();
 }
 
-void Declarator::Print( int depth ) const
+std::vector<Variable_sp> Declarator::GetFunctionParameters() const
 {
+    return m_FunctionSpecifier->GetParameters();
 }
 
 const std::string& Declarator::GetIdentifier() const
@@ -307,6 +322,14 @@ bool Declarator::IsFunctionDeclarator() const
     return static_cast<bool>(m_FunctionSpecifier);
 }
 
+Semantic Declarator::GetSemantic() const
+{
+    if( m_SemanticSpecifier )
+        return m_SemanticSpecifier->GetSemantic();
+    else
+        return Semantic();
+}
+
 bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
 {
     // Parse an identifier
@@ -314,17 +337,31 @@ bool Declarator::Parse( Parser& parser, std::unique_ptr<Declarator>& token )
     if( !parser.ExpectTerminal( TerminalType::IDENTIFIER, identifier ) )
         return false;
 
+    //
+    // optional function specifier
+    //
     std::unique_ptr<FunctionSpecifier> function_specifier;
     parser.Expect<FunctionSpecifier>( function_specifier );
     CHECK_PARSER;
 
+    //
+    // optional array specifier
+    //
     ArraySpecifierVector array_specifiers;
     parser.ExpectSequenceOf<ArraySpecifier>( array_specifiers );
     CHECK_PARSER;
 
+    //
+    // optional semantic
+    //
+    SemanticSpecifier_up semantic_specifier;
+    parser.Expect<SemanticSpecifier>( semantic_specifier );
+    CHECK_PARSER;
+
     token.reset( new Declarator( std::move(identifier),
                                  std::move(function_specifier),
-                                 std::move(array_specifiers) ) );
+                                 std::move(array_specifiers),
+                                 std::move(semantic_specifier) ) );
     return true;
 }
 

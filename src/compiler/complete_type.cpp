@@ -34,6 +34,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/shader_writer.hpp>
 #include <compiler/type_properties.hpp>
 #include <joelang/types.hpp>
 
@@ -122,6 +123,19 @@ std::string CompleteType::GetString() const
     for( unsigned e : m_ArrayExtents )
         string << "[" << e << "]";
     return string.str();
+}
+
+void CompleteType::Write( ShaderWriter& shader_writer ) const
+{
+    if( !HasGLSLType( m_BaseType ) )
+    {
+        shader_writer.Error( "Type " + GetTypeString( m_BaseType ) +
+                             " has no GLSL equivalent" );
+        return;
+    }
+    shader_writer << GetGLSLTypeString( m_BaseType );
+    for( unsigned extent : m_ArrayExtents )
+        shader_writer << "[" << extent << "]";
 }
 
 bool CompleteType::operator == ( const CompleteType& other ) const

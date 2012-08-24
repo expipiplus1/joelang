@@ -35,6 +35,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
@@ -64,6 +65,16 @@ bool ExpressionStatement::AlwaysReturns() const
     return false;
 }
 
+std::set<Function_sp> ExpressionStatement::GetCallees() const
+{
+    return m_Expression->GetCallees();
+}
+
+std::set<Variable_sp> ExpressionStatement::GetVariables() const
+{
+    return m_Expression->GetVariables();
+}
+
 void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
                                        const CompleteType& return_type )
 {
@@ -73,7 +84,12 @@ void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
 
 void ExpressionStatement::CodeGen( CodeGenerator& code_gen )
 {
-    assert( false && "Complete me" );
+    m_Expression->CodeGen( code_gen );
+}
+
+void ExpressionStatement::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << *m_Expression << ";";
 }
 
 bool ExpressionStatement::Parse( Parser& parser, ExpressionStatement_up& token )

@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -72,7 +73,8 @@ Initializer::~Initializer()
 {
 }
 
-bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
+bool Initializer::PerformSema( SemaAnalyzer& sema,
+                               const CompleteType& desired_type )
 {
     if( m_Expression )
     {
@@ -81,7 +83,7 @@ bool Initializer::PerformSema( SemaAnalyzer& sema, Type desired_type )
         m_Expression = CastExpression::Create( desired_type,
                                                std::move(m_Expression) );
         bool ret = m_Expression->PerformSema( sema );
-        m_ArrayExtents = m_Expression->GetType().GetArrayExtents();
+        m_ArrayExtents = desired_type.GetArrayExtents();
         return ret;
     }
     else
@@ -168,11 +170,6 @@ void Initializer::ReduceToExpression()
             "Trying to reduce an unreducable initializer" );
     m_Expression = std::move(m_SubInitializers[0]->m_Expression);
     m_SubInitializers.clear();
-}
-
-void Initializer::Print( int depth ) const
-{
-    assert( false && "complete me" );
 }
 
 bool Initializer::Parse( Parser& parser, std::unique_ptr<Initializer>& token )

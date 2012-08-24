@@ -30,7 +30,6 @@
 #include "literal_expression.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -43,6 +42,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -68,6 +68,16 @@ bool LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
     return true;
+}
+
+std::set<Function_sp> LiteralExpression::GetCallees() const
+{
+    return {};
+}
+
+std::set<Variable_sp> LiteralExpression::GetVariables() const
+{
+    return {};
 }
 
 bool LiteralExpression::IsConst() const
@@ -182,6 +192,11 @@ llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateInteger( m_Value, GetType().GetType() );
 }
 
+void IntegerLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_Value;
+}
+
 CompleteType IntegerLiteralExpression::GetType() const
 {
     Type type;
@@ -254,13 +269,6 @@ GenericValue IntegerLiteralExpression::GetValue() const
                             ? GenericValue( jl_i64(m_Value) )
                             : GenericValue( jl_u64(m_Value) );
     }
-}
-
-void IntegerLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Value << "\n";
 }
 
 bool IntegerLiteralExpression::ParseInteger( std::string string,
@@ -396,6 +404,15 @@ llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
                                                                : Type::DOUBLE );
 }
 
+void FloatingLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    // todo check double support
+    if( m_Suffix == Suffix::NONE )
+        shader_writer.Warning( "glsl doesn't support double, using float "
+                               "instead" );
+    shader_writer << m_Value << ( m_Suffix == Suffix::SINGLE ? "f" : "" );
+}
+
 CompleteType FloatingLiteralExpression::GetType() const
 {
     if( m_Suffix == Suffix::SINGLE )
@@ -413,13 +430,6 @@ GenericValue FloatingLiteralExpression::GetValue() const
     default:
         return GenericValue( jl_double(m_Value) );
     }
-}
-
-void FloatingLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Value << "\n";
 }
 
 bool FloatingLiteralExpression::ParseFloat( std::string string,
@@ -494,6 +504,11 @@ llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateInteger( m_Value, Type::BOOL );
 }
 
+void BooleanLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << ( m_Value ? "true" : "false" );
+}
+
 CompleteType BooleanLiteralExpression::GetType() const
 {
     return CompleteType( Type::BOOL );
@@ -502,13 +517,6 @@ CompleteType BooleanLiteralExpression::GetType() const
 GenericValue BooleanLiteralExpression::GetValue() const
 {
     return GenericValue( jl_bool(m_Value) );
-}
-
-void BooleanLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << std::boolalpha << m_Value << std::noboolalpha << "\n";
 }
 
 bool BooleanLiteralExpression::Parse(
@@ -614,6 +622,11 @@ llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateString( m_Value );
 }
 
+void StringLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer.Error( "GLSL doesn't support string literals" );
+}
+
 CompleteType StringLiteralExpression::GetType() const
 {
     return CompleteType( Type::STRING );
@@ -622,13 +635,6 @@ CompleteType StringLiteralExpression::GetType() const
 GenericValue StringLiteralExpression::GetValue() const
 {
     return GenericValue( m_Value );
-}
-
-void StringLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << '\"' << m_Value << "\"\n";
 }
 
 const std::string& StringLiteralExpression::GetString() const
@@ -713,6 +719,11 @@ llvm::Value* CharacterLiteralExpression::CodeGen(
     return code_gen.CreateInteger( m_Value, Type::I8 );
 }
 
+void CharacterLiteralExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "'" << m_Value << "'";
+}
+
 CompleteType CharacterLiteralExpression::GetType() const
 {
     return CompleteType( Type::I8 );
@@ -721,13 +732,6 @@ CompleteType CharacterLiteralExpression::GetType() const
 GenericValue CharacterLiteralExpression::GetValue() const
 {
     return GenericValue( jl_i8(m_Value) );
-}
-
-void CharacterLiteralExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << '\'' << m_Value << '\'' << "\n";
 }
 
 bool CharacterLiteralExpression::Parse(

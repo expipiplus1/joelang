@@ -44,11 +44,16 @@ namespace Compiler
 {
 
 class CodeGenerator;
+class CompileStatement;
+using CompileStatement_up = std::unique_ptr<CompileStatement>;
 class SemaAnalyzer;
 class Parser;
 class PassDeclaration;
 class PassDeclarationOrIdentifier;
+class PassStatement;
+using PassStatement_up = std::unique_ptr<PassStatement>;
 class StateAssignmentStatement;
+using StateAssignmentStatement_up = std::unique_ptr<StateAssignmentStatement>;
 
 /**
   * \class PassDefinition
@@ -60,15 +65,17 @@ class StateAssignmentStatement;
 class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
-    using StateAssignStmtVector =
-                    std::vector< std::unique_ptr<StateAssignmentStatement> >;
+    using PassStatementVector = std::vector<PassStatement_up>;
+    using StateAssignStmtVector = std::vector<StateAssignmentStatement_up>;
+    using CompileStatementVector = std::vector<CompileStatement_up>;
 
     /**
-      * \param state_assignments
-      *   A vector of the StateAssignmentStatements belonging to this pass
-      * This constructor asserts on any null StateAssignmentStatements
+      * \param statements
+      *   A vector of the PassStatements belonging to this pass
+      * This constructor asserts on any null StateAssignmentStatements or
+      * null CompileStatements
       */
-    PassDefinition  ( StateAssignStmtVector state_assignments );
+    PassDefinition  ( PassStatementVector statements );
 
     virtual
     ~PassDefinition ();
@@ -76,17 +83,11 @@ public:
     /**
       * Performs semantic analysis on all the stateassignments
       */
-    void PerformSema( SemaAnalyzer& sema );
-
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
-    virtual
-    void                    Print   ( int depth ) const;
+    bool PerformSema( SemaAnalyzer& sema );
 
     const StateAssignStmtVector& GetStateAssignments() const;
+
+    const CompileStatementVector& GetCompileStatements() const;
 
     /**
       * Parses a pass definition
@@ -101,8 +102,13 @@ public:
     static bool             Parse   ( Parser&                          parser,
                                       std::unique_ptr<PassDefinition>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassDefinition* d );
 private:
     StateAssignStmtVector   m_StateAssignments;
+    CompileStatementVector  m_CompileStatements;
 };
 
 /**
@@ -141,21 +147,8 @@ public:
       */
     Pass GeneratePass( CodeGenerator& code_gen ) const;
 
-    /**
-      * Prints this node in the CST
-      * \param depth
-      *   The indentation at which to print
-      */
     virtual
-    void    Print   ( int depth ) const override;
-
-    /**
-      * Resolves the identifier or performs sema on the pass
-      * \param sema
-      *   The semantic analyzer
-      */
-    virtual
-    void PerformSema( SemaAnalyzer& sema );
+    bool PerformSema( SemaAnalyzer& sema );
 
     /** \returns if this token is an identifier for a pass **/
     bool                   IsIdentifier    () const;
@@ -181,6 +174,10 @@ public:
     bool Parse( Parser& parser,
                 std::unique_ptr<PassDeclarationOrIdentifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const PassDeclarationOrIdentifier* d );
 private:
     /** This pass declaration's identifier if it has one, otherwise "" **/
     std::string                      m_Identifier;

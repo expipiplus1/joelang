@@ -35,23 +35,18 @@
 #include <utility>
 #include <vector>
 
+#include <joelang/program.hpp>
 #include <joelang/state_assignment.hpp>
 
 namespace JoeLang
 {
 
-Pass::Pass()
-{
-}
-
-Pass::Pass( std::string name )
-    :m_Name( std::move(name) )
-{
-}
-
-Pass::Pass( std::string name, StateAssignmentVector state_assignments )
+Pass::Pass( std::string name,
+            StateAssignmentVector state_assignments,
+            Program program )
     :m_Name( std::move(name) )
     ,m_StateAssignments( std::move(state_assignments) )
+    ,m_Program( std::move(program) )
 {
 #ifndef NDEBUG
     for( const auto& sa : m_StateAssignments )
@@ -59,24 +54,25 @@ Pass::Pass( std::string name, StateAssignmentVector state_assignments )
 #endif
 }
 
-Pass::~Pass()
-{
-}
-
 void Pass::SetState() const
 {
     for( const auto& sa : m_StateAssignments )
         sa->SetState();
+
+    m_Program.Bind();
 }
 
 void Pass::ResetState() const
 {
     for( const auto& sa : m_StateAssignments )
         sa->ResetState();
+
+    m_Program.Unbind();
 }
 
 bool Pass::Validate() const
 {
+    // validate program perhaps?
     for( const auto& sa : m_StateAssignments )
         if( !sa->ValidateState() )
             return false;

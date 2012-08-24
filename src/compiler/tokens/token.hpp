@@ -73,7 +73,10 @@ class Token
 public:
     enum class TokenTy
     {
-        /// TODO better ordering of start and ends
+        //
+        // Miscellaneous
+        //
+
         TranslationUnit,
 
         InitDeclarator,
@@ -84,45 +87,77 @@ public:
         PassDefinition,
         PassDeclarationOrIdentifier,
 
-        TypeSpecifier,
-        TypeQualifier,
-        StorageClassSpecifier,
-        DeclarationSpecifier_Start = TypeSpecifier,
-        DeclarationSpecifier_End = StorageClassSpecifier,
+        FunctionSpecifier,
+        Parameter,
+        SemanticSpecifier,
 
+        //
+        // DeclarationSpecifiers
+        //
+
+        DeclarationSpecifier_Start,
+        TypeSpecifier,
+        TypeQualifierSpecifier,
+        StorageClassSpecifier,
+        DeclarationSpecifier_End,
+
+        //
+        // Declarations
+        //
+
+        Declaration_Start,
         EmptyDeclaration,
         PassDeclaration,
         TechniqueDeclaration,
         VariableDeclarationList,
         FunctionDefinition,
-        Declaration_Start = EmptyDeclaration,
-        Declaration_End = FunctionDefinition,
+        Declaration_End,
 
-        FunctionSpecifier,
-        Parameter,
+        //
+        // Statements
+        //
 
+        Statement_Start,
         CompoundStatement,
         EmptyStatement,
         ExpressionStatement,
         ReturnStatement,
-        Statement_Start = CompoundStatement,
-        Statement_End = ReturnStatement,
+        Statement_End,
 
-        AssignmentOperator,
+        //
+        // Pass Statements
+        //
 
+        PassStatement_Start,
+        StateAssignmentStatement,
+        CompileStatement,
+        PassStatement_End,
+
+        //
+        // PostfixOperators
+        //
+        PostfixOperator_Start,
         SubscriptOperator,
         ArgumentListOperator,
         MemberAccessOperator,
         IncrementOrDecrementOperator,
-        PostfixOperator_Start = SubscriptOperator,
-        PostfixOperator_End = IncrementOrDecrementOperator,
+        PostfixOperator_End,
 
-        StateAssignmentStatement,
-        CompileStatement,
+        //
+        // Assignment Operators
+        //
+
+        AssignmentOperator,
+
+        //
+        // Expressions
+        //
+        Expression_Start,
 
         AssignmentExpression,
         ConditionalExpression,
 
+        BinaryOperatorExpression_Start,
         LogicalOrExpression,
         LogicalAndExpression,
         InclusiveOrExpression,
@@ -133,8 +168,7 @@ public:
         ShiftExpression,
         AdditiveExpression,
         MultiplicativeExpression,
-        BinaryOperatorExpression_Start = LogicalOrExpression,
-        BinaryOperatorExpression_End = MultiplicativeExpression,
+        BinaryOperatorExpression_End,
 
         CastExpression,
         UnaryExpression,
@@ -142,25 +176,20 @@ public:
         TypeConstructorExpression,
         IdentifierExpression,
 
+        LiteralExpression_Start,
         IntegerLiteralExpression,
         FloatingLiteralExpression,
         BooleanLiteralExpression,
         StringLiteralExpression,
         CharacterLiteralExpression,
-        LiteralExpression_Start = IntegerLiteralExpression,
-        LiteralExpression_End = CharacterLiteralExpression,
-
-        Expression_Start = AssignmentExpression,
-        Expression_End = CharacterLiteralExpression,
+        LiteralExpression_End,
+        Expression_End = LiteralExpression_End,
     };
 
     explicit
     Token( TokenTy sub_class_id );
     virtual
     ~Token();
-
-    virtual
-    void Print( int depth ) const = 0;
 
     /** Used for casting **/
     TokenTy GetSubClassID() const;

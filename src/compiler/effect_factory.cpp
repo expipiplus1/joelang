@@ -45,6 +45,10 @@ namespace Compiler
 
 EffectFactory::EffectFactory( const Context& context )
     :m_Context( context )
+    ,m_Runtime()
+    ,m_CodeGenerator( context, m_Runtime )
+    ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
+    ,m_ShaderWriter( m_Context )
 {
 }
 
@@ -57,21 +61,16 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
 
     TranslationUnit& ast = *parser.GetTranslationUnit();
 
-    CodeGenerator code_generator( m_Runtime );
-    SemaAnalyzer sema( m_Context, code_generator );
-    if( !sema.BuildAst( ast ) )
+    if( !m_SemaAnalyzer.BuildAst( ast ) )
         return nullptr;
 
     std::vector<Technique> techniques;
     std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 
-    code_generator.GenerateFunctions( sema.GetFunctions() );
-    techniques = code_generator.GenerateTechniques( ast );
-    llvm_execution_engine = code_generator.TakeExecutionEngine();
+    m_CodeGenerator.GenerateFunctions( m_SemaAnalyzer.GetFunctions() );
+    techniques = m_CodeGenerator.GenerateTechniques( ast );
 
-    return std::unique_ptr<Effect>( new Effect(
-                                           std::move(techniques),
-                                           std::move(llvm_execution_engine) ) );
+    return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
 }
 
 } // namespace Compiler

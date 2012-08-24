@@ -29,7 +29,6 @@
 
 #include "assignment_operator.hpp"
 
-#include <iostream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -55,13 +54,6 @@ AssignmentOperator::AssignmentOperator( Op op )
 
 AssignmentOperator::~AssignmentOperator()
 {
-}
-
-void AssignmentOperator::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "assignment_op" << std::endl;
 }
 
 AssignmentOperator::Op AssignmentOperator::GetOp() const

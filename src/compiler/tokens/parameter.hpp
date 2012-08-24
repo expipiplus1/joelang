@@ -50,6 +50,9 @@ class Initializer;
 typedef std::unique_ptr<Initializer> Initializer_up;
 class Parser;
 class SemaAnalyzer;
+class Semantic;
+class SemanticSpecifier;
+using SemanticSpecifier_up = std::unique_ptr<SemanticSpecifier>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -71,6 +74,7 @@ public:
     Parameter    ( DeclSpecsVector decl_specs,
                    std::string identifier,
                    ArraySpecifierVector array_specifiers,
+                   SemanticSpecifier_up semantic_specifier,
                    Initializer_up default_value );
     virtual
     ~Parameter   ();
@@ -85,8 +89,7 @@ public:
 
     const CompleteType& GetType() const;
 
-    virtual
-    void Print( int depth ) const override;
+    const Variable_sp& GetVariable() const;
 
     /**
       * Parses a parameter declaration
@@ -101,10 +104,15 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Parameter>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Parameter* d );
 private:
     DeclSpecsVector      m_DeclarationSpecifiers;
     std::string          m_Identifier;
     ArraySpecifierVector m_ArraySpecifers;
+    SemanticSpecifier_up m_SemanticSpecifier;
     Initializer_up       m_DefaultValue;
 
     // This is filled during performsema

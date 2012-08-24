@@ -30,10 +30,12 @@
 #pragma once
 
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
 #include <compiler/complete_type.hpp>
+#include <compiler/semantic.hpp>
 
 namespace llvm
 {
@@ -49,6 +51,10 @@ using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class Function
@@ -59,7 +65,8 @@ class Function
 public:
     Function( std::string identifier,
               CompleteType base_return_type,
-              std::vector<CompleteType> parameter_types );
+              Semantic semantic,
+              std::vector<CompleteType> parameters );
 
     const std::string& GetIdentifier() const;
 
@@ -72,6 +79,16 @@ public:
     llvm::Function* GetLLVMFunction() const;
 
     /**
+      * Get the parameter variables
+      */
+    const std::vector<Variable_sp>& GetParameters() const;
+
+    /**
+      * This asserts that the parameter types match
+      */
+    void SetParameters( std::vector<Variable_sp> parameters );
+
+    /**
       * This asserts that the function is undefined
       */
     void SetDefinition( CompoundStatement_up definition );
@@ -79,24 +96,50 @@ public:
     bool HasDefinition() const;
 
     /**
+      * Returns all the functions called by this one.
+      * this asserts that we have a definition
+      */
+    std::set<Function_sp> GetCallees() const;
+
+    /**
+      * Returns all the variables referenced in this function
+      * this asserts that we have a definition
+      */
+    std::set<Variable_sp> GetVariables() const;
+
+    /**
+      * Returns this function's semantic
+      */
+    const Semantic& GetSemantic() const;
+
+    /**
       * Generates a string for the function signature
       */
     std::string GetSignatureString() const;
 
     bool HasSameParameterTypes(
-                            const std::vector<CompleteType> other_types ) const;
+                           const std::vector<CompleteType>& other_types ) const;
 
     void CodeGenDeclaration( CodeGenerator& code_gen );
 
     void CodeGenDefinition( CodeGenerator& code_gen );
+
+    void WriteDefinition( ShaderWriter& shader_writer ) const;
+
+    void WriteDeclaration( ShaderWriter& shader_writer ) const;
 private:
-    std::string m_Identifier;
-    CompleteType m_ReturnType;
+    /** This will write the declaration sans the ';' **/
+    void WriteHeader( ShaderWriter& shader_writer ) const;
+
+    std::string               m_Identifier;
+    CompleteType              m_ReturnType;
+    Semantic                  m_Semantic;
     std::vector<CompleteType> m_ParameterTypes;
+    std::vector<Variable_sp>  m_Parameters;
 
-    CompoundStatement_up m_Definition;
+    CompoundStatement_up      m_Definition;
 
-    llvm::Function* m_LLVMFunction;
+    llvm::Function*           m_LLVMFunction;
 };
 
 } // namespace Compiler

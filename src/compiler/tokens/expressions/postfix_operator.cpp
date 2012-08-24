@@ -30,8 +30,8 @@
 #include "postfix_operator.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -42,6 +42,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -81,20 +82,10 @@ bool PostfixOperator::Parse( Parser& parser,
     return true;
 }
 
-llvm::Value* PostfixOperator::CodeGenPointerTo( CodeGenerator& code_gen,
-                                                const Expression& expression )
-{
-    assert( false && "complete me" );
-    return nullptr;
-}
-
-
 bool PostfixOperator::IsLValue( const Expression& expression ) const
 {
     return false;
 }
-
-
 
 bool PostfixOperator::classof( const Token* e )
 {
@@ -136,12 +127,10 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
 {
     bool good = true;
     good &= expression.PerformSema( sema );
-    if( good )
-    {
-        m_IndexExpression = CastExpression::Create( Type::I64,
-                                                    std::move(m_IndexExpression) );
-        good &= m_IndexExpression->PerformSema( sema );
-    }
+    m_IndexExpression = CastExpression::Create( Type::I64,
+                                                std::move(m_IndexExpression) );
+    good &= m_IndexExpression->PerformSema( sema );
+
     if( !expression.GetType().IsArrayType() )
     {
         sema.Error( "Trying to index into a non-array" );
@@ -173,6 +162,12 @@ llvm::Value* SubscriptOperator::CodeGenPointerTo(
                                                *m_IndexExpression );
 }
 
+void SubscriptOperator::Write( ShaderWriter& shader_writer,
+                               const Expression& expression ) const
+{
+    assert( false && "complete me" );
+}
+
 CompleteType SubscriptOperator::GetType( const Expression& expression ) const
 {
     ArrayExtents array_extents = expression.GetType().GetArrayExtents();
@@ -180,6 +175,18 @@ CompleteType SubscriptOperator::GetType( const Expression& expression ) const
         array_extents.resize( array_extents.size() - 1 );
     return CompleteType( expression.GetType().GetBaseType(),
                          std::move( array_extents ) );
+}
+
+std::set<Function_sp> SubscriptOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    return expression.GetCallees();
+}
+
+std::set<Variable_sp> SubscriptOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    return expression.GetVariables();
 }
 
 bool SubscriptOperator::IsConst( const Expression& expression ) const
@@ -191,14 +198,6 @@ bool SubscriptOperator::IsConst( const Expression& expression ) const
 bool SubscriptOperator::IsLValue( const Expression& expression ) const
 {
     return true;
-}
-
-void SubscriptOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "SubscriptOperator\n";
-    m_IndexExpression->Print( depth + 1 );
 }
 
 bool SubscriptOperator::Parse( Parser& parser,
@@ -243,25 +242,20 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
                                                Expression& expression )
 {
     // This doesn't resolve the identifier in expression because that will only
-    // func variables
+    // find variables
     bool good = true;
     for( auto& a : m_Arguments )
         good &= a->ResolveIdentifiers( sema );
-    return good;
-}
 
-bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
-                                        Expression& expression )
-{
+    if( !good )
+        return false;
+
     //
-    // Try and sema all the arguments and get their types
+    // Find the function to call
     //
     std::vector<CompleteType> argument_types;
     for( auto& a : m_Arguments )
-    {
-        a->PerformSema( sema );
         argument_types.push_back( a->GetType() );
-    }
 
     //
     // Make sure we're being called on an IdentifierExpression
@@ -277,12 +271,9 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
                            static_cast<const IdentifierExpression&>(expression);
     const std::string& name = identifier_expression.GetIdentifier();
 
-    //
-    // Find the function to call
-    //
     if( !sema.HasFunctionNamed( name ) )
     {
-        sema.Error( "Calling undeclared function" + name );
+        sema.Error( "Calling undeclared function " + name );
         return false;
     }
 
@@ -293,13 +284,63 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
         return false;
     }
 
-    return true;
+    return good;
+}
+
+bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
+                                        Expression& expression )
+{
+    if( !m_Function )
+        return false;
+
+    std::vector<CompleteType> types = m_Function->GetParameterTypes();
+
+    assert( types.size() >= m_Arguments.size() && "Too many arguments" );
+
+    //
+    // Cast all the arguments
+    //
+    for( unsigned i = 0; i < m_Arguments.size(); ++i )
+        m_Arguments[i] = CastExpression::Create( types[i],
+                                                 std::move(m_Arguments[i]) );
+
+    bool good = true;
+
+    for( auto& a : m_Arguments )
+        good &= a->PerformSema( sema );
+
+    return good;
 }
 
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
                                             const Expression& expression )
 {
     return code_gen.CreateFunctionCall( m_Function, m_Arguments );
+}
+
+llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Can't get the pointer of a function call" );
+    return nullptr;
+}
+
+void ArgumentListOperator::Write( ShaderWriter& shader_writer,
+                                  const Expression& expression ) const
+{
+    shader_writer << ShaderWriter::Mangle( m_Function->GetIdentifier(),
+                                           IdentifierType::FUNCTION ) << "(";
+    bool first = true;
+    for( const auto& a : m_Arguments )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
+
+        shader_writer << *a;
+    }
+    shader_writer << ")";
 }
 
 CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
@@ -309,18 +350,40 @@ CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
     return m_Function->GetReturnType();
 }
 
+std::set<Function_sp> ArgumentListOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    // The expression here is actually an identifier, which we don't want to dip
+    // into because it thinks it's a variable
+    assert( m_Function &&
+            "Trying to get the Callees of an unresolved ArgumentListOperator" );
+    std::set<Function_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetCallees();
+        ret.insert( f.begin(), f.end() );
+    }
+    ret.insert( m_Function );
+    return ret;
+}
+
+std::set<Variable_sp> ArgumentListOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    // The expression here is actually an identifier, which we don't want to dip
+    // into because it thinks it's a variable
+    std::set<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetVariables();
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
+}
+
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
 {
     return false;
-}
-
-void ArgumentListOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "ArgumentListOperator\n";
-    for( const auto& i : m_Arguments )
-        i->Print( depth + 1 );
 }
 
 bool ArgumentListOperator::Parse( Parser& parser,
@@ -383,25 +446,43 @@ llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
     return nullptr;
 }
 
+llvm::Value* MemberAccessOperator::CodeGenPointerTo(
+                                                  CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Complete me" );
+    return nullptr;
+}
+
+void MemberAccessOperator::Write( ShaderWriter& shader_writer,
+                                  const Expression& expression ) const
+{
+    assert( false && "complete me" );
+}
+
 CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
 {
     assert( false && "Complete me" );
     return CompleteType();
 }
 
+std::set<Function_sp> MemberAccessOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
+std::set<Variable_sp> MemberAccessOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst();
-}
-
-void MemberAccessOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << ".\n";
-    for( int i = 0; i < depth * 4 + 4; ++i )
-        std::cout << " ";
-    std::cout << m_Identifier << std::endl;
 }
 
 bool MemberAccessOperator::Parse( Parser& parser,
@@ -456,6 +537,20 @@ llvm::Value* IncrementOrDecrementOperator::CodeGen(
     return nullptr;
 }
 
+llvm::Value* IncrementOrDecrementOperator::CodeGenPointerTo(
+                                                  CodeGenerator& code_gen,
+                                                  const Expression& expression )
+{
+    assert( false && "Complete me" );
+    return nullptr;
+}
+
+void IncrementOrDecrementOperator::Write( ShaderWriter& shader_writer,
+                                          const Expression& expression ) const
+{
+    assert( false && "complete me" );
+}
+
 CompleteType IncrementOrDecrementOperator::GetType(
                                         const Expression& expression ) const
 {
@@ -463,16 +558,23 @@ CompleteType IncrementOrDecrementOperator::GetType(
     return CompleteType();
 }
 
+std::set<Function_sp> IncrementOrDecrementOperator::GetCallees(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
+std::set<Variable_sp> IncrementOrDecrementOperator::GetVariables(
+                                            const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return {};
+}
+
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const
 {
     return false;
-}
-
-void IncrementOrDecrementOperator::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << (m_Operator == Op::INCREMENT ? "++" : "--") << std::endl;
 }
 
 bool IncrementOrDecrementOperator::Parse(

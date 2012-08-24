@@ -58,10 +58,6 @@ Statement::~Statement()
 {
 }
 
-void Statement::Print( int depth ) const
-{
-}
-
 bool Statement::Parse( Parser& parser, Statement_up& token )
 {
     // Try and parse any kind of statement

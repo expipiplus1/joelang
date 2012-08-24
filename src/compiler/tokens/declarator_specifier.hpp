@@ -49,6 +49,12 @@ typedef std::unique_ptr<Expression> Expression_up;
 class Parameter;
 class Parser;
 class SemaAnalyzer;
+class Semantic;
+class SemanticSpecifier;
+using SemanticSpecifier_up = std::unique_ptr<SemanticSpecifier>;
+enum class SemanticType;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class ArraySpecifier
@@ -68,9 +74,6 @@ public:
     void PerformSema( SemaAnalyzer& sema );
 
     Expression_up GetExpression();
-
-    virtual
-    void Print( int depth ) const override;
 
     /**
       * Extracts the values from a list of array specifiers
@@ -97,6 +100,10 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<ArraySpecifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const ArraySpecifier* d );
 private:
     Expression_up m_Expression;
 };
@@ -125,8 +132,7 @@ public:
 
     std::vector<CompleteType> GetParameterTypes() const;
 
-    virtual
-    void Print( int depth ) const override;
+    std::vector<Variable_sp>  GetParameters() const;
 
     /**
       * Parses a function specifier
@@ -141,8 +147,53 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<FunctionSpecifier>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const FunctionSpecifier* d );
 private:
     std::vector<std::unique_ptr<Parameter> > m_Parameters;
+};
+
+/**
+  * \class SemanticSpecifier
+  * \ingroup Tokens
+  * \brief Matches a semantic specifier
+  *
+  * SemanticSpecifier =  ':' identifier ( '[' Expression ']' )
+  */
+class SemanticSpecifier : public JoeLang::Compiler::Token
+{
+public:
+    /** This constructor asserts on an empty string **/
+    SemanticSpecifier  ( std::string string, Expression_up index_expression = nullptr );
+    virtual
+    ~SemanticSpecifier ();
+
+    bool HasIndex() const;
+
+    /** This must only be called after PerformSema **/
+    Semantic GetSemantic() const;
+
+    /**
+      * Performs semantic analysis on the semantic
+      * This will resolve the index expression if there is one
+      */
+    void PerformSema( SemaAnalyzer& sema );
+
+    static
+    bool Parse       ( Parser& parser, SemanticSpecifier_up& token );
+
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const SemanticSpecifier* d );
+private:
+    std::string   m_String;
+    Expression_up m_IndexExpression;
+
+    unsigned      m_Index;
+    SemanticType  m_SemanticType;
 };
 
 } // namespace Compiler

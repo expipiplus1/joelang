@@ -31,8 +31,8 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -42,6 +42,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
@@ -254,9 +255,33 @@ llvm::Value* AssignmentExpression::CodeGenPointerTo(
     return m_AssigneePtr->CodeGenPointerTo( code_gen );
 }
 
+void AssignmentExpression::Write( ShaderWriter& shader_writer ) const
+{
+    // Todo this isn't right, need to handle += and friends properly
+    shader_writer << *m_AssigneePtr << " = " << *m_AssignedExpression;
+}
+
 CompleteType AssignmentExpression::GetType() const
 {
     return m_AssigneePtr->GetType();
+}
+
+std::set<Function_sp> AssignmentExpression::GetCallees() const
+{
+    //assert( false && "Do assignment properly" );
+    auto ret = m_Assignee->GetCallees();
+    auto f   = m_AssignedExpression->GetCallees();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
+std::set<Variable_sp> AssignmentExpression::GetVariables() const
+{
+    //assert( false && "Do assignment properly" );
+    auto ret = m_Assignee->GetVariables();
+    auto f   = m_AssignedExpression->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    return ret;
 }
 
 bool AssignmentExpression::IsLValue() const
@@ -267,16 +292,6 @@ bool AssignmentExpression::IsLValue() const
 bool AssignmentExpression::IsConst() const
 {
     return false;
-}
-
-void AssignmentExpression::Print(int depth) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Assignment Expression\n";
-
-    m_AssigneePtr->Print( depth + 1 );
-    m_AssignedExpression->Print( depth + 1 );
 }
 
 bool AssignmentExpression::Parse( Parser& parser,
@@ -392,10 +407,36 @@ llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
                                   *m_FalseExpression );
 }
 
+void ConditionalExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "(" << *m_Condition << " ? " << *m_TrueExpression <<
+                                            " : " << *m_FalseExpression << ")";
+}
+
 CompleteType ConditionalExpression::GetType() const
 {
     return GetCommonType( m_TrueExpression->GetType(),
                           m_FalseExpression->GetType() );
+}
+
+std::set<Function_sp> ConditionalExpression::GetCallees() const
+{
+    auto ret = m_Condition->GetCallees();
+    auto f   = m_TrueExpression->GetCallees();
+    ret.insert( f.begin(), f.end() );
+    f = m_FalseExpression->GetCallees();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
+std::set<Variable_sp> ConditionalExpression::GetVariables() const
+{
+    auto ret = m_Condition->GetVariables();
+    auto f   = m_TrueExpression->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    f = m_FalseExpression->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    return ret;
 }
 
 bool ConditionalExpression::IsConst() const
@@ -405,17 +446,6 @@ bool ConditionalExpression::IsConst() const
            m_TrueExpression->IsConst() &&
            m_FalseExpression->IsConst();
 
-}
-
-void ConditionalExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Conditional Expression\n";
-
-    m_Condition->Print( depth + 1 );
-    m_TrueExpression->Print( depth + 1 );
-    m_FalseExpression->Print( depth + 1 );
 }
 
 bool ConditionalExpression::Parse( Parser& parser,
@@ -541,7 +571,6 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
         }
         else
         {
-            std::cout << GetTypeString( m_CastType.GetType() ) << std::endl;
             assert( false && "Casting to an unhandled type" );
         }
     }
@@ -557,21 +586,29 @@ llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
     return code_gen.CreateCast( *m_Expression, m_CastType );
 }
 
+void CastExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << m_CastType << "(" << *m_Expression << ")";
+}
+
 CompleteType CastExpression::GetType() const
 {
     return m_CastType;
 }
 
+std::set<Function_sp> CastExpression::GetCallees() const
+{
+    return m_Expression->GetCallees();
+}
+
+std::set<Variable_sp> CastExpression::GetVariables() const
+{
+    return m_Expression->GetVariables();
+}
+
 bool CastExpression::IsConst() const
 {
     return m_Expression->IsConst();
-}
-
-void CastExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Cast Expression\n";
 }
 
 bool CastExpression::Parse( Parser& parser, Expression_up& token )
@@ -695,6 +732,20 @@ llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 }
 
+void UnaryExpression::Write( ShaderWriter& shader_writer ) const
+{
+    static const std::map<Op, std::string> op_string_map =
+    {
+        { Op::PLUS,        "+" },
+        { Op::MINUS,       "-" },
+        { Op::INCREMENT,   "++" },
+        { Op::DECREMENT,   "--" },
+        { Op::BITWISE_NOT, "~" },
+        { Op::LOGICAL_NOT, "!" }
+    };
+    shader_writer << "(" << op_string_map.at(m_Operator) << *m_Expression << ")";
+}
+
 CompleteType UnaryExpression::GetType() const
 {
     /// Todo vector and matrix bool things
@@ -716,19 +767,22 @@ CompleteType UnaryExpression::GetType() const
     return CompleteType();
 }
 
+std::set<Function_sp> UnaryExpression::GetCallees() const
+{
+    return m_Expression->GetCallees();
+}
+
+std::set<Variable_sp> UnaryExpression::GetVariables() const
+{
+    return m_Expression->GetVariables();
+}
+
+
 bool UnaryExpression::IsConst() const
 {
     return m_Expression->IsConst() &&
            m_Operator != Op::INCREMENT &&
            m_Operator != Op::DECREMENT;
-}
-
-void UnaryExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Unary Expression\n";
-    m_Expression->Print( depth + 1 );
 }
 
 bool UnaryExpression::Parse( Parser& parser,
@@ -821,9 +875,24 @@ llvm::Value* PostfixExpression::CodeGenPointerTo(
     return m_PostfixOperator->CodeGenPointerTo( code_gen, *m_Expression );
 }
 
+void PostfixExpression::Write( ShaderWriter& shader_writer ) const
+{
+    m_PostfixOperator->Write( shader_writer, *m_Expression );
+}
+
 CompleteType PostfixExpression::GetType() const
 {
     return m_PostfixOperator->GetType( *m_Expression );
+}
+
+std::set<Function_sp> PostfixExpression::GetCallees() const
+{
+    return m_PostfixOperator->GetCallees( *m_Expression );
+}
+
+std::set<Variable_sp> PostfixExpression::GetVariables() const
+{
+    return m_PostfixOperator->GetVariables( *m_Expression );
 }
 
 bool PostfixExpression::IsConst() const
@@ -834,15 +903,6 @@ bool PostfixExpression::IsConst() const
 bool PostfixExpression::IsLValue() const
 {
     return m_PostfixOperator->IsLValue( *m_Expression );
-}
-
-void PostfixExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << "Postfix Expression\n";
-    m_Expression->Print( depth + 1 );
-    m_PostfixOperator->Print( depth + 1 );
 }
 
 bool PostfixExpression::Parse( Parser& parser,
@@ -958,10 +1018,47 @@ llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
     }
 }
 
+void TypeConstructorExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << CompleteType(m_Type) << "(";
+    bool first = true;
+    for( const auto& argument : m_Arguments )
+    {
+        if( !first )
+            shader_writer << ", ";
+        else
+            first = false;
+        shader_writer << *argument;
+    }
+    shader_writer << ")";
+}
+
 CompleteType TypeConstructorExpression::GetType() const
 {
     /// todo constructing arrays
     return CompleteType( m_Type );
+}
+
+std::set<Function_sp> TypeConstructorExpression::GetCallees() const
+{
+    std::set<Function_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetCallees();
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
+}
+
+std::set<Variable_sp> TypeConstructorExpression::GetVariables() const
+{
+    std::set<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetVariables();
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
 }
 
 bool TypeConstructorExpression::IsConst() const
@@ -975,10 +1072,6 @@ bool TypeConstructorExpression::IsConst() const
 bool TypeConstructorExpression::IsLValue() const
 {
     return false;
-}
-
-void TypeConstructorExpression::Print( int depth ) const
-{
 }
 
 bool TypeConstructorExpression::Parse( Parser& parser,
@@ -1103,11 +1196,30 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
     return m_Variable->GetLLVMPointer();
 }
 
+void IdentifierExpression::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << ShaderWriter::Mangle( m_Identifier,
+                                           IdentifierType::VARIABLE );
+}
+
 CompleteType IdentifierExpression::GetType() const
 {
+    // todo should this assert
     if( !m_Variable )
         return CompleteType();
     return m_Variable->GetType();
+}
+
+std::set<Function_sp> IdentifierExpression::GetCallees() const
+{
+    return {};
+}
+
+std::set<Variable_sp> IdentifierExpression::GetVariables() const
+{
+    assert( m_Variable &&
+            "Trying to get the variables of an unresolved identifier" );
+    return { m_Variable };
 }
 
 const std::string& IdentifierExpression::GetIdentifier() const
@@ -1135,13 +1247,6 @@ const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
     return bool(m_Variable);
-}
-
-void IdentifierExpression::Print( int depth ) const
-{
-    for( int i = 0; i < depth * 4; ++i )
-        std::cout << " ";
-    std::cout << m_Identifier << "\n";
 }
 
 bool IdentifierExpression::Parse( Parser& parser,

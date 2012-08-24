@@ -43,19 +43,23 @@ enum class Type;
 namespace Compiler
 {
 class ArraySpecifier;
-typedef std::vector<unsigned> ArrayExtents;
+using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class Declarator;
 using Declarator_up = std::unique_ptr<Declarator>;
 class DeclSpecs;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
+using Expression_up = std::unique_ptr<Expression>;
 class FunctionSpecifier;
-typedef std::unique_ptr<FunctionSpecifier> FunctionSpecifier_up;
+using FunctionSpecifier_up = std::unique_ptr<FunctionSpecifier>;
 class Initializer;
 class Parser;
 class SemaAnalyzer;
+class Semantic;
+class SemanticSpecifier;
+using SemanticSpecifier_up = std::unique_ptr<SemanticSpecifier>;
 class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
 
 /**
   * \class InitDeclarator
@@ -83,9 +87,6 @@ public:
       */
     void PerformSema( SemaAnalyzer& sema, DeclSpecs& decl_specs );
 
-    virtual
-    void Print( int depth ) const override;
-
     /** This asserts that there is no initializer, we don't want to every split
       * a declarator from its initializer **/
     Declarator_up TakeDeclarator();
@@ -108,6 +109,10 @@ public:
     static
     bool Parse       ( Parser& parser, std::unique_ptr<InitDeclarator>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const InitDeclarator* d );
 private:
     std::unique_ptr<Declarator>  m_Declarator;
     std::unique_ptr<Initializer> m_Initializer;
@@ -120,7 +125,7 @@ private:
   * \ingroup Tokens
   * \brief Matches a Declarator with a param list or array specifiers or nothing
   *
-  * Declarator = identifier FunctionSpecifier? ArraySpecifier*
+  * Declarator = identifier FunctionSpecifier? ArraySpecifier* Semantic?
   */
 class Declarator : public JoeLang::Compiler::Token
 {
@@ -130,7 +135,8 @@ public:
     /** If given a function_body it asserts that it has a function specifier **/
     Declarator    ( std::string identifier,
                     FunctionSpecifier_up function_specifier,
-                    ArraySpecifierVector array_specifiers );
+                    ArraySpecifierVector array_specifiers,
+                    SemanticSpecifier_up semantic_specifier );
     virtual
     ~Declarator   ();
 
@@ -156,10 +162,18 @@ public:
       */
     std::vector<CompleteType> GetFunctionParameterTypes() const;
 
-    virtual
-    void Print( int depth ) const override;
+    /**
+      * This asserts that this is a function declarator
+      * \returns the parameters
+      */
+    std::vector<Variable_sp> GetFunctionParameters() const;
 
     bool IsFunctionDeclarator() const;
+
+    /**
+      * Returns the semantic
+      */
+    Semantic GetSemantic() const;
 
     /**
       * \returns the identifier
@@ -182,11 +196,16 @@ public:
     static
     bool Parse ( Parser& parser, std::unique_ptr<Declarator>& token );
 
+    static
+    bool classof( const Token* t );
+    static
+    bool classof( const Declarator* d );
 private:
     std::string          m_Identifier;
     FunctionSpecifier_up m_FunctionSpecifier;
     ArraySpecifierVector m_ArraySpecifiers;
     ArrayExtents         m_ArrayExtents;
+    SemanticSpecifier_up m_SemanticSpecifier;
 };
 
 } // namespace Compiler

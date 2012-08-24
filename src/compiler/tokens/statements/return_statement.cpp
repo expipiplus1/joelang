@@ -36,6 +36,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
@@ -64,6 +65,22 @@ bool ReturnStatement::AlwaysReturns() const
     return true;
 }
 
+std::set<Function_sp> ReturnStatement::GetCallees() const
+{
+    if( m_Expression )
+        return m_Expression->GetCallees();
+    else
+        return {};
+}
+
+std::set<Variable_sp> ReturnStatement::GetVariables() const
+{
+    if( m_Expression )
+        return m_Expression->GetVariables();
+    else
+        return {};
+}
+
 void ReturnStatement::PerformSema( SemaAnalyzer& sema,
                                    const CompleteType& return_type )
 {
@@ -75,6 +92,8 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
         return;
     }
 
+    m_Expression->ResolveIdentifiers( sema );
+
     // Cast the return type to what we want if this fails, sema will know
     m_Expression = CastExpression::Create( return_type,
                                            std::move(m_Expression) );
@@ -84,6 +103,14 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
 void ReturnStatement::CodeGen( CodeGenerator& code_gen )
 {
     code_gen.CreateReturnStatement( m_Expression );
+}
+
+void ReturnStatement::Write( ShaderWriter& shader_writer ) const
+{
+    shader_writer << "return";
+    if( m_Expression )
+        shader_writer << " " << *m_Expression;
+    shader_writer << ";";
 }
 
 bool ReturnStatement::Parse( Parser& parser, ReturnStatement_up& token )

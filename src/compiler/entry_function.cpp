@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,74 +27,49 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "entry_function.hpp"
 
+#include <cassert>
 #include <memory>
-#include <string>
+#include <utility>
 #include <vector>
 
-#include <compiler/tokens/token.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
-
 namespace Compiler
 {
 
-class CodeGenerator;
-class CompileStatement;
-using CompileStatement_up = std::unique_ptr<CompileStatement>;
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
-class Parser;
-class SemaAnalyzer;
-
-/**
-  * \class CompileStatement
-  * \ingroup Tokens
-  * \brief Matches a shader compile statement
-  *
-  * CompileStatement = ('vertexshader' | 'pixelshader') '='
-  *                                                   'compile' FunctionCall ';'
-  */
-class CompileStatement : public JoeLang::Compiler::Token
+EntryFunction::EntryFunction( ShaderDomain domain,
+                              Function_sp function,
+                              std::vector<Expression_up> parameters )
+    :m_Domain( domain )
+    ,m_Function( std::move(function) )
+    ,m_Parameters( std::move(parameters) )
 {
-public:
-    enum class ShaderDomain
-    {
-        VERTEX,
-        FRAGMENT
-    };
+    assert( m_Function && "EntryFunction given a null function" );
+}
 
-    /**
-      * This asserts that identifier is not empty and that none of the arguments
-      * are null
-      * \param domain
-      *   The domain of the shader
-      * \param identifier
-      *   The function identifier
-      * \param arguments
-      *   The arguments to the functions
-      */
-    CompileStatement( ShaderDomain domain,
-                      std::string identifier,
-                      std::vector<Expression_up> arguments );
-    virtual
-    ~CompileStatement();
+ShaderDomain EntryFunction::GetDomain() const
+{
+    return m_Domain;
+}
 
-    void PerformSema( SemaAnalyzer& sema );
+const Function& EntryFunction::GetFunction() const
+{
+    return *m_Function;
+}
 
-    virtual
-    void Print( int depth ) const;
+const Function_sp& EntryFunction::GetFunctionPointer() const
+{
+    return m_Function;
+}
 
-    static
-    bool Parse( Parser& parser, CompileStatement_up& token );
-
-private:
-    ShaderDomain m_Domain;
-    std::string m_Identifier;
-    std::vector<Expression_up> m_Arguments;
-};
+const std::vector<Expression_up>& EntryFunction::GetParameters() const
+{
+    return m_Parameters;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

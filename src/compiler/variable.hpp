@@ -35,10 +35,12 @@
 
 #include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
+#include <compiler/semantic.hpp>
 
 namespace llvm
 {
     class Value;
+    class Argument;
 }
 
 namespace JoeLang
@@ -62,35 +64,68 @@ class Variable
 public:
     /**
       * This constructor asserts if the varible is const and hasn't been given
-      * an initializer
+      * an initializer, and on a bunch of other things
       */
     Variable( CompleteType type,
+              Semantic semantic,
               bool is_const,
-              bool is_global = false,
-              bool is_parameter = false,
-              GenericValue initializer = GenericValue(),
-              std::string name = "" );
+              bool is_uniform,
+              bool is_varying,
+              bool is_in,
+              bool is_out,
+              bool is_global,
+              bool is_parameter,
+              GenericValue initializer,
+              std::string name );
 
     void CodeGen( CodeGenerator& code_gen );
+
+    /**
+      * This will write the declaration as if it's an ordinary variable
+      * not varying or uniform or in or out
+      */
+    void WriteDeclaration( ShaderWriter& shader_writer ) const;
+
+    void SetParameterPointer( llvm::Value* parameter_pointer );
 
     llvm::Value* GetLLVMPointer() const;
 
     const CompleteType& GetType() const;
+
+    const Semantic& GetSemantic() const;
+
+    const std::string& GetName() const;
 
     Type GetUnderlyingType() const;
 
     /** \returns true if this variable is const **/
     bool IsConst() const;
 
+    bool IsVarying() const;
+
+    bool IsUniform() const;
+
+    bool IsIn() const;
+
+    bool IsOut() const;
+
+    bool IsGlobal() const;
+
+    bool IsParameter() const;
+
 private:
     CompleteType m_Type;
+    Semantic m_Semantic;
     bool m_IsConst;
+    bool m_IsUniform;
+    bool m_IsVarying;
+    bool m_IsIn;
+    bool m_IsOut;
     bool m_IsGlobal;
     bool m_IsParameter;
     GenericValue m_Initializer;
     std::string m_Name;
 
-    /// TODO handle non global variables
     /// This holds the pointer to the variable, or the llvm::Value* representing
     /// The argument if it's an argument once it's been codegened
     llvm::Value* m_LLVMPointer = nullptr;

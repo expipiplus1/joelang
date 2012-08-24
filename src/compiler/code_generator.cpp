@@ -30,7 +30,6 @@
 #include "code_generator.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 #include <stack>
 #include <string>
@@ -44,10 +43,14 @@
 #include <llvm/GlobalVariable.h>
 #include <llvm/IRBuilder.h>
 #include <llvm/Module.h>
+#include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
+#include <llvm/Transforms/IPO.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/Target/TargetData.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
@@ -72,17 +75,40 @@ namespace JoeLang
 namespace Compiler
 {
 
-CodeGenerator::CodeGenerator( Runtime& runtime )
-    :m_Runtime( runtime )
+CodeGenerator::CodeGenerator( const Context& context, Runtime& runtime )
+    :m_Context( context )
+    ,m_Runtime( runtime )
     ,m_LLVMModule( runtime.GetModule() )
     ,m_LLVMBuilder( m_Runtime.GetLLVMContext() )
-    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT( m_LLVMModule ) )
+    ,m_LLVMExecutionEngine( llvm::ExecutionEngine::createJIT(
+                                                   m_LLVMModule,
+                                                   nullptr,
+                                                   nullptr,
+                                                   llvm::CodeGenOpt::Aggressive,
+                                                   false ) )
+    ,m_LLVMFunctionPassManager( new llvm::FunctionPassManager( m_LLVMModule ) )
+    ,m_LLVMModulePassManager( new llvm::PassManager() )
 {
     assert( m_LLVMExecutionEngine && "Couldn't create a jit" );
+
+    llvm::PassManagerBuilder pass_manager_builder;
+    pass_manager_builder.OptLevel = 3;
+    pass_manager_builder.Inliner = llvm::createFunctionInliningPass();
+    pass_manager_builder.populateFunctionPassManager(
+                                                   *m_LLVMFunctionPassManager );
+    pass_manager_builder.populateModulePassManager(
+                                                   *m_LLVMModulePassManager );
+
+    m_LLVMFunctionPassManager->doInitialization();
 }
 
 CodeGenerator::~CodeGenerator()
 {
+}
+
+const Context& CodeGenerator::GetContext() const
+{
+    return m_Context;
 }
 
 void CodeGenerator::GenerateFunctions(
@@ -115,14 +141,9 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
         }
     }
 
-    //m_LLVMModule->dump();
-
+    OptimizeModule();
+    
     return std::move(techniques);
-}
-
-std::unique_ptr<llvm::ExecutionEngine> CodeGenerator::TakeExecutionEngine()
-{
-    return std::move( m_LLVMExecutionEngine );
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
@@ -309,8 +330,8 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     }
 
     /// Cant remove the function because it trashes global variables...
-    //m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
-    //function->eraseFromParent();
+    m_LLVMExecutionEngine->freeMachineCodeForFunction( function );
+    function->eraseFromParent();
 
     m_LLVMBuilder.restoreIP( insert_point );
 
@@ -801,11 +822,11 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            *m_LLVMModule,
                                            array_type,
                                            true,
-                                           llvm::GlobalVariable::CommonLinkage,
+                                           llvm::GlobalVariable::PrivateLinkage,
                                            data_constant,
                                            "string_data" );
 
-    llvm::Constant *zero = CreateInteger( 0, Type::U32 );
+    llvm::Constant* zero = CreateInteger( 0, Type::U32 );
     llvm::Constant* args[] = { zero, zero };
     llvm::Constant* data_ptr =
                     llvm::ConstantExpr::getInBoundsGetElementPtr( data_array,
@@ -813,8 +834,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
 
     llvm::Constant* string = llvm::ConstantStruct::get(
           llvm::cast<llvm::StructType>(m_Runtime.GetLLVMType(Type::STRING)),
-          std::vector<llvm::Constant*>
-            {size_constant, data_ptr} );
+          std::vector<llvm::Constant*> {size_constant, data_ptr} );
     return string;
 }
 
@@ -858,14 +878,21 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                      *m_LLVMModule,
                                      t,
                                      is_const,
-                                     llvm::GlobalVariable::CommonLinkage,
+                                     llvm::GlobalVariable::PrivateLinkage,
                                      init,
                                      name );
+    //
+    // The adderss of non const variables is important because we can modify
+    // them from outside
+    //
+    ret->setUnnamedAddr( is_const );
     return ret;
 }
 
 llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 {
+    // If this is a const param, we can use the value it was passed with,
+    // otherwise it will have been alloc
     return m_LLVMBuilder.CreateLoad( variable.GetLLVMPointer() );
 }
 
@@ -916,11 +943,15 @@ llvm::Function* CodeGenerator::CreateFunctionDeclaration(
     return function;
 }
 
-void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
-                                              const CompoundStatement_up& body )
+void CodeGenerator::CreateFunctionDefinition(
+                                     llvm::Function* function,
+                                     const std::vector<Variable_sp>& parameters,
+                                     const CompoundStatement_up& body )
 {
     assert( function && "Trying to define a null function" );
     assert( body && "Trying to define function with a null body" );
+    assert( parameters.size() == function->arg_size() &&
+            "Function parameter size mismatch" );
 
     llvm::BasicBlock* llvm_body = llvm::BasicBlock::Create(
                                                      m_Runtime.GetLLVMContext(),
@@ -929,10 +960,32 @@ void CodeGenerator::CreateFunctionDefinition( llvm::Function* function,
 
     m_LLVMBuilder.SetInsertPoint( llvm_body );
 
+    auto arg_iterator = function->arg_begin();
+    for( unsigned i = 0; i < parameters.size(); ++i, ++arg_iterator )
+    {
+        // todo in out and inout things
+        const Variable_sp& p = parameters[i];
+        assert( arg_iterator != function->arg_end() &&
+                "llvm arg iterator overrun" );
+        assert( arg_iterator->getType() == m_Runtime.GetLLVMType(
+                                                   p->GetType() ) &&
+                "Type mismatch in function parameters" );
+        assert( p->IsParameter() &&
+                "non-parameter in function parameter list" );
+
+        llvm::Value* v = m_LLVMBuilder.CreateAlloca( m_Runtime.GetLLVMType(
+                                                           p->GetType() ) );
+        m_LLVMBuilder.CreateStore( arg_iterator, v );
+        p->SetParameterPointer( v );
+    }
+    assert( arg_iterator == function->arg_end() &&
+            "llvm arg iterator underrun" );
+
     assert( body->AlwaysReturns() &&
             "Generating code for a statement which doesn't always return" );
 
     body->CodeGen( *this );
+    OptimizeFunction( *function );
 }
 
 llvm::Value* CodeGenerator::CreateFunctionCall(
@@ -1028,7 +1081,20 @@ llvm::Function* CodeGenerator::CreateFunctionFromExpression(
     assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
             "Function not valid" );
 
+    OptimizeFunction( *function );
     return function;
+}
+
+void CodeGenerator::OptimizeFunction( llvm::Function& function )
+{
+    m_LLVMFunctionPassManager->run( function );
+}
+
+void CodeGenerator::OptimizeModule()
+{
+    assert( m_LLVMModule && "Trying to optimize a null module" );
+
+    m_LLVMModulePassManager->run( *m_LLVMModule );
 }
 
 } // namespace Compiler

@@ -59,6 +59,16 @@ bool EmptyStatement::AlwaysReturns() const
     return false;
 }
 
+std::set<Function_sp> EmptyStatement::GetCallees() const
+{
+    return {};
+}
+
+std::set<Variable_sp> EmptyStatement::GetVariables() const
+{
+    return {};
+}
+
 void EmptyStatement::PerformSema( SemaAnalyzer& sema,
                                   const CompleteType& return_type )
 {
@@ -66,6 +76,11 @@ void EmptyStatement::PerformSema( SemaAnalyzer& sema,
 
 void EmptyStatement::CodeGen( CodeGenerator& code_gen )
 {
+}
+
+void EmptyStatement::Write( ShaderWriter& shader_writer ) const
+{
+    // glsl doesn't support empty statements
 }
 
 bool EmptyStatement::Parse( Parser& parser, EmptyStatement_up& token )
