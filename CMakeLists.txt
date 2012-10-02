@@ -16,6 +16,16 @@ find_package(                       OpenGL      REQUIRED )
 
 include_directories( ${joemath_INCLUDE_DIR} ${glee_INCLUDE_DIR} )
 
+#
+# Submdules
+#
+set( UCPP_STAND_ALONE FALSE )
+add_subdirectory( ucpp EXCLUDE_FROM_ALL )
+
+#
+# The library
+#
+
 add_library( joelang include/joelang/context.hpp
                      include/joelang/effect.hpp
                      include/joelang/pass.hpp
@@ -114,6 +124,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/statements/return_statement.hpp
                      src/compiler/tokens/statements/statement.cpp
                      src/compiler/tokens/statements/statement.hpp )
+
+target_link_libraries( joelang ucpp )
 
 #
 # Test executable
