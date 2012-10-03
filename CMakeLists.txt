@@ -77,6 +77,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/terminal_types.hpp
                      src/compiler/type_properties.cpp
                      src/compiler/type_properties.hpp
+                     src/compiler/ucpp.cpp
+                     src/compiler/ucpp.hpp
                      src/compiler/variable.cpp
                      src/compiler/variable.hpp
                      src/compiler/inl/shader_writer-inl.hpp
@@ -171,7 +173,7 @@ llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader i
 set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 
-list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
+list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
 target_link_libraries( joelang ${joelang_LIBS} )
 include_directories( ${joelang_INCLUDE_DIRS} )
 
