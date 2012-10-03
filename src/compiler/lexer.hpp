@@ -109,6 +109,7 @@ private:
       */
     TerminalType ReadPunctuationTerminal ( TerminalType terminal,
                                            std::string& string ) const;
+
     /**
       * Tries to read a literal terminal
       * \param terminal
@@ -120,6 +121,7 @@ private:
       */
     TerminalType ReadLiteralTerminal     ( TerminalType terminal,
                                            std::string& string ) const;
+
     /**
       * Tries to read a keyword terminal
       * \param terminal
@@ -131,13 +133,13 @@ private:
       */
     TerminalType ReadKeywordTerminal     ( TerminalType terminal,
                                            std::string& string ) const;
+
     /** Advances the position in the stream by num_chars.
       * It also keeps track of the line and column numbers
       * \param num_chars
       *   The number of characters by which to advance the position
       */
     void         ReadChars               ( std::size_t num_chars );
-
 
     const std::string           m_String;
 
