@@ -37,13 +37,14 @@
 #include <utility>
 
 #include <joelang/types.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang
@@ -98,6 +99,7 @@ bool LiteralExpression::Parse( Parser& parser,
         return false;
 
     // Cast to a LiteralExpression
+    assert( isa<LiteralExpression>(t) );
     token.reset( static_cast<LiteralExpression*>( t.release() ) );
     return true;
 }
@@ -160,7 +162,7 @@ std::unique_ptr<LiteralExpression> LiteralExpression::Create(
     return nullptr;
 }
 
-bool LiteralExpression::classof( const Expression* e )
+bool LiteralExpression::classof( const Token* e )
 {
     return e->GetSubClassID() >= TokenTy::LiteralExpression_Start &&
            e->GetSubClassID() <= TokenTy::LiteralExpression_End;

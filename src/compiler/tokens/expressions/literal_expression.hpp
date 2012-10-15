@@ -114,7 +114,7 @@ public:
     std::unique_ptr<LiteralExpression> Create( const GenericValue& v );
 
     static
-    bool classof( const Expression* e );
+    bool classof( const Token* e );
     static
     bool classof( const LiteralExpression* e );
 };

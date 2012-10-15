@@ -53,7 +53,7 @@ public:
     ~Context();
 
     Effect* CreateEffectFromString( const std::string& string );
-    Effect* CreateEffectFromFile(   const std::string& file_name );
+    Effect* CreateEffectFromFile(   const std::string& filename );
 
     /**
       * Registers a bunch of handy opengl states to be set during passes

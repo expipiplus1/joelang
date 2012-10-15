@@ -35,6 +35,8 @@
 #include <mutex>
 #include <string>
 
+#include <ucpp/cpp.h>
+
 struct lexer_state;
 
 namespace JoeLang
@@ -42,38 +44,58 @@ namespace JoeLang
 namespace Compiler
 {
 
+enum class TerminalType;
+
 void InitializeUCPP();
 
+/**
+  * \class UCPPContext
+  * \brief A class to manage the lifetime of the ucpp allocated memory
+  */
 class UCPPContext
 {
 public:
     ~UCPPContext();
+    
 private:
     friend
     void InitializeUCPP();
 
+    /**
+      * The constructor is private and can only be called from InitializeUCPP()
+      */
     UCPPContext();
-
-    void BeginLexing( std::string& filename );
-    void EndLexing();
-
-    std::unique_ptr<lexer_state> m_LexerState;
-
-    class FileCloser
-    {
-    public:
-        void operator()(std::FILE* f){if(f)std::fclose(f);};
-    };
-    std::unique_ptr<std::FILE, FileCloser> m_File;
-
-    static
-    std::mutex s_Mutex;
-
-    static
-    const long s_LexerFlags;
 };
 
-std::unique_ptr<UCPPContext> g_UCPPContext;
+/**
+  * \class UCPPLexerState
+  * \brief A class to manage the lifetime of a ucpp lexer state and buffers
+  */
+class UCPPLexerState
+{
+public:
+    UCPPLexerState( const std::string& filename, FILE* file );
+    ~UCPPLexerState();
+    
+    TerminalType Lex( std::string& string );
+    
+    unsigned GetLineNumber();
+private:
+    static
+    const long s_LexerFlags;
+    
+    lexer_state m_LexerState;
+};
+
+/**
+  * This holds onto the ucpp buffers and releases them at program termination
+  */
+extern std::unique_ptr<UCPPContext> g_UCPPContext;
+
+/**
+  * This mutex is used to control access to ucpp
+  */
+extern std::mutex g_UCPPMutex;
 
 } // namespace Compiler
 } // namespace JoeLang

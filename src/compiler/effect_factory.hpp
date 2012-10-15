@@ -52,7 +52,7 @@ public:
     explicit
     EffectFactory( const Context& context );
 
-    std::unique_ptr<Effect> CreateEffectFromString( const std::string& string );
+    std::unique_ptr<Effect> CreateEffectFromFile( const std::string& filename );
 
 private:
     const Context& m_Context;

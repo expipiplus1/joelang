@@ -52,11 +52,11 @@ EffectFactory::EffectFactory( const Context& context )
 {
 }
 
-std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
-                                                     const std::string& string )
+std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
+                                                 const std::string& filename )
 {
     Parser parser;
-    if( !parser.Parse( string ) )
+    if( !parser.Parse( filename ) )
         return nullptr;
 
     TranslationUnit& ast = *parser.GetTranslationUnit();
