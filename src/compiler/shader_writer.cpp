@@ -393,12 +393,12 @@ void ShaderWriter::WriteMainFunction(
                                                      entry_function.GetDomain(), 
                                                      false ) )
     {
+        NewLine();
         *this << entry_function.GetFunction().GetSemantic().GetBuiltin( 
                                                      entry_function.GetDomain(),
                                                      false ) <<
                  " = " << Mangle( entry_function.GetFunction().GetIdentifier(),
                                   IdentifierType::OUT_VARYING ) << ";";
-        NewLine();
     }
     
     //
