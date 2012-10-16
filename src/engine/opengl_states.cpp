@@ -76,7 +76,7 @@ void RegisterOpenGLStates( Context& context )
 
     //
     // Blending
-    //glBlendColor
+    //
 
     static
     State<float4> blend_color( "blend_color" );
