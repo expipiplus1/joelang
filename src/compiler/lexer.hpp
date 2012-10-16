@@ -29,12 +29,16 @@
 
 #pragma once
 
+#include <memory>
+#include <mutex>
 #include <string>
 
 namespace JoeLang
 {
 namespace Compiler
 {
+
+class UCPPLexerState;
 
 enum class TerminalType;
 
@@ -46,10 +50,12 @@ class Lexer
 {
 public:
     /**
-      * \param string
-      *   The string for the whole proprocessed soruce file
+      * \param filename
+      *   The file to lex
       */
-                 Lexer           ( std::string string );
+                 Lexer           ( const std::string& filename );
+                 
+                ~Lexer           ();
 
     /**
       * This function advances the stream by one token if terminal_type is the
@@ -59,6 +65,7 @@ public:
       * \returns whether terminal_type was the next terminal in the stream
       */
     bool         Expect          ( TerminalType terminal_type );
+    
     /**
       * This function advances the stream by one token if terminal_type is the
       * next token in the stream, otherwise the stream doesn't move
@@ -87,7 +94,7 @@ public:
       */
     bool PeekIdentifier( std::string& string ) const;
 
-    /** \returns The position in characters from the start of the string **/
+    /** \returns The position in the file **/
     std::size_t  GetPosition     () const;
     /** \returns The line numer in the currenst string **/
     std::size_t  GetLineNumber   () const;
@@ -95,55 +102,31 @@ public:
     std::size_t  GetColumnNumber () const;
 
 private:
-    /** Consumes terminals until a non-whitespace and non-comment one **/
-    void         ConsumeIgnoredTerminals ();
-
     /**
-      * Tries to read a punctuation terminal
-      * \param terminal
-      *   The TerminalType to look for
-      * \param string
-      *   The string to fill with the parsed characters on a sucessful parse
-      * \returns UNKNOWN_CHARACTER if it didn't parse a token
-      *   Otherwise the TerminalType parsed
+      * This will advance the lexer to the next token, unless we've reached the
+      * end of the file
       */
-    TerminalType ReadPunctuationTerminal ( TerminalType terminal,
-                                           std::string& string ) const;
-    /**
-      * Tries to read a literal terminal
-      * \param terminal
-      *   The TerminalType to look for
-      * \param string
-      *   The string to fill with the parsed characters on a sucessful parse
-      * \returns UNKNOWN_CHARACTER if it didn't parse a token
-      *   Otherwise the TerminalType parsed
-      */
-    TerminalType ReadLiteralTerminal     ( TerminalType terminal,
-                                           std::string& string ) const;
-    /**
-      * Tries to read a keyword terminal
-      * \param terminal
-      *   The TerminalType to look for
-      * \param string
-      *   The string to fill with the parsed characters on a sucessful parse
-      * \returns UNKNOWN_CHARACTER if it didn't parse a token
-      *   Otherwise the TerminalType parsed
-      */
-    TerminalType ReadKeywordTerminal     ( TerminalType terminal,
-                                           std::string& string ) const;
-    /** Advances the position in the stream by num_chars.
-      * It also keeps track of the line and column numbers
-      * \param num_chars
-      *   The number of characters by which to advance the position
-      */
-    void         ReadChars               ( std::size_t num_chars );
-
-
-    const std::string           m_String;
-
-    std::string::const_iterator m_Position;
-    std::size_t                 m_LineNumber = 1;
-    std::size_t                 m_ColumnNumber = 1;
+    void AdvanceLexer();
+    
+    //
+    // The string for the current terminal
+    //
+    std::string m_TerminalString; 
+    
+    //
+    // The type of the current terminal
+    //
+    TerminalType m_TerminalType;
+    
+    class FileCloser
+    {
+    public:
+        void operator()(std::FILE* f){if(f)std::fclose(f);};
+    };
+    
+    std::unique_ptr<std::FILE, FileCloser>  m_File;
+    std::unique_ptr<UCPPLexerState>         m_LexerState;
+    std::unique_lock<std::mutex>            m_UCPPLock;
 };
 
 } // namespace Compiler

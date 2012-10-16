@@ -86,37 +86,24 @@ bool Context::AddState( StateBase* state )
 
 Effect* Context::CreateEffectFromString( const std::string& string )
 {
+    assert( false && "Can't create from string yet" );
+}
+
+Effect* Context::CreateEffectFromFile( const std::string& filename )
+{
     if( !m_EffectFactory )
         m_EffectFactory.reset( new JoeLang::Compiler::EffectFactory( *this ) );
+    
     assert( m_EffectFactory && "Couldn't create an effect factory" );
 
     std::unique_ptr<Effect> effect(
-                            m_EffectFactory->CreateEffectFromString(string) );
+                            m_EffectFactory->CreateEffectFromFile( filename ) );
     if( effect )
     {
         m_Effects.push_back( std::move(effect) );
         return m_Effects.rbegin()->get();
     }
     return nullptr;
-}
-
-Effect* Context::CreateEffectFromFile( const std::string& file_name )
-{
-   std::ifstream file( file_name );
-   // todo error reporting here
-   if( !file )
-       return nullptr;
-
-   std::string string;
-
-   file.seekg( 0, std::ios::end );
-   string.reserve( file.tellg() );
-   file.seekg( 0, std::ios::beg );
-
-   string.assign((std::istreambuf_iterator<char>(file)),
-                  std::istreambuf_iterator<char>());
-
-   return CreateEffectFromString( string );
 }
 
 const StateBase* Context::GetNamedState(const std::string& name) const

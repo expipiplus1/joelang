@@ -38,6 +38,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/semantic_info.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -71,9 +72,35 @@ Semantic::Semantic  ( std::string string, unsigned index )
 
 bool Semantic::IsVarying() const
 {
-    // all the built in semantics are varying
-    return m_Type != SemanticType::NO_SEMANTIC &&
-           m_Type != SemanticType::CUSTOM;
+    auto s = g_SemanticInfoMap.find( m_Type );
+    if( s != g_SemanticInfoMap.end() )
+    {
+        return s->second.m_IsVarying;
+    }
+    //
+    // Semantics are not varying by default
+    //
+    return false;
+}
+
+bool Semantic::HasBuiltin( ShaderDomain domain, bool input ) const
+{
+    auto s = g_SemanticInfoMap.find( m_Type );
+    if( s == g_SemanticInfoMap.end() )
+        return false;
+    if( s->second.m_GLSLBuiltin.empty() )
+        return false;
+    auto& d = input ? s->second.m_DomainInputs : s->second.m_DomainOutputs;
+    if( d.find( domain ) == d.end() )
+        return false;
+    return true;
+}
+
+const std::string& Semantic::GetBuiltin( ShaderDomain domain, bool input ) const
+{
+    assert( HasBuiltin( domain, input ) && 
+            "Trying to get the builtin name of a variable without one" );
+    return g_SemanticInfoMap.at( m_Type ).m_GLSLBuiltin;
 }
 
 bool Semantic::HasIndex() const
@@ -94,6 +121,7 @@ void Semantic::DetermineType()
         { "POSITION", SemanticType::POSITION },
         { "DEPTH",    SemanticType::DEPTH    },
         { "COLOR",    SemanticType::COLOR    },
+        { "WPOS",     SemanticType::WPOS     }
     };
 
     //

@@ -29,6 +29,8 @@
 
 #include "type_properties.hpp"
 
+#include <cassert>
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
@@ -110,20 +112,21 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
 
 Type GetVectorType( Type base, unsigned size )
 {
-    //TODO do this in a better way
-    switch( size )
+    const static std::array< std::array< Type, 4 >, 1 > t =
     {
-    case 4:
-        switch( base )
-        {
-        case Type::FLOAT:
-            return Type::FLOAT4;
-        default:
-            assert( false &&
-                    "Trying to get the vector type of an unhandled base" );
-        }
-    default:
-        assert( false && "Trying to get the vector type of an unhandled size" );
+        //
+        // Why on earth does clang want three pairs of braces here?!
+        //
+        {{{ Type::FLOAT, Type::FLOAT2, Type::FLOAT3, Type::FLOAT4 }}}
+    };
+
+    
+    assert( size <= 4 && size != 0 && "Trying to get an invalid vector size " ); 
+    
+    for( auto& a : t )
+    {
+        if( a[0] == base )
+            return a[size-1]; 
     }
     return Type::UNKNOWN;
 }
@@ -151,6 +154,8 @@ Type GetScalarType( Type t )
     case Type::U64:
         return Type::U64;
     case Type::FLOAT:
+    case Type::FLOAT2:
+    case Type::FLOAT3:
     case Type::FLOAT4:
         return Type::FLOAT;
     case Type::DOUBLE:
@@ -178,7 +183,9 @@ bool IsIntegral( Type t )
 bool IsFloatingPoint( Type t )
 {
     return t == Type::DOUBLE ||
-           t == Type::FLOAT ||
+           t == Type::FLOAT  ||
+           t == Type::FLOAT2 ||
+           t == Type::FLOAT3 ||
            t == Type::FLOAT4;
 }
 
@@ -192,7 +199,9 @@ bool IsSigned( Type t )
 
 bool IsVectorType( Type t )
 {
-    return t == Type::FLOAT4;
+    return t == Type::FLOAT4 ||
+           t == Type::FLOAT3 ||
+           t == Type::FLOAT2;
 }
 
 bool IsScalarType( Type t )
@@ -204,6 +213,10 @@ unsigned GetVectorSize( Type t )
 {
     switch( t )
     {
+    case Type::FLOAT2:
+        return 2;
+    case Type::FLOAT3:
+        return 3;
     case Type::FLOAT4:
         return 4;
     default:
@@ -218,6 +231,8 @@ Type GetElementType( Type t )
 
     switch( t )
     {
+    case Type::FLOAT2:
+    case Type::FLOAT3:
     case Type::FLOAT4:
         return Type::FLOAT;
     default:
@@ -231,6 +246,10 @@ unsigned GetNumElementsInType( Type t )
     {
     case Type::FLOAT4:
         return 4;
+    case Type::FLOAT3:
+        return 3;
+    case Type::FLOAT2:
+        return 2;
     case Type::U64:
     case Type::I64:
     case Type::U32:
@@ -257,6 +276,9 @@ std::size_t SizeOf( Type t )
     {
     case Type::FLOAT4:
         return 16;
+    case Type::FLOAT3:
+        return 12;
+    case Type::FLOAT2:
     case Type::DOUBLE:
     case Type::U64:
     case Type::I64:
@@ -305,6 +327,8 @@ const std::string& GetTypeString( Type t )
         { Type::UNKNOWN,      "unknown type" },
         { Type::DOUBLE,       "double" },
         { Type::FLOAT,        "float" },
+        { Type::FLOAT2,       "float2" },
+        { Type::FLOAT3,       "float3" },
         { Type::FLOAT4,       "float4" },
         { Type::U64,          "u64" },
         { Type::I64,          "i64" },
@@ -328,6 +352,8 @@ bool HasGLSLType( Type t )
     const static std::set<Type> glsl_types =
     {
         Type::FLOAT,
+        Type::FLOAT2,
+        Type::FLOAT3,
         Type::FLOAT4,
         Type::U32,
         Type::I32,
@@ -343,6 +369,8 @@ const std::string& GetGLSLTypeString( Type t )
     const static std::map<Type, std::string> string_map =
     {
         { Type::FLOAT,        "float" },
+        { Type::FLOAT2,       "vec2" },
+        { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
         { Type::U32,          "uint" },
         { Type::I32,          "int" },

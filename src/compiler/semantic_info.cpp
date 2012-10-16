@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,51 +27,43 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "effect_factory.hpp"
+#include "semantic_info.hpp"
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <map>
+#include <string>
 
-#include <joelang/effect.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/parser.hpp>
-
-#include <compiler/tokens/translation_unit.hpp>
+#include <compiler/semantic.hpp>
+#include <compiler/shader_writer.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-EffectFactory::EffectFactory( const Context& context )
-    :m_Context( context )
-    ,m_Runtime()
-    ,m_CodeGenerator( context, m_Runtime )
-    ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
-    ,m_ShaderWriter( m_Context )
+const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
 {
-}
-
-std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
-                                                 const std::string& filename )
-{
-    Parser parser;
-    if( !parser.Parse( filename ) )
-        return nullptr;
-
-    TranslationUnit& ast = *parser.GetTranslationUnit();
-
-    if( !m_SemaAnalyzer.BuildAst( ast ) )
-        return nullptr;
-
-    std::vector<Technique> techniques;
-    std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
-
-    m_CodeGenerator.GenerateFunctions( m_SemaAnalyzer.GetFunctions() );
-    techniques = m_CodeGenerator.GenerateTechniques( ast );
-
-    return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
-}
+    { SemanticType::POSITION, { Type::FLOAT4, 
+                                {}, 
+                                { ShaderDomain::VERTEX   },
+                                "gl_Position",
+                                true } },    
+    { SemanticType::WPOS,     { Type::FLOAT4,
+                                { ShaderDomain::FRAGMENT },
+                                {},
+                                "gl_FragCoord",
+                                true } },
+    { SemanticType::COLOR,    { Type::FLOAT4, 
+                                {}, 
+                                { ShaderDomain::FRAGMENT },
+                                "",
+                                true } },    
+    { SemanticType::DEPTH,    { Type::FLOAT,
+                                {},
+                                { ShaderDomain::FRAGMENT }, 
+                                "gl_FragDepth",
+                                true } }
+};
 
 } // namespace Compiler
 } // namespace JoeLang

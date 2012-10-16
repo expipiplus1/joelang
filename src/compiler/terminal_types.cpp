@@ -45,16 +45,6 @@ namespace Compiler
 //------------------------------------------------------------------------------
 
 //
-// Ignored Sequence
-//
-const std::map<TerminalType, FunctionalTerminal> g_ignoredTerminals =
-{
-    { TerminalType::WHITESPACE,    { ReadWhitespace,   "whitespace"    } },
-    { TerminalType::LINE_COMMENT,  { ReadLineComment,  "line comment"  } },
-    { TerminalType::BLOCK_COMMENT, { ReadBlockComment, "block comment" } }
-};
-
-//
 // Punctuation
 //
 const std::map<TerminalType, LiteralTerminal> g_punctuationTerminals =
@@ -185,36 +175,99 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
-    std::map<TerminalType, LiteralTerminal>::const_iterator literal_iterator;
-    std::map<TerminalType, FunctionalTerminal>::const_iterator
-                                                            functional_iterator;
-
-    functional_iterator = g_ignoredTerminals.find( terminal_type );
-    if( functional_iterator != g_ignoredTerminals.end() )
-        return functional_iterator->second.readable_string;
-
-    literal_iterator = g_punctuationTerminals.find( terminal_type );
-    if( literal_iterator != g_punctuationTerminals.end() )
-        return literal_iterator->second.readable_string.empty()
-                  ? literal_iterator->second.matched_string
-                  : literal_iterator->second.readable_string;
-
-    functional_iterator = g_literalTerminals.find( terminal_type );
-    if( functional_iterator != g_literalTerminals.end() )
-        return functional_iterator->second.readable_string;
-
-    literal_iterator = g_keywordTerminals.find( terminal_type );
-    if( literal_iterator != g_keywordTerminals.end() )
-        return literal_iterator->second.readable_string.empty()
-                  ? literal_iterator->second.matched_string
-                  : literal_iterator->second.readable_string;
-
-    const static std::string s = "Unnamed Terminal";
-    const static std::string e = "EOF";
-
-    if ( terminal_type == TerminalType::END_OF_INPUT )
-        return e;
-    return s;
+    const static std::map<TerminalType, std::string> s_TerminalStringMap
+    {  
+        { TerminalType::END_OF_INPUT,         "EOF"                   },
+        { TerminalType::WHITESPACE,           "whitespace"            },
+        { TerminalType::COMMENT,              "comment"               },
+        { TerminalType::UNKNOWN_CHARACTER,    "unknown character"     },
+        { TerminalType::OPEN_BRACE,           "{"                     },
+        { TerminalType::CLOSE_BRACE,          "}"                     },
+        { TerminalType::OPEN_ROUND,           "("                     },
+        { TerminalType::CLOSE_ROUND,          ")"                     },
+        { TerminalType::OPEN_ANGLED,          "<"                     },
+        { TerminalType::CLOSE_ANGLED,         ">"                     },
+        { TerminalType::OPEN_SQUARE,          "["                     },
+        { TerminalType::CLOSE_SQUARE,         "]"                     },
+        { TerminalType::EQUALS,               "="                     },
+        { TerminalType::PLUS_EQUALS,          "+="                    },
+        { TerminalType::MINUS_EQUALS,         "-="                    },
+        { TerminalType::MULTIPLY_EQUALS,      "*="                    },
+        { TerminalType::DIVIDE_EQUALS,        "/="                    },
+        { TerminalType::MODULO_EQUALS,        "&="                    },
+        { TerminalType::LEFT_SHIFT_EQUALS,    "<<="                   },
+        { TerminalType::RIGHT_SHIFT_EQUALS,   ">>="                   },
+        { TerminalType::AND_EQUALS,           "&="                    },
+        { TerminalType::INCLUSIVE_OR_EQUALS,  "|="                    },
+        { TerminalType::EXCLUSIVE_OR_EQUALS,  "^="                    },
+        { TerminalType::EQUALITY,             "=="                    },
+        { TerminalType::NOT_EQUALITY,         "!="                    },
+        { TerminalType::LESS_THAN_EQUALS,     "<="                    },
+        { TerminalType::GREATER_THAN_EQUALS,  ">="                    },
+        { TerminalType::LESS_THAN,            "<"                     },
+        { TerminalType::GREATER_THAN,         ">"                     },
+        { TerminalType::LOGICAL_AND,          "&&"                    },
+        { TerminalType::LOGICAL_OR,           "||"                    },
+        { TerminalType::LOGICAL_NOT,          "!"                     },
+        { TerminalType::INCREMENT,            "++"                    },
+        { TerminalType::DECREMENT,            "--"                    },
+        { TerminalType::PLUS,                 "+"                     },
+        { TerminalType::MINUS,                "-"                     },
+        { TerminalType::MULTIPLY,             "*"                     },
+        { TerminalType::DIVIDE,               "/"                     },
+        { TerminalType::MODULO,               "%"                     },
+        { TerminalType::AND,                  "&"                     },
+        { TerminalType::INCLUSIVE_OR,         "|"                     },
+        { TerminalType::EXCLUSIVE_OR,         "^"                     },
+        { TerminalType::BITWISE_NOT,          "~"                     },
+        { TerminalType::LEFT_SHIFT,           "<<"                    },
+        { TerminalType::RIGHT_SHIFT,          ">>"                    },
+        { TerminalType::SEMICOLON,            ";"                     },
+        { TerminalType::COMMA,                ","                     },
+        { TerminalType::PERIOD,               "."                     },
+        { TerminalType::COLON,                ":"                     },
+        { TerminalType::QUERY,                "?"                     },
+        { TerminalType::ARROW,                "->"                    },
+        { TerminalType::FLOATING_LITERAL,     "floating literal"      },
+        { TerminalType::INTEGER_LITERAL,      "integer literal"       },
+        { TerminalType::CHARACTER_LITERAL,    "character literal"     },
+        { TerminalType::STRING_LITERAL,       "string literal"        },
+        { TerminalType::TECHNIQUE,            "technique"             },
+        { TerminalType::PASS,                 "pass"                  },
+        { TerminalType::COMPILE,              "compile"               },
+        { TerminalType::PIXEL_SHADER,         "pixel_shader"          },
+        { TerminalType::VERTEX_SHADER,        "vertex_shader"         },
+        { TerminalType::RETURN,               "return"                },
+        { TerminalType::STATIC,               "static"                },
+        { TerminalType::EXTERN,               "extern"                },
+        { TerminalType::UNIFORM,              "uniform"               },
+        { TerminalType::VARYING,              "varying"               },
+        { TerminalType::IN,                   "in"                    },
+        { TerminalType::OUT,                  "out"                   },
+        { TerminalType::INOUT,                "inout"                 },
+        { TerminalType::CONST,                "const"                 },
+        { TerminalType::VOLATILE,             "volatile"              },
+        { TerminalType::INLINE,               "inline"                },
+        { TerminalType::TYPE_VOID,            "void"                  },
+        { TerminalType::TYPE_BOOL,            "bool"                  },
+        { TerminalType::TYPE_CHAR,            "char"                  },
+        { TerminalType::TYPE_SHORT,           "short"                 },
+        { TerminalType::TYPE_INT,             "int"                   },
+        { TerminalType::TYPE_LONG,            "long"                  },
+        { TerminalType::TYPE_FLOAT,           "float"                 },
+        { TerminalType::TYPE_FLOAT4,          "float4"                },
+        { TerminalType::TYPE_DOUBLE,          "double"                },
+        { TerminalType::TYPE_SIGNED,          "signed"                },
+        { TerminalType::TYPE_UNSIGNED,        "unsigned"              },
+        { TerminalType::TYPE_STRING,          "string"                },
+        { TerminalType::TRUE,                 "true"                  },
+        { TerminalType::FALSE,                "false"                 },
+        { TerminalType::IDENTIFIER,           "identifier"            }
+    };
+    
+    assert( s_TerminalStringMap.find( terminal_type ) != s_TerminalStringMap.end() &&
+            "Trying to get the string for an unknown terminal" );
+    return s_TerminalStringMap.at( terminal_type );
 }
 
 //------------------------------------------------------------------------------

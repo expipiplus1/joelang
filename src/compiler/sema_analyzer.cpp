@@ -188,6 +188,16 @@ std::map<std::string, GenericValue>
              static_cast<const State<jl_float>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
         break;
+    case Type::FLOAT2:
+        for( const auto& e :
+             static_cast<const State<jl_float2>&>(state_base).GetEnumerations())
+            ret[e.first] = GenericValue( e.second );
+        break;
+    case Type::FLOAT3:
+        for( const auto& e :
+             static_cast<const State<jl_float3>&>(state_base).GetEnumerations())
+            ret[e.first] = GenericValue( e.second );
+        break;
     case Type::FLOAT4:
         for( const auto& e :
              static_cast<const State<jl_float4>&>(state_base).GetEnumerations())

@@ -55,8 +55,7 @@ bool Parser::Parse ( const std::string& string )
     //
     // Report error
     // TODO move this to a better place
-    std::cout << "Error parsing at " << m_Lexer->GetLineNumber() << ":"
-                                     << m_Lexer->GetColumnNumber() << "\n";
+    std::cout << "Error parsing at line " << m_Lexer->GetLineNumber() << "\n";
     if( m_ErrorMessage.empty() )
     {
         std::cout << "Expected one of: ";

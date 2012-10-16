@@ -16,6 +16,16 @@ find_package(                       OpenGL      REQUIRED )
 
 include_directories( ${joemath_INCLUDE_DIR} ${glee_INCLUDE_DIR} )
 
+#
+# Submdules
+#
+set( UCPP_STAND_ALONE FALSE )
+add_subdirectory( ucpp EXCLUDE_FROM_ALL )
+
+#
+# The library
+#
+
 add_library( joelang include/joelang/context.hpp
                      include/joelang/effect.hpp
                      include/joelang/pass.hpp
@@ -61,12 +71,16 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/sema_analyzer.hpp
                      src/compiler/semantic.cpp
                      src/compiler/semantic.hpp
+                     src/compiler/semantic_info.cpp
+                     src/compiler/semantic_info.hpp
                      src/compiler/shader_writer.cpp
                      src/compiler/shader_writer.hpp
                      src/compiler/terminal_types.cpp
                      src/compiler/terminal_types.hpp
                      src/compiler/type_properties.cpp
                      src/compiler/type_properties.hpp
+                     src/compiler/ucpp.cpp
+                     src/compiler/ucpp.hpp
                      src/compiler/variable.cpp
                      src/compiler/variable.hpp
                      src/compiler/inl/shader_writer-inl.hpp
@@ -115,6 +129,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/statements/statement.cpp
                      src/compiler/tokens/statements/statement.hpp )
 
+target_link_libraries( joelang ucpp )
+
 #
 # Test executable
 #
@@ -159,7 +175,7 @@ llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader i
 set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 
-list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
+list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
 target_link_libraries( joelang ${joelang_LIBS} )
 include_directories( ${joelang_INCLUDE_DIRS} )
 

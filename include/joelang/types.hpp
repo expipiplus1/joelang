@@ -70,6 +70,8 @@ enum class Type
 
     // Floating point types
     FLOAT,
+    FLOAT2,
+    FLOAT3,
     FLOAT4,
 
     DOUBLE,
@@ -89,6 +91,8 @@ using jl_u32    = std::uint32_t;
 using jl_u64    = std::uint64_t;
 using jl_float  = float;
 using jl_double = double;
+using jl_float2 = JoeMath::float2;
+using jl_float3 = JoeMath::float3;
 using jl_float4 = JoeMath::float4;
 
 template<typename T>
@@ -144,7 +148,11 @@ private:
     static constexpr
     Type GetVectorType()
     {
-        return   std::is_same<JoeMath::float4,T>::value
+        return   std::is_same<JoeMath::float2,T>::value
+               ? Type::FLOAT2
+               : std::is_same<JoeMath::float3,T>::value
+               ? Type::FLOAT3
+               : std::is_same<JoeMath::float4,T>::value
                ? Type::FLOAT4
                : Type::UNKNOWN;
     }

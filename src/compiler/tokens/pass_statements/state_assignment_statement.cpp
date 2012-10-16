@@ -169,6 +169,16 @@ std::unique_ptr<StateAssignmentBase>
                           new ConstStateAssignment<jl_float>(
                                  static_cast<const State<jl_float>&>(*m_State),
                                  v.GetFloat() ) );
+        case Type::FLOAT2:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_float2>(
+                                 static_cast<const State<jl_float2>&>(*m_State),
+                                 v.GetFloat2() ) );
+        case Type::FLOAT3:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_float3>(
+                                 static_cast<const State<jl_float3>&>(*m_State),
+                                 v.GetFloat3() ) );
         case Type::FLOAT4:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_float4>(

@@ -29,67 +29,54 @@
 
 #pragma once
 
-#include <memory>
+#include <map>
+#include <set>
 #include <string>
 
 namespace JoeLang
 {
 
 enum class ShaderDomain;
+enum class Type;
 
 namespace Compiler
 {
 
-enum class SemanticType
+enum class SemanticType;
+
+/// 
+/// \struct SemanticInfo
+/// \brief A class to hold information about how a semantic is written into glsl
+/// 
+struct SemanticInfo
 {
-    NO_SEMANTIC,
-
-    CUSTOM,
-
-    POSITION,
-    WPOS,
-    DEPTH,
-    COLOR,
+    //
+    // The type of variable the semantic represents
+    //
+    Type m_VariableType;
+    
+    //
+    // The domains for which a variable with this semantic can be an input
+    //
+    std::set<ShaderDomain> m_DomainInputs;
+    
+    //
+    // The domains for which a variable with this semantic can be an output
+    //
+    std::set<ShaderDomain> m_DomainOutputs;
+    
+    //
+    // The name of the glsl builtins or ""
+    //
+    std::string m_GLSLBuiltin;
+    
+    //
+    // Is this semantic varying
+    //
+    bool m_IsVarying;
 };
 
-class Semantic
-{
-public:
-    /** This initializes semantic to NO_SEMANTIC type **/
-    Semantic  ();
-    /** This constructor asserts on an empty string **/
-    explicit
-    Semantic  ( std::string string );
-    /** This constructor asserts on an empty string **/
-    Semantic  ( std::string string, unsigned index );
-
-    /**
-      * Returns true if this semantic represents a varying
-      */
-    bool IsVarying() const;
-    
-    /**
-      * Returns true if this semantic has a builtin for a particular domain
-      */
-    bool HasBuiltin( ShaderDomain domain, bool input ) const;
-    
-    /**
-      * Returns the builtin string
-      */
-    const std::string& GetBuiltin( ShaderDomain domain, bool input ) const;
-
-    bool HasIndex() const;
-    /** This asserts that we have an index **/
-    unsigned GetIndex() const;
-
-private:
-    void DetermineType();
-
-    SemanticType  m_Type;
-    std::string   m_String;
-    bool          m_HasIndex;
-    unsigned      m_Index;
-};
+extern const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap;
 
 
 } // namespace Compiler

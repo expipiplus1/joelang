@@ -54,8 +54,7 @@ enum class TerminalType
 
     // Ignored sequence
     WHITESPACE,
-    LINE_COMMENT,
-    BLOCK_COMMENT,
+    COMMENT,
 
     // Funny characters
     UNKNOWN_CHARACTER,
@@ -121,13 +120,13 @@ enum class TerminalType
     PERIOD,
     COLON,
     QUERY,
+    ARROW,
 
     //
     // Literals
     //
-    INTEGER_LITERAL,
     FLOATING_LITERAL,
-    BOOLEAN_LITERAL,
+    INTEGER_LITERAL,
     CHARACTER_LITERAL,
     STRING_LITERAL,
 
@@ -163,6 +162,8 @@ enum class TerminalType
     TYPE_INT,
     TYPE_LONG,
     TYPE_FLOAT,
+    TYPE_FLOAT2,
+    TYPE_FLOAT3,
     TYPE_FLOAT4,
     TYPE_DOUBLE,
     TYPE_SIGNED,

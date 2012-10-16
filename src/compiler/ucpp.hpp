@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2012 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,51 +27,75 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "effect_factory.hpp"
+#pragma once
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <cstdio>
 
-#include <joelang/effect.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/parser.hpp>
+#include <memory>
+#include <mutex>
+#include <string>
 
-#include <compiler/tokens/translation_unit.hpp>
+#include <ucpp/cpp.h>
+
+struct lexer_state;
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-EffectFactory::EffectFactory( const Context& context )
-    :m_Context( context )
-    ,m_Runtime()
-    ,m_CodeGenerator( context, m_Runtime )
-    ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
-    ,m_ShaderWriter( m_Context )
+enum class TerminalType;
+
+void InitializeUCPP();
+
+/**
+  * \class UCPPContext
+  * \brief A class to manage the lifetime of the ucpp allocated memory
+  */
+class UCPPContext
 {
-}
+public:
+    ~UCPPContext();
+    
+private:
+    friend
+    void InitializeUCPP();
 
-std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
-                                                 const std::string& filename )
+    /**
+      * The constructor is private and can only be called from InitializeUCPP()
+      */
+    UCPPContext();
+};
+
+/**
+  * \class UCPPLexerState
+  * \brief A class to manage the lifetime of a ucpp lexer state and buffers
+  */
+class UCPPLexerState
 {
-    Parser parser;
-    if( !parser.Parse( filename ) )
-        return nullptr;
+public:
+    UCPPLexerState( const std::string& filename, FILE* file );
+    ~UCPPLexerState();
+    
+    TerminalType Lex( std::string& string );
+    
+    unsigned GetLineNumber();
+private:
+    static
+    const long s_LexerFlags;
+    
+    lexer_state m_LexerState;
+};
 
-    TranslationUnit& ast = *parser.GetTranslationUnit();
+/**
+  * This holds onto the ucpp buffers and releases them at program termination
+  */
+extern std::unique_ptr<UCPPContext> g_UCPPContext;
 
-    if( !m_SemaAnalyzer.BuildAst( ast ) )
-        return nullptr;
-
-    std::vector<Technique> techniques;
-    std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
-
-    m_CodeGenerator.GenerateFunctions( m_SemaAnalyzer.GetFunctions() );
-    techniques = m_CodeGenerator.GenerateTechniques( ast );
-
-    return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
-}
+/**
+  * This mutex is used to control access to ucpp
+  */
+extern std::mutex g_UCPPMutex;
 
 } // namespace Compiler
 } // namespace JoeLang
