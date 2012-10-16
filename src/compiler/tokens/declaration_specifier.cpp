@@ -278,6 +278,20 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             type = Type::FLOAT;
             has_type = true;
             break;
+        case TypeSpec::FLOAT2:
+            if( has_type )
+                sema.Error( "Can't combine float2 with other type " +
+                            GetTypeString( type ) );
+            type = Type::FLOAT2;
+            has_type = true;
+            break;
+        case TypeSpec::FLOAT3:
+            if( has_type )
+                sema.Error( "Can't combine float3 with other type " +
+                            GetTypeString( type ) );
+            type = Type::FLOAT3;
+            has_type = true;
+            break;
         case TypeSpec::FLOAT4:
             if( has_type )
                 sema.Error( "Can't combine float4 with other type " +
@@ -454,6 +468,8 @@ Type TypeSpecifier::GetType() const
         { TypeSpec::SIGNED,   Type::I32    },
         { TypeSpec::UNSIGNED, Type::U32    },
         { TypeSpec::FLOAT,    Type::FLOAT  },
+        { TypeSpec::FLOAT2,   Type::FLOAT2 },
+        { TypeSpec::FLOAT3,   Type::FLOAT3 },
         { TypeSpec::FLOAT4,   Type::FLOAT4 },
         { TypeSpec::DOUBLE,   Type::DOUBLE },
         { TypeSpec::STRING,   Type::STRING }
@@ -476,6 +492,8 @@ bool TypeSpecifier::Parse( Parser& parser,
         { TerminalType::TYPE_SIGNED,   TypeSpec::SIGNED   },
         { TerminalType::TYPE_UNSIGNED, TypeSpec::UNSIGNED },
         { TerminalType::TYPE_FLOAT,    TypeSpec::FLOAT    },
+        { TerminalType::TYPE_FLOAT2,   TypeSpec::FLOAT2   },
+        { TerminalType::TYPE_FLOAT3,   TypeSpec::FLOAT3   },
         { TerminalType::TYPE_FLOAT4,   TypeSpec::FLOAT4   },
         { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
         { TerminalType::TYPE_STRING,   TypeSpec::STRING   }

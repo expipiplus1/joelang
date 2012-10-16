@@ -162,6 +162,8 @@ enum class TerminalType
     TYPE_INT,
     TYPE_LONG,
     TYPE_FLOAT,
+    TYPE_FLOAT2,
+    TYPE_FLOAT3,
     TYPE_FLOAT4,
     TYPE_DOUBLE,
     TYPE_SIGNED,

@@ -174,6 +174,41 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
          ( static_cast<const State<jl_float>&>(state),
            reinterpret_cast<jl_float(*)()>(function_ptr) );
         break;
+    case Type::FLOAT2:
+    {
+        /*
+        // TODO move this function to llvm
+        std::function<jl_float2()> wrapper = [function_ptr]()
+        {
+            __m128 r;
+            r = reinterpret_cast<__m128(*)()>(function_ptr)();
+            jl_float2* f = reinterpret_cast<jl_float2*>(&r);
+            return *f;
+        };
+        sa = new StateAssignment<jl_float2>
+         ( static_cast<const State<jl_float2>&>(state),
+           wrapper );
+        break;
+        */
+        assert( false );
+    }
+    case Type::FLOAT3:
+    {
+        /*// TODO move this function to llvm
+        std::function<jl_float3()> wrapper = [function_ptr]()
+        {
+            __m128 r;
+            r = reinterpret_cast<__m128(*)()>(function_ptr)();
+            jl_float3* f = reinterpret_cast<jl_float3*>(&r);
+            return *f;
+        };
+        sa = new StateAssignment<jl_float3>
+         ( static_cast<const State<jl_float3>&>(state),
+           wrapper );
+        break;
+        */
+        assert( false );
+    }
     case Type::FLOAT4:
     {
         // TODO move this function to llvm
@@ -312,6 +347,20 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::FLOAT:
         ret = GenericValue( reinterpret_cast<jl_float(*)()>(function_ptr)() );
         break;
+    case Type::FLOAT2:
+        {
+            assert( false );
+            //__m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
+            //ret = GenericValue( *reinterpret_cast<jl_float2*>(&m) );
+            //break;
+        }
+    case Type::FLOAT3:
+        {
+            assert( false );
+            //__m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
+            //ret = GenericValue( *reinterpret_cast<jl_float3*>(&m) );
+            //break;
+        }
     case Type::FLOAT4:
         {
             __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();

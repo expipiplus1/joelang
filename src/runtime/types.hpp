@@ -47,6 +47,8 @@ using jl_u16    = uint16_t;
 using jl_u32    = uint32_t;
 using jl_u64    = uint64_t;
 using jl_float  = float;
+using jl_float2 = JoeMath::float2;
+using jl_float3 = JoeMath::float3;
 using jl_float4 = JoeMath::float4;
 using jl_double = double;
 

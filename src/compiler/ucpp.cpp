@@ -262,6 +262,8 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         { "int",            TerminalType::TYPE_INT,      },
         { "long",           TerminalType::TYPE_LONG,     },
         { "float",          TerminalType::TYPE_FLOAT,    },
+        { "float2",         TerminalType::TYPE_FLOAT2,   },
+        { "float3",         TerminalType::TYPE_FLOAT3,   },
         { "float4",         TerminalType::TYPE_FLOAT4,   },
         { "double",         TerminalType::TYPE_DOUBLE,   },
         { "signed",         TerminalType::TYPE_SIGNED,   },

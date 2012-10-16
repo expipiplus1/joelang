@@ -110,6 +110,12 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
     case Type::FLOAT:
         m_FloatValue = g.m_FloatValue;
         break;
+    case Type::FLOAT2:
+        m_Float2Value = g.m_Float2Value;
+        break;
+    case Type::FLOAT3:
+        m_Float3Value = g.m_Float3Value;
+        break;
     case Type::FLOAT4:
         m_Float4Value = g.m_Float4Value;
         break;
@@ -194,6 +200,18 @@ GenericValue::GenericValue( jl_float  float_value  )
 {
 }
 
+GenericValue::GenericValue( jl_float2 float2_value  )
+    :m_Type( Type::FLOAT2 )
+    ,m_Float2Value( float2_value )
+{
+}
+
+GenericValue::GenericValue( jl_float3 float3_value  )
+    :m_Type( Type::FLOAT3 )
+    ,m_Float3Value( float3_value )
+{
+}
+
 GenericValue::GenericValue( jl_float4 float4_value  )
     :m_Type( Type::FLOAT4 )
     ,m_Float4Value( float4_value )
@@ -270,6 +288,16 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
         return code_gen.CreateInteger( m_U64Value, Type::U64 );
     case Type::FLOAT:
         return code_gen.CreateFloating( m_FloatValue, Type::FLOAT );
+    case Type::FLOAT2:
+    {
+        std::vector<double> values( &m_Float2Value[0], &m_Float2Value[0]+2 );
+        return code_gen.CreateFloatingVector( values, Type::FLOAT2 );
+    }
+    case Type::FLOAT3:
+    {
+        std::vector<double> values( &m_Float3Value[0], &m_Float3Value[0]+3 );
+        return code_gen.CreateFloatingVector( values, Type::FLOAT3 );
+    }
     case Type::FLOAT4:
     {
         std::vector<double> values( &m_Float4Value[0], &m_Float4Value[0]+4 );
@@ -321,6 +349,36 @@ void GenericValue::Write( ShaderWriter& shader_writer ) const
     case Type::FLOAT:
         shader_writer << m_FloatValue << "f";
         break;
+    case Type::FLOAT2:
+    {
+        shader_writer << GetGLSLTypeString( Type::FLOAT2 ) << "(";
+        bool first = true;
+        for( unsigned i = 0; i < 2; ++i )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+            shader_writer << m_Float2Value[i] << "f";
+        }
+        shader_writer << ")";
+        break;
+    }
+    case Type::FLOAT3:
+    {
+        shader_writer << GetGLSLTypeString( Type::FLOAT3 ) << "(";
+        bool first = true;
+        for( unsigned i = 0; i < 3; ++i )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+            shader_writer << m_Float3Value[i] << "f";
+        }
+        shader_writer << ")";
+        break;
+    }
     case Type::FLOAT4:
     {
         shader_writer << GetGLSLTypeString( Type::FLOAT4 ) << "(";
@@ -463,6 +521,20 @@ jl_float GenericValue::GetFloat() const
     assert( m_Type == Type::FLOAT &&
             "Trying to get the float value from a non-float GenericValue" );
     return m_FloatValue;
+}
+
+jl_float2 GenericValue::GetFloat2() const
+{
+    assert( m_Type == Type::FLOAT2 &&
+            "Trying to get the float2 value from a non-float GenericValue" );
+    return m_Float2Value;
+}
+
+jl_float3 GenericValue::GetFloat3() const
+{
+    assert( m_Type == Type::FLOAT3 &&
+            "Trying to get the float3 value from a non-float GenericValue" );
+    return m_Float3Value;
 }
 
 jl_float4 GenericValue::GetFloat4() const

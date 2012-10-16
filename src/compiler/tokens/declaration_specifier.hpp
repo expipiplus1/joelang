@@ -128,6 +128,8 @@ enum class TypeSpec
     VOID,
     STRING,
     FLOAT,
+    FLOAT2,
+    FLOAT3,
     FLOAT4,
     DOUBLE,
     BOOL,
@@ -144,7 +146,8 @@ enum class TypeSpec
   * \brief A class to hold one type specifier
   *
   * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
-  *                 | 'float4' | 'double' | 'signed' | 'unsigned' | 'string'
+  *                 | 'float2' | 'float3' | 'float4' | 'double' | 'signed' 
+  *                 | 'unsigned' | 'string'
   */
 class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {
