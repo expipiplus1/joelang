@@ -57,10 +57,10 @@ enum class Type
     BOOL,
 
     // Signed integer types
-    I8,
-    I16,
-    I32,
-    I64,
+    S8,
+    S16,
+    S32,
+    S64,
 
     // Unsigned integer types
     U8,
@@ -81,10 +81,10 @@ enum class Type
 };
 
 using jl_bool   = bool;
-using jl_i8     = std::int8_t;
-using jl_i16    = std::int16_t;
-using jl_i32    = std::int32_t;
-using jl_i64    = std::int64_t;
+using jl_s8     = std::int8_t;
+using jl_s16    = std::int16_t;
+using jl_s32    = std::int32_t;
+using jl_s64    = std::int64_t;
 using jl_u8     = std::uint8_t;
 using jl_u16    = std::uint16_t;
 using jl_u32    = std::uint32_t;
@@ -127,13 +127,13 @@ private:
     Type GetSignedIntegralType()
     {
         return sizeof(T) == 1
-            ? Type::I8
+            ? Type::S8
             : sizeof(T) == 2
-                ? Type::I16
+                ? Type::S16
                 : sizeof(T) == 4
-                    ? Type::I32
+                    ? Type::S32
                     : sizeof(T) == 8
-                        ? Type::I64
+                        ? Type::S64
                         : Type::UNKNOWN;
     }
 

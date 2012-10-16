@@ -64,13 +64,13 @@ public:
     explicit
     GenericValue( jl_bool   bool_value   );
     explicit
-    GenericValue( jl_i8     i8_value     );
+    GenericValue( jl_s8     i8_value     );
     explicit
-    GenericValue( jl_i16    i16_value    );
+    GenericValue( jl_s16    i16_value    );
     explicit
-    GenericValue( jl_i32    i32_value    );
+    GenericValue( jl_s32    i32_value    );
     explicit
-    GenericValue( jl_i64    i64_value    );
+    GenericValue( jl_s64    i64_value    );
     explicit
     GenericValue( jl_u8     u8_value     );
     explicit
@@ -106,10 +106,10 @@ public:
     ArrayExtents GetArrayExtents() const;
 
     jl_bool            GetBool() const;
-    jl_i8              GetI8() const;
-    jl_i16             GetI16() const;
-    jl_i32             GetI32() const;
-    jl_i64             GetI64() const;
+    jl_s8              GetI8() const;
+    jl_s16             GetI16() const;
+    jl_s32             GetI32() const;
+    jl_s64             GetI64() const;
     jl_u8              GetU8() const;
     jl_u16             GetU16() const;
     jl_u32             GetU32() const;
@@ -133,10 +133,10 @@ private:
     union
     {
         jl_bool     m_BoolValue;
-        jl_i8       m_I8Value;
-        jl_i16      m_I16Value;
-        jl_i32      m_I32Value;
-        jl_i64      m_I64Value;
+        jl_s8       m_I8Value;
+        jl_s16      m_I16Value;
+        jl_s32      m_I32Value;
+        jl_s64      m_I64Value;
         jl_u8       m_U8Value;
         jl_u16      m_U16Value;
         jl_u32      m_U32Value;

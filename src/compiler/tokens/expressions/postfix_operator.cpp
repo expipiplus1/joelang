@@ -127,7 +127,7 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
 {
     bool good = true;
     good &= expression.PerformSema( sema );
-    m_IndexExpression = CastExpression::Create( Type::I64,
+    m_IndexExpression = CastExpression::Create( Type::S64,
                                                 std::move(m_IndexExpression) );
     good &= m_IndexExpression->PerformSema( sema );
 

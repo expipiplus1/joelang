@@ -69,7 +69,7 @@ void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
     m_Expression->ResolveIdentifiers( sema );
     if( !m_Expression->GetType().IsIntegral() )
         sema.Error( "Can't create array with non-integer dimension" );
-    m_Expression = CastExpression::Create( Type::I64,
+    m_Expression = CastExpression::Create( Type::S64,
                                            std::move(m_Expression) );
     m_Expression->PerformSema( sema );
     if( !m_Expression->IsConst() )
@@ -92,7 +92,7 @@ ArrayExtents ArraySpecifier::GetArrayExtents(
         array_specifier->PerformSema( sema );
         GenericValue g = sema.EvaluateExpression(
                                             *array_specifier->GetExpression() );
-        jl_i64 size = g.GetI64();
+        jl_s64 size = g.GetI64();
         if( size <= 0 )
             sema.Error( "Can't create an array with a non-positive dimension" );
         ret.push_back( size );
@@ -233,7 +233,7 @@ void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
     if( !m_IndexExpression->ResolveIdentifiers( sema ) )
         return;
 
-    m_IndexExpression = CastExpression::Create( CompleteType( Type::I32 ),
+    m_IndexExpression = CastExpression::Create( CompleteType( Type::S32 ),
                                                 std::move(m_IndexExpression) );
 
     if( !m_IndexExpression->PerformSema( sema ) )

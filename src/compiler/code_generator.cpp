@@ -207,10 +207,10 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         break;
     }
     SA(DOUBLE, jl_double);
-    SA(I8, jl_i8);
-    SA(I16, jl_i16);
-    SA(I32, jl_i32);
-    SA(I64, jl_i64);
+    SA(S8, jl_s8);
+    SA(S16, jl_s16);
+    SA(S32, jl_s32);
+    SA(S64, jl_s64);
     SA(U8, jl_u8);
     SA(U16, jl_u16);
     SA(U32, jl_u32);
@@ -267,17 +267,17 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::BOOL:
         ret = GenericValue( reinterpret_cast<jl_bool(*)()>(function_ptr)() );
         break;
-    case Type::I8:
-        ret = GenericValue( reinterpret_cast<jl_i8(*)()>(function_ptr)() );
+    case Type::S8:
+        ret = GenericValue( reinterpret_cast<jl_s8(*)()>(function_ptr)() );
         break;
-    case Type::I16:
-        ret = GenericValue( reinterpret_cast<jl_i16(*)()>(function_ptr)() );
+    case Type::S16:
+        ret = GenericValue( reinterpret_cast<jl_s16(*)()>(function_ptr)() );
         break;
-    case Type::I32:
-        ret = GenericValue( reinterpret_cast<jl_i32(*)()>(function_ptr)() );
+    case Type::S32:
+        ret = GenericValue( reinterpret_cast<jl_s32(*)()>(function_ptr)() );
         break;
-    case Type::I64:
-        ret = GenericValue( reinterpret_cast<jl_i64(*)()>(function_ptr)() );
+    case Type::S64:
+        ret = GenericValue( reinterpret_cast<jl_s64(*)()>(function_ptr)() );
         break;
     case Type::U8:
         ret = GenericValue( reinterpret_cast<jl_u8(*)()>(function_ptr)() );
