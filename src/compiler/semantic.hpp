@@ -34,6 +34,9 @@
 
 namespace JoeLang
 {
+
+enum class ShaderDomain;
+
 namespace Compiler
 {
 
@@ -44,6 +47,7 @@ enum class SemanticType
     CUSTOM,
 
     POSITION,
+    WPOS,
     DEPTH,
     COLOR,
 };
@@ -63,6 +67,16 @@ public:
       * Returns true if this semantic represents a varying
       */
     bool IsVarying() const;
+    
+    /**
+      * Returns true if this semantic has a builtin for a particular domain
+      */
+    bool HasBuiltin( ShaderDomain domain, bool input ) const;
+    
+    /**
+      * Returns the builtin string
+      */
+    const std::string& GetBuiltin( ShaderDomain domain, bool input ) const;
 
     bool HasIndex() const;
     /** This asserts that we have an index **/

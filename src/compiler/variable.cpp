@@ -171,6 +171,11 @@ const CompleteType& Variable::GetType() const
     return m_Type;
 }
 
+const Semantic& Variable::GetSemantic() const
+{
+    return m_Semantic;
+}
+
 const std::string& Variable::GetName() const
 {
     return m_Name;

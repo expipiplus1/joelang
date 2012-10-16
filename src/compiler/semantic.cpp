@@ -83,6 +83,26 @@ bool Semantic::IsVarying() const
     return false;
 }
 
+bool Semantic::HasBuiltin( ShaderDomain domain, bool input ) const
+{
+    auto s = g_SemanticInfoMap.find( m_Type );
+    if( s == g_SemanticInfoMap.end() )
+        return false;
+    if( s->second.m_GLSLBuiltin.empty() )
+        return false;
+    auto& d = input ? s->second.m_DomainInputs : s->second.m_DomainOutputs;
+    if( d.find( domain ) == d.end() )
+        return false;
+    return true;
+}
+
+const std::string& Semantic::GetBuiltin( ShaderDomain domain, bool input ) const
+{
+    assert( HasBuiltin( domain, input ) && 
+            "Trying to get the builtin name of a variable without one" );
+    return g_SemanticInfoMap.at( m_Type ).m_GLSLBuiltin;
+}
+
 bool Semantic::HasIndex() const
 {
     return m_HasIndex;
@@ -101,6 +121,7 @@ void Semantic::DetermineType()
         { "POSITION", SemanticType::POSITION },
         { "DEPTH",    SemanticType::DEPTH    },
         { "COLOR",    SemanticType::COLOR    },
+        { "WPOS",     SemanticType::WPOS     }
     };
 
     //

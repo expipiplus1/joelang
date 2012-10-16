@@ -44,6 +44,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
 #include <compiler/variable.hpp>
+#include <compiler/semantic_info.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/context.hpp>
@@ -201,16 +202,30 @@ std::set<Variable_sp> ShaderWriter::WriteInputVaryings(
         {
             // We only care about input varyings here,
             // and only about ones which are not used elsewhere
+            
+            //
+            // If this has a builtin don't write the 'in'
+            //
+            if( !v->GetSemantic().HasBuiltin( entry_function.GetDomain(), 
+                                              true ) )
+                *this << "in ";  
+            
             // todo layout information here
-            *this << "in " << v->GetType() << " " <<
+            *this << v->GetType() << " " <<
                      Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
             NewLine();
         }
 
     for( const auto& v : input_varyings )
     {
+        //
+        // if this has a builtin don't write the layout information
+        //
+        if( !v->GetSemantic().HasBuiltin( entry_function.GetDomain(), true ) )
+            *this << "in ";
+        
         // todo layout information here
-        *this << "in " << v->GetType() << " " <<
+        *this << v->GetType() << " " <<
                  Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
         NewLine();
     }
@@ -229,9 +244,15 @@ std::set<Variable_sp> ShaderWriter::WriteOutputVaryings(
     //
     if( entry_function.GetFunction().GetSemantic().IsVarying() )
     {
+        //
+        // If this has a glsl builtin don't create the variable as an 'out'
+        //
+        if( !entry_function.GetFunction().GetSemantic().HasBuiltin( 
+                                                     entry_function.GetDomain(),
+                                                     false ) )
+            *this << "out "; 
         // This isn't actually a variable, so just output it now
-        *this << "out " <<
-                 entry_function.GetFunction().GetReturnType() <<  " " <<
+        *this << entry_function.GetFunction().GetReturnType() <<  " " <<
                  Mangle( entry_function.GetFunction().GetIdentifier(),
                          IdentifierType::OUT_VARYING ) <<  ";";
         NewLine();
@@ -253,9 +274,10 @@ std::set<Variable_sp> ShaderWriter::WriteOutputVaryings(
 
     for( const auto& v : output_varyings )
     {
+        if( !v->GetSemantic().HasBuiltin( entry_function.GetDomain(), false ) )
+            *this << "out ";
         // todo layout information here
-        *this << "out " <<
-                 v->GetType() << " " <<
+        *this << v->GetType() << " " <<
                  Mangle( v->GetName(), IdentifierType::OUT_VARYING ) << ";";
         NewLine();
     }
@@ -325,8 +347,15 @@ void ShaderWriter::WriteMainFunction(
         if( v->IsGlobal() )
         {
             *this << Mangle( v->GetName(), IdentifierType::VARIABLE ) <<
-                     " = " <<
-                     Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+                     " = ";
+            if( !v->GetSemantic().HasBuiltin( entry_function.GetDomain(), 
+                                              true ) )
+                *this << Mangle( v->GetName(), IdentifierType::IN_VARYING );
+            else
+                *this << v->GetSemantic().GetBuiltin( 
+                                                     entry_function.GetDomain(),
+                                                     true );
+            *this << ";";
             NewLine();
         }
 
@@ -368,13 +397,20 @@ void ShaderWriter::WriteMainFunction(
     NewLine();
 
     //
-    // Copy all the global variables to their out variables
+    // Copy all the global variables to their out variables or builtins
     //
     for( const auto& v : output_variables )
         if( v->IsGlobal() )
         {
-            *this << Mangle( v->GetName(), IdentifierType::OUT_VARYING ) <<
-                     " = " <<
+            if( v->GetSemantic().HasBuiltin( entry_function.GetDomain(), 
+                                             false ) )
+                *this << v->GetSemantic().GetBuiltin( 
+                                                     entry_function.GetDomain(),
+                                                     false );
+            else
+                *this << Mangle( v->GetName(), IdentifierType::OUT_VARYING );
+            
+            *this << " = " <<
                      Mangle( v->GetName(), IdentifierType::VARIABLE ) << ";";
             NewLine();
         }
