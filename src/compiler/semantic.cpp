@@ -38,6 +38,7 @@
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
+#include <compiler/semantic_info.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
@@ -71,9 +72,15 @@ Semantic::Semantic  ( std::string string, unsigned index )
 
 bool Semantic::IsVarying() const
 {
-    // all the built in semantics are varying
-    return m_Type != SemanticType::NO_SEMANTIC &&
-           m_Type != SemanticType::CUSTOM;
+    auto s = g_SemanticInfoMap.find( m_Type );
+    if( s != g_SemanticInfoMap.end() )
+    {
+        return s->second.m_IsVarying;
+    }
+    //
+    // Semantics are not varying by default
+    //
+    return false;
 }
 
 bool Semantic::HasIndex() const

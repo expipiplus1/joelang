@@ -320,7 +320,7 @@ void ShaderWriter::WriteMainFunction(
     // a parameter
     //
     for( const auto& v : input_variables )
-        // Dont allow input parameters, they ahve already been assigned to a
+        // Dont allow input parameters, they have already been assigned to a
         // local variable
         if( v->IsGlobal() )
         {

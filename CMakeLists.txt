@@ -71,6 +71,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/sema_analyzer.hpp
                      src/compiler/semantic.cpp
                      src/compiler/semantic.hpp
+                     src/compiler/semantic_info.cpp
+                     src/compiler/semantic_info.hpp
                      src/compiler/shader_writer.cpp
                      src/compiler/shader_writer.hpp
                      src/compiler/terminal_types.cpp
