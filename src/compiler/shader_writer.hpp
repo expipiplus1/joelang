@@ -114,7 +114,7 @@ public:
     std::string Mangle( const std::string& identifier,
                         IdentifierType identifier_type );
 private:
-    void GenerateFragmentShader( const EntryFunction& entry_function );
+    void GenerateShader( const EntryFunction& entry_function );
 
     /** Writes #version 150 to the shader **/
     void WriteGLSLVersion();

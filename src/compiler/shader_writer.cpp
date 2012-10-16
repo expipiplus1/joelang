@@ -67,18 +67,8 @@ ShaderWriter::ShaderWriter( const Context& context )
 
 std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
 {
-    // todo, I'm sure that there's something missing here...
-
-    if( entry_function.GetDomain() == ShaderDomain::FRAGMENT )
-        GenerateFragmentShader( entry_function );
-    else
-        return  "#version 150\n"
-                "in vec4 position;\n"
-                "void main()\n"
-                "{\n"
-                "   gl_Position = position;\n"
-                "}\n";
-
+    GenerateShader( entry_function );
+        
     std::string ret = m_Shader.str();
 
     // reset things
@@ -141,7 +131,7 @@ ShaderWriter& ShaderWriter::operator << ( const GenericValue& value )
     return *this;
 }
 
-void ShaderWriter::GenerateFragmentShader( const EntryFunction& entry_function )
+void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
 {
     WriteGLSLVersion();
 
@@ -396,6 +386,21 @@ void ShaderWriter::WriteMainFunction(
 
     NewLine();
 
+    //
+    // Copy the function's return variable to the builtin if it has one
+    //
+    if( entry_function.GetFunction().GetSemantic().HasBuiltin( 
+                                                     entry_function.GetDomain(), 
+                                                     false ) )
+    {
+        *this << entry_function.GetFunction().GetSemantic().GetBuiltin( 
+                                                     entry_function.GetDomain(),
+                                                     false ) <<
+                 " = " << Mangle( entry_function.GetFunction().GetIdentifier(),
+                                  IdentifierType::OUT_VARYING ) << ";";
+        NewLine();
+    }
+    
     //
     // Copy all the global variables to their out variables or builtins
     //
