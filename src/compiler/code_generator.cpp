@@ -352,7 +352,7 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
         llvm::Value* argument_value = argument->CodeGen( *this );
         if( argument->GetType().IsVectorType() )
         {
-            for( unsigned i = 0; i < argument->GetType().GetNumElements(); ++i )
+            for( unsigned i = 0; i < argument->GetType().GetVectorSize(); ++i )
             {
                 llvm::Value* new_element = m_LLVMBuilder.CreateExtractElement(
                         argument_value,

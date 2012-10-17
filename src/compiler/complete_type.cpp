@@ -89,32 +89,58 @@ bool CompleteType::IsVoid() const
 
 bool CompleteType::IsFloatingPoint() const
 {
-    return Compiler::IsFloatingPoint( m_BaseType );
+    return Compiler::IsFloatingPoint( m_BaseType ) && m_ArrayExtents.empty();
 }
 
 bool CompleteType::IsIntegral() const
 {
-    return Compiler::IsIntegral( m_BaseType );
+    return Compiler::IsIntegral( m_BaseType ) && m_ArrayExtents.empty();
+}
+
+bool CompleteType::IsMatrixType() const
+{
+    // no matrices yet
+    return false;
+}
+
+bool CompleteType::IsStructType() const
+{
+    // no structs yet
+    return false;
 }
 
 bool CompleteType::IsVectorType() const
 {
-    return Compiler::IsVectorType( m_BaseType );
+    return Compiler::IsVectorType( m_BaseType ) && m_ArrayExtents.empty();
 }
 
 bool CompleteType::IsScalarType() const
 {
-    return Compiler::IsScalarType( m_BaseType );
+    return Compiler::IsScalarType( m_BaseType ) && m_ArrayExtents.empty();
 }
 
 bool CompleteType::IsSigned() const
 {
-    return Compiler::IsSigned( m_BaseType );
+    return Compiler::IsSigned( m_BaseType ) && m_ArrayExtents.empty();
 }
 
-unsigned CompleteType::GetNumElements() const
+unsigned CompleteType::GetVectorSize() const
 {
+    assert( ( IsVectorType() || IsScalarType() ) && 
+            "Trying to get the vector size of a non vector type" );
     return Compiler::GetNumElementsInType( m_BaseType );
+}
+
+unsigned CompleteType::GetMatrixHeight() const
+{
+    assert( false && "Complete me" );
+    return 0;
+}
+
+unsigned CompleteType::GetMatrixWidth() const
+{
+    assert( false && "Complete me" );
+    return 0;
 }
 
 std::string CompleteType::GetString() const

@@ -70,14 +70,19 @@ public:
     bool IsFloatingPoint() const;
     bool IsIntegral() const;
 
+    bool IsStructType() const;
+    bool IsMatrixType() const;
     bool IsVectorType() const;
     bool IsScalarType() const;
 
     bool IsSigned() const;
 
     /** Returns the number of vector elements **/
-    unsigned GetNumElements() const;
-
+    unsigned GetVectorSize() const;
+    
+    unsigned GetMatrixWidth() const;
+    unsigned GetMatrixHeight() const;
+    
     std::string GetString() const;
 
     void Write( ShaderWriter& shader_writer ) const;

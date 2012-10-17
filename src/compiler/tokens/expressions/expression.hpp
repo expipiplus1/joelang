@@ -354,9 +354,9 @@ class CastExpression : public JoeLang::Compiler::Expression
 {
 public:
     /** This asserts that expression is not null **/
-    explicit
     CastExpression( CompleteType cast_type,
-                    Expression_up expression );
+                    Expression_up expression,
+                    bool is_explicit );
     virtual
     ~CastExpression();
 
@@ -388,19 +388,26 @@ public:
     bool Parse( Parser& parser,
                 Expression_up& token );
 
+    bool IsExplicit() const; 
+    
     static
     Expression_up Create( const CompleteType& cast_type,
-                          Expression_up expression );
+                          Expression_up expression,
+                          bool is_explicit );
 
     static
-    Expression_up Create( Type cast_type, Expression_up expression );
+    Expression_up Create( Type cast_type, 
+                          Expression_up expression, 
+                          bool is_explicit );
 
     /**
       * Casts vectors to a different base type, preserving size
       */
     static
     Expression_up CreateBaseTypeCast( Type base_type,
-                                      Expression_up cast_expression );
+                                      Expression_up cast_expression,
+                                      bool is_explicit 
+                                      );
 
     static
     bool classof( const Expression* e );
@@ -408,8 +415,16 @@ public:
     bool classof( const CastExpression* e );
 
 private:
+    bool CanCastFromScalar( SemaAnalyzer& sema );
+    bool CanCastFromVector( SemaAnalyzer& sema );
+    bool CanCastFromMatrix( SemaAnalyzer& sema );
+    bool CanCastFromStruct( SemaAnalyzer& sema );
+    bool CanCastFromArray ( SemaAnalyzer& sema );
+    bool CanCastFromString( SemaAnalyzer& sema );
+    
     CompleteType m_CastType;
     Expression_up m_Expression;
+    bool m_IsExplicit;
 };
 
 /**

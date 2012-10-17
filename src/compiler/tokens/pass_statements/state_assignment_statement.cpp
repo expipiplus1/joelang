@@ -89,7 +89,8 @@ bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
         return false;
 
     m_Expression = CastExpression::Create( m_State->GetType(),
-                                           std::move(m_Expression) );
+                                           std::move(m_Expression),
+                                           false );
 
     if( !m_Expression->PerformSema( sema ) )
         return false;

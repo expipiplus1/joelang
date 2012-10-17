@@ -151,7 +151,8 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     // Assuming that we can assign to the same as ReturnType;
     m_AssignedExpression = CastExpression::Create(
                                               m_Assignee->GetType(),
-                                              std::move(m_AssignedExpression) );
+                                              std::move(m_AssignedExpression),
+                                              false );
     good &= m_AssignedExpression->PerformSema( sema );
 
     switch( m_AssignmentOperator )
@@ -367,7 +368,9 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     /// TODO check that the true and false expressions are of equal array size
     bool good = true;
 
-    m_Condition = CastExpression::Create( Type::BOOL, std::move(m_Condition) );
+    m_Condition = CastExpression::Create( Type::BOOL,
+                                          std::move(m_Condition),
+                                          false );
 
     const CompleteType& t = GetType();
     if( t.IsUnknown() )
@@ -387,10 +390,12 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     {
         m_TrueExpression = CastExpression::Create(
                                                 t,
-                                                std::move(m_TrueExpression) );
+                                                std::move(m_TrueExpression),
+                                                false );
         m_FalseExpression = CastExpression::Create(
                                                 t,
-                                                std::move(m_FalseExpression) );
+                                                std::move(m_FalseExpression),
+                                                false );
     }
 
     good &= m_Condition->PerformSema( sema );
@@ -496,10 +501,12 @@ bool ConditionalExpression::classof( const ConditionalExpression* e )
 //------------------------------------------------------------------------------
 
 CastExpression::CastExpression( CompleteType cast_type,
-                                Expression_up expression )
+                                Expression_up expression,
+                                bool is_explicit )
     :Expression( TokenTy::CastExpression )
     ,m_CastType( std::move(cast_type) )
     ,m_Expression( std::move(expression) )
+    ,m_IsExplicit( is_explicit )
 {
     assert( m_Expression && "CastExpression given a null expression" );
 }
@@ -516,68 +523,194 @@ bool CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 bool CastExpression::PerformSema( SemaAnalyzer& sema )
 {
     // todo this in a better way
-    bool good = true;
+    bool good;
 
     const CompleteType& t = m_Expression->GetType();
-
-    if( !t.IsUnknown() )
-    {
-        if( t.GetType() == Type::STRING && m_CastType.GetType() != Type::STRING )
-        {
-            good = false;
-            sema.Error( "Can't cast string to " + m_CastType.GetString() );
-        }
-        else if( m_CastType.GetType() == Type::UNKNOWN )
-        {
-            // Can't cast to unknown type
-            good = false;
-            sema.Error( "Can't cast to an unknown type" );
-        }
-        else if( m_CastType.GetType() == Type::ARRAY )
-        {
-            // Can't cast to an array type
-            good = false;
-            sema.Error( "Can't cast to an array type" );
-        }
-        else if( t.IsArrayType() )
-        {
-            // Can't cast from an array type
-            good = false;
-            sema.Error( "Can't cast from an array type" );
-        }
-        else if( m_CastType.GetType() == Type::STRING )
-        {
-            // Can only cast string to string
-            if( t.GetType() != Type::STRING )
-            {
-                good = false;
-                sema.Error( "Can't cast " + t.GetString() + " to string" );
-            }
-        }
-        else if( IsScalarType( m_CastType.GetType() ) )
-        {
-            // All scalar types are compatible nothing to check
-        }
-        else if( IsVectorType( m_CastType.GetType() ) )
-        {
-            // Can only cast same size vectors
-            // But all vector types are compatible
-            if( m_CastType.GetNumElements() != t.GetNumElements() )
-            {
-                good = false;
-                sema.Error( "Can't cast " + t.GetString() + " to " +
-                            m_CastType.GetString() );
-            }
-        }
-        else
-        {
-            assert( false && "Casting to an unhandled type" );
-        }
-    }
-
+    
+    assert( !t.IsUnknown() && "Trying to cast from unknown type" );
+    assert( !m_CastType.IsUnknown() && "Trying to cast to unknown type" );
+    
+    if( t == m_CastType )
+        good = true;
+    
+    if( t.IsScalarType() )
+        good = CanCastFromScalar( sema );
+    else if( t.IsVectorType() )
+        good = CanCastFromVector( sema );
+    else if( t.IsMatrixType() )
+        good = CanCastFromMatrix( sema );
+    else if( t.IsStructType() )
+        good = CanCastFromStruct( sema );
+    else if( t.IsArrayType() )
+        good = CanCastFromArray ( sema );
+    else if( t.GetType() == Type::STRING )
+        good = CanCastFromString( sema );
+    else 
+        assert( false && "Trying to cast from unhandled type" );
+    
     good &= m_Expression->PerformSema( sema );
 
     return good;
+}
+
+bool CastExpression::CanCastFromScalar( SemaAnalyzer& sema )
+{
+    //
+    // We can cast from a scalar to a scalar, vector or matrix
+    //
+    if( m_CastType.IsScalarType() ||
+        m_CastType.IsVectorType() ||
+        m_CastType.IsMatrixType() )
+        return true;
+    
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromVector( SemaAnalyzer& sema )
+{
+    CompleteType t = m_Expression->GetType();
+    
+    //
+    // We issue a warning if a cast to a scalar isn't explicit
+    //
+    if( m_CastType.IsScalarType() )
+    {
+        if( !IsExplicit() )
+            sema.Warning( "Implicit cast of a vector to a scalar type" );
+        return true;
+    }
+    
+    //
+    // We can't cast to a larger vector, and issue a warning if casting to a 
+    // smaller vector
+    //
+    if( m_CastType.IsVectorType() )
+    {
+        if( m_CastType.GetVectorSize() > t.GetVectorSize() )
+        {
+            sema.Error( "Can't cast a vector to a larger vector type" );
+            return false;
+        }
+        
+        if( m_CastType.GetVectorSize() < t.GetVectorSize() )
+            sema.Warning( "Casting a vector to a smaller vector type" );    
+        return true;
+    }
+    
+    //
+    // We can only cast to a matrix if they are of the same size
+    //
+    if( m_CastType.IsMatrixType() )
+    {
+        if( m_CastType.GetMatrixWidth() * m_CastType.GetMatrixHeight() !=
+            t.GetVectorSize() )
+        {
+            sema.Error( "Can't cast a vector to a matrix of different size" );
+            return false;
+        }
+        if( !IsExplicit() )
+            sema.Warning( "Casting a vector to a matrix" );
+        return true;
+    }
+    
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromMatrix( SemaAnalyzer& sema )
+{
+    CompleteType t = m_Expression->GetType();
+    //
+    // Warn if casting to a scalar
+    //
+    if( m_CastType.IsScalarType() )
+    {
+        if( !IsExplicit() )
+            sema.Warning( "Casting a matrix to a scalar" );
+        return true;
+    }
+    
+    //
+    // Can only cast to a vector of the same size
+    //
+    if( m_CastType.IsVectorType() )
+    {
+        if( t.GetMatrixWidth() * t.GetMatrixHeight() !=
+            m_CastType.GetVectorSize() )
+        {
+            sema.Error( "Can't cast a matrix to a vector of different size" );
+            return false;
+        }
+        if( !IsExplicit() )
+            sema.Warning( "Casting a matrix to a vector" );
+        return true;
+    }
+    
+    //
+    // We can't cast to a larger matrix, and issue a warning if casting to a 
+    // smaller matrix
+    //
+    if( m_CastType.IsMatrixType() )
+    {
+        if( t.GetMatrixWidth()  < m_CastType.GetMatrixWidth() ||
+            t.GetMatrixHeight() < m_CastType.GetMatrixHeight() )
+        {
+            sema.Error( 
+                  "Can't cast a matrix to a matrix type of larger dimensions" );
+            return false;
+        }
+        
+        if( ( t.GetMatrixWidth()  > m_CastType.GetMatrixWidth() ||
+              t.GetMatrixHeight() > m_CastType.GetMatrixHeight() ) &&
+            !IsExplicit() ) 
+            sema.Warning( 
+                    "Casting a matrix to a matrix type of smaller dimensions" );
+        return true;
+    }
+    
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromStruct( SemaAnalyzer& sema )
+{
+    //
+    // Can't cast from a struct
+    // todo allow casting from structs
+    //
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromArray( SemaAnalyzer& sema )
+{
+    //
+    // Can't cast from an array
+    //
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromString( SemaAnalyzer& sema )
+{
+    //
+    // Can't cast from string
+    // todo, perhaps cast to a char[]
+    //
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::IsExplicit() const
+{
+    return m_IsExplicit;
 }
 
 llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -619,32 +752,35 @@ bool CastExpression::Parse( Parser& parser, Expression_up& token )
 }
 
 Expression_up CastExpression::Create( Type cast_type,
-                                      Expression_up expression )
+                                      Expression_up expression,
+                                      bool is_explicit )
 {
-    if( expression->GetType().GetType() == cast_type )
-        return expression;
-    return Expression_up( new CastExpression( CompleteType(cast_type),
-                                              std::move(expression) ) );
+    return Create( CompleteType( cast_type ),
+                   std::move( expression ),
+                   is_explicit );
 }
 
 Expression_up CastExpression::Create( const CompleteType& cast_type,
-                                      Expression_up expression )
+                                      Expression_up expression,
+                                      bool is_explicit )
 {
-    // If this would be a null cast don't bother creating one
-    if( expression->GetType() == cast_type )
+    // If this would be a null implicit cast don't bother creating one
+    if( expression->GetType() == cast_type && !is_explicit )
         return expression;
 
     return Expression_up( new CastExpression( cast_type,
-                                              std::move(expression) ) );
+                                              std::move(expression),
+                                              is_explicit ) );
 }
 
 Expression_up CastExpression::CreateBaseTypeCast(
                                                 Type cast_type,
-                                                Expression_up cast_expression )
+                                                Expression_up cast_expression,
+                                                bool is_explicit )
 {
     Type expression_type = cast_expression->GetType().GetType();
     if( IsScalarType( expression_type ) )
-        return Create( cast_type, std::move(cast_expression) );
+        return Create( cast_type, std::move(cast_expression), is_explicit );
 
     assert( IsVectorType( expression_type ) &&
             "Unhandled type in CreateBaseTypeCase" );
@@ -652,7 +788,8 @@ Expression_up CastExpression::CreateBaseTypeCast(
     // Find the correct cast_type
     return Create( GetVectorType( cast_type,
                                   GetNumElementsInType( expression_type ) ),
-                   std::move(cast_expression) );
+                   std::move(cast_expression),
+                   is_explicit );
 }
 
 bool CastExpression::classof( const Expression* e )
@@ -980,18 +1117,20 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     unsigned num_desired_elements = GetNumElementsInType( m_Type );
     unsigned num_elements = 0;
     for( const auto& argument : m_Arguments )
-        num_elements += argument->GetType().GetNumElements();
+        num_elements += argument->GetType().GetVectorSize();
 
     if( num_elements != num_desired_elements )
         sema.Error( "Wrong number of elements in constructor" );
 
     //
     // Verify that all the parameters can be converted into the correct base
-    // type
+    // type, if there's only one argument, then this is an explicit cast
     //
     for( auto& argument : m_Arguments )
-        argument = CastExpression::CreateBaseTypeCast( GetElementType( m_Type ),
-                                                       std::move(argument) );
+        argument = CastExpression::CreateBaseTypeCast(
+                                                      GetElementType( m_Type ),
+                                                      std::move(argument),
+                                                      m_Arguments.size() == 1 );
 
     bool ret = true;
 
