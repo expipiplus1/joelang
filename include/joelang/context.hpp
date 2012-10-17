@@ -45,7 +45,6 @@ namespace Compiler
     class EffectFactory;
 }
 
-/// \todo implement error collection
 class Context
 {
 public:
