@@ -41,7 +41,6 @@
 namespace JoeLang
 {
 
-// This may need to be a full class to handle modifiers and things
 enum class Type
 {
     // Unknown type
