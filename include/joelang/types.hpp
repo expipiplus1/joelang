@@ -99,76 +99,38 @@ struct JoeLangType
 {
 private:
     static constexpr
-    Type GetFloatingPointType()
-    {
-        return sizeof(T) == 4
-            ? Type::FLOAT
-            : sizeof(T) == 8
-                ? Type::DOUBLE
-                : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetUnsignedIntegralType()
-    {
-        return sizeof(T) == 1
-            ? Type::U8
-            : sizeof(T) == 2
-                ? Type::U16
-                : sizeof(T) == 4
-                    ? Type::U32
-                    : sizeof(T) == 8
-                        ? Type::U64
-                        : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetSignedIntegralType()
-    {
-        return sizeof(T) == 1
-            ? Type::S8
-            : sizeof(T) == 2
-                ? Type::S16
-                : sizeof(T) == 4
-                    ? Type::S32
-                    : sizeof(T) == 8
-                        ? Type::S64
-                        : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetIntegralType()
-    {
-        return std::is_signed<T>::value
-            ? GetSignedIntegralType()
-            : GetUnsignedIntegralType();
-    }
-
-    static constexpr
-    Type GetVectorType()
-    {
-        return   std::is_same<JoeMath::float2,T>::value
-               ? Type::FLOAT2
-               : std::is_same<JoeMath::float3,T>::value
-               ? Type::FLOAT3
-               : std::is_same<JoeMath::float4,T>::value
-               ? Type::FLOAT4
-               : Type::UNKNOWN;
-    }
-
-    static constexpr
     Type GetType()
     {
-        return    JoeMath::is_vector<T>::value
-                ? GetVectorType()
-                : std::is_floating_point<T>::value
-                ? GetFloatingPointType()
-                : std::is_same<bool,T>::value
+        return    std::is_same<T, jl_bool>::value
                 ? Type::BOOL
-                : std::is_same<std::string,T>::value
+                : std::is_same<T, jl_s8>::value
+                ? Type::S8
+                : std::is_same<T, jl_s16>::value
+                ? Type::S16
+                : std::is_same<T, jl_s32>::value
+                ? Type::S32
+                : std::is_same<T, jl_s64>::value
+                ? Type::S64
+                : std::is_same<T, jl_u8>::value
+                ? Type::U8
+                : std::is_same<T, jl_u16>::value
+                ? Type::U16
+                : std::is_same<T, jl_u32>::value
+                ? Type::U32
+                : std::is_same<T, jl_u64>::value
+                ? Type::U64
+                : std::is_same<T, jl_float>::value
+                ? Type::FLOAT
+                : std::is_same<T, jl_float2>::value
+                ? Type::FLOAT2
+                : std::is_same<T, jl_float3>::value
+                ? Type::FLOAT3
+                : std::is_same<T, jl_float4>::value
+                ? Type::FLOAT4
+                : std::is_same<T, jl_double>::value
+                ? Type::DOUBLE
+                : std::is_same<T, std::string>::value
                 ? Type::STRING
-                :std::is_integral<T>::value
-                ? GetIntegralType()
                 : Type::UNKNOWN;
     }
 
