@@ -52,13 +52,13 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
         Type::DOUBLE,
         Type::FLOAT,
         Type::U64,
-        Type::I64,
+        Type::S64,
         Type::U32,
-        Type::I32,
+        Type::S32,
         Type::U16,
-        Type::I16,
+        Type::S16,
         Type::U8,
-        Type::I8,
+        Type::S8,
         Type::BOOL
     };
 
@@ -137,14 +137,14 @@ Type GetScalarType( Type t )
     {
     case Type::BOOL:
         return Type::BOOL;
-    case Type::I8:
-        return Type::I8;
-    case Type::I16:
-        return Type::I16;
-    case Type::I32:
-        return Type::I32;
-    case Type::I64:
-        return Type::I64;
+    case Type::S8:
+        return Type::S8;
+    case Type::S16:
+        return Type::S16;
+    case Type::S32:
+        return Type::S32;
+    case Type::S64:
+        return Type::S64;
     case Type::U8:
         return Type::U8;
     case Type::U16:
@@ -170,10 +170,10 @@ Type GetScalarType( Type t )
 bool IsIntegral( Type t )
 {
     return t == Type::BOOL ||
-           t == Type::I8   ||
-           t == Type::I16  ||
-           t == Type::I32  ||
-           t == Type::I64  ||
+           t == Type::S8   ||
+           t == Type::S16  ||
+           t == Type::S32  ||
+           t == Type::S64  ||
            t == Type::U8   ||
            t == Type::U16  ||
            t == Type::U32  ||
@@ -191,10 +191,10 @@ bool IsFloatingPoint( Type t )
 
 bool IsSigned( Type t )
 {
-    return t == Type::I64 ||
-           t == Type::I32 ||
-           t == Type::I16 ||
-           t == Type::I8;
+    return t == Type::S64 ||
+           t == Type::S32 ||
+           t == Type::S16 ||
+           t == Type::S8;
 }
 
 bool IsVectorType( Type t )
@@ -251,13 +251,13 @@ unsigned GetNumElementsInType( Type t )
     case Type::FLOAT2:
         return 2;
     case Type::U64:
-    case Type::I64:
+    case Type::S64:
     case Type::U32:
-    case Type::I32:
+    case Type::S32:
     case Type::U16:
-    case Type::I16:
+    case Type::S16:
     case Type::U8:
-    case Type::I8:
+    case Type::S8:
     case Type::BOOL:
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -281,17 +281,17 @@ std::size_t SizeOf( Type t )
     case Type::FLOAT2:
     case Type::DOUBLE:
     case Type::U64:
-    case Type::I64:
+    case Type::S64:
         return 8;
     case Type::FLOAT:
     case Type::U32:
-    case Type::I32:
+    case Type::S32:
         return 4;
     case Type::U16:
-    case Type::I16:
+    case Type::S16:
         return 2;
     case Type::U8:
-    case Type::I8:
+    case Type::S8:
     case Type::BOOL:
         return 1;
     default:
@@ -306,13 +306,13 @@ Type MakeUnsigned( Type t )
             "Trying to make an invalid type unsigned" );
     switch( t )
     {
-    case Type::I8:
+    case Type::S8:
         return Type::U8;
-    case Type::I16:
+    case Type::S16:
         return Type::U16;
-    case Type::I32:
+    case Type::S32:
         return Type::U32;
-    case Type::I64:
+    case Type::S64:
         return Type::U64;
     default:
         // t is already unsigned;
@@ -331,13 +331,13 @@ const std::string& GetTypeString( Type t )
         { Type::FLOAT3,       "float3" },
         { Type::FLOAT4,       "float4" },
         { Type::U64,          "u64" },
-        { Type::I64,          "i64" },
+        { Type::S64,          "i64" },
         { Type::U32,          "u32" },
-        { Type::I32,          "i32" },
+        { Type::S32,          "i32" },
         { Type::U16,          "u16" },
-        { Type::I16,          "i16" },
+        { Type::S16,          "i16" },
         { Type::U8,           "u8" },
-        { Type::I8,           "i8" },
+        { Type::S8,           "i8" },
         { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
         { Type::ARRAY,        "array" },
@@ -356,7 +356,7 @@ bool HasGLSLType( Type t )
         Type::FLOAT3,
         Type::FLOAT4,
         Type::U32,
-        Type::I32,
+        Type::S32,
         Type::BOOL,
         Type::VOID,
     };
@@ -373,7 +373,7 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
         { Type::U32,          "uint" },
-        { Type::I32,          "int" },
+        { Type::S32,          "int" },
         { Type::BOOL,         "bool" },
         { Type::VOID,         "void" },
     };

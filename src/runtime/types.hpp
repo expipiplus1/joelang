@@ -38,10 +38,10 @@ extern "C"
 {
 
 using jl_bool   = bool;
-using jl_i8     = int8_t;
-using jl_i16    = int16_t;
-using jl_i32    = int32_t;
-using jl_i64    = int64_t;
+using jl_s8     = int8_t;
+using jl_s16    = int16_t;
+using jl_s32    = int32_t;
+using jl_s64    = int64_t;
 using jl_u8     = uint8_t;
 using jl_u16    = uint16_t;
 using jl_u32    = uint32_t;

@@ -127,8 +127,9 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
 {
     bool good = true;
     good &= expression.PerformSema( sema );
-    m_IndexExpression = CastExpression::Create( Type::I64,
-                                                std::move(m_IndexExpression) );
+    m_IndexExpression = CastExpression::Create( Type::S64,
+                                                std::move(m_IndexExpression),
+                                                false );
     good &= m_IndexExpression->PerformSema( sema );
 
     if( !expression.GetType().IsArrayType() )
@@ -302,7 +303,8 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
     //
     for( unsigned i = 0; i < m_Arguments.size(); ++i )
         m_Arguments[i] = CastExpression::Create( types[i],
-                                                 std::move(m_Arguments[i]) );
+                                                 std::move(m_Arguments[i]),
+                                                 false );
 
     bool good = true;
 

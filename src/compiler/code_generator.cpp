@@ -161,24 +161,19 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     //
     // Cast to the appropriate type
     //
+    
+#define SA(type, jl_type) case Type::type: \
+    sa = new StateAssignment<jl_type> \
+     ( static_cast<const State<jl_type>&>(state), \
+       reinterpret_cast<jl_type(*)()>(function_ptr) ); \
+    break
+    
     StateAssignmentBase* sa;
     switch( state.GetType() )
     {
-    case Type::BOOL:
-        sa = new StateAssignment<jl_bool>
-         ( static_cast<const State<bool>&>(state),
-           reinterpret_cast<bool(*)()>(function_ptr) );
-        break;
-    case Type::FLOAT:
-        sa = new StateAssignment<jl_float>
-         ( static_cast<const State<jl_float>&>(state),
-           reinterpret_cast<jl_float(*)()>(function_ptr) );
-        break;
-    case Type::FLOAT2:
-        sa = new StateAssignment<jl_float2>
-         ( static_cast<const State<jl_float2>&>(state),
-           reinterpret_cast<jl_float2(*)()>(function_ptr) );
-        break;
+    SA(BOOL, jl_bool);
+    SA(FLOAT, jl_float);
+    SA(FLOAT2, jl_float2);
     case Type::FLOAT3:
     {
         // TODO this is pretty yucky, assuming that llvm returns this all in one
@@ -211,51 +206,15 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
            wrapper );
         break;
     }
-    case Type::DOUBLE:
-        sa = new StateAssignment<jl_double>
-         ( static_cast<const State<jl_double>&>(state),
-           reinterpret_cast<jl_double(*)()>(function_ptr) );
-        break;
-    case Type::I8:
-        sa = new StateAssignment<jl_i8>
-         ( static_cast<const State<jl_i8>&>(state),
-           reinterpret_cast<jl_i8(*)()>(function_ptr) );
-        break;
-    case Type::I16:
-        sa = new StateAssignment<jl_i16>
-         ( static_cast<const State<jl_i16>&>(state),
-           reinterpret_cast<jl_i16(*)()>(function_ptr) );
-        break;
-    case Type::I32:
-        sa = new StateAssignment<jl_i32>
-         ( static_cast<const State<jl_i32>&>(state),
-           reinterpret_cast<jl_i32(*)()>(function_ptr) );
-        break;
-    case Type::I64:
-        sa = new StateAssignment<jl_i64>
-         ( static_cast<const State<jl_i64>&>(state),
-           reinterpret_cast<jl_i64(*)()>(function_ptr) );
-        break;
-    case Type::U8:
-        sa = new StateAssignment<jl_u8>
-         ( static_cast<const State<jl_u8>&>(state),
-           reinterpret_cast<jl_u8(*)()>(function_ptr) );
-        break;
-    case Type::U16:
-        sa = new StateAssignment<jl_u16>
-         ( static_cast<const State<jl_u16>&>(state),
-           reinterpret_cast<jl_u16(*)()>(function_ptr) );
-        break;
-    case Type::U32:
-        sa = new StateAssignment<jl_u32>
-         ( static_cast<const State<jl_u32>&>(state),
-           reinterpret_cast<jl_u32(*)()>(function_ptr) );
-        break;
-    case Type::U64:
-        sa = new StateAssignment<jl_u64>
-         ( static_cast<const State<jl_u64>&>(state),
-           reinterpret_cast<jl_u64(*)()>(function_ptr) );
-        break;
+    SA(DOUBLE, jl_double);
+    SA(S8, jl_s8);
+    SA(S16, jl_s16);
+    SA(S32, jl_s32);
+    SA(S64, jl_s64);
+    SA(U8, jl_u8);
+    SA(U16, jl_u16);
+    SA(U32, jl_u32);
+    SA(U64, jl_u64);
     case Type::STRING:
     {
         // Cast from string to std::string and destroy original
@@ -279,6 +238,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         assert( false && "Generating a stateassignment of unhandled type" );
         sa = nullptr;
     }
+#undef SA
     return std::unique_ptr<StateAssignmentBase>( sa );
 }
 
@@ -307,17 +267,17 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::BOOL:
         ret = GenericValue( reinterpret_cast<jl_bool(*)()>(function_ptr)() );
         break;
-    case Type::I8:
-        ret = GenericValue( reinterpret_cast<jl_i8(*)()>(function_ptr)() );
+    case Type::S8:
+        ret = GenericValue( reinterpret_cast<jl_s8(*)()>(function_ptr)() );
         break;
-    case Type::I16:
-        ret = GenericValue( reinterpret_cast<jl_i16(*)()>(function_ptr)() );
+    case Type::S16:
+        ret = GenericValue( reinterpret_cast<jl_s16(*)()>(function_ptr)() );
         break;
-    case Type::I32:
-        ret = GenericValue( reinterpret_cast<jl_i32(*)()>(function_ptr)() );
+    case Type::S32:
+        ret = GenericValue( reinterpret_cast<jl_s32(*)()>(function_ptr)() );
         break;
-    case Type::I64:
-        ret = GenericValue( reinterpret_cast<jl_i64(*)()>(function_ptr)() );
+    case Type::S64:
+        ret = GenericValue( reinterpret_cast<jl_s64(*)()>(function_ptr)() );
         break;
     case Type::U8:
         ret = GenericValue( reinterpret_cast<jl_u8(*)()>(function_ptr)() );
@@ -392,7 +352,7 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
         llvm::Value* argument_value = argument->CodeGen( *this );
         if( argument->GetType().IsVectorType() )
         {
-            for( unsigned i = 0; i < argument->GetType().GetNumElements(); ++i )
+            for( unsigned i = 0; i < argument->GetType().GetVectorSize(); ++i )
             {
                 llvm::Value* new_element = m_LLVMBuilder.CreateExtractElement(
                         argument_value,

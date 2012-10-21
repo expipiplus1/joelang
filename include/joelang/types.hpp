@@ -41,7 +41,6 @@
 namespace JoeLang
 {
 
-// This may need to be a full class to handle modifiers and things
 enum class Type
 {
     // Unknown type
@@ -57,10 +56,10 @@ enum class Type
     BOOL,
 
     // Signed integer types
-    I8,
-    I16,
-    I32,
-    I64,
+    S8,
+    S16,
+    S32,
+    S64,
 
     // Unsigned integer types
     U8,
@@ -81,10 +80,10 @@ enum class Type
 };
 
 using jl_bool   = bool;
-using jl_i8     = std::int8_t;
-using jl_i16    = std::int16_t;
-using jl_i32    = std::int32_t;
-using jl_i64    = std::int64_t;
+using jl_s8     = std::int8_t;
+using jl_s16    = std::int16_t;
+using jl_s32    = std::int32_t;
+using jl_s64    = std::int64_t;
 using jl_u8     = std::uint8_t;
 using jl_u16    = std::uint16_t;
 using jl_u32    = std::uint32_t;
@@ -100,76 +99,38 @@ struct JoeLangType
 {
 private:
     static constexpr
-    Type GetFloatingPointType()
-    {
-        return sizeof(T) == 4
-            ? Type::FLOAT
-            : sizeof(T) == 8
-                ? Type::DOUBLE
-                : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetUnsignedIntegralType()
-    {
-        return sizeof(T) == 1
-            ? Type::U8
-            : sizeof(T) == 2
-                ? Type::U16
-                : sizeof(T) == 4
-                    ? Type::U32
-                    : sizeof(T) == 8
-                        ? Type::U64
-                        : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetSignedIntegralType()
-    {
-        return sizeof(T) == 1
-            ? Type::I8
-            : sizeof(T) == 2
-                ? Type::I16
-                : sizeof(T) == 4
-                    ? Type::I32
-                    : sizeof(T) == 8
-                        ? Type::I64
-                        : Type::UNKNOWN;
-    }
-
-    static constexpr
-    Type GetIntegralType()
-    {
-        return std::is_signed<T>::value
-            ? GetSignedIntegralType()
-            : GetUnsignedIntegralType();
-    }
-
-    static constexpr
-    Type GetVectorType()
-    {
-        return   std::is_same<JoeMath::float2,T>::value
-               ? Type::FLOAT2
-               : std::is_same<JoeMath::float3,T>::value
-               ? Type::FLOAT3
-               : std::is_same<JoeMath::float4,T>::value
-               ? Type::FLOAT4
-               : Type::UNKNOWN;
-    }
-
-    static constexpr
     Type GetType()
     {
-        return    JoeMath::is_vector<T>::value
-                ? GetVectorType()
-                : std::is_floating_point<T>::value
-                ? GetFloatingPointType()
-                : std::is_same<bool,T>::value
+        return    std::is_same<T, jl_bool>::value
                 ? Type::BOOL
-                : std::is_same<std::string,T>::value
+                : std::is_same<T, jl_s8>::value
+                ? Type::S8
+                : std::is_same<T, jl_s16>::value
+                ? Type::S16
+                : std::is_same<T, jl_s32>::value
+                ? Type::S32
+                : std::is_same<T, jl_s64>::value
+                ? Type::S64
+                : std::is_same<T, jl_u8>::value
+                ? Type::U8
+                : std::is_same<T, jl_u16>::value
+                ? Type::U16
+                : std::is_same<T, jl_u32>::value
+                ? Type::U32
+                : std::is_same<T, jl_u64>::value
+                ? Type::U64
+                : std::is_same<T, jl_float>::value
+                ? Type::FLOAT
+                : std::is_same<T, jl_float2>::value
+                ? Type::FLOAT2
+                : std::is_same<T, jl_float3>::value
+                ? Type::FLOAT3
+                : std::is_same<T, jl_float4>::value
+                ? Type::FLOAT4
+                : std::is_same<T, jl_double>::value
+                ? Type::DOUBLE
+                : std::is_same<T, std::string>::value
                 ? Type::STRING
-                :std::is_integral<T>::value
-                ? GetIntegralType()
                 : Type::UNKNOWN;
     }
 

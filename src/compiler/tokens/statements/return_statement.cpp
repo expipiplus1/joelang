@@ -96,7 +96,8 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
 
     // Cast the return type to what we want if this fails, sema will know
     m_Expression = CastExpression::Create( return_type,
-                                           std::move(m_Expression) );
+                                           std::move(m_Expression),
+                                           false );
     m_Expression->PerformSema( sema );
 }
 

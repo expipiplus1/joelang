@@ -142,7 +142,8 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
     //
     for( unsigned i = 0; i < m_Arguments.size(); ++i )
         m_Arguments[i] = CastExpression::Create( types[i],
-                                                 std::move(m_Arguments[i]) );
+                                                 std::move(m_Arguments[i]),
+                                                 false );
 
     bool good = true;
 

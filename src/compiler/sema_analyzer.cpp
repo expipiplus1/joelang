@@ -208,24 +208,24 @@ std::map<std::string, GenericValue>
              static_cast<const State<jl_double>&>(state_base).GetEnumerations())
             ret[e.first] = GenericValue( e.second );
         break;
-    case Type::I8:
+    case Type::S8:
         for( const auto& e :
-             static_cast<const State<jl_i8>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_s8>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
         break;
-    case Type::I16:
+    case Type::S16:
         for( const auto& e :
-             static_cast<const State<jl_i16>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_s16>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::I32:
+    case Type::S32:
         for( const auto& e :
-             static_cast<const State<jl_i32>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_s32>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::I64:
+    case Type::S64:
         for( const auto& e :
-             static_cast<const State<jl_i64>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_s64>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
     case Type::U8:

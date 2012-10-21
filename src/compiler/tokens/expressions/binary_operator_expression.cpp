@@ -100,8 +100,12 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t, 
+                                              std::move(m_LeftSide), 
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide), 
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );
@@ -304,8 +308,12 @@ bool LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    m_LeftSide = CastExpression::Create( Type::BOOL, std::move(m_LeftSide) );
-    m_RightSide = CastExpression::Create( Type::BOOL, std::move(m_RightSide) );
+    m_LeftSide = CastExpression::Create( Type::BOOL, 
+                                         std::move(m_LeftSide),
+                                         false );
+    m_RightSide = CastExpression::Create( Type::BOOL, 
+                                          std::move(m_RightSide),
+                                          false );
 
     good &= m_LeftSide->PerformSema( sema );
     good &= m_RightSide->PerformSema( sema );
@@ -364,8 +372,12 @@ bool LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
 
-    m_LeftSide = CastExpression::Create( Type::BOOL, std::move(m_LeftSide) );
-    m_RightSide = CastExpression::Create( Type::BOOL, std::move(m_RightSide) );
+    m_LeftSide = CastExpression::Create( Type::BOOL, 
+                                         std::move(m_LeftSide), 
+                                         false );
+    m_RightSide = CastExpression::Create( Type::BOOL, 
+                                          std::move(m_RightSide),
+                                          false );
 
     good &= m_LeftSide->PerformSema( sema );
     good &= m_RightSide->PerformSema( sema );
@@ -435,8 +447,12 @@ bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t,
+                                              std::move(m_LeftSide), 
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide),
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );
@@ -503,8 +519,12 @@ bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t, 
+                                              std::move(m_LeftSide),
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide),
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );
@@ -569,8 +589,12 @@ bool AndExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t, 
+                                              std::move(m_LeftSide),
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide),
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );
@@ -728,8 +752,12 @@ bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t, 
+                                              std::move(m_LeftSide),
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide),
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );
@@ -844,8 +872,12 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, std::move(m_LeftSide) );
-        m_RightSide = CastExpression::Create( t, std::move(m_RightSide) );
+        m_LeftSide  = CastExpression::Create( t, 
+                                              std::move(m_LeftSide),
+                                              false );
+        m_RightSide = CastExpression::Create( t, 
+                                              std::move(m_RightSide),
+                                              false );
     }
 
     good &= m_LeftSide->PerformSema( sema );

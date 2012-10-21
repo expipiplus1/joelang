@@ -89,7 +89,8 @@ bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
         return false;
 
     m_Expression = CastExpression::Create( m_State->GetType(),
-                                           std::move(m_Expression) );
+                                           std::move(m_Expression),
+                                           false );
 
     if( !m_Expression->PerformSema( sema ) )
         return false;
@@ -124,25 +125,25 @@ std::unique_ptr<StateAssignmentBase>
                           new ConstStateAssignment<jl_bool>(
                                  static_cast<const State<jl_bool>&>(*m_State),
                                  v.GetBool() ) );
-        case Type::I8:
+        case Type::S8:
             return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_i8>(
-                                 static_cast<const State<jl_i8>&>(*m_State),
+                          new ConstStateAssignment<jl_s8>(
+                                 static_cast<const State<jl_s8>&>(*m_State),
                                  v.GetI8() ) );
-        case Type::I16:
+        case Type::S16:
             return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_i16>(
-                                 static_cast<const State<jl_i16>&>(*m_State),
+                          new ConstStateAssignment<jl_s16>(
+                                 static_cast<const State<jl_s16>&>(*m_State),
                                  v.GetI16() ) );
-        case Type::I32:
+        case Type::S32:
             return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_i32>(
-                                 static_cast<const State<jl_i32>&>(*m_State),
+                          new ConstStateAssignment<jl_s32>(
+                                 static_cast<const State<jl_s32>&>(*m_State),
                                  v.GetI32() ) );
-        case Type::I64:
+        case Type::S64:
             return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_i64>(
-                                 static_cast<const State<jl_i64>&>(*m_State),
+                          new ConstStateAssignment<jl_s64>(
+                                 static_cast<const State<jl_s64>&>(*m_State),
                                  v.GetI64() ) );
         case Type::U8:
             return std::unique_ptr<StateAssignmentBase>(
