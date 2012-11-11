@@ -49,7 +49,6 @@
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/Target/TargetData.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <joelang/context.hpp>
