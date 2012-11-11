@@ -265,7 +265,8 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         { TerminalType::IDENTIFIER,           "identifier"            }
     };
     
-    assert( s_TerminalStringMap.find( terminal_type ) != s_TerminalStringMap.end() &&
+    assert( s_TerminalStringMap.find( terminal_type ) != 
+            s_TerminalStringMap.end() &&
             "Trying to get the string for an unknown terminal" );
     return s_TerminalStringMap.at( terminal_type );
 }

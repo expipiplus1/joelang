@@ -51,14 +51,14 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
     {
         Type::DOUBLE,
         Type::FLOAT,
-        Type::U64,
-        Type::S64,
-        Type::U32,
-        Type::S32,
-        Type::U16,
-        Type::S16,
-        Type::U8,
-        Type::S8,
+        Type::ULONG,
+        Type::LONG,
+        Type::UINT,
+        Type::INT,
+        Type::USHORT,
+        Type::SHORT,
+        Type::UCHAR,
+        Type::CHAR,
         Type::BOOL
     };
 
@@ -120,8 +120,7 @@ Type GetVectorType( Type base, unsigned size )
         {{{ Type::FLOAT, Type::FLOAT2, Type::FLOAT3, Type::FLOAT4 }}}
     };
 
-    
-    assert( size <= 4 && size != 0 && "Trying to get an invalid vector size " ); 
+    assert( size <= 4 && size != 0 && "Trying to get an invalid vector size " );
     
     for( auto& a : t )
     {
@@ -137,22 +136,22 @@ Type GetScalarType( Type t )
     {
     case Type::BOOL:
         return Type::BOOL;
-    case Type::S8:
-        return Type::S8;
-    case Type::S16:
-        return Type::S16;
-    case Type::S32:
-        return Type::S32;
-    case Type::S64:
-        return Type::S64;
-    case Type::U8:
-        return Type::U8;
-    case Type::U16:
-        return Type::U16;
-    case Type::U32:
-        return Type::U32;
-    case Type::U64:
-        return Type::U64;
+    case Type::CHAR:
+        return Type::CHAR;
+    case Type::SHORT:
+        return Type::SHORT;
+    case Type::INT:
+        return Type::INT;
+    case Type::LONG:
+        return Type::LONG;
+    case Type::UCHAR:
+        return Type::UCHAR;
+    case Type::USHORT:
+        return Type::USHORT;
+    case Type::UINT:
+        return Type::UINT;
+    case Type::ULONG:
+        return Type::ULONG;
     case Type::FLOAT:
     case Type::FLOAT2:
     case Type::FLOAT3:
@@ -170,14 +169,14 @@ Type GetScalarType( Type t )
 bool IsIntegral( Type t )
 {
     return t == Type::BOOL ||
-           t == Type::S8   ||
-           t == Type::S16  ||
-           t == Type::S32  ||
-           t == Type::S64  ||
-           t == Type::U8   ||
-           t == Type::U16  ||
-           t == Type::U32  ||
-           t == Type::U64;
+           t == Type::CHAR   ||
+           t == Type::SHORT  ||
+           t == Type::INT  ||
+           t == Type::LONG  ||
+           t == Type::UCHAR   ||
+           t == Type::USHORT  ||
+           t == Type::UINT  ||
+           t == Type::ULONG;
 }
 
 bool IsFloatingPoint( Type t )
@@ -191,10 +190,10 @@ bool IsFloatingPoint( Type t )
 
 bool IsSigned( Type t )
 {
-    return t == Type::S64 ||
-           t == Type::S32 ||
-           t == Type::S16 ||
-           t == Type::S8;
+    return t == Type::LONG ||
+           t == Type::INT ||
+           t == Type::SHORT ||
+           t == Type::CHAR;
 }
 
 bool IsVectorType( Type t )
@@ -250,14 +249,14 @@ unsigned GetNumElementsInType( Type t )
         return 3;
     case Type::FLOAT2:
         return 2;
-    case Type::U64:
-    case Type::S64:
-    case Type::U32:
-    case Type::S32:
-    case Type::U16:
-    case Type::S16:
-    case Type::U8:
-    case Type::S8:
+    case Type::ULONG:
+    case Type::LONG:
+    case Type::UINT:
+    case Type::INT:
+    case Type::USHORT:
+    case Type::SHORT:
+    case Type::UCHAR:
+    case Type::CHAR:
     case Type::BOOL:
     case Type::FLOAT:
     case Type::DOUBLE:
@@ -280,18 +279,18 @@ std::size_t SizeOf( Type t )
         return 12;
     case Type::FLOAT2:
     case Type::DOUBLE:
-    case Type::U64:
-    case Type::S64:
+    case Type::ULONG:
+    case Type::LONG:
         return 8;
     case Type::FLOAT:
-    case Type::U32:
-    case Type::S32:
+    case Type::UINT:
+    case Type::INT:
         return 4;
-    case Type::U16:
-    case Type::S16:
+    case Type::USHORT:
+    case Type::SHORT:
         return 2;
-    case Type::U8:
-    case Type::S8:
+    case Type::UCHAR:
+    case Type::CHAR:
     case Type::BOOL:
         return 1;
     default:
@@ -306,14 +305,14 @@ Type MakeUnsigned( Type t )
             "Trying to make an invalid type unsigned" );
     switch( t )
     {
-    case Type::S8:
-        return Type::U8;
-    case Type::S16:
-        return Type::U16;
-    case Type::S32:
-        return Type::U32;
-    case Type::S64:
-        return Type::U64;
+    case Type::CHAR:
+        return Type::UCHAR;
+    case Type::SHORT:
+        return Type::USHORT;
+    case Type::INT:
+        return Type::UINT;
+    case Type::LONG:
+        return Type::ULONG;
     default:
         // t is already unsigned;
         return t;
@@ -330,14 +329,14 @@ const std::string& GetTypeString( Type t )
         { Type::FLOAT2,       "float2" },
         { Type::FLOAT3,       "float3" },
         { Type::FLOAT4,       "float4" },
-        { Type::U64,          "u64" },
-        { Type::S64,          "i64" },
-        { Type::U32,          "u32" },
-        { Type::S32,          "i32" },
-        { Type::U16,          "u16" },
-        { Type::S16,          "i16" },
-        { Type::U8,           "u8" },
-        { Type::S8,           "i8" },
+        { Type::ULONG,          "u64" },
+        { Type::LONG,          "i64" },
+        { Type::UINT,          "u32" },
+        { Type::INT,          "i32" },
+        { Type::USHORT,          "u16" },
+        { Type::SHORT,          "i16" },
+        { Type::UCHAR,           "u8" },
+        { Type::CHAR,           "i8" },
         { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
         { Type::ARRAY,        "array" },
@@ -355,8 +354,8 @@ bool HasGLSLType( Type t )
         Type::FLOAT2,
         Type::FLOAT3,
         Type::FLOAT4,
-        Type::U32,
-        Type::S32,
+        Type::UINT,
+        Type::INT,
         Type::BOOL,
         Type::VOID,
     };
@@ -372,8 +371,8 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT2,       "vec2" },
         { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
-        { Type::U32,          "uint" },
-        { Type::S32,          "int" },
+        { Type::UINT,          "uint" },
+        { Type::INT,          "int" },
         { Type::BOOL,         "bool" },
         { Type::VOID,         "void" },
     };

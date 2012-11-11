@@ -46,7 +46,7 @@ jl_string String_Copy( jl_string from );
 void String_Move( jl_string& to, jl_string&& from );
 */
 
-jl_string String_Create( jl_u32 size, const jl_u8* data );
+jl_string String_Create( jl_uint size, const jl_uchar* data );
 
 void String_Destroy( jl_string a );
 

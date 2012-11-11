@@ -318,7 +318,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
                 sema.Error( "Can't combine char with other type " +
                             GetTypeString( type ) );
             // Types are signed by default
-            type = Type::S8;
+            type = Type::CHAR;
             has_type = true;
             break;
         case TypeSpec::SHORT:
@@ -326,7 +326,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
                 sema.Error( "Can't combine short with other type " +
                             GetTypeString( type ) );
             // Types are signed by default
-            type = Type::S16;
+            type = Type::SHORT;
             has_type = true;
             break;
         case TypeSpec::INT:
@@ -334,14 +334,14 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             {
                 if( !IsIntegral( type ) ||
                     type == Type::BOOL ||
-                    type == Type::S32 )
+                    type == Type::INT )
                     sema.Error( "Can't combine int with other type " +
                             GetTypeString( type ) );
                 // Don't change the type
             }
             else
             {
-                type = Type::S32;
+                type = Type::INT;
                 has_type = true;
             }
             break;
@@ -350,13 +350,13 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             {
                 if( !IsIntegral( type ) ||
                     type == Type::BOOL ||
-                    type == Type::S8 ||
-                    type == Type::S16 )
+                    type == Type::CHAR ||
+                    type == Type::SHORT )
                     sema.Error( "Can't combine long with other type " +
                                 GetTypeString( type ) );
             }
             has_type = true;
-            type = Type::S64;
+            type = Type::LONG;
             break;
         case TypeSpec::SIGNED:
             if( has_type )
@@ -370,7 +370,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             else
             {
                 has_type = true;
-                type = Type::S32;
+                type = Type::INT;
             }
             is_signed = true;
             break;
@@ -389,7 +389,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             else
             {
                 has_type = true;
-                type = Type::U32;
+                type = Type::UINT;
             }
             break;
         }
@@ -461,12 +461,12 @@ Type TypeSpecifier::GetType() const
     {
         { TypeSpec::VOID,     Type::VOID   },
         { TypeSpec::BOOL,     Type::BOOL   },
-        { TypeSpec::CHAR,     Type::S8     },
-        { TypeSpec::SHORT,    Type::S16    },
-        { TypeSpec::INT,      Type::S32    },
-        { TypeSpec::LONG,     Type::S64    },
-        { TypeSpec::SIGNED,   Type::S32    },
-        { TypeSpec::UNSIGNED, Type::U32    },
+        { TypeSpec::CHAR,     Type::CHAR     },
+        { TypeSpec::SHORT,    Type::SHORT    },
+        { TypeSpec::INT,      Type::INT    },
+        { TypeSpec::LONG,     Type::LONG    },
+        { TypeSpec::SIGNED,   Type::INT    },
+        { TypeSpec::UNSIGNED, Type::UINT    },
         { TypeSpec::FLOAT,    Type::FLOAT  },
         { TypeSpec::FLOAT2,   Type::FLOAT2 },
         { TypeSpec::FLOAT3,   Type::FLOAT3 },

@@ -152,7 +152,7 @@ public:
       *   The integer suffix
       */
     explicit
-    IntegerLiteralExpression( jl_u64 value,
+    IntegerLiteralExpression( jl_ulong value,
                               Suffix suffix );
     virtual
     ~IntegerLiteralExpression();
@@ -190,10 +190,10 @@ private:
       */
     static
     bool ParseInteger( std::string string,
-                       jl_u64&  value,
+                       jl_ulong&  value,
                        Suffix&     suffix );
 
-    jl_u64 m_Value;
+    jl_ulong m_Value;
     Suffix m_Suffix;
 };
 

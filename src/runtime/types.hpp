@@ -38,14 +38,14 @@ extern "C"
 {
 
 using jl_bool   = bool;
-using jl_s8     = int8_t;
-using jl_s16    = int16_t;
-using jl_s32    = int32_t;
-using jl_s64    = int64_t;
-using jl_u8     = uint8_t;
-using jl_u16    = uint16_t;
-using jl_u32    = uint32_t;
-using jl_u64    = uint64_t;
+using jl_char     = int8_t;
+using jl_short    = int16_t;
+using jl_int    = int32_t;
+using jl_long    = int64_t;
+using jl_uchar     = uint8_t;
+using jl_ushort    = uint16_t;
+using jl_uint    = uint32_t;
+using jl_ulong    = uint64_t;
 using jl_float  = float;
 using jl_float2 = JoeMath::float2;
 using jl_float3 = JoeMath::float3;
@@ -54,8 +54,8 @@ using jl_double = double;
 
 struct jl_string
 {
-    jl_u32 size;
-    const jl_u8* data;
+    jl_uint size;
+    const jl_uchar* data;
 };
 
 }

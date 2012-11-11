@@ -56,16 +56,16 @@ enum class Type
     BOOL,
 
     // Signed integer types
-    S8,
-    S16,
-    S32,
-    S64,
+    CHAR,
+    SHORT,
+    INT,
+    LONG,
 
     // Unsigned integer types
-    U8,
-    U16,
-    U32,
-    U64,
+    UCHAR,
+    USHORT,
+    UINT,
+    ULONG,
 
     // Floating point types
     FLOAT,
@@ -80,14 +80,14 @@ enum class Type
 };
 
 using jl_bool   = bool;
-using jl_s8     = std::int8_t;
-using jl_s16    = std::int16_t;
-using jl_s32    = std::int32_t;
-using jl_s64    = std::int64_t;
-using jl_u8     = std::uint8_t;
-using jl_u16    = std::uint16_t;
-using jl_u32    = std::uint32_t;
-using jl_u64    = std::uint64_t;
+using jl_char   = std::int8_t;
+using jl_short  = std::int16_t;
+using jl_int    = std::int32_t;
+using jl_long   = std::int64_t;
+using jl_uchar  = std::uint8_t;
+using jl_ushort = std::uint16_t;
+using jl_uint   = std::uint32_t;
+using jl_ulong  = std::uint64_t;
 using jl_float  = float;
 using jl_double = double;
 using jl_float2 = JoeMath::float2;
@@ -103,22 +103,22 @@ private:
     {
         return    std::is_same<T, jl_bool>::value
                 ? Type::BOOL
-                : std::is_same<T, jl_s8>::value
-                ? Type::S8
-                : std::is_same<T, jl_s16>::value
-                ? Type::S16
-                : std::is_same<T, jl_s32>::value
-                ? Type::S32
-                : std::is_same<T, jl_s64>::value
-                ? Type::S64
-                : std::is_same<T, jl_u8>::value
-                ? Type::U8
-                : std::is_same<T, jl_u16>::value
-                ? Type::U16
-                : std::is_same<T, jl_u32>::value
-                ? Type::U32
-                : std::is_same<T, jl_u64>::value
-                ? Type::U64
+                : std::is_same<T, jl_char>::value
+                ? Type::CHAR
+                : std::is_same<T, jl_short>::value
+                ? Type::SHORT
+                : std::is_same<T, jl_int>::value
+                ? Type::INT
+                : std::is_same<T, jl_long>::value
+                ? Type::LONG
+                : std::is_same<T, jl_uchar>::value
+                ? Type::UCHAR
+                : std::is_same<T, jl_ushort>::value
+                ? Type::USHORT
+                : std::is_same<T, jl_uint>::value
+                ? Type::UINT
+                : std::is_same<T, jl_ulong>::value
+                ? Type::ULONG
                 : std::is_same<T, jl_float>::value
                 ? Type::FLOAT
                 : std::is_same<T, jl_float2>::value

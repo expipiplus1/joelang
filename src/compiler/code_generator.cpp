@@ -206,14 +206,14 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         break;
     }
     SA(DOUBLE, jl_double);
-    SA(S8, jl_s8);
-    SA(S16, jl_s16);
-    SA(S32, jl_s32);
-    SA(S64, jl_s64);
-    SA(U8, jl_u8);
-    SA(U16, jl_u16);
-    SA(U32, jl_u32);
-    SA(U64, jl_u64);
+    SA(CHAR,   jl_char);
+    SA(SHORT,  jl_short);
+    SA(INT,    jl_int);
+    SA(LONG,   jl_long);
+    SA(UCHAR,  jl_uchar);
+    SA(USHORT, jl_ushort);
+    SA(UINT,   jl_uint);
+    SA(ULONG,  jl_ulong);
     case Type::STRING:
     {
         // Cast from string to std::string and destroy original
@@ -266,29 +266,29 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::BOOL:
         ret = GenericValue( reinterpret_cast<jl_bool(*)()>(function_ptr)() );
         break;
-    case Type::S8:
-        ret = GenericValue( reinterpret_cast<jl_s8(*)()>(function_ptr)() );
+    case Type::CHAR:
+        ret = GenericValue( reinterpret_cast<jl_char(*)()>(function_ptr)() );
         break;
-    case Type::S16:
-        ret = GenericValue( reinterpret_cast<jl_s16(*)()>(function_ptr)() );
+    case Type::SHORT:
+        ret = GenericValue( reinterpret_cast<jl_short(*)()>(function_ptr)() );
         break;
-    case Type::S32:
-        ret = GenericValue( reinterpret_cast<jl_s32(*)()>(function_ptr)() );
+    case Type::INT:
+        ret = GenericValue( reinterpret_cast<jl_int(*)()>(function_ptr)() );
         break;
-    case Type::S64:
-        ret = GenericValue( reinterpret_cast<jl_s64(*)()>(function_ptr)() );
+    case Type::LONG:
+        ret = GenericValue( reinterpret_cast<jl_long(*)()>(function_ptr)() );
         break;
-    case Type::U8:
-        ret = GenericValue( reinterpret_cast<jl_u8(*)()>(function_ptr)() );
+    case Type::UCHAR:
+        ret = GenericValue( reinterpret_cast<jl_uchar(*)()>(function_ptr)() );
         break;
-    case Type::U16:
-        ret = GenericValue( reinterpret_cast<jl_u16(*)()>(function_ptr)() );
+    case Type::USHORT:
+        ret = GenericValue( reinterpret_cast<jl_ushort(*)()>(function_ptr)() );
         break;
-    case Type::U32:
-        ret = GenericValue( reinterpret_cast<jl_u32(*)()>(function_ptr)() );
+    case Type::UINT:
+        ret = GenericValue( reinterpret_cast<jl_uint(*)()>(function_ptr)() );
         break;
-    case Type::U64:
-        ret = GenericValue( reinterpret_cast<jl_u64(*)()>(function_ptr)() );
+    case Type::ULONG:
+        ret = GenericValue( reinterpret_cast<jl_ulong(*)()>(function_ptr)() );
         break;
     case Type::FLOAT:
         ret = GenericValue( reinterpret_cast<jl_float(*)()>(function_ptr)() );
@@ -355,11 +355,11 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
             {
                 llvm::Value* new_element = m_LLVMBuilder.CreateExtractElement(
                         argument_value,
-                        CreateInteger( i, Type::U32 ) );
+                        CreateInteger( i, Type::UINT ) );
                 ret = m_LLVMBuilder.CreateInsertElement(
-                                                ret,
-                                                new_element,
-                                                CreateInteger( p, Type::U32 ) );
+                                               ret,
+                                               new_element,
+                                               CreateInteger( p, Type::UINT ) );
                 ++p;
             }
         }
@@ -368,9 +368,9 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
             assert( argument->GetType().IsScalarType() &&
                     "Trying to use an unhandled type in vector constructor" );
             ret = m_LLVMBuilder.CreateInsertElement(
-                                                ret,
-                                                argument_value,
-                                                CreateInteger( p, Type::U32 ) );
+                                               ret,
+                                               argument_value,
+                                               CreateInteger( p, Type::UINT ) );
             ++p;
         }
     }
@@ -795,15 +795,15 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
     //
 
     // u32 here because that's what's used in string for size
-    llvm::Constant* size_constant = CreateInteger( value.size(), Type::U32 );
+    llvm::Constant* size_constant = CreateInteger( value.size(), Type::UINT );
 
     llvm::ArrayType* array_type = llvm::ArrayType::get(
-                                         m_Runtime.GetLLVMType( Type::U8 ),
+                                         m_Runtime.GetLLVMType( Type::UCHAR ),
                                          value.size() );
 
     std::vector<llvm::Constant*> characters;
     for( char c : value )
-        characters.push_back( CreateInteger( c, Type::U8 ) );
+        characters.push_back( CreateInteger( c, Type::UCHAR ) );
 
     llvm::Constant* data_constant = llvm::ConstantArray::get( array_type,
                                                               characters );
@@ -816,7 +816,7 @@ llvm::Constant* CodeGenerator::CreateString( const std::string& value )
                                            data_constant,
                                            "string_data" );
 
-    llvm::Constant* zero = CreateInteger( 0, Type::U32 );
+    llvm::Constant* zero = CreateInteger( 0, Type::UINT );
     llvm::Constant* args[] = { zero, zero };
     llvm::Constant* data_ptr =
                     llvm::ConstantExpr::getInBoundsGetElementPtr( data_array,
@@ -995,7 +995,7 @@ llvm::Value* CodeGenerator::CreateFunctionCall(
         // TODO default arguments
         //else
             //llvm_argumens.push_back(
-                               //function->GetDefaultArgument->CodeGen( *this ) );
+                             //function->GetDefaultArgument->CodeGen( *this ) );
     return m_LLVMBuilder.CreateCall( function->GetLLVMFunction(),
                                      std::move(llvm_arguments) );
 }
