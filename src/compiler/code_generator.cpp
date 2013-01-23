@@ -38,18 +38,17 @@
 
 #include <x86intrin.h>
 
-#include <llvm/BasicBlock.h>
-#include <llvm/Function.h>
-#include <llvm/GlobalVariable.h>
-#include <llvm/IRBuilder.h>
-#include <llvm/Module.h>
 #include <llvm/PassManager.h>
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/Target/TargetData.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
 #include <joelang/context.hpp>

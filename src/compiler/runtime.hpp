@@ -32,7 +32,7 @@
 #include <string>
 #include <vector>
 
-#include <llvm/IRBuilder.h>
+#include <llvm/IR/IRBuilder.h>
 
 #ifdef __i386
 #define ARCH_I386

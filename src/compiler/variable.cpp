@@ -35,9 +35,9 @@
 #include <utility>
 #include <vector>
 
-#include <llvm/Argument.h>
-#include <llvm/GlobalVariable.h>
-#include <llvm/Value.h>
+#include <llvm/IR/Argument.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/IR/Value.h>
 
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
