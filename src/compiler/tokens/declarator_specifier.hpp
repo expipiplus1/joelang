@@ -166,7 +166,8 @@ class SemanticSpecifier : public JoeLang::Compiler::Token
 {
 public:
     /** This constructor asserts on an empty string **/
-    SemanticSpecifier  ( std::string string, Expression_up index_expression = nullptr );
+    SemanticSpecifier  ( std::string string, 
+                         Expression_up index_expression = nullptr );
     virtual
     ~SemanticSpecifier ();
 

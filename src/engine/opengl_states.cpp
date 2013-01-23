@@ -135,9 +135,11 @@ void RegisterOpenGLStates( Context& context )
     State<uint2> blend_equation_separate( "blend_equation_separate",
                                          blend_equation_enumerants );
     blend_equation_separate.SetCallbacks( [](uint2 v)->void
-                                          {glBlendEquationSeparate(v.x(), v.y());},
+                                          {glBlendEquationSeparate(v.x(), 
+                                                                   v.y());},
                                           []()->void
-                                          {glBlendEquation(GL_FUNC_ADD, GL_FUNC_ADD);} );
+                                          {glBlendEquation(GL_FUNC_ADD, 
+                                                           GL_FUNC_ADD);} );
 
     static
     State<uint2> blend_func( "blend_func", blend_func_enumerants );
@@ -147,9 +149,13 @@ void RegisterOpenGLStates( Context& context )
                              {glBlendFunc(GL_ONE, GL_ZERO);} );
 
     static
-    State<uint4> blend_func_separate( "blend_func_separate", blend_func_enumerants );
+    State<uint4> blend_func_separate( "blend_func_separate", 
+                                      blend_func_enumerants );
     blend_func_separate.SetCallbacks( [](uint4 v)->void
-                                      {glBlendFuncSeparate(v.x(), v.y(), v.z(), v.w());},
+                                      {glBlendFuncSeparate(v.x(), 
+                                                           v.y(), 
+                                                           v.z(), 
+                                                           v.w());},
                                       []()->void
                                       {glBlendFuncSeparate(GL_ONE, GL_ZERO,
                                                            GL_ONE, GL_ZERO);} );

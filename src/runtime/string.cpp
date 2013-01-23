@@ -46,7 +46,7 @@ jl_string String_Concat( jl_string a, jl_string b )
 {
     jl_string ret;
     ret.size = a.size + b.size;
-    jl_u8* data = new jl_u8[ret.size];
+    jl_uchar* data = new jl_uchar[ret.size];
     memcpy( data, a.data, a.size );
     memcpy( data + a.size, b.data, b.size );
     ret.data = data;
@@ -57,7 +57,7 @@ jl_string String_Copy( jl_string from )
 {
     jl_string ret;
     ret.size = from.size;
-    jl_u8* data = new jl_u8[ret.size];
+    jl_uchar* data = new jl_uchar[ret.size];
     memcpy( data, from.data, from.size );
     ret.data = data;
     return ret;
@@ -76,11 +76,11 @@ void String_Move( jl_string& to, jl_string&& from )
 }
 */
 
-jl_string String_Create( jl_u32 size, const jl_u8* data )
+jl_string String_Create( jl_uint size, const jl_uchar* data )
 {
     jl_string ret;
     ret.size = size;
-    jl_u8* ret_data = new jl_u8[ret.size];
+    jl_uchar* ret_data = new jl_uchar[ret.size];
     memcpy( ret_data, data, ret.size );
     ret.data = data;
     return ret;

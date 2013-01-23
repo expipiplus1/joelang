@@ -83,28 +83,28 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
     case Type::BOOL:
         m_BoolValue = g.m_BoolValue;
         break;
-    case Type::S8:
+    case Type::CHAR:
         m_I8Value = g.m_I8Value;
         break;
-    case Type::S16:
+    case Type::SHORT:
         m_I16Value = g.m_I16Value;
         break;
-    case Type::S32:
+    case Type::INT:
         m_I32Value = g.m_I32Value;
         break;
-    case Type::S64:
+    case Type::LONG:
         m_I64Value = g.m_I64Value;
         break;
-    case Type::U8:
+    case Type::UCHAR:
         m_U8Value = g.m_U8Value;
         break;
-    case Type::U16:
+    case Type::USHORT:
         m_U16Value = g.m_U16Value;
         break;
-    case Type::U32:
+    case Type::UINT:
         m_U32Value = g.m_U32Value;
         break;
-    case Type::U64:
+    case Type::ULONG:
         m_U64Value = g.m_U64Value;
         break;
     case Type::FLOAT:
@@ -146,50 +146,50 @@ GenericValue::GenericValue( jl_bool   bool_value   )
 {
 }
 
-GenericValue::GenericValue( jl_s8     i8_value     )
-    :m_Type( Type::S8 )
+GenericValue::GenericValue( jl_char     i8_value     )
+    :m_Type( Type::CHAR )
     ,m_I8Value( i8_value )
 {
 }
 
-GenericValue::GenericValue( jl_s16    i16_value    )
-    :m_Type( Type::S16 )
+GenericValue::GenericValue( jl_short    i16_value    )
+    :m_Type( Type::SHORT )
     ,m_I16Value( i16_value )
 {
 }
 
-GenericValue::GenericValue( jl_s32    i32_value    )
-    :m_Type( Type::S32 )
+GenericValue::GenericValue( jl_int    i32_value    )
+    :m_Type( Type::INT )
     ,m_I32Value( i32_value )
 {
 }
 
-GenericValue::GenericValue( jl_s64    i64_value    )
-    :m_Type( Type::S64 )
+GenericValue::GenericValue( jl_long    i64_value    )
+    :m_Type( Type::LONG )
     ,m_I64Value( i64_value )
 {
 }
 
-GenericValue::GenericValue( jl_u8     u8_value     )
-    :m_Type( Type::U8 )
+GenericValue::GenericValue( jl_uchar     u8_value     )
+    :m_Type( Type::UCHAR )
     ,m_U8Value( u8_value )
 {
 }
 
-GenericValue::GenericValue( jl_u16    u16_value    )
-    :m_Type( Type::U16 )
+GenericValue::GenericValue( jl_ushort    u16_value    )
+    :m_Type( Type::USHORT )
     ,m_U16Value( u16_value )
 {
 }
 
-GenericValue::GenericValue( jl_u32    u32_value    )
-    :m_Type( Type::U32 )
+GenericValue::GenericValue( jl_uint    u32_value    )
+    :m_Type( Type::UINT )
     ,m_U32Value( u32_value )
 {
 }
 
-GenericValue::GenericValue( jl_u64    u64_value    )
-    :m_Type( Type::U64 )
+GenericValue::GenericValue( jl_ulong    u64_value    )
+    :m_Type( Type::ULONG )
     ,m_U64Value( u64_value )
 {
 }
@@ -270,22 +270,22 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
     {
     case Type::BOOL:
         return code_gen.CreateInteger( m_BoolValue, Type::BOOL );
-    case Type::S8:
-        return code_gen.CreateInteger( m_I8Value, Type::S8 );
-    case Type::S16:
-        return code_gen.CreateInteger( m_I16Value, Type::S16 );
-    case Type::S32:
-        return code_gen.CreateInteger( m_I32Value, Type::S32 );
-    case Type::S64:
-        return code_gen.CreateInteger( m_I64Value, Type::S64 );
-    case Type::U8:
-        return code_gen.CreateInteger( m_U8Value,  Type::U8 );
-    case Type::U16:
-        return code_gen.CreateInteger( m_U16Value, Type::U16 );
-    case Type::U32:
-        return code_gen.CreateInteger( m_U32Value, Type::U32 );
-    case Type::U64:
-        return code_gen.CreateInteger( m_U64Value, Type::U64 );
+    case Type::CHAR:
+        return code_gen.CreateInteger( m_I8Value, Type::CHAR );
+    case Type::SHORT:
+        return code_gen.CreateInteger( m_I16Value, Type::SHORT );
+    case Type::INT:
+        return code_gen.CreateInteger( m_I32Value, Type::INT );
+    case Type::LONG:
+        return code_gen.CreateInteger( m_I64Value, Type::LONG );
+    case Type::UCHAR:
+        return code_gen.CreateInteger( m_U8Value,  Type::UCHAR );
+    case Type::USHORT:
+        return code_gen.CreateInteger( m_U16Value, Type::USHORT );
+    case Type::UINT:
+        return code_gen.CreateInteger( m_U32Value, Type::UINT );
+    case Type::ULONG:
+        return code_gen.CreateInteger( m_U64Value, Type::ULONG );
     case Type::FLOAT:
         return code_gen.CreateFloating( m_FloatValue, Type::FLOAT );
     case Type::FLOAT2:
@@ -322,28 +322,28 @@ void GenericValue::Write( ShaderWriter& shader_writer ) const
     case Type::BOOL:
         shader_writer << m_BoolValue;
         break;
-    case Type::S8:
+    case Type::CHAR:
         shader_writer << m_I8Value;
         break;
-    case Type::S16:
+    case Type::SHORT:
         shader_writer << m_I16Value;
         break;
-    case Type::S32:
+    case Type::INT:
         shader_writer << m_I32Value;
         break;
-    case Type::S64:
+    case Type::LONG:
         shader_writer << m_I64Value;
         break;
-    case Type::U8:
+    case Type::UCHAR:
         shader_writer << m_U8Value;
         break;
-    case Type::U16:
+    case Type::USHORT:
         shader_writer << m_U16Value;
         break;
-    case Type::U32:
+    case Type::UINT:
         shader_writer << m_U32Value;
         break;
-    case Type::U64:
+    case Type::ULONG:
         shader_writer << m_U64Value;
         break;
     case Type::FLOAT:
@@ -460,58 +460,58 @@ jl_bool GenericValue::GetBool() const
     return m_BoolValue;
 }
 
-jl_s8 GenericValue::GetI8() const
+jl_char GenericValue::GetI8() const
 {
-    assert( m_Type == Type::S8 &&
+    assert( m_Type == Type::CHAR &&
             "Trying to get the i8 value from a non-i8 GenericValue" );
     return m_I8Value;
 }
 
-jl_s16 GenericValue::GetI16() const
+jl_short GenericValue::GetI16() const
 {
-    assert( m_Type == Type::S16 &&
+    assert( m_Type == Type::SHORT &&
             "Trying to get the i16 value from a non-i16 GenericValue" );
     return m_I16Value;
 }
 
-jl_s32 GenericValue::GetI32() const
+jl_int GenericValue::GetI32() const
 {
-    assert( m_Type == Type::S32 &&
+    assert( m_Type == Type::INT &&
             "Trying to get the i32 value from a non-i32 GenericValue" );
     return m_I32Value;
 }
 
-jl_s64 GenericValue::GetI64() const
+jl_long GenericValue::GetI64() const
 {
-    assert( m_Type == Type::S64 &&
+    assert( m_Type == Type::LONG &&
             "Trying to get the i64 value from a non-i64 GenericValue" );
     return m_I64Value;
 }
 
-jl_u8 GenericValue::GetU8() const
+jl_uchar GenericValue::GetU8() const
 {
-    assert( m_Type == Type::U8 &&
+    assert( m_Type == Type::UCHAR &&
             "Trying to get the u8 value from a non-u8 GenericValue" );
     return m_U8Value;
 }
 
-jl_u16 GenericValue::GetU16() const
+jl_ushort GenericValue::GetU16() const
 {
-    assert( m_Type == Type::U16 &&
+    assert( m_Type == Type::USHORT &&
             "Trying to get the u16 value from a non-u16 GenericValue" );
     return m_U16Value;
 }
 
-jl_u32 GenericValue::GetU32() const
+jl_uint GenericValue::GetU32() const
 {
-    assert( m_Type == Type::U32 &&
+    assert( m_Type == Type::UINT &&
             "Trying to get the u32 value from a non-u32 GenericValue" );
     return m_U32Value;
 }
 
-jl_u64 GenericValue::GetU64() const
+jl_ulong GenericValue::GetU64() const
 {
-    assert( m_Type == Type::U64 &&
+    assert( m_Type == Type::ULONG &&
             "Trying to get the u64 value from a non-u64 GenericValue" );
     return m_U64Value;
 }

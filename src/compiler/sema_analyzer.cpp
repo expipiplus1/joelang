@@ -208,44 +208,44 @@ std::map<std::string, GenericValue>
              static_cast<const State<jl_double>&>(state_base).GetEnumerations())
             ret[e.first] = GenericValue( e.second );
         break;
-    case Type::S8:
+    case Type::CHAR:
         for( const auto& e :
-             static_cast<const State<jl_s8>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_char>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
         break;
-    case Type::S16:
+    case Type::SHORT:
         for( const auto& e :
-             static_cast<const State<jl_s16>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_short>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::S32:
+    case Type::INT:
         for( const auto& e :
-             static_cast<const State<jl_s32>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_int>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::S64:
+    case Type::LONG:
         for( const auto& e :
-             static_cast<const State<jl_s64>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_long>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::U8:
+    case Type::UCHAR:
         for( const auto& e :
-             static_cast<const State<jl_u8>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_uchar>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::U16:
+    case Type::USHORT:
         for( const auto& e :
-             static_cast<const State<jl_u16>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_ushort>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
      break;
-    case Type::U32:
+    case Type::UINT:
         for( const auto& e :
-             static_cast<const State<jl_u32>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_uint>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
-    case Type::U64:
+    case Type::ULONG:
         for( const auto& e :
-             static_cast<const State<jl_u64>&>(state_base).GetEnumerations() )
+             static_cast<const State<jl_ulong>&>(state_base).GetEnumerations() )
             ret[e.first] = GenericValue( e.second );
          break;
     case Type::STRING:

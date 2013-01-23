@@ -1125,6 +1125,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     //
     // Verify that all the parameters can be converted into the correct base
     // type, if there's only one argument, then this is an explicit cast
+    // todo matrices
     //
     for( auto& argument : m_Arguments )
         argument = CastExpression::CreateBaseTypeCast(

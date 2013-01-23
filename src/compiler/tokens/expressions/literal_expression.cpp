@@ -112,35 +112,35 @@ std::unique_ptr<LiteralExpression> LiteralExpression::Create(
     case Type::BOOL:
         return std::unique_ptr<LiteralExpression>(
                                 new BooleanLiteralExpression( v.GetBool() ) );
-    case Type::S8:
+    case Type::CHAR:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                                  v.GetI8(),
                                  IntegerLiteralExpression::Suffix::CHAR ) );
-    case Type::S16:
+    case Type::SHORT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                                  v.GetI16(),
                                  IntegerLiteralExpression::Suffix::SHORT ) );
-    case Type::S32:
+    case Type::INT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                                  v.GetI32(),
                                  IntegerLiteralExpression::Suffix::INT ) );
-    case Type::S64:
+    case Type::LONG:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                                  v.GetI64(),
                                  IntegerLiteralExpression::Suffix::LONG ) );
-    case Type::U8:
+    case Type::UCHAR:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                            v.GetU8(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_CHAR ) );
-    case Type::U16:
+    case Type::USHORT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                            v.GetU16(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_SHORT ) );
-    case Type::U32:
+    case Type::UINT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                            v.GetU32(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_INT ) );
-    case Type::U64:
+    case Type::ULONG:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
                            v.GetU64(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_LONG ) );
@@ -177,7 +177,7 @@ bool LiteralExpression::classof( const LiteralExpression* e )
 // IntegerlLiteralExpression
 //------------------------------------------------------------------------------
 
-IntegerLiteralExpression::IntegerLiteralExpression( jl_u64 value,
+IntegerLiteralExpression::IntegerLiteralExpression( jl_ulong value,
                                                     Suffix suffix )
     :LiteralExpression( TokenTy::IntegerLiteralExpression )
     ,m_Value( value )
@@ -205,37 +205,37 @@ CompleteType IntegerLiteralExpression::GetType() const
     switch( m_Suffix )
     {
     case Suffix::CHAR:
-        type = Type::S8;
+        type = Type::CHAR;
         break;
     case Suffix::INT:
-        type = Type::S32;
+        type = Type::INT;
         break;
     case Suffix::SHORT:
-        type = Type::S16;
+        type = Type::SHORT;
         break;
     case Suffix::LONG:
-        type = Type::S64;
+        type = Type::LONG;
         break;
     case Suffix::UNSIGNED_CHAR:
-        type = Type::U8;
+        type = Type::UCHAR;
         break;
     case Suffix::UNSIGNED_INT:
-        type = Type::U32;
+        type = Type::UINT;
         break;
     case Suffix::UNSIGNED_SHORT:
-        type = Type::U16;
+        type = Type::USHORT;
         break;
     case Suffix::UNSIGNED_LONG:
-        type = Type::U64;
+        type = Type::ULONG;
         break;
     default:
-        type = m_Value <= jl_u64(std::numeric_limits<jl_s32>::max())
-                    ? Type::S32
-                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
-                        ? Type::U32
-                        : m_Value <= jl_u64(std::numeric_limits<jl_s64>::max())
-                            ? Type::S64
-                            : Type::U64;
+        type = m_Value <= jl_ulong(std::numeric_limits<jl_int>::max())
+                    ? Type::INT
+                    : m_Value <= jl_ulong(std::numeric_limits<jl_uint>::max())
+                    ? Type::UINT
+                    : m_Value <= jl_ulong(std::numeric_limits<jl_long>::max())
+                    ? Type::LONG
+                    : Type::ULONG;
         break;
     }
 
@@ -247,34 +247,34 @@ GenericValue IntegerLiteralExpression::GetValue() const
     switch( m_Suffix )
     {
     case Suffix::CHAR:
-        return GenericValue( jl_s8(m_Value) );
+        return GenericValue( jl_char(m_Value) );
     case Suffix::INT:
-        return GenericValue( jl_s32(m_Value) );
+        return GenericValue( jl_int(m_Value) );
     case Suffix::SHORT:
-        return GenericValue( jl_s16(m_Value) );
+        return GenericValue( jl_short(m_Value) );
     case Suffix::LONG:
-        return GenericValue( jl_s64(m_Value) );
+        return GenericValue( jl_long(m_Value) );
     case Suffix::UNSIGNED_CHAR:
-        return GenericValue( jl_u8(m_Value) );
+        return GenericValue( jl_uchar(m_Value) );
     case Suffix::UNSIGNED_INT:
-        return GenericValue( jl_u32(m_Value) );
+        return GenericValue( jl_uint(m_Value) );
     case Suffix::UNSIGNED_SHORT:
-        return GenericValue( jl_u16(m_Value) );
+        return GenericValue( jl_ushort(m_Value) );
     case Suffix::UNSIGNED_LONG:
-        return GenericValue( jl_u64(m_Value) );
+        return GenericValue( jl_ulong(m_Value) );
     default:
-        return m_Value <= jl_u64(std::numeric_limits<jl_s32>::max())
-                    ? GenericValue( jl_s32(m_Value) )
-                    : m_Value <= jl_u64(std::numeric_limits<jl_u32>::max())
-                        ? GenericValue( jl_u32(m_Value) )
-                        : m_Value <= jl_u64(std::numeric_limits<jl_s64>::max())
-                            ? GenericValue( jl_s64(m_Value) )
-                            : GenericValue( jl_u64(m_Value) );
+        return m_Value <= jl_ulong(std::numeric_limits<jl_int>::max())
+                    ? GenericValue( jl_int(m_Value) )
+                    : m_Value <= jl_ulong(std::numeric_limits<jl_uint>::max())
+                    ? GenericValue( jl_uint(m_Value) )
+                    : m_Value <= jl_ulong(std::numeric_limits<jl_long>::max())
+                    ? GenericValue( jl_long(m_Value) )
+                    : GenericValue( jl_ulong(m_Value) );
     }
 }
 
 bool IntegerLiteralExpression::ParseInteger( std::string string,
-                                             jl_u64& value,
+                                             jl_ulong& value,
                                              Suffix& suffix )
 {
     if( string.empty() )
@@ -363,7 +363,7 @@ bool IntegerLiteralExpression::Parse(
     if( !parser.ExpectTerminal( TerminalType::INTEGER_LITERAL, string ) )
         return false;
 
-    jl_u64 value;
+    jl_ulong value;
     Suffix suffix;
 
     if( !ParseInteger( string, value, suffix ) )
@@ -718,7 +718,7 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 llvm::Value* CharacterLiteralExpression::CodeGen(
                                                 CodeGenerator& code_gen ) const
 {
-    return code_gen.CreateInteger( m_Value, Type::S8 );
+    return code_gen.CreateInteger( m_Value, Type::CHAR );
 }
 
 void CharacterLiteralExpression::Write( ShaderWriter& shader_writer ) const
@@ -728,12 +728,12 @@ void CharacterLiteralExpression::Write( ShaderWriter& shader_writer ) const
 
 CompleteType CharacterLiteralExpression::GetType() const
 {
-    return CompleteType( Type::S8 );
+    return CompleteType( Type::CHAR );
 }
 
 GenericValue CharacterLiteralExpression::GetValue() const
 {
-    return GenericValue( jl_s8(m_Value) );
+    return GenericValue( jl_char(m_Value) );
 }
 
 bool CharacterLiteralExpression::Parse(

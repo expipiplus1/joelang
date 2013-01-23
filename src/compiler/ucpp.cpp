@@ -169,7 +169,7 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         { NUMBER,   TerminalType::INTEGER_LITERAL       }, // number constant 
         //{ NAME,   TerminalType:: // identifier 
         { BUNCH,    TerminalType::UNKNOWN_CHARACTER     }, // non-C characters 
-        { PRAGMA,   TerminalType::UNKNOWN_CHARACTER     }, // a #pragma directive 
+        { PRAGMA,   TerminalType::UNKNOWN_CHARACTER     }, // #pragma directive 
         { CONTEXT,  TerminalType::UNKNOWN_CHARACTER     }, // new file or #line 
         { STRING,   TerminalType::STRING_LITERAL        }, // constant "xxx" 
         { CHAR,     TerminalType::CHARACTER_LITERAL     }, // constant 'xxx' 

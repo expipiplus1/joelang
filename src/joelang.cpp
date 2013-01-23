@@ -46,7 +46,8 @@ int main( int argc, char** argv )
                                             << v << std::endl;} );
 
     JoeLang::State<float> my_state( "my_floating_state",
-                                    std::map<std::string,float>({{"one", 1}, {"two", 2}}) );
+                                    std::map<std::string,float>({{"one", 1}, 
+                                                                 {"two", 2}}) );
 
     my_state.SetCallbacks( [](float v) -> void
                              {std::cout << "setting my_floating_state to "

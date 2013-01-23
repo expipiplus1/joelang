@@ -102,10 +102,10 @@ Runtime::Runtime()
 
 #if defined( ARCH_X86_64 )
     m_StringType = llvm::cast<llvm::StructType>(
-                m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() );
+             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() );
 
     assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
-                m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
+             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
 #elif defined( ARCH_I386 )
     m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
 #else
