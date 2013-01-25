@@ -468,7 +468,7 @@ std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
             //
             Error( "Recursion in shader function: " +
                    current->GetSignatureString() );
-            return {};
+            return std::set<Function_sp>{};
         }
 
 

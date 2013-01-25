@@ -61,12 +61,12 @@ bool EmptyStatement::AlwaysReturns() const
 
 std::set<Function_sp> EmptyStatement::GetCallees() const
 {
-    return {};
+    return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> EmptyStatement::GetVariables() const
 {
-    return {};
+    return std::set<Variable_sp>{};
 }
 
 void EmptyStatement::PerformSema( SemaAnalyzer& sema,

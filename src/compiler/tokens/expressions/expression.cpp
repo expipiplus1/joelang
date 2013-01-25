@@ -1352,7 +1352,7 @@ CompleteType IdentifierExpression::GetType() const
 
 std::set<Function_sp> IdentifierExpression::GetCallees() const
 {
-    return {};
+    return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> IdentifierExpression::GetVariables() const

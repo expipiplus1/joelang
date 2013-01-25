@@ -69,7 +69,8 @@ class State : public StateBase
     static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a state with an unhandled type" );
 public:
-    State( std::string name, std::map<std::string, T> enumerations = {} );
+    using EnumerantMap = std::map<std::string, T>;
+    State( std::string name, EnumerantMap enumerations = EnumerantMap{} );
     virtual
     ~State() = default;
 

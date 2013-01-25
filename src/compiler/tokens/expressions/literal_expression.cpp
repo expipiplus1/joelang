@@ -73,12 +73,12 @@ bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
 
 std::set<Function_sp> LiteralExpression::GetCallees() const
 {
-    return {};
+    return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> LiteralExpression::GetVariables() const
 {
-    return {};
+    return std::set<Variable_sp>{};
 }
 
 bool LiteralExpression::IsConst() const

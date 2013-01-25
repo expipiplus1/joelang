@@ -70,7 +70,7 @@ std::set<Function_sp> ReturnStatement::GetCallees() const
     if( m_Expression )
         return m_Expression->GetCallees();
     else
-        return {};
+        return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> ReturnStatement::GetVariables() const
@@ -78,7 +78,7 @@ std::set<Variable_sp> ReturnStatement::GetVariables() const
     if( m_Expression )
         return m_Expression->GetVariables();
     else
-        return {};
+        return std::set<Variable_sp>{};
 }
 
 void ReturnStatement::PerformSema( SemaAnalyzer& sema,

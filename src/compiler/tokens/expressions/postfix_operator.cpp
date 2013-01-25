@@ -472,14 +472,14 @@ std::set<Function_sp> MemberAccessOperator::GetCallees(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> MemberAccessOperator::GetVariables(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    return std::set<Variable_sp>{};
 }
 
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
@@ -564,14 +564,14 @@ std::set<Function_sp> IncrementOrDecrementOperator::GetCallees(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    return std::set<Function_sp>{};
 }
 
 std::set<Variable_sp> IncrementOrDecrementOperator::GetVariables(
                                             const Expression& expression ) const
 {
     assert( false && "Complete me" );
-    return {};
+    return std::set<Variable_sp>{};
 }
 
 bool IncrementOrDecrementOperator::IsConst( const Expression& expression ) const
