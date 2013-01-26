@@ -527,7 +527,12 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
 
     const CompleteType& t = m_Expression->GetType();
     
-    assert( !t.IsUnknown() && "Trying to cast from unknown type" );
+    if( t.IsUnknown() )
+    {
+        sema.Error( "Trying to cast from unknown type" );
+        return false;
+    }
+
     assert( !m_CastType.IsUnknown() && "Trying to cast to unknown type" );
     
     if( t == m_CastType )
