@@ -264,10 +264,7 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         { TerminalType::FALSE,                "false"                 },
         { TerminalType::IDENTIFIER,           "identifier"            }
     };
-    
-    if( s_TerminalStringMap.find( terminal_type ) !=
-            s_TerminalStringMap.end() )
-        volatile int i = 0;
+
     assert( s_TerminalStringMap.find( terminal_type ) != 
             s_TerminalStringMap.end() &&
             "Trying to get the string for an unknown terminal" );
