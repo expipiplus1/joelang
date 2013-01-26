@@ -123,6 +123,7 @@ bool ReturnStatement::Parse( Parser& parser, ReturnStatement_up& token )
     // Parse the optional expression
     Expression_up expression;
     parser.Expect<Expression>( expression );
+    CHECK_PARSER;
 
     if( !parser.ExpectTerminal( TerminalType::SEMICOLON ) )
     {
