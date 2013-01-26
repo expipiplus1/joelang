@@ -134,7 +134,7 @@ bool Lexer::PeekIdentifier( std::string& string ) const
 
 std::size_t Lexer::GetPosition() const
 {
-    return ftell( m_File.get() );
+    return m_NumTokensLexed;
 }
 
 std::size_t Lexer::GetLineNumber() const
@@ -145,6 +145,7 @@ std::size_t Lexer::GetLineNumber() const
 void Lexer::AdvanceLexer()
 {
     m_TerminalType = m_LexerState->Lex( m_TerminalString );
+    ++m_NumTokensLexed;
 }
 
 } // namespace Compiler

@@ -117,10 +117,14 @@ private:
     // The type of the current terminal
     //
     TerminalType m_TerminalType;
+
+    //
+    // The number of tokens lexed
+    //
+    std::size_t m_NumTokensLexed = 0;
     
-    class FileCloser
+    struct FileCloser
     {
-    public:
         void operator()(std::FILE* f){if(f)std::fclose(f);};
     };
     
