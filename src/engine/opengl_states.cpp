@@ -32,9 +32,9 @@
 #include <GL/GLee.h>
 
 #if defined(__APPLE__)
-#include <OpenGL/gl.h>
+#include <OpenGL/gl3.h>
 #else
-#include <GL/gl.h>
+#include <GL3/gl3.h>
 #endif
 
 #include <joemath/joemath.hpp>
@@ -186,7 +186,6 @@ void RegisterOpenGLActions( Context& context )
     State<u32> clear( "clear",
                       {{"COLOR",  GL_COLOR_BUFFER_BIT},
                        {"DEPTH",  GL_DEPTH_BUFFER_BIT},
-                       {"ACCUM",  GL_ACCUM_BUFFER_BIT},
                        {"STENCIL",GL_STENCIL_BUFFER_BIT}} );
     clear.SetCallbacks( [](u32 v)->void
                         {glClear(v);} );
