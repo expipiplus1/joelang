@@ -77,10 +77,10 @@ bool Parser::Parse ( const std::string& string )
     return false;
 }
 
-bool Parser::PeekTerminal( TerminalType terminal_type )
+TerminalType Parser::PeekTerminal()
 {
     std::string dummy;
-    return terminal_type == m_Lexer->PeekNextTerminal( dummy );
+    return m_Lexer->PeekNextTerminal( dummy );
 }
 
 bool Parser::ExpectTerminal( TerminalType terminal_type )

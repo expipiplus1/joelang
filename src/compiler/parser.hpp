@@ -77,7 +77,7 @@ public:
       * \param terminal_type
       *   The terminal type to look for
       */
-    bool PeekTerminal       ( TerminalType terminal_type );
+    TerminalType PeekTerminal();
     /**
       * Function to try to match a terminal
       * \returns true if we have consumed a terminal
