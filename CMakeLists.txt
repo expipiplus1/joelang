@@ -166,8 +166,13 @@ add_custom_command(
     COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
-add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
-                                   SOURCES ${runtime_sources} )
+if( ${CMAKE_GENERATOR} STREQUAL "Xcode" )
+    add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc" )
+else()
+    add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
+                                       SOURCES ${runtime_sources} )
+endif()
+
 add_dependencies( joelang compile_runtime )
 
 #
