@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project( joelang )
 
-set( joelang_CXX_FLAGS "-fno-exceptions -Wall -std=c++11 -msse" CACHE STRING "joelang compiler options" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS}" )
+set( joelang_CXX_FLAGS -fno-exceptions -Wall -std=c++11 -msse CACHE STRING "joelang compiler options" )
+set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS} )
 
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
@@ -153,9 +153,17 @@ set( runtime_sources src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )
 
+set( JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set( JOELANG_RUNTIME_COMPILER ${CMAKE_CXX_COMPILER} )
+else()
+    set( JOELANG_RUNTIME_COMPULER clang++ )
+endif()
+
 add_custom_command(
     OUTPUT ${CMAKE_BINARY_DIR}/runtime.bc
-    COMMAND clang++ -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
+    COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 
 add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
