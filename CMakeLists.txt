@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project( joelang )
 
-set( joelang_CXX_FLAGS -fno-exceptions -Wall -std=c++11 -msse CACHE STRING "joelang compiler options" )
-set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS} )
+set( joelang_CXX_FLAGS "-fno-exceptions -Wall -std=c++11 -msse" CACHE STRING "joelang compiler options" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS}" )
 
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
@@ -153,12 +153,12 @@ set( runtime_sources src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )
 
-set( JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+string( REPLACE " " ";" JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set( JOELANG_RUNTIME_COMPILER ${CMAKE_CXX_COMPILER} )
 else()
-    set( JOELANG_RUNTIME_COMPULER clang++ )
+    set( JOELANG_RUNTIME_COMPILER clang++ )
 endif()
 
 add_custom_command(
