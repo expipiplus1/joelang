@@ -29,6 +29,9 @@
 
 #pragma once
 
+#include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
 #include <vector>
 
 #include <joelang/shader.hpp>
@@ -69,3 +72,17 @@ private:
 };
 
 } // namespace JoeLang
+
+#else
+
+namespace JoeLang
+{
+    class Program
+    {
+    public:
+        void Bind() const {};
+        void Unbind() const {};
+    };
+}
+
+#endif

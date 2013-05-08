@@ -29,6 +29,9 @@
 
 #pragma once
 
+#include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -90,3 +93,14 @@ private:
 };
 
 } // namespace JoeLang
+
+#else
+namespace JoeLang
+{
+    enum class ShaderDomain
+    {
+        VERTEX,
+        FRAGMENT
+    };
+}
+#endif

@@ -29,6 +29,9 @@
 
 #include <joelang/program.hpp>
 
+#include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
 #include <cassert>
 #include <iostream>
 #include <utility>
@@ -125,3 +128,5 @@ bool Program::IsCompiled() const
 }
 
 } // namespace JoeLang
+
+#endif

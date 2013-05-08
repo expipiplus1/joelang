@@ -45,6 +45,7 @@
 #include <compiler/tokens/pass_statements/pass_statement.hpp>
 #include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
 #include <compiler/tokens/pass_statements/compile_statement.hpp>
+#include <joelang/config.h>
 #include <joelang/pass.hpp>
 #include <joelang/program.hpp>
 #include <joelang/shader.hpp>
@@ -169,6 +170,7 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
                                                                  name ) );
 
 
+#ifdef JOELANG_WITH_OPENGL
     //
     // Create a shader for every compile statement in the pass
     //
@@ -190,6 +192,9 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     //
     // todo, how to report errors here?
     program.Compile();
+#else
+    Program program;
+#endif
 
     return Pass( name, std::move(state_assignments), std::move(program) );
 }

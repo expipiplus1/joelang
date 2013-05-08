@@ -29,6 +29,9 @@
 
 #include <joelang/shader.hpp>
 
+#include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
 #include <cassert>
 #include <map>
 #include <memory>
@@ -155,3 +158,5 @@ const std::string& Shader::GetString() const
 }
 
 } // namespace JoeLang
+
+#endif

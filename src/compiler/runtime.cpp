@@ -40,6 +40,7 @@
 #include <llvm/Support/system_error.h>
 #include <llvm/Support/TargetSelect.h>
 
+#include <joelang/config.h>
 #include <joelang/types.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
@@ -86,7 +87,11 @@ Runtime::Runtime()
     llvm::InitializeNativeTarget();
 
     llvm::OwningPtr<llvm::MemoryBuffer> buffer;
-    llvm::MemoryBuffer::getFile( "runtime.bc", buffer );
+#ifndef JOELANG_RUNTIME_FILENAME
+    #error Missing runtime filename
+#endif
+
+    llvm::MemoryBuffer::getFile( JOELANG_RUNTIME_FILENAME, buffer );
     assert( buffer && "Couldn't load runtime library" );
     m_RuntimeModule = llvm::ParseBitcodeFile ( buffer.get(),
                                                m_LLVMContext );

@@ -43,6 +43,7 @@
 #include <compiler/effect_factory.hpp>
 #include <compiler/runtime.hpp>
 #include <compiler/terminal_types.hpp>
+#include <joelang/config.h>
 #include <joelang/effect.hpp>
 #include <joelang/state.hpp>
 
@@ -57,6 +58,8 @@ Context::~Context()
 {
 }
 
+#ifdef JOELANG_WITH_OPENGL
+
 void Context::RegisterOpenGLStates()
 {
     JoeLang::RegisterOpenGLStates( *this );
@@ -66,6 +69,8 @@ void Context::RegisterOpenGLActions()
 {
     JoeLang::RegisterOpenGLActions( *this );
 }
+
+#endif
 
 bool Context::AddState( StateBase* state )
 {

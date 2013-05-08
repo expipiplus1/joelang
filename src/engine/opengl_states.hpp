@@ -29,6 +29,10 @@
 
 #pragma once
 
+#include <joelang/config.h>
+
+#ifdef JOELANG_WITH_OPENGL
+
 namespace JoeLang
 {
 
@@ -39,3 +43,5 @@ void RegisterOpenGLStates( Context& context );
 void RegisterOpenGLActions( Context& context );
 
 } // namespace JoeLang
+
+#endif

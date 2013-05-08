@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include <joelang/config.h>
+
 namespace JoeLang
 {
 
@@ -54,6 +56,7 @@ public:
     Effect* CreateEffectFromString( const std::string& string );
     Effect* CreateEffectFromFile(   const std::string& filename );
 
+#ifdef JOELANG_WITH_OPENGL
     /**
       * Registers a bunch of handy opengl states to be set during passes
       */
@@ -63,6 +66,7 @@ public:
       * Registers a bunch of handy opengl actions to be set during passes
       */
     void RegisterOpenGLActions();
+#endif
 
     bool AddState( StateBase* state );
     const StateBase* GetNamedState( const std::string& name ) const;

@@ -23,6 +23,11 @@ set( UCPP_STAND_ALONE FALSE )
 add_subdirectory( ucpp EXCLUDE_FROM_ALL )
 
 #
+# Testing
+#
+add_subdirectory( tests EXCLUDE_FROM_ALL )
+
+#
 # The library
 #
 
@@ -132,10 +137,21 @@ add_library( joelang include/joelang/context.hpp
 target_link_libraries( joelang ucpp )
 
 #
+# configuration
+#
+set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable built in OpenGL state setting" )
+set( JOELANG_RUNTIME_FILENAME ${CMAKE_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
+configure_file( ${CMAKE_SOURCE_DIR}/include/joelang/config.h.in ${CMAKE_SOURCE_DIR}/include/joelang/config.h )
+
+#
 # Test executable
 #
 add_executable( joelang_test src/joelang.cpp )
-target_link_libraries( joelang_test joelang ${OPENGL_LIBRARY} glee )
+if( ${JOELANG_WITH_OPENGL} )
+    target_link_libraries( joelang_test joelang ${OPENGL_LIBRARY} glee )
+else()
+    target_link_libraries( joelang_test joelang )
+endif()
 
 #
 # Various custom commands
@@ -162,7 +178,7 @@ else()
 endif()
 
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/runtime.bc
+    OUTPUT ${JOELANG_RUNTIME_FILENAME}
     COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
     DEPENDS ${runtime_sources} )
 

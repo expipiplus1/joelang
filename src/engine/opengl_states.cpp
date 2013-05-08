@@ -29,6 +29,10 @@
 
 #include "opengl_states.hpp"
 
+#include <joelang/config.h>
+
+#ifdef JOELANG_WITH_OPENGL
+
 #include <GL/GLee.h>
 
 #if defined(__APPLE__)
@@ -195,3 +199,5 @@ void RegisterOpenGLActions( Context& context )
 }
 
 } // namespace JoeLang
+
+#endif
