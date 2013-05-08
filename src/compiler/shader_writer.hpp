@@ -60,6 +60,7 @@ enum class IdentifierType
     VARIABLE,
     IN_VARYING,
     OUT_VARYING,
+    UNIFORM,
     FUNCTION
 };
 
@@ -113,6 +114,15 @@ public:
     static
     std::string Mangle( const std::string& identifier,
                         IdentifierType identifier_type );
+
+    /**
+     * This will mangle a variables name according to what it is
+     * @param v
+     *   The variable to mangle
+     * @returns the mangled identifier of the variable
+     */
+    static
+    std::string MangleVariable( const Variable& v );
 private:
     void GenerateShader( const EntryFunction& entry_function );
 
@@ -159,7 +169,8 @@ private:
       * Gather all the variables used by any of the functions
       */
     std::set<Variable_sp> GatherVariables(
-                                       const std::set<Function_sp>& functions );
+                                       const std::set<Function_sp>& functions,
+                                       const EntryFunction& entry_function );
 
     /**
       * Gather all the variables used in the parameters for the entry_function

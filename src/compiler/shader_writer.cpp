@@ -102,9 +102,20 @@ std::string ShaderWriter::Mangle( const std::string& identifier,
         { IdentifierType::VARIABLE,    "_"  },
         { IdentifierType::IN_VARYING,  "i_"  },
         { IdentifierType::OUT_VARYING, "o_"  },
+        { IdentifierType::UNIFORM,     "u_"  },
         { IdentifierType::FUNCTION,    "f_" }
     };
     return prefix_map.at(identifier_type) + identifier;
+}
+
+std::string ShaderWriter::MangleVariable( const Variable& v )
+{
+    return Mangle( v.GetName(),
+        v.IsVarying() ?
+            ( v.IsIn() ? IdentifierType::IN_VARYING :
+                         IdentifierType::OUT_VARYING ) :
+        v.IsUniform() ? IdentifierType::UNIFORM :
+        IdentifierType::VARIABLE );
 }
 
 ShaderWriter& ShaderWriter::operator << ( const CompleteType& value )
@@ -145,7 +156,7 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
     // Get all the variables used by the functions. We're interested in the
     // inputs and outputs
     //
-    std::set<Variable_sp> variables = GatherVariables( functions );
+    std::set<Variable_sp> variables = GatherVariables( functions, entry_function );
     std::set<Variable_sp> input_variables;
     std::set<Variable_sp> output_variables;
 
@@ -352,13 +363,15 @@ void ShaderWriter::WriteMainFunction(
     NewLine();
 
     //
-    // Write all the input parameters
+    // Write all the input parameters unless they are global
     //
     for( const auto& v : input_parameters )
     {
-        *this << v->GetType() << " " <<
-                 Mangle( v->GetName(), IdentifierType::VARIABLE ) << " = " <<
-                 Mangle( v->GetName(), IdentifierType::IN_VARYING ) << ";";
+        if( !v->IsGlobal() )
+            *this << "const " << v->GetType() << " "
+                  << Mangle( v->GetName(), IdentifierType::VARIABLE ) << " = "
+                  << MangleVariable( *v ) << ";";
+
         NewLine();
     }
 
@@ -489,7 +502,8 @@ std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
 }
 
 std::set<Variable_sp> ShaderWriter::GatherVariables(
-                                        const std::set<Function_sp>& functions )
+                                        const std::set<Function_sp>& functions,
+                                        const EntryFunction& entry_function )
 {
     std::set<Variable_sp> ret;
     for( const auto& f : functions )
@@ -497,6 +511,8 @@ std::set<Variable_sp> ShaderWriter::GatherVariables(
         std::set<Variable_sp> v = f->GetVariables();
         ret.insert( v.begin(), v.end() );
     }
+    for( const auto& v : GatherParameterVariables( entry_function ) )
+        ret.insert( v );
     return ret;
 }
 
