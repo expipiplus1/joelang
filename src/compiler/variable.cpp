@@ -82,7 +82,7 @@ Variable::Variable( CompleteType type,
             "Trying to construct a variable of unknown type" );
     assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
             "Parameters can't have initializers" );
-    assert( ( !m_IsConst || m_IsParameter ||
+    assert( ( !IsConst() || IsParameter() ||
               !m_Initializer.GetType().IsUnknown() ) &&
             "Const variables must have an initializer or be a parameter" );
     assert( ( m_Initializer.GetType().IsUnknown() ||
@@ -91,30 +91,30 @@ Variable::Variable( CompleteType type,
 
     //
     // assert that this is either in or out if it's a parameter or a varying
-    // (m_IsParameter || m_IsVarying) -> (m_IsIn || m_IsOut)
+    // (IsParameter() || IsVarying()) -> (IsIn() || IsOut())
     //
-    assert( (!m_IsVarying || (m_IsIn || m_IsOut)) &&
+    assert( (!IsVarying() || (IsIn() || IsOut())) &&
             "Trying to make a varying that's not in or out" );
-    assert( (!m_IsParameter || (m_IsIn || m_IsOut)) &&
+    assert( (!IsParameter() || (IsIn() || IsOut())) &&
             "Trying to make a parameter that's not in or out" );
-    assert( (!m_IsIn || (m_IsVarying || m_IsParameter)) &&
+    assert( (!IsIn() || (IsVarying() || IsParameter())) &&
             "Trying to make an in variable that's not a varying or parameter" );
-    assert( (!m_IsOut || (m_IsVarying || m_IsParameter)) &&
+    assert( (!IsOut() || (IsVarying() || IsParameter())) &&
             "Trying to make an out variable that's not a varying or "
             "parameter" );
 
     //
-    // assert that a uniform can't be in or out
-    // m_IsUniform -> !(m_IsIn || m_IsOut)
+    // assert that a uniform can't be in or out unless it's a parameter
     //
-    assert( (!m_IsUniform || !(m_IsIn || m_IsOut)) &&
-            "Trying to make a uniform variable that's in or out" );
+    assert( (IsParameter() || !IsUniform() || !(IsIn() || IsOut())) &&
+            "Trying to make a uniform variable that's in or out and isn't a "
+            "parameter" );
 
     //
     // assert that a uniform is global or a parameter
-    // m_IsUniform -> (m_IsGlobal || m_IsParameter)
+    // IsUniform() -> (IsGlobal() || IsParameter())
     //
-    assert( (!m_IsUniform || (m_IsGlobal || m_IsParameter)) &&
+    assert( (!IsUniform() || (IsGlobal() || IsParameter())) &&
             "Trying to make a uniform variable that's not a global or "
             "parameter" );
 
