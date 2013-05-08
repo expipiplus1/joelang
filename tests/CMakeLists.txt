@@ -11,7 +11,7 @@ set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joemath_CXX_FLAGS}" )
 
 file( GLOB test_files "*.jfx" )
 
-add_custom_target( check
+add_custom_target( check_joelang
                    COMMAND ${CMAKE_CTEST_COMMAND}
                    DEPENDS joelang_tester
                    SOURCES ${test_files} )
