@@ -1,0 +1,18 @@
+/*
+int_state: 0 
+float_state: 0
+bool_state: 0
+float4_state: 0 0 0 0
+string_state: Hello, World!
+*/
+technique t1
+{
+    pass p1
+    {
+        int_state = 0;
+        float_state = 0;
+        bool_state = 0;
+        float4_state = 0;
+        string_state = "Hello, World!";
+    }
+}

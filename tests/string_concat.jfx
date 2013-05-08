@@ -1,0 +1,14 @@
+/*
+string_state: Hello, World!
+*/
+
+const string hello = "Hello";
+const string world = "World";
+
+technique t1
+{
+    pass p1
+    {
+        string_state = hello + ", " + world + "!";
+    }
+}
