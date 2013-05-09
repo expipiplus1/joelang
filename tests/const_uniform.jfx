@@ -1,0 +1,17 @@
+/*
+int_state: 0 
+*/
+
+//
+// Making sure we can have a const uniform variable
+//
+
+const uniform int i;  
+
+technique t1
+{
+    pass p1
+    {
+        int_state = 0;
+    }
+}
