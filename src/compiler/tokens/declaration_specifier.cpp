@@ -248,7 +248,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
 {
     bool is_signed = false;
     bool has_type = false;
-    Type type;
+    Type type = Type::UNKNOWN;
 
     // Sort the type specifiers to ease combination
     std::sort( type_specs.begin(), type_specs.end() );
