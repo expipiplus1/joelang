@@ -82,9 +82,10 @@ Variable::Variable( CompleteType type,
             "Trying to construct a variable of unknown type" );
     assert( !(is_parameter && !m_Initializer.GetType().IsUnknown() ) &&
             "Parameters can't have initializers" );
-    assert( ( !IsConst() || IsParameter() ||
+    assert( ( !IsConst() || IsParameter() || IsUniform() ||
               !m_Initializer.GetType().IsUnknown() ) &&
-            "Const variables must have an initializer or be a parameter" );
+            "Const variables must have an initializer or be a parameter or a "
+            "uniform" );
     assert( ( m_Initializer.GetType().IsUnknown() ||
               m_Initializer.GetType() == type ) &&
             "Trying to initialize a variable with the wrong type" );

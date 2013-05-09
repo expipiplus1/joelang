@@ -112,8 +112,9 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                                 CompleteType( base_type,
                                                               array_extents ) );
 
-    // If the variable is const, it must have an initializer
+    // If the variable is const and not a uniform, it must have an initializer
     if( decl_specs.IsConst() &&
+        !decl_specs.IsUniform() &&
         !m_Initializer )
     {
         sema.Error( "Const variables must have an initializer" );
