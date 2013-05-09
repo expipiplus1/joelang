@@ -180,6 +180,7 @@ bool DeclSpecs::AnalyzeDeclSpecs(
 
     if( m_Type == Type::UNKNOWN )
     {
+        sema.Error( "No type in declaration specifier" );
         good = false;
     }
 
