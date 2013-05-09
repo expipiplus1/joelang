@@ -80,12 +80,6 @@ public:
 
     void CodeGen( CodeGenerator& code_gen );
 
-    /**
-      * This will write the declaration as if it's an ordinary variable
-      * not varying or uniform or in or out
-      */
-    void WriteDeclaration( ShaderWriter& shader_writer ) const;
-
     void SetParameterPointer( llvm::Value* parameter_pointer );
 
     llvm::Value* GetLLVMPointer() const;
@@ -95,6 +89,8 @@ public:
     const Semantic& GetSemantic() const;
 
     const std::string& GetName() const;
+
+    const GenericValue& GetInitializer() const;
 
     Type GetUnderlyingType() const;
 
@@ -112,7 +108,6 @@ public:
     bool IsGlobal() const;
 
     bool IsParameter() const;
-
 private:
     CompleteType m_Type;
     Semantic m_Semantic;

@@ -92,6 +92,18 @@ std::set<Variable_sp> CompoundStatement::GetVariables() const
     return ret;
 }
 
+
+std::set<Variable_sp> CompoundStatement::GetWrittenToVariables() const
+{
+    std::set<Variable_sp> ret;
+    for( const auto& s : m_Statements )
+    {
+        auto f = s->GetWrittenToVariables();
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
+}
+
 void CompoundStatement::PerformSemaAsFunction( SemaAnalyzer& sema,
                                                const CompleteType& return_type )
 {

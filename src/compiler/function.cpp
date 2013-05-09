@@ -123,9 +123,18 @@ std::set<Function_sp> Function::GetCallees() const
 std::set<Variable_sp> Function::GetVariables() const
 {
     assert( m_Definition &&
-            "Trying to get the callees of a function without a definition" );
+            "Trying to get the variables of a function without a definition" );
     return m_Definition->GetVariables();
 }
+
+std::set<Variable_sp> Function::GetWrittenToVariables() const
+{
+    assert( m_Definition &&
+            "Trying to get the written to variables of a function without a "
+            "definition" );
+    return m_Definition->GetWrittenToVariables();
+}
+
 
 const Semantic& Function::GetSemantic() const
 {

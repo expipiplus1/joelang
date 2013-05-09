@@ -101,6 +101,10 @@ public:
     std::set<Variable_sp> GetVariables() const override final;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                        bool is_assigned ) const override final;
+
+    virtual
     bool IsConst() const override;
 
     virtual

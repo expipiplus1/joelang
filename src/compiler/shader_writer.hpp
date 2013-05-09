@@ -123,6 +123,11 @@ public:
      */
     static
     std::string MangleVariable( const Variable& v );
+
+    /**
+     * This will write a variable name with the correct prefix
+     */
+    void WriteVariableName( const Variable_sp v );
 private:
     void GenerateShader( const EntryFunction& entry_function );
 
@@ -145,8 +150,15 @@ private:
                                        const EntryFunction& entry_function,
                                        const std::set<Variable_sp>& variables );
 
-    /** Writes all the global variables used by the shader **/
-    void WriteGlobalVariables( const std::set<Variable_sp>& variables );
+    /**
+      * Writes all the global variables used by the shader
+      * \returns the set of variables written
+      **/
+    std::set<Variable_sp> WriteGlobalVariables(
+                                       const std::set<Variable_sp>& variables );
+
+    /** Writes the declaration for a particular variable **/
+    void WriteVariableDeclaration( Variable_sp variable );
 
     /** Writes all the function declarations **/
     void WriteFunctionDeclarations( const std::set<Function_sp> functions );
@@ -157,7 +169,8 @@ private:
     /** Writes main(){...} **/
     void WriteMainFunction( const EntryFunction& entry_function,
                             const std::set<Variable_sp>& input_variables,
-                            const std::set<Variable_sp>& output_variables );
+                            const std::set<Variable_sp>& output_variables,
+                            const std::set<Variable_sp>& global_variables );
 
     /**
       * Gathers all the functions used by this function, checks for recursion
@@ -168,13 +181,22 @@ private:
     /**
       * Gather all the variables used by any of the functions
       */
+    static
     std::set<Variable_sp> GatherVariables(
                                        const std::set<Function_sp>& functions,
                                        const EntryFunction& entry_function );
 
     /**
+      * Gather all the variables written to by any of the functions
+      */
+    static
+    std::set<Variable_sp> GatherWrittenToVariables(
+                                       const std::set<Function_sp>& functions );
+
+    /**
       * Gather all the variables used in the parameters for the entry_function
       */
+    static
     std::set<Variable_sp> GatherParameterVariables( 
                                           const EntryFunction& entry_function );
 
@@ -192,6 +214,11 @@ private:
       * The current indentation
       */
     unsigned m_Indentation = 0;
+
+    /**
+      * The set of variables which are written to in the shader being compiled
+      */
+    std::set<Variable_sp> m_WrittenToVariables;
 
     /**
       * This is false if Error has been called

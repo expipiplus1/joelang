@@ -108,6 +108,12 @@ public:
     std::set<Variable_sp> GetVariables() const;
 
     /**
+      * Returns all the variables written to in this function
+      * this asserts that we have a definition
+      */
+    std::set<Variable_sp> GetWrittenToVariables() const;
+
+    /**
       * Returns this function's semantic
       */
     const Semantic& GetSemantic() const;

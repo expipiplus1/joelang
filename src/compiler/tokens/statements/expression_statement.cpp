@@ -75,6 +75,11 @@ std::set<Variable_sp> ExpressionStatement::GetVariables() const
     return m_Expression->GetVariables();
 }
 
+std::set<Variable_sp> ExpressionStatement::GetWrittenToVariables() const
+{
+    return m_Expression->GetWrittenToVariables();
+}
+
 void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
                                        const CompleteType& return_type )
 {

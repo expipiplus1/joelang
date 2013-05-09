@@ -216,6 +216,17 @@ std::set<Variable_sp> BinaryOperatorExpression::GetVariables() const
     return ret;
 }
 
+std::set<Variable_sp> BinaryOperatorExpression::GetWrittenToVariables(
+                                                        bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a binary expression" );
+    std::set<Variable_sp> ret = m_LeftSide->GetWrittenToVariables(
+                                                                  is_assigned );
+    std::set<Variable_sp> f = m_RightSide->GetWrittenToVariables( is_assigned );
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
 bool BinaryOperatorExpression::IsConst() const
 {
     return m_LeftSide->IsConst() &&

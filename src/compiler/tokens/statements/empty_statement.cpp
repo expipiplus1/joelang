@@ -69,6 +69,11 @@ std::set<Variable_sp> EmptyStatement::GetVariables() const
     return std::set<Variable_sp>{};
 }
 
+std::set<Variable_sp> EmptyStatement::GetWrittenToVariables() const
+{
+    return std::set<Variable_sp>{};
+}
+
 void EmptyStatement::PerformSema( SemaAnalyzer& sema,
                                   const CompleteType& return_type )
 {

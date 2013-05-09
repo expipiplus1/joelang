@@ -71,6 +71,9 @@ public:
     std::set<Variable_sp> GetVariables() const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables() const override;
+
+    virtual
     void PerformSema( SemaAnalyzer& sema,
                       const CompleteType& return_type ) override;
 

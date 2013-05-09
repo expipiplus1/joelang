@@ -161,6 +161,16 @@ public:
     std::set<Variable_sp> GetVariables() const = 0;
 
     /**
+      * \returns the list of variables written to by this expression
+      * \param is_assigned
+      *   This is true when the expression is on the left hand side of the
+      *   nearest assignment operator
+      */
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                           bool is_assigned = false ) const = 0;
+
+    /**
       * \returns true if the Expression represents a l-value
       * by default this returns false
       */
@@ -254,6 +264,9 @@ public:
     std::set<Variable_sp> GetVariables() const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
+
+    virtual
     bool IsConst() const override;
 
     virtual
@@ -324,6 +337,9 @@ public:
     std::set<Variable_sp> GetVariables() const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
+
+    virtual
     bool IsConst() const override;
 
     static
@@ -380,6 +396,9 @@ public:
 
     virtual
     std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
 
     virtual
     bool IsConst() const override;
@@ -483,6 +502,9 @@ public:
     std::set<Variable_sp> GetVariables() const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
+
+    virtual
     bool IsConst() const override;
 
     static
@@ -538,11 +560,13 @@ public:
     virtual
     std::set<Variable_sp> GetVariables() const override;
 
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
+
 
     virtual
     bool IsConst() const override;
 
-    virtual
     bool IsLValue() const override;
 
     static
@@ -600,6 +624,9 @@ public:
 
     virtual
     std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
 
     virtual
     bool IsConst() const override;
@@ -681,6 +708,9 @@ public:
 
     virtual
     std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
 
     /** \returns true **/
     virtual

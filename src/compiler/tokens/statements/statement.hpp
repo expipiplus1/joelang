@@ -89,6 +89,12 @@ public:
     virtual
     std::set<Variable_sp> GetVariables() const = 0;
 
+    /**
+      * Returns all the variables written to by this statement
+      */
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables() const = 0;
+
     virtual
     void PerformSema( SemaAnalyzer& sema, const CompleteType& return_type ) = 0;
 

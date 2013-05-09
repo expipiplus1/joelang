@@ -73,6 +73,7 @@ std::string ShaderWriter::GenerateGLSL( const EntryFunction& entry_function )
 
     // reset things
     m_Shader.str("");
+    m_WrittenToVariables.clear();
 
     assert( m_Indentation == 0 && "Unmatched indentations" );
 
@@ -118,6 +119,18 @@ std::string ShaderWriter::MangleVariable( const Variable& v )
         IdentifierType::VARIABLE );
 }
 
+void ShaderWriter::WriteVariableName( const Variable_sp v )
+{
+    //
+    // If we don't write to this variable and it's global then use the u_ prefix
+    //
+    if( v->IsGlobal() && v->IsUniform() &&
+        m_WrittenToVariables.find(v) == m_WrittenToVariables.end() )
+        *this << Mangle( v->GetName(), IdentifierType::UNIFORM );
+    else
+        *this << Mangle( v->GetName(), IdentifierType::VARIABLE );
+}
+
 ShaderWriter& ShaderWriter::operator << ( const CompleteType& value )
 {
     value.Write( *this );
@@ -153,19 +166,24 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
                                           entry_function.GetFunctionPointer() );
 
     //
+    // Find out which variables are ever written to
+    //
+    m_WrittenToVariables = GatherWrittenToVariables( functions );
+
+    //
     // Get all the variables used by the functions. We're interested in the
     // inputs and outputs
     //
     std::set<Variable_sp> variables = GatherVariables( functions, entry_function );
     std::set<Variable_sp> input_variables;
     std::set<Variable_sp> output_variables;
+    std::set<Variable_sp> global_variables;
 
     input_variables = WriteInputVaryings( entry_function, variables );
     NewLine();
     output_variables = WriteOutputVaryings( entry_function, variables );
     NewLine();
-
-    WriteGlobalVariables( variables );
+    global_variables = WriteGlobalVariables( variables );
     NewLine();
 
     WriteFunctionDeclarations( functions );
@@ -174,7 +192,10 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
     WriteFunctionDefinitions( functions );
     NewLine();
 
-    WriteMainFunction( entry_function, input_variables, output_variables );
+    WriteMainFunction( entry_function,
+                       input_variables,
+                       output_variables,
+                       global_variables );
 }
 
 void ShaderWriter::WriteGLSLVersion()
@@ -286,15 +307,66 @@ std::set<Variable_sp> ShaderWriter::WriteOutputVaryings(
     return output_varyings;
 }
 
-void ShaderWriter::WriteGlobalVariables(
+std::set<Variable_sp> ShaderWriter::WriteGlobalVariables(
                                         const std::set<Variable_sp>& variables )
 {
+    std::set<Variable_sp> global_variables;
     for( const auto& v : variables )
         if( v->IsGlobal() )
         {
-            v->WriteDeclaration( *this );
+            WriteVariableDeclaration( v );
+            NewLine();
+
+            global_variables.insert( v );
+        }
+    return global_variables;
+}
+
+void ShaderWriter::WriteVariableDeclaration( Variable_sp variable )
+{
+
+    if( variable->IsUniform() )
+    {
+        //
+        // If we write to this variable we need to create a mutable alias for it
+        //
+        if( m_WrittenToVariables.find(variable) != m_WrittenToVariables.end() )
+        {
+            assert( !variable->IsConst() &&
+                    "We've written to a const variable?" );
+            *this << variable->GetType() << " " <<
+                     Mangle( variable->GetName(), IdentifierType::VARIABLE ) <<
+                     ";";
             NewLine();
         }
+
+        //
+        // Write out the uniform version
+        //
+        *this << "uniform " << variable->GetType() << " " <<
+                         ShaderWriter::Mangle( variable->GetName(),
+                                               IdentifierType::UNIFORM );
+    }
+    else
+    {
+        if( variable->IsConst() )
+            *this << "const ";
+
+        //
+        // Write out the variable
+        //
+        *this << variable->GetType() << " " <<
+                 ShaderWriter::Mangle( variable->GetName(),
+                                       IdentifierType::VARIABLE );
+    }
+
+    //
+    // If we have an initializer write the assignment
+    //
+    if( variable->GetInitializer().GetUnderlyingType() != Type::UNKNOWN )
+        *this << " = " << variable->GetInitializer();
+
+    *this << ";";
 }
 
 void ShaderWriter::WriteFunctionDeclarations(
@@ -324,7 +396,8 @@ void ShaderWriter::WriteFunctionDefinitions(
 void ShaderWriter::WriteMainFunction(
                                  const EntryFunction& entry_function,
                                  const std::set<Variable_sp>& input_variables,
-                                 const std::set<Variable_sp>& output_variables )
+                                 const std::set<Variable_sp>& output_variables,
+                                 const std::set<Variable_sp>& global_variables )
 {
     m_Shader << "void main()";
     NewLine();
@@ -361,6 +434,26 @@ void ShaderWriter::WriteMainFunction(
         }
 
     NewLine();
+
+    //
+    // Copy all the non-const uniforms to their aliases
+    //
+    for( const auto& v : global_variables )
+    {
+        assert( v->IsGlobal() && "Non global variable in global variables" );
+
+        //
+        // If this is a uniform that is written to we must initialize the alias
+        // with the value of the uniform
+        //
+        if( v->IsUniform() &&
+            m_WrittenToVariables.find(v) != m_WrittenToVariables.end() )
+        {
+            *this << Mangle( v->GetName(), IdentifierType::VARIABLE ) << " = "
+                  << Mangle( v->GetName(), IdentifierType::UNIFORM ) << ";";
+            NewLine();
+        }
+    }
 
     //
     // Write all the input parameters unless they are global
@@ -498,6 +591,18 @@ std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
         expanded.push( current->GetCallees() );
     }
 
+    return ret;
+}
+
+std::set<Variable_sp> ShaderWriter::GatherWrittenToVariables(
+                                        const std::set<Function_sp>& functions )
+{
+    std::set<Variable_sp> ret;
+    for( const auto& f : functions )
+    {
+        std::set<Variable_sp> v = f->GetWrittenToVariables();
+        ret.insert( v.begin(), v.end() );
+    }
     return ret;
 }
 

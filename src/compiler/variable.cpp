@@ -137,20 +137,6 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     }
 }
 
-void Variable::WriteDeclaration( ShaderWriter& shader_writer ) const
-{
-    if( m_IsConst )
-        shader_writer << "const ";
-
-    shader_writer << m_Type << " " <<
-                     ShaderWriter::Mangle( m_Name,
-                                           IdentifierType::VARIABLE );
-
-    if( m_Initializer.GetUnderlyingType() != Type::UNKNOWN )
-        shader_writer << " = " << m_Initializer;
-
-    shader_writer << ";";
-}
 
 void Variable::SetParameterPointer( llvm::Value* parameter_pointer )
 {
@@ -179,6 +165,11 @@ const Semantic& Variable::GetSemantic() const
 const std::string& Variable::GetName() const
 {
     return m_Name;
+}
+
+const GenericValue& Variable::GetInitializer() const
+{
+    return m_Initializer;
 }
 
 Type Variable::GetUnderlyingType() const

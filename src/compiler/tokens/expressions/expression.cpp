@@ -285,6 +285,15 @@ std::set<Variable_sp> AssignmentExpression::GetVariables() const
     return ret;
 }
 
+std::set<Variable_sp> AssignmentExpression::GetWrittenToVariables(
+                                                        bool is_assigned ) const
+{
+    auto ret = m_Assignee->GetWrittenToVariables( true );
+    auto f   = m_AssignedExpression->GetWrittenToVariables( false );
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
 bool AssignmentExpression::IsLValue() const
 {
     return true;
@@ -440,6 +449,18 @@ std::set<Variable_sp> ConditionalExpression::GetVariables() const
     auto f   = m_TrueExpression->GetVariables();
     ret.insert( f.begin(), f.end() );
     f = m_FalseExpression->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
+std::set<Variable_sp> ConditionalExpression::GetWrittenToVariables(
+                                                        bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a conditional expression" );
+    auto ret = m_Condition->GetWrittenToVariables( false );
+    auto f   = m_TrueExpression->GetWrittenToVariables( false );
+    ret.insert( f.begin(), f.end() );
+    f = m_FalseExpression->GetWrittenToVariables( false );
     ret.insert( f.begin(), f.end() );
     return ret;
 }
@@ -744,6 +765,13 @@ std::set<Variable_sp> CastExpression::GetVariables() const
     return m_Expression->GetVariables();
 }
 
+std::set<Variable_sp> CastExpression::GetWrittenToVariables(
+                                                    bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a cast expression" );
+    return m_Expression->GetWrittenToVariables( is_assigned );
+}
+
 bool CastExpression::IsConst() const
 {
     return m_Expression->IsConst();
@@ -919,6 +947,12 @@ std::set<Variable_sp> UnaryExpression::GetVariables() const
     return m_Expression->GetVariables();
 }
 
+std::set<Variable_sp> UnaryExpression::GetWrittenToVariables(
+                                                    bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a unaryexpression" );
+    return m_Expression->GetWrittenToVariables( is_assigned );
+}
 
 bool UnaryExpression::IsConst() const
 {
@@ -1035,6 +1069,13 @@ std::set<Function_sp> PostfixExpression::GetCallees() const
 std::set<Variable_sp> PostfixExpression::GetVariables() const
 {
     return m_PostfixOperator->GetVariables( *m_Expression );
+}
+
+std::set<Variable_sp> PostfixExpression::GetWrittenToVariables(
+                                                     bool is_assigned ) const
+{
+    return m_PostfixOperator->GetWrittenToVariables( *m_Expression,
+                                                     is_assigned );
 }
 
 bool PostfixExpression::IsConst() const
@@ -1206,6 +1247,19 @@ std::set<Variable_sp> TypeConstructorExpression::GetVariables() const
     return ret;
 }
 
+std::set<Variable_sp> TypeConstructorExpression::GetWrittenToVariables(
+                                                        bool is_assigned) const
+{
+    assert( !is_assigned && "Trying to assign to a constructor expression");
+    std::set<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetWrittenToVariables( is_assigned );
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
+}
+
 bool TypeConstructorExpression::IsConst() const
 {
     for( const auto& argument : m_Arguments )
@@ -1343,8 +1397,7 @@ llvm::Value* IdentifierExpression::CodeGenPointerTo(
 
 void IdentifierExpression::Write( ShaderWriter& shader_writer ) const
 {
-    shader_writer << ShaderWriter::Mangle( m_Identifier,
-                                           IdentifierType::VARIABLE );
+    shader_writer.WriteVariableName( m_Variable );
 }
 
 CompleteType IdentifierExpression::GetType() const
@@ -1365,6 +1418,15 @@ std::set<Variable_sp> IdentifierExpression::GetVariables() const
     assert( m_Variable &&
             "Trying to get the variables of an unresolved identifier" );
     return { m_Variable };
+}
+
+std::set<Variable_sp> IdentifierExpression::GetWrittenToVariables(
+                                                     bool is_assigned ) const
+{
+    assert( m_Variable &&
+            "Trying to get the variables of an unresolved identifier" );
+
+    return is_assigned ? std::set<Variable_sp>{ m_Variable } : std::set<Variable_sp>{};
 }
 
 const std::string& IdentifierExpression::GetIdentifier() const

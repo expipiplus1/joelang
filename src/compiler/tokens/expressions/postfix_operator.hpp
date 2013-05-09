@@ -118,6 +118,13 @@ public:
     std::set<Variable_sp> GetVariables(
                                        const Expression& expression ) const = 0;
 
+    /**
+      * \returns the list of variables written to by this operator
+      */
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( const Expression& expression,
+                                                 bool is_assigned ) const = 0;
+
     virtual
     bool IsConst( const Expression& expression ) const = 0;
 
@@ -188,6 +195,11 @@ public:
                                   const Expression& expression ) const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                              const Expression& expression,
+                                              bool is_assigned ) const override;
+
+    virtual
     bool IsConst( const Expression& expression ) const override;
 
     virtual
@@ -253,6 +265,11 @@ public:
     virtual
     std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                              const Expression& expression,
+                                              bool is_assigned ) const override;
 
     /** \returns false **/
     virtual
@@ -323,6 +340,11 @@ public:
                                   const Expression& expression ) const override;
 
     virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                              const Expression& expression,
+                                              bool is_assigned ) const override;
+
+    virtual
     bool IsConst( const Expression& expression ) const override;
 
     static
@@ -386,6 +408,11 @@ public:
     virtual
     std::set<Variable_sp> GetVariables(
                                   const Expression& expression ) const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables(
+                                              const Expression& expression,
+                                              bool is_assigned ) const override;
 
     /** \returns false **/
     virtual

@@ -81,6 +81,14 @@ std::set<Variable_sp> ReturnStatement::GetVariables() const
         return std::set<Variable_sp>{};
 }
 
+std::set<Variable_sp> ReturnStatement::GetWrittenToVariables() const
+{
+    if( m_Expression )
+        return m_Expression->GetWrittenToVariables();
+    else
+        return std::set<Variable_sp>{};
+}
+
 void ReturnStatement::PerformSema( SemaAnalyzer& sema,
                                    const CompleteType& return_type )
 {

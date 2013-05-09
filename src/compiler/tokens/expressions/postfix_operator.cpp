@@ -181,13 +181,29 @@ CompleteType SubscriptOperator::GetType( const Expression& expression ) const
 std::set<Function_sp> SubscriptOperator::GetCallees(
                                             const Expression& expression ) const
 {
-    return expression.GetCallees();
+    auto ret = expression.GetCallees();
+    auto f   = m_IndexExpression->GetCallees();
+    ret.insert( f.begin(), f.end() );
+    return ret;
 }
 
 std::set<Variable_sp> SubscriptOperator::GetVariables(
                                             const Expression& expression ) const
 {
-    return expression.GetVariables();
+    auto ret = expression.GetVariables();
+    auto f   = m_IndexExpression->GetVariables();
+    ret.insert( f.begin(), f.end() );
+    return ret;
+}
+
+std::set<Variable_sp> SubscriptOperator::GetWrittenToVariables(
+                                                   const Expression& expression,
+                                                   bool is_assigned ) const
+{
+    auto ret = expression.GetWrittenToVariables( is_assigned );
+    auto f   = m_IndexExpression->GetWrittenToVariables( false );
+    ret.insert( f.begin(), f.end() );
+    return ret;
 }
 
 bool SubscriptOperator::IsConst( const Expression& expression ) const
@@ -383,6 +399,23 @@ std::set<Variable_sp> ArgumentListOperator::GetVariables(
     return ret;
 }
 
+std::set<Variable_sp> ArgumentListOperator::GetWrittenToVariables(
+                                                   const Expression& expression,
+                                                   bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a function call" );
+
+    // The expression here is actually an identifier, which we don't want to dip
+    // into because it thinks it's a variable
+    std::set<Variable_sp> ret;
+    for( const auto& a : m_Arguments )
+    {
+        auto f = a->GetWrittenToVariables( is_assigned );
+        ret.insert( f.begin(), f.end() );
+    }
+    return ret;
+}
+
 bool ArgumentListOperator::IsConst( const Expression& expression ) const
 {
     return false;
@@ -482,6 +515,14 @@ std::set<Variable_sp> MemberAccessOperator::GetVariables(
     return std::set<Variable_sp>{};
 }
 
+std::set<Variable_sp> MemberAccessOperator::GetWrittenToVariables(
+                                                   const Expression& expression,
+                                                   bool is_assigned ) const
+{
+    assert( false && "Complete me" );
+    return std::set<Variable_sp>{};
+}
+
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst();
@@ -569,6 +610,14 @@ std::set<Function_sp> IncrementOrDecrementOperator::GetCallees(
 
 std::set<Variable_sp> IncrementOrDecrementOperator::GetVariables(
                                             const Expression& expression ) const
+{
+    assert( false && "Complete me" );
+    return std::set<Variable_sp>{};
+}
+
+std::set<Variable_sp> IncrementOrDecrementOperator::GetWrittenToVariables(
+                                                   const Expression& expression,
+                                                   bool is_assigned ) const
 {
     assert( false && "Complete me" );
     return std::set<Variable_sp>{};

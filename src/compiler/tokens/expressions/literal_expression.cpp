@@ -81,6 +81,13 @@ std::set<Variable_sp> LiteralExpression::GetVariables() const
     return std::set<Variable_sp>{};
 }
 
+std::set<Variable_sp> LiteralExpression::GetWrittenToVariables(
+                                                        bool is_assigned ) const
+{
+    assert( !is_assigned && "Trying to assign to a literal" );
+    return std::set<Variable_sp>{};
+}
+
 bool LiteralExpression::IsConst() const
 {
     return true;
