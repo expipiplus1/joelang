@@ -1,0 +1,12 @@
+#ifndef JFX_INCLUDE_HEADER
+#define JFX_INCLUDE_HEADER
+
+technique t1
+{
+    pass p1
+    {
+        int_state = 0;
+    }
+}
+
+#endif
