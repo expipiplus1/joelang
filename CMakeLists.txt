@@ -139,7 +139,9 @@ target_link_libraries( joelang ucpp )
 #
 # configuration
 #
-set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable built in OpenGL state setting" )
+if( NOT DEFINED JOELANG_WITH_OPENGL )
+    set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable built in OpenGL state setting" )
+endif()
 set( JOELANG_RUNTIME_FILENAME ${CMAKE_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
 configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_SOURCE_DIR}/include/joelang/config.h )
 
