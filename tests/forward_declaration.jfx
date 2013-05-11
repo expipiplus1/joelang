@@ -1,0 +1,19 @@
+/*
+int_state: 0 
+*/
+
+int f();
+
+technique t1
+{
+    pass p1
+    {
+        int_state = f();
+    }
+}
+
+int f()
+{
+    return 0;
+}
+
