@@ -1,0 +1,15 @@
+/*
+int_state: 0 
+*/
+
+pass p1;
+
+technique t1
+{
+    p1;
+}
+
+pass p1
+{
+    int_state = 0;
+}
