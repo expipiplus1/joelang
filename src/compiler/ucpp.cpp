@@ -145,9 +145,9 @@ UCPPLexerState::UCPPLexerState( const std::string& source,
     //
     init_lexer_mode( &m_LexerState );
     
-    //set_init_buffer( &m_LexerState,
-                     ////reinterpret_cast<const unsigned char*>(source.c_str()),
-                     //source.size() );
+    set_init_buffer( &m_LexerState,
+                     reinterpret_cast<const unsigned char*>(source.c_str()),
+                     source.size() );
 
     m_LexerState.flags = s_LexerFlags;
 }
