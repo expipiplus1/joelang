@@ -74,7 +74,7 @@ private:
 class UCPPLexerState
 {
 public:
-    UCPPLexerState( const std::string& filename, FILE* file );
+    UCPPLexerState( const std::string& source, const std::string& filename );
     ~UCPPLexerState();
     
     TerminalType Lex( std::string& string );

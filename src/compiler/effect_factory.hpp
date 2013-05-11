@@ -54,6 +54,10 @@ public:
 
     std::unique_ptr<Effect> CreateEffectFromFile( const std::string& filename );
 
+    std::unique_ptr<Effect> CreateEffectFromString(
+                                                 const std::string& source,
+                                                 const std::string& name = "" );
+
 private:
     const Context& m_Context;
     Runtime        m_Runtime;

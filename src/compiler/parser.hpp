@@ -49,13 +49,16 @@ class Parser
 {
 public:
     /** Tries to parse the string
-      * \param string
+      * \param source
       *   The string to parse
+      * \param name
+      *   The name of the file
       * \returns
       *   true if the parsing was successful,
       *   false if the parsing failed
       */
-    bool                                    Parse( const std::string& string );
+    bool Parse( const std::string& source,
+                const std::string& name );
 
     /** \returns the parsed CST or null if we haven't parsed a TU **/
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;

@@ -87,10 +87,10 @@ Runtime::Runtime()
     llvm::InitializeNativeTarget();
 
     llvm::OwningPtr<llvm::MemoryBuffer> buffer;
+
 #ifndef JOELANG_RUNTIME_FILENAME
     #error Missing runtime filename
 #endif
-
     llvm::MemoryBuffer::getFile( JOELANG_RUNTIME_FILENAME, buffer );
     assert( buffer && "Couldn't load runtime library" );
     m_RuntimeModule = llvm::ParseBitcodeFile ( buffer.get(),

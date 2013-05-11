@@ -127,7 +127,8 @@ UCPPContext::~UCPPContext()
     wipeout();
 }
 
-UCPPLexerState::UCPPLexerState( const std::string& filename, FILE* file )
+UCPPLexerState::UCPPLexerState( const std::string& source,
+                                const std::string& filename )
 {
     //
     // This file shouldn't be opened by ucpp
@@ -144,17 +145,16 @@ UCPPLexerState::UCPPLexerState( const std::string& filename, FILE* file )
     //
     init_lexer_mode( &m_LexerState );
     
-    //
-    // Load the file
-    //
-    m_LexerState.input = file;
+    //set_init_buffer( &m_LexerState,
+                     ////reinterpret_cast<const unsigned char*>(source.c_str()),
+                     //source.size() );
 
     m_LexerState.flags = s_LexerFlags;
 }
 
 UCPPLexerState::~UCPPLexerState()
 {
-    m_LexerState.input = nullptr;
+    m_LexerState.input_buf = nullptr;
     free_lexer_state( &m_LexerState );
 }
 

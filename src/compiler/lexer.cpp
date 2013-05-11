@@ -52,7 +52,7 @@ namespace Compiler
 // Lexer
 //------------------------------------------------------------------------------
 
-Lexer::Lexer( const std::string& filename )
+Lexer::Lexer( const std::string& source, const std::string& filename )
     :m_UCPPLock( g_UCPPMutex, std::defer_lock )
 {
     //
@@ -66,14 +66,9 @@ Lexer::Lexer( const std::string& filename )
     m_UCPPLock.lock();
     
     //
-    // Open the file
-    //
-    m_File.reset( std::fopen( filename.c_str(), "r" ) );
-    
-    //
     // Set up the lexerstate
     //
-    m_LexerState.reset( new UCPPLexerState( filename, m_File.get() ) );
+    m_LexerState.reset( new UCPPLexerState( source, filename ) );
     
     //
     // Lex the first token
@@ -87,7 +82,6 @@ Lexer::~Lexer()
     // Free the lexerstate and close the file
     //
     m_LexerState.reset();
-    m_File.reset();
     
     //
     // Release the lock on ucpp

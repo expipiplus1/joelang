@@ -29,7 +29,7 @@
 
 #include "effect_factory.hpp"
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <fstream>
 
 #include <joelang/effect.hpp>
 #include <compiler/sema_analyzer.hpp>
@@ -55,8 +55,27 @@ EffectFactory::EffectFactory( const Context& context )
 std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
                                                  const std::string& filename )
 {
+    std::string source;
+
+    std::ifstream file( filename, std::ios::in );
+    if (!file)
+        return nullptr;
+
+    file.seekg( 0, std::ios::end );
+    source.resize( file.tellg() );
+    file.seekg( 0, std::ios::beg );
+    file.read( &source[0], source.size() );
+    file.close();
+
+    return CreateEffectFromString( source, filename );
+}
+
+std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
+                                                      const std::string& source,
+                                                      const std::string& name )
+{
     Parser parser;
-    if( !parser.Parse( filename ) )
+    if( !parser.Parse( source, name ) )
         return nullptr;
 
     TranslationUnit& ast = *parser.GetTranslationUnit();
@@ -65,13 +84,14 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
         return nullptr;
 
     std::vector<Technique> techniques;
-    std::unique_ptr<llvm::ExecutionEngine> llvm_execution_engine;
 
     m_CodeGenerator.GenerateFunctions( m_SemaAnalyzer.GetFunctions() );
     techniques = m_CodeGenerator.GenerateTechniques( ast );
 
     return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
 }
+
+
 
 } // namespace Compiler
 } // namespace JoeLang

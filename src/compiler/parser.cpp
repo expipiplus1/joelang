@@ -43,10 +43,10 @@ namespace JoeLang
 namespace Compiler
 {
 
-bool Parser::Parse ( const std::string& string )
+bool Parser::Parse ( const std::string& source, const std::string& filename )
 {
     // Set up the lexer
-    m_Lexer.reset( new Compiler::Lexer( string ) );
+    m_Lexer.reset( new Compiler::Lexer( source, filename ) );
 
     // Try and parse a translation unit
     if( TranslationUnit::Parse( *this, m_TranslationUnit ) )

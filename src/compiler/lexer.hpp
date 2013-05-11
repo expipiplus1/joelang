@@ -53,7 +53,8 @@ public:
       * \param filename
       *   The file to lex
       */
-                 Lexer           ( const std::string& filename );
+                 Lexer           ( const std::string& source,
+                                   const std::string& filename );
                  
                 ~Lexer           ();
 
@@ -123,12 +124,6 @@ private:
     //
     std::size_t m_NumTokensLexed = 0;
     
-    struct FileCloser
-    {
-        void operator()(std::FILE* f){if(f)std::fclose(f);};
-    };
-    
-    std::unique_ptr<std::FILE, FileCloser>  m_File;
     std::unique_ptr<UCPPLexerState>         m_LexerState;
     std::unique_lock<std::mutex>            m_UCPPLock;
 };
