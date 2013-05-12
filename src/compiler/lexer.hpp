@@ -81,11 +81,11 @@ public:
 
     /**
       * \param string
-      *   The characters belonging to the next terminal
+      *   A string with which to return the characters belonging to the terminal
       * \returns
       *   The TerminalType of the next token in the stream
       */
-    TerminalType PeekNextTerminal ( std::string& string ) const;
+    TerminalType PeekNextTerminal ( std::string* string = nullptr ) const;
 
     /**
       * \param string

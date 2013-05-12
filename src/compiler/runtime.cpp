@@ -29,6 +29,8 @@
 
 #include "runtime.hpp"
 
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/PassManager.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
@@ -39,11 +41,20 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/system_error.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Transforms/IPO.h>
+#include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
+
+#include <joelang/context.hpp>
 #include <joelang/config.h>
 #include <joelang/types.hpp>
+#include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/type_properties.hpp>
+
+#ifndef JOELANG_RUNTIME_FILENAME
+    #error Missing runtime filename
+#endif
 
 namespace JoeLang
 {
@@ -81,46 +92,55 @@ const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
                                         Type::VOID,   {Type::STRING}}},
 };
 
-Runtime::Runtime()
-    :m_LLVMContext( llvm::getGlobalContext() )
+Runtime::Runtime( const JoeLang::Context& joelang_context )
+    :m_JoeLangContext( joelang_context )
 {
     llvm::InitializeNativeTarget();
 
     llvm::OwningPtr<llvm::MemoryBuffer> buffer;
 
-#ifndef JOELANG_RUNTIME_FILENAME
-    #error Missing runtime filename
-#endif
     llvm::MemoryBuffer::getFile( JOELANG_RUNTIME_FILENAME, buffer );
-    assert( buffer && "Couldn't load runtime library" );
-    m_RuntimeModule = llvm::ParseBitcodeFile ( buffer.get(),
-                                               m_LLVMContext );
-    assert( m_RuntimeModule && "Couldn't parse runtime library" );
-
-    for( const auto& function_info : s_FunctionInfos )
+    if( !buffer )
     {
-        m_Functions[function_info.first] =
-                     m_RuntimeModule->getFunction( function_info.second.name );
-        assert( m_Functions[function_info.first] &&
-                "Couldn't find function in runtime" );
+        m_JoeLangContext.Error( "Couldn't load runtime module" );
+        return;
+    }
+    m_Module = llvm::ParseBitcodeFile ( buffer.get(), m_LLVMContext );
+    if( !m_Module )
+    {
+        m_JoeLangContext.Error( "Couldn't parse runtime module" );
+        return;
     }
 
-#if defined( ARCH_X86_64 )
-    m_StringType = llvm::cast<llvm::StructType>(
-             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() );
+    if( !FindRuntimeFunctions() )
+    {
+        m_JoeLangContext.Error( "Error finding functions in runtime" );
+        return;
+    }
 
-    assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
-             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
-#elif defined( ARCH_I386 )
-    m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
-#else
-    llvm::Type* size_type = GetLLVMType( Type::U32 );
-    llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
-    m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
-                                               {size_type, char_ptr_type} );
-#endif
-    assert( m_StringType && "Can't find String type" );
-    /// TODO make assertions about string type;
+    if( !FindRuntimeTypes() )
+    {
+        m_JoeLangContext.Error( "Error determining runtime types" );
+        return;
+    }
+
+    std::string error_string;
+    m_ExecutionEngine.reset( llvm::EngineBuilder(m_Module)
+                             .setErrorStr(&error_string)
+                             .setOptLevel(llvm::CodeGenOpt::Default)
+                             .create() );
+    if( !m_ExecutionEngine )
+        m_JoeLangContext.Error( "Error creating LLVM ExecutionEngine: " +
+                                error_string );
+}
+
+Runtime::~Runtime()
+{
+}
+
+const JoeLang::Context& Runtime::GetJoeLangContext() const
+{
+    return m_JoeLangContext;
 }
 
 llvm::LLVMContext& Runtime::GetLLVMContext()
@@ -128,9 +148,19 @@ llvm::LLVMContext& Runtime::GetLLVMContext()
     return m_LLVMContext;
 }
 
-llvm::Module* Runtime::GetModule()
+llvm::Module& Runtime::GetModule()
 {
-    return m_RuntimeModule;
+    return *m_Module;
+}
+
+CodeGenerator Runtime::CreateCodeGenerator()
+{
+    return CodeGenerator( *this );
+}
+
+llvm::ExecutionEngine& Runtime::GetExecutionEngine()
+{
+    return *m_ExecutionEngine;
 }
 
 llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
@@ -155,7 +185,7 @@ llvm::Value* Runtime::CreateRuntimeCall( RuntimeFunction function,
 // Misc
 //
 
-llvm::Type* Runtime::GetLLVMType( const CompleteType& type ) const
+llvm::Type* Runtime::GetLLVMType( const CompleteType& type )
 {
     llvm::Type* t = GetLLVMType( type.GetBaseType() );
 
@@ -167,7 +197,7 @@ llvm::Type* Runtime::GetLLVMType( const CompleteType& type ) const
     return t;
 }
 
-llvm::Type* Runtime::GetLLVMType( Type type ) const
+llvm::Type* Runtime::GetLLVMType( Type type )
 {
     llvm::Type* t;
     if( type == Type::DOUBLE )
@@ -269,6 +299,68 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
     return nullptr;
 }
 
+bool Runtime::FindRuntimeFunctions()
+{
+    for( const auto& function_info : s_FunctionInfos )
+    {
+        m_Functions[function_info.first] =
+                     m_Module->getFunction( function_info.second.name );
+        if( !m_Functions[function_info.first] )
+            return false;
+    }
+    return true;
+}
+
+bool Runtime::FindRuntimeTypes()
+{
+#if defined( ARCH_X86_64 )
+    m_StringType = llvm::cast<llvm::StructType>(
+             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() );
+
+    assert( m_StringType->isLayoutIdentical( llvm::cast<llvm::StructType>(
+             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
+#elif defined( ARCH_I386 )
+    m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
+#else
+    llvm::Type* size_type = GetLLVMType( Type::U32 );
+    llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
+    m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
+                                               {size_type, char_ptr_type} );
+#endif
+    if( !m_StringType )
+        return false;
+    return true;
+}
+
+void Runtime::InitializeOptimizers()
+{
+    m_LLVMFunctionPassManager.reset(
+                                    new llvm::FunctionPassManager( m_Module ) );
+    m_LLVMModulePassManager.reset( new llvm::PassManager() );
+
+    llvm::PassManagerBuilder pass_manager_builder;
+    pass_manager_builder.OptLevel = 3;
+    pass_manager_builder.Inliner = llvm::createFunctionInliningPass();
+    pass_manager_builder.LoopVectorize = true;
+    pass_manager_builder.BBVectorize = true;
+    pass_manager_builder.SLPVectorize = true;
+    pass_manager_builder.populateFunctionPassManager(
+                                                   *m_LLVMFunctionPassManager );
+    pass_manager_builder.populateModulePassManager(
+                                                   *m_LLVMModulePassManager );
+
+    m_LLVMFunctionPassManager->doInitialization();
+}
+
+void Runtime::OptimizeFunction( llvm::Function& function )
+{
+    m_LLVMFunctionPassManager->run( function );
+}
+
+void Runtime::OptimizeModule()
+{
+    m_LLVMModulePassManager->run( *m_Module );
+}
 
 } // namespace Compiler
 } // namespace JoeLang

@@ -48,17 +48,18 @@ class TranslationUnit;
 class Parser
 {
 public:
-    /** Tries to parse the string
-      * \param source
-      *   The string to parse
-      * \param name
-      *   The name of the file
+    /**
+      * \param token_stream
+      *   The lexer from which to get the tokens.
+     */
+    Parser( Lexer& token_stream );
+
+    /** Tries to parse from the token stream it has
       * \returns
       *   true if the parsing was successful,
       *   false if the parsing failed
       */
-    bool Parse( const std::string& source,
-                const std::string& name );
+    bool Parse ();
 
     /** \returns the parsed CST or null if we haven't parsed a TU **/
     const std::unique_ptr<TranslationUnit>& GetTranslationUnit() const;
@@ -70,6 +71,9 @@ public:
       *   The error message
       */
     void Error  ( std::string error_message );
+
+    const std::vector<std::string>& GetErrors() const;
+
     /** \returns true if no error has occured **/
     bool Good   () const;
 
@@ -172,10 +176,10 @@ public:
 private:
     std::unique_ptr<TranslationUnit>    m_TranslationUnit;
 
-    std::unique_ptr<Lexer>              m_Lexer;
+    Lexer&                              m_TokenStream;
 
     bool                                m_Good = true;
-    std::string                         m_ErrorMessage;
+    std::vector<std::string>            m_Errors;
     std::set<TerminalType>              m_ExpectedTerminals;
 };
 

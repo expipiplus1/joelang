@@ -89,26 +89,43 @@ bool Context::AddState( StateBase* state )
     return true;
 }
 
-Effect* Context::CreateEffectFromString( const std::string& string )
+Effect* Context::CreateEffectFromString( const std::string& source,
+                                         const std::string& name )
 {
-    assert( false && "Can't create from string yet" );
-}
-
-Effect* Context::CreateEffectFromFile( const std::string& filename )
-{
+    if( !m_Runtime )
+        m_Runtime.reset( new JoeLang::Compiler::Runtime( *this ) );
     if( !m_EffectFactory )
-        m_EffectFactory.reset( new JoeLang::Compiler::EffectFactory( *this ) );
-    
-    assert( m_EffectFactory && "Couldn't create an effect factory" );
+        m_EffectFactory.reset( new JoeLang::Compiler::EffectFactory(
+                                                                 *this,
+                                                                 *m_Runtime ) );
 
     std::unique_ptr<Effect> effect(
-                            m_EffectFactory->CreateEffectFromFile( filename ) );
+                            m_EffectFactory->CreateEffectFromString( source,
+                                                                     name ) );
     if( effect )
     {
         m_Effects.push_back( std::move(effect) );
         return m_Effects.rbegin()->get();
     }
     return nullptr;
+}
+
+Effect* Context::CreateEffectFromFile( const std::string& filename )
+{
+    std::string source;
+
+    std::ifstream file( filename, std::ios::in );
+    if (!file)
+        return nullptr;
+
+    file.seekg( 0, std::ios::end );
+    source.resize( file.tellg() );
+    file.seekg( 0, std::ios::beg );
+    file.read( &source[0], source.size() );
+    file.close();
+
+    return CreateEffectFromString( source, filename );
+
 }
 
 const StateBase* Context::GetNamedState(const std::string& name) const

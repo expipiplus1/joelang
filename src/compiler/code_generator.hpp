@@ -41,16 +41,13 @@ namespace llvm
     class ExecutionEngine;
     struct GenericValue;
     class GlobalVariable;
-    class FunctionPassManager;
     class LLVMContext;
     class Module;
-    class PassManager;
 }
 
 namespace JoeLang
 {
 
-class Context;
 class StateBase;
 class StateAssignmentBase;
 class Technique;
@@ -72,6 +69,7 @@ using Function_sp = std::shared_ptr<Function>;
 class GenericValue;
 class Runtime;
 class TechniqueDeclaration;
+using TechniqueDeclaration_up = std::unique_ptr<TechniqueDeclaration>;
 class TranslationUnit;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
@@ -80,14 +78,15 @@ using Variable_sp = std::shared_ptr<Variable>;
 class CodeGenerator
 {
 public:
-    CodeGenerator( const Context& context, Runtime& runtime );
+    CodeGenerator( Runtime& runtime );
     ~CodeGenerator();
 
-    const Context& GetContext() const;
+    const Runtime& GetRuntime() const;
 
     void GenerateFunctions( const std::vector<Function_sp>& functions );
 
-    std::vector<Technique> GenerateTechniques( const TranslationUnit& ast );
+    std::vector<Technique> GenerateTechniques(
+           const std::vector<TechniqueDeclaration_up>& technique_declarations );
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,
@@ -271,27 +270,15 @@ private:
                                                 const Expression& expression,
                                                 std::string name = "" );
 
-    /**
-      * Runs some optimizations on the function
-      */
-    void OptimizeFunction( llvm::Function& function );
-
-    /**
-      * Runs some optimizations on the module
-      */
-    void OptimizeModule();
-
-    const Context& m_Context;
-
     std::stack<llvm::Value*> m_Temporaries;
 
     Runtime&                 m_Runtime;
 
-    llvm::Module*            m_LLVMModule;
-    llvm::IRBuilder<>        m_LLVMBuilder;
-    std::unique_ptr<llvm::ExecutionEngine>     m_LLVMExecutionEngine;
-    std::unique_ptr<llvm::FunctionPassManager> m_LLVMFunctionPassManager;
-    std::unique_ptr<llvm::PassManager>         m_LLVMModulePassManager;
+    llvm::IRBuilder<>        m_Builder;
+
+    llvm::ExecutionEngine&   m_ExecutionEngine;
+
+    llvm::Module&            m_Module;
 };
 
 } // namespace Compiler

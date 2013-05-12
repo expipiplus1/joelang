@@ -44,9 +44,12 @@
 
 namespace llvm
 {
+    class ExecutionEngine;
     class Function;
+    class FunctionPassManager;
     class LLVMContext;
     class Module;
+    class PassManager;
     class StructType;
     class Type;
     class Value;
@@ -56,12 +59,14 @@ namespace JoeLang
 {
 
 enum class Type;
+class Context;
 
 namespace Compiler
 {
 
 typedef std::vector<unsigned> ArrayExtents;
 class CompleteType;
+class CodeGenerator;
 
 enum class RuntimeFunction
 {
@@ -69,23 +74,27 @@ enum class RuntimeFunction
     STRING_NOTEQUAL,
     STRING_CONCAT,
     STRING_COPY,
-    STRING_DESTROY,
+    STRING_DESTROY
 };
 
 class Runtime
 {
 public:
-    Runtime();
+    Runtime( const JoeLang::Context& joelang_context );
+    ~Runtime();
 
-    llvm::LLVMContext&  GetLLVMContext();
-    llvm::Module*       GetModule();
+    const JoeLang::Context& GetJoeLangContext() const;
+    llvm::LLVMContext&      GetLLVMContext();
+    llvm::ExecutionEngine&  GetExecutionEngine();
+    llvm::Module&           GetModule();
+    CodeGenerator           CreateCodeGenerator();
 
     llvm::Value*        CreateRuntimeCall( RuntimeFunction function,
                                            std::vector<llvm::Value*> params,
                                            llvm::IRBuilder<>& builder ) const;
 
-    llvm::Type*         GetLLVMType( const CompleteType& type ) const;
-    llvm::Type*         GetLLVMType( Type type ) const;
+    llvm::Type*         GetLLVMType( const CompleteType& type );
+    llvm::Type*         GetLLVMType( Type type );
 private:
     enum class ReturnType
     {
@@ -127,17 +136,71 @@ private:
                                     const std::vector<ParamValue>& param_types,
                                     llvm::IRBuilder<>& builder ) const;
 
-    llvm::LLVMContext&  m_LLVMContext;
+    bool FindRuntimeFunctions();
+    bool FindRuntimeTypes();
 
-    llvm::Module*       m_RuntimeModule;
+    void InitializeOptimizers();
 
+    /**
+      * Runs some optimizations on the function
+      */
+    void OptimizeFunction( llvm::Function& function );
+
+    /**
+      * Runs some optimizations on the module
+      */
+    void OptimizeModule();
+
+    //
+    // The JoeLang Context to which this runtime belongs
+    //
+    const JoeLang::Context& m_JoeLangContext;
+
+    //
+    // The LLVMContext which belongs to this JoeLang Context
+    //
+    llvm::LLVMContext  m_LLVMContext;
+
+    //
+    // The llvm module into which we put everything, initialized from runtime.bc
+    //
+    llvm::Module*       m_Module;
+
+    //
+    // The ExecutionEngine which runs the module
+    //
+    std::unique_ptr<llvm::ExecutionEngine>     m_ExecutionEngine;
+
+    //
+    // Optimization
+    //
+    std::unique_ptr<llvm::FunctionPassManager> m_LLVMFunctionPassManager;
+    std::unique_ptr<llvm::PassManager>         m_LLVMModulePassManager;
+
+    //
+    // The type of a JoeLang string
+    //
     llvm::StructType*   m_StringType;
 
+    //
+    // The list of functions in the runtime
+    //
     std::map<RuntimeFunction, llvm::Function*> m_Functions;
 
+    //
+    // The mapping of joelang types to llvm types
+    //
+    std::map<Type, llvm::Type*> m_Types;
+
+    //
+    // A list of types and how they are passed to and from functions
+    //
     const static
     std::map<Type, TypeInformation> s_TypeInformationMap;
 
+    //
+    // A mapping between the runtime functions and information describing them
+    //
     const static
     std::map<RuntimeFunction, FunctionInfo> s_FunctionInfos;
 };

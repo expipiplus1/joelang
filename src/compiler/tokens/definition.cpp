@@ -38,6 +38,7 @@
 #include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
@@ -178,7 +179,7 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
     std::vector<Shader> shaders;
     shaders.reserve( (*m_DefinitionRef)->GetCompileStatements().size() );
     for( const auto& c : (*m_DefinitionRef)->GetCompileStatements() )
-        shaders.push_back( Shader( code_gen.GetContext(),
+        shaders.push_back( Shader( code_gen.GetRuntime().GetJoeLangContext(),
                                    c->GetEntryFunction() ) );
 
     //

@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
 #include <compiler/semantic.hpp>
 
@@ -59,7 +60,16 @@ class Function;
 using Function_sp = std::shared_ptr<Function>;
 class Initializer;
 class PassDefinition;
+class Runtime;
 class TechniqueDefinition;
+class TechniqueDeclaration;
+using TechniqueDeclaration_up = std::unique_ptr<TechniqueDeclaration>;
+class PassDeclaration;
+using PassDeclaration_up = std::unique_ptr<PassDeclaration>;
+class VariableDeclarationList;
+using VariableDeclarationList_up = std::unique_ptr<VariableDeclarationList>;
+class FunctionDefinition;
+using FunctionDefinition_up = std::unique_ptr<FunctionDefinition>;
 class TranslationUnit;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
@@ -73,17 +83,30 @@ class SemaAnalyzer
 public:
     using PassDefinitionRef = std::shared_ptr<std::unique_ptr<PassDefinition> >;
 
-    SemaAnalyzer( const Context& context, CodeGenerator& code_gen );
+    SemaAnalyzer( const Context& context, Runtime& runtime );
     ~SemaAnalyzer();
 
     /**
-      * Insert implicit casts and verify types and resolve identifiers and all
-      * \param cst
-      *   The parse tree
+      * Extract all the information from this translation unit.
+      * Also put in implicit casts, verify typing, resolve identifiers, etc
       * \returns
       *   true if there were no errors
       */
-    bool BuildAst( TranslationUnit& cst );
+    bool Analyze( TranslationUnit& tu );
+
+    /**
+      * Transfers ownership of a various declaration to the analyzer
+      * Sema will be performed on these
+      */
+    void AddTechniqueDeclaration( std::unique_ptr<TechniqueDeclaration> t );
+
+    void AddPassDeclaration( std::unique_ptr<PassDeclaration> p );
+
+    void AddVariableDeclarations( std::unique_ptr<VariableDeclarationList> v );
+
+    void AddFunctionDefinition( std::unique_ptr<FunctionDefinition> f );
+
+    const std::vector<TechniqueDeclaration_up>& GetTechniqueDeclarations() const;
 
     /**
       * Declare and optionally define a pass.
@@ -264,6 +287,16 @@ public:
     bool Good() const;
 
     /**
+      * \returns the vector of all errors
+      */
+    const std::vector<std::string>& GetErrors() const;
+
+    /**
+      * \returns the vector of all warnings
+      */
+    const std::vector<std::string>& GetWarnings() const;
+
+    /**
       * \returns the CodeGenerator object
       */
     CodeGenerator& GetCodeGenerator();
@@ -318,10 +351,18 @@ private:
 
     std::vector<SymbolMaps>  m_SymbolStack;
 
+    std::vector<TechniqueDeclaration_up>    m_TechniqueDeclarations;
+    std::vector<PassDeclaration_up>         m_PassDeclarations;
+    std::vector<VariableDeclarationList_up> m_VariableDeclarations;
+    std::vector<FunctionDefinition_up>      m_FunctionDefinitions;
+
     bool m_Good = true;
+    std::vector<std::string> m_Errors;
+    std::vector<std::string> m_Warnings;
 
     const Context& m_Context;
-    CodeGenerator& m_CodeGenerator;
+    Runtime&       m_Runtime;
+    CodeGenerator  m_CodeGenerator;
 };
 
 } // namespace Compiler

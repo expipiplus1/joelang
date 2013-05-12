@@ -42,6 +42,7 @@
 #include <compiler/complete_type.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/type_properties.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
@@ -58,9 +59,10 @@ namespace JoeLang
 namespace Compiler
 {
 
-SemaAnalyzer::SemaAnalyzer( const Context& context, CodeGenerator& code_gen )
+SemaAnalyzer::SemaAnalyzer( const Context& context, Runtime& runtime )
     :m_Context( context )
-    ,m_CodeGenerator( code_gen )
+    ,m_Runtime( runtime )
+    ,m_CodeGenerator( std::move(m_Runtime.CreateCodeGenerator()) )
 {
 }
 
@@ -70,19 +72,29 @@ SemaAnalyzer::~SemaAnalyzer()
             "The symbol table is still inside a scope" );
 }
 
-bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
+bool SemaAnalyzer::Analyze( TranslationUnit& tu )
 {
-    EnterScope();
-    // Perform sema on the tree
-    cst.PerformSema( *this );
-    LeaveScope();
+    assert( m_SymbolStack.size() == 0 &&
+            "Analyzing a translation unit while already in a scope" );
+
+    SemaAnalyzer::ScopeHolder scope( *this );
+    scope.Enter();
+
+    //
+    // This will cause this analyzer to be filled up with all that it needs
+    //
+    tu.PerformSema( *this );
+
+    scope.Leave();
 
     //
     // Check for undefined passes
     //
     for( const auto& p : m_PassDefinitions )
     {
+        //
         // If this pass is referenced and not defined
+        //
         if( !p.second.unique() &&
             !(*p.second) )
             Error( "Use of undefined pass: " + p.first );
@@ -90,7 +102,7 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 
     for( auto& fo : m_FunctionOverloads )
     {
-        // error If the function is referenced and not defined
+        // error if the function is referenced and not defined
         for( const auto& f : fo.second )
             if( !f.unique() &&
                 !f->HasDefinition() )
@@ -108,7 +120,40 @@ bool SemaAnalyzer::BuildAst( TranslationUnit& cst )
 
     // Todo, reset state here
     // Return success or not
-    return m_Good;
+    return Good();
+}
+
+void SemaAnalyzer::AddTechniqueDeclaration(
+                                       std::unique_ptr<TechniqueDeclaration> t )
+{
+    t->PerformSema( *this );
+    m_TechniqueDeclarations.emplace_back( std::move(t) );
+}
+
+void SemaAnalyzer::AddPassDeclaration( std::unique_ptr<PassDeclaration> p )
+{
+    p->PerformSema( *this );
+    m_PassDeclarations.emplace_back( std::move(p) );
+}
+
+void SemaAnalyzer::AddVariableDeclarations(
+                                    std::unique_ptr<VariableDeclarationList> v )
+{
+    v->PerformSema( *this );
+    m_VariableDeclarations.emplace_back( std::move(v) );
+}
+
+void SemaAnalyzer::AddFunctionDefinition(
+                                         std::unique_ptr<FunctionDefinition> f )
+{
+    f->PerformSema( *this );
+    m_FunctionDefinitions.emplace_back( std::move(f) );
+}
+
+const std::vector<TechniqueDeclaration_up>&
+                                  SemaAnalyzer::GetTechniqueDeclarations() const
+{
+    return m_TechniqueDeclarations;
 }
 
 void SemaAnalyzer::DeclarePass( std::string name,
@@ -533,19 +578,28 @@ GenericValue SemaAnalyzer::EvaluateInitializer( const Initializer& initializer )
 void SemaAnalyzer::Error( const std::string& error_message )
 {
     m_Good = false;
-    std::cout << "Error during semantic analysis: " << error_message <<
-                 std::endl;
+    m_Errors.push_back( "Error during semantic analysis: " + error_message );
 }
 
 void SemaAnalyzer::Warning( const std::string& warning_message)
 {
-    std::cout << "Warning during semantic analysis: " << warning_message <<
-                 std::endl;
+    m_Warnings.push_back( "Warning during semantic analysis: "
+                        + warning_message );
 }
 
 bool SemaAnalyzer::Good() const
 {
     return m_Good;
+}
+
+const std::vector<std::string>& SemaAnalyzer::GetErrors() const
+{
+    return m_Errors;
+}
+
+const std::vector<std::string>& SemaAnalyzer::GetWarnings() const
+{
+    return m_Warnings;
 }
 
 CodeGenerator& SemaAnalyzer::GetCodeGenerator()

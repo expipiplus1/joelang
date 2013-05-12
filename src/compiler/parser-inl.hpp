@@ -48,7 +48,7 @@ bool Parser::Expect( std::unique_ptr<U>& token )
     if( !Good() )
         return false;
 
-    std::size_t p = m_Lexer->GetPosition();
+    std::size_t p = m_TokenStream.GetPosition();
 
     if( T::Parse( *this, token ) )
     {
@@ -56,7 +56,7 @@ bool Parser::Expect( std::unique_ptr<U>& token )
     }
     else
     {
-        if( m_Lexer->GetPosition() != p )
+        if( m_TokenStream.GetPosition() != p )
             Error();
 
         return false;
@@ -69,7 +69,7 @@ bool Parser::Expect()
     if( !Good() )
         return false;
 
-    std::size_t p = m_Lexer->GetPosition();
+    std::size_t p = m_TokenStream.GetPosition();
 
     if( T::Parse( *this ) )
     {
@@ -77,7 +77,7 @@ bool Parser::Expect()
     }
     else
     {
-        if( m_Lexer->GetPosition() != p )
+        if( m_TokenStream.GetPosition() != p )
             Error();
 
         return false;

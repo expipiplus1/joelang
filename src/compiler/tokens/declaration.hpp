@@ -66,6 +66,7 @@ class TechniqueDefinition;
   * DeclarationBase =   EmptyDeclaration
   *                   | PassDeclaration
   *                   | TechniqueDeclaration
+  *                   | VariableListOrFunctionDefinition
   */
 class DeclarationBase : public JoeLang::Compiler::Token
 {
@@ -327,7 +328,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
-    bool classof( const Token* t );
+    bool classof( const DeclarationBase* d );
     static
     bool classof( const VariableDeclarationList* d );
 private:
@@ -360,7 +361,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     static
-    bool classof( const Token* t );
+    bool classof( const DeclarationBase* d );
     static
     bool classof( const FunctionDefinition* d );
 private:

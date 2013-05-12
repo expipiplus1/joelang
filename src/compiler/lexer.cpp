@@ -110,9 +110,10 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
     return false;
 }
 
-TerminalType Lexer::PeekNextTerminal( std::string& string ) const
+TerminalType Lexer::PeekNextTerminal( std::string* string ) const
 {
-    string = m_TerminalString;
+    if( string )
+        *string = m_TerminalString;
     return m_TerminalType;
 }
 

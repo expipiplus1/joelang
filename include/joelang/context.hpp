@@ -45,6 +45,7 @@ class StateBase;
 namespace Compiler
 {
     class EffectFactory;
+    class Runtime;
 }
 
 class Context
@@ -53,7 +54,8 @@ public:
     Context();
     ~Context();
 
-    Effect* CreateEffectFromString( const std::string& string );
+    Effect* CreateEffectFromString( const std::string& source,
+                                    const std::string& name );
     Effect* CreateEffectFromFile(   const std::string& filename );
 
 #ifdef JOELANG_WITH_OPENGL
@@ -85,6 +87,8 @@ private:
     std::vector<std::unique_ptr<Effect> >       m_Effects;
 
     std::function<void(std::string)>            m_ErrorCallback;
+
+    std::unique_ptr<Compiler::Runtime>          m_Runtime;
 
     std::unique_ptr<Compiler::EffectFactory>    m_EffectFactory;
 };
