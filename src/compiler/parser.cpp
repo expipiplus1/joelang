@@ -29,10 +29,11 @@
 
 #include "parser.hpp"
 
-#include <iostream>
+#include <cassert>
 #include <memory>
 #include <set>
 #include <string>
+#include <sstream>
 
 #include <compiler/lexer.hpp>
 #include <compiler/terminal_types.hpp>
@@ -43,44 +44,46 @@ namespace JoeLang
 namespace Compiler
 {
 
-bool Parser::Parse ( const std::string& source, const std::string& filename )
+Parser::Parser( Lexer& token_stream )
+    :m_TokenStream( token_stream )
 {
-    // Set up the lexer
-    m_Lexer.reset( new Compiler::Lexer( source, filename ) );
+}
 
+bool Parser::Parse()
+{
     // Try and parse a translation unit
     if( TranslationUnit::Parse( *this, m_TranslationUnit ) )
+    {
+        assert( Good() && "Parse was a success but we are not good" );
         return true;
+    }
 
     //
     // Report error
     // TODO move this to a better place
-    std::cout << "Error parsing at line " << m_Lexer->GetLineNumber() << "\n";
-    if( m_ErrorMessage.empty() )
+    if( m_Errors.empty() )
     {
-        std::cout << "Expected one of: ";
+        std::stringstream ss;
+        ss << "Error parsing at line " << m_TokenStream.GetLineNumber()
+           << "\n";
+        ss << "Expected one of: ";
         for( TerminalType expected_terminal : m_ExpectedTerminals )
         {
-            std::cout << "\'"
+            ss << "\'"
                       << Compiler::GetTerminalString( expected_terminal )
                       << "\', ";
         }
         std::string next_terminal;
-        m_Lexer->PeekNextTerminal( next_terminal );
-        std::cout << "Got: '" << next_terminal << "'";
+        m_TokenStream.PeekNextTerminal( &next_terminal );
+        ss << "Got: '" << next_terminal << "'";
+        m_Errors.push_back( ss.str() );
     }
-    else
-    {
-        std::cout << m_ErrorMessage;
-    }
-    std::cout << std::endl;
     return false;
 }
 
 TerminalType Parser::PeekTerminal()
 {
-    std::string dummy;
-    return m_Lexer->PeekNextTerminal( dummy );
+    return m_TokenStream.PeekNextTerminal();
 }
 
 bool Parser::ExpectTerminal( TerminalType terminal_type )
@@ -91,7 +94,7 @@ bool Parser::ExpectTerminal( TerminalType terminal_type )
 
 bool Parser::ExpectTerminal( TerminalType terminal_type, std::string& string )
 {
-    if( m_Lexer->Expect( terminal_type, string ) )
+    if( m_TokenStream.Expect( terminal_type, string ) )
     {
         m_ExpectedTerminals.clear();
         return true;
@@ -113,8 +116,13 @@ void Parser::Error()
 
 void Parser::Error( std::string error_message )
 {
-    m_ErrorMessage = std::move( error_message );
+    m_Errors.emplace_back( std::move( error_message ) );
     Error();
+}
+
+const std::vector<std::string>& Parser::GetErrors() const
+{
+    return m_Errors;
 }
 
 bool Parser::Good() const

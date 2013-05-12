@@ -31,6 +31,7 @@
 
 #include <fstream>
 
+#include <joelang/context.hpp>
 #include <joelang/effect.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/code_generator.hpp>
@@ -43,50 +44,51 @@ namespace JoeLang
 namespace Compiler
 {
 
-EffectFactory::EffectFactory( const Context& context )
+EffectFactory::EffectFactory( const Context& context, Runtime& runtime )
     :m_Context( context )
-    ,m_Runtime()
-    ,m_CodeGenerator( context, m_Runtime )
-    ,m_SemaAnalyzer( m_Context, m_CodeGenerator )
-    ,m_ShaderWriter( m_Context )
+    ,m_Runtime( runtime )
 {
-}
-
-std::unique_ptr<Effect> EffectFactory::CreateEffectFromFile(
-                                                 const std::string& filename )
-{
-    std::string source;
-
-    std::ifstream file( filename, std::ios::in );
-    if (!file)
-        return nullptr;
-
-    file.seekg( 0, std::ios::end );
-    source.resize( file.tellg() );
-    file.seekg( 0, std::ios::beg );
-    file.read( &source[0], source.size() );
-    file.close();
-
-    return CreateEffectFromString( source, filename );
 }
 
 std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
                                                       const std::string& source,
                                                       const std::string& name )
 {
-    Parser parser;
-    if( !parser.Parse( source, name ) )
+    Lexer         token_stream( source, name );
+    Parser        parser( token_stream );
+    SemaAnalyzer  sema_analyzer( m_Context, m_Runtime );
+    CodeGenerator code_generator( m_Runtime.CreateCodeGenerator() );
+
+    parser.Parse();
+
+    if( !parser.Good() )
+    {
+        for( const auto& s : parser.GetErrors() )
+            m_Context.Error( s );
         return nullptr;
+    }
 
-    TranslationUnit& ast = *parser.GetTranslationUnit();
+    TranslationUnit& tu = *parser.GetTranslationUnit();
 
-    if( !m_SemaAnalyzer.BuildAst( ast ) )
+    //
+    // This will resolve identifiers and insert implicit casts
+    // It may also codegen variables used in initializers
+    //
+    sema_analyzer.Analyze( tu );
+
+    if( !sema_analyzer.Good() )
+    {
+        for( const auto& s : sema_analyzer.GetErrors() )
+            m_Context.Error( s );
         return nullptr;
+    }
 
-    std::vector<Technique> techniques;
+    code_generator.GenerateFunctions( sema_analyzer.GetFunctions() );
+    std::vector<Technique> techniques = code_generator.GenerateTechniques(
+                                     sema_analyzer.GetTechniqueDeclarations() );
 
-    m_CodeGenerator.GenerateFunctions( m_SemaAnalyzer.GetFunctions() );
-    techniques = m_CodeGenerator.GenerateTechniques( ast );
+    //std::vector<Technique> techniques = sema_analyzer.GetTechniques();
+    //std::vector<Parameter> parameters = sema_analyzer.GetParameters();
 
     return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
 }

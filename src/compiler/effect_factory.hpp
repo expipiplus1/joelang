@@ -50,9 +50,8 @@ class EffectFactory
 {
 public:
     explicit
-    EffectFactory( const Context& context );
-
-    std::unique_ptr<Effect> CreateEffectFromFile( const std::string& filename );
+    EffectFactory( const Context& context,
+                   Runtime& runtime );
 
     std::unique_ptr<Effect> CreateEffectFromString(
                                                  const std::string& source,
@@ -60,10 +59,7 @@ public:
 
 private:
     const Context& m_Context;
-    Runtime        m_Runtime;
-    CodeGenerator  m_CodeGenerator;
-    SemaAnalyzer   m_SemaAnalyzer;
-    ShaderWriter   m_ShaderWriter;
+    Runtime&       m_Runtime;
 };
 
 } // namespace Compiler

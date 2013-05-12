@@ -32,8 +32,9 @@
 #include <memory>
 #include <vector>
 
-#include <compiler/sema_analyzer.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
@@ -59,8 +60,47 @@ TranslationUnit::~TranslationUnit()
 
 void TranslationUnit::PerformSema( SemaAnalyzer& sema )
 {
-    for( const auto& d : m_Declarations )
-        d->PerformSema( sema );
+    //
+    // We want to give all of the declarations to sema
+    //
+    for( auto& d : m_Declarations )
+    {
+        DeclarationBase* r = d.release();
+        if( std::unique_ptr<EmptyDeclaration> e{dyn_cast<EmptyDeclaration>(r)} )
+        {
+            // don't do anything for emptydeclarations
+        }
+        else if( std::unique_ptr<TechniqueDeclaration> t
+                                           {dyn_cast<TechniqueDeclaration>(r)} )
+        {
+            sema.AddTechniqueDeclaration( std::move(t) );
+        }
+        else if( std::unique_ptr<PassDeclaration> p
+                                           {dyn_cast<PassDeclaration>(r)} )
+        {
+            sema.AddPassDeclaration( std::move(p) );
+        }
+        else if( std::unique_ptr<VariableDeclarationList> v
+                                        {dyn_cast<VariableDeclarationList>(r)} )
+        {
+            sema.AddVariableDeclarations( std::move(v) );
+        }
+        else if( std::unique_ptr<FunctionDefinition> f
+                                             {dyn_cast<FunctionDefinition>(r)} )
+        {
+            sema.AddFunctionDefinition( std::move(f) );
+        }
+        else
+        {
+            assert( false && "Unhandled declaration type in PerformSema" );
+        }
+        assert( !d && "Unhandled declaraion" );
+    }
+
+    //
+    // to remove the null pointers we now have
+    //
+    m_Declarations.clear();
 }
 
 const TranslationUnit::DeclarationVector&
@@ -79,7 +119,10 @@ bool TranslationUnit::Parse( Parser& parser,
 
     // Make sure that there's nothing left
     if( !parser.ExpectTerminal( TerminalType::END_OF_INPUT ) )
+    {
+        parser.Error( "Extra input" );
         return false;
+    }
 
     token.reset( new TranslationUnit( std::move(declarations) ) );
     return true;

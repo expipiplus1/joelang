@@ -423,6 +423,16 @@ bool VariableDeclarationList::PerformSema( SemaAnalyzer& sema )
     return true;
 }
 
+bool VariableDeclarationList::classof( const DeclarationBase* d )
+{
+    return d->GetSubClassID() == TokenTy::VariableDeclarationList;
+}
+
+bool VariableDeclarationList::classof( const VariableDeclarationList* d )
+{
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // FunctionDefinition
 //------------------------------------------------------------------------------
@@ -477,6 +487,18 @@ bool FunctionDefinition::PerformSema( SemaAnalyzer& sema )
                          std::move(m_Body) );
     return true;
 }
+
+bool FunctionDefinition::classof( const DeclarationBase* d )
+{
+    return d->GetSubClassID() == TokenTy::FunctionDefinition;
+}
+
+bool FunctionDefinition::classof( const FunctionDefinition* d )
+{
+    return true;
+}
+
+
 
 } // namespace Compiler
 } // namespace JoeLang
