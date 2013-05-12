@@ -38,6 +38,7 @@
 #include <llvm/IR/Type.h>
 #include <llvm/ADT/OwningPtr.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/system_error.h>
 #include <llvm/Support/TargetSelect.h>
@@ -136,6 +137,7 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
 
 Runtime::~Runtime()
 {
+    llvm::llvm_shutdown();
 }
 
 const JoeLang::Context& Runtime::GetJoeLangContext() const
