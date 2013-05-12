@@ -146,26 +146,8 @@ set( JOELANG_RUNTIME_FILENAME ${CMAKE_BINARY_DIR}/runtime.bc CACHE FILENAME "The
 configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_SOURCE_DIR}/include/joelang/config.h )
 
 #
-# Test executable
-#
-add_executable( joelang_test src/joelang.cpp )
-if( ${JOELANG_WITH_OPENGL} )
-    target_link_libraries( joelang_test joelang ${OPENGL_LIBRARY} glee )
-else()
-    target_link_libraries( joelang_test joelang )
-endif()
-
-#
 # Various custom commands
 #
-
-add_custom_command(
-    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/test.jfx
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/test.jfx ${CMAKE_CURRENT_BINARY_DIR}/test.jfx
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/test.jfx )
-
-add_custom_target( joelang_copy_files DEPENDS "${PROJECT_BINARY_DIR}/test.jfx" )
-add_dependencies( joelang joelang_copy_files )
 
 set( runtime_sources src/runtime/string.cpp
                      src/runtime/string.hpp
