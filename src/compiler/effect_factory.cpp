@@ -83,7 +83,6 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
         return nullptr;
     }
 
-    code_generator.GenerateFunctions( sema_analyzer.GetFunctions() );
     std::vector<Technique> techniques = code_generator.GenerateTechniques(
                                      sema_analyzer.GetTechniqueDeclarations() );
 

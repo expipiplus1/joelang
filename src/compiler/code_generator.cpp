@@ -87,9 +87,15 @@ const Runtime& CodeGenerator::GetRuntime() const
     return m_Runtime;
 }
 
-void CodeGenerator::GenerateFunctions(
-                                     const std::vector<Function_sp>& functions )
+void CodeGenerator::GenerateFunctions( std::set<Function_sp>& functions )
 {
+    //
+    // remove any functions which have already been codegened
+    //
+    for( auto& f : functions )
+        if( f->HasLLVMFunction() )
+            functions.erase( f );
+
     //
     // First, declare all the functions
     //
@@ -124,6 +130,20 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     /// TODO assigning arrays
     assert( expression.GetType().GetType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
+
+    //
+    // Generate all the functions this may rely on first
+    //
+    std::set<Function_sp> function_dependencies;
+    for( const auto& f : expression.GetCallees() )
+    {
+        bool recursion;
+        auto d = f->GetFunctionDependencies( recursion );
+        function_dependencies.insert( d.begin(), d.end() );
+        function_dependencies.insert( f );
+    }
+
+    GenerateFunctions( function_dependencies );
 
     llvm::Function* function = CreateFunctionFromExpression( expression, name );
     void* function_ptr = m_ExecutionEngine.getPointerToFunction(function);

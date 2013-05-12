@@ -173,12 +173,6 @@ private:
                             const std::set<Variable_sp>& global_variables );
 
     /**
-      * Gathers all the functions used by this function, checks for recursion
-      * too.
-      */
-    std::set<Function_sp> GatherFunctions( Function_sp function );
-
-    /**
       * Gather all the variables used by any of the functions
       */
     static

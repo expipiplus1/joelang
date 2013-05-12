@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <set>
 #include <stack>
 #include <string>
 #include <memory>
@@ -83,7 +84,7 @@ public:
 
     const Runtime& GetRuntime() const;
 
-    void GenerateFunctions( const std::vector<Function_sp>& functions );
+    void GenerateFunctions( std::set<Function_sp>& functions );
 
     std::vector<Technique> GenerateTechniques(
            const std::vector<TechniqueDeclaration_up>& technique_declarations );

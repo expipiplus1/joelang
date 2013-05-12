@@ -113,11 +113,51 @@ bool Function::HasDefinition() const
     return static_cast<bool>(m_Definition);
 }
 
+bool Function::HasLLVMFunction() const
+{
+    return m_LLVMFunction;
+}
+
 std::set<Function_sp> Function::GetCallees() const
 {
     assert( m_Definition &&
             "Trying to get the callees of a function without a definition" );
     return m_Definition->GetCallees();
+}
+
+std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const
+{
+    std::set<Function_sp> ret;
+    std::set<const Function*> stack = { this };
+    recursion = false;
+
+    std::function<void(Function_sp)> visit;
+    visit = [&ret, &stack, &recursion, &visit]( Function_sp f ) -> void
+    {
+        //
+        // If this is in the temp list we have recursion
+        // go no further
+        //
+        if( stack.find( f.get() ) != stack.end() )
+        {
+            recursion = true;
+            return;
+        }
+
+        //
+        // Otherwise it's in ret or needs to go in temp
+        //
+        stack.insert( f.get() );
+        for( auto c : f->GetCallees() )
+            visit( c );
+        stack.erase( f.get() );
+        ret.insert( f );
+    };
+
+    for( auto c : GetCallees() )
+        visit( c );
+
+    return ret;
 }
 
 std::set<Variable_sp> Function::GetVariables() const

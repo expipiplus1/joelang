@@ -95,11 +95,18 @@ public:
 
     bool HasDefinition() const;
 
+    bool HasLLVMFunction() const;
+
     /**
-      * Returns all the functions called by this one.
+      * Returns all the functions called directly by this one.
       * this asserts that we have a definition
       */
     std::set<Function_sp> GetCallees() const;
+
+    /**
+      * Returns all functions below this one in the call graph
+      */
+    std::set<Function_sp> GetFunctionDependencies( bool& recursion ) const;
 
     /**
       * Returns all the variables referenced in this function

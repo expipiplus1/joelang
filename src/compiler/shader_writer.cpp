@@ -55,7 +55,7 @@ namespace JoeLang
 namespace Compiler
 {
 
-const std::string ShaderWriter::s_GLSLVersion = "150";
+const std::string ShaderWriter::s_GLSLVersion = " 150";
 
 ShaderWriter::ShaderWriter( const Context& context )
     :m_Context( context )
@@ -162,8 +162,16 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
     //
     // Get all the functions used by this entry function
     //
-    std::set<Function_sp> functions = GatherFunctions(
-                                          entry_function.GetFunctionPointer() );
+    bool recursion;
+    std::set<Function_sp> functions =
+      entry_function.GetFunctionPointer()->GetFunctionDependencies( recursion );
+    functions.insert( entry_function.GetFunctionPointer() );
+
+    if( recursion )
+    {
+        m_Context.Error( "Creating a shader with recursion" );
+        return;
+    }
 
     //
     // Find out which variables are ever written to
@@ -530,68 +538,6 @@ void ShaderWriter::WriteMainFunction(
     NewLine();
     m_Shader << "}";
     NewLine(2);
-}
-
-std::set<Function_sp> ShaderWriter::GatherFunctions( Function_sp function )
-{
-    assert( function && "GatherFunctions given null function" );
-
-    std::set<Function_sp> ret =
-    {
-        function
-    };
-
-    //
-    // Perform a dfs on the function tree
-    //
-    std::vector<Function_sp>               call_stack = { function };
-    std::stack< std::set<Function_sp> > expanded;
-    expanded.push( function->GetCallees() );
-
-    while( !expanded.empty() )
-    {
-        //
-        // If we've exhausted all of the expanded functions we can move up
-        //
-        if( expanded.top().empty() )
-        {
-            expanded.pop();
-            call_stack.pop_back();
-            continue;
-        }
-
-        //
-        // We still have functions at this level to explore explore the next one
-        //
-        Function_sp current = *expanded.top().begin();
-
-        const auto& f = std::find( call_stack.begin(), call_stack.end(),
-                                   current );
-        if( f != call_stack.end() )
-        {
-            //
-            // If this function is in the call stack, error because of recursion
-            //
-            Error( "Recursion in shader function: " +
-                   current->GetSignatureString() );
-            return std::set<Function_sp>{};
-        }
-
-
-        //
-        // Remove this function from the expanded function list
-        //
-        expanded.top().erase( expanded.top().begin() );
-
-        //
-        // Add this function to the call stack and expand it's children
-        //
-        ret.insert( current );
-        call_stack.push_back( current );
-        expanded.push( current->GetCallees() );
-    }
-
-    return ret;
 }
 
 std::set<Variable_sp> ShaderWriter::GatherWrittenToVariables(
