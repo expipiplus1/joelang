@@ -1,0 +1,12 @@
+/*
+int_state: 255
+*/
+int a = 0377;
+
+technique t1
+{
+    pass p1
+    {
+        int_state = a;
+    }
+}

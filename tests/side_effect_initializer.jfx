@@ -1,0 +1,14 @@
+/*
+int_state: 1 
+*/
+
+int a = 0;
+const int b = a += 1;
+
+technique t1
+{
+    pass p1
+    {
+        int_state = a;
+    }
+}
