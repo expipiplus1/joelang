@@ -127,27 +127,27 @@ void SemaAnalyzer::AddTechniqueDeclaration(
                                        std::unique_ptr<TechniqueDeclaration> t )
 {
     t->PerformSema( *this );
-    m_TechniqueDeclarations.emplace_back( std::move(t) );
+    m_TechniqueDeclarations.push_back( std::move(t) );
 }
 
 void SemaAnalyzer::AddPassDeclaration( std::unique_ptr<PassDeclaration> p )
 {
     p->PerformSema( *this );
-    m_PassDeclarations.emplace_back( std::move(p) );
+    m_PassDeclarations.push_back( std::move(p) );
 }
 
 void SemaAnalyzer::AddVariableDeclarations(
                                     std::unique_ptr<VariableDeclarationList> v )
 {
     v->PerformSema( *this );
-    m_VariableDeclarations.emplace_back( std::move(v) );
+    m_VariableDeclarations.push_back( std::move(v) );
 }
 
 void SemaAnalyzer::AddFunctionDefinition(
                                          std::unique_ptr<FunctionDefinition> f )
 {
     f->PerformSema( *this );
-    m_FunctionDefinitions.emplace_back( std::move(f) );
+    m_FunctionDefinitions.push_back( std::move(f) );
 }
 
 const std::vector<TechniqueDeclaration_up>&
