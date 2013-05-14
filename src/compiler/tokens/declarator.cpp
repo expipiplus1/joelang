@@ -124,8 +124,7 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
     // If the variable is in it has to be varying
     if( decl_specs.IsIn() && !decl_specs.IsVarying() )
     {
-        sema.Error( "'in' variables must be varying or a parameter to a top "
-                    "level function" );
+        sema.Error( "'in' variables must be varying or a parameter to a function" );
         decl_specs.SetIsVarying( true );
         decl_specs.SetIsUniform( false );
     }
