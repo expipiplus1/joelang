@@ -259,7 +259,7 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
                                                Expression& expression )
 {
     // This doesn't resolve the identifier in expression because that will only
-    // find variables
+    // find variables and not functions
     bool good = true;
     for( auto& a : m_Arguments )
         good &= a->ResolveIdentifiers( sema );

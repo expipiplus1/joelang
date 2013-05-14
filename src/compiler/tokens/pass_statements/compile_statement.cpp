@@ -89,7 +89,7 @@ bool CompileStatement::ResolveIdentifiers( SemaAnalyzer& sema,
                                            Function_sp& function )
 {
     // This doesn't resolve the identifier in expression because that will only
-    // find variables
+    // find variables and not the function to call
     bool good = true;
     for( auto& a : m_Arguments )
         good &= a->ResolveIdentifiers( sema );
