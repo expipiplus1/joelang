@@ -61,7 +61,7 @@ public:
     ~ParameterWatcherBase();
 
     //
-    // Send the variable to glsl if it's updated
+    // Send the variable to glsl if it's changed
     //
     virtual
     void Update() = 0;
