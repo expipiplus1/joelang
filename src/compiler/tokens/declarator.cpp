@@ -144,6 +144,11 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
         }
     }
 
+    //
+    // If we can't initialize this for whatever reason, sema will have been
+    // notified, so just pretend that this is non-const for the sake of later
+    // analysis
+    //
     m_Variable = std::make_shared<Variable>( CompleteType( base_type,
                                                            array_extents ),
                                              m_Declarator->GetSemantic(),
@@ -157,9 +162,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                              can_init ? std::move(initializer)
                                                       : GenericValue(),
                                              m_Declarator->GetIdentifier() );
-    // If we can't initialize this for whatever reason, sema will have been
-    // notified, so just pretend that this is non-const for the sake of later
-    // analysis
     sema.DeclareVariable( m_Declarator->GetIdentifier(), m_Variable );
 
     //

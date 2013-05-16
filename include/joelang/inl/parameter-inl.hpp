@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,56 +27,40 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/effect.hpp>
-
-#include <algorithm>
-#include <memory>
-#include <utility>
-#include <vector>
-
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#pragma once
 
 #include <joelang/parameter.hpp>
-#include <joelang/technique.hpp>
+
+#include <string>
+
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques,
-                std::vector<ParameterBase_up> parameters )
-    :m_Techniques( std::move(techniques) )
-    ,m_Parameters( std::move(parameters) )
+template<typename T>
+Parameter<T>::Parameter( std::string name, T& data_location )
+    :ParameterBase( std::move(name) )
+    ,m_Data( data_location )
 {
 }
 
-Effect::~Effect()
+template<typename T>
+void Parameter<T>::SetParameter( T value )
 {
+    m_Data = value;
 }
 
-const std::vector<Technique>& Effect::GetTechniques() const
+template<typename T>
+T Parameter<T>::GetParameter() const
 {
-    return m_Techniques;
+    return m_Data;
 }
 
-const Technique* Effect::GetNamedTechnique( const std::string& name ) const
+template<typename T>
+Type Parameter<T>::GetType() const
 {
-    const auto& technique = std::find_if( m_Techniques.begin(),
-                                          m_Techniques.end(),
-                                         [&name](const Technique& t)
-                                            {return t.GetName() == name;} );
-    return technique == m_Techniques.end() ? nullptr :  &*technique;
-}
-
-ParameterBase* Effect::GetNamedParameter( const std::string& name )
-{
-    auto it = std::find_if( m_Parameters.begin(),
-                            m_Parameters.end(),
-                            [&]( const ParameterBase_up& p )
-                                { return p->GetName() == name; } );
-
-    if( it == m_Parameters.end() )
-        return nullptr;
-    return (*it).get();
+    return JoeLangType<T>::value;
 }
 
 } // namespace JoeLang

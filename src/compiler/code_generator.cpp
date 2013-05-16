@@ -48,6 +48,7 @@
 #include <llvm/IR/Module.h>
 
 #include <joelang/context.hpp>
+#include <joelang/parameter.hpp>
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/technique.hpp>
@@ -120,6 +121,63 @@ std::vector<Technique> CodeGenerator::GenerateTechniques(
     }
 
     return std::move(techniques);
+}
+
+std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
+                             const std::vector<Variable_sp>& uniform_variables )
+{
+    std::vector<ParameterBase_up> parameters;
+
+    for( const auto& uniform : uniform_variables )
+    {
+        assert( uniform->IsUniform() && "Trying to generate a parameter for a "
+                "non-uniform variable" );
+        assert( uniform->GetType().GetArrayExtents().empty() &&
+                "Trying to create a parameter for an array" );
+        assert( uniform->GetLLVMPointer() &&
+                "Uniform doesn't have a llvm value" );
+        assert( llvm::isa<llvm::GlobalValue>(uniform->GetLLVMPointer()) &&
+                "Uniform doesn't have a llvm global value" );
+
+        Type type = uniform->GetType().GetBaseType();
+        llvm::GlobalValue* gv = cast<llvm::GlobalValue>(
+                                                    uniform->GetLLVMPointer() );
+        assert( gv->getType()->isValidElementType(
+                                m_Runtime.GetLLVMType( uniform->GetType() ) ) &&
+                "Trying to create a parameter with the wrong llvm type" );
+
+#define CREATE_TYPED_PARAM(Type) \
+        case JoeLangType<Type>::value: \
+           parameters.emplace_back( new Parameter<Type>( \
+                    uniform->GetName(), \
+                    *(static_cast<Type*>( \
+                             m_ExecutionEngine.getPointerToGlobal( gv ) ) ) ) ); \
+            break
+
+        switch( type )
+        {
+        CREATE_TYPED_PARAM(jl_bool);
+        CREATE_TYPED_PARAM(jl_char);
+        CREATE_TYPED_PARAM(jl_short);
+        CREATE_TYPED_PARAM(jl_int);
+        CREATE_TYPED_PARAM(jl_long);
+        CREATE_TYPED_PARAM(jl_uchar);
+        CREATE_TYPED_PARAM(jl_ushort);
+        CREATE_TYPED_PARAM(jl_uint);
+        CREATE_TYPED_PARAM(jl_ulong);
+        CREATE_TYPED_PARAM(jl_float);
+        CREATE_TYPED_PARAM(jl_float4);
+        CREATE_TYPED_PARAM(jl_double);
+        default:
+            assert( false &&
+                    "Trying to create a parameter for an unhandled type" );
+            break;
+        }
+    }
+
+#undef CREATE_TYPED_PARAM
+
+    return parameters;
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
@@ -775,7 +833,10 @@ llvm::Constant* CodeGenerator::CreateFloatingVector(
     data.reserve( value.size() );
     for( double d : value )
         data.push_back( CreateFloating( d, GetElementType( type ) ) );
-    return llvm::ConstantVector::get( data );
+    auto ret = llvm::ConstantVector::get( data );
+    assert( ret->getType() == m_Runtime.GetLLVMType( type ) &&
+            "Created a wrong type" ) ;
+    return ret;
 }
 
 llvm::Constant* CodeGenerator::CreateString( const std::string& value )

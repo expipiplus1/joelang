@@ -29,10 +29,10 @@
 
 #pragma once
 
+#include <memory>
 #include <set>
 #include <stack>
 #include <string>
-#include <memory>
 #include <vector>
 
 #include <llvm/IR/IRBuilder.h>
@@ -49,6 +49,8 @@ namespace llvm
 namespace JoeLang
 {
 
+class ParameterBase;
+using ParameterBase_up = std::unique_ptr<ParameterBase>;
 class StateBase;
 class StateAssignmentBase;
 class Technique;
@@ -88,6 +90,9 @@ public:
 
     std::vector<Technique> GenerateTechniques(
            const std::vector<TechniqueDeclaration_up>& technique_declarations );
+
+    std::vector<ParameterBase_up> GenerateParameters(
+                            const std::vector<Variable_sp>& uniform_variables );
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                  const StateBase& state,

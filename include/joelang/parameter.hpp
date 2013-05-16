@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,56 +27,56 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/effect.hpp>
+#pragma once
 
-#include <algorithm>
-#include <memory>
-#include <utility>
-#include <vector>
+#include <string>
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-
-#include <joelang/parameter.hpp>
-#include <joelang/technique.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques,
-                std::vector<ParameterBase_up> parameters )
-    :m_Techniques( std::move(techniques) )
-    ,m_Parameters( std::move(parameters) )
+class ParameterBase
 {
-}
+public:
+    explicit
+    ParameterBase( std::string name );
+    virtual
+    ~ParameterBase();
 
-Effect::~Effect()
+    const std::string& GetName() const;
+
+    virtual
+    Type GetType() const = 0;
+
+private:
+    std::string m_Name;
+};
+
+template<typename T>
+class Parameter : public ParameterBase
 {
-}
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
+                   "Can't create a Parameter with an unhandled type" );
+public:
+    Parameter( std::string name, T& data_location );
+    virtual
+    ~Parameter() = default;
 
-const std::vector<Technique>& Effect::GetTechniques() const
-{
-    return m_Techniques;
-}
+    void SetParameter( T value );
+    T    GetParameter() const;
 
-const Technique* Effect::GetNamedTechnique( const std::string& name ) const
-{
-    const auto& technique = std::find_if( m_Techniques.begin(),
-                                          m_Techniques.end(),
-                                         [&name](const Technique& t)
-                                            {return t.GetName() == name;} );
-    return technique == m_Techniques.end() ? nullptr :  &*technique;
-}
+    virtual
+    Type GetType() const override;
 
-ParameterBase* Effect::GetNamedParameter( const std::string& name )
-{
-    auto it = std::find_if( m_Parameters.begin(),
-                            m_Parameters.end(),
-                            [&]( const ParameterBase_up& p )
-                                { return p->GetName() == name; } );
-
-    if( it == m_Parameters.end() )
-        return nullptr;
-    return (*it).get();
-}
+private:
+    //
+    // This typically points to the data for this variable in the LLVM execution
+    // engine, but there's no reason it couldn't point to somewhere else
+    //
+    T&  m_Data;
+};
 
 } // namespace JoeLang
+
+#include "inl/parameter-inl.hpp"

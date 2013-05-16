@@ -38,18 +38,25 @@
 namespace JoeLang
 {
 
+class ParameterBase;
+using ParameterBase_up = std::unique_ptr<ParameterBase>;
+
 class Effect
 {
 public:
     Effect() = default;
-    explicit
-    Effect( std::vector<Technique> techniques );
+    Effect( std::vector<Technique> techniques,
+            std::vector<ParameterBase_up> parameters );
+    ~Effect();
 
     const std::vector<Technique>& GetTechniques() const;
     const Technique* GetNamedTechnique( const std::string& name ) const;
 
+    ParameterBase* GetNamedParameter( const std::string& name );
+
 private:
     std::vector<Technique>                  m_Techniques;
+    std::vector<ParameterBase_up>           m_Parameters;
 };
 
 } // namespace JoeLang

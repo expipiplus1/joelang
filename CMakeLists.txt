@@ -33,6 +33,7 @@ add_subdirectory( tests EXCLUDE_FROM_ALL )
 
 add_library( joelang include/joelang/context.hpp
                      include/joelang/effect.hpp
+                     include/joelang/parameter.hpp
                      include/joelang/pass.hpp
                      include/joelang/program.hpp
                      include/joelang/shader.hpp
@@ -40,12 +41,14 @@ add_library( joelang include/joelang/context.hpp
                      include/joelang/technique.hpp
                      include/joelang/types.hpp
                      include/joelang/state.hpp
+                     include/joelang/inl/parameter-inl.hpp
                      include/joelang/inl/state_assignment-inl.hpp
                      include/joelang/inl/state-inl.hpp
                      src/engine/context.cpp
                      src/engine/effect.cpp
                      src/engine/opengl_states.cpp
                      src/engine/opengl_states.hpp
+                     src/engine/parameter.cpp
                      src/engine/pass.cpp
                      src/engine/program.cpp
                      src/engine/shader.cpp

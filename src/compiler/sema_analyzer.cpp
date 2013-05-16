@@ -156,6 +156,11 @@ const std::vector<TechniqueDeclaration_up>&
     return m_TechniqueDeclarations;
 }
 
+const std::vector<Variable_sp>& SemaAnalyzer::GetUniformVariables() const
+{
+    return m_UniformVariables;
+}
+
 void SemaAnalyzer::DeclarePass( std::string name,
                                 std::unique_ptr<PassDefinition> definition )
 {
@@ -330,15 +335,26 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 }
 
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
-                                    std::shared_ptr<Variable> value )
+                                    std::shared_ptr<Variable> variable )
 {
     bool inserted = m_SymbolStack.rbegin()->m_Variables.insert(
-                        std::make_pair( identifier, std::move(value) ) ).second;
+                        std::make_pair( identifier, variable ) ).second;
 
     if( !inserted )
         Error( "Duplicate definition of variable: " + identifier );
     else
     {
+        //
+        // Remember this if it's a global uniform
+        //
+        if( variable->IsUniform() && variable->IsGlobal() )
+        {
+            m_UniformVariables.push_back( std::move(variable) );
+        }
+
+        //
+        // Give a warning if we are shadowing another variable
+        //
         for( auto it = ++m_SymbolStack.rbegin();
              it != m_SymbolStack.rend();
              ++it )

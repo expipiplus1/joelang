@@ -108,6 +108,8 @@ public:
 
     const std::vector<TechniqueDeclaration_up>& GetTechniqueDeclarations() const;
 
+    const std::vector<Variable_sp>& GetUniformVariables() const;
+
     /**
       * Declare and optionally define a pass.
       * This will error if one tries to define an already defined pass
@@ -355,6 +357,8 @@ private:
     std::vector<PassDeclaration_up>         m_PassDeclarations;
     std::vector<VariableDeclarationList_up> m_VariableDeclarations;
     std::vector<FunctionDefinition_up>      m_FunctionDefinitions;
+
+    std::vector<Variable_sp>                m_UniformVariables;
 
     bool m_Good = true;
     std::vector<std::string> m_Errors;

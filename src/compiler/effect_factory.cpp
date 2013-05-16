@@ -30,9 +30,11 @@
 #include "effect_factory.hpp"
 
 #include <fstream>
+#include <memory>
 
 #include <joelang/context.hpp>
 #include <joelang/effect.hpp>
+#include <joelang/parameter.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/parser.hpp>
@@ -41,6 +43,11 @@
 
 namespace JoeLang
 {
+
+class ParameterBase;
+using ParameterBase_up = std::unique_ptr<ParameterBase>;
+
+
 namespace Compiler
 {
 
@@ -85,11 +92,11 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
 
     std::vector<Technique> techniques = code_generator.GenerateTechniques(
                                      sema_analyzer.GetTechniqueDeclarations() );
+    std::vector<ParameterBase_up> parameters =
+       code_generator.GenerateParameters( sema_analyzer.GetUniformVariables() );
 
-    //std::vector<Technique> techniques = sema_analyzer.GetTechniques();
-    //std::vector<Parameter> parameters = sema_analyzer.GetParameters();
-
-    return std::unique_ptr<Effect>( new Effect( std::move(techniques) ) );
+    return std::unique_ptr<Effect>( new Effect( std::move(techniques),
+                                                std::move(parameters) ) );
 }
 
 

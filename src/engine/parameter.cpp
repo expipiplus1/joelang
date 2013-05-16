@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,56 +27,25 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/effect.hpp>
-
-#include <algorithm>
-#include <memory>
-#include <utility>
-#include <vector>
-
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-
 #include <joelang/parameter.hpp>
-#include <joelang/technique.hpp>
+
+#include <string>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques,
-                std::vector<ParameterBase_up> parameters )
-    :m_Techniques( std::move(techniques) )
-    ,m_Parameters( std::move(parameters) )
+ParameterBase::ParameterBase( std::string name )
+    :m_Name( std::move(name) )
 {
 }
 
-Effect::~Effect()
+ParameterBase::~ParameterBase()
 {
 }
 
-const std::vector<Technique>& Effect::GetTechniques() const
+const std::string& ParameterBase::GetName() const
 {
-    return m_Techniques;
-}
-
-const Technique* Effect::GetNamedTechnique( const std::string& name ) const
-{
-    const auto& technique = std::find_if( m_Techniques.begin(),
-                                          m_Techniques.end(),
-                                         [&name](const Technique& t)
-                                            {return t.GetName() == name;} );
-    return technique == m_Techniques.end() ? nullptr :  &*technique;
-}
-
-ParameterBase* Effect::GetNamedParameter( const std::string& name )
-{
-    auto it = std::find_if( m_Parameters.begin(),
-                            m_Parameters.end(),
-                            [&]( const ParameterBase_up& p )
-                                { return p->GetName() == name; } );
-
-    if( it == m_Parameters.end() )
-        return nullptr;
-    return (*it).get();
+    return m_Name;
 }
 
 } // namespace JoeLang
