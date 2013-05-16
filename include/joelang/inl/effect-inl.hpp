@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,43 +29,18 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <joelang/effect.hpp>
 
-#include <joelang/technique.hpp>
 #include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-class ParameterBase;
-using ParameterBase_up = std::unique_ptr<ParameterBase>;
-template<typename>
-class Parameter;
-
-class Effect
+template<typename T>
+Parameter<T>* Effect::GetNamedParameter( const std::string& name )
 {
-public:
-    Effect() = default;
-    Effect( std::vector<Technique> techniques,
-            std::vector<ParameterBase_up> parameters );
-    ~Effect();
-
-    const std::vector<Technique>& GetTechniques() const;
-    const Technique* GetNamedTechnique( const std::string& name ) const;
-
-    ParameterBase* GetNamedParameter( const std::string& name,
-                                      Type type = Type::UNKNOWN );
-    
-    template<typename T>
-    Parameter<T>*  GetNamedParameter( const std::string& name );
-
-private:
-    std::vector<Technique>                  m_Techniques;
-    std::vector<ParameterBase_up>           m_Parameters;
-};
+    return static_cast<Parameter<T>*>(
+                             GetNamedParameter( name, JoeLangType<T>::value ) );
+}
 
 } // namespace JoeLang
-
-#include "inl/effect-inl.hpp"

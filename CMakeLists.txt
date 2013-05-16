@@ -41,6 +41,7 @@ add_library( joelang include/joelang/context.hpp
                      include/joelang/technique.hpp
                      include/joelang/types.hpp
                      include/joelang/state.hpp
+                     include/joelang/inl/effect-inl.hpp
                      include/joelang/inl/parameter-inl.hpp
                      include/joelang/inl/state_assignment-inl.hpp
                      include/joelang/inl/state-inl.hpp

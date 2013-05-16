@@ -39,6 +39,7 @@
 #include <joelang/config.h>
 #include <joelang/parameter.hpp>
 #include <joelang/technique.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
@@ -68,7 +69,7 @@ const Technique* Effect::GetNamedTechnique( const std::string& name ) const
     return technique == m_Techniques.end() ? nullptr :  &*technique;
 }
 
-ParameterBase* Effect::GetNamedParameter( const std::string& name )
+ParameterBase* Effect::GetNamedParameter( const std::string& name, Type type )
 {
     auto it = std::find_if( m_Parameters.begin(),
                             m_Parameters.end(),
@@ -76,6 +77,12 @@ ParameterBase* Effect::GetNamedParameter( const std::string& name )
                                 { return p->GetName() == name; } );
 
     if( it == m_Parameters.end() )
+        return nullptr;
+
+    //
+    // If a type was specified filter by that type
+    //
+    if( type != Type::UNKNOWN && (*it)->GetType() != type )
         return nullptr;
 
     //

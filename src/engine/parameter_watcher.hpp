@@ -29,6 +29,9 @@
 
 #pragma once
 
+#include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
 #include <memory>
 #include <string>
 
@@ -95,3 +98,5 @@ private:
 } // namespace JoeLang
 
 #include "inl/parameter_watcher-inl.hpp"
+
+#endif
