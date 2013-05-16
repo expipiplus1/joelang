@@ -1,0 +1,16 @@
+/*
+int_state: 4 
+int_state: 2 
+*/
+
+int a = 4;
+unsigned int b = 2;
+
+technique t1
+{
+    pass p1
+    {
+        int_state = a;
+        int_state = b;
+    }
+}

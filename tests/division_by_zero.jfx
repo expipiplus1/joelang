@@ -1,0 +1,14 @@
+/*
+float_state: nan
+float_state: inf
+float_state: -inf
+*/
+technique t1
+{
+    pass p1
+    {
+        float_state = 0.0/0.0;
+        float_state = 1.0/0.0;
+        float_state = 1.0/-0.0;
+    }
+}
