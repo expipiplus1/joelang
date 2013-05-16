@@ -30,6 +30,7 @@
 #include "literal_expression.hpp"
 
 #include <cassert>
+#include <cstdlib>
 #include <limits>
 #include <memory>
 #include <sstream>
@@ -443,25 +444,18 @@ GenericValue FloatingLiteralExpression::GetValue() const
 
 bool FloatingLiteralExpression::ParseFloat( std::string string,
                                             double& value,
-                                            Suffix& suffix )
+                                            std::string& suffix )
 {
-    std::istringstream ss( string );
-    ss.unsetf( std::ios_base::skipws );
-    if( !( ss >> value ) )
+    char* end = nullptr;
+    value = std::strtod( string.c_str(), &end );
+
+    //
+    // If no characters were read we can conclude this failed
+    //
+    if( suffix == string.c_str() )
         return false;
 
-    // check if there is a suffix
-    if( ss.eof() )
-    {
-        suffix = Suffix::NONE;
-        return true;
-    }
-
-    // There is a suffix
-    if( string[ss.tellg()] == 'f' )
-        suffix = Suffix::SINGLE;
-    else
-        return false;
+    suffix = end;
 
     return true;
 }
@@ -476,9 +470,27 @@ bool FloatingLiteralExpression::Parse(
         return false;
 
     double value;
-    Suffix suffix;
-    if( !ParseFloat( string, value, suffix ) )
+    std::string suffix_string;
+    if( !ParseFloat( string, value, suffix_string ) )
         return false;
+
+    Suffix suffix;
+    if( suffix_string.empty() )
+    {
+        suffix = Suffix::NONE;
+    }
+    else
+    {
+        // There is a suffix
+        if( suffix_string[0] == 'f' )
+            suffix = Suffix::SINGLE;
+        else
+        {
+            parser.Error( "Invalid suffix on floating point literal: "
+                          + suffix_string );
+            return false;
+        }
+    }
 
     token.reset( new FloatingLiteralExpression( value, suffix ) );
     return true;

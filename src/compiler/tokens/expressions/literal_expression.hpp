@@ -258,9 +258,9 @@ private:
       * \returns true if parsed successfully
       */
     static
-    bool ParseFloat( std::string string,
+    bool ParseFloat(std::string string,
                      double& value,
-                     Suffix& suffix );
+                     std::string& suffix );
 
     double m_Value;
     Suffix m_Suffix;
