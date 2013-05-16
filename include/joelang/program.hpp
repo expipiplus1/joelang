@@ -32,12 +32,17 @@
 #include <joelang/config.h>
 #ifdef JOELANG_WITH_OPENGL
 
+#include <memory>
 #include <vector>
 
 #include <joelang/shader.hpp>
 
 namespace JoeLang
 {
+
+class ParameterBase;
+class ParameterWatcherBase;
+using ParameterWatcherBase_up = std::unique_ptr<ParameterWatcherBase>;
 
 class Program
 {
@@ -62,11 +67,16 @@ public:
       */
     void Unbind() const;
 
+    void NotifyParameter( const ParameterBase& parameter );
+
+    unsigned GetGLUniformLocation( const std::string& name ) const;
+
     void Compile();
 
     bool IsCompiled() const;
 private:
-    std::vector<Shader> m_Shaders;
+    std::vector<Shader>                  m_Shaders;
+    std::vector<ParameterWatcherBase_up> m_ParameterWatchers;
 
     unsigned m_Object;
 };

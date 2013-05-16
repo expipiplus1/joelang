@@ -77,7 +77,6 @@ class TranslationUnit;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
-/// todo make this reusable
 class CodeGenerator
 {
 public:

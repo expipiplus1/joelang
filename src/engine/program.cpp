@@ -40,6 +40,7 @@
 #include <GL/GLee.h>
 
 #include <joelang/shader.hpp>
+#include <engine/parameter_watcher.hpp>
 
 namespace JoeLang
 {
@@ -76,11 +77,26 @@ void Program::Swap( Program& other )
 void Program::Bind() const
 {
     glUseProgram( m_Object );
+    for( const auto& p: m_ParameterWatchers )
+        p->Update();
 }
 
 void Program::Unbind() const
 {
     glUseProgram( 0 );
+}
+
+void Program::NotifyParameter( const ParameterBase& parameter )
+{
+    ParameterWatcherBase_up watcher = ParameterWatcherBase::Create( *this,
+                                                                    parameter );
+    if( watcher )
+        m_ParameterWatchers.push_back( std::move( watcher ) );
+}
+
+unsigned Program::GetGLUniformLocation( const std::string& uniform_name ) const
+{
+    return glGetUniformLocation( m_Object, uniform_name.c_str() );
 }
 
 void Program::Compile()

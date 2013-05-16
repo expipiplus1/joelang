@@ -55,6 +55,8 @@ public:
     bool Validate() const;
 
     const std::string& GetName() const;
+    const Program&     GetProgram() const;
+    Program&           GetProgram();
 
 private:
     std::string           m_Name;

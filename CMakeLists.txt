@@ -49,12 +49,15 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/opengl_states.cpp
                      src/engine/opengl_states.hpp
                      src/engine/parameter.cpp
+                     src/engine/parameter_watcher.cpp
+                     src/engine/parameter_watcher.hpp
                      src/engine/pass.cpp
                      src/engine/program.cpp
                      src/engine/shader.cpp
                      src/engine/state_assignment.cpp
                      src/engine/technique.cpp
                      src/engine/state.cpp
+                     src/engine/inl/parameter_watcher-inl.hpp
                      src/compiler/casting.hpp
                      src/compiler/code_generator.cpp
                      src/compiler/code_generator.hpp

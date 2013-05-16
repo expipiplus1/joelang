@@ -49,6 +49,11 @@ const std::vector<Pass>& Technique::GetPasses() const
     return m_Passes;
 }
 
+std::vector<Pass>& Technique::GetPasses()
+{
+    return m_Passes;
+}
+
 const std::string& Technique::GetName() const
 {
     return m_Name;

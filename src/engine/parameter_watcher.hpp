@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,28 +29,69 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
-#include <vector>
 
-#include <joelang/pass.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-class Technique
+class Program;
+class ParameterWatcherBase;
+using ParameterWatcherBase_up = std::unique_ptr<ParameterWatcherBase>;
+class ParameterBase;
+template<typename>
+class Parameter;
+
+class ParameterWatcherBase
 {
 public:
-    Technique() = default;
-    Technique( std::string name, std::vector<Pass> passes );
+    static
+    ParameterWatcherBase_up Create( const Program& program,
+                                    const ParameterBase& parameter );
 
-    const std::vector<Pass>& GetPasses() const;
-    std::vector<Pass>& GetPasses();
+    explicit
+    ParameterWatcherBase( int uniform_location );
 
-    const std::string& GetName() const;
+    virtual
+    ~ParameterWatcherBase();
+
+    //
+    // Send the variable to glsl if it's updated
+    //
+    virtual
+    void Update() = 0;
+
+    virtual
+    Type GetType() const = 0;
+
+protected:
+    int m_UniformLocation;
+};
+
+template<typename T>
+class ParameterWatcher : public ParameterWatcherBase
+{
+    static_assert( JoeLangType<T>::value != Type::UNKNOWN,
+                   "Can't create a ParameterWatcher with an unhandled type" );
+public:
+    ParameterWatcher( int uniform_location,
+                      const Parameter<T>& parameter );
+    virtual
+    ~ParameterWatcher() = default;
+
+    virtual
+    void Update() override;
+
+    virtual
+    Type GetType() const override;
 
 private:
-    std::string m_Name;
-    std::vector<Pass> m_Passes;
+    const Parameter<T>& m_Parameter;
+    T                   m_CurrentValue;
 };
 
 } // namespace JoeLang
+
+#include "inl/parameter_watcher-inl.hpp"

@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,67 +27,45 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include <joelang/effect.hpp>
+#pragma once
 
-#include <algorithm>
-#include <memory>
-#include <utility>
-#include <vector>
-
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <engine/parameter_watcher.hpp>
 
 #include <joelang/config.h>
+#ifdef JOELANG_WITH_OPENGL
+
+#include <GL/GLee.h>
+
 #include <joelang/parameter.hpp>
-#include <joelang/technique.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 
-Effect::Effect( std::vector<Technique> techniques,
-                std::vector<ParameterBase_up> parameters )
-    :m_Techniques( std::move(techniques) )
-    ,m_Parameters( std::move(parameters) )
+template<typename T>
+ParameterWatcher<T>::ParameterWatcher( int uniform_location,
+                                       const Parameter<T>& parameter )
+    :ParameterWatcherBase( uniform_location )
+    ,m_Parameter( parameter )
 {
+    m_CurrentValue = m_Parameter.GetParameter();
 }
 
-Effect::~Effect()
+//
+// The specializations of this are in parameter_watcher.cpp
+//
+template<typename T>
+void ParameterWatcher<T>::Update()
 {
+    assert( false && "Trying to update a uniform of unhandled type" );
 }
 
-const std::vector<Technique>& Effect::GetTechniques() const
+template<typename T>
+Type ParameterWatcher<T>::GetType() const
 {
-    return m_Techniques;
-}
-
-const Technique* Effect::GetNamedTechnique( const std::string& name ) const
-{
-    const auto& technique = std::find_if( m_Techniques.begin(),
-                                          m_Techniques.end(),
-                                         [&name](const Technique& t)
-                                            {return t.GetName() == name;} );
-    return technique == m_Techniques.end() ? nullptr :  &*technique;
-}
-
-ParameterBase* Effect::GetNamedParameter( const std::string& name )
-{
-    auto it = std::find_if( m_Parameters.begin(),
-                            m_Parameters.end(),
-                            [&]( const ParameterBase_up& p )
-                                { return p->GetName() == name; } );
-
-    if( it == m_Parameters.end() )
-        return nullptr;
-
-    //
-    // Link the parameter to the programs if we're using opengl
-    //
-#ifdef JOELANG_WITH_OPENGL
-    for( auto& t : m_Techniques )
-        for( auto& p : t.GetPasses() )
-            p.GetProgram().NotifyParameter( **it );
-#endif
-
-    return (*it).get();
+    return JoeLangType<T>::value;
 }
 
 } // namespace JoeLang
+
+#endif

@@ -84,4 +84,14 @@ const std::string& Pass::GetName() const
     return m_Name;
 }
 
+const Program& Pass::GetProgram() const
+{
+    return m_Program;
+}
+
+Program& Pass::GetProgram()
+{
+    return m_Program;
+}
+
 } // namespace JoeLang
