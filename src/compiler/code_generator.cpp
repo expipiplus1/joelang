@@ -510,7 +510,10 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e,
 
 llvm::Value* CodeGenerator::CreateNeg( const Expression& e )
 {
-    return m_Builder.CreateNeg( e.CodeGen( *this ) );
+    if( e.GetType().IsFloatingPoint() )
+        return m_Builder.CreateFNeg( e.CodeGen( *this ) );
+    else
+        return m_Builder.CreateNeg( e.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateNot( const Expression& e )
