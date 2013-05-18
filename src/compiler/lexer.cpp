@@ -103,8 +103,8 @@ bool Lexer::Expect( TerminalType terminal_type, std::string& string )
 {
     if( m_TerminalType == terminal_type )
     {
-        AdvanceLexer();
         string = m_TerminalString;
+        AdvanceLexer();
         return true;
     }
     return false;
