@@ -100,7 +100,8 @@ void ReturnStatement::PerformSema( SemaAnalyzer& sema,
         return;
     }
 
-    m_Expression->ResolveIdentifiers( sema );
+    if( !m_Expression->ResolveIdentifiers( sema ) )
+        return;
 
     // Cast the return type to what we want if this fails, sema will know
     m_Expression = CastExpression::Create( return_type,
