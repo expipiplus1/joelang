@@ -112,13 +112,23 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
 
 Type GetVectorType( Type base, unsigned size )
 {
-    const static std::array< std::array< Type, 4 >, 1 > t =
-    {
-        //
-        // Why on earth does clang want three pairs of braces here?!
-        //
-        {{{ Type::FLOAT, Type::FLOAT2, Type::FLOAT3, Type::FLOAT4 }}}
-    };
+#define CREATE_VECTOR_MAPPING(type) \
+    {{ type, type##2, type##3, type##4 }}
+    const static std::array< std::array< Type, 4 >, 11 > t =
+    {{
+        CREATE_VECTOR_MAPPING(Type::BOOL),
+        CREATE_VECTOR_MAPPING(Type::CHAR),
+        CREATE_VECTOR_MAPPING(Type::INT),
+        CREATE_VECTOR_MAPPING(Type::SHORT),
+        CREATE_VECTOR_MAPPING(Type::LONG),
+        CREATE_VECTOR_MAPPING(Type::UCHAR),
+        CREATE_VECTOR_MAPPING(Type::UINT),
+        CREATE_VECTOR_MAPPING(Type::USHORT),
+        CREATE_VECTOR_MAPPING(Type::ULONG),
+        CREATE_VECTOR_MAPPING(Type::FLOAT),
+        CREATE_VECTOR_MAPPING(Type::DOUBLE)
+    }};
+#undef CREATE_VECTOR_MAPPING
 
     assert( size <= 4 && size != 0 && "Trying to get an invalid vector size " );
     
@@ -127,41 +137,36 @@ Type GetVectorType( Type base, unsigned size )
         if( a[0] == base )
             return a[size-1]; 
     }
+    assert( false && "Trying to make an unhandled vector type" );
     return Type::UNKNOWN;
 }
 
 Type GetScalarType( Type t )
 {
+#define RETURN_BASE(type) \
+    case type: \
+    case type##2: \
+    case type##3: \
+    case type##4: \
+        return type
+
     switch( t )
     {
-    case Type::BOOL:
-        return Type::BOOL;
-    case Type::CHAR:
-        return Type::CHAR;
-    case Type::SHORT:
-        return Type::SHORT;
-    case Type::INT:
-        return Type::INT;
-    case Type::LONG:
-        return Type::LONG;
-    case Type::UCHAR:
-        return Type::UCHAR;
-    case Type::USHORT:
-        return Type::USHORT;
-    case Type::UINT:
-        return Type::UINT;
-    case Type::ULONG:
-        return Type::ULONG;
-    case Type::FLOAT:
-    case Type::FLOAT2:
-    case Type::FLOAT3:
-    case Type::FLOAT4:
-        return Type::FLOAT;
-    case Type::DOUBLE:
-        return Type::DOUBLE;
+    RETURN_BASE(Type::BOOL);
+    RETURN_BASE(Type::CHAR);
+    RETURN_BASE(Type::SHORT);
+    RETURN_BASE(Type::INT);
+    RETURN_BASE(Type::LONG);
+    RETURN_BASE(Type::UCHAR);
+    RETURN_BASE(Type::USHORT);
+    RETURN_BASE(Type::UINT);
+    RETURN_BASE(Type::ULONG);
+    RETURN_BASE(Type::FLOAT);
+    RETURN_BASE(Type::DOUBLE);
     case Type::STRING:
         return Type::STRING;
     default:
+        assert( false && "Trying to get the scalar type of an unknown type" );
         return Type::UNKNOWN;
     }
 }
@@ -198,9 +203,21 @@ bool IsSigned( Type t )
 
 bool IsVectorType( Type t )
 {
-    return t == Type::FLOAT4 ||
-           t == Type::FLOAT3 ||
-           t == Type::FLOAT2;
+#define EQUALS_VECTOR_TYPES(type) \
+    t == type##2 || \
+    t == type##3 || \
+    t == type##4
+    return EQUALS_VECTOR_TYPES(Type::BOOL) ||
+           EQUALS_VECTOR_TYPES(Type::CHAR) ||
+           EQUALS_VECTOR_TYPES(Type::SHORT) ||
+           EQUALS_VECTOR_TYPES(Type::INT) ||
+           EQUALS_VECTOR_TYPES(Type::LONG) ||
+           EQUALS_VECTOR_TYPES(Type::UCHAR) ||
+           EQUALS_VECTOR_TYPES(Type::USHORT) ||
+           EQUALS_VECTOR_TYPES(Type::UINT) ||
+           EQUALS_VECTOR_TYPES(Type::ULONG) ||
+           EQUALS_VECTOR_TYPES(Type::FLOAT) ||
+           EQUALS_VECTOR_TYPES(Type::DOUBLE);
 }
 
 bool IsScalarType( Type t )
@@ -241,25 +258,28 @@ Type GetElementType( Type t )
 
 unsigned GetNumElementsInType( Type t )
 {
+#define MATCH_N(n) \
+    case Type::BOOL##n: \
+    case Type::CHAR##n: \
+    case Type::SHORT##n: \
+    case Type::INT##n: \
+    case Type::LONG##n: \
+    case Type::UCHAR##n: \
+    case Type::USHORT##n: \
+    case Type::UINT##n: \
+    case Type::ULONG##n: \
+    case Type::FLOAT##n: \
+    case Type::DOUBLE##n:
+
     switch( t )
     {
-    case Type::FLOAT4:
+    MATCH_N(4)
         return 4;
-    case Type::FLOAT3:
+    MATCH_N(3)
         return 3;
-    case Type::FLOAT2:
+    MATCH_N(2)
         return 2;
-    case Type::ULONG:
-    case Type::LONG:
-    case Type::UINT:
-    case Type::INT:
-    case Type::USHORT:
-    case Type::SHORT:
-    case Type::UCHAR:
-    case Type::CHAR:
-    case Type::BOOL:
-    case Type::FLOAT:
-    case Type::DOUBLE:
+    MATCH_N( )
     case Type::STRING:
         return 1;
     default:
@@ -267,6 +287,8 @@ unsigned GetNumElementsInType( Type t )
                 "Trying to get the number of elements in an unhandled type" );
     }
     return 0;
+
+#undef MATCH_N
 }
 
 std::size_t SizeOf( Type t )
@@ -321,27 +343,34 @@ Type MakeUnsigned( Type t )
 
 const std::string& GetTypeString( Type t )
 {
+#define STR(s) #s
+#define TYPE_STRINGS(type, name) \
+    { type, STR(name) }, \
+    { type##2, STR(name##2) }, \
+    { type##3, STR(name##3) }, \
+    { type##4, STR(name##4) }
+
     const static std::map<Type, std::string> string_map =
     {
+        TYPE_STRINGS(Type::BOOL,   bool),
+        TYPE_STRINGS(Type::CHAR,   char),
+        TYPE_STRINGS(Type::SHORT,  short),
+        TYPE_STRINGS(Type::INT,    int),
+        TYPE_STRINGS(Type::LONG,   long),
+        TYPE_STRINGS(Type::UCHAR,  uchar),
+        TYPE_STRINGS(Type::USHORT, ushort),
+        TYPE_STRINGS(Type::UINT,   uint),
+        TYPE_STRINGS(Type::ULONG,  ulong),
+        TYPE_STRINGS(Type::FLOAT,  float),
+        TYPE_STRINGS(Type::DOUBLE, double),
         { Type::UNKNOWN,      "unknown type" },
-        { Type::DOUBLE,       "double" },
-        { Type::FLOAT,        "float" },
-        { Type::FLOAT2,       "float2" },
-        { Type::FLOAT3,       "float3" },
-        { Type::FLOAT4,       "float4" },
-        { Type::ULONG,          "u64" },
-        { Type::LONG,          "i64" },
-        { Type::UINT,          "u32" },
-        { Type::INT,          "i32" },
-        { Type::USHORT,          "u16" },
-        { Type::SHORT,          "i16" },
-        { Type::UCHAR,           "u8" },
-        { Type::CHAR,           "i8" },
-        { Type::BOOL,         "bool" },
         { Type::STRING,       "string" },
         { Type::ARRAY,        "array" },
-        { Type::VOID,         "void" },
+        { Type::VOID,         "void" }
     };
+
+#undef TYPE_STRINGS
+#undef STR
 
     return string_map.at(t);
 }
@@ -371,6 +400,12 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT2,       "vec2" },
         { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
+
+        { Type::FLOAT,        "float" },
+        { Type::FLOAT2,       "vec2" },
+        { Type::FLOAT3,       "vec3" },
+        { Type::FLOAT4,       "vec4" },
+
         { Type::UINT,          "uint" },
         { Type::INT,          "int" },
         { Type::BOOL,         "bool" },
