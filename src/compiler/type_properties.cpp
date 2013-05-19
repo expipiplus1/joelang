@@ -172,6 +172,7 @@ Type GetScalarType( Type t )
 
 bool IsIntegral( Type t )
 {
+    t = GetScalarType( t );
     return t == Type::BOOL ||
            t == Type::CHAR   ||
            t == Type::SHORT  ||
@@ -185,15 +186,14 @@ bool IsIntegral( Type t )
 
 bool IsFloatingPoint( Type t )
 {
+    t = GetScalarType( t );
     return t == Type::DOUBLE ||
-           t == Type::FLOAT  ||
-           t == Type::FLOAT2 ||
-           t == Type::FLOAT3 ||
-           t == Type::FLOAT4;
+           t == Type::FLOAT;
 }
 
 bool IsSigned( Type t )
 {
+    t = GetScalarType( t );
     return t == Type::LONG ||
            t == Type::INT ||
            t == Type::SHORT ||
@@ -222,37 +222,6 @@ bool IsVectorType( Type t )
 bool IsScalarType( Type t )
 {
     return GetNumElementsInType( t ) == 1 && !IsVectorType( t );
-}
-
-unsigned GetVectorSize( Type t )
-{
-    switch( t )
-    {
-    case Type::FLOAT2:
-        return 2;
-    case Type::FLOAT3:
-        return 3;
-    case Type::FLOAT4:
-        return 4;
-    default:
-        assert( false && "Trying to get the vector size of a non-vector type" );
-    }
-    return 0;
-}
-
-Type GetElementType( Type t )
-{
-    assert( t != Type::ARRAY && "Trying to get the base type of Type::ARRAY" );
-
-    switch( t )
-    {
-    case Type::FLOAT2:
-    case Type::FLOAT3:
-    case Type::FLOAT4:
-        return Type::FLOAT;
-    default:
-        return t;
-    }
 }
 
 unsigned GetNumElementsInType( Type t )
@@ -397,11 +366,6 @@ const std::string& GetGLSLTypeString( Type t )
 {
     const static std::map<Type, std::string> string_map =
     {
-        { Type::FLOAT,        "float" },
-        { Type::FLOAT2,       "vec2" },
-        { Type::FLOAT3,       "vec3" },
-        { Type::FLOAT4,       "vec4" },
-
         { Type::FLOAT,        "float" },
         { Type::FLOAT2,       "vec2" },
         { Type::FLOAT3,       "vec3" },

@@ -63,13 +63,6 @@ bool IsVectorType( Type t );
 bool IsScalarType( Type t );
 
 /**
-  * This asserts that t is a vector type
-  */
-unsigned GetVectorSize( Type t );
-
-Type GetElementType( Type t );
-
-/**
   * This asserts that t is not Type::UNKNOWN
   */
 unsigned GetNumElementsInType( Type t );

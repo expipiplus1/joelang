@@ -553,8 +553,12 @@ llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
             return m_Builder.CreateSIToFP( e_value,
                                            m_Runtime.GetLLVMType( to_type ) );
         else
+        {
+            assert( from_type.IsIntegral() && !from_type.IsSigned() &&
+                    "we've let a bad type through" );
             return m_Builder.CreateUIToFP( e_value,
                                            m_Runtime.GetLLVMType( to_type ) );
+        }
     }
 
     assert( to_type.IsIntegral() && "Type should be integral" );
@@ -989,12 +993,12 @@ llvm::Constant* CodeGenerator::CreateFloatingVector(
             "Trying to create a floating constant of non-floating type" );
     assert( IsVectorType( type ) &&
             "Trying to create a vector constant of non-vector type" );
-    assert( value.size() == GetVectorSize( type ) &&
+    assert( value.size() == GetNumElementsInType( type ) &&
             "Wrong number of values to construct vector constant" );
     std::vector<llvm::Constant*> data;
     data.reserve( value.size() );
     for( double d : value )
-        data.push_back( CreateFloating( d, GetElementType( type ) ) );
+        data.push_back( CreateFloating( d, GetScalarType( type ) ) );
     auto ret = llvm::ConstantVector::get( data );
     assert( ret->getType() == m_Runtime.GetLLVMType( type ) &&
             "Created a wrong type" ) ;

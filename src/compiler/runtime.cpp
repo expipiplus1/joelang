@@ -216,8 +216,8 @@ llvm::Type* Runtime::GetLLVMType( Type type )
     else if( type == Type::STRING )
         t = m_StringType;
     else if( IsVectorType( type ) )
-        t = llvm::VectorType::get( GetLLVMType( GetElementType( type ) ),
-                                   GetVectorSize( type ) );
+        t = llvm::VectorType::get( GetLLVMType( GetScalarType( type ) ),
+                                   GetNumElementsInType( type ) );
     else if( type == Type::VOID )
         t = llvm::Type::getVoidTy( m_LLVMContext );
     else

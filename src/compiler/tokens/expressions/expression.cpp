@@ -1207,7 +1207,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     //
     for( auto& argument : m_Arguments )
         argument = CastExpression::CreateBaseTypeCast(
-                                                      GetElementType( m_Type ),
+                                                      GetScalarType( m_Type ),
                                                       std::move(argument),
                                                       m_Arguments.size() == 1 );
 
