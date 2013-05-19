@@ -285,7 +285,7 @@ CompleteType AssignmentExpression::GetType() const
 std::set<Function_sp> AssignmentExpression::GetCallees() const
 {
     //assert( false && "Do assignment properly" );
-    auto ret = m_Assignee->GetCallees();
+    auto ret = m_AssigneePtr->GetCallees();
     auto f   = m_AssignedExpression->GetCallees();
     ret.insert( f.begin(), f.end() );
     return ret;
