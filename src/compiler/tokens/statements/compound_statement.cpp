@@ -145,7 +145,7 @@ void CompoundStatement::PerformSemaCommon( SemaAnalyzer& sema,
             !AlwaysReturns() )
             m_Statements.emplace_back( new ReturnStatement( nullptr ) );
         if( !AlwaysReturns() )
-            sema.Error( "Function doesn't always return" );
+            sema.Error( "control reaches the end of a non-void function" );
     }
 }
 
