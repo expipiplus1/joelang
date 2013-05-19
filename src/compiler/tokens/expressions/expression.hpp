@@ -108,7 +108,7 @@ public:
       * in sema.
       */
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) = 0;
+    bool ResolveIdentifiers( SemaAnalyzer& sema );
 
     /**
       * Performs type checking and things.
@@ -539,6 +539,8 @@ public:
     ~PostfixExpression();
 
     PostfixOperator& GetOperator();
+
+    Expression_up TakeExpression();
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema ) override;

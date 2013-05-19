@@ -86,11 +86,12 @@ public:
     ~PostfixOperator();
 
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema, Expression& expression ) = 0;
+    bool ResolveIdentifiers( SemaAnalyzer& sema,
+                             Expression_up& expression ) = 0;
 
     /** The postfix operator must performsema on the expression **/
     virtual
-    bool PerformSema( SemaAnalyzer& sema, Expression& expression ) = 0;
+    bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -167,10 +168,10 @@ public:
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression& expression ) override;
+                             Expression_up& expression ) override;
 
     virtual
-    bool PerformSema( SemaAnalyzer& sema, Expression& expression ) override;
+    bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) override;
 
     //TODO pass expression as reference instead of pointer
     virtual
@@ -239,11 +240,11 @@ public:
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression& expression ) override;
+                             Expression_up& expression ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      Expression& expression ) override;
+                      Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -312,11 +313,11 @@ public:
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression& expression ) override;
+                             Expression_up& expression ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      Expression& expression ) override;
+                      Expression_up& expression ) override;
 
     bool IsSwizzle() const;
 
@@ -372,7 +373,7 @@ public:
     static
     bool classof( const MemberAccessOperator* d );
 private:
-    bool PerformSemaSwizzle( SemaAnalyzer& sema, Expression& expression );
+    bool PerformSemaSwizzle( SemaAnalyzer& sema, Expression_up& expression );
 
     std::string m_Identifier;
     Swizzle m_Swizzle;
@@ -399,11 +400,11 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
-                      Expression& expression ) override;
+                      Expression_up& expression ) override;
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression& expression ) override;
+                             Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,

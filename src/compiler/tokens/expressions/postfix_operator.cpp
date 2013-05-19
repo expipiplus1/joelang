@@ -117,29 +117,31 @@ SubscriptOperator::~SubscriptOperator()
 }
 
 bool SubscriptOperator::ResolveIdentifiers( SemaAnalyzer& sema,
-                                            Expression& expression )
+                                            Expression_up& expression )
 {
-    bool good = expression.ResolveIdentifiers( sema );
+    bool good = expression->ResolveIdentifiers( sema );
     good &= m_IndexExpression->ResolveIdentifiers( sema );
     return good;
 }
 
 bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
-                                     Expression& expression )
+                                     Expression_up& expression )
 {
+    assert( expression && "PerformSema given null expression" );
+
     bool good = true;
-    good &= expression.PerformSema( sema );
+    good &= expression->PerformSema( sema );
     m_IndexExpression = CastExpression::Create( Type::LONG,
                                                 std::move(m_IndexExpression),
                                                 false );
     good &= m_IndexExpression->PerformSema( sema );
 
-    if( !expression.GetType().IsArrayType() )
+    if( !expression->GetType().IsArrayType() )
     {
         sema.Error( "Trying to index into a non-array" );
         return false;
     }
-    const ArrayExtents extents = expression.GetType().GetArrayExtents();
+    const ArrayExtents extents = expression->GetType().GetArrayExtents();
     assert( !extents.empty() && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
@@ -258,7 +260,7 @@ ArgumentListOperator::~ArgumentListOperator()
 }
 
 bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
-                                               Expression& expression )
+                                               Expression_up& expression )
 {
     // This doesn't resolve the identifier in expression because that will only
     // find variables and not functions
@@ -287,7 +289,7 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
     }
 
     const IdentifierExpression& identifier_expression =
-                           static_cast<const IdentifierExpression&>(expression);
+                           static_cast<const IdentifierExpression&>(*expression);
     const std::string& name = identifier_expression.GetIdentifier();
 
     if( !sema.HasFunctionNamed( name ) )
@@ -307,7 +309,7 @@ bool ArgumentListOperator::ResolveIdentifiers( SemaAnalyzer& sema,
 }
 
 bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
-                                        Expression& expression )
+                                        Expression_up& expression )
 {
     if( !m_Function )
         return false;
@@ -464,16 +466,16 @@ MemberAccessOperator::~MemberAccessOperator()
 }
 
 bool MemberAccessOperator::ResolveIdentifiers( SemaAnalyzer& sema,
-                                               Expression& expression )
+                                               Expression_up& expression )
 {
-    if( !expression.ResolveIdentifiers( sema ) )
+    if( !expression->ResolveIdentifiers( sema ) )
         return false;
 
     //
     // If we're acting on a scalar or vector then we're a swizzle
     //
-    if( expression.GetType().IsScalarType() ||
-        expression.GetType().IsVectorType() )
+    if( expression->GetType().IsScalarType() ||
+        expression->GetType().IsVectorType() )
     {
         //
         // TODO stop running resolve identifiers apart from performsema
@@ -487,14 +489,16 @@ bool MemberAccessOperator::ResolveIdentifiers( SemaAnalyzer& sema,
 
 bool MemberAccessOperator::PerformSema(
                                 SemaAnalyzer& sema,
-                                Expression& expression )
+                                Expression_up& expression )
 {
-    expression.PerformSema( sema );
+    assert( expression && "PerformSema passed a null expression" );
+
+    expression->PerformSema( sema );
     //
     // We're a swizzle if we're being applied to a vector or a scalar
     //
-    if( expression.GetType().IsScalarType() ||
-        expression.GetType().IsVectorType() )
+    if( expression->GetType().IsScalarType() ||
+        expression->GetType().IsVectorType() )
     {
         return PerformSemaSwizzle( sema, expression );
     }
@@ -504,8 +508,10 @@ bool MemberAccessOperator::PerformSema(
 }
 
 bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
-                                               Expression& expression )
+                                               Expression_up& expression )
 {
+    assert( expression && "PerformSemaSwizzle passed a null expression" );
+
     //
     // A swizzle can be at most four characters
     // Although this will be detected anyway, we can give a different error here
@@ -563,6 +569,26 @@ bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
                         + m_Identifier );
             return false;
         }
+    }
+
+    //
+    // We have our swizzle, now check if we can fold this swizzle with the one
+    // below ours if there is one
+    //
+    if( PostfixExpression* p = dyn_cast<PostfixExpression>( expression.get() ) )
+    if( MemberAccessOperator* m = dyn_cast<MemberAccessOperator>(
+                                                           &p->GetOperator() ) )
+    if( m->IsSwizzle() )
+    {
+        //
+        // If this is a swizzle then we can steal it and fold the two together
+        //
+        Swizzle other_swizzle = m->GetSwizzle();
+
+        for( unsigned i = 0; i < num_swizzle_elements; ++i )
+            swizzle_indices[i] = other_swizzle.GetIndex( swizzle_indices[i] );
+
+        expression = std::move( p->TakeExpression() );
     }
 
     m_Swizzle = Swizzle( swizzle_indices[0],
@@ -741,14 +767,14 @@ IncrementOrDecrementOperator::~IncrementOrDecrementOperator()
 }
 
 bool IncrementOrDecrementOperator::ResolveIdentifiers( SemaAnalyzer& sema,
-                                                       Expression& expression )
+                                                       Expression_up& expression )
 {
     assert( false && "Complete me" );
     return false;
 }
 
 bool IncrementOrDecrementOperator::PerformSema( SemaAnalyzer& sema,
-                                                Expression& expression )
+                                                Expression_up& expression )
 {
     assert( false && "Complete me" );
     return false;

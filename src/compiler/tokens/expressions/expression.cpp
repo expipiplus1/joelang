@@ -1062,14 +1062,23 @@ PostfixOperator& PostfixExpression::GetOperator()
     return *m_PostfixOperator;
 }
 
+Expression_up PostfixExpression::TakeExpression()
+{
+    return std::move(m_Expression);
+}
+
 bool PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
 {
-    return m_PostfixOperator->ResolveIdentifiers( sema, *m_Expression );
+    return m_PostfixOperator->ResolveIdentifiers( sema, m_Expression );
 }
 
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
-    return m_PostfixOperator->PerformSema( sema, *m_Expression );
+    //
+    // The operators are free to change our expression, for example folding
+    // swizzles
+    //
+    return m_PostfixOperator->PerformSema( sema, m_Expression );
 }
 
 llvm::Value* PostfixExpression::CodeGen( CodeGenerator& code_gen ) const
