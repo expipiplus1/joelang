@@ -37,6 +37,8 @@
 
 #include <llvm/IR/IRBuilder.h>
 
+#include <compiler/swizzle.hpp>
+
 namespace llvm
 {
     class ExecutionEngine;
@@ -109,6 +111,8 @@ public:
     llvm::Value* CreateScalarConstructor( Type type,
                                           const Expression& argument );
 
+    // Swizzle Operators
+    llvm::Value* CreateSwizzle( const Expression& e, Swizzle swizzle );
 
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, const CompleteType& type );
@@ -230,7 +234,8 @@ public:
     llvm::Value* CreateParameterRead( const Variable& parameter );
 
     llvm::Value* CreateAssignment( const Expression& variable,
-                                   const Expression& e );
+                                   const Expression& e,
+                                   Swizzle s );
 
     // Functions
     /**

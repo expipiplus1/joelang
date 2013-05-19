@@ -29,11 +29,13 @@
 
 #pragma once
 
+#include <array>
 #include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
+#include <compiler/swizzle.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace llvm
@@ -316,10 +318,21 @@ public:
     bool PerformSema( SemaAnalyzer& sema,
                       Expression& expression ) override;
 
+    bool IsSwizzle() const;
+
+    //
+    // this asserts that IsSwizzle()
+    //
+    Swizzle GetSwizzle() const;
+
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression& expression ) override;
 
+    //
+    // If this is a swizzle mask this returns the pointer to the vector
+    // The code generator must apply the swizzle mask seperately
+    //
     virtual
     llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen,
                                    const Expression& expression ) override;
@@ -347,16 +360,22 @@ public:
     virtual
     bool IsConst( const Expression& expression ) const override;
 
+    virtual
+    bool IsLValue( const Expression& expression ) const override;
+
     static
     bool Parse( Parser& parser,
                 std::unique_ptr<MemberAccessOperator>& token );
 
     static
-    bool classof( const Token* t );
+    bool classof( const PostfixOperator* t );
     static
     bool classof( const MemberAccessOperator* d );
 private:
+    bool PerformSemaSwizzle( SemaAnalyzer& sema, Expression& expression );
+
     std::string m_Identifier;
+    Swizzle m_Swizzle;
 };
 
 /**

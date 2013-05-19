@@ -95,6 +95,7 @@ namespace Compiler
   *
   * Expression = AssignmentExpression
   */
+// todo split this file up
 class Expression : public JoeLang::Compiler::Token
 {
 public:
@@ -440,7 +441,8 @@ private:
     bool CanCastFromStruct( SemaAnalyzer& sema );
     bool CanCastFromArray ( SemaAnalyzer& sema );
     bool CanCastFromString( SemaAnalyzer& sema );
-    
+    bool CanCastFromVoid  ( SemaAnalyzer& sema );
+
     CompleteType m_CastType;
     Expression_up m_Expression;
     bool m_IsExplicit;
@@ -535,6 +537,8 @@ public:
                        std::unique_ptr<PostfixOperator> postfix_operator );
     virtual
     ~PostfixExpression();
+
+    PostfixOperator& GetOperator();
 
     virtual
     bool ResolveIdentifiers( SemaAnalyzer& sema ) override;

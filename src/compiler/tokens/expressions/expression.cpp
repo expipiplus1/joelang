@@ -37,13 +37,14 @@
 #include <utility>
 
 #include <joelang/types.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/casting.hpp>
 #include <compiler/code_generator.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/token.hpp>
@@ -77,7 +78,9 @@ bool Expression::IsLValue() const
 
 llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
 {
-    assert( false && "Complete me" );
+    if( IsLValue() )
+        assert( false && "Complete me" );
+    assert( false && "Trying to write to an rvalue" );
     return nullptr;
 }
 
@@ -238,11 +241,23 @@ llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     assert( m_AssigneePtr &&
             "Trying to codegen an assignmentexpression with null assigneeptr" );
+
+    //
+    // Get the swizzle data if there is any
+    //
+    Swizzle swizzle;
+    if( PostfixExpression* p = dyn_cast<PostfixExpression>(m_AssigneePtr) )
+        if( MemberAccessOperator* m =
+                             dyn_cast<MemberAccessOperator>(&p->GetOperator()) )
+            if( m->IsSwizzle() )
+                swizzle = m->GetSwizzle();
+
     switch( m_AssignmentOperator )
     {
     case Op::EQUALS:
         return code_gen.CreateAssignment( *m_AssigneePtr,
-                                          *m_AssignedExpression );
+                                          *m_AssignedExpression,
+                                          swizzle );
         break;
     default:
         assert( false && "unhandled assignment operator" );
@@ -571,6 +586,8 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
         good = CanCastFromArray ( sema );
     else if( t.GetType() == Type::STRING )
         good = CanCastFromString( sema );
+    else if( t.IsVoid() )
+        good = CanCastFromVoid( sema );
     else 
         assert( false && "Trying to cast from unhandled type" );
     
@@ -730,6 +747,16 @@ bool CastExpression::CanCastFromString( SemaAnalyzer& sema )
     // todo, perhaps cast to a char[]
     //
     sema.Error( "Can't cast " + m_Expression->GetType().GetString() + 
+                " to " + m_CastType.GetString() );
+    return false;
+}
+
+bool CastExpression::CanCastFromVoid( SemaAnalyzer& sema )
+{
+    //
+    // Can't cast from void
+    //
+    sema.Error( "Can't cast " + m_Expression->GetType().GetString() +
                 " to " + m_CastType.GetString() );
     return false;
 }
@@ -1028,6 +1055,11 @@ PostfixExpression::PostfixExpression(
 
 PostfixExpression::~PostfixExpression()
 {
+}
+
+PostfixOperator& PostfixExpression::GetOperator()
+{
+    return *m_PostfixOperator;
 }
 
 bool PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )

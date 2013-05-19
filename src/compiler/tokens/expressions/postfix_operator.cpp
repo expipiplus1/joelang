@@ -43,7 +43,9 @@
 #include <compiler/parser.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/shader_writer.hpp>
+#include <compiler/swizzle.hpp>
 #include <compiler/terminal_types.hpp>
+#include <compiler/type_properties.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -453,6 +455,8 @@ MemberAccessOperator::MemberAccessOperator( std::string identifier )
     :PostfixOperator( TokenTy::MemberAccessOperator )
     ,m_Identifier( std::move( identifier ) )
 {
+    assert( !m_Identifier.empty() &&
+            "MemberAccessOpertor given empty identifier" );
 }
 
 MemberAccessOperator::~MemberAccessOperator()
@@ -462,6 +466,21 @@ MemberAccessOperator::~MemberAccessOperator()
 bool MemberAccessOperator::ResolveIdentifiers( SemaAnalyzer& sema,
                                                Expression& expression )
 {
+    if( !expression.ResolveIdentifiers( sema ) )
+        return false;
+
+    //
+    // If we're acting on a scalar or vector then we're a swizzle
+    //
+    if( expression.GetType().IsScalarType() ||
+        expression.GetType().IsVectorType() )
+    {
+        //
+        // TODO stop running resolve identifiers apart from performsema
+        //
+        return PerformSemaSwizzle( sema, expression );
+    }
+
     assert( false && "Complete me" );
     return false;
 }
@@ -470,13 +489,108 @@ bool MemberAccessOperator::PerformSema(
                                 SemaAnalyzer& sema,
                                 Expression& expression )
 {
+    expression.PerformSema( sema );
+    //
+    // We're a swizzle if we're being applied to a vector or a scalar
+    //
+    if( expression.GetType().IsScalarType() ||
+        expression.GetType().IsVectorType() )
+    {
+        return PerformSemaSwizzle( sema, expression );
+    }
+
     assert( false && "Complete me" );
     return false;
+}
+
+bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
+                                               Expression& expression )
+{
+    //
+    // A swizzle can be at most four characters
+    // Although this will be detected anyway, we can give a different error here
+    //
+    if( m_Identifier.size() > 4 )
+    {
+        sema.Error( "Swizzle too large: " + m_Identifier );
+        return false;
+    }
+    unsigned num_swizzle_elements = m_Identifier.size();
+
+    //
+    // A swizzle can only be from one of the swizzle sets
+    //
+
+    static
+    const std::array<std::string, 3> swizzle_sets =
+    {{
+        "xyzw",
+        "rgba",
+        "stpq"
+    }};
+
+    int swizzle_set_index = -1;
+
+    std::array<unsigned char, 4> swizzle_indices = {{ 0xff, 0xff, 0xff, 0xff }};
+
+    for( unsigned h = 0; h < num_swizzle_elements; ++h )
+    {
+        char c = m_Identifier[h];
+        int j = -1;
+        for( unsigned i = 0; i < swizzle_sets.size() && j == -1; ++i )
+        {
+            for( unsigned char k = 0; k < swizzle_sets[i].size(); ++k )
+            {
+                char s = swizzle_sets[i][k];
+                if( c == s )
+                {
+                    j = i;
+                    swizzle_indices[h] = k;
+                    break;
+                }
+            }
+        }
+        if( j == -1 )
+        {
+            sema.Error( "Unknown element in swizzle: " + m_Identifier );
+            return false;
+        }
+        if( swizzle_set_index == -1 )
+            swizzle_set_index = j;
+        else if( swizzle_set_index != j )
+        {
+            sema.Error( "Swizzle of different swizzle sets: "
+                        + m_Identifier );
+            return false;
+        }
+    }
+
+    m_Swizzle = Swizzle( swizzle_indices[0],
+                         swizzle_indices[1],
+                         swizzle_indices[2],
+                         swizzle_indices[3] );
+
+    return true;
+}
+
+bool MemberAccessOperator::IsSwizzle() const
+{
+    return m_Swizzle.IsValid();
+}
+
+Swizzle MemberAccessOperator::GetSwizzle() const
+{
+    assert( IsSwizzle() &&
+            "Trying to get a swizzle from a non swizzle operator" );
+    return m_Swizzle;
 }
 
 llvm::Value* MemberAccessOperator::CodeGen( CodeGenerator& code_gen,
                                             const Expression& expression )
 {
+    if( IsSwizzle() )
+        return code_gen.CreateSwizzle( expression, m_Swizzle );
+
     assert( false && "complete me" );
     return nullptr;
 }
@@ -485,6 +599,11 @@ llvm::Value* MemberAccessOperator::CodeGenPointerTo(
                                                   CodeGenerator& code_gen,
                                                   const Expression& expression )
 {
+    if( IsSwizzle() )
+    {
+        return expression.CodeGenPointerTo( code_gen );
+    }
+
     assert( false && "Complete me" );
     return nullptr;
 }
@@ -492,11 +611,44 @@ llvm::Value* MemberAccessOperator::CodeGenPointerTo(
 void MemberAccessOperator::Write( ShaderWriter& shader_writer,
                                   const Expression& expression ) const
 {
-    assert( false && "complete me" );
+    if( IsSwizzle() )
+    {
+        //
+        // If this is a scalar, we have to make a vector constructor for it
+        // because glsl doesn't support swizzle operators before version 420
+        //
+        if( IsScalarType( expression.GetType().GetBaseType() ) )
+        {
+            //
+            // If this is a scalar to scalar swizzle just output the expression
+            //
+            if( m_Swizzle.GetSize() == 1 )
+                shader_writer << expression;
+            else
+                shader_writer << GetType( expression )
+                              << "(" << expression << ")";
+        }
+        else
+        {
+            static
+            const std::string swizzle_set = "xyzw";
+            shader_writer << expression << ".";
+            for( unsigned i = 0; i < m_Swizzle.GetSize(); ++i )
+                shader_writer << swizzle_set[m_Swizzle.GetIndex(i)];
+        }
+    }
+    else
+        assert( false && "complete me" );
 }
 
 CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
 {
+    if( IsSwizzle() )
+    {
+        Type base_type = GetScalarType( expression.GetType().GetBaseType() );
+        return CompleteType( GetVectorType( base_type, m_Swizzle.GetSize() ) );
+    }
+
     assert( false && "Complete me" );
     return CompleteType();
 }
@@ -504,6 +656,9 @@ CompleteType MemberAccessOperator::GetType( const Expression& expression ) const
 std::set<Function_sp> MemberAccessOperator::GetCallees(
                                             const Expression& expression ) const
 {
+    if( IsSwizzle() )
+        return expression.GetCallees();
+
     assert( false && "Complete me" );
     return std::set<Function_sp>{};
 }
@@ -511,6 +666,9 @@ std::set<Function_sp> MemberAccessOperator::GetCallees(
 std::set<Variable_sp> MemberAccessOperator::GetVariables(
                                             const Expression& expression ) const
 {
+    if( IsSwizzle() )
+        return expression.GetVariables();
+
     assert( false && "Complete me" );
     return std::set<Variable_sp>{};
 }
@@ -519,6 +677,9 @@ std::set<Variable_sp> MemberAccessOperator::GetWrittenToVariables(
                                                    const Expression& expression,
                                                    bool is_assigned ) const
 {
+    if( IsSwizzle() )
+        return expression.GetWrittenToVariables( is_assigned );
+
     assert( false && "Complete me" );
     return std::set<Variable_sp>{};
 }
@@ -526,6 +687,17 @@ std::set<Variable_sp> MemberAccessOperator::GetWrittenToVariables(
 bool MemberAccessOperator::IsConst( const Expression& expression ) const
 {
     return expression.IsConst();
+}
+
+bool MemberAccessOperator::IsLValue( const Expression& expression ) const
+{
+    if( IsSwizzle() )
+    {
+        return expression.IsLValue() && !m_Swizzle.HasDuplicates();
+    }
+
+    assert( false && "complete me" );
+    return false;
 }
 
 bool MemberAccessOperator::Parse( Parser& parser,
@@ -541,6 +713,16 @@ bool MemberAccessOperator::Parse( Parser& parser,
         return false;
 
     token.reset( new MemberAccessOperator( std::move(identifier) ) );
+    return true;
+}
+
+bool MemberAccessOperator::classof( const PostfixOperator* e )
+{
+    return e->GetSubClassID() == TokenTy::MemberAccessOperator;
+}
+
+bool MemberAccessOperator::classof( const MemberAccessOperator* e )
+{
     return true;
 }
 

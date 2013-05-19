@@ -57,12 +57,14 @@
 #include <compiler/function.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/runtime.hpp>
+#include <compiler/swizzle.hpp>
 #include <compiler/type_properties.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <runtime/types.hpp>
 
@@ -151,7 +153,7 @@ std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
            parameters.emplace_back( new Parameter<Type>( \
                     uniform->GetName(), \
                     *(static_cast<Type*>( \
-                             m_ExecutionEngine.getPointerToGlobal( gv ) ) ) ) ); \
+                           m_ExecutionEngine.getPointerToGlobal( gv ) ) ) ) ); \
             break
 
         switch( type )
@@ -404,11 +406,11 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
             {
                 llvm::Value* new_element = m_Builder.CreateExtractElement(
                         argument_value,
-                        CreateInteger( i, Type::UINT ) );
+                        CreateInteger( i, Type::INT ) );
                 ret = m_Builder.CreateInsertElement(
                                                ret,
                                                new_element,
-                                               CreateInteger( p, Type::UINT ) );
+                                               CreateInteger( p, Type::INT ) );
                 ++p;
             }
         }
@@ -419,7 +421,7 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
             ret = m_Builder.CreateInsertElement(
                                                ret,
                                                argument_value,
-                                               CreateInteger( p, Type::UINT ) );
+                                               CreateInteger( p, Type::INT ) );
             ++p;
         }
     }
@@ -433,6 +435,70 @@ llvm::Value* CodeGenerator::CreateScalarConstructor(
                                                     const Expression& argument )
 {
     return argument.CodeGen( *this );
+}
+
+//
+// Swizzle operators
+//
+
+llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
+                                           Swizzle swizzle )
+{
+#ifndef NDEBUG
+    unsigned e_vector_size = e.GetType().GetVectorSize();
+    for( unsigned i = 0; i < swizzle.GetSize(); ++i )
+        assert( swizzle.GetIndex(i) >= 0 && swizzle.GetIndex(i) < e_vector_size &&
+                "swizzle index out of bounds" );
+#endif
+    //
+    //
+    //
+
+    llvm::Value* e_value = e.CodeGen( *this );
+
+    //
+    // If we only have one swizzle index we want to extract an element
+    //
+    if( swizzle.GetSize() == 1 )
+    {
+        //
+        // if e is already a scalar type (the expression was myscalar.x)
+        // just return the scalar
+        //
+        if( e.GetType().IsScalarType() )
+            return e_value;
+
+        //
+        // Otherwise extract the element
+        //
+        return m_Builder.CreateExtractElement(
+                    e_value,
+                    llvm::ConstantInt::get( m_Runtime.GetLLVMType( Type::INT ),
+                                            swizzle.GetIndex(0) ) );
+    }
+
+    //
+    // We are swizzling and returning a vector
+    //
+
+    //
+    // If this isn't a vector, package it into one
+    //
+    if( e.GetType().IsScalarType() )
+        e_value = m_Builder.CreateInsertElement(
+            llvm::UndefValue::get( llvm::VectorType::get( e_value->getType(),
+                                                          1 ) ),
+            e_value,
+            CreateInteger( 0, Type::INT ) );
+
+    std::vector<unsigned> indices( swizzle.begin(), swizzle.end() );
+
+    return m_Builder.CreateShuffleVector(
+                    e_value,
+                    llvm::UndefValue::get( e_value->getType() ),
+                    llvm::ConstantDataVector::get( m_Runtime.GetLLVMContext(),
+                                                   indices ) );
+
 }
 
 //
@@ -941,8 +1007,12 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
     return m_Builder.CreateLoad( variable.GetLLVMPointer() );
 }
 
+//
+// todo class for swizzle
+//
 llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
-                                              const Expression& e )
+                                              const Expression& e,
+                                              Swizzle swizzle )
 {
     assert( variable.IsLValue() &&
             "Trying to codegen an assignment to a RValue" );
@@ -950,10 +1020,39 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
             "Trying to codegen an assignment to a const variable" );
     assert( variable.GetType() == e.GetType() &&
             "Trying to assign a variable with a different type" );
+
     llvm::Value* assigned_value = e.CodeGen( *this );
-    m_Builder.CreateStore( assigned_value,
-                               variable.CodeGenPointerTo( *this ) );
-    return m_Builder.CreateLoad( variable.CodeGenPointerTo( *this ) );
+    llvm::Value* pointer        = variable.CodeGenPointerTo( *this );
+
+    if( swizzle.IsValid() )
+    {
+        //
+        // We are storing with a swizzle mask
+        //
+        llvm::Value* assignee_value = m_Builder.CreateLoad( pointer );
+
+        assert( e.GetType().GetVectorSize() == swizzle.GetSize() &&
+                "Assigning to a different sized vector type" );
+        for( unsigned i = 0; i < e.GetType().GetVectorSize(); ++i )
+        {
+            llvm::Value* element;
+            if( e.GetType().IsScalarType() )
+                element = assigned_value;
+            else
+                element = m_Builder.CreateExtractElement(
+                                                 assigned_value,
+                                                 CreateInteger( i, Type::INT) );
+            assignee_value = m_Builder.CreateInsertElement(
+                               assignee_value,
+                               element,
+                               CreateInteger( swizzle.GetIndex(i), Type::INT) );
+        }
+
+        assigned_value = assignee_value;
+    }
+
+    m_Builder.CreateStore( assigned_value, pointer );
+    return assigned_value;
 }
 
 llvm::Function* CodeGenerator::CreateFunctionDeclaration(
