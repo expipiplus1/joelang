@@ -506,67 +506,161 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
 //
 
 llvm::Value* CodeGenerator::CreateCast( const Expression& e,
-                                        const CompleteType& type )
+                                        const CompleteType& to_type )
 {
-    /// todo make this better
-
-    const CompleteType& e_type  = e.GetType();
-    llvm::Value* e_value = e.CodeGen( *this );
-
-    assert( !type.IsArrayType() && "todo, casting to arrays" );
-    assert( !e_type.IsArrayType() && "todo, casting from arrays" );
-    assert( !e_type.IsUnknown() && !type.IsUnknown() &&
+    const CompleteType& from_type = e.GetType();
+    assert( !from_type.IsUnknown() && !to_type.IsUnknown() &&
             "Can't cast an unknown type" );
 
-    if( !e_value )
-        return nullptr;
+    if( to_type == from_type )
+        return e.CodeGen( *this );
 
-    if( type.IsVoid() )
-    {
-        assert( e_type.IsVoid() && "Can only cast void to void" );
-        // we've already codegened it
-        return nullptr;
-    }
+    if( to_type.IsScalarType() )
+        return CreateCastToScalar( e, to_type );
+    if( to_type.IsVectorType() )
+        return CreateCastToVector( e, to_type );
+
+    assert( false && "Trying to cast to and unhandled type" );
+    return nullptr;
+}
+
+llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
+                                                llvm::Value* e_value,
+                                                const CompleteType& from_type,
+                                                const CompleteType& to_type )
+{
+    assert( to_type.GetVectorSize() == to_type.GetVectorSize() &&
+            "Trying to cast different sized types" );
+
     //
-    // For a cast to bool, compare to zero
+    // for a cast to bool, compare to zero
     //
-    if( type.GetType() == Type::BOOL )
+    if( to_type.GetType() == Type::BOOL )
     {
-        if( IsFloatingPoint( e_type.GetBaseType() ) )
+        if( from_type.IsFloatingPoint() )
             return m_Builder.CreateFCmpOEQ(
-                        e_value,
-                        llvm::ConstantFP::getNullValue( e_value->getType() ) );
+                     e_value,
+                     llvm::ConstantFP::getNullValue( e_value->getType() ) );
         return m_Builder.CreateIsNotNull( e_value );
     }
 
-    if( IsFloatingPoint( type.GetBaseType() ) )
+    if( to_type.IsFloatingPoint() )
     {
-        if( IsFloatingPoint( e_type.GetBaseType() ) )
+        e_value->getType()->dump();
+        if( from_type.IsFloatingPoint() )
             return m_Builder.CreateFPCast( e_value,
-                                               m_Runtime.GetLLVMType( type ) );
-        if( IsSigned( e_type.GetBaseType() ) )
+                                           m_Runtime.GetLLVMType( to_type ) );
+        else if( from_type.IsSigned() )
             return m_Builder.CreateSIToFP( e_value,
-                                               m_Runtime.GetLLVMType( type ) );
-        return m_Builder.CreateUIToFP( e_value,
-                                           m_Runtime.GetLLVMType( type ) );
+                                           m_Runtime.GetLLVMType( to_type ) );
+        else
+            return m_Builder.CreateUIToFP( e_value,
+                                           m_Runtime.GetLLVMType( to_type ) );
     }
 
-    assert( IsIntegral( type.GetBaseType() ) && "Type should be integral" );
-    if( IsIntegral( e_type.GetBaseType() ) )
+    assert( to_type.IsIntegral() && "Type should be integral" );
+    if( from_type.IsIntegral() )
     {
         return m_Builder.CreateIntCast( e_value,
-                                            m_Runtime.GetLLVMType( type ),
-                                            IsSigned( e_type.GetBaseType() ) );
+                                        m_Runtime.GetLLVMType( to_type ),
+                                        from_type.IsSigned() );
     }
 
-    assert( IsFloatingPoint( e_type.GetBaseType() ) &&
-            "e_type should be floating point" );
-    if( IsSigned( type.GetBaseType() ) )
+    assert( from_type.IsFloatingPoint() &&
+            "from_type should be floating point" );
+    if( to_type.IsSigned() )
         return m_Builder.CreateFPToSI( e_value,
-                                           m_Runtime.GetLLVMType( type ) );
+                                       m_Runtime.GetLLVMType( to_type ) );
     else
         return m_Builder.CreateFPToUI( e_value,
-                                           m_Runtime.GetLLVMType( type ) );
+                                       m_Runtime.GetLLVMType( to_type ) );
+}
+
+llvm::Value* CodeGenerator::CreateCastToScalar( const Expression& expression,
+                                                const CompleteType& to_type )
+{
+    CompleteType from_type = expression.GetType();
+    llvm::Value* e_value = expression.CodeGen( *this );
+    assert( e_value->getType() == m_Runtime.GetLLVMType( from_type ) &&
+            "Type mismatch" );
+
+    //
+    // If we're casting from a vector type extract the first element and then
+    // cast as if we're casting from a scalar
+    //
+    if( from_type.IsVectorType() )
+    {
+        e_value = m_Builder.CreateExtractElement(
+                                                e_value,
+                                                CreateInteger( 0, Type::INT ) );
+        from_type = CompleteType( from_type.GetVectorElementType() );
+    }
+
+    if( from_type.IsScalarType() )
+    {
+        return CreateScalarOrVectorCast( e_value, from_type, to_type );
+    }
+
+    assert( false && "Trying to cast from an unhandled type" );
+    return nullptr;
+}
+
+llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
+                                                const CompleteType& to_type )
+{
+    assert( to_type.IsVectorType() &&
+            "Trying to create a vector cast to a non-vector type" );
+
+    CompleteType from_type = expression.GetType();
+    //llvm::Value* e_value = expression.CodeGen( *this );
+
+    if( from_type.IsScalarType() )
+    {
+        //
+        // If we have a scalar type then cast it to the right element type and
+        //  splat it
+        //
+        llvm::Value* e_value = CreateCastToScalar(
+                               expression,
+                               CompleteType( to_type.GetVectorElementType() ) );
+        return m_Builder.CreateVectorSplat( to_type.GetVectorSize(), e_value );
+    }
+
+    if( from_type.IsVectorType() )
+    {
+        llvm::Value* e_value = expression.CodeGen( *this );
+
+        if( from_type.GetVectorSize() != to_type.GetVectorSize() )
+        {
+            //
+            // They are not the same size
+            //
+            assert( from_type.GetVectorSize() > to_type.GetVectorSize() &&
+                    "Trying to cast a smaller vector into a bigger one" );
+
+            //
+            // we can do this with a shuffle
+            //
+
+            std::vector<unsigned> indices( to_type.GetVectorSize() );
+
+            for( unsigned i = 0; i < to_type.GetVectorSize(); ++i )
+                indices[i] = i;
+
+            e_value = m_Builder.CreateShuffleVector(
+                      e_value,
+                      llvm::UndefValue::get( e_value->getType() ),
+                      llvm::ConstantDataVector::get( m_Runtime.GetLLVMContext(),
+                                                     indices ) );
+        }
+
+        return CreateScalarOrVectorCast( expression.CodeGen( *this ),
+                                         from_type,
+                                         to_type );
+    }
+
+    assert( false && "Trying to cas from an unhandled type" );
+    return nullptr;
 }
 
 //
@@ -1023,6 +1117,7 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
 
     llvm::Value* assigned_value = e.CodeGen( *this );
     llvm::Value* pointer        = variable.CodeGenPointerTo( *this );
+    llvm::Value* ret            = assigned_value;
 
     if( swizzle.IsValid() )
     {
@@ -1052,7 +1147,8 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
     }
 
     m_Builder.CreateStore( assigned_value, pointer );
-    return assigned_value;
+
+    return ret;
 }
 
 llvm::Function* CodeGenerator::CreateFunctionDeclaration(

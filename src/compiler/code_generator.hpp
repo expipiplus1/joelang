@@ -117,6 +117,12 @@ public:
     // Cast Operators
     llvm::Value* CreateCast( const Expression& e, const CompleteType& type );
 
+    llvm::Value* CreateCastToScalar( const Expression& expression,
+                                     const CompleteType& to_type );
+
+    llvm::Value* CreateCastToVector( const Expression& expression,
+                                     const CompleteType& to_type );
+
     // Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );
     llvm::Value* CreateNot(  const Expression& e );
@@ -272,6 +278,14 @@ private:
       * Destroys the temporay strings created in evaluating the expression
       */
     void CreateDestroyTemporaryCalls();
+
+    //
+    // because llvm doesn't care if the types are scalars or vectors we can
+    // factor out some casting code here
+    //
+    llvm::Value* CreateScalarOrVectorCast( llvm::Value* e_value,
+                                           const CompleteType& from_type,
+                                           const CompleteType& to_type );
 
     /**
       * Create an anonymous llvm function taking no arguments

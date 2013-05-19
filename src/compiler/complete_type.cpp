@@ -131,6 +131,13 @@ unsigned CompleteType::GetVectorSize() const
     return Compiler::GetNumElementsInType( m_BaseType );
 }
 
+Type CompleteType::GetVectorElementType() const
+{
+    assert( ( IsVectorType() || IsScalarType() ) &&
+            "Trying to get the vector element type of a non vector type" );
+    return Compiler::GetElementType( m_BaseType );
+}
+
 unsigned CompleteType::GetMatrixHeight() const
 {
     assert( false && "Complete me" );

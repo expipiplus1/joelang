@@ -79,6 +79,8 @@ public:
 
     /** Returns the number of vector elements **/
     unsigned GetVectorSize() const;
+
+    Type GetVectorElementType() const;
     
     unsigned GetMatrixWidth() const;
     unsigned GetMatrixHeight() const;
