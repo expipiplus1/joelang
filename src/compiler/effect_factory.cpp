@@ -89,11 +89,18 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
             m_Context.Error( s );
         return nullptr;
     }
+    for( const auto& s : sema_analyzer.GetWarnings() )
+        m_Context.Error( s );
 
     std::vector<Technique> techniques = code_generator.GenerateTechniques(
                                      sema_analyzer.GetTechniqueDeclarations() );
     std::vector<ParameterBase_up> parameters =
        code_generator.GenerateParameters( sema_analyzer.GetUniformVariables() );
+
+    //
+    // Todo, investigate if this is optimizing all the old effects again
+    //
+    //m_Runtime.OptimizeModule();
 
     return std::unique_ptr<Effect>( new Effect( std::move(techniques),
                                                 std::move(parameters) ) );
