@@ -282,6 +282,8 @@ unsigned GetNumElementsInType( Type t )
     MATCH_N( )
     case Type::STRING:
         return 1;
+    case Type::VOID:
+        return 0;
     default:
         assert( false &&
                 "Trying to get the number of elements in an unhandled type" );
