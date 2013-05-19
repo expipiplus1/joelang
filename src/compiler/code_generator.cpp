@@ -546,7 +546,6 @@ llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
 
     if( to_type.IsFloatingPoint() )
     {
-        e_value->getType()->dump();
         if( from_type.IsFloatingPoint() )
             return m_Builder.CreateFPCast( e_value,
                                            m_Runtime.GetLLVMType( to_type ) );
@@ -654,7 +653,7 @@ llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
                                                      indices ) );
         }
 
-        return CreateScalarOrVectorCast( expression.CodeGen( *this ),
+        return CreateScalarOrVectorCast( e_value,
                                          from_type,
                                          to_type );
     }

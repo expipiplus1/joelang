@@ -75,15 +75,9 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
             return CompleteType();
     }
 
-    // Can't convert a vector into a scalar
-    if( IsVectorType( t1.GetBaseType() ) != IsVectorType( t2.GetBaseType() ) )
-        return CompleteType();
-
-    // Vectors have to be the same size
-    if( GetNumElementsInType( t1.GetBaseType() ) !=
-                                      GetNumElementsInType( t2.GetBaseType() ) )
-        return CompleteType();
-
+    //
+    // strings can only be converted into strings
+    //
     if( t1.GetBaseType() == Type::STRING )
     {
         if( t2.GetBaseType() == Type::STRING )
@@ -92,8 +86,8 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
             return CompleteType();
     }
 
-    Type t1_scalar_type = GetScalarType( t1.GetBaseType() );
-    Type t2_scalar_type = GetScalarType( t2.GetBaseType() );
+    Type t1_scalar_type = t1.GetVectorElementType();
+    Type t2_scalar_type = t2.GetVectorElementType();
     Type common_scalar_type = Type::UNKNOWN;
 
     for( Type t : promotion_ordering )
@@ -103,11 +97,16 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
             break;
         }
 
-    if( IsScalarType( t1.GetBaseType() )  )
-        return CompleteType( common_scalar_type );
 
+    //
+    // Vectors can be implicitly cast to a smaller vector type, this will
+    // issue a warning
+    //
+
+    unsigned result_size = JoeMath::Min( t1.GetVectorSize(),
+                                         t2.GetVectorSize() );
     return CompleteType( GetVectorType( common_scalar_type,
-                                         GetVectorSize( t1.GetBaseType() ) ) );
+                                        result_size ) );
 }
 
 Type GetVectorType( Type base, unsigned size )
