@@ -85,6 +85,15 @@ public:
       *   The terminal type to look for
       */
     TerminalType PeekTerminal();
+
+    /**
+      * function to return if the next token is an identifier
+      * \param identifier
+      *   the identifier string if there is one
+      * \return true of the next terminal is an identifier
+      */
+    bool PeekIdentifier( std::string& identifier );
+
     /**
       * Function to try to match a terminal
       * \returns true if we have consumed a terminal

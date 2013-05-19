@@ -340,7 +340,15 @@ bool VariableListOrFunctionDefinition::Parse(
 
     // We need at least one declaration specifier
     if( !parser.ExpectSequenceOf<DeclarationSpecifier>( decl_specs ) )
+    {
+        //
+        // This will likely have to change when we have typedefs
+        //
+        std::string identifier;
+        if( parser.PeekIdentifier( identifier ) )
+            parser.Error( "Unknown type: " + identifier );
         return false;
+    }
 
     // Try and parse some declarators
     DeclaratorVector declarators;

@@ -86,6 +86,11 @@ TerminalType Parser::PeekTerminal()
     return m_TokenStream.PeekNextTerminal();
 }
 
+bool Parser::PeekIdentifier( std::string& identifier )
+{
+    return m_TokenStream.PeekIdentifier( identifier );
+}
+
 bool Parser::ExpectTerminal( TerminalType terminal_type )
 {
     std::string dummy;
