@@ -85,6 +85,9 @@ int main( int argc, char** argv )
     
     JoeLang::Context context;
 
+    context.SetErrorCallback( [](const std::string& error) -> void
+                              { std::cerr << error << std::endl; } );
+
     JoeLang::State<int> int_state( "int_state" );
     int_state.SetCallbacks( [&actual](int v) -> void
                             {actual << "int_state: " << v << "\n";} );
@@ -101,16 +104,29 @@ int main( int argc, char** argv )
     string_state.SetCallbacks( [&actual](std::string v) -> void
                                {actual << "string_state: " << v << "\n";} );
 
+    JoeLang::State<JoeMath::float2> float2_state( "float2_state" );
+    float2_state.SetCallbacks( [&actual](JoeMath::float2 v) -> void
+                               {actual << "float2_state: "
+                                       << v.x() << " " << v.y() << "\n";} );
+
+    JoeLang::State<JoeMath::float3> float3_state( "float3_state" );
+    float3_state.SetCallbacks( [&actual](JoeMath::float3 v) -> void
+                               {actual << "float3_state: "
+                                       << v.x() << " " << v.y() << " "
+                                       << v.z() << "\n";} );
+
     JoeLang::State<JoeMath::float4> float4_state( "float4_state" );
     float4_state.SetCallbacks( [&actual](JoeMath::float4 v) -> void
                                {actual << "float4_state: "
-                                          << v.x() << " " << v.y() << " "
-                                          << v.z() << " " << v.w() << "\n";} );
+                                       << v.x() << " " << v.y() << " "
+                                       << v.z() << " " << v.w() << "\n";} );
 
     context.AddState( &int_state );
     context.AddState( &float_state );
     context.AddState( &bool_state );
     context.AddState( &string_state );
+    context.AddState( &float2_state );
+    context.AddState( &float3_state );
     context.AddState( &float4_state );
 
     // TODO make this reuse the string when we can load from string
