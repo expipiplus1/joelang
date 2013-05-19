@@ -133,10 +133,13 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
     if( !m_ExecutionEngine )
         m_JoeLangContext.Error( "Error creating LLVM ExecutionEngine: " +
                                 error_string );
+
+    InitializeOptimizers();
 }
 
 Runtime::~Runtime()
 {
+    m_Module->dump();
     llvm::llvm_shutdown();
 }
 

@@ -89,6 +89,11 @@ public:
     llvm::Module&           GetModule();
     CodeGenerator           CreateCodeGenerator();
 
+    /**
+      * Runs some optimizations on the module
+      */
+    void OptimizeModule();
+
     llvm::Value*        CreateRuntimeCall( RuntimeFunction function,
                                            std::vector<llvm::Value*> params,
                                            llvm::IRBuilder<>& builder ) const;
@@ -145,11 +150,6 @@ private:
       * Runs some optimizations on the function
       */
     void OptimizeFunction( llvm::Function& function );
-
-    /**
-      * Runs some optimizations on the module
-      */
-    void OptimizeModule();
 
     //
     // The JoeLang Context to which this runtime belongs
