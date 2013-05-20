@@ -1,0 +1,25 @@
+/*
+int_state: 1 
+int_state: 1 
+int_state: 0 
+*/
+
+int a;
+int b;
+static int A[2];// = { 0, 0 };
+
+int f()
+{
+    a += 1;
+    return a;
+}
+
+technique t1
+{
+    pass p1
+    {
+        int_state = (A[f()] = b) = 1;
+        int_state = a;
+        int_state = b;
+    }
+}
