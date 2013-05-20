@@ -1,0 +1,44 @@
+/*
+float4_state: 1 2 3 4
+float4_state: 4 3 2 1
+float3_state: 1 1 1
+float3_state: 1 1 1
+float3_state: 1 1 1
+float3_state: 1 1 1
+float2_state: 3 4
+float3_state: 4 2 3
+*/
+
+float4 a = float4{1,2,3,4};
+
+float4 ReverseA()
+{
+    a.wzyx = a;
+    return a;
+}
+
+float2 ComplicatedRead( float2 v )
+{
+    return v.xxyy.ar.ttss.yz;
+}
+
+float3 ComplicatedWrite( float3 v, float i )
+{
+    v.yxz.y = i; 
+    return v;
+}
+
+technique t1
+{
+    pass p1
+    {
+        float4_state = a;
+        float4_state = ReverseA();
+        float3_state = (1).xxx;
+        float3_state = 1..xxx;
+        float3_state = 1.0.xxx;
+        float3_state = 1.0f.xxx;
+        float2_state = ComplicatedRead( float2(3,4) );
+        float3_state = ComplicatedWrite( float3(1,2,3), 4 );
+    }
+}
