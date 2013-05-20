@@ -79,7 +79,6 @@ bool Initializer::PerformSema( SemaAnalyzer& sema,
     if( m_Expression )
     {
         // If this is a single expression try and cast it to the desired type
-        m_Expression->ResolveIdentifiers( sema );
         m_Expression = CastExpression::Create( desired_type,
                                                std::move(m_Expression),
                                                false );

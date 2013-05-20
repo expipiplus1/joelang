@@ -118,9 +118,6 @@ public:
     ~BinaryOperatorExpression();
 
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
-    virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -169,6 +166,10 @@ public:
     static
     bool classof( const BinaryOperatorExpression* e );
 protected:
+    bool PerformIntOperatorSema( SemaAnalyzer& sema );
+
+    bool PerformBooleanOperatorSema( SemaAnalyzer& sema );
+
     Op m_Operator;
     Expression_up m_LeftSide;
     Expression_up m_RightSide;

@@ -83,8 +83,6 @@ std::set<Variable_sp> ExpressionStatement::GetWrittenToVariables() const
 void ExpressionStatement::PerformSema( SemaAnalyzer& sema,
                                        const CompleteType& return_type )
 {
-    if( !m_Expression->ResolveIdentifiers( sema ) )
-        return;
     m_Expression->PerformSema( sema );
 }
 

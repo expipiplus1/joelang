@@ -85,10 +85,6 @@ public:
     virtual
     ~PostfixOperator();
 
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression_up& expression ) = 0;
-
     /** The postfix operator must performsema on the expression **/
     virtual
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) = 0;
@@ -167,10 +163,6 @@ public:
     ~SubscriptOperator();
 
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression_up& expression ) override;
-
-    virtual
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) override;
 
     //TODO pass expression as reference instead of pointer
@@ -238,9 +230,9 @@ public:
     virtual
     ~ArgumentListOperator();
 
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression_up& expression ) override;
+
+    bool ResolveFunctionIdentifier( SemaAnalyzer& sema,
+                                    Expression& expression );
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
@@ -310,10 +302,6 @@ public:
     MemberAccessOperator( std::string identifier );
     virtual
     ~MemberAccessOperator();
-
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression_up& expression ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema,
@@ -401,10 +389,6 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema,
                       Expression_up& expression ) override;
-
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema,
-                             Expression_up& expression ) override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,

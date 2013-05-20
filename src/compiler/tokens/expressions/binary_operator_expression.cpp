@@ -71,16 +71,13 @@ BinaryOperatorExpression::~BinaryOperatorExpression()
 {
 }
 
-bool BinaryOperatorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return m_LeftSide->ResolveIdentifiers( sema ) &&
-           m_RightSide->ResolveIdentifiers( sema );
-}
-
 bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
 {
     /// TODO operands can't be arrays
     bool good = true;
+
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
 
     const CompleteType& left_type = m_LeftSide->GetType();
     const CompleteType& right_type = m_RightSide->GetType();
@@ -100,13 +97,67 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_LeftSide  = CastExpression::Create( t, 
-                                              std::move(m_LeftSide), 
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide), 
-                                              false );
+        CastExpression_up c;
+
+        c = CastExpression::Create( t, std::move(m_LeftSide), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_LeftSide = std::move(c);
+
+        c = CastExpression::Create( t, std::move(m_RightSide), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_RightSide = std::move(c);
     }
+
+    return good;
+}
+
+bool BinaryOperatorExpression::PerformIntOperatorSema( SemaAnalyzer& sema )
+{
+    bool good = true;
+
+    good &= m_LeftSide->PerformSema( sema );
+    good &= m_RightSide->PerformSema( sema );
+
+    //
+    // GetType will return the common type of left and right
+    //
+    const CompleteType& t = GetType();
+
+    if( !t.IsIntegral() )
+    {
+        good = false;
+        if( !m_LeftSide->GetType().IsUnknown() &&
+            !m_RightSide->GetType().IsUnknown() )
+            sema.Error( "Invalid operand types to operator: " +
+                        m_LeftSide->GetType().GetString() + " and " +
+                        m_RightSide->GetType().GetString() );
+    }
+    else
+    {
+        CastExpression_up c;
+
+        c = CastExpression::Create( t, std::move(m_LeftSide), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_LeftSide = std::move(c);
+
+        c = CastExpression::Create( t, std::move(m_RightSide), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_RightSide = std::move(c);
+    }
+
+    return good;
+}
+
+bool BinaryOperatorExpression::PerformBooleanOperatorSema( SemaAnalyzer& sema )
+{
+    bool good = true;
+
+    m_LeftSide = CastExpression::Create( Type::BOOL,
+                                         std::move(m_LeftSide),
+                                         false );
+    m_RightSide = CastExpression::Create( Type::BOOL,
+                                          std::move(m_RightSide),
+                                          false );
 
     good &= m_LeftSide->PerformSema( sema );
     good &= m_RightSide->PerformSema( sema );
@@ -317,19 +368,7 @@ LogicalOrExpression::~LogicalOrExpression()
 
 bool LogicalOrExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-
-    m_LeftSide = CastExpression::Create( Type::BOOL, 
-                                         std::move(m_LeftSide),
-                                         false );
-    m_RightSide = CastExpression::Create( Type::BOOL, 
-                                          std::move(m_RightSide),
-                                          false );
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformBooleanOperatorSema( sema );
 }
 
 CompleteType LogicalOrExpression::GetType() const
@@ -381,19 +420,7 @@ LogicalAndExpression::~LogicalAndExpression()
 
 bool LogicalAndExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-
-    m_LeftSide = CastExpression::Create( Type::BOOL, 
-                                         std::move(m_LeftSide), 
-                                         false );
-    m_RightSide = CastExpression::Create( Type::BOOL, 
-                                          std::move(m_RightSide),
-                                          false );
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformBooleanOperatorSema( sema );
 }
 
 CompleteType LogicalAndExpression::GetType() const
@@ -444,32 +471,7 @@ InclusiveOrExpression::~InclusiveOrExpression()
 
 bool InclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-    const CompleteType& t = GetType();
-
-    if( !t.IsIntegral() )
-    {
-        good = false;
-        if( !m_LeftSide->GetType().IsUnknown() &&
-            !m_RightSide->GetType().IsUnknown() )
-            sema.Error( "Invalid operand types to to inclusive or operator: " +
-                        m_LeftSide->GetType().GetString() + " and " +
-                        m_RightSide->GetType().GetString() );
-    }
-    else
-    {
-        m_LeftSide  = CastExpression::Create( t,
-                                              std::move(m_LeftSide), 
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide),
-                                              false );
-    }
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformIntOperatorSema( sema );
 }
 
 bool InclusiveOrExpression::Parse( Parser& parser,
@@ -516,32 +518,7 @@ ExclusiveOrExpression::~ExclusiveOrExpression()
 
 bool ExclusiveOrExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-    const CompleteType& t = GetType();
-
-    if( !t.IsIntegral() )
-    {
-        good = false;
-        if( !m_LeftSide->GetType().IsUnknown() &&
-            !m_RightSide->GetType().IsUnknown() )
-            sema.Error( "Invalid operand types to to enclusive or operator: " +
-                        m_LeftSide->GetType().GetString() + " and " +
-                        m_RightSide->GetType().GetString() );
-    }
-    else
-    {
-        m_LeftSide  = CastExpression::Create( t, 
-                                              std::move(m_LeftSide),
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide),
-                                              false );
-    }
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformIntOperatorSema( sema );
 }
 
 bool ExclusiveOrExpression::Parse( Parser& parser,
@@ -586,32 +563,7 @@ AndExpression::~AndExpression()
 
 bool AndExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-    const CompleteType& t = GetType();
-
-    if( !t.IsIntegral() )
-    {
-        good = false;
-        if( !m_LeftSide->GetType().IsUnknown() &&
-            !m_RightSide->GetType().IsUnknown() )
-            sema.Error( "Invalid operand types to to and operator: " +
-                        m_LeftSide->GetType().GetString() + " and " +
-                        m_RightSide->GetType().GetString() );
-    }
-    else
-    {
-        m_LeftSide  = CastExpression::Create( t, 
-                                              std::move(m_LeftSide),
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide),
-                                              false );
-    }
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformIntOperatorSema( sema );
 }
 
 bool AndExpression::Parse( Parser& parser, Expression_up& token )
@@ -749,32 +701,7 @@ ShiftExpression::~ShiftExpression()
 
 bool ShiftExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = true;
-    const CompleteType& t = GetType();
-
-    if( !t.IsIntegral() )
-    {
-        good = false;
-        if( !m_LeftSide->GetType().IsUnknown() &&
-            !m_RightSide->GetType().IsUnknown() )
-            sema.Error( "Invalid operand types to to shift operator: " +
-                        m_LeftSide->GetType().GetString() + " and " +
-                        m_RightSide->GetType().GetString() );
-    }
-    else
-    {
-        m_LeftSide  = CastExpression::Create( t, 
-                                              std::move(m_LeftSide),
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide),
-                                              false );
-    }
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-
-    return good;
+    return PerformIntOperatorSema( sema );
 }
 
 bool ShiftExpression::Parse( Parser& parser,
@@ -867,33 +794,8 @@ bool MultiplicativeExpression::PerformSema( SemaAnalyzer& sema )
     //
     if( m_Operator != BinaryOperatorExpression::Op::MODULO )
         return BinaryOperatorExpression::PerformSema( sema );
-
-    bool good = true;
-
-    const CompleteType& t = GetType();
-
-    if( !t.IsIntegral() )
-    {
-        good = false;
-        if( !m_LeftSide->GetType().IsUnknown() &&
-            !m_RightSide->GetType().IsUnknown() )
-            sema.Error( "Invalid operand types to to modulo operator: " +
-                        m_LeftSide->GetType().GetString() + " and " +
-                        m_RightSide->GetType().GetString() );
-    }
     else
-    {
-        m_LeftSide  = CastExpression::Create( t, 
-                                              std::move(m_LeftSide),
-                                              false );
-        m_RightSide = CastExpression::Create( t, 
-                                              std::move(m_RightSide),
-                                              false );
-    }
-
-    good &= m_LeftSide->PerformSema( sema );
-    good &= m_RightSide->PerformSema( sema );
-    return good;
+        return PerformIntOperatorSema( sema );
 }
 
 bool MultiplicativeExpression::Parse( Parser& parser,

@@ -50,6 +50,8 @@ namespace Compiler
 
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+class CastExpression;
+using CastExpression_up = std::unique_ptr<CastExpression>;
 
 //------------------------------------------------------------------------------
 // CompileStatement
@@ -85,18 +87,9 @@ const EntryFunction_sp& CompileStatement::GetEntryFunction() const
     return m_EntryFunction;
 }
 
-bool CompileStatement::ResolveIdentifiers( SemaAnalyzer& sema, 
-                                           Function_sp& function )
+bool CompileStatement::ResolveFunctionIdentifier( SemaAnalyzer& sema,
+                                                  Function_sp& function )
 {
-    // This doesn't resolve the identifier in expression because that will only
-    // find variables and not the function to call
-    bool good = true;
-    for( auto& a : m_Arguments )
-        good &= a->ResolveIdentifiers( sema );
-
-    if( !good )
-        return false;
-
     //
     // Find the function to call
     //
@@ -117,7 +110,7 @@ bool CompileStatement::ResolveIdentifiers( SemaAnalyzer& sema,
         return false;
     }
 
-    return good;
+    return true;
 }
 
 bool CompileStatement::PerformSema( SemaAnalyzer& sema )
@@ -125,10 +118,22 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
     assert( !m_EntryFunction && "About to overrite a non-null entryfunction" );
 
     //
-    // Resolve all the identifiers and bail if there was a problem
+    // PerformSema on all the arguments so we can get their types to
+    // get the function overload
+    //
+    bool good = true;
+
+    for( auto& a : m_Arguments )
+        good &= a->PerformSema( sema );
+
+    if( !good )
+        return false;
+
+    //
+    // Resolve the function overload
     //
     Function_sp function;
-    if( !ResolveIdentifiers( sema, function ) )
+    if( !ResolveFunctionIdentifier( sema, function ) )
         return false;
 
     assert( function && "Performing Sema on a null function" );
@@ -141,14 +146,13 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
     // Cast all the arguments
     //
     for( unsigned i = 0; i < m_Arguments.size(); ++i )
-        m_Arguments[i] = CastExpression::Create( types[i],
-                                                 std::move(m_Arguments[i]),
-                                                 false );
-
-    bool good = true;
-
-    for( auto& a : m_Arguments )
-        good &= a->PerformSema( sema );
+    {
+        CastExpression_up a = CastExpression::Create( types[i],
+                                                      std::move(m_Arguments[i]),
+                                                      false );
+        good &= a->PerformSemaNoRecurse( sema );
+        m_Arguments[i] = std::move(a);
+    }
 
     if( !good )
         return false;

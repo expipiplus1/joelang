@@ -62,6 +62,8 @@ namespace JoeLang
         class CodeGenerator;
         class Expression;
         typedef std::unique_ptr<Expression> Expression_up;
+        class CastExpression;
+        typedef std::unique_ptr<CastExpression> CastExpression_up;
         class GenericValue;
         class Function;
         using Function_sp = std::shared_ptr<Function>;
@@ -102,13 +104,6 @@ public:
     Expression( TokenTy sub_class_id );
     virtual
     ~Expression();
-
-    /**
-      * Recurses down and resolves IdentifierExpressions using the symbol table
-      * in sema.
-      */
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema );
 
     /**
       * Performs type checking and things.
@@ -234,9 +229,6 @@ public:
     virtual
     ~AssignmentExpression();
 
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
     /**
       * For expressions such as 'a += b' this is inteerpreted as 'a = a+b', with
       * m_AssignedExpression being replaced with a+b and ownership of a being
@@ -317,9 +309,6 @@ public:
     ~ConditionalExpression();
 
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
-    virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -377,8 +366,7 @@ public:
     virtual
     ~CastExpression();
 
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
+    bool PerformSemaNoRecurse( SemaAnalyzer& sema );
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -411,14 +399,14 @@ public:
     bool IsExplicit() const; 
     
     static
-    Expression_up Create( const CompleteType& cast_type,
-                          Expression_up expression,
-                          bool is_explicit );
+    CastExpression_up Create( const CompleteType& cast_type,
+                              Expression_up expression,
+                              bool is_explicit );
 
     static
-    Expression_up Create( Type cast_type, 
-                          Expression_up expression, 
-                          bool is_explicit );
+    CastExpression_up Create( Type cast_type,
+                              Expression_up expression,
+                              bool is_explicit );
 
     /**
       * Casts vectors to a different base type, preserving size
@@ -483,9 +471,6 @@ public:
     ~UnaryExpression();
 
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
-    virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
@@ -541,9 +526,6 @@ public:
     PostfixOperator& GetOperator();
 
     Expression_up TakeExpression();
-
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -609,9 +591,6 @@ public:
                                std::vector<Expression_up> arguments );
     virtual
     ~TypeConstructorExpression();
-
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
@@ -698,9 +677,6 @@ public:
     virtual
     ~IdentifierExpression();
 
-    virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
     const std::string& GetIdentifier() const;
 
     virtual
@@ -726,6 +702,8 @@ public:
     bool IsConst() const override;
 
     const std::shared_ptr<Variable>& GetVariable() const;
+
+    bool ResolveIdentifier( SemaAnalyzer& sema );
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;

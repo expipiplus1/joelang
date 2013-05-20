@@ -62,11 +62,6 @@ LiteralExpression::LiteralExpression( TokenTy sub_class_id )
 {
 }
 
-bool LiteralExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return true;
-}
-
 bool LiteralExpression::PerformSema( SemaAnalyzer& sema )
 {
     return true;

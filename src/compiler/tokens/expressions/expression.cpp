@@ -126,12 +126,6 @@ AssignmentExpression::~AssignmentExpression()
 {
 }
 
-bool AssignmentExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return m_Assignee->ResolveIdentifiers( sema ) &&
-           m_AssignedExpression->ResolveIdentifiers( sema );
-}
-
 bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
 {
     bool good = true;
@@ -148,7 +142,7 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     if( m_Assignee->IsConst() )
     {
         good = false;
-        sema.Error( "Trying to assign to a Const expression" );
+        sema.Error( "Trying to assign to a const expression" );
     }
 
     // Assuming that we can assign to the same as ReturnType;
@@ -380,13 +374,6 @@ ConditionalExpression::~ConditionalExpression()
 {
 }
 
-bool ConditionalExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return m_Condition->ResolveIdentifiers( sema ) &&
-           m_TrueExpression->ResolveIdentifiers( sema ) &&
-           m_FalseExpression->ResolveIdentifiers( sema );
-}
-
 bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
 {
     /// TODO check that the true and false expressions are of equal array size
@@ -395,6 +382,10 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     m_Condition = CastExpression::Create( Type::BOOL,
                                           std::move(m_Condition),
                                           false );
+
+    good &= m_Condition->PerformSema( sema );
+    good &= m_TrueExpression->PerformSema( sema );
+    good &= m_FalseExpression->PerformSema( sema );
 
     const CompleteType& t = GetType();
     if( t.IsUnknown() )
@@ -412,19 +403,15 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     }
     else
     {
-        m_TrueExpression = CastExpression::Create(
-                                                t,
-                                                std::move(m_TrueExpression),
-                                                false );
-        m_FalseExpression = CastExpression::Create(
-                                                t,
-                                                std::move(m_FalseExpression),
-                                                false );
-    }
+        CastExpression_up c;
+        c = CastExpression::Create( t, std::move(m_TrueExpression), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_TrueExpression = std::move(c);
 
-    good &= m_Condition->PerformSema( sema );
-    good &= m_TrueExpression->PerformSema( sema );
-    good &= m_FalseExpression->PerformSema( sema );
+        c = CastExpression::Create( t, std::move(m_FalseExpression), false );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_FalseExpression = std::move(c);
+    }
 
     return good;
 }
@@ -551,18 +538,10 @@ CastExpression::~CastExpression()
 {
 }
 
-bool CastExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool CastExpression::PerformSemaNoRecurse( SemaAnalyzer& sema )
 {
-    return m_Expression->ResolveIdentifiers( sema );
-}
-
-bool CastExpression::PerformSema( SemaAnalyzer& sema )
-{
-    // todo this in a better way
-    bool good;
-
     const CompleteType& t = m_Expression->GetType();
-    
+
     if( t.IsUnknown() )
     {
         sema.Error( "Trying to cast from unknown type" );
@@ -570,29 +549,33 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     }
 
     assert( !m_CastType.IsUnknown() && "Trying to cast to unknown type" );
-    
-    if( t == m_CastType )
-        good = true;
-    
-    if( t.IsScalarType() )
-        good = CanCastFromScalar( sema );
-    else if( t.IsVectorType() )
-        good = CanCastFromVector( sema );
-    else if( t.IsMatrixType() )
-        good = CanCastFromMatrix( sema );
-    else if( t.IsStructType() )
-        good = CanCastFromStruct( sema );
-    else if( t.IsArrayType() )
-        good = CanCastFromArray ( sema );
-    else if( t.GetType() == Type::STRING )
-        good = CanCastFromString( sema );
-    else if( t.IsVoid() )
-        good = CanCastFromVoid( sema );
-    else 
-        assert( false && "Trying to cast from unhandled type" );
-    
-    good &= m_Expression->PerformSema( sema );
 
+    if( t == m_CastType )
+        return true;
+
+    if( t.IsScalarType() )
+        return CanCastFromScalar( sema );
+    else if( t.IsVectorType() )
+        return CanCastFromVector( sema );
+    else if( t.IsMatrixType() )
+        return CanCastFromMatrix( sema );
+    else if( t.IsStructType() )
+        return CanCastFromStruct( sema );
+    else if( t.IsArrayType() )
+        return CanCastFromArray ( sema );
+    else if( t.GetType() == Type::STRING )
+        return CanCastFromString( sema );
+    else if( t.IsVoid() )
+        return CanCastFromVoid( sema );
+    else
+        assert( false && "Trying to cast from unhandled type" );
+    return false;
+}
+
+bool CastExpression::PerformSema( SemaAnalyzer& sema )
+{
+    bool good = m_Expression->PerformSema( sema );
+    good &= PerformSemaNoRecurse( sema );
     return good;
 }
 
@@ -811,26 +794,26 @@ bool CastExpression::Parse( Parser& parser, Expression_up& token )
     return parser.Expect<UnaryExpression>( token );
 }
 
-Expression_up CastExpression::Create( Type cast_type,
-                                      Expression_up expression,
-                                      bool is_explicit )
+CastExpression_up CastExpression::Create( Type cast_type,
+                                          Expression_up expression,
+                                          bool is_explicit )
 {
     return Create( CompleteType( cast_type ),
                    std::move( expression ),
                    is_explicit );
 }
 
-Expression_up CastExpression::Create( const CompleteType& cast_type,
-                                      Expression_up expression,
-                                      bool is_explicit )
+CastExpression_up CastExpression::Create( const CompleteType& cast_type,
+                                          Expression_up expression,
+                                          bool is_explicit )
 {
     // If this would be a null implicit cast don't bother creating one
-    if( expression->GetType() == cast_type && !is_explicit )
-        return expression;
+    //if( expression->GetType() == cast_type && !is_explicit )
+        //return expression;
 
-    return Expression_up( new CastExpression( cast_type,
-                                              std::move(expression),
-                                              is_explicit ) );
+    return CastExpression_up( new CastExpression( cast_type,
+                                                  std::move(expression),
+                                                  is_explicit ) );
 }
 
 Expression_up CastExpression::CreateBaseTypeCast(
@@ -878,15 +861,12 @@ UnaryExpression::~UnaryExpression()
 {
 }
 
-bool UnaryExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return m_Expression->ResolveIdentifiers( sema );
-}
-
 bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
 {
     /// TODO check that expression isn't an array
     bool good = true;
+
+    good &= m_Expression->PerformSema( sema );
 
     const CompleteType& t = m_Expression->GetType();
     if( t.GetType() == Type::STRING )
@@ -900,8 +880,6 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
         good = false;
         sema.Error( "Invalid type to bitwise unary not operator" );
     }
-
-    good &= m_Expression->PerformSema( sema );
 
     return good;
 }
@@ -1067,11 +1045,6 @@ Expression_up PostfixExpression::TakeExpression()
     return std::move(m_Expression);
 }
 
-bool PostfixExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    return m_PostfixOperator->ResolveIdentifiers( sema, m_Expression );
-}
-
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
     //
@@ -1188,16 +1161,13 @@ TypeConstructorExpression::~TypeConstructorExpression()
 {
 }
 
-bool TypeConstructorExpression::ResolveIdentifiers( SemaAnalyzer& sema )
-{
-    bool ret = true;
-    for( const auto& argument : m_Arguments )
-        ret &= argument->ResolveIdentifiers( sema );
-    return ret;
-}
-
 bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 {
+    bool good = true;
+
+    for( const auto& argument : m_Arguments )
+        good &= argument->PerformSema( sema );
+
     //
     // Verify that we have the correct number of parameters for this type
     //
@@ -1220,12 +1190,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
                                                       std::move(argument),
                                                       m_Arguments.size() == 1 );
 
-    bool ret = true;
-
-    for( const auto& argument : m_Arguments )
-        ret &= argument->PerformSema( sema );
-
-    return ret;
+    return good;
 }
 
 llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -1407,7 +1372,7 @@ IdentifierExpression::~IdentifierExpression()
 {
 }
 
-bool IdentifierExpression::ResolveIdentifiers( SemaAnalyzer& sema )
+bool IdentifierExpression::ResolveIdentifier( SemaAnalyzer& sema )
 {
     m_Variable = sema.GetVariable( m_Identifier );
     if( !m_Variable )
@@ -1494,7 +1459,7 @@ const std::shared_ptr<Variable>& IdentifierExpression::GetVariable() const
 
 bool IdentifierExpression::PerformSema( SemaAnalyzer& sema )
 {
-    return bool(m_Variable);
+    return ResolveIdentifier( sema );
 }
 
 bool IdentifierExpression::Parse( Parser& parser,

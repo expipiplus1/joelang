@@ -66,9 +66,6 @@ ArraySpecifier::~ArraySpecifier()
 
 void ArraySpecifier::PerformSema( SemaAnalyzer& sema )
 {
-    m_Expression->ResolveIdentifiers( sema );
-    if( !m_Expression->GetType().IsIntegral() )
-        sema.Error( "Can't create array with non-integer dimension" );
     m_Expression = CastExpression::Create( Type::LONG,
                                            std::move(m_Expression),
                                            false );
@@ -229,9 +226,6 @@ void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
     // If we don't have an index we have no work to do here
     //
     if( !m_IndexExpression )
-        return;
-
-    if( !m_IndexExpression->ResolveIdentifiers( sema ) )
         return;
 
     m_IndexExpression = CastExpression::Create( CompleteType( Type::INT ),

@@ -85,9 +85,6 @@ bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     }
     sema.LoadStateEnumerants( *m_State );
 
-    if( !m_Expression->ResolveIdentifiers( sema ) )
-        return false;
-
     m_Expression = CastExpression::Create( m_State->GetType(),
                                            std::move(m_Expression),
                                            false );

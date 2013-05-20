@@ -86,12 +86,6 @@ public:
       * Does nothing
       */
     virtual
-    bool ResolveIdentifiers( SemaAnalyzer& sema ) override;
-
-    /**
-      * Does nothing
-      */
-    virtual
     bool PerformSema( SemaAnalyzer& sema ) override final;
 
     virtual
