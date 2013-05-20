@@ -312,7 +312,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
 
     virtual
-    llvm::Value*CodeGen( CodeGenerator& code_gen ) const override;
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
 
     virtual
     void Write( ShaderWriter& shader_writer ) const override;
