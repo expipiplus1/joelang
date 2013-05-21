@@ -730,7 +730,7 @@ CastExpression_up CastExpression::Create( const CompleteType& cast_type,
                                                   is_explicit ) );
 }
 
-Expression_up CastExpression::CreateBaseTypeCast(
+CastExpression_up CastExpression::CreateBaseTypeCast(
                                                 Type cast_type,
                                                 Expression_up cast_expression,
                                                 bool is_explicit )
@@ -1091,7 +1091,10 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
         num_elements += argument->GetType().GetVectorSize();
 
     if( num_elements != num_desired_elements )
+    {
         sema.Error( "Wrong number of elements in constructor" );
+        good = false;
+    }
 
     //
     // Verify that all the parameters can be converted into the correct base
@@ -1099,10 +1102,14 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     // todo matrices
     //
     for( auto& argument : m_Arguments )
-        argument = CastExpression::CreateBaseTypeCast(
-                                                      GetScalarType( m_Type ),
-                                                      std::move(argument),
-                                                      m_Arguments.size() == 1 );
+    {
+        CastExpression_up c;
+        c =  CastExpression::CreateBaseTypeCast( GetScalarType( m_Type ),
+                                                 std::move(argument),
+                                                 m_Arguments.size() == 1 );
+        good &= c->PerformSemaNoRecurse( sema );
+        argument = std::move(c);
+    }
 
     return good;
 }

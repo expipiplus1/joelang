@@ -407,7 +407,7 @@ public:
       * Casts vectors to a different base type, preserving size
       */
     static
-    Expression_up CreateBaseTypeCast( Type base_type,
+    CastExpression_up CreateBaseTypeCast( Type base_type,
                                       Expression_up cast_expression,
                                       bool is_explicit 
                                       );
