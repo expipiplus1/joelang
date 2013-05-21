@@ -447,8 +447,8 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
 #ifndef NDEBUG
     unsigned e_vector_size = e.GetType().GetVectorSize();
     for( unsigned i = 0; i < swizzle.GetSize(); ++i )
-        assert( swizzle.GetIndex(i) >= 0 && swizzle.GetIndex(i) < e_vector_size &&
-                "swizzle index out of bounds" );
+        assert( swizzle.GetIndex(i) >= 0 && swizzle.GetIndex(i) < e_vector_size
+                && "swizzle index out of bounds" );
 #endif
     //
     //
@@ -456,6 +456,14 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
 
     llvm::Value* e_value = e.CodeGen( *this );
 
+    return SwizzleValue( e.GetType(), e_value, swizzle );
+}
+
+llvm::Value* CodeGenerator::SwizzleValue( const CompleteType& type,
+                                          llvm::Value* value,
+                                          Swizzle swizzle )
+{
+    assert( value->getType() == m_Runtime.GetLLVMType(type) && "Type mismatch");
     //
     // If we only have one swizzle index we want to extract an element
     //
@@ -465,14 +473,14 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
         // if e is already a scalar type (the expression was myscalar.x)
         // just return the scalar
         //
-        if( e.GetType().IsScalarType() )
-            return e_value;
+        if( type.IsScalarType() )
+            return value;
 
         //
         // Otherwise extract the element
         //
         return m_Builder.CreateExtractElement(
-                    e_value,
+                    value,
                     llvm::ConstantInt::get( m_Runtime.GetLLVMType( Type::INT ),
                                             swizzle.GetIndex(0) ) );
     }
@@ -484,18 +492,18 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
     //
     // If this isn't a vector, package it into one
     //
-    if( e.GetType().IsScalarType() )
-        e_value = m_Builder.CreateInsertElement(
-            llvm::UndefValue::get( llvm::VectorType::get( e_value->getType(),
+    if( type.IsScalarType() )
+        value = m_Builder.CreateInsertElement(
+            llvm::UndefValue::get( llvm::VectorType::get( value->getType(),
                                                           1 ) ),
-            e_value,
+            value,
             CreateInteger( 0, Type::INT ) );
 
     std::vector<unsigned> indices( swizzle.begin(), swizzle.end() );
 
     return m_Builder.CreateShuffleVector(
-                    e_value,
-                    llvm::UndefValue::get( e_value->getType() ),
+                    value,
+                    llvm::UndefValue::get( value->getType() ),
                     llvm::ConstantDataVector::get( m_Runtime.GetLLVMContext(),
                                                    indices ) );
 
@@ -715,7 +723,7 @@ llvm::Value* CodeGenerator::CreateOr( const Expression& l, const Expression& r )
     assert( l.GetType() == r.GetType() &&
             "Type mismatch in code gen for binary operator" );
     return m_Builder.CreateOr( l.CodeGen( *this ),
-                                   r.CodeGen( *this ) );
+                               r.CodeGen( *this ) );
 }
 
 llvm::Value* CodeGenerator::CreateXor( const Expression& l,
@@ -1109,7 +1117,8 @@ llvm::Value* CodeGenerator::CreateVariableRead( const Variable& variable )
 //
 llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
                                               const Expression& e,
-                                              Swizzle swizzle )
+                                              Swizzle swizzle,
+                                              AssignmentOperator op )
 {
     assert( variable.IsLValue() &&
             "Trying to codegen an assignment to a RValue" );
@@ -1121,6 +1130,30 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
     llvm::Value* assigned_value = e.CodeGen( *this );
     llvm::Value* pointer        = variable.CodeGenPointerTo( *this );
     llvm::Value* ret            = assigned_value;
+
+    if( op != AssignmentOperator::EQUALS )
+    {
+        //
+        // If we're not just assigning, create a new assigned value from
+        // the old one
+        //
+        llvm::Value* assignee_value = m_Builder.CreateLoad( pointer );
+        if( swizzle.IsValid() )
+            assignee_value = SwizzleValue( variable.GetType(),
+                                           assignee_value,
+                                           swizzle );
+
+        switch( op )
+        {
+        case AssignmentOperator::PLUS_EQUALS:
+            assigned_value = m_Builder.CreateAdd( assignee_value,
+                                                  assigned_value );
+            break;
+        default:
+            assert( false &&
+                    "Trying to codegen an unhandled assignment operator" );
+        }
+    }
 
     if( swizzle.IsValid() )
     {

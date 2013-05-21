@@ -43,49 +43,49 @@ namespace Compiler
 {
 
 //------------------------------------------------------------------------------
-// AssignmentOperator
+// AssignmentOperatorToken
 //------------------------------------------------------------------------------
 
-AssignmentOperator::AssignmentOperator( Op op )
+AssignmentOperatorToken::AssignmentOperatorToken( AssignmentOperator op )
     :Token( TokenTy::AssignmentOperator )
     ,m_Operator(op)
 {
 }
 
-AssignmentOperator::~AssignmentOperator()
+AssignmentOperatorToken::~AssignmentOperatorToken()
 {
 }
 
-AssignmentOperator::Op AssignmentOperator::GetOp() const
+AssignmentOperator AssignmentOperatorToken::GetOp() const
 {
     return m_Operator;
 }
 
-bool AssignmentOperator::Parse( Parser& parser,
-                                std::unique_ptr<AssignmentOperator>& token )
+bool AssignmentOperatorToken::Parse( Parser& parser,
+                               std::unique_ptr<AssignmentOperatorToken>& token )
 {
-    // A vector of terminals for assignment operators and their Op enumerants
-    static const std::vector< std::pair<TerminalType, Op> >
+    // A vector of terminals for assignment operators and their enumerants
+    static const std::vector< std::pair<TerminalType, AssignmentOperator> >
            s_assignment_operator_terminals =
     {
-        { TerminalType::EQUALS,             Op::EQUALS },
-        { TerminalType::PLUS_EQUALS,        Op::PLUS_EQUALS },
-        { TerminalType::MINUS_EQUALS,       Op::MINUS_EQUALS },
-        { TerminalType::MULTIPLY_EQUALS,    Op::MULTIPLY_EQUALS },
-        { TerminalType::DIVIDE_EQUALS,      Op::DIVIDE_EQUALS },
-        { TerminalType::MODULO_EQUALS,      Op::MODULO_EQUALS },
-        { TerminalType::LEFT_SHIFT_EQUALS,  Op::SHL_EQUALS },
-        { TerminalType::RIGHT_SHIFT_EQUALS, Op::SHR_EQUALS },
-        { TerminalType::AND_EQUALS,         Op::AND_EQUALS },
-        { TerminalType::INCLUSIVE_OR_EQUALS, Op::OR_EQUALS },
-        { TerminalType::EXCLUSIVE_OR_EQUALS, Op::XOR_EQUALS }
+        { TerminalType::EQUALS,           AssignmentOperator::EQUALS },
+        { TerminalType::PLUS_EQUALS,      AssignmentOperator::PLUS_EQUALS },
+        { TerminalType::MINUS_EQUALS,     AssignmentOperator::MINUS_EQUALS },
+        { TerminalType::MULTIPLY_EQUALS,  AssignmentOperator::MULTIPLY_EQUALS },
+        { TerminalType::DIVIDE_EQUALS,    AssignmentOperator::DIVIDE_EQUALS },
+        { TerminalType::MODULO_EQUALS,    AssignmentOperator::MODULO_EQUALS },
+        { TerminalType::LEFT_SHIFT_EQUALS,   AssignmentOperator::SHL_EQUALS },
+        { TerminalType::RIGHT_SHIFT_EQUALS,  AssignmentOperator::SHR_EQUALS },
+        { TerminalType::AND_EQUALS,          AssignmentOperator::AND_EQUALS },
+        { TerminalType::INCLUSIVE_OR_EQUALS, AssignmentOperator::OR_EQUALS },
+        { TerminalType::EXCLUSIVE_OR_EQUALS, AssignmentOperator::XOR_EQUALS }
     };
 
     // Try and match any of these operators
     for( const auto& p : s_assignment_operator_terminals )
         if( parser.ExpectTerminal( p.first ) )
         {
-            token.reset( new AssignmentOperator( p.second ) );
+            token.reset( new AssignmentOperatorToken( p.second ) );
             return true;
         }
     return false;

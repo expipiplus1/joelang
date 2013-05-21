@@ -78,6 +78,7 @@ using TechniqueDeclaration_up = std::unique_ptr<TechniqueDeclaration>;
 class TranslationUnit;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
+enum class AssignmentOperator;
 
 class CodeGenerator
 {
@@ -241,7 +242,8 @@ public:
 
     llvm::Value* CreateAssignment( const Expression& variable,
                                    const Expression& e,
-                                   Swizzle s );
+                                   Swizzle s,
+                                   AssignmentOperator op );
 
     // Functions
     /**
@@ -286,6 +288,13 @@ private:
     llvm::Value* CreateScalarOrVectorCast( llvm::Value* e_value,
                                            const CompleteType& from_type,
                                            const CompleteType& to_type );
+
+    //
+    // We need to swizzle from multiple places, so do it once here.
+    //
+    llvm::Value* SwizzleValue( const CompleteType& type,
+                               llvm::Value* value,
+                               Swizzle swizzle );
 
     /**
       * Create an anonymous llvm function taking no arguments

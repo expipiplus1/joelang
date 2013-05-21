@@ -108,7 +108,7 @@ bool Expression::classof( const Expression* e )
 
 AssignmentExpression::AssignmentExpression(
                         Expression_up assignee,
-                        Op assignment_operator,
+                        AssignmentOperator assignment_operator,
                         Expression_up assigned_expression )
     :Expression( TokenTy::AssignmentExpression )
     ,m_Assignee          ( std::move(assignee) )
@@ -119,7 +119,6 @@ AssignmentExpression::AssignmentExpression(
             "AssignmentExpression given an invalid assignee" );
     assert( m_AssignedExpression &&
             "AssignmentExpression given an invalid assigned expression" );
-    m_AssigneePtr = m_Assignee.get();
 }
 
 AssignmentExpression::~AssignmentExpression()
@@ -150,136 +149,51 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
                                               m_Assignee->GetType(),
                                               std::move(m_AssignedExpression),
                                               false );
-    good &= m_AssignedExpression->PerformSema( sema );
 
-    switch( m_AssignmentOperator )
-    {
-    case Op::EQUALS:
-        break;
-    case Op::SHL_EQUALS:
-        m_AssignedExpression.reset(
-                  new ShiftExpression( BinaryOperatorExpression::Op::LEFT_SHIFT,
-                                      std::move(m_Assignee),
-                                      std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::SHR_EQUALS:
-        m_AssignedExpression.reset(
-                 new ShiftExpression( BinaryOperatorExpression::Op::RIGHT_SHIFT,
-                                      std::move(m_Assignee),
-                                      std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::AND_EQUALS:
-        m_AssignedExpression.reset(
-                   new AndExpression( BinaryOperatorExpression::Op::AND,
-                                      std::move(m_Assignee),
-                                      std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::XOR_EQUALS:
-        m_AssignedExpression.reset(
-           new ExclusiveOrExpression( BinaryOperatorExpression::Op::XOR,
-                                      std::move(m_Assignee),
-                                      std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::OR_EQUALS:
-        m_AssignedExpression.reset(
-           new InclusiveOrExpression( BinaryOperatorExpression::Op::OR,
-                                      std::move(m_Assignee),
-                                      std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::PLUS_EQUALS:
-        m_AssignedExpression.reset(
-                    new AdditiveExpression( BinaryOperatorExpression::Op::PLUS,
-                                            std::move(m_Assignee),
-                                            std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::MINUS_EQUALS:
-        m_AssignedExpression.reset(
-                    new AdditiveExpression( BinaryOperatorExpression::Op::MINUS,
-                                            std::move(m_Assignee),
-                                            std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::MULTIPLY_EQUALS:
-        m_AssignedExpression.reset(
-          new MultiplicativeExpression( BinaryOperatorExpression::Op::MULTIPLY,
-                                        std::move(m_Assignee),
-                                        std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::DIVIDE_EQUALS:
-        m_AssignedExpression.reset(
-          new MultiplicativeExpression( BinaryOperatorExpression::Op::DIVIDE,
-                                        std::move(m_Assignee),
-                                        std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    case Op::MODULO_EQUALS:
-        m_AssignedExpression.reset(
-          new MultiplicativeExpression( BinaryOperatorExpression::Op::MODULO,
-                                        std::move(m_Assignee),
-                                        std::move(m_AssignedExpression) ) );
-        m_AssignmentOperator = Op::EQUALS;
-        break;
-    }
+    good &= m_AssignedExpression->PerformSema( sema );
 
     return good;
 }
 
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    assert( m_AssigneePtr &&
-            "Trying to codegen an assignmentexpression with null assigneeptr" );
-
     //
     // Get the swizzle data if there is any
     //
     Swizzle swizzle;
-    if( PostfixExpression* p = dyn_cast<PostfixExpression>(m_AssigneePtr) )
+    if( PostfixExpression* p = dyn_cast<PostfixExpression>(m_Assignee.get()) )
         if( MemberAccessOperator* m =
                              dyn_cast<MemberAccessOperator>(&p->GetOperator()) )
             if( m->IsSwizzle() )
                 swizzle = m->GetSwizzle();
 
-    switch( m_AssignmentOperator )
-    {
-    case Op::EQUALS:
-        return code_gen.CreateAssignment( *m_AssigneePtr,
-                                          *m_AssignedExpression,
-                                          swizzle );
-        break;
-    default:
-        assert( false && "unhandled assignment operator" );
-        return nullptr;
-    }
+    return code_gen.CreateAssignment( *m_Assignee,
+                                      *m_AssignedExpression,
+                                      swizzle,
+                                      m_AssignmentOperator );
 }
 
 llvm::Value* AssignmentExpression::CodeGenPointerTo(
                                                   CodeGenerator& code_gen) const
 {
-    return m_AssigneePtr->CodeGenPointerTo( code_gen );
+    return m_Assignee->CodeGenPointerTo( code_gen );
 }
 
 void AssignmentExpression::Write( ShaderWriter& shader_writer ) const
 {
     // Todo this isn't right, need to handle += and friends properly
-    shader_writer << *m_AssigneePtr << " = " << *m_AssignedExpression;
+    shader_writer << *m_Assignee << " = " << *m_AssignedExpression;
 }
 
 CompleteType AssignmentExpression::GetType() const
 {
-    return m_AssigneePtr->GetType();
+    return m_Assignee->GetType();
 }
 
 std::set<Function_sp> AssignmentExpression::GetCallees() const
 {
     //assert( false && "Do assignment properly" );
-    auto ret = m_AssigneePtr->GetCallees();
+    auto ret = m_Assignee->GetCallees();
     auto f   = m_AssignedExpression->GetCallees();
     ret.insert( f.begin(), f.end() );
     return ret;
@@ -320,8 +234,8 @@ bool AssignmentExpression::Parse( Parser& parser,
     if( !parser.Expect< ConditionalExpression >( lhs_expression ) )
         return false;
 
-    std::unique_ptr<AssignmentOperator> assignment_operator;
-    if( !parser.Expect< AssignmentOperator >( assignment_operator ) )
+    std::unique_ptr<AssignmentOperatorToken> assignment_operator;
+    if( !parser.Expect<AssignmentOperatorToken>( assignment_operator ) )
     {
         CHECK_PARSER;
 

@@ -42,6 +42,23 @@ namespace Compiler
 
 class Parser;
 
+/** \enum AssignmentOperator
+  *   An enum for any kind of assignment operator **/
+enum class AssignmentOperator
+{
+    EQUALS,
+    SHL_EQUALS,
+    SHR_EQUALS,
+    AND_EQUALS,
+    XOR_EQUALS,
+    OR_EQUALS,
+    PLUS_EQUALS,
+    MINUS_EQUALS,
+    MULTIPLY_EQUALS,
+    DIVIDE_EQUALS,
+    MODULO_EQUALS
+};
+
 /**
   * \class AssignmentOperator
   * \ingroup Tokens
@@ -50,46 +67,30 @@ class Parser;
   * AssignmentExpression = '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' |
   *                        '>>=' | '&=' | '^=' | '|='
   */
-class AssignmentOperator : public JoeLang::Compiler::Token
+class AssignmentOperatorToken : public JoeLang::Compiler::Token
 {
 public:
-    /** \enum Op
-      *   An enum for any kind of assignment operator **/
-    enum class Op
-    {
-        EQUALS,
-        SHL_EQUALS,
-        SHR_EQUALS,
-        AND_EQUALS,
-        XOR_EQUALS,
-        OR_EQUALS,
-        PLUS_EQUALS,
-        MINUS_EQUALS,
-        MULTIPLY_EQUALS,
-        DIVIDE_EQUALS,
-        MODULO_EQUALS,
-    };
 
     /**
       * \param assignment_operator
       *   The operator
       */
-    AssignmentOperator( Op assignment_operator );
+    AssignmentOperatorToken( AssignmentOperator assignment_operator );
     virtual
-    ~AssignmentOperator();
+    ~AssignmentOperatorToken();
 
-    Op GetOp() const;
+    AssignmentOperator GetOp() const;
 
     static
     bool Parse( Parser& parser,
-                std::unique_ptr<AssignmentOperator>& token );
+                std::unique_ptr<AssignmentOperatorToken>& token );
 
     static
     bool classof( const Token* t );
     static
-    bool classof( const AssignmentOperator* d );
+    bool classof( const AssignmentOperatorToken* d );
 private:
-    Op m_Operator;
+    AssignmentOperator m_Operator;
 };
 
 } // namespace Compiler

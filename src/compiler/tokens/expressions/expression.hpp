@@ -212,8 +212,6 @@ public:
 class AssignmentExpression : public JoeLang::Compiler::Expression
 {
 public:
-    using Op = AssignmentOperator::Op;
-
     /**
       * This constructor asserts on any null pointers
       * \param assignee
@@ -224,7 +222,7 @@ public:
       *   The assigned Expression
       */
     AssignmentExpression( Expression_up assignee,
-                          Op assignment_operator,
+                          AssignmentOperator assignment_operator,
                           Expression_up assigned_expression );
     virtual
     ~AssignmentExpression();
@@ -275,10 +273,7 @@ public:
     bool classof( const AssignmentExpression* e );
 private:
     Expression_up m_Assignee;
-    /// This points to the assignee, to hold onto it after ownership has been
-    /// given to AssignedExpression for expressions such as a += b;
-    Expression*   m_AssigneePtr = nullptr;
-    Op            m_AssignmentOperator;
+    AssignmentOperator m_AssignmentOperator;
     Expression_up m_AssignedExpression;
 };
 
