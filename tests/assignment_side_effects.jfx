@@ -1,12 +1,12 @@
 /*
 int_state: 1 
 int_state: 1 
-int_state: 0 
+int_state: 1 
 */
 
-int a;
-int b;
-static int A[2];// = { 0, 0 };
+static int a;
+static int b;
+static int A[2];
 
 int f()
 {
@@ -14,12 +14,18 @@ int f()
     return a;
 }
 
+int g()
+{
+    A[b+=1] += 1;
+    return b;
+}
+
 technique t1
 {
     pass p1
     {
-        int_state = (A[f()] = b) = 1;
+        int_state = (A[f()] = 1) = 1;
         int_state = a;
-        int_state = b;
+        int_state = g();
     }
 }
