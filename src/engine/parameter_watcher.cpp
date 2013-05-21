@@ -61,27 +61,32 @@ ParameterWatcherBase_up ParameterWatcherBase::Create(
     if( uniform_location == -1 )
         return nullptr;
 
-#define CREATE_TYPED_PARAMETER_WATCHER(Type) \
-    case JoeLangType<Type>::value: \
+#define CREATE_TYPED_PARAMETER_WATCHER(type) \
+    case JoeLangType<type>::value: \
         return ParameterWatcherBase_up( \
-            new ParameterWatcher<Type>( \
+            new ParameterWatcher<type>( \
                         uniform_location, \
-                        reinterpret_cast<const Parameter<Type>&>( parameter) ) )
+                        reinterpret_cast<const Parameter<type>&>( parameter) ) )
+
+#define CREATE_TYPED_PARAMETER_WATCHER_N(type) \
+        CREATE_TYPED_PARAMETER_WATCHER(type); \
+        CREATE_TYPED_PARAMETER_WATCHER(type##2); \
+        CREATE_TYPED_PARAMETER_WATCHER(type##3); \
+        CREATE_TYPED_PARAMETER_WATCHER(type##4)
 
     switch( parameter.GetType() )
     {
-    CREATE_TYPED_PARAMETER_WATCHER(jl_bool);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_char);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_short);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_int);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_long);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_uchar);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_ushort);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_uint);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_ulong);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_float);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_float4);
-    CREATE_TYPED_PARAMETER_WATCHER(jl_double);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_bool);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_char);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_short);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_int);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_long);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uchar);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ushort);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uint);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ulong);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_float);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_double);
     default:
         assert( false &&
                 "Trying to create a parameter watcher for an unhandled type" );
