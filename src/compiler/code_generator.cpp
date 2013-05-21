@@ -148,28 +148,33 @@ std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
                                 m_Runtime.GetLLVMType( uniform->GetType() ) ) &&
                 "Trying to create a parameter with the wrong llvm type" );
 
-#define CREATE_TYPED_PARAM(Type) \
-        case JoeLangType<Type>::value: \
-           parameters.emplace_back( new Parameter<Type>( \
+#define CREATE_TYPED_PARAM(type) \
+        case JoeLangType<type>::value: \
+           parameters.emplace_back( new Parameter<type>( \
                     uniform->GetName(), \
-                    *(static_cast<Type*>( \
+                    *(static_cast<type*>( \
                            m_ExecutionEngine.getPointerToGlobal( gv ) ) ) ) ); \
             break
 
+#define CREATE_TYPED_PARAM_N(type) \
+        CREATE_TYPED_PARAM(type); \
+        CREATE_TYPED_PARAM(type##2); \
+        CREATE_TYPED_PARAM(type##3); \
+        CREATE_TYPED_PARAM(type##4)
+
         switch( type )
         {
-        CREATE_TYPED_PARAM(jl_bool);
-        CREATE_TYPED_PARAM(jl_char);
-        CREATE_TYPED_PARAM(jl_short);
-        CREATE_TYPED_PARAM(jl_int);
-        CREATE_TYPED_PARAM(jl_long);
-        CREATE_TYPED_PARAM(jl_uchar);
-        CREATE_TYPED_PARAM(jl_ushort);
-        CREATE_TYPED_PARAM(jl_uint);
-        CREATE_TYPED_PARAM(jl_ulong);
-        CREATE_TYPED_PARAM(jl_float);
-        CREATE_TYPED_PARAM(jl_float4);
-        CREATE_TYPED_PARAM(jl_double);
+        CREATE_TYPED_PARAM_N(jl_bool);
+        CREATE_TYPED_PARAM_N(jl_char);
+        CREATE_TYPED_PARAM_N(jl_short);
+        CREATE_TYPED_PARAM_N(jl_int);
+        CREATE_TYPED_PARAM_N(jl_long);
+        CREATE_TYPED_PARAM_N(jl_uchar);
+        CREATE_TYPED_PARAM_N(jl_ushort);
+        CREATE_TYPED_PARAM_N(jl_uint);
+        CREATE_TYPED_PARAM_N(jl_ulong);
+        CREATE_TYPED_PARAM_N(jl_float);
+        CREATE_TYPED_PARAM_N(jl_double);
         default:
             assert( false &&
                     "Trying to create a parameter for an unhandled type" );
@@ -177,6 +182,7 @@ std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
         }
     }
 
+#undef CREATE_TYPED_PARAM_N
 #undef CREATE_TYPED_PARAM
 
     return parameters;
