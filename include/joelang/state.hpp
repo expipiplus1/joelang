@@ -46,21 +46,23 @@ bool DefaultStateValidateCallback();
 class StateBase
 {
 public:
+    using EnumerantMap = std::map<std::string, int>;
+
     explicit
-    StateBase( std::string name );
+    StateBase( std::string name, EnumerantMap enumerations );
     virtual
     ~StateBase();
 
     const std::string& GetName() const;
 
     virtual
-    std::vector<std::string> GetEnumerantNames() const = 0;
-
-    virtual
     Type GetType() const = 0;
+
+    const EnumerantMap& GetEnumerations() const;
 
 private:
     std::string m_Name;
+    EnumerantMap m_Enumerations;
 };
 
 template<typename T>
@@ -69,7 +71,7 @@ class State : public StateBase
     static_assert( JoeLangType<T>::value != Type::UNKNOWN,
                    "Can't create a state with an unhandled type" );
 public:
-    using EnumerantMap = std::map<std::string, T>;
+    explicit
     State( std::string name, EnumerantMap enumerations = EnumerantMap{} );
     virtual
     ~State() = default;
@@ -84,16 +86,9 @@ public:
     bool ValidateState() const;
 
     virtual
-    std::vector<std::string> GetEnumerantNames() const override;
-
-    virtual
     Type GetType() const override;
 
-    const std::map<std::string, T>& GetEnumerations() const;
-
 private:
-    std::map<std::string, T> m_Enumerations;
-
     std::function<void(T)> m_SetCallback;
     std::function<void()> m_ResetCallback;
     std::function<bool()> m_ValidateCallback;

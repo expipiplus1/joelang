@@ -76,14 +76,20 @@ bool Context::AddState( StateBase* state )
 {
     assert( state && "Context given a null state" );
 
-    // todo report error here
     for( const auto s : m_States )
         if( s->GetName() == state->GetName() )
+        {
+            Error( "State with duplicate name" );
             return false;
+        }
 
-    for( const std::string& name : state->GetEnumerantNames() )
-        if( !Compiler::IsValidIdentifier( name ) )
+    for( const auto& s : state->GetEnumerations() )
+        if( !Compiler::IsValidIdentifier(s.first) )
+        {
+            Error( "State enumerant doesn't have a valid identifier: " +
+                   s.first );
             return false;
+        }
 
     m_States.push_back( state );
     return true;

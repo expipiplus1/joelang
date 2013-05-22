@@ -44,8 +44,9 @@ bool DefaultStateValidateCallback()
     return true;
 }
 
-StateBase::StateBase( std::string name )
+StateBase::StateBase( std::string name, EnumerantMap enumerations )
     :m_Name( std::move(name) )
+    ,m_Enumerations( std::move(enumerations) )
 {
 }
 
@@ -56,6 +57,11 @@ StateBase::~StateBase()
 const std::string& StateBase::GetName() const
 {
     return m_Name;
+}
+
+const StateBase::EnumerantMap& StateBase::GetEnumerations() const
+{
+    return m_Enumerations;
 }
 
 } // namespace JoeLang

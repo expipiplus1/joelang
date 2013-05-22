@@ -48,9 +48,8 @@ void DefaultStateSetCallback( T value )
 }
 
 template<typename T>
-State<T>::State( std::string name, std::map< std::string, T > enumerations )
-    :StateBase( std::move(name) )
-    ,m_Enumerations( std::move(enumerations) )
+State<T>::State( std::string name, EnumerantMap enumerations )
+    :StateBase( std::move(name), std::move(enumerations) )
     ,m_SetCallback( DefaultStateSetCallback<T> )
     ,m_ResetCallback( DefaultStateResetCallback )
     ,m_ValidateCallback( DefaultStateValidateCallback )
@@ -89,25 +88,9 @@ bool State<T>::ValidateState() const
 }
 
 template<typename T>
-std::vector<std::string> State<T>::GetEnumerantNames() const
-{
-    std::vector<std::string> ret;
-    ret.reserve( m_Enumerations.size() );
-    for( const auto& e : m_Enumerations )
-        ret.push_back( e.first );
-    return std::move(ret);
-}
-
-template<typename T>
 Type State<T>::GetType() const
 {
     return JoeLangType<T>::value;
-}
-
-template<typename T>
-const std::map<std::string, T>& State<T>::GetEnumerations() const
-{
-    return m_Enumerations;
 }
 
 } // namespace JoeLang
