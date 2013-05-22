@@ -175,6 +175,17 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
 
 const std::string& GetTerminalString( TerminalType terminal_type )
 {
+#define STR(s) #s
+
+#define TYPE_NAME(type, name) \
+        { TerminalType::TYPE_##type,           STR(name)            }
+
+#define TYPE_NAME_N(type, name) \
+        TYPE_NAME(type, name), \
+        TYPE_NAME(type##2, name##2), \
+        TYPE_NAME(type##3, name##3), \
+        TYPE_NAME(type##4, name##4)
+
     const static std::map<TerminalType, std::string> s_TerminalStringMap
     {  
         { TerminalType::END_OF_INPUT,         "EOF"                   },
@@ -248,15 +259,14 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         { TerminalType::CONST,                "const"                 },
         { TerminalType::VOLATILE,             "volatile"              },
         { TerminalType::INLINE,               "inline"                },
+        TYPE_NAME_N(BOOL, bool),
+        TYPE_NAME_N(CHAR, char),
+        TYPE_NAME_N(SHORT, short),
+        TYPE_NAME_N(INT, int),
+        TYPE_NAME_N(LONG, long),
+        TYPE_NAME_N(FLOAT, float),
+        TYPE_NAME_N(DOUBLE, double),
         { TerminalType::TYPE_VOID,            "void"                  },
-        { TerminalType::TYPE_BOOL,            "bool"                  },
-        { TerminalType::TYPE_CHAR,            "char"                  },
-        { TerminalType::TYPE_SHORT,           "short"                 },
-        { TerminalType::TYPE_INT,             "int"                   },
-        { TerminalType::TYPE_LONG,            "long"                  },
-        { TerminalType::TYPE_FLOAT,           "float"                 },
-        { TerminalType::TYPE_FLOAT4,          "float4"                },
-        { TerminalType::TYPE_DOUBLE,          "double"                },
         { TerminalType::TYPE_SIGNED,          "signed"                },
         { TerminalType::TYPE_UNSIGNED,        "unsigned"              },
         { TerminalType::TYPE_STRING,          "string"                },
@@ -264,6 +274,10 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         { TerminalType::FALSE,                "false"                 },
         { TerminalType::IDENTIFIER,           "identifier"            }
     };
+
+#undef TYPE_NAME_N
+#undef TYPE_NAME
+#undef STR
 
     assert( s_TerminalStringMap.find( terminal_type ) != 
             s_TerminalStringMap.end() &&

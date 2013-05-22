@@ -137,7 +137,7 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
     assert( !extents.empty() && "Indexing into a non array" );
     if( m_IndexExpression->IsConst() )
     {
-        unsigned index = sema.EvaluateExpression( *m_IndexExpression ).GetI64();
+        unsigned index = sema.EvaluateExpression( *m_IndexExpression ).GetLong();
         if( index >= extents[0] )
             sema.Error( "Indexing beyond array bounds" );
     }

@@ -312,6 +312,9 @@ std::map<std::string, GenericValue>
 
 void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 {
+    m_StateEnumerants = &state.GetEnumerations();
+
+    /*
     /// TODO cache these results
     /// TODO support arrays here
     /// TODO something better than making these global
@@ -332,6 +335,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
         variable->CodeGen( m_CodeGenerator );
         DeclareVariable( v.first, std::move(variable) );
     }
+    */
 }
 
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
@@ -369,6 +373,35 @@ void SemaAnalyzer::DeclareVariable( const std::string& identifier,
 std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
                                                 const std::string& identifier )
 {
+    //
+    // If we have any state enumerants, try and match those first
+    //
+    if( m_StateEnumerants )
+    {
+        auto s = m_StateEnumerants->find( identifier );
+        if( s != m_StateEnumerants->end() )
+        {
+            //
+            // if we've found it, declare it and return it, no need to hang onto
+            // it
+            //
+            std::shared_ptr<Variable> variable =  std::make_shared<Variable>(
+                                                        Type::INT,
+                                                        Semantic(),
+                                                        true, //Is const
+                                                        false, //Isn't uniform
+                                                        false, //Isn't varying
+                                                        false, //Isn't in
+                                                        false, //Isn't out
+                                                        true, //Is global
+                                                        false,//Isn't a param
+                                                        GenericValue(s->second),
+                                                        s->first );
+            variable->CodeGen( m_CodeGenerator );
+            return std::move(variable);
+        }
+    }
+
     // iterate in reverse because deeper scopes take priority
     for( auto it = m_SymbolStack.rbegin();
          it != m_SymbolStack.rend(); ++it )
@@ -563,6 +596,11 @@ void SemaAnalyzer::EnterScope()
 void SemaAnalyzer::LeaveScope()
 {
     m_SymbolStack.pop_back();
+
+    //
+    // If we had any state enumerants here remove them
+    //
+    m_StateEnumerants = nullptr;
 }
 
 bool SemaAnalyzer::InGlobalScope() const

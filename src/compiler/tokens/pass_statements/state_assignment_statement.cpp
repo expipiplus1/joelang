@@ -126,42 +126,47 @@ std::unique_ptr<StateAssignmentBase>
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_char>(
                                  static_cast<const State<jl_char>&>(*m_State),
-                                 v.GetI8() ) );
+                                 v.GetChar() ) );
         case Type::SHORT:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_short>(
                                  static_cast<const State<jl_short>&>(*m_State),
-                                 v.GetI16() ) );
+                                 v.GetShort() ) );
         case Type::INT:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_int>(
                                  static_cast<const State<jl_int>&>(*m_State),
-                                 v.GetI32() ) );
+                                 v.GetInt() ) );
         case Type::LONG:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_long>(
                                  static_cast<const State<jl_long>&>(*m_State),
-                                 v.GetI64() ) );
+                                 v.GetLong() ) );
         case Type::UCHAR:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_uchar>(
                                  static_cast<const State<jl_uchar>&>(*m_State),
-                                 v.GetU8() ) );
+                                 v.GetUChar() ) );
         case Type::USHORT:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_ushort>(
                                  static_cast<const State<jl_ushort>&>(*m_State),
-                                 v.GetU16() ) );
+                                 v.GetUShort() ) );
         case Type::UINT:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_uint>(
                                  static_cast<const State<jl_uint>&>(*m_State),
-                                 v.GetU32() ) );
+                                 v.GetUInt() ) );
+        case Type::UINT2:
+            return std::unique_ptr<StateAssignmentBase>(
+                          new ConstStateAssignment<jl_uint2>(
+                                 static_cast<const State<jl_uint2>&>(*m_State),
+                                 v.GetUInt2() ) );
         case Type::ULONG:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_ulong>(
                                  static_cast<const State<jl_ulong>&>(*m_State),
-                                 v.GetU64() ) );
+                                 v.GetULong() ) );
         case Type::FLOAT:
             return std::unique_ptr<StateAssignmentBase>(
                           new ConstStateAssignment<jl_float>(

@@ -37,6 +37,7 @@
 
 #include <llvm/IR/IRBuilder.h>
 
+#include <joelang/types.hpp>
 #include <compiler/swizzle.hpp>
 
 namespace llvm
@@ -175,7 +176,20 @@ public:
       *
       * This will assert if type isn't an integer type
       */
-    llvm::Constant* CreateInteger( unsigned long long value, Type type );
+    llvm::Constant* CreateInteger( jl_ulong value, Type type );
+
+    /**
+      * Create the llvm::Value representing a floating point vector
+      * \param value
+      *   The vector of values with which to create the vector
+      * \param type
+      *   The type of vector
+      * \returns the llvm::Value representing the float vector
+      *
+      * This will assert if type isn't a floating point vector type
+      */
+    llvm::Constant* CreateIntegerVector( const std::vector<jl_ulong>& value,
+                                          Type type );
 
     /**
       * Create the llvm::Value representing a floating point value

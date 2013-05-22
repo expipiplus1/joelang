@@ -76,52 +76,36 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
 {
     FreeData();
 
+
+#define COPY_DATA(Type, TYPE) \
+    case TYPE: \
+        m_##Type##Value = g.m_##Type##Value; \
+        break;
+
+#define COPY_DATA_N(Type, TYPE) \
+    COPY_DATA(Type, TYPE) \
+    COPY_DATA(Type##2, TYPE##2) \
+    COPY_DATA(Type##3, TYPE##3) \
+    COPY_DATA(Type##4, TYPE##4)
+
+
     switch( g.m_Type )
     {
     case Type::UNKNOWN:
         break;
-    case Type::BOOL:
-        m_BoolValue = g.m_BoolValue;
-        break;
-    case Type::CHAR:
-        m_I8Value = g.m_I8Value;
-        break;
-    case Type::SHORT:
-        m_I16Value = g.m_I16Value;
-        break;
-    case Type::INT:
-        m_I32Value = g.m_I32Value;
-        break;
-    case Type::LONG:
-        m_I64Value = g.m_I64Value;
-        break;
-    case Type::UCHAR:
-        m_U8Value = g.m_U8Value;
-        break;
-    case Type::USHORT:
-        m_U16Value = g.m_U16Value;
-        break;
-    case Type::UINT:
-        m_U32Value = g.m_U32Value;
-        break;
-    case Type::ULONG:
-        m_U64Value = g.m_U64Value;
-        break;
-    case Type::FLOAT:
-        m_FloatValue = g.m_FloatValue;
-        break;
-    case Type::FLOAT2:
-        m_Float2Value = g.m_Float2Value;
-        break;
-    case Type::FLOAT3:
-        m_Float3Value = g.m_Float3Value;
-        break;
-    case Type::FLOAT4:
-        m_Float4Value = g.m_Float4Value;
-        break;
-    case Type::DOUBLE:
-        m_DoubleValue = g.m_DoubleValue;
-        break;
+
+    COPY_DATA_N(Bool,   Type::BOOL)
+    COPY_DATA_N(Char,   Type::CHAR)
+    COPY_DATA_N(Short,  Type::SHORT)
+    COPY_DATA_N(Int,    Type::INT)
+    COPY_DATA_N(Long,   Type::LONG)
+    COPY_DATA_N(UChar,  Type::UCHAR)
+    COPY_DATA_N(UShort, Type::USHORT)
+    COPY_DATA_N(UInt,   Type::UINT)
+    COPY_DATA_N(ULong,  Type::ULONG)
+    COPY_DATA_N(Float,  Type::FLOAT)
+    COPY_DATA_N(Double, Type::DOUBLE)
+
     case Type::STRING:
         new(&m_StringValue) std::string;
         m_StringValue = g.m_StringValue;
@@ -138,91 +122,45 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
     m_Type = g.m_Type;
 
     return *this;
+
+#undef COPY_DATA_N
+#undef COPY_DATA
 }
 
-GenericValue::GenericValue( jl_bool   bool_value   )
-    :m_Type( Type::BOOL )
-    ,m_BoolValue( bool_value )
-{
+#define TYPE_CONSTRUCTOR_AND_GETTER(type, Type, TYPE) \
+GenericValue::GenericValue( type   type##_value   ) \
+    :m_Type( TYPE ) \
+    ,m_##Type##Value( type##_value ) \
+{ \
+} \
+  \
+type GenericValue::Get##Type() const \
+{ \
+    assert( m_Type == TYPE && \
+            "Trying to get the wrong type from a GenericValue" ); \
+    return m_##Type##Value; \
 }
 
-GenericValue::GenericValue( jl_char     i8_value     )
-    :m_Type( Type::CHAR )
-    ,m_I8Value( i8_value )
-{
-}
+#define TYPE_CONSTRUCTOR_AND_GETTER_N(type, Type, TYPE) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type, Type, TYPE) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##2, Type##2, TYPE##2) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##3, Type##3, TYPE##3) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##4, Type##4, TYPE##4)
 
-GenericValue::GenericValue( jl_short    i16_value    )
-    :m_Type( Type::SHORT )
-    ,m_I16Value( i16_value )
-{
-}
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_bool,   Bool,   Type::BOOL )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_char,   Char,   Type::CHAR )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_short,  Short,  Type::SHORT )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_int,    Int,    Type::INT )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_long,   Long,   Type::LONG )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_uchar,  UChar,  Type::UCHAR )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_ushort, UShort, Type::USHORT )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_uint,   UInt,   Type::UINT )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_ulong,  ULong,  Type::ULONG )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_float,  Float,  Type::FLOAT )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_double, Double, Type::DOUBLE )
 
-GenericValue::GenericValue( jl_int    i32_value    )
-    :m_Type( Type::INT )
-    ,m_I32Value( i32_value )
-{
-}
-
-GenericValue::GenericValue( jl_long    i64_value    )
-    :m_Type( Type::LONG )
-    ,m_I64Value( i64_value )
-{
-}
-
-GenericValue::GenericValue( jl_uchar     u8_value     )
-    :m_Type( Type::UCHAR )
-    ,m_U8Value( u8_value )
-{
-}
-
-GenericValue::GenericValue( jl_ushort    u16_value    )
-    :m_Type( Type::USHORT )
-    ,m_U16Value( u16_value )
-{
-}
-
-GenericValue::GenericValue( jl_uint    u32_value    )
-    :m_Type( Type::UINT )
-    ,m_U32Value( u32_value )
-{
-}
-
-GenericValue::GenericValue( jl_ulong    u64_value    )
-    :m_Type( Type::ULONG )
-    ,m_U64Value( u64_value )
-{
-}
-
-GenericValue::GenericValue( jl_float  float_value  )
-    :m_Type( Type::FLOAT )
-    ,m_FloatValue( float_value )
-{
-}
-
-GenericValue::GenericValue( jl_float2 float2_value  )
-    :m_Type( Type::FLOAT2 )
-    ,m_Float2Value( float2_value )
-{
-}
-
-GenericValue::GenericValue( jl_float3 float3_value  )
-    :m_Type( Type::FLOAT3 )
-    ,m_Float3Value( float3_value )
-{
-}
-
-GenericValue::GenericValue( jl_float4 float4_value  )
-    :m_Type( Type::FLOAT4 )
-    ,m_Float4Value( float4_value )
-{
-}
-
-GenericValue::GenericValue( jl_double double_value )
-    :m_Type( Type::DOUBLE )
-    ,m_DoubleValue( double_value )
-{
-}
+#undef TYPE_CONSTRUCTOR_AND_GETTER_N
+#undef TYPE_CONSTRUCTOR_AND_GETTER
 
 GenericValue::GenericValue( jl_string&& string_value )
     :m_Type( Type::STRING )
@@ -266,45 +204,57 @@ GenericValue::~GenericValue()
 
 llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
 {
+#define CODE_INTEGER( Type, TYPE ) \
+    case TYPE: \
+        return code_gen.CreateInteger( m_##Type##Value, TYPE );
+
+#define CODE_INTEGER_VECTOR( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        std::vector<jl_ulong> values( &m_##Type##Value[0], \
+                                     &m_##Type##Value[0]+(n) ); \
+        return code_gen.CreateIntegerVector( values, TYPE ); \
+    }
+
+#define CODE_INTEGER_N( Type, TYPE ) \
+    CODE_INTEGER( Type, TYPE ) \
+    CODE_INTEGER_VECTOR( Type##2, TYPE##2, 2 ) \
+    CODE_INTEGER_VECTOR( Type##3, TYPE##3, 3 ) \
+    CODE_INTEGER_VECTOR( Type##4, TYPE##4, 4 )
+
+#define CODE_FLOATING( Type, TYPE ) \
+    case TYPE: \
+        return code_gen.CreateFloating( m_##Type##Value, TYPE );
+
+#define CODE_FLOATING_VECTOR( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        std::vector<jl_double> values( &m_##Type##Value[0], \
+                                       &m_##Type##Value[0]+(n) ); \
+        return code_gen.CreateFloatingVector( values, TYPE ); \
+    }
+
+#define CODE_FLOATING_N( Type, TYPE ) \
+    CODE_FLOATING( Type, TYPE ) \
+    CODE_FLOATING_VECTOR( Type##2, TYPE##2, 2 ) \
+    CODE_FLOATING_VECTOR( Type##3, TYPE##3, 3 ) \
+    CODE_FLOATING_VECTOR( Type##4, TYPE##4, 4 )
+
     switch( m_Type )
     {
-    case Type::BOOL:
-        return code_gen.CreateInteger( m_BoolValue, Type::BOOL );
-    case Type::CHAR:
-        return code_gen.CreateInteger( m_I8Value, Type::CHAR );
-    case Type::SHORT:
-        return code_gen.CreateInteger( m_I16Value, Type::SHORT );
-    case Type::INT:
-        return code_gen.CreateInteger( m_I32Value, Type::INT );
-    case Type::LONG:
-        return code_gen.CreateInteger( m_I64Value, Type::LONG );
-    case Type::UCHAR:
-        return code_gen.CreateInteger( m_U8Value,  Type::UCHAR );
-    case Type::USHORT:
-        return code_gen.CreateInteger( m_U16Value, Type::USHORT );
-    case Type::UINT:
-        return code_gen.CreateInteger( m_U32Value, Type::UINT );
-    case Type::ULONG:
-        return code_gen.CreateInteger( m_U64Value, Type::ULONG );
-    case Type::FLOAT:
-        return code_gen.CreateFloating( m_FloatValue, Type::FLOAT );
-    case Type::FLOAT2:
-    {
-        std::vector<double> values( &m_Float2Value[0], &m_Float2Value[0]+2 );
-        return code_gen.CreateFloatingVector( values, Type::FLOAT2 );
-    }
-    case Type::FLOAT3:
-    {
-        std::vector<double> values( &m_Float3Value[0], &m_Float3Value[0]+3 );
-        return code_gen.CreateFloatingVector( values, Type::FLOAT3 );
-    }
-    case Type::FLOAT4:
-    {
-        std::vector<double> values( &m_Float4Value[0], &m_Float4Value[0]+4 );
-        return code_gen.CreateFloatingVector( values, Type::FLOAT4 );
-    }
-    case Type::DOUBLE:
-        return code_gen.CreateFloating( m_DoubleValue, Type::DOUBLE );
+    CODE_INTEGER_N( Bool,   Type::BOOL )
+    CODE_INTEGER_N( Char,   Type::CHAR )
+    CODE_INTEGER_N( Short,  Type::SHORT )
+    CODE_INTEGER_N( Int,    Type::INT )
+    CODE_INTEGER_N( Long,   Type::LONG )
+    CODE_INTEGER_N( UChar,  Type::UCHAR )
+    CODE_INTEGER_N( UShort, Type::USHORT )
+    CODE_INTEGER_N( UInt,   Type::UINT )
+    CODE_INTEGER_N( ULong,  Type::ULONG )
+
+    CODE_FLOATING_N( Float,  Type::FLOAT );
+    CODE_FLOATING_N( Double, Type::DOUBLE );
+
     case Type::STRING:
         return code_gen.CreateString( m_StringValue );
     case Type::ARRAY:
@@ -313,90 +263,74 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
         assert( false && "Trying to codegen an unhandled type" );
     }
     return nullptr;
+
+#undef CODE_FLOATING_N
+#undef CODE_FLOATING_VECTOR
+#undef CODE_FLOATING
+#undef CODE_INTEGER_N
+#undef CODE_INTEGER_VECTOR
+#undef CODE_INTEGER
+}
+
+template<typename T>
+static void WriteValue( ShaderWriter& shader_writer, T t )
+{
+    std::string suffix = GetGLSLTypeSuffix( JoeLangType<T>::value );
+    shader_writer << t << suffix;
+}
+
+template<typename Scalar, JoeMath::u32 Rows, JoeMath::u32 Columns>
+static void WriteValue( ShaderWriter& shader_writer,
+                   const JoeMath::Matrix<Scalar, Rows, Columns>& m )
+{
+    shader_writer << GetGLSLTypeString(
+                   JoeLangType<JoeMath::Matrix<Scalar, Rows, Columns>>::value )
+                  << "(";
+    std::string suffix = GetGLSLTypeSuffix( JoeLangType<Scalar>::value );
+
+    bool first = true;
+    for( unsigned i = 0; i < Columns; ++i )
+        for( unsigned j = 0; j < Rows; ++j )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+
+            shader_writer << m.GetColumn(i)[j] << suffix;
+        }
+    shader_writer << ")";
 }
 
 void GenericValue::Write( ShaderWriter& shader_writer ) const
 {
+
+#define WRITE( Type, TYPE ) \
+    case TYPE: \
+        WriteValue( shader_writer, m_##Type##Value ); \
+        break; \
+
+#define WRITE_N( Type, TYPE ) \
+    WRITE( Type, TYPE ) \
+    WRITE( Type##2, TYPE##2 ) \
+    WRITE( Type##3, TYPE##3 ) \
+    WRITE( Type##4, TYPE##4 )
+
     switch( m_Type )
     {
-    case Type::BOOL:
-        shader_writer << m_BoolValue;
-        break;
-    case Type::CHAR:
-        shader_writer << m_I8Value;
-        break;
-    case Type::SHORT:
-        shader_writer << m_I16Value;
-        break;
-    case Type::INT:
-        shader_writer << m_I32Value;
-        break;
-    case Type::LONG:
-        shader_writer << m_I64Value;
-        break;
-    case Type::UCHAR:
-        shader_writer << m_U8Value;
-        break;
-    case Type::USHORT:
-        shader_writer << m_U16Value;
-        break;
-    case Type::UINT:
-        shader_writer << m_U32Value;
-        break;
-    case Type::ULONG:
-        shader_writer << m_U64Value;
-        break;
-    case Type::FLOAT:
-        shader_writer << m_FloatValue << "f";
-        break;
-    case Type::FLOAT2:
-    {
-        shader_writer << GetGLSLTypeString( Type::FLOAT2 ) << "(";
-        bool first = true;
-        for( unsigned i = 0; i < 2; ++i )
-        {
-            if( !first )
-                shader_writer << ", ";
-            else
-                first = false;
-            shader_writer << m_Float2Value[i] << "f";
-        }
-        shader_writer << ")";
-        break;
-    }
-    case Type::FLOAT3:
-    {
-        shader_writer << GetGLSLTypeString( Type::FLOAT3 ) << "(";
-        bool first = true;
-        for( unsigned i = 0; i < 3; ++i )
-        {
-            if( !first )
-                shader_writer << ", ";
-            else
-                first = false;
-            shader_writer << m_Float3Value[i] << "f";
-        }
-        shader_writer << ")";
-        break;
-    }
-    case Type::FLOAT4:
-    {
-        shader_writer << GetGLSLTypeString( Type::FLOAT4 ) << "(";
-        bool first = true;
-        for( unsigned i = 0; i < 4; ++i )
-        {
-            if( !first )
-                shader_writer << ", ";
-            else
-                first = false;
-            shader_writer << m_Float4Value[i] << "f";
-        }
-        shader_writer << ")";
-        break;
-    }
-    case Type::DOUBLE:
-        shader_writer << m_DoubleValue << "d";
-        break;
+    WRITE_N( Bool,   Type::BOOL )
+    WRITE_N( Char,   Type::CHAR )
+    WRITE_N( Short,  Type::SHORT )
+    WRITE_N( Int,    Type::INT )
+    WRITE_N( Long,   Type::LONG )
+    WRITE_N( UChar,  Type::UCHAR )
+    WRITE_N( UShort, Type::USHORT )
+    WRITE_N( UInt,   Type::UINT )
+    WRITE_N( ULong,  Type::ULONG )
+
+    WRITE_N( Float,  Type::FLOAT )
+    WRITE_N( Double, Type::DOUBLE )
+
     case Type::STRING:
         shader_writer << "\"" << m_StringValue << "\"";
         break;
@@ -451,104 +385,6 @@ ArrayExtents GenericValue::GetArrayExtents() const
         return ret;
     }
     return {};
-}
-
-jl_bool GenericValue::GetBool() const
-{
-    assert( m_Type == Type::BOOL &&
-            "Trying to get the bool value from a non-bool GenericValue" );
-    return m_BoolValue;
-}
-
-jl_char GenericValue::GetI8() const
-{
-    assert( m_Type == Type::CHAR &&
-            "Trying to get the i8 value from a non-i8 GenericValue" );
-    return m_I8Value;
-}
-
-jl_short GenericValue::GetI16() const
-{
-    assert( m_Type == Type::SHORT &&
-            "Trying to get the i16 value from a non-i16 GenericValue" );
-    return m_I16Value;
-}
-
-jl_int GenericValue::GetI32() const
-{
-    assert( m_Type == Type::INT &&
-            "Trying to get the i32 value from a non-i32 GenericValue" );
-    return m_I32Value;
-}
-
-jl_long GenericValue::GetI64() const
-{
-    assert( m_Type == Type::LONG &&
-            "Trying to get the i64 value from a non-i64 GenericValue" );
-    return m_I64Value;
-}
-
-jl_uchar GenericValue::GetU8() const
-{
-    assert( m_Type == Type::UCHAR &&
-            "Trying to get the u8 value from a non-u8 GenericValue" );
-    return m_U8Value;
-}
-
-jl_ushort GenericValue::GetU16() const
-{
-    assert( m_Type == Type::USHORT &&
-            "Trying to get the u16 value from a non-u16 GenericValue" );
-    return m_U16Value;
-}
-
-jl_uint GenericValue::GetU32() const
-{
-    assert( m_Type == Type::UINT &&
-            "Trying to get the u32 value from a non-u32 GenericValue" );
-    return m_U32Value;
-}
-
-jl_ulong GenericValue::GetU64() const
-{
-    assert( m_Type == Type::ULONG &&
-            "Trying to get the u64 value from a non-u64 GenericValue" );
-    return m_U64Value;
-}
-
-jl_float GenericValue::GetFloat() const
-{
-    assert( m_Type == Type::FLOAT &&
-            "Trying to get the float value from a non-float GenericValue" );
-    return m_FloatValue;
-}
-
-jl_float2 GenericValue::GetFloat2() const
-{
-    assert( m_Type == Type::FLOAT2 &&
-            "Trying to get the float2 value from a non-float GenericValue" );
-    return m_Float2Value;
-}
-
-jl_float3 GenericValue::GetFloat3() const
-{
-    assert( m_Type == Type::FLOAT3 &&
-            "Trying to get the float3 value from a non-float GenericValue" );
-    return m_Float3Value;
-}
-
-jl_float4 GenericValue::GetFloat4() const
-{
-    assert( m_Type == Type::FLOAT4 &&
-            "Trying to get the float4 value from a non-float GenericValue" );
-    return m_Float4Value;
-}
-
-jl_double GenericValue::GetDouble() const
-{
-    assert( m_Type == Type::DOUBLE &&
-            "Trying to get the double value from a non-double GenericValue" );
-    return m_DoubleValue;
 }
 
 const std::string& GenericValue::GetString() const

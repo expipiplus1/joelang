@@ -38,6 +38,12 @@ namespace JoeLang
 namespace Compiler
 {
 
+#define TYPE_N(type) \
+    TYPE_##type, \
+    TYPE_##type##2, \
+    TYPE_##type##3, \
+    TYPE_##type##4
+
 /**
   * \enum TerminalType
   * An enumeration for all the kinds of tokens the lexer may produce while
@@ -156,16 +162,17 @@ enum class TerminalType
 
     // Types
     TYPE_VOID,
-    TYPE_BOOL,
-    TYPE_CHAR,
-    TYPE_SHORT,
-    TYPE_INT,
-    TYPE_LONG,
-    TYPE_FLOAT,
-    TYPE_FLOAT2,
-    TYPE_FLOAT3,
-    TYPE_FLOAT4,
-    TYPE_DOUBLE,
+    TYPE_N(BOOL),
+    TYPE_N(CHAR),
+    TYPE_N(SHORT),
+    TYPE_N(INT),
+    TYPE_N(LONG),
+    TYPE_N(UCHAR),
+    TYPE_N(USHORT),
+    TYPE_N(UINT),
+    TYPE_N(ULONG),
+    TYPE_N(FLOAT),
+    TYPE_N(DOUBLE),
     TYPE_SIGNED,
     TYPE_UNSIGNED,
     TYPE_STRING,

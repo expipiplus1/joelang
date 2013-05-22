@@ -225,6 +225,18 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         { UMINUS,   TerminalType::MINUS                 }  // unary - 
     };
     
+#define TYPE_KEYWORD( name, TYPE ) \
+        { #name,      TerminalType::TYPE_##TYPE,     },
+
+#define TYPE_KEYWORD_V( name, TYPE ) \
+    TYPE_KEYWORD( name##2, TYPE##2 ) \
+    TYPE_KEYWORD( name##3, TYPE##3 ) \
+    TYPE_KEYWORD( name##4, TYPE##4 )
+
+#define TYPE_KEYWORD_N( name, TYPE ) \
+    TYPE_KEYWORD( name, TYPE ) \
+    TYPE_KEYWORD_V( name, TYPE )
+
     const static std::map<std::string, TerminalType> s_KeywordMap =
     {
         { "technique",      TerminalType::TECHNIQUE,     },
@@ -255,21 +267,26 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         //
         // Types
         //
-        { "void",           TerminalType::TYPE_VOID,     },
-        { "bool",           TerminalType::TYPE_BOOL,     },
-        { "char",           TerminalType::TYPE_CHAR,     },
-        { "short",          TerminalType::TYPE_SHORT,    },
-        { "int",            TerminalType::TYPE_INT,      },
-        { "long",           TerminalType::TYPE_LONG,     },
-        { "float",          TerminalType::TYPE_FLOAT,    },
-        { "float2",         TerminalType::TYPE_FLOAT2,   },
-        { "float3",         TerminalType::TYPE_FLOAT3,   },
-        { "float4",         TerminalType::TYPE_FLOAT4,   },
-        { "double",         TerminalType::TYPE_DOUBLE,   },
-        { "signed",         TerminalType::TYPE_SIGNED,   },
-        { "unsigned",       TerminalType::TYPE_UNSIGNED, },
-        { "string",         TerminalType::TYPE_STRING,   },
-     
+        TYPE_KEYWORD( void, VOID )
+        TYPE_KEYWORD( string, STRING )
+        TYPE_KEYWORD( signed, SIGNED )
+        TYPE_KEYWORD( unsigned, UNSIGNED )
+
+        TYPE_KEYWORD_N( bool, BOOL )
+
+        TYPE_KEYWORD_N( char, CHAR )
+        TYPE_KEYWORD_N( short, SHORT )
+        TYPE_KEYWORD_N( int, INT )
+        TYPE_KEYWORD_N( long, LONG )
+
+        TYPE_KEYWORD_V( uchar, UCHAR )
+        TYPE_KEYWORD_V( ushort, USHORT )
+        TYPE_KEYWORD_V( uint, UINT )
+        TYPE_KEYWORD_V( ulong, ULONG )
+
+        TYPE_KEYWORD_N( float, FLOAT )
+        TYPE_KEYWORD_N( double, DOUBLE )
+
         //
         // Constants
         //

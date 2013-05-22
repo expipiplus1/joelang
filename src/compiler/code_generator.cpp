@@ -344,6 +344,16 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     case Type::UINT:
         ret = GenericValue( reinterpret_cast<jl_uint(*)()>(function_ptr)() );
         break;
+    case Type::UINT2:
+        {
+            //
+            // Todo, do all this stuff in one small horrible layer
+            //
+            __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
+            ret = GenericValue( jl_uint2( reinterpret_cast<jl_uint*>(&m)[0],
+                                          reinterpret_cast<jl_uint*>(&m)[2] ) );
+            break;
+        }
     case Type::ULONG:
         ret = GenericValue( reinterpret_cast<jl_ulong(*)()>(function_ptr)() );
         break;
@@ -549,7 +559,7 @@ llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
     //
     // for a cast to bool, compare to zero
     //
-    if( to_type.GetType() == Type::BOOL )
+    if( GetScalarType( to_type.GetType() ) == Type::BOOL )
     {
         if( from_type.IsFloatingPoint() )
             return m_Builder.CreateFCmpOEQ(
@@ -981,7 +991,7 @@ void CodeGenerator::CreateReturnStatement( const Expression_up& expression )
 //
 // Constants
 //
-llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
+llvm::Constant* CodeGenerator::CreateInteger( jl_ulong value,
                                               Type type )
 {
     assert( IsIntegral( type ) &&
@@ -989,6 +999,26 @@ llvm::Constant* CodeGenerator::CreateInteger( unsigned long long value,
     return llvm::ConstantInt::get( m_Runtime.GetLLVMType( type ),
                                    value,
                                    IsSigned( type ) );
+}
+
+llvm::Constant* CodeGenerator::CreateIntegerVector(
+                                             const std::vector<jl_ulong>& value,
+                                             Type type )
+{
+    assert( IsIntegral( type ) &&
+            "Trying to create a integer constant of non-integer type" );
+    assert( IsVectorType( type ) &&
+            "Trying to create a vector constant of non-vector type" );
+    assert( value.size() == GetNumElementsInType( type ) &&
+            "Wrong number of values to construct vector constant" );
+    std::vector<llvm::Constant*> data;
+    data.reserve( value.size() );
+    for( double d : value )
+        data.push_back( CreateInteger( d, GetScalarType( type ) ) );
+    auto ret = llvm::ConstantVector::get( data );
+    assert( ret->getType() == m_Runtime.GetLLVMType( type ) &&
+            "Created a wrong type" ) ;
+    return ret;
 }
 
 llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )

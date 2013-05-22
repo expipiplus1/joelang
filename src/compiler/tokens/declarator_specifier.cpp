@@ -90,7 +90,7 @@ ArrayExtents ArraySpecifier::GetArrayExtents(
         array_specifier->PerformSema( sema );
         GenericValue g = sema.EvaluateExpression(
                                             *array_specifier->GetExpression() );
-        jl_long size = g.GetI64();
+        jl_long size = g.GetLong();
         if( size <= 0 )
             sema.Error( "Can't create an array with a non-positive dimension" );
         ret.push_back( size );
@@ -241,7 +241,7 @@ void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
         return;
     }
 
-    int index = sema.EvaluateExpression( *m_IndexExpression ).GetI32();
+    int index = sema.EvaluateExpression( *m_IndexExpression ).GetInt();
     if( index < 0 )
     {
         sema.Error( "SemanticSpecifier index must be non-negative" );

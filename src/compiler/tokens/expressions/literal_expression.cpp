@@ -117,35 +117,35 @@ std::unique_ptr<LiteralExpression> LiteralExpression::Create(
                                 new BooleanLiteralExpression( v.GetBool() ) );
     case Type::CHAR:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                                 v.GetI8(),
+                                 v.GetChar(),
                                  IntegerLiteralExpression::Suffix::CHAR ) );
     case Type::SHORT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                                 v.GetI16(),
+                                 v.GetShort(),
                                  IntegerLiteralExpression::Suffix::SHORT ) );
     case Type::INT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                                 v.GetI32(),
+                                 v.GetInt(),
                                  IntegerLiteralExpression::Suffix::INT ) );
     case Type::LONG:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                                 v.GetI64(),
+                                 v.GetLong(),
                                  IntegerLiteralExpression::Suffix::LONG ) );
     case Type::UCHAR:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                           v.GetU8(),
+                           v.GetUChar(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_CHAR ) );
     case Type::USHORT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                           v.GetU16(),
+                           v.GetUShort(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_SHORT ) );
     case Type::UINT:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                           v.GetU32(),
+                           v.GetUInt(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_INT ) );
     case Type::ULONG:
         return std::unique_ptr<LiteralExpression>( new IntegerLiteralExpression(
-                           v.GetU64(),
+                           v.GetULong(),
                            IntegerLiteralExpression::Suffix::UNSIGNED_LONG ) );
     case Type::FLOAT:
         return std::unique_ptr<LiteralExpression>(new FloatingLiteralExpression(

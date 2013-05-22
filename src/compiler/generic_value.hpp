@@ -61,34 +61,32 @@ public:
     GenericValue( Type type );
     const GenericValue& operator = ( const GenericValue& g );
 
-    explicit
-    GenericValue( jl_bool   bool_value   );
-    explicit
-    GenericValue( jl_char     i8_value     );
-    explicit
-    GenericValue( jl_short    i16_value    );
-    explicit
-    GenericValue( jl_int    i32_value    );
-    explicit
-    GenericValue( jl_long    i64_value    );
-    explicit
-    GenericValue( jl_uchar     u8_value     );
-    explicit
-    GenericValue( jl_ushort    u16_value    );
-    explicit
-    GenericValue( jl_uint    u32_value    );
-    explicit
-    GenericValue( jl_ulong    u64_value    );
-    explicit
-    GenericValue( jl_float  float_value  );
-    explicit
-    GenericValue( jl_float2 float2_value );
-    explicit
-    GenericValue( jl_float3 float3_value );
-    explicit
-    GenericValue( jl_float4 float4_value );
-    explicit
-    GenericValue( jl_double double_value );
+#define TYPE_CONSTRUCTOR_AND_GETTER(type, Type) \
+    explicit \
+    GenericValue( type type##_value ); \
+    type Get##Type() const;
+
+#define TYPE_CONSTRUCTOR_AND_GETTER_N(type, Type) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type, Type) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##2, Type##2) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##3, Type##3) \
+    TYPE_CONSTRUCTOR_AND_GETTER(type##4, Type##4)
+
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_bool,   Bool )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_char,   Char )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_short,  Short )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_int,    Int )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_long,   Long )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_uchar,  UChar )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_ushort, UShort )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_uint,   UInt )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_ulong,  ULong )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_float,  Float )
+    TYPE_CONSTRUCTOR_AND_GETTER_N( jl_double, Double )
+
+#undef TYPE_CONSTRUCTOR_AND_GETTER_N
+#undef TYPE_CONSTRUCTOR_AND_GETTER
+
     explicit
     GenericValue( jl_string&& string_value );
     explicit
@@ -105,20 +103,6 @@ public:
     Type GetUnderlyingType() const;
     ArrayExtents GetArrayExtents() const;
 
-    jl_bool            GetBool() const;
-    jl_char              GetI8() const;
-    jl_short             GetI16() const;
-    jl_int             GetI32() const;
-    jl_long             GetI64() const;
-    jl_uchar              GetU8() const;
-    jl_ushort             GetU16() const;
-    jl_uint             GetU32() const;
-    jl_ulong             GetU64() const;
-    jl_float           GetFloat() const;
-    jl_float2          GetFloat2() const;
-    jl_float3          GetFloat3() const;
-    jl_float4          GetFloat4() const;
-    jl_double          GetDouble() const;
     const std::string& GetString() const;
     const std::vector<GenericValue>& GetArray() const;
 
@@ -130,25 +114,32 @@ private:
 
     Type m_Type;
 
+#define TYPE_N(type, Type) \
+    type    m_##Type##Value; \
+    type##2 m_##Type##2##Value; \
+    type##3 m_##Type##3##Value; \
+    type##4 m_##Type##4##Value;
+
     union
     {
-        jl_bool     m_BoolValue;
-        jl_char       m_I8Value;
-        jl_short      m_I16Value;
-        jl_int      m_I32Value;
-        jl_long      m_I64Value;
-        jl_uchar       m_U8Value;
-        jl_ushort      m_U16Value;
-        jl_uint      m_U32Value;
-        jl_ulong      m_U64Value;
-        jl_float    m_FloatValue;
-        jl_float2   m_Float2Value;
-        jl_float3   m_Float3Value;
-        jl_float4   m_Float4Value;
-        jl_double   m_DoubleValue;
+        TYPE_N( jl_bool,   Bool )
+        TYPE_N( jl_char,   Char )
+        TYPE_N( jl_short,  Short )
+        TYPE_N( jl_int,    Int )
+        TYPE_N( jl_long,   Long )
+        TYPE_N( jl_uchar,  UChar )
+        TYPE_N( jl_ushort, UShort )
+        TYPE_N( jl_uint,   UInt )
+        TYPE_N( jl_ulong,  ULong )
+        TYPE_N( jl_float,  Float )
+        TYPE_N( jl_double, Double )
+
         std::string m_StringValue;
         std::vector<GenericValue> m_ArrayValue;
     };
+
+#undef TYPE_N
+
 };
 
 } // namespace Compiler

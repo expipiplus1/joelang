@@ -168,6 +168,8 @@ Type GetScalarType( Type t )
         assert( false && "Trying to get the scalar type of an unknown type" );
         return Type::UNKNOWN;
     }
+
+#undef RETURN_BASE
 }
 
 bool IsIntegral( Type t )
@@ -263,32 +265,33 @@ unsigned GetNumElementsInType( Type t )
 
 std::size_t SizeOf( Type t )
 {
+
+#define TYPE_SIZE_N(type, size) \
+    case Type::type: return (size); \
+    case Type::type##2: return (size) * 2; \
+    case Type::type##3: return (size) * 3; \
+    case Type::type##4: return (size) * 4
+
     switch( t )
     {
-    case Type::FLOAT4:
-        return 16;
-    case Type::FLOAT3:
-        return 12;
-    case Type::FLOAT2:
-    case Type::DOUBLE:
-    case Type::ULONG:
-    case Type::LONG:
-        return 8;
-    case Type::FLOAT:
-    case Type::UINT:
-    case Type::INT:
-        return 4;
-    case Type::USHORT:
-    case Type::SHORT:
-        return 2;
-    case Type::UCHAR:
-    case Type::CHAR:
-    case Type::BOOL:
-        return 1;
+    TYPE_SIZE_N(BOOL,   1);
+    TYPE_SIZE_N(CHAR,   1);
+    TYPE_SIZE_N(SHORT,  2);
+    TYPE_SIZE_N(INT,    4);
+    TYPE_SIZE_N(LONG,   8);
+    TYPE_SIZE_N(UCHAR,  1);
+    TYPE_SIZE_N(USHORT, 2);
+    TYPE_SIZE_N(UINT,   4);
+    TYPE_SIZE_N(ULONG,  8);
+    TYPE_SIZE_N(FLOAT,  4);
+    TYPE_SIZE_N(DOUBLE, 8);
+
     default:
         assert( false && "Trying to get the size of an unhandled type" );
     }
     return 0;
+
+#undef TYPE_SIZE_N
 }
 
 Type MakeUnsigned( Type t )
@@ -371,7 +374,7 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
 
-        { Type::UINT,          "uint" },
+        { Type::UINT,         "uint" },
         { Type::INT,          "int" },
         { Type::BOOL,         "bool" },
         { Type::VOID,         "void" },
@@ -381,6 +384,22 @@ const std::string& GetGLSLTypeString( Type t )
             "Trying to get a type not supported by glsl" );
 
     return string_map.at(t);
+}
+
+std::string GetGLSLTypeSuffix( Type t )
+{
+    const static std::map<Type, std::string> suffix_map =
+    {
+        { Type::FLOAT,        "f" },
+        { Type::UINT,         "u" },
+    };
+
+    auto s = suffix_map.find(t);
+
+    if( s == suffix_map.end() )
+        return "";
+
+    return s->second;
 }
 
 } // namespace Compiler

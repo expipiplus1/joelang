@@ -253,67 +253,43 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
     // Sort the type specifiers to ease combination
     std::sort( type_specs.begin(), type_specs.end() );
 
+#define NO_COMBINE( TYPE ) \
+        case TypeSpec::TYPE: \
+            if( has_type ) \
+                sema.Error( "Can't combine " + GetTypeString( Type::TYPE ) + \
+                            " with other type " + GetTypeString( type ) ); \
+            type = Type::TYPE; \
+            has_type = true; \
+            break;
+
+#define NO_COMBINE_V( TYPE ) \
+    NO_COMBINE( TYPE##2 ) \
+    NO_COMBINE( TYPE##3 ) \
+    NO_COMBINE( TYPE##4 )
+
+#define NO_COMBINE_N( TYPE ) \
+    NO_COMBINE( TYPE ) \
+    NO_COMBINE_V( TYPE )
+
     /// TODO do this in a better way
     for( auto ts : type_specs )
     {
         switch( ts )
         {
-        case TypeSpec::VOID:
-            if( has_type )
-                sema.Error( "Can't combine void with other type " +
-                            GetTypeString( type ) );
-            type = Type::VOID;
-            has_type = true;
-            break;
-        case TypeSpec::STRING:
-            if( has_type )
-                sema.Error( "Can't combine string with other type " +
-                            GetTypeString( type ) );
-            type = Type::STRING;
-            has_type = true;
-            break;
-        case TypeSpec::FLOAT:
-            if( has_type )
-                sema.Error( "Can't combine float with other type " +
-                            GetTypeString( type ) );
-            type = Type::FLOAT;
-            has_type = true;
-            break;
-        case TypeSpec::FLOAT2:
-            if( has_type )
-                sema.Error( "Can't combine float2 with other type " +
-                            GetTypeString( type ) );
-            type = Type::FLOAT2;
-            has_type = true;
-            break;
-        case TypeSpec::FLOAT3:
-            if( has_type )
-                sema.Error( "Can't combine float3 with other type " +
-                            GetTypeString( type ) );
-            type = Type::FLOAT3;
-            has_type = true;
-            break;
-        case TypeSpec::FLOAT4:
-            if( has_type )
-                sema.Error( "Can't combine float4 with other type " +
-                            GetTypeString( type ) );
-            type = Type::FLOAT4;
-            has_type = true;
-            break;
-        case TypeSpec::DOUBLE:
-            if( has_type )
-                sema.Error( "Can't combine double with other type " +
-                            GetTypeString( type ) );
-            type = Type::DOUBLE;
-            has_type = true;
-            break;
-        case TypeSpec::BOOL:
-            if( has_type )
-                sema.Error( "Can't combine bool with other type " +
-                            GetTypeString( type ) );
-            type = Type::BOOL;
-            has_type = true;
-            break;
+        NO_COMBINE( VOID )
+        NO_COMBINE( STRING )
+        NO_COMBINE_N( FLOAT )
+        NO_COMBINE_N( DOUBLE )
+        NO_COMBINE_N( BOOL )
+        NO_COMBINE_V( CHAR )
+        NO_COMBINE_V( SHORT )
+        NO_COMBINE_V( INT )
+        NO_COMBINE_V( LONG )
+        NO_COMBINE_V( UCHAR )
+        NO_COMBINE_V( USHORT )
+        NO_COMBINE_V( UINT )
+        NO_COMBINE_V( ULONG )
+
         case TypeSpec::CHAR:
             if( has_type )
                 sema.Error( "Can't combine char with other type " +
@@ -397,6 +373,10 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
     }
 
     return type;
+
+#undef NO_COMBINE_N
+#undef NO_COMBINE_V
+#undef NO_COMBINE
 }
 
 //------------------------------------------------------------------------------
@@ -458,45 +438,85 @@ TypeSpec TypeSpecifier::GetSpecifier() const
 
 Type TypeSpecifier::GetType() const
 {
+#define TYPE_MAP( type ) \
+        { TypeSpec::type,     Type::type   },
+
+#define TYPE_MAP_V( type ) \
+    TYPE_MAP( type##2 ) \
+    TYPE_MAP( type##3 ) \
+    TYPE_MAP( type##4 )
+
+#define TYPE_MAP_N( type ) \
+    TYPE_MAP( type ) \
+    TYPE_MAP_V( type )
+
     const static std::map<TypeSpec, Type> type_map =
     {
         { TypeSpec::VOID,     Type::VOID   },
-        { TypeSpec::BOOL,     Type::BOOL   },
-        { TypeSpec::CHAR,     Type::CHAR     },
-        { TypeSpec::SHORT,    Type::SHORT    },
-        { TypeSpec::INT,      Type::INT    },
-        { TypeSpec::LONG,     Type::LONG    },
+
+        TYPE_MAP_N( BOOL )
+        TYPE_MAP_N( CHAR )
+        TYPE_MAP_N( SHORT )
+        TYPE_MAP_N( INT )
+        TYPE_MAP_N( LONG )
+
+        TYPE_MAP_V( UCHAR )
+        TYPE_MAP_V( USHORT )
+        TYPE_MAP_V( UINT )
+        TYPE_MAP_V( ULONG )
+
+        TYPE_MAP_N( FLOAT )
+        TYPE_MAP_N( DOUBLE )
+
         { TypeSpec::SIGNED,   Type::INT    },
         { TypeSpec::UNSIGNED, Type::UINT    },
-        { TypeSpec::FLOAT,    Type::FLOAT  },
-        { TypeSpec::FLOAT2,   Type::FLOAT2 },
-        { TypeSpec::FLOAT3,   Type::FLOAT3 },
-        { TypeSpec::FLOAT4,   Type::FLOAT4 },
         { TypeSpec::DOUBLE,   Type::DOUBLE },
         { TypeSpec::STRING,   Type::STRING }
     };
 
     return type_map.at( m_TypeSpec );
+
+#undef TYPE_MAP_N
+#undef TYPE_MAP_V
+#undef TYPE_MAP
 }
 
 bool TypeSpecifier::Parse( Parser& parser,
                            std::unique_ptr<TypeSpecifier>& token )
 {
+#define TYPE_MAP( type ) \
+        { TerminalType::TYPE_##type,     TypeSpec::type   },
+
+#define TYPE_MAP_V( type ) \
+    TYPE_MAP( type##2 ) \
+    TYPE_MAP( type##3 ) \
+    TYPE_MAP( type##4 )
+
+#define TYPE_MAP_N( type ) \
+    TYPE_MAP( type ) \
+    TYPE_MAP_V( type )
+
+
     const static std::vector<std::pair<TerminalType, TypeSpec> > type_map =
     {
         { TerminalType::TYPE_VOID,     TypeSpec::VOID     },
-        { TerminalType::TYPE_BOOL,     TypeSpec::BOOL     },
-        { TerminalType::TYPE_CHAR,     TypeSpec::CHAR     },
-        { TerminalType::TYPE_SHORT,    TypeSpec::SHORT    },
-        { TerminalType::TYPE_INT,      TypeSpec::INT      },
-        { TerminalType::TYPE_LONG,     TypeSpec::LONG     },
+
+        TYPE_MAP_N( BOOL )
+        TYPE_MAP_N( CHAR )
+        TYPE_MAP_N( SHORT )
+        TYPE_MAP_N( INT )
+        TYPE_MAP_N( LONG )
+
+        TYPE_MAP_V( UCHAR )
+        TYPE_MAP_V( USHORT )
+        TYPE_MAP_V( UINT )
+        TYPE_MAP_V( ULONG )
+
+        TYPE_MAP_N( FLOAT )
+        TYPE_MAP_N( DOUBLE )
+
         { TerminalType::TYPE_SIGNED,   TypeSpec::SIGNED   },
         { TerminalType::TYPE_UNSIGNED, TypeSpec::UNSIGNED },
-        { TerminalType::TYPE_FLOAT,    TypeSpec::FLOAT    },
-        { TerminalType::TYPE_FLOAT2,   TypeSpec::FLOAT2   },
-        { TerminalType::TYPE_FLOAT3,   TypeSpec::FLOAT3   },
-        { TerminalType::TYPE_FLOAT4,   TypeSpec::FLOAT4   },
-        { TerminalType::TYPE_DOUBLE,   TypeSpec::DOUBLE   },
         { TerminalType::TYPE_STRING,   TypeSpec::STRING   }
     };
 
@@ -508,6 +528,10 @@ bool TypeSpecifier::Parse( Parser& parser,
         }
 
     return false;
+
+#undef TYPE_MAP_N
+#undef TYPE_MAP_V
+#undef TYPE_MAP
 }
 
 bool TypeSpecifier::classof( const DeclarationSpecifier* d )

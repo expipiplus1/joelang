@@ -122,17 +122,62 @@ public:
 private:
 };
 
+//
 // The ordering here is imporant for VariableDeclarationList::PerformSema
+// Types which are incompatible with others must be at the top
+//
 enum class TypeSpec
 {
     VOID,
     STRING,
+
     FLOAT,
     FLOAT2,
     FLOAT3,
     FLOAT4,
+
     DOUBLE,
+    DOUBLE2,
+    DOUBLE3,
+    DOUBLE4,
+
     BOOL,
+    BOOL2,
+    BOOL3,
+    BOOL4,
+
+    CHAR2,
+    CHAR3,
+    CHAR4,
+
+    SHORT2,
+    SHORT3,
+    SHORT4,
+
+    INT2,
+    INT3,
+    INT4,
+
+    LONG2,
+    LONG3,
+    LONG4,
+
+    UCHAR2,
+    UCHAR3,
+    UCHAR4,
+
+    USHORT2,
+    USHORT3,
+    USHORT4,
+
+    UINT2,
+    UINT3,
+    UINT4,
+
+    ULONG2,
+    ULONG3,
+    ULONG4,
+
     CHAR,
     SHORT,
     INT,
@@ -147,7 +192,7 @@ enum class TypeSpec
   *
   * TypeSpecifier =   'void' | 'char' | 'short' | 'int' | 'long' | 'float'
   *                 | 'float2' | 'float3' | 'float4' | 'double' | 'signed' 
-  *                 | 'unsigned' | 'string'
+  *                 | 'unsigned' | 'string' ...
   */
 class TypeSpecifier : public JoeLang::Compiler::DeclarationSpecifier
 {

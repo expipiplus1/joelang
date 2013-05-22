@@ -204,29 +204,27 @@ llvm::Type* Runtime::GetLLVMType( const CompleteType& type )
 
 llvm::Type* Runtime::GetLLVMType( Type type )
 {
-    llvm::Type* t;
-    if( type == Type::DOUBLE )
-        t = llvm::Type::getDoubleTy( m_LLVMContext );
-    else if( type == Type::FLOAT )
-        t = llvm::Type::getFloatTy( m_LLVMContext );
-    else if( type == Type::BOOL )
-        t = llvm::Type::getInt1Ty( m_LLVMContext );
-    else if( IsIntegral( type ) )
-        t = llvm::Type::getIntNTy( m_LLVMContext, SizeOf(type)*8 );
-    else if( type == Type::STRING )
-        t = m_StringType;
-    else if( IsVectorType( type ) )
-        t = llvm::VectorType::get( GetLLVMType( GetScalarType( type ) ),
+    if( IsVectorType( type ) )
+        return llvm::VectorType::get( GetLLVMType( GetScalarType( type ) ),
                                    GetNumElementsInType( type ) );
+    else if( type == Type::DOUBLE )
+        return llvm::Type::getDoubleTy( m_LLVMContext );
+    else if( type == Type::FLOAT )
+        return llvm::Type::getFloatTy( m_LLVMContext );
+    else if( type == Type::BOOL )
+        return llvm::Type::getInt1Ty( m_LLVMContext );
+    else if( IsIntegral( type ) )
+        return llvm::Type::getIntNTy( m_LLVMContext, SizeOf(type)*8 );
+    else if( type == Type::STRING )
+        return m_StringType;
     else if( type == Type::VOID )
-        t = llvm::Type::getVoidTy( m_LLVMContext );
+        return llvm::Type::getVoidTy( m_LLVMContext );
     else
     {
         assert( false && "Trying to get the llvm::Type of an unhandled Type" );
-        return nullptr;
     }
 
-    return t;
+    return nullptr;
 }
 
 llvm::Value* Runtime::CreateCall( llvm::Function* function,
