@@ -99,7 +99,7 @@ void RegisterOpenGLStates( Context& context )
                                []()->void
                                {glDisable(GL_BLEND);} );
 
-    const static std::map<std::string, u32> blend_equation_enumerants =
+    const static std::map<std::string, int> blend_equation_enumerants =
     {
         {"ADD",              GL_FUNC_ADD},
         {"SUBTRACT",         GL_FUNC_SUBTRACT},
@@ -108,7 +108,7 @@ void RegisterOpenGLStates( Context& context )
         {"MAX",              GL_MAX}
     };
 
-    const static std::map<std::string, u32> blend_func_enumerants =
+    const static std::map<std::string, int> blend_func_enumerants =
     {
         {"ZERO",                     GL_ZERO},
         {"ONE",                      GL_ONE},
@@ -134,16 +134,16 @@ void RegisterOpenGLStates( Context& context )
                                  []()->void
                                  {glBlendEquation(GL_FUNC_ADD);} );
 
-    /*
     static
     State<uint2> blend_equation_separate( "blend_equation_separate",
-                                         blend_equation_enumerants );
+                                          blend_equation_enumerants );
     blend_equation_separate.SetCallbacks( [](uint2 v)->void
                                           {glBlendEquationSeparate(v.x(), 
                                                                    v.y());},
                                           []()->void
-                                          {glBlendEquation(GL_FUNC_ADD, 
-                                                           GL_FUNC_ADD);} );
+                                          {glBlendEquationSeparate(
+                                                               GL_FUNC_ADD,
+                                                               GL_FUNC_ADD);} );
 
     static
     State<uint2> blend_func( "blend_func", blend_func_enumerants );
@@ -153,7 +153,7 @@ void RegisterOpenGLStates( Context& context )
                              {glBlendFunc(GL_ONE, GL_ZERO);} );
 
     static
-    State<uint4> blend_func_separate( "blend_func_separate", 
+    State<uint4> blend_func_separate( "blend_func_separate",
                                       blend_func_enumerants );
     blend_func_separate.SetCallbacks( [](uint4 v)->void
                                       {glBlendFuncSeparate(v.x(), 
@@ -163,7 +163,6 @@ void RegisterOpenGLStates( Context& context )
                                       []()->void
                                       {glBlendFuncSeparate(GL_ONE, GL_ZERO,
                                                            GL_ONE, GL_ZERO);} );
-    */
 
     bool good = true;
 
@@ -172,15 +171,13 @@ void RegisterOpenGLStates( Context& context )
     good &= context.AddState( &clear_stencil );
 
     good &= context.AddState( &blend_color );
+    good &= context.AddState( &blend_enable );
     good &= context.AddState( &blend_equation );
-    /*
     good &= context.AddState( &blend_equation_separate );
     good &= context.AddState( &blend_func );
     good &= context.AddState( &blend_func_separate );
-    */
 
     assert( good && "Error adding opengl state" );
-
 }
 
 void RegisterOpenGLActions( Context& context )
