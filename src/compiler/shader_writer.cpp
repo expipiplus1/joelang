@@ -182,7 +182,8 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
     // Get all the variables used by the functions. We're interested in the
     // inputs and outputs
     //
-    std::set<Variable_sp> variables = GatherVariables( functions, entry_function );
+    std::set<Variable_sp> variables = GatherVariables( functions,
+                                                       entry_function );
     std::set<Variable_sp> input_variables;
     std::set<Variable_sp> output_variables;
     std::set<Variable_sp> global_variables;

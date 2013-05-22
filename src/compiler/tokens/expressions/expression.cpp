@@ -1353,7 +1353,8 @@ std::set<Variable_sp> IdentifierExpression::GetWrittenToVariables(
     assert( m_Variable &&
             "Trying to get the variables of an unresolved identifier" );
 
-    return is_assigned ? std::set<Variable_sp>{ m_Variable } : std::set<Variable_sp>{};
+    return is_assigned ? std::set<Variable_sp>{ m_Variable } :
+                         std::set<Variable_sp>{};
 }
 
 const std::string& IdentifierExpression::GetIdentifier() const
