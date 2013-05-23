@@ -103,8 +103,19 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
     // issue a warning
     //
 
-    unsigned result_size = JoeMath::Min( t1.GetVectorSize(),
-                                         t2.GetVectorSize() );
+    //
+    // If they are both vectors, shrink one of them
+    // otherwise expand the scalar type
+    //
+    unsigned result_size;
+
+    if( t1.IsVectorType() && t2.IsVectorType() )
+        result_size = JoeMath::Min( t1.GetVectorSize(),
+                                    t2.GetVectorSize() );
+    else
+        result_size = JoeMath::Max( t1.GetVectorSize(),
+                                    t2.GetVectorSize() );
+
     return CompleteType( GetVectorType( common_scalar_type,
                                         result_size ) );
 }
