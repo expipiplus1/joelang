@@ -357,7 +357,7 @@ private:
     // If we're parsing a state assignment statement, this will hold the
     // enumerations
     //
-    const std::map<std::string, int>* m_StateEnumerants;
+    const std::map<std::string, int>* m_StateEnumerants = nullptr;
 
     std::vector<TechniqueDeclaration_up>    m_TechniqueDeclarations;
     std::vector<PassDeclaration_up>         m_PassDeclarations;
