@@ -33,7 +33,17 @@
 
 extern "C"
 {
+    jl_float dot_float ( jl_float  v1, jl_float  v2 );
+    jl_float dot_float2( jl_float2 v1, jl_float2 v2 );
     jl_float dot_float3( jl_float3 v1, jl_float3 v2 );
+    jl_float dot_float4( jl_float4 v1, jl_float4 v2 );
 
+    jl_float  normalize_float ( jl_float  v );
+    jl_float2 normalize_float2( jl_float2 v );
     jl_float3 normalize_float3( jl_float3 v );
+    jl_float4 normalize_float4( jl_float4 v );
+
+    jl_float4 mul_float4x4_float4( jl_float4x4 m, jl_float4 v );
+
+    jl_float4x4 mul_float4x4_float4x4( jl_float4x4 m1, jl_float4x4 m2 );
 }

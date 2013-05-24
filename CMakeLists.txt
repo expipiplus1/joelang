@@ -175,8 +175,8 @@ configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_SOUR
 # Various custom commands
 #
 
-set( runtime_sources src/runtime/float3.cpp
-                     src/runtime/float3.hpp
+set( runtime_sources src/runtime/float.cpp
+                     src/runtime/float.hpp
                      src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )

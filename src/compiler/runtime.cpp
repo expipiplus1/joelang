@@ -55,7 +55,7 @@
 #include <compiler/semantic.hpp>
 #include <compiler/type_properties.hpp>
 
-
+#include <iostream>
 
 #ifndef JOELANG_RUNTIME_FILENAME
     #error Missing runtime filename
@@ -70,11 +70,14 @@ namespace Compiler
 const std::map<Type, Runtime::TypeInformation> Runtime::s_TypeInformationMap =
 {
 #if defined(ARCH_X86_64)
-    {Type::VOID,   {ReturnType::IGNORE,  ParamType::IGNORE}},
-    {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
-    {Type::STRING, {ReturnType::DEFAULT, ParamType::EXPAND}},
-    {Type::FLOAT,  {ReturnType::DEFAULT, ParamType::DEFAULT}},
-    {Type::FLOAT3, {ReturnType::STRUCT,  ParamType::EXPAND}},
+    {Type::VOID,     {ReturnType::IGNORE,  ParamType::IGNORE}},
+    {Type::BOOL,     {ReturnType::DEFAULT, ParamType::DEFAULT}},
+    {Type::STRING,   {ReturnType::DEFAULT, ParamType::EXPAND}},
+    {Type::FLOAT,    {ReturnType::DEFAULT, ParamType::DEFAULT}},
+    {Type::FLOAT2,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
+    {Type::FLOAT3,   {ReturnType::STRUCT,  ParamType::EXPAND}},
+    {Type::FLOAT4,   {ReturnType::STRUCT,  ParamType::EXPAND}},
+    {Type::FLOAT4x4, {ReturnType::POINTER, ParamType::POINTER}},
 #elif defined(ARCH_I386)
     {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
     {Type::BOOL,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
@@ -98,11 +101,37 @@ const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
     {RuntimeFunction::STRING_DESTROY,   {"String_Destroy", "",
                                          Type::VOID,   {Type::STRING}}},
 
+    {RuntimeFunction::FLOAT_DOT,        {"dot_float",  "dot",
+                                         Type::FLOAT,  {Type::FLOAT,
+                                                        Type::FLOAT}}},
+    {RuntimeFunction::FLOAT2_DOT,       {"dot_float2", "dot",
+                                         Type::FLOAT,  {Type::FLOAT2,
+                                                        Type::FLOAT2}}},
     {RuntimeFunction::FLOAT3_DOT,       {"dot_float3", "dot",
                                          Type::FLOAT,  {Type::FLOAT3,
                                                         Type::FLOAT3}}},
+    {RuntimeFunction::FLOAT4_DOT,       {"dot_float4", "dot",
+                                         Type::FLOAT,  {Type::FLOAT4,
+                                                        Type::FLOAT4}}},
+
+    {RuntimeFunction::FLOAT_NORMALIZE,  {"normalize_float", "normalize",
+                                         Type::FLOAT, {Type::FLOAT}}},
+    {RuntimeFunction::FLOAT2_NORMALIZE, {"normalize_float2", "normalize",
+                                         Type::FLOAT2, {Type::FLOAT2}}},
     {RuntimeFunction::FLOAT3_NORMALIZE, {"normalize_float3", "normalize",
                                          Type::FLOAT3, {Type::FLOAT3}}},
+    {RuntimeFunction::FLOAT4_NORMALIZE, {"normalize_float4", "normalize",
+                                         Type::FLOAT4, {Type::FLOAT4}}},
+
+    {RuntimeFunction::FLOAT4x4_FLOAT4_MUL,
+                                        {"mul_float4x4_float4", "mul",
+                                         Type::FLOAT4, {Type::FLOAT4x4,
+                                                        Type::FLOAT4}}},
+
+    {RuntimeFunction::FLOAT4x4_FLOAT4x4_MUL,
+                                        {"mul_float4x4_float4x4", "mul",
+                                         Type::FLOAT4x4, {Type::FLOAT4x4,
+                                                        Type::FLOAT4x4}}},
 };
 
 Runtime::Runtime( const JoeLang::Context& joelang_context )
@@ -263,6 +292,17 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
 {
     std::vector<llvm::Value*> params;
 
+    llvm::Value* ret_ptr = nullptr;
+
+    if( s_TypeInformationMap.at(return_type).returnType == ReturnType::POINTER )
+    {
+        //
+        // If we get the return value by pointer allocate it here and pass it in
+        //
+        ret_ptr = builder.CreateAlloca( GetRuntimeLLVMType( return_type ) );
+        params.push_back( ret_ptr );
+    }
+
     for( auto param_type : param_types )
     {
         ParamType pass_type = s_TypeInformationMap.at(param_type.type).passType;
@@ -271,9 +311,10 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
         // If this isn't the same as the internal type then we have to cast it
         // TODO, is there anywhere where a bitcast isn't sufficient
         //
-        llvm::Value* param_value = CreateRuntimeTypeCast( param_type,
-                                                          builder );
-
+        llvm::Value* param_value = CreateDeepCopy(
+                                          param_type.value,
+                                          GetRuntimeLLVMType( param_type.type ),
+                                          builder );
         assert( param_value && "Error casting value" );
 
         switch( pass_type )
@@ -301,10 +342,9 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
         case ParamType::POINTER:
         {
             // Store it and send pointer
-            assert( param_type.type != Type::STRING && "complete me" );
             llvm::Value* ptr = builder.CreateAlloca(
-                                           GetRuntimeLLVMType( Type::STRING ) );
-            builder.CreateStore( param_type.value, ptr );
+                                        GetRuntimeLLVMType( param_type.type ) );
+            builder.CreateStore( param_value, ptr );
             params.push_back( ptr );
             break;
         }
@@ -323,8 +363,12 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
     case ReturnType::IGNORE:
         return call;
     case ReturnType::POINTER:
+        //
+        // load the pointer and cast it
+        //
+        call = builder.CreateLoad( ret_ptr );
     case ReturnType::STRUCT:
-        return CreateInternalTypeCast( {call, return_type}, builder );
+        return CreateDeepCopy( call, GetLLVMType( return_type), builder );
     case ReturnType::INTEGER:
         // The function returns an integer big enough to hold the struct
         // Store the int
@@ -346,187 +390,171 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
     return nullptr;
 }
 
-llvm::Value* Runtime::CreateRuntimeTypeCast( ParamValue value,
-                                             llvm::IRBuilder<>& builder )
+llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
+                                      llvm::Type* to_type,
+                                      llvm::IRBuilder<>& builder )
 {
-    llvm::Type* from_type = value.value->getType();
-    llvm::Type* to_type = GetRuntimeLLVMType( value.type );
-    llvm::Value* ret = nullptr;
-    llvm::Value* from_value = value.value;
-
     //
     // If the type is alreay correct
     //
-    if( from_type == to_type )
-        return from_value;
+    if( value->getType() == to_type )
+        return value;
 
     //
-    // The case where we're casting from a vector to a struct with the same
-    // total number of components
+    // We perform a depth first traversal of the from_type to get the values
     //
-    if( llvm::isa<llvm::VectorType>(from_type) &&
-        llvm::isa<llvm::StructType>(to_type) )
+    std::stack<std::pair<llvm::Value*, unsigned>> elements;
+    elements.push( {value, 0u} );
+
+    std::function<llvm::Value*()> GetNextElement;
+    GetNextElement =
+        [&elements, &builder, &GetNextElement, this]
+        () -> llvm::Value*
     {
-        llvm::Type* base_type = from_type->getScalarType();
-        llvm::StructType* to_struct_type =
-                                       llvm::cast<llvm::StructType>( to_type );
-        ret = llvm::UndefValue::get( to_struct_type );
+        llvm::Type* t = elements.top().first->getType();
 
+        unsigned end = t->isPrimitiveType() ? 1 :
+                       t->isVectorTy() ? t->getVectorNumElements() :
+                       t->isArrayTy() ? t->getArrayNumElements() :
+                       t->isStructTy() ? t->getStructNumElements() : 0;
 
-        unsigned current_index = 0;
+        assert( end != 0 && "How did we get an end of 0?" );
 
-        for( unsigned i = 0; i < to_struct_type->getNumElements(); ++i )
+        if( elements.top().second == end )
         {
-            llvm::Type* element_type = to_struct_type->getElementType( i );
-            llvm::Value* element = nullptr;
-
             //
-            // make sure that the to_type only contains fields of this scalar type
+            // If we've processed everything here, pop the stack
             //
-            assert( element_type->getScalarType() == base_type &&
-                    "Struct isn't of uniform type" );
-
-            //
-            // If *e is a vector then we need to swizzle out the values from
-            // from_value
-            //
-            if( llvm::isa<llvm::VectorType>(element_type) )
-            {
-                unsigned size = element_type->getVectorNumElements();
-                std::vector<unsigned> indices( size );
-                for( unsigned j = 0; j < size; ++j )
-                    indices[j] = current_index + j;
-
-                element = builder.CreateShuffleVector(
-                                from_value,
-                                llvm::UndefValue::get( from_value->getType() ),
-                                llvm::ConstantDataVector::get( GetLLVMContext(),
-                                                               indices ) );
-
-                current_index += size;
-            }
-            else
-            {
-                assert( element_type->isPrimitiveType() &&
-                        "unhandled, non primitive types here" );
-
-                element = builder.CreateExtractElement(
-                                 from_value,
-                                 llvm::ConstantInt::get( GetLLVMType(Type::INT),
-                                                         current_index ) );
-
-                current_index += 1;
-            }
-
-            ret = builder.CreateInsertValue( ret, element, {i} );
+            elements.pop();
+            if( elements.empty() )
+                return nullptr;
+            ++elements.top().second;
+            return GetNextElement();
         }
-    }
+
+        if( t->isPrimitiveType() )
+        {
+            llvm::Value* ret = elements.top().first;
+            ++elements.top().second;
+            return ret;
+        }
+
+        if( t->isVectorTy() )
+        {
+            llvm::Value* ret = builder.CreateExtractElement(
+                          elements.top().first,
+                          llvm::ConstantInt::get( GetLLVMType( Type::INT),
+                                                  elements.top().second ) );
+            ++elements.top().second;
+            return ret;
+        }
+
+        assert( t->isStructTy() || t->isArrayTy() );
+
+        std::pair<llvm::Value*, unsigned> p;
+        p.first = builder.CreateExtractValue( elements.top().first,
+                                              {elements.top().second} );
+        p.second = 0;
+        elements.push( p );
+        return GetNextElement();
+    };
+
+    using it = std::vector<llvm::Value*>::const_iterator;
+    std::function<llvm::Value*(llvm::Type*, it&, it)> FillType;
+    FillType =
+        [&builder, &FillType, this]
+        ( llvm::Type* t, it& begin, it end ) -> llvm::Value*
+    {
+        if( t->isPrimitiveType() )
+        {
+            //
+            // return one element and increment begin
+            //
+            assert( begin != end && "No elements to take from" );
+            return *begin++;
+        }
+
+        if( t->isVectorTy() )
+        {
+            //
+            // We need to construct a vector from all of these values
+            //
+            llvm::Value* ret = llvm::UndefValue::get( t );
+
+            //
+            // insert all the elements we need
+            //
+            for( unsigned i = 0; i < t->getVectorNumElements(); ++i )
+            {
+                assert( begin != end && "No elements to take from" );
+                ret = builder.CreateInsertElement(
+                                ret,
+                                *begin++,
+                                llvm::ConstantInt::get( GetLLVMType( Type::INT),
+                                                        i ) );
+            }
+
+            return ret;
+        }
+
+        assert( t->isStructTy() || t->isArrayTy() );
+
+        unsigned size = t->isArrayTy() ? t->getArrayNumElements() :
+                        t->isStructTy() ? t->getStructNumElements() : 0;
+
+        llvm::Value* ret = llvm::UndefValue::get( t );
+
+        assert( size != 0 && "Struct or array of size zero" );
+
+        for( unsigned i = 0; i < size; ++i )
+        {
+            llvm::Type* sub_type =
+                                t->isArrayTy() ? t->getArrayElementType() :
+                                t->isStructTy() ? t->getStructElementType( i ) :
+                                nullptr;
+            assert( sub_type && "couldn't get sub_type" );
+
+            llvm::Value* sub_value = FillType( sub_type, begin, end );
+
+            ret = builder.CreateInsertValue( ret, sub_value, {i} );
+        }
+
+        return ret;
+    };
+
+    std::vector<llvm::Value*> flat_elements;
+    while( llvm::Value* v = GetNextElement() )
+        flat_elements.push_back(v);
+
+    llvm::Value* ret = nullptr;
+
+    it begin = flat_elements.begin();
+
+    ret = FillType( to_type, begin, flat_elements.end() );
+
+    assert( begin == flat_elements.end() && "Too few elements taken" );
 
     return ret;
 }
 
-llvm::Value* Runtime::CreateInternalTypeCast( ParamValue value,
-                                              llvm::IRBuilder<>& builder )
+llvm::Value* Runtime::CreatePointerCastCopy( llvm::Value* value,
+                                             llvm::Type* to_type,
+                                             llvm::IRBuilder<>& builder )
 {
-    llvm::Type* from_type = value.value->getType();
-    llvm::Type* to_type = GetLLVMType( value.type );
-    llvm::Value* ret = nullptr;
-    llvm::Value* from_value = value.value;
-
     //
     // If the type is alreay correct
     //
-    if( from_type == to_type )
-        return from_value;
+    if( value->getType() == to_type )
+        return value;
 
     //
-    // The case where we're casting from a vector to a struct with the same
-    // total number of components
+    // store it, cast the pointer and load
     //
-    if( llvm::isa<llvm::VectorType>(to_type) &&
-        llvm::isa<llvm::StructType>(from_type) )
-    {
-        llvm::Type* base_type = to_type->getScalarType();
-        llvm::StructType* from_struct_type =
-                                      llvm::cast<llvm::StructType>( from_type );
-        llvm::VectorType* to_vector_type =
-                                      llvm::cast<llvm::VectorType>( to_type );
-        ret = llvm::UndefValue::get( to_vector_type );
-
-        unsigned to_vector_size = to_vector_type->getVectorNumElements();
-
-
-        unsigned current_index = 0;
-
-        for( unsigned i = 0; i < from_struct_type->getNumElements(); ++i )
-        {
-            llvm::Type* element_type = from_struct_type->getElementType( i );
-            llvm::Value* element = builder.CreateExtractValue( from_value,
-                                                               {i} );
-
-            //
-            // make sure that the to_type only contains fields of this scalar type
-            //
-            assert( element_type->getScalarType() == base_type &&
-                    "Struct isn't of uniform type" );
-
-            //
-            // If element_type is a vector then we need to swizzle out the
-            // values from from_value
-            //
-            if( llvm::isa<llvm::VectorType>(element_type) )
-            {
-                //
-                // expand this vector into one of the right size
-                //
-                unsigned element_size = element_type->getVectorNumElements();
-
-                std::vector<unsigned> indices( to_vector_size );
-                for( unsigned j = 0; j < indices.size(); ++j )
-                    indices[j] = j < element_size ? j : element_size;
-
-                //
-                // Make it the same size as to_vector
-                //
-                llvm::Value* element_vector = builder.CreateShuffleVector(
-                                element,
-                                llvm::UndefValue::get( element_type ),
-                                llvm::ConstantDataVector::get( GetLLVMContext(),
-                                                               indices ) );
-
-                //
-                // Set the indices for inserting element_vector in the right
-                // place
-                //
-                for( unsigned j = 0; j < indices.size(); ++j )
-                    indices[j] = j < current_index ?
-                                         j : j - current_index + indices.size();
-
-                ret = builder.CreateShuffleVector(
-                                ret,
-                                element_vector,
-                                llvm::ConstantDataVector::get( GetLLVMContext(),
-                                                               indices ) );
-
-                current_index += element_size;
-            }
-            else
-            {
-                assert( element_type->isPrimitiveType() &&
-                        "unhandled, non primitive types here" );
-
-
-                ret = builder.CreateInsertElement(
-                                 ret,
-                                 element,
-                                 llvm::ConstantInt::get( GetLLVMType(Type::INT),
-                                                         current_index ) );
-                current_index += 1;
-            }
-        }
-    }
-
-    return ret;
+    llvm::Value* ptr = builder.CreateAlloca( value->getType() );
+    builder.CreateStore( value, ptr );
+    llvm::Value* ret_ptr = builder.CreateBitCast( ptr,
+                                                  to_type->getPointerTo() );
+    return builder.CreateLoad( ret_ptr );
 }
 
 bool Runtime::FindRuntimeFunctions()
@@ -615,14 +643,27 @@ bool Runtime::FindRuntimeTypes()
     m_RuntimeTypeMap[Type::STRING] =
             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType();
 
+    m_RuntimeTypeMap[Type::FLOAT] =
+            m_Functions[RuntimeFunction::FLOAT_NORMALIZE]->getReturnType();
+    m_RuntimeTypeMap[Type::FLOAT2] =
+            m_Functions[RuntimeFunction::FLOAT2_NORMALIZE]->getReturnType();
+    m_RuntimeTypeMap[Type::FLOAT3] =
+            m_Functions[RuntimeFunction::FLOAT3_NORMALIZE]->getReturnType();
+    m_RuntimeTypeMap[Type::FLOAT4] =
+            m_Functions[RuntimeFunction::FLOAT4_NORMALIZE]->getReturnType();
+
+    //
+    // Get the hidden return value pointer and find the type behind that
+    //
+    m_RuntimeTypeMap[Type::FLOAT4x4] =
+            m_Functions[RuntimeFunction::FLOAT4x4_FLOAT4_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+
     assert( llvm::cast<llvm::StructType>(m_RuntimeTypeMap[Type::STRING])->
             isLayoutIdentical(
                 llvm::cast<llvm::StructType>(
              m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType() ) ) );
 
-
-    m_RuntimeTypeMap[Type::FLOAT3] =
-            m_Functions[RuntimeFunction::FLOAT3_NORMALIZE]->getReturnType();
 
 #elif defined( ARCH_I386 )
     m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );

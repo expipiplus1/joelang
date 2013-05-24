@@ -79,8 +79,19 @@ enum class RuntimeFunction
     STRING_COPY,
     STRING_DESTROY,
 
+    FLOAT_DOT,
+    FLOAT2_DOT,
     FLOAT3_DOT,
+    FLOAT4_DOT,
+
+    FLOAT_NORMALIZE,
+    FLOAT2_NORMALIZE,
     FLOAT3_NORMALIZE,
+    FLOAT4_NORMALIZE,
+
+    FLOAT4x4_FLOAT4_MUL,
+
+    FLOAT4x4_FLOAT4x4_MUL,
 };
 
 class Runtime
@@ -175,16 +186,18 @@ private:
     llvm::Type*         GetRuntimeLLVMType( Type type ) const;
 
     //
-    // This function unpacks vectors and puts them into structs and other things
+    // This will flatten value, and repackage it as a to_type
     //
-    llvm::Value*        CreateRuntimeTypeCast( ParamValue value,
-                                               llvm::IRBuilder<>& builder );
+    llvm::Value*        CreateDeepCopy( llvm::Value* value,
+                                        llvm::Type* to_type,
+                                        llvm::IRBuilder<>& builder );
 
     //
-    // This function packs structs back into vectors
+    // This will store the value, and load it back as a to_type
     //
-    llvm::Value*        CreateInternalTypeCast( ParamValue value,
-                                                llvm::IRBuilder<>& builder );
+    llvm::Value*        CreatePointerCastCopy( llvm::Value* value,
+                                               llvm::Type* to_type,
+                                               llvm::IRBuilder<>& builder );
 
     //
     // The JoeLang Context to which this runtime belongs
