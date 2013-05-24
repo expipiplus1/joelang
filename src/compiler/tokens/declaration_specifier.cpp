@@ -267,9 +267,21 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
     NO_COMBINE( TYPE##3 ) \
     NO_COMBINE( TYPE##4 )
 
+#define NO_COMBINE_M( TYPE ) \
+    NO_COMBINE( TYPE##2x2 ) \
+    NO_COMBINE( TYPE##2x3 ) \
+    NO_COMBINE( TYPE##2x4 ) \
+    NO_COMBINE( TYPE##3x2 ) \
+    NO_COMBINE( TYPE##3x3 ) \
+    NO_COMBINE( TYPE##3x4 ) \
+    NO_COMBINE( TYPE##4x2 ) \
+    NO_COMBINE( TYPE##4x3 ) \
+    NO_COMBINE( TYPE##4x4 )
+
 #define NO_COMBINE_N( TYPE ) \
     NO_COMBINE( TYPE ) \
-    NO_COMBINE_V( TYPE )
+    NO_COMBINE_V( TYPE ) \
+    NO_COMBINE_M( TYPE )
 
     /// TODO do this in a better way
     for( auto ts : type_specs )
@@ -289,6 +301,14 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
         NO_COMBINE_V( USHORT )
         NO_COMBINE_V( UINT )
         NO_COMBINE_V( ULONG )
+        NO_COMBINE_M( CHAR )
+        NO_COMBINE_M( SHORT )
+        NO_COMBINE_M( INT )
+        NO_COMBINE_M( LONG )
+        NO_COMBINE_M( UCHAR )
+        NO_COMBINE_M( USHORT )
+        NO_COMBINE_M( UINT )
+        NO_COMBINE_M( ULONG )
 
         case TypeSpec::CHAR:
             if( has_type )
@@ -375,6 +395,7 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
     return type;
 
 #undef NO_COMBINE_N
+#undef NO_COMBINE_M
 #undef NO_COMBINE_V
 #undef NO_COMBINE
 }
@@ -446,9 +467,21 @@ Type TypeSpecifier::GetType() const
     TYPE_MAP( type##3 ) \
     TYPE_MAP( type##4 )
 
+#define TYPE_MAP_M( type ) \
+    TYPE_MAP( type##2x2 ) \
+    TYPE_MAP( type##2x3 ) \
+    TYPE_MAP( type##2x4 ) \
+    TYPE_MAP( type##3x2 ) \
+    TYPE_MAP( type##3x3 ) \
+    TYPE_MAP( type##3x4 ) \
+    TYPE_MAP( type##4x2 ) \
+    TYPE_MAP( type##4x3 ) \
+    TYPE_MAP( type##4x4 )
+
 #define TYPE_MAP_N( type ) \
     TYPE_MAP( type ) \
-    TYPE_MAP_V( type )
+    TYPE_MAP_V( type ) \
+    TYPE_MAP_M( type )
 
     const static std::map<TypeSpec, Type> type_map =
     {
@@ -477,6 +510,7 @@ Type TypeSpecifier::GetType() const
     return type_map.at( m_TypeSpec );
 
 #undef TYPE_MAP_N
+#undef TYPE_MAP_M
 #undef TYPE_MAP_V
 #undef TYPE_MAP
 }
@@ -492,9 +526,21 @@ bool TypeSpecifier::Parse( Parser& parser,
     TYPE_MAP( type##3 ) \
     TYPE_MAP( type##4 )
 
+#define TYPE_MAP_M( type ) \
+    TYPE_MAP( type##2x2 ) \
+    TYPE_MAP( type##2x3 ) \
+    TYPE_MAP( type##2x4 ) \
+    TYPE_MAP( type##3x2 ) \
+    TYPE_MAP( type##3x3 ) \
+    TYPE_MAP( type##3x4 ) \
+    TYPE_MAP( type##4x2 ) \
+    TYPE_MAP( type##4x3 ) \
+    TYPE_MAP( type##4x4 )
+
 #define TYPE_MAP_N( type ) \
     TYPE_MAP( type ) \
-    TYPE_MAP_V( type )
+    TYPE_MAP_V( type ) \
+    TYPE_MAP_M( type )
 
 
     const static std::vector<std::pair<TerminalType, TypeSpec> > type_map =
@@ -511,6 +557,11 @@ bool TypeSpecifier::Parse( Parser& parser,
         TYPE_MAP_V( USHORT )
         TYPE_MAP_V( UINT )
         TYPE_MAP_V( ULONG )
+
+        TYPE_MAP_M( UCHAR )
+        TYPE_MAP_M( USHORT )
+        TYPE_MAP_M( UINT )
+        TYPE_MAP_M( ULONG )
 
         TYPE_MAP_N( FLOAT )
         TYPE_MAP_N( DOUBLE )
@@ -530,6 +581,7 @@ bool TypeSpecifier::Parse( Parser& parser,
     return false;
 
 #undef TYPE_MAP_N
+#undef TYPE_MAP_M
 #undef TYPE_MAP_V
 #undef TYPE_MAP
 }

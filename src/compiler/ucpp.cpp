@@ -233,9 +233,21 @@ TerminalType UCPPLexerState::Lex( std::string& string )
     TYPE_KEYWORD( name##3, TYPE##3 ) \
     TYPE_KEYWORD( name##4, TYPE##4 )
 
+#define TYPE_KEYWORD_M( name, TYPE ) \
+    TYPE_KEYWORD( name##2x2, TYPE##2x2 ) \
+    TYPE_KEYWORD( name##2x3, TYPE##2x3 ) \
+    TYPE_KEYWORD( name##2x4, TYPE##2x4 ) \
+    TYPE_KEYWORD( name##3x2, TYPE##3x2 ) \
+    TYPE_KEYWORD( name##3x3, TYPE##3x3 ) \
+    TYPE_KEYWORD( name##3x4, TYPE##3x4 ) \
+    TYPE_KEYWORD( name##4x2, TYPE##4x2 ) \
+    TYPE_KEYWORD( name##4x3, TYPE##4x3 ) \
+    TYPE_KEYWORD( name##4x4, TYPE##4x4 )
+
 #define TYPE_KEYWORD_N( name, TYPE ) \
     TYPE_KEYWORD( name, TYPE ) \
-    TYPE_KEYWORD_V( name, TYPE )
+    TYPE_KEYWORD_V( name, TYPE ) \
+    TYPE_KEYWORD_M( name, TYPE )
 
     const static std::map<std::string, TerminalType> s_KeywordMap =
     {
@@ -284,6 +296,11 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         TYPE_KEYWORD_V( uint, UINT )
         TYPE_KEYWORD_V( ulong, ULONG )
 
+        TYPE_KEYWORD_M( uchar, UCHAR )
+        TYPE_KEYWORD_M( ushort, USHORT )
+        TYPE_KEYWORD_M( uint, UINT )
+        TYPE_KEYWORD_M( ulong, ULONG )
+
         TYPE_KEYWORD_N( float, FLOAT )
         TYPE_KEYWORD_N( double, DOUBLE )
 
@@ -293,7 +310,12 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         { "true",           TerminalType::TRUE,          },
         { "false",          TerminalType::FALSE,         }
     };
-    
+
+#undef TYPE_KEYWORD_N
+#undef TYPE_KEYWORD_M
+#undef TYPE_KEYWORD_V
+#undef TYPE_KEYWORD
+
     int lex_result = lex( &m_LexerState );
     if( lex_result == CPPERR_EOF )
         return TerminalType::END_OF_INPUT;

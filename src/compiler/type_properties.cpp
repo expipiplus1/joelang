@@ -158,6 +158,15 @@ Type GetScalarType( Type t )
     case type##2: \
     case type##3: \
     case type##4: \
+    case type##2x2: \
+    case type##2x3: \
+    case type##2x4: \
+    case type##3x2: \
+    case type##3x3: \
+    case type##3x4: \
+    case type##4x2: \
+    case type##4x3: \
+    case type##4x4: \
         return type
 
     switch( t )
@@ -181,6 +190,45 @@ Type GetScalarType( Type t )
     }
 
 #undef RETURN_BASE
+}
+
+Type GetMatrixElementType( Type t )
+{
+    assert( IsMatrixType(t) &&
+            "Trying to get the element type of a non-matrix type" );
+
+#define RETURN_ELEMENT(type) \
+    case type##2x2: \
+    case type##2x3: \
+    case type##2x4: \
+    case type##3x2: \
+    case type##3x3: \
+    case type##3x4: \
+    case type##4x2: \
+    case type##4x3: \
+    case type##4x4: \
+        return GetVectorType( type, GetNumRowsInType( t ) );
+
+    switch( t )
+    {
+    RETURN_ELEMENT(Type::BOOL);
+    RETURN_ELEMENT(Type::CHAR);
+    RETURN_ELEMENT(Type::SHORT);
+    RETURN_ELEMENT(Type::INT);
+    RETURN_ELEMENT(Type::LONG);
+    RETURN_ELEMENT(Type::UCHAR);
+    RETURN_ELEMENT(Type::USHORT);
+    RETURN_ELEMENT(Type::UINT);
+    RETURN_ELEMENT(Type::ULONG);
+    RETURN_ELEMENT(Type::FLOAT);
+    RETURN_ELEMENT(Type::DOUBLE);
+    default:
+        assert( false &&
+                "Trying to get the element type of an unhandled type" );
+        return Type::UNKNOWN;
+    }
+
+#undef RETURN_ELEMENT
 }
 
 bool IsIntegral( Type t )
@@ -213,12 +261,41 @@ bool IsSigned( Type t )
            t == Type::CHAR;
 }
 
+bool IsMatrixType( Type t )
+{
+#define EQUALS_MATRIX_TYPES(type) \
+    t == type##2x2 || \
+    t == type##2x3 || \
+    t == type##2x4 || \
+    t == type##3x2 || \
+    t == type##3x3 || \
+    t == type##3x4 || \
+    t == type##4x2 || \
+    t == type##4x3 || \
+    t == type##4x4
+
+    return EQUALS_MATRIX_TYPES(Type::BOOL) ||
+           EQUALS_MATRIX_TYPES(Type::CHAR) ||
+           EQUALS_MATRIX_TYPES(Type::SHORT) ||
+           EQUALS_MATRIX_TYPES(Type::INT) ||
+           EQUALS_MATRIX_TYPES(Type::LONG) ||
+           EQUALS_MATRIX_TYPES(Type::UCHAR) ||
+           EQUALS_MATRIX_TYPES(Type::USHORT) ||
+           EQUALS_MATRIX_TYPES(Type::UINT) ||
+           EQUALS_MATRIX_TYPES(Type::ULONG) ||
+           EQUALS_MATRIX_TYPES(Type::FLOAT) ||
+           EQUALS_MATRIX_TYPES(Type::DOUBLE);
+
+#undef EQUALS_MATRIX_TYPES
+}
+
 bool IsVectorType( Type t )
 {
 #define EQUALS_VECTOR_TYPES(type) \
     t == type##2 || \
     t == type##3 || \
     t == type##4
+
     return EQUALS_VECTOR_TYPES(Type::BOOL) ||
            EQUALS_VECTOR_TYPES(Type::CHAR) ||
            EQUALS_VECTOR_TYPES(Type::SHORT) ||
@@ -230,6 +307,7 @@ bool IsVectorType( Type t )
            EQUALS_VECTOR_TYPES(Type::ULONG) ||
            EQUALS_VECTOR_TYPES(Type::FLOAT) ||
            EQUALS_VECTOR_TYPES(Type::DOUBLE);
+
 #undef EQUALS_VECTOR_TYPES
 }
 
@@ -275,6 +353,88 @@ unsigned GetNumElementsInType( Type t )
 #undef MATCH_N
 }
 
+unsigned GetNumRowsInType( Type t )
+{
+    assert( IsMatrixType(t) &&
+            "Trying to get the number of rows of a non-matrix type" );
+
+#define RETURN_ROWS(type) \
+    case type##2x2: \
+    case type##3x2: \
+    case type##4x2: \
+        return 2; \
+    case type##2x3: \
+    case type##3x3: \
+    case type##4x3: \
+        return 3; \
+    case type##2x4: \
+    case type##3x4: \
+    case type##4x4: \
+        return 4;
+
+    switch( t )
+    {
+    RETURN_ROWS(Type::BOOL);
+    RETURN_ROWS(Type::CHAR);
+    RETURN_ROWS(Type::SHORT);
+    RETURN_ROWS(Type::INT);
+    RETURN_ROWS(Type::LONG);
+    RETURN_ROWS(Type::UCHAR);
+    RETURN_ROWS(Type::USHORT);
+    RETURN_ROWS(Type::UINT);
+    RETURN_ROWS(Type::ULONG);
+    RETURN_ROWS(Type::FLOAT);
+    RETURN_ROWS(Type::DOUBLE);
+    default:
+        assert( false &&
+                "Trying to get the number of rows of an unhandled type" );
+        return 0;
+    }
+
+#undef RETURN_ROWS
+}
+
+unsigned GetNumColumnsInType( Type t )
+{
+    assert( IsMatrixType(t) &&
+            "Trying to get the number of columns of a non-matrix type" );
+
+#define RETURN_COLUMNS(type) \
+    case type##2x2: \
+    case type##2x3: \
+    case type##2x4: \
+        return 2; \
+    case type##3x2: \
+    case type##3x3: \
+    case type##3x4: \
+        return 3; \
+    case type##4x2: \
+    case type##4x3: \
+    case type##4x4: \
+        return 4;
+
+    switch( t )
+    {
+    RETURN_COLUMNS(Type::BOOL);
+    RETURN_COLUMNS(Type::CHAR);
+    RETURN_COLUMNS(Type::SHORT);
+    RETURN_COLUMNS(Type::INT);
+    RETURN_COLUMNS(Type::LONG);
+    RETURN_COLUMNS(Type::UCHAR);
+    RETURN_COLUMNS(Type::USHORT);
+    RETURN_COLUMNS(Type::UINT);
+    RETURN_COLUMNS(Type::ULONG);
+    RETURN_COLUMNS(Type::FLOAT);
+    RETURN_COLUMNS(Type::DOUBLE);
+    default:
+        assert( false &&
+                "Trying to get the number of columns of an unhandled type" );
+        return 0;
+    }
+
+#undef RETURN_COLUMNS
+}
+
 std::size_t SizeOf( Type t )
 {
 
@@ -282,7 +442,16 @@ std::size_t SizeOf( Type t )
     case Type::type: return (size); \
     case Type::type##2: return (size) * 2; \
     case Type::type##3: return (size) * 3; \
-    case Type::type##4: return (size) * 4
+    case Type::type##4: return (size) * 4; \
+    case Type::type##2x2: return (size) * 2*2; \
+    case Type::type##2x3: return (size) * 2*3; \
+    case Type::type##2x4: return (size) * 2*4; \
+    case Type::type##3x2: return (size) * 3*2; \
+    case Type::type##3x3: return (size) * 3*3; \
+    case Type::type##3x4: return (size) * 3*4; \
+    case Type::type##4x2: return (size) * 4*2; \
+    case Type::type##4x3: return (size) * 4*3; \
+    case Type::type##4x4: return (size) * 4*4
 
     switch( t )
     {
@@ -333,7 +502,16 @@ const std::string& GetTypeString( Type t )
     { type, STR(name) }, \
     { type##2, STR(name##2) }, \
     { type##3, STR(name##3) }, \
-    { type##4, STR(name##4) }
+    { type##4, STR(name##4) }, \
+    { type##2x2, STR(name##2x2) }, \
+    { type##2x3, STR(name##2x3) }, \
+    { type##2x4, STR(name##2x4) }, \
+    { type##3x2, STR(name##3x2) }, \
+    { type##3x3, STR(name##3x3) }, \
+    { type##3x4, STR(name##3x4) }, \
+    { type##4x2, STR(name##4x2) }, \
+    { type##4x3, STR(name##4x3) }, \
+    { type##4x4, STR(name##4x4) }
 
     const static std::map<Type, std::string> string_map =
     {

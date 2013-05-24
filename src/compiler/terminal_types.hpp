@@ -42,7 +42,16 @@ namespace Compiler
     TYPE_##type, \
     TYPE_##type##2, \
     TYPE_##type##3, \
-    TYPE_##type##4
+    TYPE_##type##4, \
+    TYPE_##type##2x2, \
+    TYPE_##type##2x3, \
+    TYPE_##type##2x4, \
+    TYPE_##type##3x2, \
+    TYPE_##type##3x3, \
+    TYPE_##type##3x4, \
+    TYPE_##type##4x2, \
+    TYPE_##type##4x3, \
+    TYPE_##type##4x4
 
 /**
   * \enum TerminalType
@@ -186,6 +195,8 @@ enum class TerminalType
     //
     IDENTIFIER
 };
+
+#undef TYPE_N
 
 /** Get the human readable string associated with the given TerminalType **/
 const std::string& GetTerminalString( TerminalType terminal_type );

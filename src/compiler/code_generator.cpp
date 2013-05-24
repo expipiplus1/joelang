@@ -162,21 +162,30 @@ std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
         CREATE_TYPED_PARAM(type); \
         CREATE_TYPED_PARAM(type##2); \
         CREATE_TYPED_PARAM(type##3); \
-        CREATE_TYPED_PARAM(type##4)
+        CREATE_TYPED_PARAM(type##4); \
+        CREATE_TYPED_PARAM(type##2x2); \
+        CREATE_TYPED_PARAM(type##2x3); \
+        CREATE_TYPED_PARAM(type##2x4); \
+        CREATE_TYPED_PARAM(type##3x2); \
+        CREATE_TYPED_PARAM(type##3x3); \
+        CREATE_TYPED_PARAM(type##3x4); \
+        CREATE_TYPED_PARAM(type##4x2); \
+        CREATE_TYPED_PARAM(type##4x3); \
+        CREATE_TYPED_PARAM(type##4x4);
 
         switch( type )
         {
-        CREATE_TYPED_PARAM_N(jl_bool);
-        CREATE_TYPED_PARAM_N(jl_char);
-        CREATE_TYPED_PARAM_N(jl_short);
-        CREATE_TYPED_PARAM_N(jl_int);
-        CREATE_TYPED_PARAM_N(jl_long);
-        CREATE_TYPED_PARAM_N(jl_uchar);
-        CREATE_TYPED_PARAM_N(jl_ushort);
-        CREATE_TYPED_PARAM_N(jl_uint);
-        CREATE_TYPED_PARAM_N(jl_ulong);
-        CREATE_TYPED_PARAM_N(jl_float);
-        CREATE_TYPED_PARAM_N(jl_double);
+        CREATE_TYPED_PARAM_N(jl_bool)
+        CREATE_TYPED_PARAM_N(jl_char)
+        CREATE_TYPED_PARAM_N(jl_short)
+        CREATE_TYPED_PARAM_N(jl_int)
+        CREATE_TYPED_PARAM_N(jl_long)
+        CREATE_TYPED_PARAM_N(jl_uchar)
+        CREATE_TYPED_PARAM_N(jl_ushort)
+        CREATE_TYPED_PARAM_N(jl_uint)
+        CREATE_TYPED_PARAM_N(jl_ulong)
+        CREATE_TYPED_PARAM_N(jl_float)
+        CREATE_TYPED_PARAM_N(jl_double)
         default:
             assert( false &&
                     "Trying to create a parameter for an unhandled type" );
@@ -263,6 +272,10 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
          ( static_cast<const State<jl_float4>&>(state),
            wrapper );
         break;
+    }
+    case Type::FLOAT4x4:
+    {
+        assert( false );
     }
     SA(DOUBLE, jl_double);
     SA(CHAR,   jl_char);

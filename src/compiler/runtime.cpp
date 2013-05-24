@@ -549,6 +549,9 @@ bool Runtime::FindLLVMTypes()
         if( IsVectorType( type ) )
             return llvm::VectorType::get( GetType( GetScalarType( type ) ),
                                           GetNumElementsInType( type ) );
+        else if( IsMatrixType( type ) )
+            return llvm::ArrayType::get( GetType( GetMatrixElementType(type) ),
+                                         GetNumColumnsInType( type ) );
         else if( type == Type::DOUBLE )
             return llvm::Type::getDoubleTy( m_LLVMContext );
         else if( type == Type::FLOAT )
@@ -576,7 +579,16 @@ bool Runtime::FindLLVMTypes()
     GET_TYPE( type) \
     GET_TYPE( type##2 ) \
     GET_TYPE( type##3 ) \
-    GET_TYPE( type##4 )
+    GET_TYPE( type##4 ) \
+    GET_TYPE( type##2x2 ) \
+    GET_TYPE( type##2x3 ) \
+    GET_TYPE( type##2x4 ) \
+    GET_TYPE( type##3x2 ) \
+    GET_TYPE( type##3x3 ) \
+    GET_TYPE( type##3x4 ) \
+    GET_TYPE( type##4x2 ) \
+    GET_TYPE( type##4x3 ) \
+    GET_TYPE( type##4x4 )
 
     GET_TYPE_N( Type::BOOL )
     GET_TYPE_N( Type::CHAR )
