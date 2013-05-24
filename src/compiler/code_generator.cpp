@@ -95,9 +95,11 @@ void CodeGenerator::GenerateFunctions( std::set<Function_sp>& functions )
     //
     // remove any functions which have already been codegened
     //
-    for( auto& f : functions )
-        if( f->HasLLVMFunction() )
-            functions.erase( f );
+    for( auto it = functions.begin(); it != functions.end(); )
+        if( (*it)->HasLLVMFunction() )
+            functions.erase( it++ );
+        else
+            ++it;
 
     //
     // First, declare all the functions
@@ -1113,6 +1115,7 @@ llvm::Constant* CodeGenerator::CreateArray(
 llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
                                 const CompleteType& type,
                                 bool is_const,
+                                bool is_uniform,
                                 const GenericValue& initializer,
                                 const std::string& name )
 {
@@ -1126,11 +1129,18 @@ llvm::GlobalVariable* CodeGenerator::CreateGlobalVariable(
         init = initializer.CodeGen( *this );
     else
         init = llvm::Constant::getNullValue( t );
+
+    auto linkage = is_uniform ? llvm::GlobalVariable::ExternalLinkage :
+                                llvm::GlobalVariable::PrivateLinkage;
+
     llvm::GlobalVariable* ret = new llvm::GlobalVariable(
                                      m_Module,
                                      t,
-                                     is_const,
-                                     llvm::GlobalVariable::PrivateLinkage,
+                                     is_const && !is_uniform, //If something is
+                                                              // uniform, it may
+                                                              // be changed from
+                                                              // outside
+                                     linkage,
                                      init,
                                      name );
     //

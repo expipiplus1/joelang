@@ -346,6 +346,8 @@ private:
     using FunctionOverloadsMap = std::map< std::string,
                                            std::vector<Function_sp> >;
 
+    void AddFunction( Function_sp function );
+
     PassDefinitionMap        m_PassDefinitions;
     std::vector<std::string> m_Techniques;
 

@@ -68,6 +68,13 @@ public:
               Semantic semantic,
               std::vector<CompleteType> parameters );
 
+    Function( std::string identifier,
+              CompleteType return_type,
+              std::vector<CompleteType> parameter_types,
+              llvm::Function* llvm_function );
+
+    ~Function();
+
     const std::string& GetIdentifier() const;
 
     const CompleteType& GetReturnType() const;

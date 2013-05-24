@@ -64,6 +64,8 @@ SemaAnalyzer::SemaAnalyzer( const Context& context, Runtime& runtime )
     ,m_Runtime( runtime )
     ,m_CodeGenerator( std::move(m_Runtime.CreateCodeGenerator()) )
 {
+    for( Function_sp f : m_Runtime.GetRuntimeFunctions() )
+        AddFunction( std::move(f) );
 }
 
 SemaAnalyzer::~SemaAnalyzer()
@@ -105,7 +107,8 @@ bool SemaAnalyzer::Analyze( TranslationUnit& tu )
         // error if the function is referenced and not defined
         for( const auto& f : fo.second )
             if( !f.unique() &&
-                !f->HasDefinition() )
+                !f->HasDefinition() &&
+                !f->HasLLVMFunction() )
                 Error( "Use of undefined function: " +
                        f->GetSignatureString() );
 
@@ -411,6 +414,29 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
             return v->second;
     }
     return nullptr;
+}
+
+void SemaAnalyzer::AddFunction( Function_sp function )
+{
+    std::vector<Function_sp>& function_overloads =
+                                 m_FunctionOverloads[function->GetIdentifier()];
+
+    for( const auto& f : function_overloads )
+        if( f->HasSameParameterTypes( function->GetParameterTypes() ) )
+        {
+            // If we already have this funciton, make sure that we have the same
+            // return type
+            if( f->GetReturnType().GetBaseType() !=
+                                      function->GetReturnType().GetBaseType() ||
+                f->GetReturnType().GetArrayExtents() !=
+                                   function->GetReturnType().GetArrayExtents() )
+                assert( false && "Trying to add a function which differs only "
+                        "by return type" );
+            return;
+        }
+
+    function_overloads.emplace_back( function );
+    return;
 }
 
 void SemaAnalyzer::DeclareFunction( std::string identifier,

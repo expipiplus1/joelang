@@ -1082,6 +1082,9 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     for( const auto& argument : m_Arguments )
         good &= argument->PerformSema( sema );
 
+    if( !good )
+        return false;
+
     //
     // Verify that we have the correct number of parameters for this type
     //

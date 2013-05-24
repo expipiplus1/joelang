@@ -230,6 +230,7 @@ bool IsVectorType( Type t )
            EQUALS_VECTOR_TYPES(Type::ULONG) ||
            EQUALS_VECTOR_TYPES(Type::FLOAT) ||
            EQUALS_VECTOR_TYPES(Type::DOUBLE);
+#undef EQUALS_VECTOR_TYPES
 }
 
 bool IsScalarType( Type t )

@@ -241,12 +241,15 @@ public:
       *   The type of the global variable
       * \param is_const
       *   Whether this is a const variable
+      * \param is_uniform
+      *   Whether this is a uniform variable, this determines the linkage
       * \param initializer
       *   An optional value to initialize the variable with
       * \returns the llvm::GlobalVariable allocated
       */
     llvm::GlobalVariable* CreateGlobalVariable( const CompleteType& type,
                                                 bool is_const,
+                                                bool is_uniform,
                                                 const GenericValue& initializer,
                                                 const std::string& name );
 

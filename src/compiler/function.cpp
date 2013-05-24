@@ -60,6 +60,21 @@ Function::Function( std::string identifier,
 {
 }
 
+Function::Function( std::string identifier,
+                    CompleteType return_type,
+                    std::vector<CompleteType> parameter_types,
+                    llvm::Function* llvm_function )
+    :m_Identifier( std::move(identifier) )
+    ,m_ReturnType( std::move(return_type) )
+    ,m_ParameterTypes( std::move(parameter_types) )
+    ,m_LLVMFunction( llvm_function )
+{
+    assert( llvm_function && "Function given a null llvm_function" );
+}
+
+Function::~Function()
+{}
+
 const std::string& Function::GetIdentifier() const
 {
     return m_Identifier;
@@ -120,9 +135,9 @@ bool Function::HasLLVMFunction() const
 
 std::set<Function_sp> Function::GetCallees() const
 {
-    assert( m_Definition &&
-            "Trying to get the callees of a function without a definition" );
-    return m_Definition->GetCallees();
+    if( HasDefinition() )
+        return m_Definition->GetCallees();
+    return std::set<Function_sp>{};
 }
 
 std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const

@@ -151,38 +151,67 @@ target_link_libraries( joelang ucpp )
 if( NOT DEFINED JOELANG_WITH_OPENGL )
     set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable built in OpenGL state setting" )
 endif()
-set( JOELANG_RUNTIME_FILENAME ${CMAKE_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
+
+set( JOELANG_RUNTIME_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
 configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_SOURCE_DIR}/include/joelang/config.h )
 
 #
 # Various custom commands
 #
 
-set( runtime_sources src/runtime/string.cpp
+set( runtime_sources src/runtime/float3.cpp
+                     src/runtime/float3.hpp
+                     src/runtime/string.cpp
                      src/runtime/string.hpp
                      src/runtime/types.hpp )
 
 string( REPLACE " " ";" JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+set( JOELANG_RUNTIME_CXX_FLAGS ${JOELANG_RUNTIME_CXX_FLAGS} -msse4.1 )
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set( JOELANG_RUNTIME_COMPILER ${CMAKE_CXX_COMPILER} )
 else()
     set( JOELANG_RUNTIME_COMPILER clang++ )
 endif()
+set( JOELANG_RUNTIME_LINKER llvm-link )
+
+set( runtime_bitcode_files "" )
+
+foreach( runtime_source ${runtime_sources} )
+    get_filename_component( extension ${runtime_source} EXT )
+    if( ${extension} STREQUAL ".cpp" )
+        get_filename_component( bitcode_file ${runtime_source} NAME )
+        set( bitcode_file ${CMAKE_CURRENT_BINARY_DIR}/${bitcode_file}.bc )
+        add_custom_command(
+            OUTPUT ${bitcode_file}
+            COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/${runtime_source} -o ${bitcode_file}
+            DEPENDS ${runtime_sources} )
+        list( APPEND runtime_bitcode_files ${bitcode_file} )
+    endif()
+endforeach()
 
 add_custom_command(
     OUTPUT ${JOELANG_RUNTIME_FILENAME}
-    COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/src/runtime/string.cpp -o ${CMAKE_BINARY_DIR}/runtime.bc
-    DEPENDS ${runtime_sources} )
+    COMMAND ${JOELANG_RUNTIME_LINKER} -o ${JOELANG_RUNTIME_FILENAME} ${runtime_bitcode_files}
+    DEPENDS ${runtime_bitcode_files} )
 
 if( ${CMAKE_GENERATOR} STREQUAL "Xcode" )
-    add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc" )
+    add_custom_target( compile_runtime DEPENDS ${JOELANG_RUNTIME_FILENAME} )
 else()
-    add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
+    add_custom_target( compile_runtime DEPENDS ${JOELANG_RUNTIME_FILENAME} 
                                        SOURCES ${runtime_sources} )
 endif()
 
 add_dependencies( joelang compile_runtime )
+        
+
+#if( ${CMAKE_GENERATOR} STREQUAL "Xcode" )
+    #add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc" )
+#else()
+    #add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
+                                       #SOURCES ${runtime_sources} )
+#endif()
+
 
 #
 # Linking

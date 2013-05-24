@@ -128,7 +128,8 @@ void Variable::CodeGen( CodeGenerator& code_gen )
     if( m_IsGlobal )
     {
         m_LLVMPointer = code_gen.CreateGlobalVariable( m_Type,
-                                                       m_IsConst,
+                                                       IsConst(),
+                                                       IsUniform(),
                                                        m_Initializer,
                                                        m_Name );
     }

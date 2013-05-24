@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -67,6 +68,8 @@ namespace Compiler
 typedef std::vector<unsigned> ArrayExtents;
 class CompleteType;
 class CodeGenerator;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 
 enum class RuntimeFunction
 {
@@ -74,7 +77,10 @@ enum class RuntimeFunction
     STRING_NOTEQUAL,
     STRING_CONCAT,
     STRING_COPY,
-    STRING_DESTROY
+    STRING_DESTROY,
+
+    FLOAT3_DOT,
+    FLOAT3_NORMALIZE,
 };
 
 class Runtime
@@ -89,6 +95,8 @@ public:
     llvm::Module&           GetModule();
     CodeGenerator           CreateCodeGenerator();
 
+    std::vector<Function_sp> GetRuntimeFunctions() const;
+
     /**
       * Runs some optimizations on the module
       */
@@ -96,10 +104,10 @@ public:
 
     llvm::Value*        CreateRuntimeCall( RuntimeFunction function,
                                            std::vector<llvm::Value*> params,
-                                           llvm::IRBuilder<>& builder ) const;
+                                           llvm::IRBuilder<>& builder );
 
-    llvm::Type*         GetLLVMType( const CompleteType& type );
-    llvm::Type*         GetLLVMType( Type type );
+    llvm::Type*         GetLLVMType( const CompleteType& type ) const;
+    llvm::Type*         GetLLVMType( Type type ) const;
 private:
     enum class ReturnType
     {
@@ -107,6 +115,8 @@ private:
         POINTER, /// return by hidden first poiner argument
         INTEGER, /// return by casting into an integer
         IGNORE,  /// Ignore this value (used for void)
+        STRUCT,  /// Expand this value into a struct, for example float3 becomes
+                 /// { <float x 2>, float }
     };
 
     enum class ParamType
@@ -131,7 +141,8 @@ private:
 
     struct FunctionInfo
     {
-        const std::string name;
+        const std::string bitcodeName;
+        const std::string runtimeName;
         Type returnType;
         const std::vector<Type> paramTypes;
     };
@@ -139,10 +150,17 @@ private:
     llvm::Value*        CreateCall( llvm::Function* function,
                                     Type return_type,
                                     const std::vector<ParamValue>& param_types,
-                                    llvm::IRBuilder<>& builder ) const;
+                                    llvm::IRBuilder<>& builder );
 
     bool FindRuntimeFunctions();
+    bool FindLLVMTypes();
     bool FindRuntimeTypes();
+
+    //
+    // This will generate a Function for each of the runtime functions
+    //
+    bool GenerateFunctionWrappers();
+    Function_sp GenerateFunctionWrapper( RuntimeFunction runtime_function );
 
     void InitializeOptimizers();
 
@@ -150,6 +168,23 @@ private:
       * Runs some optimizations on the function
       */
     void OptimizeFunction( llvm::Function& function );
+
+    //
+    // The runtime often has slightly different types
+    //
+    llvm::Type*         GetRuntimeLLVMType( Type type ) const;
+
+    //
+    // This function unpacks vectors and puts them into structs and other things
+    //
+    llvm::Value*        CreateRuntimeTypeCast( ParamValue value,
+                                               llvm::IRBuilder<>& builder );
+
+    //
+    // This function packs structs back into vectors
+    //
+    llvm::Value*        CreateInternalTypeCast( ParamValue value,
+                                                llvm::IRBuilder<>& builder );
 
     //
     // The JoeLang Context to which this runtime belongs
@@ -178,9 +213,14 @@ private:
     std::unique_ptr<llvm::PassManager>         m_LLVMModulePassManager;
 
     //
-    // The type of a JoeLang string
+    // The types as used in the runtime
     //
-    llvm::StructType*   m_StringType;
+    std::map<Type, llvm::Type*> m_RuntimeTypeMap;
+
+    //
+    // The mapping of joelang types to llvm types
+    //
+    std::map<Type, llvm::Type*> m_InternalTypeMap;
 
     //
     // The list of functions in the runtime
@@ -188,9 +228,9 @@ private:
     std::map<RuntimeFunction, llvm::Function*> m_Functions;
 
     //
-    // The mapping of joelang types to llvm types
+    // The list of functions and their wrappers
     //
-    std::map<Type, llvm::Type*> m_Types;
+    std::map<RuntimeFunction, Function_sp> m_FunctionWrappers;
 
     //
     // A list of types and how they are passed to and from functions
