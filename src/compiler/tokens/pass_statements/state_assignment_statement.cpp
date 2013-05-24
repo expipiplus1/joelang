@@ -40,6 +40,7 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
 

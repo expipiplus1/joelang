@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2011 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,43 +27,33 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "semantic_info.hpp"
+#pragma once
 
-#include <map>
-#include <string>
-
-#include <compiler/semantic.hpp>
-#include <compiler/shader_writer.hpp>
-#include <joelang/shader.hpp>
-#include <joelang/types.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
+/**
+  * \class PrimaryExpression
+  * \ingroup Expressions
+  * \brief Matches a primary expression
+  *
+  * PrimaryExpression just forwards the parse to any of the sub expressions and
+  * is never directly created
+  *
+  * PrimaryExpression =   IdentifierExpression
+  *                     | LiteralExpression
+  *                     | '(' Expression ')'
+  */
+class PrimaryExpression : public JoeLang::Compiler::Expression
 {
-    { SemanticType::POSITION, { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::VERTEX   },
-                                "gl_Position",
-                                true } },    
-    { SemanticType::WPOS,     { Type::FLOAT4,
-                                { ShaderDomain::FRAGMENT },
-                                std::set<ShaderDomain>{},
-                                "gl_FragCoord",
-                                true } },
-    { SemanticType::COLOR,    { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT },
-                                "",
-                                true } },    
-    { SemanticType::DEPTH,    { Type::FLOAT,
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT }, 
-                                "gl_FragDepth",
-                                true } }
+public:
+    static
+    bool Parse( Parser& parser,
+                Expression_up& token );
 };
 
 } // namespace Compiler

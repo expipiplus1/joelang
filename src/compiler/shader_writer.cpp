@@ -49,6 +49,7 @@
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/context.hpp>
 #include <joelang/shader.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

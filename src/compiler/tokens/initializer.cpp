@@ -41,6 +41,8 @@
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/assignment_expression.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2011 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,44 +27,50 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "semantic_info.hpp"
+#include "primary_expression.hpp"
 
-#include <map>
-#include <string>
+#include <memory>
 
-#include <compiler/semantic.hpp>
-#include <compiler/shader_writer.hpp>
-#include <joelang/shader.hpp>
-#include <joelang/types.hpp>
+#include <compiler/parser.hpp>
+#include <compiler/terminal_types.hpp>
+#include <compiler/tokens/expressions/identifier_expression.hpp>
+#include <compiler/tokens/expressions/literal_expression.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
+//------------------------------------------------------------------------------
+// PrimaryExpression
+//------------------------------------------------------------------------------
+
+bool PrimaryExpression::Parse( Parser& parser,
+                               Expression_up& token )
 {
-    { SemanticType::POSITION, { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::VERTEX   },
-                                "gl_Position",
-                                true } },    
-    { SemanticType::WPOS,     { Type::FLOAT4,
-                                { ShaderDomain::FRAGMENT },
-                                std::set<ShaderDomain>{},
-                                "gl_FragCoord",
-                                true } },
-    { SemanticType::COLOR,    { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT },
-                                "",
-                                true } },    
-    { SemanticType::DEPTH,    { Type::FLOAT,
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT }, 
-                                "gl_FragDepth",
-                                true } }
-};
+    // Try and parse and identifier
+    if( parser.Expect<IdentifierExpression>( token ) )
+        return true;
+    CHECK_PARSER;
+
+    // Try and parse a literal
+    if( parser.Expect<LiteralExpression>( token ) )
+        return true;
+    CHECK_PARSER;
+
+    // Try and parse a bracketed expression
+    if( !parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
+        return false;
+    if( !parser.Expect<Expression>( token ) )
+        return false;
+    if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
+    {
+        parser.Error( "Expected closing ')' in primary expression" );
+        return false;
+    }
+
+    return true;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

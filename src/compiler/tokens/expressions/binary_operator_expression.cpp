@@ -41,6 +41,7 @@
 #include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <compiler/tokens/token.hpp>
 

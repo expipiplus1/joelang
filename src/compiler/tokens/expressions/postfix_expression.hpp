@@ -27,63 +27,82 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "expression.hpp"
+#pragma once
 
-#include <cassert>
 #include <memory>
-#include <set>
 
-#include <compiler/parser.hpp>
-#include <compiler/tokens/expressions/assignment_expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-//------------------------------------------------------------------------------
-// Expression
-//------------------------------------------------------------------------------
+class PostfixOperator;
+using PostfixOperator_up = std::unique_ptr<PostfixOperator>;
 
-Expression::Expression( TokenTy sub_class_id )
-    :Token( sub_class_id )
+/**
+  * \class PostfixExpression
+  * \ingroup Expressions
+  * \brief Matches a postfix expression
+  *
+  * PostfixExpression = TypeConstructorExpression ( PostfixOperator )*
+  */
+class PostfixExpression : public JoeLang::Compiler::Expression
 {
-}
+public:
+    /** This asserts on a null expression or operator **/
+    PostfixExpression( Expression_up expression,
+                       PostfixOperator_up postfix_operator );
+    virtual
+    ~PostfixExpression();
 
-Expression::~Expression()
-{
-}
+    PostfixOperator& GetOperator();
 
-bool Expression::IsLValue() const
-{
-    return false;
-}
+    Expression_up TakeExpression();
 
-llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
-{
-    if( IsLValue() )
-        assert( false && "Complete me" );
-    assert( false && "Trying to write to an rvalue" );
-    return nullptr;
-}
+    virtual
+    bool PerformSema( SemaAnalyzer& sema ) override;
 
-bool Expression::Parse( Parser& parser, Expression_up& token )
-{
-    // TODO comma sep expressions
-    return parser.Expect<AssignmentExpression>( token );
-}
+    virtual
+    llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;
 
-bool Expression::classof( const Token* t )
-{
-    return t->GetSubClassID() >= TokenTy::Expression_Start &&
-           t->GetSubClassID() <= TokenTy::Expression_End;
-}
+    virtual
+    llvm::Value* CodeGenPointerTo( CodeGenerator& code_gen ) const override;
 
-bool Expression::classof( const Expression* e )
-{
-    // An Expression is always an Expression
-    return true;
-}
+    virtual
+    void Write( ShaderWriter& shader_writer ) const override;
+
+    virtual
+    CompleteType GetType() const override;
+
+    virtual
+    std::set<Function_sp> GetCallees() const override;
+
+    virtual
+    std::set<Variable_sp> GetVariables() const override;
+
+    virtual
+    std::set<Variable_sp> GetWrittenToVariables( bool is_assigned ) const override;
+
+
+    virtual
+    bool IsConst() const override;
+
+    bool IsLValue() const override;
+
+    static
+    bool Parse( Parser& parser,
+                Expression_up& token );
+
+    static
+    bool classof( const Expression* e );
+    static
+    bool classof( const PostfixExpression* e );
+private:
+    Expression_up m_Expression;
+    PostfixOperator_up m_PostfixOperator;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

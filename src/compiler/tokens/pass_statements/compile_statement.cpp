@@ -41,6 +41,8 @@
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/assignment_expression.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <joelang/shader.hpp>
 
 namespace JoeLang

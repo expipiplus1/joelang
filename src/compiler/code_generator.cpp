@@ -64,6 +64,7 @@
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/assignment_expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <runtime/types.hpp>

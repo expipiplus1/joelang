@@ -100,7 +100,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     //
     // Todo, investigate if this is optimizing all the old effects again
     //
-    m_Runtime.OptimizeModule();
+    //m_Runtime.OptimizeModule();
 
     return std::unique_ptr<Effect>( new Effect( std::move(techniques),
                                                 std::move(parameters) ) );

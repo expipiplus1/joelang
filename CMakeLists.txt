@@ -118,14 +118,30 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/translation_unit.hpp
                      src/compiler/tokens/expressions/assignment_operator.cpp
                      src/compiler/tokens/expressions/assignment_operator.hpp
+                     src/compiler/tokens/expressions/assignment_expression.cpp
+                     src/compiler/tokens/expressions/assignment_expression.hpp
                      src/compiler/tokens/expressions/binary_operator_expression.cpp
                      src/compiler/tokens/expressions/binary_operator_expression.hpp
+                     src/compiler/tokens/expressions/cast_expression.cpp
+                     src/compiler/tokens/expressions/cast_expression.hpp
+                     src/compiler/tokens/expressions/conditional_expression.cpp
+                     src/compiler/tokens/expressions/conditional_expression.hpp
                      src/compiler/tokens/expressions/expression.cpp
                      src/compiler/tokens/expressions/expression.hpp
+                     src/compiler/tokens/expressions/identifier_expression.cpp
+                     src/compiler/tokens/expressions/identifier_expression.hpp
                      src/compiler/tokens/expressions/literal_expression.cpp
                      src/compiler/tokens/expressions/literal_expression.hpp
+                     src/compiler/tokens/expressions/postfix_expression.cpp
+                     src/compiler/tokens/expressions/postfix_expression.hpp
                      src/compiler/tokens/expressions/postfix_operator.cpp
                      src/compiler/tokens/expressions/postfix_operator.hpp
+                     src/compiler/tokens/expressions/primary_expression.cpp
+                     src/compiler/tokens/expressions/primary_expression.hpp
+                     src/compiler/tokens/expressions/type_constructor_expression.cpp
+                     src/compiler/tokens/expressions/type_constructor_expression.hpp
+                     src/compiler/tokens/expressions/unary_expression.cpp
+                     src/compiler/tokens/expressions/unary_expression.hpp
                      src/compiler/tokens/pass_statements/compile_statement.cpp
                      src/compiler/tokens/pass_statements/compile_statement.hpp
                      src/compiler/tokens/pass_statements/pass_statement.cpp

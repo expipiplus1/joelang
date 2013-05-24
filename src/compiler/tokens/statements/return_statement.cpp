@@ -39,6 +39,7 @@
 #include <compiler/shader_writer.hpp>
 #include <compiler/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
