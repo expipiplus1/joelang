@@ -80,6 +80,9 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     good &= m_LeftSide->PerformSema( sema );
     good &= m_RightSide->PerformSema( sema );
 
+    if( !good )
+        return false;
+
     const CompleteType& left_type = m_LeftSide->GetType();
     const CompleteType& right_type = m_RightSide->GetType();
 
@@ -236,6 +239,24 @@ void BinaryOperatorExpression::Write( ShaderWriter& shader_writer ) const
         { Op::DIVIDE,              "/"  },
         { Op::MODULO,              "%"  }
     };
+
+    //
+    // Todo, make the shader writer and code generator have the same interface
+    // to avoid silly special cases like this
+    //
+
+    //
+    // in glsl one must use matrixCompMult to component-wise multiply matrices
+    //
+
+    if( m_LeftSide->GetType().IsMatrixType() && m_Operator == Op::MULTIPLY )
+    {
+        assert( m_RightSide->GetType() == m_LeftSide->GetType() &&
+                "operating on values of different types" );
+        shader_writer << "matrixCompMult(" << *m_LeftSide << ", "
+                      << *m_RightSide << ")";
+        return;
+    }
 
     shader_writer << "(" <<
                      *m_LeftSide <<

@@ -77,14 +77,12 @@ public:
 
     bool IsSigned() const;
 
-    /** Returns the number of vector elements **/
-    unsigned GetVectorSize() const;
+    Type GetElementType() const;
 
-    Type GetVectorElementType() const;
-    
+    unsigned GetNumElements() const;
+
     unsigned GetNumMatrixRows() const;
     unsigned GetNumMatrixColumns() const;
-    unsigned GetNumMatrixElements() const;
 
     std::string GetString() const;
 

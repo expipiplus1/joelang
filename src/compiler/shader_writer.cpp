@@ -43,8 +43,9 @@
 #include <compiler/entry_function.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/function.hpp>
-#include <compiler/variable.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/semantic_info.hpp>
+#include <compiler/variable.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/context.hpp>
@@ -388,7 +389,13 @@ void ShaderWriter::WriteFunctionDeclarations(
 #endif
 
     for( const auto& f : functions )
-        f->WriteDeclaration( *this );
+    {
+        //
+        // Don't write runtime functions
+        //
+        if( !f->IsRuntimeFunction() )
+            f->WriteDeclaration( *this );
+    }
 }
 
 void ShaderWriter::WriteFunctionDefinitions(
@@ -400,7 +407,11 @@ void ShaderWriter::WriteFunctionDefinitions(
 #endif
 
     for( const auto& f : functions )
-        f->WriteDefinition( *this );
+        //
+        // Don't write runtime functions
+        //
+        if( !f->IsRuntimeFunction() )
+            f->WriteDefinition( *this );
 }
 
 void ShaderWriter::WriteMainFunction(
@@ -588,6 +599,87 @@ void ShaderWriter::NewLine( unsigned num_lines )
         m_Shader << '\n';
     for( unsigned i = 0; i < m_Indentation; ++i )
         m_Shader << indent;
+}
+
+void ShaderWriter::WriteRuntimeFunctionCall(
+                                   RuntimeFunction function,
+                                   const std::vector<Expression_up>& arguments )
+{
+    std::string function_name;
+
+    switch( function )
+    {
+    case RuntimeFunction::FLOAT_DOT:
+    case RuntimeFunction::FLOAT2_DOT:
+    case RuntimeFunction::FLOAT3_DOT:
+    case RuntimeFunction::FLOAT4_DOT:
+        function_name = "dot";
+        break;
+    case RuntimeFunction::FLOAT_NORMALIZE:
+    case RuntimeFunction::FLOAT2_NORMALIZE:
+    case RuntimeFunction::FLOAT3_NORMALIZE:
+    case RuntimeFunction::FLOAT4_NORMALIZE:
+        function_name = "normalize";
+        break;
+    case RuntimeFunction::FLOAT2x2_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT4x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT4x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT4x4_MUL:
+    {
+        assert( arguments.size() == 2 &&
+                "Trying to multiply wrong number of arguments" );
+        *this << "(" << *arguments[0] << " * " << *arguments[1] << ")";
+        return;
+    }
+    default:
+        assert( false && "Trying to write an unhandled runtime function" );
+    }
+
+    *this << function_name << "(";
+
+    bool first = true;
+    for( const auto& a : arguments )
+    {
+        if( !first )
+            *this << ", ";
+        else
+            first = false;
+
+        *this << *a;
+    }
+    *this << ")";
 }
 
 void ShaderWriter::Error( const std::string& error_string )

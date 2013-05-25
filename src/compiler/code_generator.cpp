@@ -494,7 +494,9 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
                                            Swizzle swizzle )
 {
 #ifndef NDEBUG
-    unsigned e_vector_size = e.GetType().GetVectorSize();
+    assert( e.GetType().IsVectorType() || e.GetType().IsScalarType() &&
+            "Can only swizzle scalars or vectors" );
+    unsigned e_vector_size = e.GetType().GetNumElements();
     for( unsigned i = 0; i < swizzle.GetSize(); ++i )
         assert( swizzle.GetIndex(i) >= 0 && swizzle.GetIndex(i) < e_vector_size
                 && "swizzle index out of bounds" );
@@ -586,7 +588,11 @@ llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
                                                 const CompleteType& from_type,
                                                 const CompleteType& to_type )
 {
-    assert( to_type.GetVectorSize() == to_type.GetVectorSize() &&
+    assert( from_type.IsVectorType() || from_type.IsScalarType() &&
+            "Trying to create a cast with unhandled types" );
+    assert( to_type.IsVectorType() || to_type.IsScalarType() &&
+            "Trying to create a cast with unhandled types" );
+    assert( to_type.GetNumElements() == to_type.GetNumElements() &&
             "Trying to cast different sized types" );
 
     //
@@ -653,7 +659,7 @@ llvm::Value* CodeGenerator::CreateCastToScalar( const Expression& expression,
         e_value = m_Builder.CreateExtractElement(
                                                 e_value,
                                                 CreateInteger( 0, Type::INT ) );
-        from_type = CompleteType( from_type.GetVectorElementType() );
+        from_type = CompleteType( from_type.GetElementType() );
     }
 
     if( from_type.IsScalarType() )
@@ -672,7 +678,6 @@ llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
             "Trying to create a vector cast to a non-vector type" );
 
     CompleteType from_type = expression.GetType();
-    //llvm::Value* e_value = expression.CodeGen( *this );
 
     if( from_type.IsScalarType() )
     {
@@ -682,29 +687,29 @@ llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
         //
         llvm::Value* e_value = CreateCastToScalar(
                                expression,
-                               CompleteType( to_type.GetVectorElementType() ) );
-        return m_Builder.CreateVectorSplat( to_type.GetVectorSize(), e_value );
+                               CompleteType( to_type.GetElementType() ) );
+        return m_Builder.CreateVectorSplat( to_type.GetNumElements(), e_value );
     }
 
     if( from_type.IsVectorType() )
     {
         llvm::Value* e_value = expression.CodeGen( *this );
 
-        if( from_type.GetVectorSize() != to_type.GetVectorSize() )
+        if( from_type.GetNumElements() != to_type.GetNumElements() )
         {
             //
             // They are not the same size
             //
-            assert( from_type.GetVectorSize() > to_type.GetVectorSize() &&
+            assert( from_type.GetNumElements() > to_type.GetNumElements() &&
                     "Trying to cast a smaller vector into a bigger one" );
 
             //
             // we can do this with a shuffle
             //
 
-            std::vector<unsigned> indices( to_type.GetVectorSize() );
+            std::vector<unsigned> indices( to_type.GetNumElements() );
 
-            for( unsigned i = 0; i < to_type.GetVectorSize(); ++i )
+            for( unsigned i = 0; i < to_type.GetNumElements(); ++i )
                 indices[i] = i;
 
             e_value = m_Builder.CreateShuffleVector(
@@ -719,7 +724,7 @@ llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
                                          to_type );
     }
 
-    assert( false && "Trying to cas from an unhandled type" );
+    assert( false && "Trying to cast from an unhandled type" );
     return nullptr;
 }
 
@@ -1239,9 +1244,9 @@ llvm::Value* CodeGenerator::CreateAssignment( const Expression& variable,
         //
         llvm::Value* assignee_value = m_Builder.CreateLoad( pointer );
 
-        assert( e.GetType().GetVectorSize() == swizzle.GetSize() &&
+        assert( e.GetType().GetNumElements() == swizzle.GetSize() &&
                 "Assigning to a different sized vector type" );
-        for( unsigned i = 0; i < e.GetType().GetVectorSize(); ++i )
+        for( unsigned i = 0; i < e.GetType().GetNumElements(); ++i )
         {
             llvm::Value* element;
             if( e.GetType().IsScalarType() )

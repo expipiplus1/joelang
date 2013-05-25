@@ -47,10 +47,12 @@ namespace Compiler
 class CompleteType;
 class EntryFunction;
 class Expression;
+using Expression_up = std::unique_ptr<Expression>;
 class GenericValue;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
 class PostfixOperator;
+enum class RuntimeFunction;
 class Statement;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
@@ -128,6 +130,10 @@ public:
      * This will write a variable name with the correct prefix
      */
     void WriteVariableName( const Variable_sp v );
+
+    void WriteRuntimeFunctionCall(
+                                  RuntimeFunction runtime_function,
+                                  const std::vector<Expression_up>& arguments );
 private:
     void GenerateShader( const EntryFunction& entry_function );
 

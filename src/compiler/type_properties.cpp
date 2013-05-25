@@ -62,11 +62,16 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
         Type::BOOL
     };
 
+    //
+    // There is no common type between arrays of different sizes
+    //
     if( t1.GetArrayExtents() != t2.GetArrayExtents() )
         return CompleteType();
 
+    //
     // If they are array types they have to have identical types (no implicit
     // conversion of arrays)
+    //
     if( t1.IsArrayType() )
     {
         if( t1.GetBaseType() == t2.GetBaseType() )
@@ -86,8 +91,8 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
             return CompleteType();
     }
 
-    Type t1_scalar_type = t1.GetVectorElementType();
-    Type t2_scalar_type = t2.GetVectorElementType();
+    Type t1_scalar_type = t1.GetElementType();
+    Type t2_scalar_type = t2.GetElementType();
     Type common_scalar_type = Type::UNKNOWN;
 
     for( Type t : promotion_ordering )
@@ -98,26 +103,132 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
         }
 
 
-    //
-    // Vectors can be implicitly cast to a smaller vector type, this will
-    // issue a warning
-    //
+    assert( t1.IsScalarType() || t1.IsVectorType() || t1.IsMatrixType() &&
+            "No structs or array's here, please" );
+    assert( t2.IsScalarType() || t2.IsVectorType() || t2.IsMatrixType() &&
+            "No structs or array's here, please" );
 
     //
-    // If they are both vectors, shrink one of them
-    // otherwise expand the scalar type
+    // If both are scalars, return the common scalar type
     //
-    unsigned result_size;
+    if( t1.IsScalarType() && t2.IsScalarType() )
+        return CompleteType( common_scalar_type );
 
-    if( t1.IsVectorType() && t2.IsVectorType() )
-        result_size = JoeMath::Min( t1.GetVectorSize(),
-                                    t2.GetVectorSize() );
-    else
-        result_size = JoeMath::Max( t1.GetVectorSize(),
-                                    t2.GetVectorSize() );
+    //
+    // If only one type is a scalar
+    //
+    if( t1.IsScalarType() ^ t2.IsScalarType() )
+    {
+        //
+        // we need to smear the scalar to the other type
+        //
+        if( t1.IsVectorType() || t2.IsVectorType() )
+        {
+            unsigned result_size;
+            result_size = JoeMath::Max( t1.GetNumElements(),
+                                        t2.GetNumElements() );
+            return CompleteType( GetVectorType( common_scalar_type,
+                                                result_size ) );
+        }
 
-    return CompleteType( GetVectorType( common_scalar_type,
-                                        result_size ) );
+        if( t1.IsMatrixType() || t2.IsMatrixType() )
+        {
+            const CompleteType& m = t1.IsMatrixType() ? t1 : t2;
+            return CompleteType( GetMatrixType( common_scalar_type,
+                                                m.GetNumMatrixColumns(),
+                                                m.GetNumMatrixRows() ) );
+        }
+    }
+
+    //
+    // If only one type is a vector
+    //
+    if( t1.IsVectorType() ^ t2.IsVectorType() )
+    {
+        //
+        // There is no common type between vectors and matrices
+        //
+        return CompleteType();
+    }
+
+    assert( t1.IsVectorType() == t2.IsVectorType() &&
+            t1.IsMatrixType() == t2.IsMatrixType() &&
+            "t1 and t2 have to be the same class of type" );
+
+    if( t1.IsMatrixType() )
+    {
+        //
+        // Only if they're the same size
+        //
+        unsigned t1_rows    = t1.GetNumMatrixRows();
+        unsigned t1_columns = t1.GetNumMatrixColumns();
+        unsigned t2_rows    = t2.GetNumMatrixRows();
+        unsigned t2_columns = t2.GetNumMatrixColumns();
+
+        if( t1_rows == t2_rows && t1_columns == t2_columns )
+            return CompleteType( GetMatrixType( common_scalar_type,
+                                                t1_columns,
+                                                t1_rows ) );
+        return CompleteType();
+    }
+
+    if( t1.IsVectorType() )
+    {
+        //
+        // Vectors can be implicitly cast to a smaller vector type, this will
+        // issue a warning
+        //
+        unsigned size = JoeMath::Min( t1.GetNumElements(),
+                                      t2.GetNumElements() );
+
+        return CompleteType( GetVectorType( common_scalar_type,
+                                            size ) );
+    }
+
+    assert( false && "How did we get here?" );
+    return CompleteType();
+}
+
+Type GetMatrixType( Type base, unsigned columns, unsigned rows )
+{
+#define CREATE_MATRIX_MAPPING(type) \
+    {{ type, type##2x2, type##2x3, type##2x4, \
+             type##3x2, type##3x3, type##3x4, \
+             type##4x2, type##4x3, type##4x4 }}
+
+    const static std::array< std::array< Type, 10 >, 11 > t =
+    {{
+        CREATE_MATRIX_MAPPING(Type::BOOL),
+        CREATE_MATRIX_MAPPING(Type::CHAR),
+        CREATE_MATRIX_MAPPING(Type::INT),
+        CREATE_MATRIX_MAPPING(Type::SHORT),
+        CREATE_MATRIX_MAPPING(Type::LONG),
+        CREATE_MATRIX_MAPPING(Type::UCHAR),
+        CREATE_MATRIX_MAPPING(Type::UINT),
+        CREATE_MATRIX_MAPPING(Type::USHORT),
+        CREATE_MATRIX_MAPPING(Type::ULONG),
+        CREATE_MATRIX_MAPPING(Type::FLOAT),
+        CREATE_MATRIX_MAPPING(Type::DOUBLE)
+    }};
+#undef CREATE_MATRIX_MAPPING
+
+    return Type::UNKNOWN;
+
+    assert( columns > 1  && "Trying to make a too small matrix" );
+    assert( columns <= 4 && "Trying to make a too big matrix" );
+    assert( rows    > 1  && "Trying to make a too small matrix" );
+    assert( rows    <= 4 && "Trying to make a too big matrix" );
+
+    unsigned index = 1 + (columns - 2) * 3 + (rows - 2);
+
+    for( auto& a : t )
+    {
+        if( a[0] == base )
+            return a[index];
+    }
+
+    assert( false && "Trying to make an unhandled vector type" );
+    return Type::UNKNOWN;
 }
 
 Type GetVectorType( Type base, unsigned size )
@@ -313,11 +424,16 @@ bool IsVectorType( Type t )
 
 bool IsScalarType( Type t )
 {
-    return GetNumElementsInType( t ) == 1 && !IsVectorType( t );
+    return GetNumElementsInType( t ) == 1 &&
+           !IsVectorType( t ) &&
+           !IsMatrixType( t );
 }
 
 unsigned GetNumElementsInType( Type t )
 {
+    if( IsMatrixType( t ) )
+        return GetNumColumnsInType( t ) * GetNumColumnsInType( t );
+
 #define MATCH_N(n) \
     case Type::BOOL##n: \
     case Type::CHAR##n: \
@@ -435,11 +551,6 @@ unsigned GetNumColumnsInType( Type t )
 #undef RETURN_COLUMNS
 }
 
-unsigned GetNumMatrixElements( Type t )
-{
-    return GetNumColumnsInType( t ) * GetNumRowsInType( t );
-}
-
 std::size_t SizeOf( Type t )
 {
 
@@ -551,6 +662,15 @@ bool HasGLSLType( Type t )
         Type::FLOAT2,
         Type::FLOAT3,
         Type::FLOAT4,
+        Type::FLOAT2x2,
+        Type::FLOAT2x3,
+        Type::FLOAT2x4,
+        Type::FLOAT3x2,
+        Type::FLOAT3x3,
+        Type::FLOAT3x4,
+        Type::FLOAT4x2,
+        Type::FLOAT4x3,
+        Type::FLOAT4x4,
         Type::UINT,
         Type::INT,
         Type::BOOL,
@@ -568,6 +688,16 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT2,       "vec2" },
         { Type::FLOAT3,       "vec3" },
         { Type::FLOAT4,       "vec4" },
+
+        { Type::FLOAT2x2,     "mat2x2" },
+        { Type::FLOAT2x3,     "mat2x3" },
+        { Type::FLOAT2x4,     "mat2x4" },
+        { Type::FLOAT3x2,     "mat3x2" },
+        { Type::FLOAT3x3,     "mat3x3" },
+        { Type::FLOAT3x4,     "mat3x4" },
+        { Type::FLOAT4x2,     "mat4x2" },
+        { Type::FLOAT4x3,     "mat4x3" },
+        { Type::FLOAT4x4,     "mat4x4" },
 
         { Type::UINT,         "uint" },
         { Type::INT,          "int" },

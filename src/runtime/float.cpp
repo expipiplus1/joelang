@@ -77,11 +77,156 @@ jl_float4 normalize_float4( jl_float4 v )
     return Normalized( v );
 }
 
-jl_float4 mul_float4x4_float4( jl_float4x4 m, jl_float4 v )
+jl_float2   mul_float2x2_float2( jl_float2x2 m1, jl_float2 m2 )
 {
-    return Mul( m, v );
+    return Mul( m1, m2 );
+}
+jl_float2x2 mul_float2x2_float2x2( jl_float2x2 m1, jl_float2x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x2 mul_float2x2_float3x2( jl_float2x2 m1, jl_float3x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x2 mul_float2x2_float4x2( jl_float2x2 m1, jl_float4x2 m2 )
+{
+    return Mul( m1, m2 );
 }
 
+jl_float3   mul_float2x3_float2( jl_float2x3 m1, jl_float2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x3 mul_float2x3_float2x2( jl_float2x3 m1, jl_float2x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x3 mul_float2x3_float3x2( jl_float2x3 m1, jl_float3x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x3 mul_float2x3_float4x2( jl_float2x3 m1, jl_float4x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+jl_float4   mul_float2x4_float2( jl_float2x4 m1, jl_float2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x4 mul_float2x4_float2x2( jl_float2x4 m1, jl_float2x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x4 mul_float2x4_float3x2( jl_float2x4 m1, jl_float3x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x4 mul_float2x4_float4x2( jl_float2x4 m1, jl_float4x2 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+
+jl_float2   mul_float3x2_float3( jl_float3x2 m1, jl_float3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x2 mul_float3x2_float2x3( jl_float3x2 m1, jl_float2x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x2 mul_float3x2_float3x3( jl_float3x2 m1, jl_float3x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x2 mul_float3x2_float4x3( jl_float3x2 m1, jl_float4x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+jl_float3   mul_float3x3_float3( jl_float3x3 m1, jl_float3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x3 mul_float3x3_float2x3( jl_float3x3 m1, jl_float2x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x3 mul_float3x3_float3x3( jl_float3x3 m1, jl_float3x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x3 mul_float3x3_float4x3( jl_float3x3 m1, jl_float4x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+jl_float4   mul_float3x4_float3( jl_float3x4 m1, jl_float3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x4 mul_float3x4_float2x3( jl_float3x4 m1, jl_float2x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x4 mul_float3x4_float3x3( jl_float3x4 m1, jl_float3x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x4 mul_float3x4_float4x3( jl_float3x4 m1, jl_float4x3 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+
+jl_float2   mul_float4x2_float4( jl_float4x2 m1, jl_float4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x2 mul_float4x2_float2x4( jl_float4x2 m1, jl_float2x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x2 mul_float4x2_float3x4( jl_float4x2 m1, jl_float3x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x2 mul_float4x2_float4x4( jl_float4x2 m1, jl_float4x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+jl_float3   mul_float4x3_float4( jl_float4x3 m1, jl_float4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x3 mul_float4x3_float2x4( jl_float4x3 m1, jl_float2x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x3 mul_float4x3_float3x4( jl_float4x3 m1, jl_float3x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float4x3 mul_float4x3_float4x4( jl_float4x3 m1, jl_float4x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+
+jl_float4   mul_float4x4_float4( jl_float4x4 m1, jl_float4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float2x4 mul_float4x4_float2x4( jl_float4x4 m1, jl_float2x4 m2 )
+{
+    return Mul( m1, m2 );
+}
+jl_float3x4 mul_float4x4_float3x4( jl_float4x4 m1, jl_float3x4 m2 )
+{
+    return Mul( m1, m2 );
+}
 jl_float4x4 mul_float4x4_float4x4( jl_float4x4 m1, jl_float4x4 m2 )
 {
     return Mul( m1, m2 );

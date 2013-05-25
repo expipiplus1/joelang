@@ -71,10 +71,22 @@ const std::map<Type, Runtime::TypeInformation> Runtime::s_TypeInformationMap =
     {Type::VOID,     {ReturnType::IGNORE,  ParamType::IGNORE}},
     {Type::BOOL,     {ReturnType::DEFAULT, ParamType::DEFAULT}},
     {Type::STRING,   {ReturnType::DEFAULT, ParamType::EXPAND}},
+
     {Type::FLOAT,    {ReturnType::DEFAULT, ParamType::DEFAULT}},
     {Type::FLOAT2,   {ReturnType::DEFAULT, ParamType::DEFAULT}},
     {Type::FLOAT3,   {ReturnType::STRUCT,  ParamType::EXPAND}},
     {Type::FLOAT4,   {ReturnType::STRUCT,  ParamType::EXPAND}},
+
+    {Type::FLOAT2x2, {ReturnType::STRUCT, ParamType::EXPAND}},
+    {Type::FLOAT2x3, {ReturnType::POINTER, ParamType::POINTER}},
+    {Type::FLOAT2x4, {ReturnType::POINTER, ParamType::POINTER}},
+
+    {Type::FLOAT3x2, {ReturnType::POINTER, ParamType::POINTER}},
+    {Type::FLOAT3x3, {ReturnType::POINTER, ParamType::POINTER}},
+    {Type::FLOAT3x4, {ReturnType::POINTER, ParamType::POINTER}},
+
+    {Type::FLOAT4x2, {ReturnType::POINTER, ParamType::POINTER}},
+    {Type::FLOAT4x3, {ReturnType::POINTER, ParamType::POINTER}},
     {Type::FLOAT4x4, {ReturnType::POINTER, ParamType::POINTER}},
 #elif defined(ARCH_I386)
     {Type::VOID,   {ReturnType::IGNORE, ParamType::IGNORE}},
@@ -130,6 +142,161 @@ const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
                                         {"mul_float4x4_float4x4", "mul",
                                          Type::FLOAT4x4, {Type::FLOAT4x4,
                                                         Type::FLOAT4x4}}},
+
+    {RuntimeFunction::FLOAT2x2_FLOAT2_MUL,
+    {"mul_float2x2_float2", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT2x2, Type::FLOAT2}}},
+    {RuntimeFunction::FLOAT2x2_FLOAT2x2_MUL,
+    {"mul_float2x2_float2x2", "mul",
+     Type::FLOAT2x2,
+     {Type::FLOAT2x2, Type::FLOAT2x2}}},
+    {RuntimeFunction::FLOAT2x2_FLOAT3x2_MUL,
+    {"mul_float2x2_float3x2", "mul",
+     Type::FLOAT3x2,
+     {Type::FLOAT2x2, Type::FLOAT3x2}}},
+    {RuntimeFunction::FLOAT2x2_FLOAT4x2_MUL,
+    {"mul_float2x2_float4x2", "mul",
+     Type::FLOAT4x2,
+     {Type::FLOAT2x2, Type::FLOAT4x2}}},
+
+    {RuntimeFunction::FLOAT2x3_FLOAT2_MUL,
+    {"mul_float2x3_float2", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT2x3, Type::FLOAT2}}},
+    {RuntimeFunction::FLOAT2x3_FLOAT2x2_MUL,
+    {"mul_float2x3_float2x2", "mul",
+     Type::FLOAT2x3,
+     {Type::FLOAT2x3, Type::FLOAT2x2}}},
+    {RuntimeFunction::FLOAT2x3_FLOAT3x2_MUL,
+    {"mul_float2x3_float3x2", "mul",
+     Type::FLOAT3x3,
+     {Type::FLOAT2x3, Type::FLOAT3x2}}},
+    {RuntimeFunction::FLOAT2x3_FLOAT4x2_MUL,
+    {"mul_float2x3_float4x2", "mul",
+     Type::FLOAT4x3,
+     {Type::FLOAT2x3, Type::FLOAT4x2}}},
+
+    {RuntimeFunction::FLOAT2x4_FLOAT2_MUL,
+    {"mul_float2x4_float2", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT2x4, Type::FLOAT2}}},
+    {RuntimeFunction::FLOAT2x4_FLOAT2x2_MUL,
+    {"mul_float2x4_float2x2", "mul",
+     Type::FLOAT2x4,
+     {Type::FLOAT2x4, Type::FLOAT2x2}}},
+    {RuntimeFunction::FLOAT2x4_FLOAT3x2_MUL,
+    {"mul_float2x4_float3x2", "mul",
+     Type::FLOAT3x4,
+     {Type::FLOAT2x4, Type::FLOAT3x2}}},
+    {RuntimeFunction::FLOAT2x4_FLOAT4x2_MUL,
+    {"mul_float2x4_float4x2", "mul",
+     Type::FLOAT4x4,
+     {Type::FLOAT2x4, Type::FLOAT4x2}}},
+
+
+    {RuntimeFunction::FLOAT3x2_FLOAT3_MUL,
+    {"mul_float3x2_float3", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT3x2, Type::FLOAT3}}},
+    {RuntimeFunction::FLOAT3x2_FLOAT2x3_MUL,
+    {"mul_float3x2_float2x3", "mul",
+     Type::FLOAT2x2,
+     {Type::FLOAT3x2, Type::FLOAT2x3}}},
+    {RuntimeFunction::FLOAT3x2_FLOAT3x3_MUL,
+    {"mul_float3x2_float3x3", "mul",
+     Type::FLOAT3x2,
+     {Type::FLOAT3x2, Type::FLOAT3x3}}},
+    {RuntimeFunction::FLOAT3x2_FLOAT4x3_MUL,
+    {"mul_float3x2_float4x3", "mul",
+     Type::FLOAT4x2,
+     {Type::FLOAT3x2, Type::FLOAT4x3}}},
+
+    {RuntimeFunction::FLOAT3x3_FLOAT3_MUL,
+    {"mul_float3x3_float3", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT3x3, Type::FLOAT3}}},
+    {RuntimeFunction::FLOAT3x3_FLOAT2x3_MUL,
+    {"mul_float3x3_float2x3", "mul",
+     Type::FLOAT2x3,
+     {Type::FLOAT3x3, Type::FLOAT2x3}}},
+    {RuntimeFunction::FLOAT3x3_FLOAT3x3_MUL,
+    {"mul_float3x3_float3x3", "mul",
+     Type::FLOAT3x3,
+     {Type::FLOAT3x3, Type::FLOAT3x3}}},
+    {RuntimeFunction::FLOAT3x3_FLOAT4x3_MUL,
+    {"mul_float3x3_float4x3", "mul",
+     Type::FLOAT4x3,
+     {Type::FLOAT3x3, Type::FLOAT4x3}}},
+
+    {RuntimeFunction::FLOAT3x4_FLOAT3_MUL,
+    {"mul_float3x4_float3", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT3x4, Type::FLOAT3}}},
+    {RuntimeFunction::FLOAT3x4_FLOAT2x3_MUL,
+    {"mul_float3x4_float2x3", "mul",
+     Type::FLOAT2x4,
+     {Type::FLOAT3x4, Type::FLOAT2x3}}},
+    {RuntimeFunction::FLOAT3x4_FLOAT3x3_MUL,
+    {"mul_float3x4_float3x3", "mul",
+     Type::FLOAT3x4,
+     {Type::FLOAT3x4, Type::FLOAT3x3}}},
+    {RuntimeFunction::FLOAT3x4_FLOAT4x3_MUL,
+    {"mul_float3x4_float4x3", "mul",
+     Type::FLOAT4x4,
+     {Type::FLOAT3x4, Type::FLOAT4x3}}},
+
+
+    {RuntimeFunction::FLOAT4x2_FLOAT4_MUL,
+    {"mul_float4x2_float4", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT4x2, Type::FLOAT4}}},
+    {RuntimeFunction::FLOAT4x2_FLOAT2x4_MUL,
+    {"mul_float4x2_float2x4", "mul",
+     Type::FLOAT2x2,
+     {Type::FLOAT4x2, Type::FLOAT2x4}}},
+    {RuntimeFunction::FLOAT4x2_FLOAT3x4_MUL,
+    {"mul_float4x2_float3x4", "mul",
+     Type::FLOAT3x2,
+     {Type::FLOAT4x2, Type::FLOAT3x4}}},
+    {RuntimeFunction::FLOAT4x2_FLOAT4x4_MUL,
+    {"mul_float4x2_float4x4", "mul",
+     Type::FLOAT4x2,
+     {Type::FLOAT4x2, Type::FLOAT4x4}}},
+
+    {RuntimeFunction::FLOAT4x3_FLOAT4_MUL,
+    {"mul_float4x3_float4", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT4x3, Type::FLOAT4}}},
+    {RuntimeFunction::FLOAT4x3_FLOAT2x4_MUL,
+    {"mul_float4x3_float2x4", "mul",
+     Type::FLOAT2x3,
+     {Type::FLOAT4x3, Type::FLOAT2x4}}},
+    {RuntimeFunction::FLOAT4x3_FLOAT3x4_MUL,
+    {"mul_float4x3_float3x4", "mul",
+     Type::FLOAT3x3,
+     {Type::FLOAT4x3, Type::FLOAT3x4}}},
+    {RuntimeFunction::FLOAT4x3_FLOAT4x4_MUL,
+    {"mul_float4x3_float4x4", "mul",
+     Type::FLOAT4x3,
+     {Type::FLOAT4x3, Type::FLOAT4x4}}},
+
+    {RuntimeFunction::FLOAT4x4_FLOAT4_MUL,
+    {"mul_float4x4_float4", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT4x4, Type::FLOAT4}}},
+    {RuntimeFunction::FLOAT4x4_FLOAT2x4_MUL,
+    {"mul_float4x4_float2x4", "mul",
+     Type::FLOAT2x4,
+     {Type::FLOAT4x4, Type::FLOAT2x4}}},
+    {RuntimeFunction::FLOAT4x4_FLOAT3x4_MUL,
+    {"mul_float4x4_float3x4", "mul",
+     Type::FLOAT3x4,
+     {Type::FLOAT4x4, Type::FLOAT3x4}}},
+    {RuntimeFunction::FLOAT4x4_FLOAT4x4_MUL,
+    {"mul_float4x4_float4x4", "mul",
+     Type::FLOAT4x4,
+     {Type::FLOAT4x4, Type::FLOAT4x4}}},
 };
 
 Runtime::Runtime( const JoeLang::Context& joelang_context )
@@ -190,7 +357,7 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
 
 Runtime::~Runtime()
 {
-    m_Module->dump();
+    //m_Module->dump();
     llvm::llvm_shutdown();
 }
 
@@ -666,11 +833,39 @@ bool Runtime::FindRuntimeTypes()
     m_RuntimeTypeMap[Type::FLOAT4] =
             m_Functions[RuntimeFunction::FLOAT4_NORMALIZE]->getReturnType();
 
+
+    m_RuntimeTypeMap[Type::FLOAT2x2] =
+            m_Functions[RuntimeFunction::FLOAT2x2_FLOAT2x2_MUL]->
+                    getFunctionType()->getReturnType();
+
     //
     // Get the hidden return value pointer and find the type behind that
     //
+    m_RuntimeTypeMap[Type::FLOAT2x3] =
+            m_Functions[RuntimeFunction::FLOAT2x3_FLOAT2x2_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+    m_RuntimeTypeMap[Type::FLOAT2x4] =
+            m_Functions[RuntimeFunction::FLOAT2x4_FLOAT2x2_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+
+    m_RuntimeTypeMap[Type::FLOAT3x2] =
+            m_Functions[RuntimeFunction::FLOAT3x2_FLOAT3x3_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+    m_RuntimeTypeMap[Type::FLOAT3x3] =
+            m_Functions[RuntimeFunction::FLOAT3x3_FLOAT3x3_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+    m_RuntimeTypeMap[Type::FLOAT3x4] =
+            m_Functions[RuntimeFunction::FLOAT3x4_FLOAT3x3_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+
+    m_RuntimeTypeMap[Type::FLOAT4x2] =
+            m_Functions[RuntimeFunction::FLOAT4x2_FLOAT4x4_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
+    m_RuntimeTypeMap[Type::FLOAT4x3] =
+            m_Functions[RuntimeFunction::FLOAT4x3_FLOAT4x4_MUL]->
+                    getFunctionType()->getParamType(0)->getPointerElementType();
     m_RuntimeTypeMap[Type::FLOAT4x4] =
-            m_Functions[RuntimeFunction::FLOAT4x4_FLOAT4_MUL]->
+            m_Functions[RuntimeFunction::FLOAT4x4_FLOAT4x4_MUL]->
                     getFunctionType()->getParamType(0)->getPointerElementType();
 
     assert( llvm::cast<llvm::StructType>(m_RuntimeTypeMap[Type::STRING])->
@@ -777,7 +972,8 @@ Function_sp Runtime::GenerateFunctionWrapper( RuntimeFunction runtime_function )
     return std::make_shared<Function> ( info.runtimeName,
                                         CompleteType( info.returnType ),
                                         std::move( param_types ),
-                                        function );
+                                        function,
+                                        runtime_function );
 }
 
 void Runtime::InitializeOptimizers()

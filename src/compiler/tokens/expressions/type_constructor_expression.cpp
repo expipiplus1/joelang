@@ -93,9 +93,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
         // We have more than one argument, check if will fit in the type
         //
         unsigned num_elements = 0;
-        unsigned num_desired_elements = IsMatrixType( m_Type ) ?
-                                            GetNumMatrixElements( m_Type ) :
-                                            GetNumElementsInType( m_Type );
+        unsigned num_desired_elements = GetNumElementsInType( m_Type );
 
         for( const auto& argument : m_Arguments )
         {
@@ -105,7 +103,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
             {
                 sema.Warning( "Using a matrix as an element in a "
                               "multi-element constructor" );
-                arg_size = arg_type.GetNumMatrixElements();
+                arg_size = arg_type.GetNumElements();
             }
             else
             {
@@ -113,7 +111,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
                           arg_type.IsVectorType() ) &&
                         "Using a struct or array" );
 
-                arg_size = arg_type.GetVectorSize();
+                arg_size = arg_type.GetNumElements();
             }
 
             if( IsMatrixType( m_Type ) )

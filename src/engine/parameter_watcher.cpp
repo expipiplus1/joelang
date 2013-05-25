@@ -65,28 +65,37 @@ ParameterWatcherBase_up ParameterWatcherBase::Create(
     case JoeLangType<type>::value: \
         return ParameterWatcherBase_up( \
             new ParameterWatcher<type>( \
-                        uniform_location, \
-                        reinterpret_cast<const Parameter<type>&>( parameter) ) )
+                       uniform_location, \
+                       reinterpret_cast<const Parameter<type>&>( parameter) ) );
 
 #define CREATE_TYPED_PARAMETER_WATCHER_N(type) \
-        CREATE_TYPED_PARAMETER_WATCHER(type); \
-        CREATE_TYPED_PARAMETER_WATCHER(type##2); \
-        CREATE_TYPED_PARAMETER_WATCHER(type##3); \
-        CREATE_TYPED_PARAMETER_WATCHER(type##4)
+        CREATE_TYPED_PARAMETER_WATCHER( type ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##2 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##3 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##4 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##2x2 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##2x3 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##2x4 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##3x2 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##3x3 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##3x4 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##4x2 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##4x3 ) \
+        CREATE_TYPED_PARAMETER_WATCHER( type##4x4 )
 
     switch( parameter.GetType() )
     {
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_bool);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_char);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_short);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_int);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_long);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uchar);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ushort);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uint);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ulong);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_float);
-    CREATE_TYPED_PARAMETER_WATCHER_N(jl_double);
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_bool)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_char)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_short)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_int)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_long)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uchar)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ushort)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_uint)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_ulong)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_float)
+    CREATE_TYPED_PARAMETER_WATCHER_N(jl_double)
     default:
         assert( false &&
                 "Trying to create a parameter watcher for an unhandled type" );
@@ -159,27 +168,51 @@ void ParameterWatcher<type>::Update() \
     } \
 }
 
+#define CREATE_FLOAT_MATRIX_SPECIALIZATION( type, gl_suffix ) \
+template<> \
+void ParameterWatcher<type>::Update() \
+{ \
+    if( m_CurrentValue != m_Parameter.GetParameter() ) \
+    { \
+        m_CurrentValue = m_Parameter.GetParameter(); \
+        glUniformMatrix##gl_suffix( m_UniformLocation, \
+                                    1, /* one matrix */ \
+                                    false, /* don't transpose */ \
+                                    &m_CurrentValue[0][0] ); \
+    } \
+}
 
 #define CREATE_SPECIALIZATION(type, gl_function_suffix) \
     CREATE_SCALAR_SPECIALIZATION(type, glUniform1##gl_function_suffix) \
-    CREATE_VEC1_SPECIALIZATION(type##1,   glUniform1##gl_function_suffix) \
     CREATE_VEC2_SPECIALIZATION(type##2,   glUniform2##gl_function_suffix) \
     CREATE_VEC3_SPECIALIZATION(type##3,   glUniform3##gl_function_suffix) \
     CREATE_VEC4_SPECIALIZATION(type##4,   glUniform4##gl_function_suffix)
 
 CREATE_SPECIALIZATION(jl_bool, ui)
-CREATE_SPECIALIZATION(jl_char, i);
-CREATE_SPECIALIZATION(jl_short, i);
-CREATE_SPECIALIZATION(jl_int, i);
-CREATE_SPECIALIZATION(jl_long, i); // TODO make this use 64 but uniforms if pos.
-CREATE_SPECIALIZATION(jl_uchar, ui);
-CREATE_SPECIALIZATION(jl_ushort, ui);
-CREATE_SPECIALIZATION(jl_uint, ui);
-CREATE_SPECIALIZATION(jl_ulong, ui);
-CREATE_SPECIALIZATION(jl_float, f);
-CREATE_SPECIALIZATION(jl_double, d);
+CREATE_SPECIALIZATION(jl_char, i)
+CREATE_SPECIALIZATION(jl_short, i)
+CREATE_SPECIALIZATION(jl_int, i)
+CREATE_SPECIALIZATION(jl_long, i) // TODO make this use 64 but uniforms if pos.
+CREATE_SPECIALIZATION(jl_uchar, ui)
+CREATE_SPECIALIZATION(jl_ushort, ui)
+CREATE_SPECIALIZATION(jl_uint, ui)
+CREATE_SPECIALIZATION(jl_ulong, ui)
+CREATE_SPECIALIZATION(jl_float, f)
+CREATE_SPECIALIZATION(jl_double, d)
 
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float2x2, 2fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float2x3, 2x3fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float2x4, 2x3fv)
 
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float3x2, 3x2fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float3x3, 3fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float3x4, 3x4fv)
+
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float4x2, 4x2fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float4x3, 4x3fv)
+CREATE_FLOAT_MATRIX_SPECIALIZATION(jl_float4x4, 4fv)
+
+#undef CREATE_FLOAT_MATRIX_SPECIALIZATION
 #undef CREATE_VEC1_SPECIALIZATION
 
 } // namespace JoeLang

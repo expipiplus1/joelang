@@ -53,6 +53,7 @@ class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+enum class RuntimeFunction;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -68,10 +69,11 @@ public:
               Semantic semantic,
               std::vector<CompleteType> parameters );
 
-    Function( std::string identifier,
+    Function(std::string identifier,
               CompleteType return_type,
               std::vector<CompleteType> parameter_types,
-              llvm::Function* llvm_function );
+              llvm::Function* llvm_function,
+              RuntimeFunction runtime_function );
 
     ~Function();
 
@@ -103,6 +105,10 @@ public:
     bool HasDefinition() const;
 
     bool HasLLVMFunction() const;
+
+    bool IsRuntimeFunction() const;
+
+    RuntimeFunction GetRuntimeFunction() const;
 
     /**
       * Returns all the functions called directly by this one.
@@ -160,6 +166,8 @@ private:
     CompoundStatement_up      m_Definition;
 
     llvm::Function*           m_LLVMFunction;
+
+    RuntimeFunction           m_RuntimeFunction;
 };
 
 } // namespace Compiler

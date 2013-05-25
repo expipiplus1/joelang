@@ -47,6 +47,8 @@ class CompleteType;
   */
 CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 );
 
+Type GetMatrixType( Type base, unsigned columns, unsigned rows );
+
 Type GetVectorType( Type base, unsigned size );
 
 /** Reduces matrix or vector types to their scalar types **/
@@ -67,16 +69,11 @@ bool IsMatrixType( Type t );
 
 bool IsScalarType( Type t );
 
-/**
-  * This asserts that t is not Type::UNKNOWN
-  */
 unsigned GetNumElementsInType( Type t );
 
 unsigned GetNumRowsInType( Type t );
 
 unsigned GetNumColumnsInType( Type t );
-
-unsigned GetNumMatrixElements( Type t );
 
 /**
   * \param t

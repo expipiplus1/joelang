@@ -41,6 +41,7 @@
 #include <compiler/function.hpp>
 #include <compiler/generic_value.hpp>
 #include <compiler/parser.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/sema_analyzer.hpp>
 #include <compiler/shader_writer.hpp>
 #include <compiler/swizzle.hpp>
@@ -353,6 +354,17 @@ llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
 void ArgumentListOperator::Write( ShaderWriter& shader_writer,
                                   const Expression& expression ) const
 {
+    //
+    // If this is a runtime function, defer writing to the runtime
+    //
+    if( m_Function->IsRuntimeFunction() )
+    {
+        shader_writer.WriteRuntimeFunctionCall(
+                                               m_Function->GetRuntimeFunction(),
+                                               m_Arguments );
+        return;
+    }
+
     shader_writer << ShaderWriter::Mangle( m_Function->GetIdentifier(),
                                            IdentifierType::FUNCTION ) << "(";
     bool first = true;

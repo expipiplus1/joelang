@@ -39,6 +39,7 @@
 
 #include <compiler/code_generator.hpp>
 #include <compiler/complete_type.hpp>
+#include <compiler/runtime.hpp>
 #include <compiler/shader_writer.hpp>
 #include <compiler/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
@@ -57,17 +58,20 @@ Function::Function( std::string identifier,
     ,m_Semantic( std::move(semantic) )
     ,m_ParameterTypes( std::move(parameter_types) )
     ,m_LLVMFunction( nullptr )
+    ,m_RuntimeFunction( RuntimeFunction::NONE )
 {
 }
 
 Function::Function( std::string identifier,
                     CompleteType return_type,
                     std::vector<CompleteType> parameter_types,
-                    llvm::Function* llvm_function )
+                    llvm::Function* llvm_function,
+                    RuntimeFunction runtime_function )
     :m_Identifier( std::move(identifier) )
     ,m_ReturnType( std::move(return_type) )
     ,m_ParameterTypes( std::move(parameter_types) )
     ,m_LLVMFunction( llvm_function )
+    ,m_RuntimeFunction( runtime_function )
 {
     assert( llvm_function && "Function given a null llvm_function" );
 }
@@ -119,6 +123,7 @@ void Function::SetParameters( std::vector<Variable_sp> parameters )
 
 void Function::SetDefinition( CompoundStatement_up definition )
 {
+    assert( !IsRuntimeFunction() && "Trying to define a runtime function" );
     assert( !HasDefinition() && "Definining a function twice" );
     m_Definition = std::move(definition);
 }
@@ -133,11 +138,23 @@ bool Function::HasLLVMFunction() const
     return m_LLVMFunction;
 }
 
+bool Function::IsRuntimeFunction() const
+{
+    return m_RuntimeFunction != RuntimeFunction::NONE;
+}
+
+RuntimeFunction Function::GetRuntimeFunction() const
+{
+    return m_RuntimeFunction;
+}
+
 std::set<Function_sp> Function::GetCallees() const
 {
-    if( HasDefinition() )
-        return m_Definition->GetCallees();
-    return std::set<Function_sp>{};
+    if( IsRuntimeFunction() )
+        return std::set<Function_sp>{};
+    assert( HasDefinition() &&
+            "Trying to get the callees of a function without a definition" );
+    return m_Definition->GetCallees();
 }
 
 std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const
@@ -177,6 +194,9 @@ std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const
 
 std::set<Variable_sp> Function::GetVariables() const
 {
+    if( IsRuntimeFunction() )
+        return std::set<Variable_sp>{};
+
     assert( m_Definition &&
             "Trying to get the variables of a function without a definition" );
     return m_Definition->GetVariables();
@@ -184,6 +204,9 @@ std::set<Variable_sp> Function::GetVariables() const
 
 std::set<Variable_sp> Function::GetWrittenToVariables() const
 {
+    if( IsRuntimeFunction() )
+        return std::set<Variable_sp>{};
+
     assert( m_Definition &&
             "Trying to get the written to variables of a function without a "
             "definition" );
@@ -232,6 +255,8 @@ void Function::CodeGenDefinition( CodeGenerator& code_gen )
 
 void Function::WriteDeclaration( ShaderWriter& shader_writer ) const
 {
+    assert( !IsRuntimeFunction() &&
+            "Trying to write the decalaration for a runtime function" );
     WriteHeader( shader_writer );
     shader_writer << ";";
     shader_writer.NewLine();
@@ -239,6 +264,9 @@ void Function::WriteDeclaration( ShaderWriter& shader_writer ) const
 
 void Function::WriteDefinition( ShaderWriter& shader_writer ) const
 {
+    assert( !IsRuntimeFunction() &&
+            "Trying to write the definition for a runtime function" );
+
     WriteHeader( shader_writer );
 
     shader_writer.NewLine();

@@ -183,7 +183,7 @@ set( runtime_sources src/runtime/float.cpp
                      src/runtime/types.hpp )
 
 string( REPLACE " " ";" JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
-set( JOELANG_RUNTIME_CXX_FLAGS ${JOELANG_RUNTIME_CXX_FLAGS} -msse4.1 )
+set( JOELANG_RUNTIME_CXX_FLAGS ${JOELANG_RUNTIME_CXX_FLAGS} -msse4.1 -Wno-return-type-c-linkage)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set( JOELANG_RUNTIME_COMPILER ${CMAKE_CXX_COMPILER} )
@@ -197,7 +197,7 @@ set( runtime_bitcode_files "" )
 foreach( runtime_source ${runtime_sources} )
     get_filename_component( extension ${runtime_source} EXT )
     if( ${extension} STREQUAL ".cpp" )
-        get_filename_component( bitcode_file ${runtime_source} NAME )
+        get_filename_component( bitcode_file ${runtime_source} NAME)
         set( bitcode_file ${CMAKE_CURRENT_BINARY_DIR}/${bitcode_file}.bc )
         add_custom_command(
             OUTPUT ${bitcode_file}

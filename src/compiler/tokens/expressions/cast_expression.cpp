@@ -102,9 +102,9 @@ bool CastExpression::PerformSemaNoRecurse( SemaAnalyzer& sema )
 
 bool CastExpression::PerformSema( SemaAnalyzer& sema )
 {
-    bool good = m_Expression->PerformSema( sema );
-    good &= PerformSemaNoRecurse( sema );
-    return good;
+    if( !m_Expression->PerformSema( sema ) )
+        return false;
+    return PerformSemaNoRecurse( sema );
 }
 
 bool CastExpression::CanCastFromScalar( SemaAnalyzer& sema )
@@ -142,13 +142,13 @@ bool CastExpression::CanCastFromVector( SemaAnalyzer& sema )
     //
     if( m_CastType.IsVectorType() )
     {
-        if( m_CastType.GetVectorSize() > t.GetVectorSize() )
+        if( m_CastType.GetNumElements() > t.GetNumElements() )
         {
             sema.Error( "Can't cast a vector to a larger vector type" );
             return false;
         }
         
-        if( m_CastType.GetVectorSize() < t.GetVectorSize() )
+        if( m_CastType.GetNumElements() < t.GetNumElements() )
             sema.Warning( "Casting a vector to a smaller vector type" );    
         return true;
     }
@@ -158,8 +158,7 @@ bool CastExpression::CanCastFromVector( SemaAnalyzer& sema )
     //
     if( m_CastType.IsMatrixType() )
     {
-        if( m_CastType.GetNumMatrixColumns() * m_CastType.GetNumMatrixRows() !=
-            t.GetVectorSize() )
+        if( m_CastType.GetNumElements() != t.GetNumElements() )
         {
             sema.Error( "Can't cast a vector to a matrix of different size" );
             return false;
@@ -192,8 +191,7 @@ bool CastExpression::CanCastFromMatrix( SemaAnalyzer& sema )
     //
     if( m_CastType.IsVectorType() )
     {
-        if( t.GetNumMatrixColumns() * t.GetNumMatrixRows() !=
-            m_CastType.GetVectorSize() )
+        if( t.GetNumElements() != m_CastType.GetNumElements() )
         {
             sema.Error( "Can't cast a matrix to a vector of different size" );
             return false;

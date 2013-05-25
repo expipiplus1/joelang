@@ -99,8 +99,7 @@ bool CompleteType::IsIntegral() const
 
 bool CompleteType::IsMatrixType() const
 {
-    // no matrices yet
-    return false;
+    return Compiler::IsMatrixType( m_BaseType ) && m_ArrayExtents.empty();
 }
 
 bool CompleteType::IsStructType() const
@@ -124,17 +123,11 @@ bool CompleteType::IsSigned() const
     return Compiler::IsSigned( m_BaseType ) && m_ArrayExtents.empty();
 }
 
-unsigned CompleteType::GetVectorSize() const
+Type CompleteType::GetElementType() const
 {
-    assert( ( IsVectorType() || IsScalarType() ) && 
-            "Trying to get the vector size of a non vector type" );
-    return Compiler::GetNumElementsInType( m_BaseType );
-}
-
-Type CompleteType::GetVectorElementType() const
-{
-    assert( ( IsVectorType() || IsScalarType() ) &&
-            "Trying to get the vector element type of a non vector type" );
+    assert( ( IsMatrixType() || IsVectorType() || IsScalarType() ) &&
+            "Trying to get the element type of a non-vector or non-matrix "
+            "type" );
     return Compiler::GetScalarType( m_BaseType );
 }
 
@@ -152,9 +145,10 @@ unsigned CompleteType::GetNumMatrixRows() const
     return GetNumRowsInType( m_BaseType );
 }
 
-unsigned CompleteType::GetNumMatrixElements() const
+unsigned CompleteType::GetNumElements() const
 {
-    return GetNumMatrixRows() * GetNumMatrixColumns();
+    assert( !IsArrayType() && "Complete me" );
+    return GetNumElementsInType( m_BaseType );
 }
 
 std::string CompleteType::GetString() const

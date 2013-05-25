@@ -142,7 +142,7 @@ GenericValue::GenericValue( type   type##_value   ) \
     ,m_##Type##Value( type##_value ) \
 { \
 } \
-  \
+ \
 type GenericValue::Get##Type() const \
 { \
     assert( m_Type == TYPE && \
