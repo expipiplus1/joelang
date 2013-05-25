@@ -87,13 +87,14 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 
     //
     // Verify that we have the correct number of parameters for this type
+    // Or just one parameter
     //
     unsigned num_desired_elements = GetNumElementsInType( m_Type );
     unsigned num_elements = 0;
     for( const auto& argument : m_Arguments )
         num_elements += argument->GetType().GetVectorSize();
 
-    if( num_elements != num_desired_elements )
+    if( num_elements != num_desired_elements && num_elements != 1 )
     {
         sema.Error( "Wrong number of elements in constructor" );
         good = false;
@@ -121,7 +122,11 @@ llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     if( IsVectorType( m_Type ) )
     {
-        return code_gen.CreateVectorConstructor( m_Type, m_Arguments );
+        if( m_Arguments.size() == 1 )
+            return code_gen.CreateCast( *m_Arguments.front(),
+                                        CompleteType( m_Type ) );
+        else
+            return code_gen.CreateVectorConstructor( m_Type, m_Arguments );
     }
     else
     {
