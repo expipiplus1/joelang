@@ -87,74 +87,81 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 
     assert( m_Arguments.size() > 0 && "Type constructor has no arguments" );
 
-    if( m_Arguments.size() != 1 )
+    if( m_Arguments.size() == 1 )
     {
         //
-        // We have more than one argument, check if will fit in the type
+        // If there is only one argument, forward this work to a cast_expression
         //
-        unsigned num_elements = 0;
-        unsigned num_desired_elements = GetNumElementsInType( m_Type );
+        CastExpression_up c;
+        c = CastExpression::Create( m_Type, std::move( m_Arguments[0] ), true );
+        good &= c->PerformSemaNoRecurse( sema );
+        m_Arguments[0] = std::move(c);
+        return good;
+    }
 
-        for( const auto& argument : m_Arguments )
+
+    //
+    // We have more than one argument, check if they will fit in the type
+    //
+    unsigned num_elements = 0;
+
+    for( const auto& argument : m_Arguments )
+    {
+        CompleteType arg_type = argument->GetType();
+        unsigned arg_size;
+        if( arg_type.IsMatrixType() )
         {
-            CompleteType arg_type = argument->GetType();
-            unsigned arg_size;
-            if( arg_type.IsMatrixType() )
-            {
-                sema.Warning( "Using a matrix as an element in a "
-                              "multi-element constructor" );
-                arg_size = arg_type.GetNumElements();
-            }
-            else
-            {
-                assert( ( arg_type.IsScalarType() ||
-                          arg_type.IsVectorType() ) &&
-                        "Using a struct or array" );
+            sema.Warning( "Using a matrix as an element in a "
+                          "multi-element constructor" );
+            arg_size = arg_type.GetNumElements();
+        }
+        else
+        {
+            assert( ( arg_type.IsScalarType() ||
+                      arg_type.IsVectorType() ) &&
+                    "Using a struct or array" );
 
-                arg_size = arg_type.GetNumElements();
-            }
-
-            if( IsMatrixType( m_Type ) )
-            {
-                unsigned rows                 = GetNumRowsInType( m_Type );
-                if( ( num_elements + arg_size ) / rows != num_elements / rows &&
-                    ( num_elements + arg_size ) % rows != 0 )
-                    sema.Warning(
-                             "Element in constructor crosses column boundary" );
-            }
-
-            num_elements += arg_size;
+            arg_size = arg_type.GetNumElements();
         }
 
-        assert( num_elements > 1 &&
-                "How did we only get one element with more than one argument" );
+        if( IsMatrixType( m_Type ) )
+        {
+            unsigned rows                 = GetNumRowsInType( m_Type );
+            if( ( num_elements + arg_size ) / rows != num_elements / rows &&
+                ( num_elements + arg_size ) % rows != 0 )
+                sema.Warning(
+                         "Element in constructor crosses column boundary" );
+        }
 
-        if( num_elements < num_desired_elements )
+        num_elements += arg_size;
+    }
+
+    unsigned num_desired_elements = GetNumElementsInType( m_Type );
+    if( num_elements < num_desired_elements )
+    {
+        //
+        // If this is a matrix, we may want to fill up the main diagonal
+        //
+        if( IsMatrixType( m_Type ) &&
+            num_elements == JoeMath::Min( GetNumColumnsInType( m_Type ),
+                                          GetNumRowsInType( m_Type ) ) )
+        {
+
+        }
+        else
         {
             sema.Error( "Too few elements in constructor" );
             good = false;
         }
-        else if( num_elements > num_desired_elements )
-        {
-            sema.Error( "Too many elements in constructor" );
-            good = false;
-        }
     }
-    else
+    else if( num_elements > num_desired_elements )
     {
-        //
-        // We have a single argument, make sure it's something we can cast from
-        //
-        assert( ( m_Arguments[0]->GetType().IsScalarType() ||
-                  m_Arguments[0]->GetType().IsVectorType() ||
-                  m_Arguments[0]->GetType().IsMatrixType() ) &&
-                "Casting from a struct or array" );
+        sema.Error( "Too many elements in constructor" );
+        good = false;
     }
 
     //
     // Verify that all the parameters can be converted into the correct base
-    // type, if there's only one argument, then this is an explicit cast
-    // todo matrices
     //
     for( auto& argument : m_Arguments )
     {

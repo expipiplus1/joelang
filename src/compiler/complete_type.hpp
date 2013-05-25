@@ -84,6 +84,8 @@ public:
     unsigned GetNumMatrixRows() const;
     unsigned GetNumMatrixColumns() const;
 
+    Type GetMatrixColumnType() const;
+
     std::string GetString() const;
 
     void Write( ShaderWriter& shader_writer ) const;

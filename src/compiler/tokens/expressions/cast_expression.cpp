@@ -155,10 +155,18 @@ bool CastExpression::CanCastFromVector( SemaAnalyzer& sema )
     
     //
     // We can only cast to a matrix if they are of the same size
+    // Or we can fill up the diagonal (if this is explicit)
     //
     if( m_CastType.IsMatrixType() )
     {
-        if( m_CastType.GetNumElements() != t.GetNumElements() )
+        if( t.GetNumElements() ==
+                            JoeMath::Min( m_CastType.GetNumMatrixRows(),
+                                          m_CastType.GetNumMatrixColumns() ) &&
+            IsExplicit() )
+        {
+
+        }
+        else if( m_CastType.GetNumElements() != t.GetNumElements() )
         {
             sema.Error( "Can't cast a vector to a matrix of different size" );
             return false;

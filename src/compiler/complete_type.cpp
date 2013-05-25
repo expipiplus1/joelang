@@ -131,6 +131,13 @@ Type CompleteType::GetElementType() const
     return Compiler::GetScalarType( m_BaseType );
 }
 
+Type CompleteType::GetMatrixColumnType() const
+{
+    assert( IsMatrixType() &&
+            "Trying to get the element type of a non-matrix type" );
+    return Compiler::GetMatrixColumnType( m_BaseType );
+}
+
 unsigned CompleteType::GetNumMatrixColumns() const
 {
     assert( IsMatrixType() &&

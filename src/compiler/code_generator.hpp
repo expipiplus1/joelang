@@ -130,6 +130,10 @@ public:
     llvm::Value* CreateCastToVector( const Expression& expression,
                                      const CompleteType& to_type );
 
+    llvm::Value* CreateCastToMatrix( const Expression& expression,
+                                     const CompleteType& to_type );
+
+
     // Unary Operators
     llvm::Value* CreateNeg(  const Expression& e );
     llvm::Value* CreateNot(  const Expression& e );

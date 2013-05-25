@@ -578,8 +578,10 @@ llvm::Value* CodeGenerator::CreateCast( const Expression& e,
         return CreateCastToScalar( e, to_type );
     if( to_type.IsVectorType() )
         return CreateCastToVector( e, to_type );
+    if( to_type.IsMatrixType() )
+        return CreateCastToMatrix( e, to_type );
 
-    assert( false && "Trying to cast to and unhandled type" );
+    assert( false && "Trying to cast to an unhandled type" );
     return nullptr;
 }
 
@@ -722,6 +724,98 @@ llvm::Value* CodeGenerator::CreateCastToVector( const Expression& expression,
         return CreateScalarOrVectorCast( e_value,
                                          from_type,
                                          to_type );
+    }
+
+    assert( false && "Trying to cast from an unhandled type" );
+    return nullptr;
+}
+
+llvm::Value* CodeGenerator::CreateCastToMatrix( const Expression& expression,
+                                                const CompleteType& to_type )
+{
+    assert( to_type.IsMatrixType() &&
+            "Trying to create a vector cast to a non-vector type" );
+
+    CompleteType from_type = expression.GetType();
+
+    Type to_column_type = to_type.GetMatrixColumnType();
+
+    if( from_type.IsScalarType() )
+    {
+        //
+        // If we have a scalar type then cast it to the right element type and
+        // splat it
+        //
+        llvm::Value* column_value = CreateCastToVector(
+                                               expression,
+                                               CompleteType( to_column_type ) );
+        llvm::Value* ret = llvm::UndefValue::get(
+                                             m_Runtime.GetLLVMType( to_type ) );
+        for( int i = 0; i < to_type.GetNumMatrixColumns(); ++i )
+            ret = m_Builder.CreateInsertValue( ret, column_value, {i} );
+
+        return ret;
+    }
+
+    if( from_type.IsVectorType() )
+    {
+        llvm::Value* e_value = CreateCastToVector(
+                  expression,
+                  CompleteType( GetVectorType( to_type.GetElementType(),
+                                               from_type.GetNumElements() ) ) );
+
+        if( from_type.GetNumElements() == to_type.GetNumElements() )
+        {
+            return m_Runtime.CreateDeepCopy( e_value,
+                                             m_Runtime.GetLLVMType( to_type ),
+                                             m_Builder );
+        }
+
+        if( from_type.GetNumElements() ==
+                                JoeMath::Min( to_type.GetNumMatrixRows(),
+                                              to_type.GetNumMatrixColumns() ) )
+        {
+            llvm::Value* ret = llvm::ConstantAggregateZero::get(
+                                             m_Runtime.GetLLVMType( to_type ) );
+
+            for( int i = 0; i < from_type.GetNumElements(); ++i )
+            {
+                llvm::Value* index = CreateInteger( i, Type::INT );
+                llvm::Value* v = m_Builder.CreateExtractValue( ret, {i} );
+                llvm::Value* e = m_Builder.CreateExtractElement( e_value,
+                                                                 index );
+                v = m_Builder.CreateInsertElement( v, e, index );
+                ret = m_Builder.CreateInsertValue( ret, v, {i} );
+            }
+            return ret;
+        }
+
+        assert( false && "Couldn't cast vector to matrix" );
+    }
+
+    if( from_type.IsMatrixType() )
+    {
+        assert( to_type.GetNumMatrixColumns() <=
+                    from_type.GetNumMatrixColumns() &&
+                "Trying to cast to a larger matrix" );
+        assert( to_type.GetNumMatrixRows() <=
+                    from_type.GetNumMatrixRows() &&
+                "Trying to cast to a larger matrix" );
+
+        llvm::Value* e_value = expression.CodeGen( *this );
+        llvm::Value* ret = llvm::UndefValue::get(
+                                             m_Runtime.GetLLVMType( to_type ) );
+
+        for( unsigned i = 0; i < to_type.GetNumMatrixColumns(); ++i )
+        {
+            llvm::Value* v = m_Builder.CreateExtractValue( e_value, {i} );
+            v = CreateScalarOrVectorCast( v,
+                                          from_type.GetMatrixColumnType(),
+                                          to_type.GetMatrixColumnType() );
+            ret = m_Builder.CreateInsertValue( ret, v, {i});
+        }
+
+        return ret;
     }
 
     assert( false && "Trying to cast from an unhandled type" );
