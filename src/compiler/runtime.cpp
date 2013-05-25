@@ -55,8 +55,6 @@
 #include <compiler/semantic.hpp>
 #include <compiler/type_properties.hpp>
 
-#include <iostream>
-
 #ifndef JOELANG_RUNTIME_FILENAME
     #error Missing runtime filename
 #endif
@@ -271,7 +269,6 @@ llvm::Type* Runtime::GetLLVMType( const CompleteType& type ) const
 
 llvm::Type* Runtime::GetLLVMType( Type type ) const
 {
-    std::cout << GetTypeString(type) << std::endl;
     auto i = m_InternalTypeMap.find( type );
     assert( i != m_InternalTypeMap.end() &&
             "Trying to get the llvm::Type of an unhandled Type" );
@@ -401,11 +398,17 @@ llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
     if( value->getType() == to_type )
         return value;
 
+    return CreateDeepCopy( std::vector<llvm::Value*>{value}, to_type, builder );
+}
+
+llvm::Value* Runtime::CreateDeepCopy( const std::vector<llvm::Value*>& values,
+                                      llvm::Type* to_type,
+                                      llvm::IRBuilder<>& builder )
+{
     //
     // We perform a depth first traversal of the from_type to get the values
     //
     std::stack<std::pair<llvm::Value*, unsigned>> elements;
-    elements.push( {value, 0u} );
 
     std::function<llvm::Value*()> GetNextElement;
     GetNextElement =
@@ -414,7 +417,10 @@ llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
     {
         llvm::Type* t = elements.top().first->getType();
 
-        unsigned end = t->isPrimitiveType() ? 1 :
+        bool is_simple_type = !t->isVectorTy() &&
+                              !t->isAggregateType();
+
+        unsigned end = is_simple_type ? 1 :
                        t->isVectorTy() ? t->getVectorNumElements() :
                        t->isArrayTy() ? t->getArrayNumElements() :
                        t->isStructTy() ? t->getStructNumElements() : 0;
@@ -433,7 +439,7 @@ llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
             return GetNextElement();
         }
 
-        if( t->isPrimitiveType() )
+        if( is_simple_type )
         {
             llvm::Value* ret = elements.top().first;
             ++elements.top().second;
@@ -466,7 +472,10 @@ llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
         [&builder, &FillType, this]
         ( llvm::Type* t, it& begin, it end ) -> llvm::Value*
     {
-        if( t->isPrimitiveType() )
+        bool is_simple_type = !t->isVectorTy() &&
+                              !t->isAggregateType();
+
+        if( is_simple_type )
         {
             //
             // return one element and increment begin
@@ -524,8 +533,12 @@ llvm::Value* Runtime::CreateDeepCopy( llvm::Value* value,
     };
 
     std::vector<llvm::Value*> flat_elements;
-    while( llvm::Value* v = GetNextElement() )
-        flat_elements.push_back(v);
+    for( llvm::Value* s : values )
+    {
+        elements.push( {s, 0u} );
+        while( llvm::Value* v = GetNextElement() )
+            flat_elements.push_back(v);
+    }
 
     llvm::Value* ret = nullptr;
 

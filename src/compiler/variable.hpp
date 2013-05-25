@@ -53,7 +53,7 @@ namespace Compiler
 
 class CodeGenerator;
 class Expression;
-typedef std::unique_ptr<Expression> Expression_up;
+using Expression_up = std::unique_ptr<Expression>;
 
 /**
   * \class Variable

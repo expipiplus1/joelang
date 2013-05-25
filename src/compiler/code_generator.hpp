@@ -107,8 +107,11 @@ public:
     GenericValue EvaluateExpression( const Expression& expression );
 
     // Type construction
-    /** This asserts that all the arguments are not null **/
     llvm::Value* CreateVectorConstructor(
+                                  Type type,
+                                  const std::vector<Expression_up>& arguments );
+
+    llvm::Value* CreateMatrixConstructor(
                                   Type type,
                                   const std::vector<Expression_up>& arguments );
 

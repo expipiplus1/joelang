@@ -158,7 +158,7 @@ bool CastExpression::CanCastFromVector( SemaAnalyzer& sema )
     //
     if( m_CastType.IsMatrixType() )
     {
-        if( m_CastType.GetMatrixWidth() * m_CastType.GetMatrixHeight() !=
+        if( m_CastType.GetNumMatrixColumns() * m_CastType.GetNumMatrixRows() !=
             t.GetVectorSize() )
         {
             sema.Error( "Can't cast a vector to a matrix of different size" );
@@ -192,7 +192,7 @@ bool CastExpression::CanCastFromMatrix( SemaAnalyzer& sema )
     //
     if( m_CastType.IsVectorType() )
     {
-        if( t.GetMatrixWidth() * t.GetMatrixHeight() !=
+        if( t.GetNumMatrixColumns() * t.GetNumMatrixRows() !=
             m_CastType.GetVectorSize() )
         {
             sema.Error( "Can't cast a matrix to a vector of different size" );
@@ -209,16 +209,16 @@ bool CastExpression::CanCastFromMatrix( SemaAnalyzer& sema )
     //
     if( m_CastType.IsMatrixType() )
     {
-        if( t.GetMatrixWidth()  < m_CastType.GetMatrixWidth() ||
-            t.GetMatrixHeight() < m_CastType.GetMatrixHeight() )
+        if( t.GetNumMatrixColumns()  < m_CastType.GetNumMatrixColumns() ||
+            t.GetNumMatrixRows() < m_CastType.GetNumMatrixRows() )
         {
             sema.Error( 
                   "Can't cast a matrix to a matrix type of larger dimensions" );
             return false;
         }
         
-        if( ( t.GetMatrixWidth()  > m_CastType.GetMatrixWidth() ||
-              t.GetMatrixHeight() > m_CastType.GetMatrixHeight() ) &&
+        if( ( t.GetNumMatrixColumns()  > m_CastType.GetNumMatrixColumns() ||
+              t.GetNumMatrixRows() > m_CastType.GetNumMatrixRows() ) &&
             !IsExplicit() ) 
             sema.Warning( 
                     "Casting a matrix to a matrix type of smaller dimensions" );

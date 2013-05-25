@@ -117,6 +117,18 @@ public:
                                            std::vector<llvm::Value*> params,
                                            llvm::IRBuilder<>& builder );
 
+    //
+    // This will flatten values, and repackage it as a to_type
+    //
+    llvm::Value*        CreateDeepCopy( const std::vector<llvm::Value*>& values,
+                                        llvm::Type* to_type,
+                                        llvm::IRBuilder<>& builder );
+
+    llvm::Value*        CreateDeepCopy( llvm::Value* value,
+                                        llvm::Type* to_type,
+                                        llvm::IRBuilder<>& builder );
+
+
     llvm::Type*         GetLLVMType( const CompleteType& type ) const;
     llvm::Type*         GetLLVMType( Type type ) const;
 private:
@@ -184,13 +196,6 @@ private:
     // The runtime often has slightly different types
     //
     llvm::Type*         GetRuntimeLLVMType( Type type ) const;
-
-    //
-    // This will flatten value, and repackage it as a to_type
-    //
-    llvm::Value*        CreateDeepCopy( llvm::Value* value,
-                                        llvm::Type* to_type,
-                                        llvm::IRBuilder<>& builder );
 
     //
     // This will store the value, and load it back as a to_type

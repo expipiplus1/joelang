@@ -82,9 +82,10 @@ public:
 
     Type GetVectorElementType() const;
     
-    unsigned GetMatrixWidth() const;
-    unsigned GetMatrixHeight() const;
-    
+    unsigned GetNumMatrixRows() const;
+    unsigned GetNumMatrixColumns() const;
+    unsigned GetNumMatrixElements() const;
+
     std::string GetString() const;
 
     void Write( ShaderWriter& shader_writer ) const;

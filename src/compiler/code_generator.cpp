@@ -316,7 +316,7 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
     assert( expression.GetType().GetType() == state.GetType() &&
             "Type mismatch in state assignment code gen" );
 
-    llvm::Function* function;
+    llvm::Function* function = nullptr;
 
     std::unique_ptr<StateAssignmentBase> sa;
 
@@ -362,7 +362,6 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         break;
     default:
         assert( false && "Generating a stateassignment of unhandled type" );
-        sa = nullptr;
     }
 
     function->setName( name );
@@ -438,6 +437,27 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 // Type Construction
 //
 
+llvm::Value* CodeGenerator::CreateMatrixConstructor(
+                                   Type type,
+                                   const std::vector<Expression_up>& arguments )
+{
+#if !defined(NDEBUG)
+    for( const auto& argument : arguments )
+        assert( argument && "CreateMatrixTypeConstructor given null argument" );
+    assert( IsMatrixType( type ) &&
+            "CreateMatrixTypeConstructor given non-vector type" );
+#endif
+
+    std::vector<llvm::Value*> values;
+    values.reserve( arguments.size() );
+    for( const Expression_up& a : arguments )
+        values.push_back( a->CodeGen(*this) );
+
+    return m_Runtime.CreateDeepCopy( values,
+                                     m_Runtime.GetLLVMType( type ),
+                                     m_Builder );
+}
+
 llvm::Value* CodeGenerator::CreateVectorConstructor(
                                    Type type,
                                    const std::vector<Expression_up>& arguments )
@@ -448,41 +468,15 @@ llvm::Value* CodeGenerator::CreateVectorConstructor(
     assert( IsVectorType( type ) &&
             "CreateVectorTypeConstructor given non-vector type" );
 #endif
-    llvm::Value* ret = llvm::UndefValue::get(
-                                m_Runtime.GetLLVMType( CompleteType( type ) ) );
-    // Loop over all the arguments inserting as many elements as necessary
-    unsigned p = 0;
-    for( const auto& argument : arguments )
-    {
-        llvm::Value* argument_value = argument->CodeGen( *this );
-        if( argument->GetType().IsVectorType() )
-        {
-            for( unsigned i = 0; i < argument->GetType().GetVectorSize(); ++i )
-            {
-                llvm::Value* new_element = m_Builder.CreateExtractElement(
-                        argument_value,
-                        CreateInteger( i, Type::INT ) );
-                ret = m_Builder.CreateInsertElement(
-                                               ret,
-                                               new_element,
-                                               CreateInteger( p, Type::INT ) );
-                ++p;
-            }
-        }
-        else
-        {
-            assert( argument->GetType().IsScalarType() &&
-                    "Trying to use an unhandled type in vector constructor" );
-            ret = m_Builder.CreateInsertElement(
-                                               ret,
-                                               argument_value,
-                                               CreateInteger( p, Type::INT ) );
-            ++p;
-        }
-    }
-    assert( p == GetNumElementsInType( type ) &&
-            "constructing a vector with an incorrect number of elements" );
-    return ret;
+
+    std::vector<llvm::Value*> values;
+    values.reserve( arguments.size() );
+    for( const Expression_up& a : arguments )
+        values.push_back( a->CodeGen(*this) );
+
+    return m_Runtime.CreateDeepCopy( values,
+                                     m_Runtime.GetLLVMType( type ),
+                                     m_Builder );
 }
 
 llvm::Value* CodeGenerator::CreateScalarConstructor(

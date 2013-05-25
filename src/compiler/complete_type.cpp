@@ -138,16 +138,23 @@ Type CompleteType::GetVectorElementType() const
     return Compiler::GetScalarType( m_BaseType );
 }
 
-unsigned CompleteType::GetMatrixHeight() const
+unsigned CompleteType::GetNumMatrixColumns() const
 {
-    assert( false && "Complete me" );
-    return 0;
+    assert( IsMatrixType() &&
+            "Trying to get the number of columns in a non-matrix type" );
+    return GetNumColumnsInType( m_BaseType );
 }
 
-unsigned CompleteType::GetMatrixWidth() const
+unsigned CompleteType::GetNumMatrixRows() const
 {
-    assert( false && "Complete me" );
-    return 0;
+    assert( IsMatrixType() &&
+            "Trying to get the number of rows in a non-matrix type" );
+    return GetNumRowsInType( m_BaseType );
+}
+
+unsigned CompleteType::GetNumMatrixElements() const
+{
+    return GetNumMatrixRows() * GetNumMatrixColumns();
 }
 
 std::string CompleteType::GetString() const

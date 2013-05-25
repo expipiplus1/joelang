@@ -76,6 +76,8 @@ unsigned GetNumRowsInType( Type t );
 
 unsigned GetNumColumnsInType( Type t );
 
+unsigned GetNumMatrixElements( Type t );
+
 /**
   * \param t
   *   The type to get the size of

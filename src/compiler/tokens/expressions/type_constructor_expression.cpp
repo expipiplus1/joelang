@@ -85,19 +85,72 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     if( !good )
         return false;
 
-    //
-    // Verify that we have the correct number of parameters for this type
-    // Or just one parameter
-    //
-    unsigned num_desired_elements = GetNumElementsInType( m_Type );
-    unsigned num_elements = 0;
-    for( const auto& argument : m_Arguments )
-        num_elements += argument->GetType().GetVectorSize();
+    assert( m_Arguments.size() > 0 && "Type constructor has no arguments" );
 
-    if( num_elements != num_desired_elements && num_elements != 1 )
+    if( m_Arguments.size() != 1 )
     {
-        sema.Error( "Wrong number of elements in constructor" );
-        good = false;
+        //
+        // We have more than one argument, check if will fit in the type
+        //
+        unsigned num_elements = 0;
+        unsigned num_desired_elements = IsMatrixType( m_Type ) ?
+                                            GetNumMatrixElements( m_Type ) :
+                                            GetNumElementsInType( m_Type );
+
+        for( const auto& argument : m_Arguments )
+        {
+            CompleteType arg_type = argument->GetType();
+            unsigned arg_size;
+            if( arg_type.IsMatrixType() )
+            {
+                sema.Warning( "Using a matrix as an element in a "
+                              "multi-element constructor" );
+                arg_size = arg_type.GetNumMatrixElements();
+            }
+            else
+            {
+                assert( ( arg_type.IsScalarType() ||
+                          arg_type.IsVectorType() ) &&
+                        "Using a struct or array" );
+
+                arg_size = arg_type.GetVectorSize();
+            }
+
+            if( IsMatrixType( m_Type ) )
+            {
+                unsigned rows                 = GetNumRowsInType( m_Type );
+                if( ( num_elements + arg_size ) / rows != num_elements / rows &&
+                    ( num_elements + arg_size ) % rows != 0 )
+                    sema.Warning(
+                             "Element in constructor crosses column boundary" );
+            }
+
+            num_elements += arg_size;
+        }
+
+        assert( num_elements > 1 &&
+                "How did we only get one element with more than one argument" );
+
+        if( num_elements < num_desired_elements )
+        {
+            sema.Error( "Too few elements in constructor" );
+            good = false;
+        }
+        else if( num_elements > num_desired_elements )
+        {
+            sema.Error( "Too many elements in constructor" );
+            good = false;
+        }
+    }
+    else
+    {
+        //
+        // We have a single argument, make sure it's something we can cast from
+        //
+        assert( ( m_Arguments[0]->GetType().IsScalarType() ||
+                  m_Arguments[0]->GetType().IsVectorType() ||
+                  m_Arguments[0]->GetType().IsMatrixType() ) &&
+                "Casting from a struct or array" );
     }
 
     //
@@ -120,7 +173,15 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 
 llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const
 {
-    if( IsVectorType( m_Type ) )
+    if( IsMatrixType( m_Type ) )
+    {
+        if( m_Arguments.size() == 1 )
+            return code_gen.CreateCast( *m_Arguments.front(),
+                                        CompleteType( m_Type ) );
+        else
+            return code_gen.CreateMatrixConstructor( m_Type, m_Arguments );
+    }
+    else if( IsVectorType( m_Type ) )
     {
         if( m_Arguments.size() == 1 )
             return code_gen.CreateCast( *m_Arguments.front(),

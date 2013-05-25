@@ -435,6 +435,11 @@ unsigned GetNumColumnsInType( Type t )
 #undef RETURN_COLUMNS
 }
 
+unsigned GetNumMatrixElements( Type t )
+{
+    return GetNumColumnsInType( t ) * GetNumRowsInType( t );
+}
+
 std::size_t SizeOf( Type t )
 {
 
