@@ -166,7 +166,7 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
         return;
     }
 
-    if( !FindLLVMTypes() )
+    if( !FindInternalTypes() )
     {
         m_JoeLangContext.Error( "Error determining internal types" );
         return;
@@ -271,6 +271,7 @@ llvm::Type* Runtime::GetLLVMType( const CompleteType& type ) const
 
 llvm::Type* Runtime::GetLLVMType( Type type ) const
 {
+    std::cout << GetTypeString(type) << std::endl;
     auto i = m_InternalTypeMap.find( type );
     assert( i != m_InternalTypeMap.end() &&
             "Trying to get the llvm::Type of an unhandled Type" );
@@ -569,7 +570,7 @@ bool Runtime::FindRuntimeFunctions()
     return true;
 }
 
-bool Runtime::FindLLVMTypes()
+bool Runtime::FindInternalTypes()
 {
     std::function<llvm::Type*(Type)> GetType;
     GetType = [&]( Type type ) -> llvm::Type*
@@ -604,7 +605,7 @@ bool Runtime::FindLLVMTypes()
         return false;
 
 #define GET_TYPE_N(type) \
-    GET_TYPE( type) \
+    GET_TYPE( type ) \
     GET_TYPE( type##2 ) \
     GET_TYPE( type##3 ) \
     GET_TYPE( type##4 ) \
@@ -622,7 +623,7 @@ bool Runtime::FindLLVMTypes()
     GET_TYPE_N( Type::CHAR )
     GET_TYPE_N( Type::SHORT )
     GET_TYPE_N( Type::INT )
-    GET_TYPE_N( Type::ULONG )
+    GET_TYPE_N( Type::LONG )
     GET_TYPE_N( Type::UCHAR )
     GET_TYPE_N( Type::USHORT )
     GET_TYPE_N( Type::UINT )

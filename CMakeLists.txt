@@ -61,6 +61,7 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/inl/parameter_watcher-inl.hpp
                      src/compiler/casting.hpp
                      src/compiler/code_generator.cpp
+                     src/compiler/code_generator_wrappers.cpp
                      src/compiler/code_generator.hpp
                      src/compiler/complete_type.cpp
                      src/compiler/complete_type.hpp

@@ -106,7 +106,5 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
                                                 std::move(parameters) ) );
 }
 
-
-
 } // namespace Compiler
 } // namespace JoeLang

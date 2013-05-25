@@ -200,14 +200,11 @@ std::vector<ParameterBase_up> CodeGenerator::GenerateParameters(
     return parameters;
 }
 
-std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
-        const StateBase& state,
-        const Expression& expression,
-        const std::string& name )
+llvm::Function* CodeGenerator::WrapExpressionCommon(
+                                                   const Expression& expression,
+                                                   bool has_simple_return )
 {
     /// TODO assigning arrays
-    assert( expression.GetType().GetType() == state.GetType() &&
-            "Type mismatch in state assignment code gen" );
 
     //
     // Generate all the functions this may rely on first
@@ -220,115 +217,188 @@ std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
         function_dependencies.insert( d.begin(), d.end() );
         function_dependencies.insert( f );
     }
-
     GenerateFunctions( function_dependencies );
 
-    llvm::Function* function = CreateFunctionFromExpression( expression, name );
-    void* function_ptr = m_ExecutionEngine.getPointerToFunction(function);
+
+    llvm::Type* return_type = m_Runtime.GetLLVMType( expression.GetType() );
+
+    llvm::FunctionType* prototype;
+
+    if( has_simple_return )
+    {
+        //
+        // create a function prototype which takes no arguments!
+        //
+        prototype = llvm::FunctionType::get( return_type,
+                                             {},
+                                             false );
+    }
+    else
+    {
+        //
+        // The function takes a pointer to some memory in which to put the
+        // return value
+        //
+        prototype = llvm::FunctionType::get(
+                            llvm::Type::getVoidTy( m_Runtime.GetLLVMContext() ),
+                            { return_type->getPointerTo() },
+                            false );
+    }
+    assert( prototype && "Error generating empty function prototype" );
 
     //
-    // Cast to the appropriate type
+    // Create an anonymous function
     //
-    
-#define SA(type, jl_type) case Type::type: \
-    sa = new StateAssignment<jl_type> \
-     ( static_cast<const State<jl_type>&>(state), \
-       reinterpret_cast<jl_type(*)()>(function_ptr) ); \
-    break
-    
-    StateAssignmentBase* sa;
+    llvm::Function* function = llvm::Function::Create(
+                                                prototype,
+                                                llvm::Function::ExternalLinkage,
+                                                "",
+                                                &m_Module );
+    assert( function && "Error generating llvm function" );
+
+    llvm::BasicBlock* body = llvm::BasicBlock::Create(
+                                                    m_Runtime.GetLLVMContext(),
+                                                    "entry",
+                                                    function );
+
+    auto old_insert_point = m_Builder.saveAndClearIP();
+
+    m_Builder.SetInsertPoint( body );
+
+    //
+    // Generate the code from the expression
+    //
+    llvm::Value* v = expression.CodeGen( *this );
+    /// TODO arrays of strings
+    if( expression.GetType().GetType() == Type::STRING )
+    {
+        assert( !expression.GetType().IsArrayType() &&
+                "Todo arrays of strings" );
+        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY,
+                                         {v},
+                                         m_Builder );
+    }
+    CreateDestroyTemporaryCalls();
+
+    assert( v && "Invalid expression llvm::Value*" );
+    assert( m_Temporaries.empty() && "Leftover temporaries" );
+
+    if( has_simple_return )
+    {
+        //
+        // Set it as the return value for the function
+        //
+        m_Builder.CreateRet( v );
+    }
+    else
+    {
+        assert( function->arg_size() == 1 &&
+                "This isn't a pointer return function" );
+
+        m_Builder.CreateStore( v, function->arg_begin() );
+        m_Builder.CreateRetVoid();
+    }
+
+    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) &&
+            "Function not valid" );
+
+    m_Builder.restoreIP( old_insert_point );
+
+    return function;
+}
+
+std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(
+        const StateBase& state,
+        const Expression& expression,
+        const std::string& name )
+{
+    /// TODO assigning arrays
+    assert( expression.GetType().GetType() == state.GetType() &&
+            "Type mismatch in state assignment code gen" );
+
+    llvm::Function* function;
+
+    std::unique_ptr<StateAssignmentBase> sa;
+
+#define CREATE_STATE_ASSIGNMENT( type ) \
+    case JoeLangType<type>::value: \
+        sa.reset( new StateAssignment<type>( \
+            static_cast<const State<type>&>(state), \
+            WrapExpression<type>( expression, function ) ) ); \
+        break;
+
+#define CREATE_STATE_ASSIGNMENT_N( type ) \
+    CREATE_STATE_ASSIGNMENT( type ) \
+    CREATE_STATE_ASSIGNMENT( type##2 ) \
+    CREATE_STATE_ASSIGNMENT( type##3 ) \
+    CREATE_STATE_ASSIGNMENT( type##4 ) \
+    CREATE_STATE_ASSIGNMENT( type##2x2 ) \
+    CREATE_STATE_ASSIGNMENT( type##2x3 ) \
+    CREATE_STATE_ASSIGNMENT( type##2x4 ) \
+    CREATE_STATE_ASSIGNMENT( type##3x2 ) \
+    CREATE_STATE_ASSIGNMENT( type##3x3 ) \
+    CREATE_STATE_ASSIGNMENT( type##3x4 ) \
+    CREATE_STATE_ASSIGNMENT( type##4x2 ) \
+    CREATE_STATE_ASSIGNMENT( type##4x3 ) \
+    CREATE_STATE_ASSIGNMENT( type##4x4 )
+
     switch( state.GetType() )
     {
-    SA(BOOL, jl_bool);
-    SA(FLOAT, jl_float);
-    SA(FLOAT2, jl_float2);
-    case Type::FLOAT3:
-    {
-        // TODO this is pretty yucky, assuming that llvm returns this all in one
-        // register
-        // TODO move this function to llvm
-        std::function<jl_float3()> wrapper = [function_ptr]()
-        {
-            __m128 r;
-            r = reinterpret_cast<__m128(*)()>(function_ptr)();
-            jl_float3* f = reinterpret_cast<jl_float3*>(&r);
-            return *f;
-        };
-        sa = new StateAssignment<jl_float3>
-         ( static_cast<const State<jl_float3>&>(state),
-           wrapper );
-        break;
-    }
-    case Type::FLOAT4:
-    {
-        // TODO move this function to llvm
-        std::function<jl_float4()> wrapper = [function_ptr]()
-        {
-            __m128 r;
-            r = reinterpret_cast<__m128(*)()>(function_ptr)();
-            jl_float4* f = reinterpret_cast<jl_float4*>(&r);
-            return *f;
-        };
-        sa = new StateAssignment<jl_float4>
-         ( static_cast<const State<jl_float4>&>(state),
-           wrapper );
-        break;
-    }
-    case Type::FLOAT4x4:
-    {
-        assert( false );
-    }
-    SA(DOUBLE, jl_double);
-    SA(CHAR,   jl_char);
-    SA(SHORT,  jl_short);
-    SA(INT,    jl_int);
-    SA(LONG,   jl_long);
-    SA(UCHAR,  jl_uchar);
-    SA(USHORT, jl_ushort);
-    SA(UINT,   jl_uint);
-    SA(ULONG,  jl_ulong);
+    CREATE_STATE_ASSIGNMENT_N( jl_bool )
+    CREATE_STATE_ASSIGNMENT_N( jl_char )
+    CREATE_STATE_ASSIGNMENT_N( jl_short )
+    CREATE_STATE_ASSIGNMENT_N( jl_int )
+    CREATE_STATE_ASSIGNMENT_N( jl_long )
+    CREATE_STATE_ASSIGNMENT_N( jl_uchar )
+    CREATE_STATE_ASSIGNMENT_N( jl_ushort )
+    CREATE_STATE_ASSIGNMENT_N( jl_uint )
+    CREATE_STATE_ASSIGNMENT_N( jl_ulong )
+    CREATE_STATE_ASSIGNMENT_N( jl_float )
+    CREATE_STATE_ASSIGNMENT_N( jl_double )
     case Type::STRING:
-    {
-        // Cast from string to std::string and destroy original
-        const auto ToString = [function_ptr]()
-                                 {
-                                    jl_string s =
-                                          reinterpret_cast<jl_string(*)()>(
-                                                              function_ptr)();
-                                    std::string ret(
-                                          reinterpret_cast<const char*>(s.data),
-                                          s.size);
-                                   delete[] s.data;
-                                   return ret;
-                                 };
-        sa = new StateAssignment<std::string>(
-                 static_cast<const State<std::string>&>(state),
-                 ToString );
+        sa.reset( new StateAssignment<std::string>(
+            static_cast<const State<std::string>&>(state),
+            WrapStringExpression( expression, function ) ) );
         break;
-    }
     default:
         assert( false && "Generating a stateassignment of unhandled type" );
         sa = nullptr;
     }
-#undef SA
-    return std::unique_ptr<StateAssignmentBase>( sa );
+
+    function->setName( name );
+    function->setLinkage( llvm::Function::ExternalLinkage );
+
+    return sa;
+
+#undef CREATE_STATE_ASSIGNMENT_N
+#undef CREATE_STATE_ASSIGNMENT
 }
 
 GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
 {
-    /// TODO is this really necessary?
-    //assert( expression.IsConst() &&
-            //"Trying to evaluate a non-const expression" );
     assert( m_Temporaries.empty() && "Leftover temporaries" );
 
-    auto insert_point = m_Builder.saveAndClearIP();
+    llvm::Function* function;
 
-    llvm::Function* function = CreateFunctionFromExpression(
-                                                        expression,
-                                                        "TemporaryEvaluation" );
-    // Make this function private
-    function->setLinkage( llvm::GlobalVariable::PrivateLinkage );
-    void* function_ptr = m_ExecutionEngine.getPointerToFunction(function);
+#define GET_VALUE( type ) \
+    case JoeLangType<type>::value: \
+        ret = GenericValue( WrapExpression<type>( expression, function )() ); \
+        break;
+
+#define GET_VALUE_N( type ) \
+    GET_VALUE( type ) \
+    GET_VALUE( type##2 ) \
+    GET_VALUE( type##3 ) \
+    GET_VALUE( type##4 ) \
+    GET_VALUE( type##2x2 ) \
+    GET_VALUE( type##2x3 ) \
+    GET_VALUE( type##2x4 ) \
+    GET_VALUE( type##3x2 ) \
+    GET_VALUE( type##3x3 ) \
+    GET_VALUE( type##3x4 ) \
+    GET_VALUE( type##4x2 ) \
+    GET_VALUE( type##4x3 ) \
+    GET_VALUE( type##4x4 )
 
     //
     // Extract the result
@@ -336,77 +406,30 @@ GenericValue CodeGenerator::EvaluateExpression( const Expression& expression )
     GenericValue ret;
     switch( expression.GetType().GetType() )
     {
-    case Type::BOOL:
-        ret = GenericValue( reinterpret_cast<jl_bool(*)()>(function_ptr)() );
-        break;
-    case Type::CHAR:
-        ret = GenericValue( reinterpret_cast<jl_char(*)()>(function_ptr)() );
-        break;
-    case Type::SHORT:
-        ret = GenericValue( reinterpret_cast<jl_short(*)()>(function_ptr)() );
-        break;
-    case Type::INT:
-        ret = GenericValue( reinterpret_cast<jl_int(*)()>(function_ptr)() );
-        break;
-    case Type::LONG:
-        ret = GenericValue( reinterpret_cast<jl_long(*)()>(function_ptr)() );
-        break;
-    case Type::UCHAR:
-        ret = GenericValue( reinterpret_cast<jl_uchar(*)()>(function_ptr)() );
-        break;
-    case Type::USHORT:
-        ret = GenericValue( reinterpret_cast<jl_ushort(*)()>(function_ptr)() );
-        break;
-    case Type::UINT:
-        ret = GenericValue( reinterpret_cast<jl_uint(*)()>(function_ptr)() );
-        break;
-    case Type::UINT2:
-        {
-            //
-            // Todo, do all this stuff in one small horrible layer
-            //
-            __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
-            ret = GenericValue( jl_uint2( reinterpret_cast<jl_uint*>(&m)[0],
-                                          reinterpret_cast<jl_uint*>(&m)[2] ) );
-            break;
-        }
-    case Type::ULONG:
-        ret = GenericValue( reinterpret_cast<jl_ulong(*)()>(function_ptr)() );
-        break;
-    case Type::FLOAT:
-        ret = GenericValue( reinterpret_cast<jl_float(*)()>(function_ptr)() );
-        break;
-    case Type::FLOAT2:
-        ret = GenericValue( reinterpret_cast<jl_float2(*)()>(function_ptr)() );
-        break;
-    case Type::FLOAT3:
-        {
-            __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
-            ret = GenericValue( *reinterpret_cast<jl_float3*>(&m) );
-            break;
-        }
-    case Type::FLOAT4:
-        {
-            __m128 m = reinterpret_cast<__m128(*)()>(function_ptr)();
-            ret = GenericValue( *reinterpret_cast<jl_float4*>(&m) );
-            break;
-        }
-    case Type::DOUBLE:
-        ret = GenericValue( reinterpret_cast<jl_double(*)()>(function_ptr)() );
-        break;
+    GET_VALUE_N( jl_bool )
+    GET_VALUE_N( jl_char )
+    GET_VALUE_N( jl_short )
+    GET_VALUE_N( jl_int )
+    GET_VALUE_N( jl_long )
+    GET_VALUE_N( jl_uchar )
+    GET_VALUE_N( jl_ushort )
+    GET_VALUE_N( jl_uint )
+    GET_VALUE_N( jl_ulong )
+    GET_VALUE_N( jl_float )
+    GET_VALUE_N( jl_double )
     case Type::STRING:
-        ret = GenericValue( reinterpret_cast<jl_string(*)()>(function_ptr)() );
+        ret = GenericValue( WrapStringExpression( expression, function )() );
         break;
     default:
         assert( false &&
                 "Trying to run a function returning an unhandled type" );
     }
 
-    /// Cant remove the function because it trashes global variables...
+#undef GET_VALUE_N
+#undef GET_VALUE
+
     m_ExecutionEngine.freeMachineCodeForFunction( function );
     function->eraseFromParent();
-
-    m_Builder.restoreIP( insert_point );
 
     return ret;
 }

@@ -83,10 +83,19 @@ const GenericValue& GenericValue::operator = ( const GenericValue& g )
         break;
 
 #define COPY_DATA_N(Type, TYPE) \
-    COPY_DATA(Type, TYPE) \
-    COPY_DATA(Type##2, TYPE##2) \
-    COPY_DATA(Type##3, TYPE##3) \
-    COPY_DATA(Type##4, TYPE##4)
+    COPY_DATA( Type,      TYPE ) \
+    COPY_DATA( Type##2,   TYPE##2 ) \
+    COPY_DATA( Type##3,   TYPE##3 ) \
+    COPY_DATA( Type##4,   TYPE##4 ) \
+    COPY_DATA( Type##2x2, TYPE##2x2 ) \
+    COPY_DATA( Type##2x3, TYPE##2x3 ) \
+    COPY_DATA( Type##2x4, TYPE##2x4 ) \
+    COPY_DATA( Type##3x2, TYPE##3x2 ) \
+    COPY_DATA( Type##3x3, TYPE##3x3 ) \
+    COPY_DATA( Type##3x4, TYPE##3x4 ) \
+    COPY_DATA( Type##4x2, TYPE##4x2 ) \
+    COPY_DATA( Type##4x3, TYPE##4x3 ) \
+    COPY_DATA( Type##4x4, TYPE##4x4 )
 
 
     switch( g.m_Type )
@@ -142,10 +151,19 @@ type GenericValue::Get##Type() const \
 }
 
 #define TYPE_CONSTRUCTOR_AND_GETTER_N(type, Type, TYPE) \
-    TYPE_CONSTRUCTOR_AND_GETTER(type, Type, TYPE) \
-    TYPE_CONSTRUCTOR_AND_GETTER(type##2, Type##2, TYPE##2) \
-    TYPE_CONSTRUCTOR_AND_GETTER(type##3, Type##3, TYPE##3) \
-    TYPE_CONSTRUCTOR_AND_GETTER(type##4, Type##4, TYPE##4)
+    TYPE_CONSTRUCTOR_AND_GETTER( type,      Type,      TYPE ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##2,   Type##2,   TYPE##2 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##3,   Type##3,   TYPE##3 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##4,   Type##4,   TYPE##4 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##2x2, Type##2x2, TYPE##2x2 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##2x3, Type##2x3, TYPE##2x3 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##2x4, Type##2x4, TYPE##2x4 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##3x2, Type##3x2, TYPE##3x2 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##3x3, Type##3x3, TYPE##3x3 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##3x4, Type##3x4, TYPE##3x4 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##4x2, Type##4x2, TYPE##4x2 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##4x3, Type##4x3, TYPE##4x3 ) \
+    TYPE_CONSTRUCTOR_AND_GETTER( type##4x4, Type##4x4, TYPE##4x4 )
 
     TYPE_CONSTRUCTOR_AND_GETTER_N( jl_bool,   Bool,   Type::BOOL )
     TYPE_CONSTRUCTOR_AND_GETTER_N( jl_char,   Char,   Type::CHAR )

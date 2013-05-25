@@ -31,6 +31,8 @@
 
 #include <joemath/joemath.hpp>
 
+#include <smmintrin.h>
+
 jl_float dot_float( jl_float v1, jl_float v2 )
 {
     return v1 * v2;
@@ -45,8 +47,6 @@ jl_float dot_float3( jl_float3 v1, jl_float3 v2 )
 {
     return Dot( v1, v2 );
 }
-
-#include <smmintrin.h>
 
 jl_float dot_float4( jl_float4 v1, jl_float4 v2 )
 {
@@ -76,8 +76,6 @@ jl_float4 normalize_float4( jl_float4 v )
 {
     return Normalized( v );
 }
-
-#define _mm_madd_ps( a, b, c ) _mm_add_ps( _mm_mul_ps( (a), (b) ), (c) )
 
 jl_float4 mul_float4x4_float4( jl_float4x4 m, jl_float4 v )
 {

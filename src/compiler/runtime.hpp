@@ -164,7 +164,7 @@ private:
                                     llvm::IRBuilder<>& builder );
 
     bool FindRuntimeFunctions();
-    bool FindLLVMTypes();
+    bool FindInternalTypes();
     bool FindRuntimeTypes();
 
     //

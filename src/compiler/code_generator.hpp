@@ -49,6 +49,8 @@ namespace llvm
     class Module;
 }
 
+struct jl_string;
+
 namespace JoeLang
 {
 
@@ -297,6 +299,21 @@ private:
       * Destroys the temporay strings created in evaluating the expression
       */
     void CreateDestroyTemporaryCalls();
+
+    //
+    // This will wrap the expression into a getter function,
+    // it will also return the internal llvm function
+    //
+    template<typename T>
+    std::function<T()> WrapExpression( const Expression& expression,
+                                       llvm::Function*& function );
+
+    std::function<std::string()> WrapStringExpression(
+                                                   const Expression& expression,
+                                                   llvm::Function*& function );
+
+    llvm::Function* WrapExpressionCommon( const Expression& expression,
+                                          bool has_simple_return );
 
     //
     // because llvm doesn't care if the types are scalars or vectors we can
