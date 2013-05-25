@@ -5,7 +5,7 @@ enable_testing()
 #
 add_executable( joelang_tester EXCLUDE_FROM_ALL tester.cpp )
 target_link_libraries( joelang_tester joelang )
-include_directories( ${joelang_SOURCE_DIR}/include )
+include_directories( ${joelang_BINARY_DIR}/include ${joelang_SOURCE_DIR}/include )
 
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joemath_CXX_FLAGS}" )
 

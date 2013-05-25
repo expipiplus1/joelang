@@ -121,6 +121,18 @@ int main( int argc, char** argv )
                                        << v.x() << " " << v.y() << " "
                                        << v.z() << " " << v.w() << "\n";} );
 
+    JoeLang::State<JoeMath::float4x4> float4x4_state( "float4x4_state" );
+    float4x4_state.SetCallbacks( [&actual](JoeMath::float4x4 m)
+                              {actual << "float4x4_state: "
+                                      << m[0][0] << " " << m[1][0] << " "
+                                      << m[2][0] << " " << m[3][0] << " "
+                                      << m[0][1] << " " << m[1][1] << " "
+                                      << m[2][1] << " " << m[3][1] << " "
+                                      << m[0][2] << " " << m[1][2] << " "
+                                      << m[2][2] << " " << m[3][2] << " "
+                                      << m[0][3] << " " << m[1][3] << " "
+                                      << m[2][3] << " " << m[3][3] << "\n";} );
+
     context.AddState( &int_state );
     context.AddState( &float_state );
     context.AddState( &bool_state );
@@ -128,6 +140,7 @@ int main( int argc, char** argv )
     context.AddState( &float2_state );
     context.AddState( &float3_state );
     context.AddState( &float4_state );
+    context.AddState( &float4x4_state );
 
     // TODO make this reuse the string when we can load from string
     JoeLang::Effect* e = context.CreateEffectFromFile( test_filename );
