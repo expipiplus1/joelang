@@ -43,6 +43,7 @@
 #include <compiler/tokens/expressions/cast_expression.hpp>
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
@@ -112,98 +113,56 @@ std::unique_ptr<StateAssignmentBase>
     assert( m_Expression->GetType().GetType() == t &&
             "Trying to create a state assignment with mismatched types" );
 
+#define CREATE_CONST_STATE_ASSIGNMENT( type, Type ) \
+    case JoeLangType<type>::value: \
+        return std::unique_ptr<StateAssignmentBase>( \
+                          new ConstStateAssignment<type>( \
+                                    static_cast<const State<type>&>(*m_State), \
+                                    v.Get##Type() ) );
+
+#define CREATE_CONST_STATE_ASSIGNMENT_N( type, Type ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type, Type ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##2, Type##2 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##3, Type##3 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##4, Type##4 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##2x2, Type##2x2 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##2x3, Type##2x3 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##2x4, Type##2x4 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##3x2, Type##3x2 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##3x3, Type##3x3 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##3x4, Type##3x4 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##4x2, Type##4x2 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##4x3, Type##4x3 ) \
+    CREATE_CONST_STATE_ASSIGNMENT( type##4x4, Type##4x4 )
+
     // If this is just a constant return a ConstStateAssignment
     if( m_Expression->IsConst() )
     {
         GenericValue v = code_gen.EvaluateExpression( *m_Expression );
         switch( t )
         {
-        case Type::BOOL:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_bool>(
-                                 static_cast<const State<jl_bool>&>(*m_State),
-                                 v.GetBool() ) );
-        case Type::CHAR:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_char>(
-                                 static_cast<const State<jl_char>&>(*m_State),
-                                 v.GetChar() ) );
-        case Type::SHORT:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_short>(
-                                 static_cast<const State<jl_short>&>(*m_State),
-                                 v.GetShort() ) );
-        case Type::INT:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_int>(
-                                 static_cast<const State<jl_int>&>(*m_State),
-                                 v.GetInt() ) );
-        case Type::LONG:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_long>(
-                                 static_cast<const State<jl_long>&>(*m_State),
-                                 v.GetLong() ) );
-        case Type::UCHAR:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_uchar>(
-                                 static_cast<const State<jl_uchar>&>(*m_State),
-                                 v.GetUChar() ) );
-        case Type::USHORT:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_ushort>(
-                                 static_cast<const State<jl_ushort>&>(*m_State),
-                                 v.GetUShort() ) );
-        case Type::UINT:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_uint>(
-                                 static_cast<const State<jl_uint>&>(*m_State),
-                                 v.GetUInt() ) );
-        case Type::UINT2:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_uint2>(
-                                 static_cast<const State<jl_uint2>&>(*m_State),
-                                 v.GetUInt2() ) );
-        case Type::ULONG:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_ulong>(
-                                 static_cast<const State<jl_ulong>&>(*m_State),
-                                 v.GetULong() ) );
-        case Type::FLOAT:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_float>(
-                                 static_cast<const State<jl_float>&>(*m_State),
-                                 v.GetFloat() ) );
-        case Type::FLOAT2:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_float2>(
-                                 static_cast<const State<jl_float2>&>(*m_State),
-                                 v.GetFloat2() ) );
-        case Type::FLOAT3:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_float3>(
-                                 static_cast<const State<jl_float3>&>(*m_State),
-                                 v.GetFloat3() ) );
-        case Type::FLOAT4:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_float4>(
-                                 static_cast<const State<jl_float4>&>(*m_State),
-                                 v.GetFloat4() ) );
-        case Type::DOUBLE:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<jl_double>(
-                                 static_cast<const State<jl_double>&>(*m_State),
-                                 v.GetDouble() ) );
-        case Type::STRING:
-            return std::unique_ptr<StateAssignmentBase>(
-                          new ConstStateAssignment<std::string>(
-                               static_cast<const State<std::string>&>(*m_State),
-                               v.GetString() ) );
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_bool, Bool )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_char, Char )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_short, Short )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_int, Int )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_long, Long )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_uchar, UChar )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_ushort, UShort )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_uint, UInt )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_ulong, ULong )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_float, Float )
+        CREATE_CONST_STATE_ASSIGNMENT_N( jl_double, Double )
+        CREATE_CONST_STATE_ASSIGNMENT( std::string, String )
+
         default:
             assert( false &&
              "Trying to create a ConstStateAssignment with an unhandled type" );
             return nullptr;
         }
     }
+
+#undef CREATE_CONST_STATE_ASSIGNMENT_N
+#undef CREATE_CONST_STATE_ASSIGNMENT
 
     return code_gen.GenerateStateAssignment( *m_State,
                                              *m_Expression,
