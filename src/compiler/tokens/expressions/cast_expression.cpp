@@ -285,7 +285,10 @@ llvm::Value* CastExpression::CodeGen( CodeGenerator& code_gen ) const
 
 void CastExpression::Write( ShaderWriter& shader_writer ) const
 {
-    shader_writer << m_CastType << "(" << *m_Expression << ")";
+    if( m_CastType == m_Expression->GetType() )
+        shader_writer << *m_Expression;
+    else
+        shader_writer << m_CastType << "(" << *m_Expression << ")";
 }
 
 CompleteType CastExpression::GetType() const
