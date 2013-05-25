@@ -63,11 +63,11 @@ std::function<T()> CodeGenerator::WrapExpression(
     }
     else
     {
-        return [function_ptr]()
+        return [function_ptr]() -> T
         {
-            T t;
-            reinterpret_cast<void(*)(T*)>( function_ptr )(&t);
-            return t;
+            T t[1];
+            reinterpret_cast<void(*)(T*)>( function_ptr )(t);
+            return t[0];
         };
     }
 }
