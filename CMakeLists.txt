@@ -170,7 +170,8 @@ if( NOT DEFINED JOELANG_WITH_OPENGL )
 endif()
 
 set( JOELANG_RUNTIME_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
-configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_SOURCE_DIR}/include/joelang/config.h )
+configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_BINARY_DIR}/include/joelang/config.h )
+set( joelang_INCLUDE_DIR ${joelang_INCLUDE_DIR} ${joelang_BINARY_DIR}/include/ PARENT_SCOPE )
 
 #
 # Various custom commands
@@ -220,28 +221,18 @@ else()
 endif()
 
 add_dependencies( joelang compile_runtime )
-        
-
-#if( ${CMAKE_GENERATOR} STREQUAL "Xcode" )
-    #add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc" )
-#else()
-    #add_custom_target( compile_runtime DEPENDS "${CMAKE_BINARY_DIR}/runtime.bc"
-                                       #SOURCES ${runtime_sources} )
-#endif()
-
 
 #
 # Linking
 #
 
-#llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipa ipo linker )
 llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipo )
 set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 
-list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
+#list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
 target_link_libraries( joelang ${joelang_LIBS} )
-include_directories( ${joelang_INCLUDE_DIRS} )
+include_directories( ${joelang_BINARY_DIR}/include ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/src ${joelang_SOURCE_DIR}/include )
 
 #
 # add a target to generate API documentation with Doxygen
