@@ -486,7 +486,9 @@ bool MemberAccessOperator::PerformSema(
 {
     assert( expression && "PerformSema passed a null expression" );
 
-    expression->PerformSema( sema );
+    if( !expression->PerformSema( sema ) )
+        return false;
+
     //
     // We're a swizzle if we're being applied to a vector or a scalar
     //
@@ -562,6 +564,17 @@ bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
                         + m_Identifier );
             return false;
         }
+    }
+
+    //
+    // Check if any of the indices are out of bounds
+    //
+    unsigned max_index = expression->GetType().GetNumElements() - 1;
+    for( unsigned i = 0; swizzle_indices[i] != 0xff; ++i )
+    {
+        if( swizzle_indices[i] > max_index )
+            sema.Error( "Swizzle index out of bounds" );
+        return false;
     }
 
     //
