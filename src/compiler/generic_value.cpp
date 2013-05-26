@@ -230,16 +230,33 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
     case TYPE: \
     { \
         std::vector<jl_ulong> values( &m_##Type##Value[0], \
-                                     &m_##Type##Value[0]+(n) ); \
+                                      &m_##Type##Value[0]+(n) ); \
         return code_gen.CreateIntegerVector( values, TYPE ); \
     }
-
+    
+#define CODE_INTEGER_MATRIX( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        std::vector<jl_ulong> values( &m_##Type##Value[0][0], \
+                                      &m_##Type##Value[0][0]+(n) ); \
+        return code_gen.CreateIntegerMatrix( values, TYPE ); \
+    }
+    
 #define CODE_INTEGER_N( Type, TYPE ) \
     CODE_INTEGER( Type, TYPE ) \
     CODE_INTEGER_VECTOR( Type##2, TYPE##2, 2 ) \
     CODE_INTEGER_VECTOR( Type##3, TYPE##3, 3 ) \
-    CODE_INTEGER_VECTOR( Type##4, TYPE##4, 4 )
-
+    CODE_INTEGER_VECTOR( Type##4, TYPE##4, 4 ) \
+    CODE_INTEGER_MATRIX( Type##2x2, TYPE##2x2, 2 * 2 ) \
+    CODE_INTEGER_MATRIX( Type##2x3, TYPE##2x3, 2 * 3 ) \
+    CODE_INTEGER_MATRIX( Type##2x4, TYPE##2x4, 2 * 4 ) \
+    CODE_INTEGER_MATRIX( Type##3x2, TYPE##3x2, 3 * 2 ) \
+    CODE_INTEGER_MATRIX( Type##3x3, TYPE##3x3, 3 * 3 ) \
+    CODE_INTEGER_MATRIX( Type##3x4, TYPE##3x4, 3 * 4 ) \
+    CODE_INTEGER_MATRIX( Type##4x2, TYPE##4x2, 4 * 2 ) \
+    CODE_INTEGER_MATRIX( Type##4x3, TYPE##4x3, 4 * 3 ) \
+    CODE_INTEGER_MATRIX( Type##4x4, TYPE##4x4, 4 * 4 )
+    
 #define CODE_FLOATING( Type, TYPE ) \
     case TYPE: \
         return code_gen.CreateFloating( m_##Type##Value, TYPE );
@@ -251,12 +268,29 @@ llvm::Constant* GenericValue::CodeGen( CodeGenerator& code_gen ) const
                                        &m_##Type##Value[0]+(n) ); \
         return code_gen.CreateFloatingVector( values, TYPE ); \
     }
-
+    
+#define CODE_FLOATING_MATRIX( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        std::vector<jl_double> values( &m_##Type##Value[0][0], \
+                                       &m_##Type##Value[0][0]+(n) ); \
+        return code_gen.CreateFloatingMatrix( values, TYPE ); \
+    }
+    
 #define CODE_FLOATING_N( Type, TYPE ) \
     CODE_FLOATING( Type, TYPE ) \
     CODE_FLOATING_VECTOR( Type##2, TYPE##2, 2 ) \
     CODE_FLOATING_VECTOR( Type##3, TYPE##3, 3 ) \
-    CODE_FLOATING_VECTOR( Type##4, TYPE##4, 4 )
+    CODE_FLOATING_VECTOR( Type##4, TYPE##4, 4 ) \
+    CODE_FLOATING_MATRIX( Type##2x2, TYPE##2x2, 2 * 2 ) \
+    CODE_FLOATING_MATRIX( Type##2x3, TYPE##2x3, 2 * 3 ) \
+    CODE_FLOATING_MATRIX( Type##2x4, TYPE##2x4, 2 * 4 ) \
+    CODE_FLOATING_MATRIX( Type##3x2, TYPE##3x2, 3 * 2 ) \
+    CODE_FLOATING_MATRIX( Type##3x3, TYPE##3x3, 3 * 3 ) \
+    CODE_FLOATING_MATRIX( Type##3x4, TYPE##3x4, 3 * 4 ) \
+    CODE_FLOATING_MATRIX( Type##4x2, TYPE##4x2, 4 * 2 ) \
+    CODE_FLOATING_MATRIX( Type##4x3, TYPE##4x3, 4 * 3 ) \
+    CODE_FLOATING_MATRIX( Type##4x4, TYPE##4x4, 4 * 4 )
 
     switch( m_Type )
     {
@@ -332,7 +366,16 @@ void GenericValue::Write( ShaderWriter& shader_writer ) const
     WRITE( Type, TYPE ) \
     WRITE( Type##2, TYPE##2 ) \
     WRITE( Type##3, TYPE##3 ) \
-    WRITE( Type##4, TYPE##4 )
+    WRITE( Type##4, TYPE##4 ) \
+    WRITE( Type##2x2, TYPE##2x2 ) \
+    WRITE( Type##2x3, TYPE##2x3 ) \
+    WRITE( Type##2x4, TYPE##2x4 ) \
+    WRITE( Type##3x2, TYPE##3x2 ) \
+    WRITE( Type##3x3, TYPE##3x3 ) \
+    WRITE( Type##3x4, TYPE##3x4 ) \
+    WRITE( Type##4x2, TYPE##4x2 ) \
+    WRITE( Type##4x3, TYPE##4x3 ) \
+    WRITE( Type##4x4, TYPE##4x4 )
 
     switch( m_Type )
     {
