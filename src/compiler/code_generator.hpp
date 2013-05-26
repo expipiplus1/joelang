@@ -199,6 +199,19 @@ public:
       */
     llvm::Constant* CreateIntegerVector( const std::vector<jl_ulong>& value,
                                           Type type );
+    
+    /**
+      * Create the llvm::Value representing a floating point matrix
+      * \param value
+      *   The vector of values with which to create the matrix
+      * \param type
+      *   The type of matrix
+      * \returns the llvm::Value representing the float matrix
+      *
+      * This will assert if type isn't a floating point matrix type
+      */
+    llvm::Constant* CreateIntegerMatrix( const std::vector<jl_ulong>& value,
+                                         Type type );
 
     /**
       * Create the llvm::Value representing a floating point value
@@ -211,7 +224,7 @@ public:
       * This will assert if type isn't a floating point type
       */
     llvm::Constant* CreateFloating( double value, Type type );
-
+    
     /**
       * Create the llvm::Value representing a floating point vector
       * \param value
@@ -223,6 +236,19 @@ public:
       * This will assert if type isn't a floating point vector type
       */
     llvm::Constant* CreateFloatingVector( const std::vector<double>& value,
+                                          Type type );
+    
+    /**
+      * Create the llvm::Value representing a floating point matrix
+      * \param value
+      *   The vector of values with which to create the matrix
+      * \param type
+      *   The type of matrix
+      * \returns the llvm::Value representing the float matrix
+      *
+      * This will assert if type isn't a floating point matrix type
+      */
+    llvm::Constant* CreateFloatingMatrix( const std::vector<double>& value,
                                           Type type );
 
     /**

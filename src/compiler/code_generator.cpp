@@ -220,7 +220,12 @@ llvm::Function* CodeGenerator::WrapExpressionCommon(
     GenerateFunctions( function_dependencies );
 
 
-    llvm::Type* return_type = m_Runtime.GetLLVMType( expression.GetType() );
+    assert( !expression.GetType().IsArrayType() && "Can't wrap an array type" );
+    
+    //
+    // Use the runtime llvm type here, because that was taken from c++ too
+    //
+    llvm::Type* return_type = m_Runtime.GetRuntimeLLVMType( expression.GetType().GetBaseType() );
 
     llvm::FunctionType* prototype;
 
@@ -280,6 +285,8 @@ llvm::Function* CodeGenerator::WrapExpressionCommon(
     }
     CreateDestroyTemporaryCalls();
 
+    v = m_Runtime.CreateDeepCopy( v, return_type, m_Builder );
+    
     assert( v && "Invalid expression llvm::Value*" );
     assert( m_Temporaries.empty() && "Leftover temporaries" );
 
@@ -1183,6 +1190,37 @@ llvm::Constant* CodeGenerator::CreateIntegerVector(
             "Created a wrong type" ) ;
     return ret;
 }
+llvm::Constant* CodeGenerator::CreateIntegerMatrix(
+                                               const std::vector<jl_ulong>& value,
+                                               Type type )
+{
+    assert( IsIntegral( type ) &&
+            "Trying to create a integer constant of non-integer type" );
+    assert( IsMatrixType( type ) &&
+            "Trying to create a matrix constant of non-matrix type" );
+    assert( value.size() == GetNumElementsInType( type ) &&
+            "Wrong number of values to construct matrix constant" );
+    
+    unsigned rows = GetNumRowsInType( type );
+    unsigned columns = GetNumColumnsInType( type );
+    
+    std::vector<llvm::Constant*> data;
+    data.reserve( columns );
+    
+    for( unsigned i = 0; i < columns; ++i )
+    {
+        std::vector<jl_ulong> column( value.begin() + i * rows, value.begin() + (i+1) * rows );
+        data.push_back( CreateIntegerVector( column, GetMatrixColumnType( type ) ) );
+    }
+    
+    llvm::Constant* ret = llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( m_Runtime.GetLLVMType( type ) ),
+                                                    data );
+    
+    assert( ret->getType() == m_Runtime.GetLLVMType( type ) &&
+            "Created a wrong type" ) ;
+    
+    return ret;
+}
 
 llvm::Constant* CodeGenerator::CreateFloating( double value, Type type )
 {
@@ -1212,6 +1250,39 @@ llvm::Constant* CodeGenerator::CreateFloatingVector(
     return ret;
 }
 
+llvm::Constant* CodeGenerator::CreateFloatingMatrix(
+                                               const std::vector<double>& value,
+                                               Type type )
+{
+    assert( IsFloatingPoint( type ) &&
+            "Trying to create a floating constant of non-floating type" );
+    assert( IsMatrixType( type ) &&
+            "Trying to create a matrix constant of non-matrix type" );
+    assert( value.size() == GetNumElementsInType( type ) &&
+            "Wrong number of values to construct matrix constant" );
+    
+    unsigned rows = GetNumRowsInType( type );
+    unsigned columns = GetNumColumnsInType( type );
+    
+    std::vector<llvm::Constant*> data;
+    data.reserve( columns );
+    
+    for( unsigned i = 0; i < columns; ++i )
+    {
+        std::vector<double> column( value.begin() + i * rows, value.begin() + (i+1) * rows );
+        data.push_back( CreateFloatingVector( column, GetMatrixColumnType( type ) ) );
+    }
+    
+    llvm::Constant* ret = llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( m_Runtime.GetLLVMType( type ) ),
+                                                    data );
+    
+    assert( ret->getType() == m_Runtime.GetLLVMType( type ) &&
+            "Created a wrong type" ) ;
+    
+    return ret;
+}
+
+    
 llvm::Constant* CodeGenerator::CreateString( const std::string& value )
 {
     /// TODO use CreateGlobalString here
