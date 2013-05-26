@@ -90,4 +90,19 @@ extern "C"
     jl_float2x4 mul_float4x4_float2x4( jl_float4x4 m1, jl_float2x4 m2 );
     jl_float3x4 mul_float4x4_float3x4( jl_float4x4 m1, jl_float3x4 m2 );
     jl_float4x4 mul_float4x4_float4x4( jl_float4x4 m1, jl_float4x4 m2 );
+
+    //
+    // These treat the vector as a row vector and return a row vector
+    //
+    jl_float2   mul_float2_float2x2( jl_float2 m1, jl_float2x2 m2 );
+    jl_float3   mul_float2_float3x2( jl_float2 m1, jl_float3x2 m2 );
+    jl_float4   mul_float2_float4x2( jl_float2 m1, jl_float4x2 m2 );
+
+    jl_float2   mul_float3_float2x3( jl_float3 m1, jl_float2x3 m2 );
+    jl_float3   mul_float3_float3x3( jl_float3 m1, jl_float3x3 m2 );
+    jl_float4   mul_float3_float4x3( jl_float3 m1, jl_float4x3 m2 );
+
+    jl_float2   mul_float4_float2x4( jl_float4 m1, jl_float2x4 m2 );
+    jl_float3   mul_float4_float3x4( jl_float4 m1, jl_float3x4 m2 );
+    jl_float4   mul_float4_float4x4( jl_float4 m1, jl_float4x4 m2 );
 }
