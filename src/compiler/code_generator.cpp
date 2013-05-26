@@ -448,6 +448,37 @@ llvm::Value* CodeGenerator::CreateMatrixConstructor(
             "CreateMatrixTypeConstructor given non-vector type" );
 #endif
 
+    //
+    // If we the right number of elements to fill up the main diagonal, do that
+    //
+    unsigned num_elements = 0;
+    for( const Expression_up& a : arguments )
+        num_elements += a->GetType().GetNumElements();
+
+    unsigned diagonal_size = JoeMath::Min( GetNumColumnsInType( type ),
+                                           GetNumRowsInType( type ) );
+    if( num_elements == diagonal_size )
+    {
+        Type diagonal_type = GetVectorType( GetScalarType( type ),
+                                            diagonal_size );
+        llvm::Value* diagonal = CreateVectorConstructor( diagonal_type,
+                                                         arguments );
+
+        llvm::Value* ret = llvm::ConstantAggregateZero::get(
+                                         m_Runtime.GetLLVMType( type ) );
+
+        for( int i = 0; i < diagonal_size; ++i )
+        {
+            llvm::Value* index = CreateInteger( i, Type::INT );
+            llvm::Value* v = m_Builder.CreateExtractValue( ret, {i} );
+            llvm::Value* e = m_Builder.CreateExtractElement( diagonal,
+                                                             index );
+            v = m_Builder.CreateInsertElement( v, e, index );
+            ret = m_Builder.CreateInsertValue( ret, v, {i} );
+        }
+        return ret;
+    }
+
     std::vector<llvm::Value*> values;
     values.reserve( arguments.size() );
     for( const Expression_up& a : arguments )
