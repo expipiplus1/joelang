@@ -119,6 +119,7 @@ void Semantic::DetermineType()
     const static std::map<std::string, SemanticType> type_map =
     {
         { "POSITION", SemanticType::POSITION },
+        { "VERTEXID", SemanticType::VERTEXID },
         { "DEPTH",    SemanticType::DEPTH    },
         { "COLOR",    SemanticType::COLOR    },
         { "WPOS",     SemanticType::WPOS     }

@@ -47,6 +47,7 @@ enum class SemanticType
     CUSTOM,
 
     POSITION,
+    VERTEXID,
     WPOS,
     DEPTH,
     COLOR,
