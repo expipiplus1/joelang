@@ -931,13 +931,6 @@ bool Runtime::FindRuntimeTypes()
 
 
 #elif defined( ARCH_I386 )
-    m_StringType = m_RuntimeModule->getTypeByName( "struct.jl_string" );
-    assert( false && "complete me" );
-#else
-    llvm::Type* size_type = GetLLVMType( Type::U32 );
-    llvm::Type* char_ptr_type = llvm::Type::getInt8PtrTy( m_LLVMContext );
-    m_StringType = llvm::StructType::create( std::vector<llvm::Type*>
-                                               {size_type, char_ptr_type} );
     assert( false && "complete me" );
 #endif
 
