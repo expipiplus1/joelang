@@ -67,6 +67,8 @@ bool CompoundStatement::AlwaysReturns() const
     // This assumes that we've performed sema on this object and have dropped
     // Statements after the return statement
     //
+    if( m_Statements.empty() )
+        return false;
     return (*m_Statements.rbegin())->AlwaysReturns();
 }
 
