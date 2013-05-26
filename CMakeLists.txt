@@ -191,7 +191,10 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 else()
     set( JOELANG_RUNTIME_COMPILER clang++ )
 endif()
-set( JOELANG_RUNTIME_LINKER llvm-link )
+
+find_program( LLVM_LINK_EXECUTABLE llvm-link )
+
+set( JOELANG_RUNTIME_LINKER ${LLVM_LINK_EXECUTABLE} )
 
 set( runtime_bitcode_files "" )
 
