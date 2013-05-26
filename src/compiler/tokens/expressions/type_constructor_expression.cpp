@@ -150,13 +150,17 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
         }
         else
         {
-            sema.Error( "Too few elements in constructor" );
+            sema.Error( IsMatrixType( m_Type ) ?
+                            "Too few elements in matrix constructor" :
+                            "Too few elements in vector constructor" );
             good = false;
         }
     }
     else if( num_elements > num_desired_elements )
     {
-        sema.Error( "Too many elements in constructor" );
+        sema.Error( IsMatrixType( m_Type ) ?
+                            "Too many elements in matrix constructor" :
+                            "Too many elements in vector constructor" );
         good = false;
     }
 
