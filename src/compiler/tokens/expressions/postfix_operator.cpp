@@ -573,8 +573,10 @@ bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
     for( unsigned i = 0; swizzle_indices[i] != 0xff; ++i )
     {
         if( swizzle_indices[i] > max_index )
+        {
             sema.Error( "Swizzle index out of bounds" );
-        return false;
+            return false;
+        }
     }
 
     //
