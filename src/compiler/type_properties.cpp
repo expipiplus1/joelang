@@ -212,8 +212,6 @@ Type GetMatrixType( Type base, unsigned columns, unsigned rows )
     }};
 #undef CREATE_MATRIX_MAPPING
 
-    return Type::UNKNOWN;
-
     assert( columns > 1  && "Trying to make a too small matrix" );
     assert( columns <= 4 && "Trying to make a too big matrix" );
     assert( rows    > 1  && "Trying to make a too small matrix" );
@@ -672,8 +670,18 @@ bool HasGLSLType( Type t )
         Type::FLOAT4x3,
         Type::FLOAT4x4,
         Type::UINT,
+        Type::UINT2,
+        Type::UINT3,
+        Type::UINT4,
         Type::INT,
+        Type::INT2,
+        Type::INT3,
+        Type::INT4,
         Type::BOOL,
+        Type::BOOL2,
+        Type::BOOL3,
+        Type::BOOL4,
+        
         Type::VOID,
     };
 
@@ -700,8 +708,20 @@ const std::string& GetGLSLTypeString( Type t )
         { Type::FLOAT4x4,     "mat4x4" },
 
         { Type::UINT,         "uint" },
-        { Type::INT,          "int" },
+        { Type::UINT2,        "uvec2" },
+        { Type::UINT3,        "uvec3" },
+        { Type::UINT4,        "uvec4" },
+        
+        { Type::INT,         "int" },
+        { Type::INT2,        "ivec2" },
+        { Type::INT3,        "ivec3" },
+        { Type::INT4,        "ivec4" },
+        
         { Type::BOOL,         "bool" },
+        { Type::BOOL2,        "bvec2" },
+        { Type::BOOL3,        "bvec3" },
+        { Type::BOOL4,        "bvec4" },
+        
         { Type::VOID,         "void" },
     };
 
