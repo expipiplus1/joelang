@@ -262,46 +262,6 @@ Type GetVectorType( Type base, unsigned size )
     return Type::UNKNOWN;
 }
 
-Type GetMatrixColumnType( Type t )
-{
-    assert( IsMatrixType( t ) &&
-            "Trying to get the column type of a non-matrix type" );
-
-#define RETURN_COLUMN(type) \
-    case type##2x2: \
-    case type##3x2: \
-    case type##4x2: \
-        return type##2; \
-    case type##2x3: \
-    case type##3x3: \
-    case type##4x3: \
-        return type##4; \
-    case type##2x4: \
-    case type##3x4: \
-    case type##4x4: \
-        return type##4;
-
-    switch( t )
-    {
-    RETURN_COLUMN(Type::BOOL)
-    RETURN_COLUMN(Type::CHAR)
-    RETURN_COLUMN(Type::SHORT)
-    RETURN_COLUMN(Type::INT)
-    RETURN_COLUMN(Type::LONG)
-    RETURN_COLUMN(Type::UCHAR)
-    RETURN_COLUMN(Type::USHORT)
-    RETURN_COLUMN(Type::UINT)
-    RETURN_COLUMN(Type::ULONG)
-    RETURN_COLUMN(Type::FLOAT)
-    RETURN_COLUMN(Type::DOUBLE)
-    default:
-        assert( false && "Trying to get the scalar type of an unknown type" );
-        return Type::UNKNOWN;
-    }
-
-#undef RETURN_COLUMN
-}
-
 Type GetScalarType( Type t )
 {
 #define RETURN_BASE(type) \
@@ -343,7 +303,7 @@ Type GetScalarType( Type t )
 #undef RETURN_BASE
 }
 
-Type GetMatrixElementType( Type t )
+Type GetMatrixColumnType( Type t )
 {
     assert( IsMatrixType(t) &&
             "Trying to get the element type of a non-matrix type" );

@@ -54,11 +54,8 @@ Type GetVectorType( Type base, unsigned size );
 /** Reduces matrix or vector types to their scalar types **/
 Type GetScalarType( Type t );
 
-/** Reduces matrix or vector types to their scalar types **/
-Type GetMatrixColumnType( Type t );
-
 /** Reduces matrix types to their vector type **/
-Type GetMatrixElementType( Type t );
+Type GetMatrixColumnType( Type t );
 
 bool IsFloatingPoint( Type t );
 
