@@ -189,6 +189,12 @@ public:
 
     llvm::Type*         GetLLVMType( const CompleteType& type ) const;
     llvm::Type*         GetLLVMType( Type type ) const;
+
+    //
+    // The runtime often has slightly different types
+    //
+    llvm::Type*         GetRuntimeLLVMType( Type type ) const;
+    
 private:
     enum class ReturnType
     {
@@ -250,11 +256,6 @@ private:
       * Runs some optimizations on the function
       */
     void OptimizeFunction( llvm::Function& function );
-
-    //
-    // The runtime often has slightly different types
-    //
-    llvm::Type*         GetRuntimeLLVMType( Type type ) const;
 
     //
     // This will store the value, and load it back as a to_type

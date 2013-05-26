@@ -496,8 +496,13 @@ llvm::Type* Runtime::GetLLVMType( Type type ) const
 llvm::Type* Runtime::GetRuntimeLLVMType( Type type ) const
 {
     auto i = m_RuntimeTypeMap.find( type );
-    assert( i != m_RuntimeTypeMap.end() &&
-            "Trying to get an unknown runtime llvm type" );
+    
+    if( i == m_RuntimeTypeMap.end() )
+    {
+        m_JoeLangContext.Error( "Getting unknown runtime type, returning internal type instead" );
+        return GetLLVMType( type );
+    }
+    
     return i->second;
 }
 
