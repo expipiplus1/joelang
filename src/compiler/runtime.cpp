@@ -45,6 +45,10 @@
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
+#include <cassert>
+#include <map>
+#include <string>
+#include <vector>
 
 #include <joelang/context.hpp>
 #include <joelang/config.h>
@@ -297,6 +301,45 @@ const std::map<RuntimeFunction, Runtime::FunctionInfo> Runtime::s_FunctionInfos=
     {"mul_float4x4_float4x4", "mul",
      Type::FLOAT4x4,
      {Type::FLOAT4x4, Type::FLOAT4x4}}},
+
+    {RuntimeFunction::FLOAT2_FLOAT2x2_MUL,
+    {"mul_float2_float2x2", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT2, Type::FLOAT2x2}}},
+    {RuntimeFunction::FLOAT2_FLOAT3x2_MUL,
+    {"mul_float2_float3x2", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT2, Type::FLOAT3x2}}},
+    {RuntimeFunction::FLOAT2_FLOAT4x2_MUL,
+    {"mul_float2_float4x2", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT2, Type::FLOAT4x2}}},
+
+    {RuntimeFunction::FLOAT3_FLOAT2x3_MUL,
+    {"mul_float3_float2x3", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT3, Type::FLOAT2x3}}},
+    {RuntimeFunction::FLOAT3_FLOAT3x3_MUL,
+    {"mul_float3_float3x3", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT3, Type::FLOAT3x3}}},
+    {RuntimeFunction::FLOAT3_FLOAT4x3_MUL,
+    {"mul_float3_float4x3", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT3, Type::FLOAT4x3}}},
+
+    {RuntimeFunction::FLOAT4_FLOAT2x4_MUL,
+    {"mul_float4_float2x4", "mul",
+     Type::FLOAT2,
+     {Type::FLOAT4, Type::FLOAT2x4}}},
+    {RuntimeFunction::FLOAT4_FLOAT3x4_MUL,
+    {"mul_float4_float3x4", "mul",
+     Type::FLOAT3,
+     {Type::FLOAT4, Type::FLOAT3x4}}},
+    {RuntimeFunction::FLOAT4_FLOAT4x4_MUL,
+    {"mul_float4_float4x4", "mul",
+     Type::FLOAT4,
+     {Type::FLOAT4, Type::FLOAT4x4}}},
 };
 
 Runtime::Runtime( const JoeLang::Context& joelang_context )
@@ -334,6 +377,14 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
     if( !FindInternalTypes() )
     {
         m_JoeLangContext.Error( "Error determining internal types" );
+        return;
+    }
+
+    std::vector<std::string> errors = VerifyRuntimeFunctions();
+    if( !errors.empty() )
+    {
+        for( const auto& s : errors )
+            m_JoeLangContext.Error( s );
         return;
     }
 
@@ -494,8 +545,7 @@ llvm::Value* Runtime::CreateCall( llvm::Function* function,
             assert( llvm::isa<llvm::StructType>( param_value->getType() )&&
                     "Can't expand a non-struct type" );
             for( unsigned i = 0;
-                 i < llvm::cast<llvm::StructType>(
-                                      param_value->getType())->getNumElements();
+                 i < param_value->getType()->getStructNumElements();
                  ++i )
             {
                 params.push_back( builder.CreateExtractValue(
@@ -759,7 +809,7 @@ bool Runtime::FindInternalTypes()
             return llvm::VectorType::get( GetType( GetScalarType( type ) ),
                                           GetNumElementsInType( type ) );
         else if( IsMatrixType( type ) )
-            return llvm::ArrayType::get( GetType( GetMatrixElementType(type) ),
+            return llvm::ArrayType::get( GetType( GetMatrixColumnType(type) ),
                                          GetNumColumnsInType( type ) );
         else if( type == Type::DOUBLE )
             return llvm::Type::getDoubleTy( m_LLVMContext );
@@ -821,8 +871,14 @@ bool Runtime::FindInternalTypes()
 bool Runtime::FindRuntimeTypes()
 {
 #if defined( ARCH_X86_64 )
+    m_RuntimeTypeMap[Type::VOID] =
+            m_Functions[RuntimeFunction::STRING_DESTROY]->getReturnType();
+
     m_RuntimeTypeMap[Type::STRING] =
             m_Functions[RuntimeFunction::STRING_CONCAT]->getReturnType();
+
+    m_RuntimeTypeMap[Type::BOOL] =
+            m_Functions[RuntimeFunction::STRING_EQUAL]->getReturnType();
 
     m_RuntimeTypeMap[Type::FLOAT] =
             m_Functions[RuntimeFunction::FLOAT_NORMALIZE]->getReturnType();
@@ -890,6 +946,133 @@ bool Runtime::FindRuntimeTypes()
             return false;
 
     return true;
+}
+
+std::vector<std::string> Runtime::VerifyRuntimeFunctions()
+{
+    std::vector<std::string> ret;
+
+    for( const auto& r : s_FunctionInfos )
+    {
+        const std::string& function_name = r.second.bitcodeName;
+
+        auto i = m_Functions.find( r.first );
+        if( i == m_Functions.end() )
+        {
+            ret.push_back( function_name + ": Couldn't find function" );
+        }
+
+        //
+        // We've got the function, now check if the types are what we expect
+        //
+        llvm::Function* function = i->second;
+        llvm::FunctionType* function_type = function->getFunctionType();
+
+        Type return_type = r.second.returnType;
+        const std::vector<Type>& argument_types = r.second.paramTypes;
+
+        bool has_return_pointer = s_TypeInformationMap.at(
+                               return_type ).returnType  == ReturnType::POINTER;
+
+        unsigned num_params = has_return_pointer ? 1 : 0;
+        for( Type argument_type : argument_types )
+        {
+            if( s_TypeInformationMap.at( argument_type ).passType
+                                                           == ParamType::EXPAND)
+            {
+                llvm::Type* llvm_argument_type = GetRuntimeLLVMType(
+                                                                argument_type );
+                num_params += llvm::cast<llvm::StructType>(
+                                          llvm_argument_type)->getNumElements();
+            }
+            else
+            {
+                ++num_params;
+            }
+        }
+
+        //unsigned llvm_num_params = function_type->getNumParams();
+        if( function_type->getNumParams() != num_params )
+        {
+            ret.push_back( function_name +
+                           ": Wrong number of parameters" );
+        }
+
+        if( has_return_pointer )
+        {
+            llvm::Type* return_pointer_type =
+                                       function_type->getFunctionParamType( 0 );
+            if( return_pointer_type->getPointerElementType() !=
+                                            GetRuntimeLLVMType( return_type ) )
+                ret.push_back( function_name +
+                               ": Mismatch in hidden pointer return type" );
+        }
+        else
+        {
+            llvm::Type* llvm_return_type = function_type->getReturnType();
+            if( llvm_return_type != GetRuntimeLLVMType( return_type ) )
+                ret.push_back( function_name +
+                               ": Mismatch in return type" );
+        }
+
+
+        unsigned argument_index = has_return_pointer ? 1 : 0;
+        for( Type argument_type : argument_types )
+        {
+            llvm::Type* runtime_argument_type =
+                                            GetRuntimeLLVMType( argument_type );
+
+            switch( s_TypeInformationMap.at( argument_type ).passType )
+            {
+            case ParamType::EXPAND:
+            {
+                for( unsigned s = 0;
+                     s < runtime_argument_type->getStructNumElements();
+                     ++s )
+                {
+                    llvm::Type* runtime_sub_argument_type =
+                               runtime_argument_type->getStructElementType( s );
+                    llvm::Type* llvm_argument_type =
+                                function_type->getParamType( argument_index++ );
+                    if( llvm_argument_type != runtime_sub_argument_type )
+                    {
+                        ret.push_back( function_name +
+                                       ": Mismatch in argument type" );
+                    }
+                }
+                break;
+            }
+            case ParamType::POINTER:
+            {
+                llvm::Type* llvm_argument_type =
+                                function_type->getParamType( argument_index++ );
+                if( llvm_argument_type->getPointerElementType()
+                                                      != runtime_argument_type )
+                {
+                    ret.push_back( function_name +
+                                   ": Mismatch in argument type" );
+                }
+                break;
+            }
+            case ParamType::DEFAULT:
+            {
+                llvm::Type* llvm_argument_type =
+                                    function_type->getParamType( argument_index++ );
+                if( llvm_argument_type != runtime_argument_type )
+                {
+                    ret.push_back( function_name +
+                                   ": Mismatch in argument type" );
+                }
+                break;
+            }
+            case ParamType::IGNORE:
+            {
+                break;
+            }
+            }
+        }
+    }
+    return ret;
 }
 
 bool Runtime::GenerateFunctionWrappers()

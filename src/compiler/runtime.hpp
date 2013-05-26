@@ -138,6 +138,18 @@ enum class RuntimeFunction
     FLOAT4x4_FLOAT2x4_MUL,
     FLOAT4x4_FLOAT3x4_MUL,
     FLOAT4x4_FLOAT4x4_MUL,
+
+    FLOAT2_FLOAT2x2_MUL,
+    FLOAT2_FLOAT3x2_MUL,
+    FLOAT2_FLOAT4x2_MUL,
+
+    FLOAT3_FLOAT2x3_MUL,
+    FLOAT3_FLOAT3x3_MUL,
+    FLOAT3_FLOAT4x3_MUL,
+
+    FLOAT4_FLOAT2x4_MUL,
+    FLOAT4_FLOAT3x4_MUL,
+    FLOAT4_FLOAT4x4_MUL,
 };
 
 class Runtime
@@ -212,7 +224,7 @@ private:
     {
         const std::string bitcodeName;
         const std::string runtimeName;
-        Type returnType;
+        const Type returnType;
         const std::vector<Type> paramTypes;
     };
 
@@ -224,6 +236,7 @@ private:
     bool FindRuntimeFunctions();
     bool FindInternalTypes();
     bool FindRuntimeTypes();
+    std::vector<std::string> VerifyRuntimeFunctions();
 
     //
     // This will generate a Function for each of the runtime functions
