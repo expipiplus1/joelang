@@ -341,7 +341,7 @@ TerminalType UCPPLexerState::Lex( std::string& string )
     if( ucpp_token == NUMBER )
     {
         if( ReadFloatingLiteral( string.begin(), string.end() ) == 
-            string.end() - string.begin() )
+            std::size_t( string.end() - string.begin() ) )
             return TerminalType::FLOATING_LITERAL;
         return TerminalType::INTEGER_LITERAL;
     }
