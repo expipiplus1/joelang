@@ -474,7 +474,7 @@ llvm::Value* CodeGenerator::CreateMatrixConstructor(
         llvm::Value* ret = llvm::ConstantAggregateZero::get(
                                          m_Runtime.GetLLVMType( type ) );
 
-        for( int i = 0; i < diagonal_size; ++i )
+        for( unsigned i = 0; i < diagonal_size; ++i )
         {
             llvm::Value* index = CreateInteger( i, Type::INT );
             llvm::Value* v = m_Builder.CreateExtractValue( ret, {i} );
@@ -532,7 +532,7 @@ llvm::Value* CodeGenerator::CreateSwizzle( const Expression& e,
                                            Swizzle swizzle )
 {
 #ifndef NDEBUG
-    assert( e.GetType().IsVectorType() || e.GetType().IsScalarType() &&
+    assert( ( e.GetType().IsVectorType() || e.GetType().IsScalarType() ) &&
             "Can only swizzle scalars or vectors" );
     unsigned e_vector_size = e.GetType().GetNumElements();
     for( unsigned i = 0; i < swizzle.GetSize(); ++i )
@@ -628,9 +628,9 @@ llvm::Value* CodeGenerator::CreateScalarOrVectorCast(
                                                 const CompleteType& from_type,
                                                 const CompleteType& to_type )
 {
-    assert( from_type.IsVectorType() || from_type.IsScalarType() &&
+    assert( ( from_type.IsVectorType() || from_type.IsScalarType() ) &&
             "Trying to create a cast with unhandled types" );
-    assert( to_type.IsVectorType() || to_type.IsScalarType() &&
+    assert( ( to_type.IsVectorType() || to_type.IsScalarType() ) &&
             "Trying to create a cast with unhandled types" );
     assert( to_type.GetNumElements() == to_type.GetNumElements() &&
             "Trying to cast different sized types" );
@@ -789,7 +789,7 @@ llvm::Value* CodeGenerator::CreateCastToMatrix( const Expression& expression,
                                                CompleteType( to_column_type ) );
         llvm::Value* ret = llvm::UndefValue::get(
                                              m_Runtime.GetLLVMType( to_type ) );
-        for( int i = 0; i < to_type.GetNumMatrixColumns(); ++i )
+        for( unsigned i = 0; i < to_type.GetNumMatrixColumns(); ++i )
             ret = m_Builder.CreateInsertValue( ret, column_value, {i} );
 
         return ret;
@@ -816,7 +816,7 @@ llvm::Value* CodeGenerator::CreateCastToMatrix( const Expression& expression,
             llvm::Value* ret = llvm::ConstantAggregateZero::get(
                                              m_Runtime.GetLLVMType( to_type ) );
 
-            for( int i = 0; i < from_type.GetNumElements(); ++i )
+            for( unsigned i = 0; i < from_type.GetNumElements(); ++i )
             {
                 llvm::Value* index = CreateInteger( i, Type::INT );
                 llvm::Value* v = m_Builder.CreateExtractValue( ret, {i} );

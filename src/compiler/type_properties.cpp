@@ -103,9 +103,9 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
         }
 
 
-    assert( t1.IsScalarType() || t1.IsVectorType() || t1.IsMatrixType() &&
+    assert( ( t1.IsScalarType() || t1.IsVectorType() || t1.IsMatrixType() ) &&
             "No structs or array's here, please" );
-    assert( t2.IsScalarType() || t2.IsVectorType() || t2.IsMatrixType() &&
+    assert( ( t2.IsScalarType() || t2.IsVectorType() || t2.IsMatrixType() ) &&
             "No structs or array's here, please" );
 
     //
