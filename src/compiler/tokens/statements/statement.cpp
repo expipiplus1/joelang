@@ -32,8 +32,8 @@
 #include <cassert>
 #include <memory>
 
-#include <compiler/casting.hpp>
-#include <compiler/parser.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/statements/empty_statement.hpp>
 #include <compiler/tokens/statements/expression_statement.hpp>

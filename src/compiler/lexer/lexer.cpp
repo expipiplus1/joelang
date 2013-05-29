@@ -31,8 +31,8 @@
 
 #include <cstdio>
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <map>
 #include <memory>
@@ -40,8 +40,8 @@
 #include <string>
 #include <utility>
 
-#include <compiler/terminal_types.hpp>
-#include <compiler/ucpp.hpp>
+#include <compiler/lexer/terminal_types.hpp>
+#include <compiler/lexer/ucpp.hpp>
 
 namespace JoeLang
 {

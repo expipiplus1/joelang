@@ -34,12 +34,12 @@
 #include <set>
 #include <utility>
 
-#include <compiler/code_generator.hpp>
-#include <compiler/complete_type.hpp>
-#include <compiler/parser.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/shader_writer.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/writers/shader_writer.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/tokens/expressions/unary_expression.hpp>
 
 namespace JoeLang

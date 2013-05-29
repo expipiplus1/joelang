@@ -34,11 +34,12 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/code_generator.hpp>
-#include <compiler/complete_type.hpp>
-#include <compiler/shader_writer.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
+
 
 namespace JoeLang
 {

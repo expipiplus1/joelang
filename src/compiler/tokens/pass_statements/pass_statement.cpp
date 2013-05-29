@@ -33,8 +33,8 @@
 #include <memory>
 #include <utility>
 
-#include <compiler/casting.hpp>
-#include <compiler/parser.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/pass_statements/compile_statement.hpp>
 #include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
 

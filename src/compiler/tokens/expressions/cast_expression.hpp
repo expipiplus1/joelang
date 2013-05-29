@@ -31,7 +31,7 @@
 
 #include <memory>
 
-#include <compiler/complete_type.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang

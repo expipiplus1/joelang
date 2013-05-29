@@ -231,4 +231,4 @@ private:
 } // namespace Compiler
 } // namespace JoeLang
 
-#include "inl/shader_writer-inl.hpp"
+#include "shader_writer-inl.hpp"

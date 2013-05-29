@@ -34,8 +34,8 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/shader_writer.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/writers/shader_writer.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
 #include <joelang/types.hpp>
 
 namespace JoeLang

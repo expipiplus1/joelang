@@ -35,12 +35,12 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/casting.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/parser.hpp>
-#include <compiler/runtime.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/terminal_types.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/token.hpp>
 #include <compiler/tokens/pass_statements/pass_statement.hpp>

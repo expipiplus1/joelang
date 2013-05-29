@@ -33,7 +33,7 @@
 #include <memory>
 #include <set>
 
-#include <compiler/parser.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
 
 namespace JoeLang

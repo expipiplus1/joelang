@@ -34,16 +34,16 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/parser.hpp>
-#include <compiler/generic_value.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/semantic.hpp>
-#include <compiler/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/support/generic_value.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/parameter.hpp>
 #include <compiler/tokens/token.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
 
 namespace JoeLang
 {

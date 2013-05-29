@@ -35,8 +35,8 @@
 #include <string>
 #include <sstream>
 
-#include <compiler/lexer.hpp>
-#include <compiler/terminal_types.hpp>
+#include <compiler/lexer/lexer.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 
 namespace JoeLang

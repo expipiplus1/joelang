@@ -34,12 +34,12 @@
 #include <string>
 #include <utility>
 
-#include <compiler/complete_type.hpp>
-#include <compiler/entry_function.hpp>
-#include <compiler/function.hpp>
-#include <compiler/parser.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/terminal_types.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/entry_function.hpp>
+#include <compiler/semantic_analysis/function.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>

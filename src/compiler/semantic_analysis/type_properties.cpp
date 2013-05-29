@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include <compiler/complete_type.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <joelang/types.hpp>
 

@@ -37,14 +37,14 @@
 #include <string>
 #include <utility>
 
-#include <compiler/casting.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/complete_type.hpp>
-#include <compiler/generic_value.hpp>
-#include <compiler/function.hpp>
-#include <compiler/runtime.hpp>
-#include <compiler/type_properties.hpp>
-#include <compiler/variable.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/support/generic_value.hpp>
+#include <compiler/semantic_analysis/function.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>

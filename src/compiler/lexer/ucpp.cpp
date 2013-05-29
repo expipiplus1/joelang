@@ -37,7 +37,7 @@
 #include <mutex>
 #include <string>
 
-#include <compiler/terminal_types.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 
 #include <ucpp/cpp.h>
 

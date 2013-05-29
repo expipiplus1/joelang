@@ -35,7 +35,7 @@
 #include <string>
 #include <vector>
 
-#include <compiler/swizzle.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace llvm

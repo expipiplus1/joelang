@@ -39,10 +39,10 @@
 #include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/Value.h>
 
-#include <compiler/casting.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/generic_value.hpp>
-#include <compiler/shader_writer.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/support/generic_value.hpp>
+#include <compiler/writers/shader_writer.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang

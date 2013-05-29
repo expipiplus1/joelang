@@ -27,49 +27,28 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "semantic_info.hpp"
+#pragma once
 
-#include <map>
-#include <string>
+#include "shader_writer.hpp"
 
-#include <compiler/semantic.hpp>
-#include <compiler/shader_writer.hpp>
-#include <joelang/shader.hpp>
-#include <joelang/types.hpp>
+#include <sstream>
+#include <type_traits>
+
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/tokens/statements/statement.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
+template<typename T>
+ShaderWriter& ShaderWriter::operator << ( const T& value )
 {
-    { SemanticType::POSITION, { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::VERTEX   },
-                                "gl_Position",
-                                true } },    
-    { SemanticType::VERTEXID, { Type::INT,
-                                { ShaderDomain::VERTEX   },
-                                std::set<ShaderDomain>{},
-                                "gl_VertexID",
-                                true } },    
-    { SemanticType::WPOS,     { Type::FLOAT4,
-                                { ShaderDomain::FRAGMENT },
-                                std::set<ShaderDomain>{},
-                                "gl_FragCoord",
-                                true } },
-    { SemanticType::COLOR,    { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT },
-                                "",
-                                true } },    
-    { SemanticType::DEPTH,    { Type::FLOAT,
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::FRAGMENT }, 
-                                "gl_FragDepth",
-                                true } }
-};
+    m_Shader << value;
+    return *this;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

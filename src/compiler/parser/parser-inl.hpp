@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/lexer.hpp>
+#include <compiler/lexer/lexer.hpp>
 
 namespace JoeLang
 {

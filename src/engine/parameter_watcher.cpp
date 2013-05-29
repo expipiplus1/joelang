@@ -34,7 +34,7 @@
 
 #include <joelang/parameter.hpp>
 #include <joelang/program.hpp>
-#include <compiler/shader_writer.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

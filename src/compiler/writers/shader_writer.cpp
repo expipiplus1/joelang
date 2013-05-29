@@ -39,13 +39,13 @@
 #include <sstream>
 #include <vector>
 
-#include <compiler/complete_type.hpp>
-#include <compiler/entry_function.hpp>
-#include <compiler/generic_value.hpp>
-#include <compiler/function.hpp>
-#include <compiler/runtime.hpp>
-#include <compiler/semantic_info.hpp>
-#include <compiler/variable.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/entry_function.hpp>
+#include <compiler/support/generic_value.hpp>
+#include <compiler/semantic_analysis/function.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/writers/semantic_info.hpp>
+#include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
 #include <joelang/context.hpp>

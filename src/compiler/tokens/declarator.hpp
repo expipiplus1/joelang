@@ -33,7 +33,7 @@
 #include <string>
 #include <vector>
 
-#include <compiler/complete_type.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

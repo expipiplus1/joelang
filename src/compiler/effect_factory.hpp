@@ -32,10 +32,10 @@
 #include <memory>
 #include <vector>
 
-#include <compiler/code_generator.hpp>
-#include <compiler/runtime.hpp>
-#include <compiler/sema_analyzer.hpp>
-#include <compiler/shader_writer.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

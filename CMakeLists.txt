@@ -59,68 +59,50 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/technique.cpp
                      src/engine/state.cpp
                      src/engine/inl/parameter_watcher-inl.hpp
-                     src/compiler/casting.hpp
-                     src/compiler/code_generator.cpp
-                     src/compiler/code_generator_wrappers.cpp
-                     src/compiler/code_generator.hpp
-                     src/compiler/complete_type.cpp
-                     src/compiler/complete_type.hpp
                      src/compiler/effect_factory.cpp
                      src/compiler/effect_factory.hpp
-                     src/compiler/entry_function.cpp
-                     src/compiler/entry_function.hpp
-                     src/compiler/generic_value.cpp
-                     src/compiler/generic_value.hpp
-                     src/compiler/function.cpp
-                     src/compiler/function.hpp
-                     src/compiler/lexer.cpp
-                     src/compiler/lexer.hpp
-                     src/compiler/parser.cpp
-                     src/compiler/parser.hpp
-                     src/compiler/parser-inl.hpp
-                     src/compiler/runtime.cpp
-                     src/compiler/runtime.hpp
-                     src/compiler/sema_analyzer.cpp
-                     src/compiler/sema_analyzer.hpp
-                     src/compiler/semantic.cpp
-                     src/compiler/semantic.hpp
-                     src/compiler/semantic_info.cpp
-                     src/compiler/semantic_info.hpp
-                     src/compiler/shader_writer.cpp
-                     src/compiler/shader_writer.hpp
-                     src/compiler/swizzle.cpp
-                     src/compiler/swizzle.hpp
-                     src/compiler/terminal_types.cpp
-                     src/compiler/terminal_types.hpp
-                     src/compiler/type_properties.cpp
-                     src/compiler/type_properties.hpp
-                     src/compiler/ucpp.cpp
-                     src/compiler/ucpp.hpp
-                     src/compiler/variable.cpp
-                     src/compiler/variable.hpp
-                     src/compiler/inl/shader_writer-inl.hpp
-                     src/compiler/tokens/declaration_specifier.cpp
-                     src/compiler/tokens/declaration_specifier.hpp
+                     src/compiler/lexer/lexer.cpp
+                     src/compiler/lexer/lexer.hpp
+                     src/compiler/lexer/terminal_types.cpp
+                     src/compiler/lexer/terminal_types.hpp
+                     src/compiler/lexer/ucpp.cpp
+                     src/compiler/lexer/ucpp.hpp
+                     src/compiler/parser/parser.cpp
+                     src/compiler/parser/parser.hpp
+                     src/compiler/parser/parser-inl.hpp
+                     src/compiler/semantic_analysis/complete_type.cpp
+                     src/compiler/semantic_analysis/complete_type.hpp
+                     src/compiler/semantic_analysis/entry_function.cpp
+                     src/compiler/semantic_analysis/entry_function.hpp
+                     src/compiler/semantic_analysis/function.cpp
+                     src/compiler/semantic_analysis/function.hpp
+                     src/compiler/semantic_analysis/sema_analyzer.cpp
+                     src/compiler/semantic_analysis/sema_analyzer.hpp
+                     src/compiler/semantic_analysis/semantic.cpp
+                     src/compiler/semantic_analysis/semantic.hpp
+                     src/compiler/semantic_analysis/swizzle.cpp
+                     src/compiler/semantic_analysis/swizzle.hpp
+                     src/compiler/semantic_analysis/type_properties.cpp
+                     src/compiler/semantic_analysis/type_properties.hpp
+                     src/compiler/semantic_analysis/variable.cpp
+                     src/compiler/semantic_analysis/variable.hpp
+                     src/compiler/support/casting.hpp
+                     src/compiler/support/generic_value.cpp
+                     src/compiler/support/generic_value.hpp
                      src/compiler/tokens/declaration.cpp
                      src/compiler/tokens/declaration.hpp
-                     src/compiler/tokens/declarator_specifier.cpp
-                     src/compiler/tokens/declarator_specifier.hpp
+                     src/compiler/tokens/declaration_specifier.cpp
+                     src/compiler/tokens/declaration_specifier.hpp
                      src/compiler/tokens/declarator.cpp
                      src/compiler/tokens/declarator.hpp
+                     src/compiler/tokens/declarator_specifier.cpp
+                     src/compiler/tokens/declarator_specifier.hpp
                      src/compiler/tokens/definition.cpp
                      src/compiler/tokens/definition.hpp
-                     src/compiler/tokens/initializer.cpp
-                     src/compiler/tokens/initializer.hpp
-                     src/compiler/tokens/parameter.cpp
-                     src/compiler/tokens/parameter.hpp
-                     src/compiler/tokens/token.cpp
-                     src/compiler/tokens/token.hpp
-                     src/compiler/tokens/translation_unit.cpp
-                     src/compiler/tokens/translation_unit.hpp
-                     src/compiler/tokens/expressions/assignment_operator.cpp
-                     src/compiler/tokens/expressions/assignment_operator.hpp
                      src/compiler/tokens/expressions/assignment_expression.cpp
                      src/compiler/tokens/expressions/assignment_expression.hpp
+                     src/compiler/tokens/expressions/assignment_operator.cpp
+                     src/compiler/tokens/expressions/assignment_operator.hpp
                      src/compiler/tokens/expressions/binary_operator_expression.cpp
                      src/compiler/tokens/expressions/binary_operator_expression.hpp
                      src/compiler/tokens/expressions/cast_expression.cpp
@@ -143,6 +125,10 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/expressions/type_constructor_expression.hpp
                      src/compiler/tokens/expressions/unary_expression.cpp
                      src/compiler/tokens/expressions/unary_expression.hpp
+                     src/compiler/tokens/initializer.cpp
+                     src/compiler/tokens/initializer.hpp
+                     src/compiler/tokens/parameter.cpp
+                     src/compiler/tokens/parameter.hpp
                      src/compiler/tokens/pass_statements/compile_statement.cpp
                      src/compiler/tokens/pass_statements/compile_statement.hpp
                      src/compiler/tokens/pass_statements/pass_statement.cpp
@@ -158,7 +144,22 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/tokens/statements/return_statement.cpp
                      src/compiler/tokens/statements/return_statement.hpp
                      src/compiler/tokens/statements/statement.cpp
-                     src/compiler/tokens/statements/statement.hpp )
+                     src/compiler/tokens/statements/statement.hpp
+                     src/compiler/tokens/token.cpp
+                     src/compiler/tokens/token.hpp
+                     src/compiler/tokens/translation_unit.cpp
+                     src/compiler/tokens/translation_unit.hpp
+                     src/compiler/writers/code_generator.cpp
+                     src/compiler/writers/code_generator.hpp
+                     src/compiler/writers/code_generator_wrappers.cpp
+                     src/compiler/writers/runtime.cpp
+                     src/compiler/writers/runtime.hpp
+                     src/compiler/writers/semantic_info.cpp
+                     src/compiler/writers/semantic_info.hpp
+                     src/compiler/writers/shader_writer.cpp
+                     src/compiler/writers/shader_writer.hpp
+                     src/compiler/writers/shader_writer-inl.hpp )
+
 
 target_link_libraries( joelang ucpp )
 

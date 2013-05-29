@@ -53,11 +53,11 @@
 #include <joelang/context.hpp>
 #include <joelang/config.h>
 #include <joelang/types.hpp>
-#include <compiler/code_generator.hpp>
-#include <compiler/complete_type.hpp>
-#include <compiler/function.hpp>
-#include <compiler/semantic.hpp>
-#include <compiler/type_properties.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/function.hpp>
+#include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
 
 #ifndef JOELANG_RUNTIME_FILENAME
     #error Missing runtime filename

@@ -27,28 +27,49 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "semantic_info.hpp"
 
-#include "../shader_writer.hpp"
+#include <map>
+#include <string>
 
-#include <sstream>
-#include <type_traits>
-
-#include <compiler/complete_type.hpp>
-#include <compiler/tokens/statements/statement.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/writers/shader_writer.hpp>
+#include <joelang/shader.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-template<typename T>
-ShaderWriter& ShaderWriter::operator << ( const T& value )
+const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
 {
-    m_Shader << value;
-    return *this;
-}
+    { SemanticType::POSITION, { Type::FLOAT4, 
+                                std::set<ShaderDomain>{},
+                                { ShaderDomain::VERTEX   },
+                                "gl_Position",
+                                true } },    
+    { SemanticType::VERTEXID, { Type::INT,
+                                { ShaderDomain::VERTEX   },
+                                std::set<ShaderDomain>{},
+                                "gl_VertexID",
+                                true } },    
+    { SemanticType::WPOS,     { Type::FLOAT4,
+                                { ShaderDomain::FRAGMENT },
+                                std::set<ShaderDomain>{},
+                                "gl_FragCoord",
+                                true } },
+    { SemanticType::COLOR,    { Type::FLOAT4, 
+                                std::set<ShaderDomain>{},
+                                { ShaderDomain::FRAGMENT },
+                                "",
+                                true } },    
+    { SemanticType::DEPTH,    { Type::FLOAT,
+                                std::set<ShaderDomain>{},
+                                { ShaderDomain::FRAGMENT }, 
+                                "gl_FragDepth",
+                                true } }
+};
 
 } // namespace Compiler
 } // namespace JoeLang

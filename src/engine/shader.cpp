@@ -42,8 +42,8 @@
 
 #include <GL/GLee.h>
 
-#include <compiler/entry_function.hpp>
-#include <compiler/shader_writer.hpp>
+#include <compiler/semantic_analysis/entry_function.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {
