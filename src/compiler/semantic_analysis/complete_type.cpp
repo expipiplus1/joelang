@@ -29,13 +29,13 @@
 
 #include "complete_type.hpp"
 
-#include <string>
 #include <sstream>
+#include <string>
 #include <utility>
 #include <vector>
 
-#include <compiler/writers/shader_writer.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
 
 namespace JoeLang

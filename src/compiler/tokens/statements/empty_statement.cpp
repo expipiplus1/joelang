@@ -32,8 +32,8 @@
 #include <cassert>
 #include <memory>
 
-#include <compiler/parser/parser.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang

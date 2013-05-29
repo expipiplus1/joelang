@@ -29,8 +29,8 @@
 
 #include "type_properties.hpp"
 
-#include <cassert>
 #include <array>
+#include <cassert>
 #include <map>
 #include <string>
 #include <vector>

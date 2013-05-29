@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <cstring>
+#include <stdint.h>
 
 #include <joemath/joemath.hpp>
 

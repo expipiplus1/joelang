@@ -34,12 +34,12 @@
 #include <set>
 #include <utility>
 
-#include <compiler/writers/code_generator.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/shader_writer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 
 namespace JoeLang

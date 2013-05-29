@@ -39,8 +39,8 @@
 
 #include <GL/GLee.h>
 
-#include <joelang/shader.hpp>
 #include <engine/parameter_watcher.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {

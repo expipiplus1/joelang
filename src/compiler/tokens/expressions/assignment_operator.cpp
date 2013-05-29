@@ -33,8 +33,8 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/parser/parser.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

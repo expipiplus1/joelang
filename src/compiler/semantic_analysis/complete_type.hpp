@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace JoeLang
 {

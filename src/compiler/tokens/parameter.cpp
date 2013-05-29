@@ -35,13 +35,13 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/support/generic_value.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
-#include <compiler/tokens/declarator_specifier.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
+#include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
 #include <joelang/types.hpp>

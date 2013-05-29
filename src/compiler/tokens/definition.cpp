@@ -35,17 +35,17 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/support/casting.hpp>
-#include <compiler/writers/code_generator.hpp>
-#include <compiler/parser/parser.hpp>
-#include <compiler/writers/runtime.hpp>
-#include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/declaration.hpp>
-#include <compiler/tokens/token.hpp>
+#include <compiler/tokens/pass_statements/compile_statement.hpp>
 #include <compiler/tokens/pass_statements/pass_statement.hpp>
 #include <compiler/tokens/pass_statements/state_assignment_statement.hpp>
-#include <compiler/tokens/pass_statements/compile_statement.hpp>
+#include <compiler/tokens/token.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/runtime.hpp>
 #include <joelang/config.h>
 #include <joelang/pass.hpp>
 #include <joelang/program.hpp>

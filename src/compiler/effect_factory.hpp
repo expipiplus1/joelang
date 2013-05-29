@@ -32,8 +32,8 @@
 #include <memory>
 #include <vector>
 
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/runtime.hpp>
 #include <compiler/writers/shader_writer.hpp>
 

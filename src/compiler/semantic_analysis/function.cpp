@@ -37,12 +37,12 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/writers/runtime.hpp>
-#include <compiler/writers/shader_writer.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

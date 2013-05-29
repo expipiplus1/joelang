@@ -29,8 +29,8 @@
 
 #pragma once
 
-#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
 {

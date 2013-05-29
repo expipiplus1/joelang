@@ -34,13 +34,13 @@
 #include <string>
 #include <utility>
 
-#include <compiler/support/generic_value.hpp>
-#include <compiler/parser/parser.hpp>
-#include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/lexer/terminal_types.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator_specifier.hpp>
 #include <compiler/tokens/expressions/expression.hpp>

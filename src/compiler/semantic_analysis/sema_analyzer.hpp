@@ -30,14 +30,14 @@
 #pragma once
 
 #include <map>
-#include <string>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/writers/code_generator.hpp>
 
 namespace JoeLang
 {

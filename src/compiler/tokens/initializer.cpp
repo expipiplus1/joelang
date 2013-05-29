@@ -35,14 +35,14 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/parser/parser.hpp>
-#include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
 
 namespace JoeLang

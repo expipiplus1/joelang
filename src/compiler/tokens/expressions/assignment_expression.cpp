@@ -34,16 +34,16 @@
 #include <set>
 #include <utility>
 
-#include <compiler/support/casting.hpp>
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/shader_writer.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/expressions/conditional_expression.hpp>
 #include <compiler/tokens/expressions/postfix_expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

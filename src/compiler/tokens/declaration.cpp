@@ -36,16 +36,16 @@
 #include <utility>
 #include <vector>
 
-#include <compiler/support/casting.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/declaration_specifier.hpp>
 #include <compiler/tokens/declarator.hpp>
 #include <compiler/tokens/definition.hpp>
-#include <compiler/tokens/token.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
-#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/tokens/token.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/technique.hpp>
 

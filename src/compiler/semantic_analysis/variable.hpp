@@ -34,8 +34,8 @@
 #include <vector>
 
 #include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/support/generic_value.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/support/generic_value.hpp>
 
 namespace llvm
 {

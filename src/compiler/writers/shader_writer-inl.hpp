@@ -35,8 +35,8 @@
 #include <type_traits>
 
 #include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/tokens/statements/statement.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/tokens/statements/statement.hpp>
 
 namespace JoeLang
 {

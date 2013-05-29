@@ -37,8 +37,8 @@
 
 #include <llvm/IR/IRBuilder.h>
 
-#include <joelang/types.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
+#include <joelang/types.hpp>
 
 namespace llvm
 {

@@ -32,12 +32,12 @@
 #include <fstream>
 #include <memory>
 
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/writers/code_generator.hpp>
 #include <joelang/context.hpp>
 #include <joelang/effect.hpp>
 #include <joelang/parameter.hpp>
-#include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/code_generator.hpp>
-#include <compiler/parser/parser.hpp>
 
 #include <compiler/tokens/translation_unit.hpp>
 

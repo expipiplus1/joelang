@@ -34,13 +34,13 @@
 #include <string>
 #include <utility>
 
-#include <compiler/writers/code_generator.hpp>
-#include <compiler/support/generic_value.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/writers/code_generator.hpp>
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/types.hpp>

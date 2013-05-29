@@ -29,19 +29,19 @@
 
 #include "runtime.hpp"
 
+#include <llvm/ADT/OwningPtr.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/PassManager.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
-#include <llvm/ADT/OwningPtr.h>
-#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/PassManager.h>
 #include <llvm/Support/ManagedStatic.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/system_error.h>
 #include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/system_error.h>
 #include <llvm/Transforms/IPO.h>
 #include <llvm/Transforms/IPO/PassManagerBuilder.h>
 
@@ -50,14 +50,14 @@
 #include <string>
 #include <vector>
 
-#include <joelang/context.hpp>
-#include <joelang/config.h>
-#include <joelang/types.hpp>
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <joelang/config.h>
+#include <joelang/context.hpp>
+#include <joelang/types.hpp>
 
 #ifndef JOELANG_RUNTIME_FILENAME
     #error Missing runtime filename

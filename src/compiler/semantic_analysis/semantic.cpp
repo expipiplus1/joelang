@@ -35,13 +35,13 @@
 #include <string>
 #include <utility>
 
-#include <compiler/support/generic_value.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/semantic_info.hpp>
-#include <compiler/lexer/terminal_types.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/token.hpp>
+#include <compiler/writers/semantic_info.hpp>
 
 namespace JoeLang
 {

@@ -32,12 +32,12 @@
 #include <algorithm>
 #include <memory>
 
-#include <compiler/support/casting.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
-#include <compiler/tokens/token.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/tokens/token.hpp>
 #include <joelang/types.hpp>
 
 namespace JoeLang

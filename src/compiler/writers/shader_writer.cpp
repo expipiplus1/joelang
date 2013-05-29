@@ -34,20 +34,20 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <sstream>
 #include <stack>
 #include <string>
-#include <sstream>
 #include <vector>
 
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/entry_function.hpp>
-#include <compiler/support/generic_value.hpp>
 #include <compiler/semantic_analysis/function.hpp>
-#include <compiler/writers/runtime.hpp>
-#include <compiler/writers/semantic_info.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/postfix_operator.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/writers/semantic_info.hpp>
 #include <joelang/context.hpp>
 #include <joelang/shader.hpp>
 #include <joelang/types.hpp>

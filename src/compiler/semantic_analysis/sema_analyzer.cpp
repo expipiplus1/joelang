@@ -32,25 +32,25 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 
-#include <compiler/support/casting.hpp>
-#include <compiler/writers/code_generator.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/support/generic_value.hpp>
 #include <compiler/semantic_analysis/function.hpp>
-#include <compiler/writers/runtime.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
-#include <compiler/tokens/statements/compound_statement.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/definition.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
+#include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/translation_unit.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/runtime.hpp>
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
 

@@ -34,13 +34,13 @@
 #include <set>
 #include <vector>
 
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/shader_writer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
-#include <compiler/tokens/statements/statement.hpp>
 #include <compiler/tokens/statements/return_statement.hpp>
+#include <compiler/tokens/statements/statement.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

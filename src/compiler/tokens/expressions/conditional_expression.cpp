@@ -34,15 +34,15 @@
 #include <set>
 #include <utility>
 
-#include <compiler/writers/code_generator.hpp>
+#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/shader_writer.hpp>
-#include <compiler/lexer/terminal_types.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
-#include <compiler/tokens/expressions/cast_expression.hpp>
 #include <compiler/tokens/expressions/binary_operator_expression.hpp>
+#include <compiler/tokens/expressions/cast_expression.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

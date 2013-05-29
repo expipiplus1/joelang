@@ -32,9 +32,9 @@
 #include <joelang/config.h>
 #ifdef JOELANG_WITH_OPENGL
 
+#include <compiler/writers/shader_writer.hpp>
 #include <joelang/parameter.hpp>
 #include <joelang/program.hpp>
-#include <compiler/writers/shader_writer.hpp>
 
 namespace JoeLang
 {

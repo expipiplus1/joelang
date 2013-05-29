@@ -31,8 +31,8 @@
 
 #include <memory>
 
-#include <compiler/parser/parser.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
 #include <compiler/tokens/expressions/identifier_expression.hpp>
 #include <compiler/tokens/expressions/literal_expression.hpp>
 

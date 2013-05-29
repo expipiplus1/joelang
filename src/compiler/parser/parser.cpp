@@ -32,8 +32,8 @@
 #include <cassert>
 #include <memory>
 #include <set>
-#include <string>
 #include <sstream>
+#include <string>
 
 #include <compiler/lexer/lexer.hpp>
 #include <compiler/lexer/terminal_types.hpp>

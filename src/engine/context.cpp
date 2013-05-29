@@ -39,10 +39,10 @@
 #include <utility>
 #include <vector>
 
-#include <engine/opengl_states.hpp>
 #include <compiler/effect_factory.hpp>
-#include <compiler/writers/runtime.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <engine/opengl_states.hpp>
 #include <joelang/config.h>
 #include <joelang/effect.hpp>
 #include <joelang/state.hpp>

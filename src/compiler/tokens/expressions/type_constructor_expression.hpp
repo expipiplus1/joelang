@@ -31,8 +31,8 @@
 
 #include <vector>
 
-#include <joelang/types.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

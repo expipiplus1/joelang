@@ -35,24 +35,24 @@
 #include <string>
 #include <utility>
 
-#include <joelang/types.hpp>
-#include <compiler/support/casting.hpp>
-#include <compiler/writers/code_generator.hpp>
-#include <compiler/semantic_analysis/function.hpp>
-#include <compiler/support/generic_value.hpp>
-#include <compiler/parser/parser.hpp>
-#include <compiler/writers/runtime.hpp>
-#include <compiler/semantic_analysis/sema_analyzer.hpp>
-#include <compiler/writers/shader_writer.hpp>
-#include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/lexer/terminal_types.hpp>
+#include <compiler/parser/parser.hpp>
+#include <compiler/semantic_analysis/function.hpp>
+#include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
-#include <compiler/tokens/expressions/expression.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
 #include <compiler/tokens/expressions/cast_expression.hpp>
+#include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/expressions/identifier_expression.hpp>
 #include <compiler/tokens/expressions/postfix_expression.hpp>
 #include <compiler/tokens/token.hpp>
+#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/runtime.hpp>
+#include <compiler/writers/shader_writer.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
