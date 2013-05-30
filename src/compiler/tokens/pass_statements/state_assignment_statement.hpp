@@ -48,6 +48,8 @@ class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
 class Parser;
 class SemaAnalyzer;
+class StateAssignmentNode;
+class NodeManager;
 
 /**
   * \class StateAssignmentStatement
@@ -72,6 +74,8 @@ public:
     ~StateAssignmentStatement();
 
     bool PerformSema( SemaAnalyzer& sema );
+    
+    const StateAssignmentNode& GenerateCodeDag( NodeManager& node_manager ) const;
 
     std::unique_ptr<StateAssignmentBase> GenerateStateAssignment(
                                                 CodeGenerator& code_gen,

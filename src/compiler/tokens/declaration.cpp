@@ -48,11 +48,15 @@
 #include <compiler/tokens/token.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/technique.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
+
+class PassNode;
+using PassNode_ref = std::reference_wrapper<const PassNode>;
 
 //------------------------------------------------------------------------------
 // DeclarationBase
@@ -262,9 +266,25 @@ bool TechniqueDeclaration::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+const TechniqueNode& TechniqueDeclaration::GenerateCodeDag( NodeManager& node_manager )
+{
+    std::vector<PassNode_ref> passes;
+    for( auto& pass : m_Passes )
+        passes.emplace_back( pass->GenerateCodeDag( node_manager ) );
+    return node_manager.MakeTechniqueNode( m_Name, std::move( passes ) );
+}
+
 const std::string& TechniqueDeclaration::GetName() const
 {
     return m_Name;
+}
+
+std::vector<PassDefinition_ref> TechniqueDeclaration::GetPasses() const
+{
+    std::vector<PassDefinition_ref> ret;
+    for( const auto& p : m_Passes )
+        ret.push_back( p->GetDefinition() );
+    return ret;
 }
 
 Technique TechniqueDeclaration::GenerateTechnique(

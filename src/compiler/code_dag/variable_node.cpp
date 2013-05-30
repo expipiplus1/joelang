@@ -37,11 +37,11 @@ namespace Compiler
 {
 
 VariableNode::VariableNode( Variable_sp variable )
-    : Node( NodeType::Variable, {} ),
-      m_Variable( std::move(variable) )
+    : Node( NodeType::VariableIdentifier, {} ),
+      m_Variable( std::move( variable ) )
 {
 }
-    
+
 
 const Variable_sp& VariableNode::GetVariable() const
 {

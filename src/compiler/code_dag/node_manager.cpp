@@ -36,10 +36,13 @@
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/pass_node.hpp>
+#include <compiler/code_dag/technique_node.hpp>
+#include <compiler/code_dag/state_assignment_node.hpp>
 
-namespace JoeLang 
+namespace JoeLang
 {
-namespace Compiler 
+namespace Compiler
 {
 
 NodeManager::NodeManager()
@@ -52,40 +55,69 @@ NodeManager::~NodeManager()
 
 const Node& NodeManager::MakeNode( NodeType node_type, std::vector<Node_ref> children )
 {
-    m_Nodes.emplace_back( new Node( node_type, std::move(children) ) );
+    m_Nodes.emplace_back( new Node( node_type, std::move( children ) ) );
     return *m_Nodes.back();
 }
 
 const TypeNode& NodeManager::MakeTypeNode( const CompleteType& type )
 {
     m_Nodes.emplace_back( new TypeNode( type ) );
-    return static_cast<const TypeNode&>(*m_Nodes.back());
+    return static_cast<const TypeNode&>( *m_Nodes.back() );
 }
 
 const ZeroNode& NodeManager::MakeZero( Type type )
 {
     m_Nodes.emplace_back( new ZeroNode( type ) );
-    return static_cast<const ZeroNode&>(*m_Nodes.back());
+    return static_cast<const ZeroNode&>( *m_Nodes.back() );
 }
 
 const VariableNode& NodeManager::MakeVariableNode( Variable_sp variable )
 {
-    m_Nodes.emplace_back( new VariableNode( std::move(variable) ) );
-    return static_cast<const VariableNode&>(*m_Nodes.back());
+    m_Nodes.emplace_back( new VariableNode( std::move( variable ) ) );
+    return static_cast<const VariableNode&>( *m_Nodes.back() );
 }
 
 const FunctionNode& NodeManager::MakeFunctionNode( Function_sp function )
 {
-    m_Nodes.emplace_back( new FunctionNode( std::move(function) ) );
-    return static_cast<const FunctionNode&>(*m_Nodes.back());
+    m_Nodes.emplace_back( new FunctionNode( std::move( function ) ) );
+    return static_cast<const FunctionNode&>( *m_Nodes.back() );
 }
 
 const SwizzleNode& NodeManager::MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle )
 {
     m_Nodes.emplace_back( new SwizzleNode( swizzled, swizzle ) );
-    return static_cast<const SwizzleNode&>(*m_Nodes.back());
+    return static_cast<const SwizzleNode&>( *m_Nodes.back() );
 }
 
+const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes )
+{
+    // Hopefully this will be a no-op
+    
+    std::vector<Node_ref> ns;
+    for( const PassNode& n : passes )
+        ns.emplace_back( n );
+    
+    m_Nodes.emplace_back( new TechniqueNode( name, std::move( ns ) ) );
+    return static_cast<const TechniqueNode&>( *m_Nodes.back() );
+}
+
+const PassNode& NodeManager::MakePassNode( std::string name, std::vector<StateAssignmentNode_ref> state_assignments )
+{
+    // Hopefully this will be a no-op
+    
+    std::vector<Node_ref> ns;
+    for( const StateAssignmentNode& n : state_assignments )
+        ns.emplace_back( n );
+    
+    m_Nodes.emplace_back( new PassNode( name, std::move( ns ) ) );
+    return static_cast<const PassNode&>( *m_Nodes.back() );
+}
+
+const StateAssignmentNode& NodeManager::MakeStateAssignmentNode( const StateBase& state, const Node& assigned_expression )
+{
+    m_Nodes.emplace_back( new StateAssignmentNode( state, assigned_expression ) );
+    return static_cast<const StateAssignmentNode&>( *m_Nodes.back() );
+}
 
 } // namespace Compiler
 } // namespace JoeLang

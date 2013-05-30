@@ -64,6 +64,10 @@ class Runtime;
 class TechniqueDefinition;
 class TechniqueDeclaration;
 using TechniqueDeclaration_up = std::unique_ptr<TechniqueDeclaration>;
+using TechniqueDeclaration_ref = std::reference_wrapper<TechniqueDeclaration>;
+class TechniqueNode;
+using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
+class NodeManager;
 class PassDeclaration;
 using PassDeclaration_up = std::unique_ptr<PassDeclaration>;
 class VariableDeclarationList;
@@ -106,7 +110,9 @@ public:
 
     void AddFunctionDefinition( std::unique_ptr<FunctionDefinition> f );
 
-    const std::vector<TechniqueDeclaration_up>& GetTechniqueDeclarations() const;
+    std::vector<TechniqueNode_ref> GetTechniqueNodes( NodeManager& node_manager ) const;
+    
+    std::vector<TechniqueDeclaration_ref> GetTechniqueDeclarations() const;
 
     const std::vector<Variable_sp>& GetUniformVariables() const;
 

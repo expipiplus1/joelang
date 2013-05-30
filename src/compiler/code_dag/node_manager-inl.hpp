@@ -31,16 +31,16 @@
 
 #include <compiler/code_dag/constant_node.hpp>
 
-namespace JoeLang 
+namespace JoeLang
 {
-namespace Compiler 
+namespace Compiler
 {
 
-template<typename T>
+template <typename T>
 const ConstantNode<T>& NodeManager::MakeConstant( T constant_value )
 {
-    m_Nodes.emplace_back( new ConstantNode<T>( std::move(constant_value) ) );
-    return static_cast<const ConstantNode<T>&>(*m_Nodes.back());
+    m_Nodes.emplace_back( new ConstantNode<T>( std::move( constant_value ) ) );
+    return static_cast<const ConstantNode<T>&>( *m_Nodes.back() );
 }
 
 

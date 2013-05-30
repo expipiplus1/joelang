@@ -38,10 +38,10 @@ namespace Compiler
 
 ZeroNode::ZeroNode( Type type )
     : Node( NodeType::Type, {} ),
-      m_Type( std::move(type) )
+      m_Type( std::move( type ) )
 {
 }
-    
+
 
 const Type& ZeroNode::GetType() const
 {

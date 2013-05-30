@@ -37,20 +37,20 @@ namespace JoeLang
 namespace Compiler
 {
 
-template<typename T>
+template <typename T>
 ConstantNode<T>::ConstantNode( value_type constant )
-    : ConstantNodeBase()
-    , m_Constant( std::move( constant ) )
+    : ConstantNodeBase(),
+      m_Constant( std::move( constant ) )
 {
 }
 
-template<typename T>
+template <typename T>
 const T& ConstantNode<T>::GetConstant() const
 {
     return m_Constant;
 }
 
-template<typename T>
+template <typename T>
 Type ConstantNode<T>::GetType() const
 {
     return JoeLangType<T>::value;

@@ -41,16 +41,36 @@ enum class NodeType
 {
     Unimplemented,
     
+    //
+    // Miscellaneous
+    //
     Type,
-    Constant,
-    Zero,
-    Variable,
-    Function,
-    Swizzle,
     
+    //
+    // Structural
+    //
+    
+    Technique,
+    Pass,
+    StateAssignment,
+    
+    //
+    // Statements
+    //
+
     Sequence,
     Return,
     
+    //
+    // Expressions
+    //
+
+    Constant,
+    Zero,
+    VariableIdentifier,
+    FunctionIdentifier,
+    Swizzle,
+
     BinaryOperator_start,
     LogicalOr = BinaryOperator_start,
     LogicalAnd,
@@ -71,7 +91,7 @@ enum class NodeType
     Divide,
     Modulo,
     BinaryOperator_end,
-    
+
     UnaryOperator_start = BinaryOperator_end,
     Negate = UnaryOperator_start,
     BitwiseNot,
@@ -79,14 +99,14 @@ enum class NodeType
     PreIncrement,
     PreDecrement,
     UnaryOperator_end,
-    
+
     Select = UnaryOperator_end,
     Cast,
-    
+
     ArrayIndex,
-    
+
     Call,
-    
+
     ExtractElement,
     InsertElement,
     VectorConstructor,
@@ -100,21 +120,21 @@ class Node
 {
 public:
     unsigned GetNumChildren() const;
-    
+
     const std::vector<Node_ref>& GetChildren() const;
-    
+
     NodeType GetNodeType() const;
-    
+
     virtual
     ~Node();
-    
-protected: 
+
+protected:
     friend class NodeManager;
     Node( NodeType type, std::vector<Node_ref> children );
-    
+
 private:
-    
-    const NodeType          m_Type;
+
+    const NodeType m_Type;
     const std::vector<Node_ref> m_Children;
 };
 

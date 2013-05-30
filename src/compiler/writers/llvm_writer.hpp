@@ -29,13 +29,27 @@
 
 #pragma once
 
+#include <memory>
+#include <vector>
+
 namespace JoeLang
 {
+class StateAssignmentBase;
+using StateAssignmentBase_up = std::unique_ptr<StateAssignmentBase>;
 namespace Compiler
 {
 
+class Runtime;
+class StateAssignmentNode;
+
 class LLVMWriter
 {
+public:
+    LLVMWriter( Runtime& runtime );
+    
+    StateAssignmentBase_up GenerateStateAssignment( const StateAssignmentNode& state_assignment_node );
+private:
+    Runtime& m_Runtime; 
 };
 
 } // namespace Compiler

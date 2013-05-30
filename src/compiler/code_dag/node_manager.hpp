@@ -33,19 +33,25 @@
 #include <memory>
 #include <vector>
 
-namespace JoeLang 
+namespace JoeLang
 {
 
 enum class Type;
+class StateBase;
 
-namespace Compiler 
+namespace Compiler
 {
 
 class Node;
 using Node_up = std::unique_ptr<Node>;
 using Node_ref = std::reference_wrapper<const Node>;
 class TypeNode;
-template<typename>
+class PassNode;
+using PassNode_ref = std::reference_wrapper<const PassNode>;
+class TechniqueNode;
+class StateAssignmentNode;
+using StateAssignmentNode_ref = std::reference_wrapper<const StateAssignmentNode>;
+template <typename>
 class ConstantNode;
 class ZeroNode;
 enum class NodeType;
@@ -64,21 +70,27 @@ class NodeManager
 public:
     NodeManager();
     ~NodeManager();
-    
+
     const Node& MakeNode( NodeType node_type, std::vector<Node_ref> children );
-    
+
     const TypeNode& MakeTypeNode( const CompleteType& type );
-    
-    template<typename T>
+
+    template <typename T>
     const ConstantNode<T>& MakeConstant( T constant_value );
-    
+
     const ZeroNode& MakeZero( Type type );
-    
+
     const VariableNode& MakeVariableNode( Variable_sp variable );
-    
+
     const FunctionNode& MakeFunctionNode( Function_sp function );
+
+    const SwizzleNode& MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle );
+
+    const TechniqueNode& MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes );
     
-    const SwizzleNode& MakeSwizzleNode(const Node& swizzled, const Swizzle& swizzle );
+    const PassNode& MakePassNode( std::string name, std::vector<StateAssignmentNode_ref> state_assignments );
+   
+    const StateAssignmentNode& MakeStateAssignmentNode( const StateBase& state, const Node& assigned_expression );
     
     // TODO make this a little better
     std::vector<Node_up> m_Nodes;

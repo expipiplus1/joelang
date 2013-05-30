@@ -69,8 +69,14 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/code_dag/node_manager.cpp
                      src/compiler/code_dag/node_manager.hpp
                      src/compiler/code_dag/node_manager-inl.hpp
+                     src/compiler/code_dag/pass_node.cpp
+                     src/compiler/code_dag/pass_node.hpp
+                     src/compiler/code_dag/state_assignment_node.cpp
+                     src/compiler/code_dag/state_assignment_node.hpp
                      src/compiler/code_dag/swizzle_node.cpp
                      src/compiler/code_dag/swizzle_node.hpp
+                     src/compiler/code_dag/technique_node.cpp
+                     src/compiler/code_dag/technique_node.hpp
                      src/compiler/code_dag/type_node.cpp
                      src/compiler/code_dag/type_node.hpp
                      src/compiler/code_dag/variable_node.cpp

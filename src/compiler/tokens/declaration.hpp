@@ -55,8 +55,12 @@ using Declarator_up = std::unique_ptr<Declarator>;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
+using PassDefinition_ref = std::reference_wrapper<PassDefinition>;
 class SemaAnalyzer;
 class TechniqueDefinition;
+class TechniqueNode;
+class NodeManager;
+
 
 /**
   * \class DeclarationBase
@@ -234,8 +238,12 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
 
+    const TechniqueNode& GenerateCodeDag( NodeManager& node_manager );
+    
     /** \returns this technique's name **/
     const std::string& GetName() const;
+    
+    std::vector<PassDefinition_ref> GetPasses() const;
 
     /**
       * Generates the technique represented by this token.

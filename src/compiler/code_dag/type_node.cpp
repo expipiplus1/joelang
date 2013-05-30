@@ -39,10 +39,10 @@ namespace Compiler
 
 TypeNode::TypeNode( CompleteType type )
     : Node( NodeType::Type, {} ),
-      m_Type( std::move(type) )
+      m_Type( std::move( type ) )
 {
 }
-    
+
 
 const CompleteType& TypeNode::GetType() const
 {

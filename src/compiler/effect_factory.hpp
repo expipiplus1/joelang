@@ -29,22 +29,31 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
 
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/runtime.hpp>
-#include <compiler/writers/shader_writer.hpp>
+#include <compiler/writers/llvm_writer.hpp>
 
 namespace JoeLang
 {
 
 class Context;
 class Effect;
+class StateAssignmentBase;
+class Pass;
+class Technique;
 
 namespace Compiler
 {
+
+class TechniqueNode;
+using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
+class PassNode;
+class StateAssignmentNode;
 
 class EffectFactory
 {
@@ -58,8 +67,13 @@ public:
                                                  const std::string& name = "" );
 
 private:
+    std::vector<Technique> GenerateTechniques( const std::vector<TechniqueNode_ref>& technique_nodes );
+    Technique GenerateTechnique( const TechniqueNode& technique_node );
+    Pass GeneratePass( const PassNode& pass_node );
+    
     const Context& m_Context;
     Runtime&       m_Runtime;
+    LLVMWriter     m_LLVMWriter;
 };
 
 } // namespace Compiler

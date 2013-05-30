@@ -51,6 +51,7 @@ public:
     std::string GenerateDotString();
     void AddCluster( const Node& node, std::string name );
     void Clear();
+
 private:
     bool HasSeen( const Node& node ) const;
     std::string GetEdges( const Node& node );
@@ -58,14 +59,14 @@ private:
     std::string GetIdentifier( const Node& node );
     std::string GetUniqueIdentifier();
     std::string GetNodeDescription( const Node& node ) const;
-    
+
     struct NodeCluster
     {
         const Node& node;
         const std::string name;
     };
 
-    std::map<const Node*, std::string> m_Identifiers; 
+    std::map<const Node*, std::string> m_Identifiers;
     std::vector<NodeCluster> m_Clusters;
     unsigned m_NumUniqueIdentifiers = 0;
 };

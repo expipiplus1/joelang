@@ -43,10 +43,11 @@ class TypeNode : public Node
 {
 public:
     const CompleteType& GetType() const;
+
 private:
     friend class NodeManager;
     TypeNode( CompleteType type );
-    
+
     CompleteType m_Type;
 };
 

@@ -44,10 +44,11 @@ class ZeroNode : public Node
 {
 public:
     const Type& GetType() const;
+
 private:
     friend class NodeManager;
     ZeroNode( Type type );
-    
+
     Type m_Type;
 };
 

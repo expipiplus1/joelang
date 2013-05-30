@@ -53,6 +53,7 @@
 #include <compiler/writers/runtime.hpp>
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
@@ -153,10 +154,21 @@ void SemaAnalyzer::AddFunctionDefinition(
     m_FunctionDefinitions.push_back( std::move(f) );
 }
 
-const std::vector<TechniqueDeclaration_up>&
+std::vector<TechniqueNode_ref> SemaAnalyzer::GetTechniqueNodes( NodeManager& node_manager ) const
+{
+    std::vector<TechniqueNode_ref> ret;
+    for( const auto& t : m_TechniqueDeclarations )
+        ret.push_back( t->GenerateCodeDag( node_manager ) );
+    return ret;
+}
+
+std::vector<TechniqueDeclaration_ref>
                                   SemaAnalyzer::GetTechniqueDeclarations() const
 {
-    return m_TechniqueDeclarations;
+    std::vector<TechniqueDeclaration_ref> ret;
+    for( const auto& t : m_TechniqueDeclarations )
+        ret.push_back( *t );
+    return ret;
 }
 
 const std::vector<Variable_sp>& SemaAnalyzer::GetUniformVariables() const

@@ -50,28 +50,28 @@ namespace Compiler
 
 void DotWriter::AddCluster( const Node& node, std::string name )
 {
-    m_Clusters.push_back( { node, name} );
+    m_Clusters.push_back( { node, name } );
 }
 
 std::string DotWriter::GenerateDotString()
 {
     std::string header = "digraph code_dag {\n";
     std::string footer = "}\n";
-    
+
     std::string content;
-    
-    for( const NodeCluster& cluster : m_Clusters ) 
+
+    for( const NodeCluster& cluster : m_Clusters )
     {
         std::string subgraph_header = "subgraph cluster_" + GetUniqueIdentifier() + "{\n";
-        std::string subgraph_footer = "label = \"" + cluster.name + "\";\n"
-                                      "style = \"rounded,dashed\";\n}\n";
+        std::string subgraph_footer =
+            "label = \"" + cluster.name + "\";\nstyle = \"rounded,dashed\";\n}\n";
         content += subgraph_header + GetEdges( cluster.node ) + subgraph_footer;
     }
-    
+
     std::string ret = header + GetLabels() + "\n" + content + footer;
-    
+
     Clear();
-    
+
     return ret;
 }
 
@@ -82,7 +82,7 @@ void DotWriter::Clear()
 
 bool DotWriter::HasSeen( const Node& node ) const
 {
-    return m_Identifiers.find(&node) != m_Identifiers.end();
+    return m_Identifiers.find( &node ) != m_Identifiers.end();
 }
 
 std::string DotWriter::GetEdges( const Node& node )
@@ -111,7 +111,8 @@ std::string DotWriter::GetLabels() const
         const Node& node = *i.first;
         const std::string& identifier = i.second;
         std::string description = GetNodeDescription( node );
-        std::string label = identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];";
+        std::string label =
+            identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];";
         labels += label + "\n";
     }
     return labels;
@@ -122,7 +123,7 @@ std::string DotWriter::GetIdentifier( const Node& node )
     auto i = m_Identifiers.find( &node );
     if( i != m_Identifiers.end() )
         return i->second;
-    
+
     std::string identifier = GetUniqueIdentifier();
     m_Identifiers[&node] = identifier;
     return identifier;
@@ -137,68 +138,106 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
 {
     switch( node.GetNodeType() )
     {
-    case NodeType::Unimplemented: return "Unimplemented";
-    case NodeType::Sequence: return "Sequence";
-    case NodeType::Return: return "Return";
-    case NodeType::LogicalOr: return "LogicalOr";
-    case NodeType::LogicalAnd: return "LogicalAnd";
-    case NodeType::BitwiseOr: return "BitwiseOr";
-    case NodeType::BitwiseExclusiveOr: return "BitwiseExclusiveOr";
-    case NodeType::BitwiseAnd: return "BitwiseAnd";
-    case NodeType::CompareEqual: return "CompareEqual";
-    case NodeType::CompareNotEqual: return "CompareNotEqual";
-    case NodeType::CompareLessThan: return "CompareLessThan";
-    case NodeType::CompareGreaterThan: return "CompareGreaterThan";
-    case NodeType::CompareLessThanEquals: return "CompareLessThanEquals";
-    case NodeType::CompareGreaterThanEquals: return "CompareGreaterThanEquals";
-    case NodeType::LeftShift: return "LeftShift";
-    case NodeType::RightShift: return "RightShift";
-    case NodeType::Add: return "Add"; 
-    case NodeType::Subtract: return "Subtract";
-    case NodeType::Multiply: return "Multiply";
-    case NodeType::Divide: return "Divide";
-    case NodeType::Modulo: return "Modulo";
-    case NodeType::Negate: return "Negate";
-    case NodeType::BitwiseNot: return "BitwiseNot";
-    case NodeType::LogicalNot: return "LogicalNot";
-    case NodeType::PreIncrement: return "PreIncrement";
-    case NodeType::PreDecrement: return "PreDecrement";
-    case NodeType::Select: return "Select";
-    case NodeType::Cast:  return "Cast";
-    case NodeType::ArrayIndex: return "ArrayIndex";
+    case NodeType::Unimplemented:
+        return "Unimplemented";
+    case NodeType::Technique:
+        return "Technique";
+    case NodeType::Pass:
+        return "Pass";
+    case NodeType::StateAssignment:
+        return "StateAssignment";
+    case NodeType::Sequence:
+        return "Sequence";
+    case NodeType::Return:
+        return "Return";
+    case NodeType::LogicalOr:
+        return "LogicalOr";
+    case NodeType::LogicalAnd:
+        return "LogicalAnd";
+    case NodeType::BitwiseOr:
+        return "BitwiseOr";
+    case NodeType::BitwiseExclusiveOr:
+        return "BitwiseExclusiveOr";
+    case NodeType::BitwiseAnd:
+        return "BitwiseAnd";
+    case NodeType::CompareEqual:
+        return "CompareEqual";
+    case NodeType::CompareNotEqual:
+        return "CompareNotEqual";
+    case NodeType::CompareLessThan:
+        return "CompareLessThan";
+    case NodeType::CompareGreaterThan:
+        return "CompareGreaterThan";
+    case NodeType::CompareLessThanEquals:
+        return "CompareLessThanEquals";
+    case NodeType::CompareGreaterThanEquals:
+        return "CompareGreaterThanEquals";
+    case NodeType::LeftShift:
+        return "LeftShift";
+    case NodeType::RightShift:
+        return "RightShift";
+    case NodeType::Add:
+        return "Add";
+    case NodeType::Subtract:
+        return "Subtract";
+    case NodeType::Multiply:
+        return "Multiply";
+    case NodeType::Divide:
+        return "Divide";
+    case NodeType::Modulo:
+        return "Modulo";
+    case NodeType::Negate:
+        return "Negate";
+    case NodeType::BitwiseNot:
+        return "BitwiseNot";
+    case NodeType::LogicalNot:
+        return "LogicalNot";
+    case NodeType::PreIncrement:
+        return "PreIncrement";
+    case NodeType::PreDecrement:
+        return "PreDecrement";
+    case NodeType::Select:
+        return "Select";
+    case NodeType::Cast:
+        return "Cast";
+    case NodeType::ArrayIndex:
+        return "ArrayIndex";
     case NodeType::Type:
-        return "Type: " + 
-               static_cast<const TypeNode&>(node).GetType().GetString();
-    case NodeType::Constant: 
+        return "Type: " + static_cast<const TypeNode&>( node ).GetType().GetString();
+    case NodeType::Constant:
         switch( static_cast<const ConstantNodeBase&>( node ).GetType() )
         {
         case Type::INT:
-            return "Constant " + 
-                   std::to_string( static_cast<const ConstantNode<jl_int>&>(node).GetConstant());
+            return "Constant " +
+                   std::to_string( static_cast<const ConstantNode<jl_int>&>( node ).GetConstant() );
         case Type::UINT:
-            return "Constant " + 
-                   std::to_string( static_cast<const ConstantNode<jl_uint>&>(node).GetConstant());
+            return "Constant " + std::to_string( static_cast<const ConstantNode<jl_uint>&>( node )
+                                                     .GetConstant() );
         case Type::FLOAT:
-            return "Constant " + 
-                   std::to_string( static_cast<const ConstantNode<jl_float>&>(node).GetConstant());
+            return "Constant " + std::to_string( static_cast<const ConstantNode<jl_float>&>( node )
+                                                     .GetConstant() );
         default:
             return "Constant";
         }
-    case NodeType::Zero: return "Zero";
-    case NodeType::Variable:
-        return "Variable: " +
-               static_cast<const VariableNode&>(node).GetVariable()->GetName();
-    case NodeType::Function:
+    case NodeType::Zero:
+        return "Zero";
+    case NodeType::VariableIdentifier:
+        return "Variable: " + static_cast<const VariableNode&>( node ).GetVariable()->GetName();
+    case NodeType::FunctionIdentifier:
         return "Function: " +
-               static_cast<const FunctionNode&>(node).GetFunction()->GetIdentifier();
+               static_cast<const FunctionNode&>( node ).GetFunction()->GetIdentifier();
     case NodeType::Swizzle:
-        return "Swizzle: " +
-               static_cast<const SwizzleNode&>(node).GetSwizzle().GetString();
-    case NodeType::Call: return "Call";
-    case NodeType::ExtractElement: return "ExtractElement";
-    case NodeType::InsertElement: return "InsertElement";
-    case NodeType::VectorConstructor: return "VectorConstructor";
-    case NodeType::MatrixConstructor: return "MatrixConstructor";
+        return "Swizzle: " + static_cast<const SwizzleNode&>( node ).GetSwizzle().GetString();
+    case NodeType::Call:
+        return "Call";
+    case NodeType::ExtractElement:
+        return "ExtractElement";
+    case NodeType::InsertElement:
+        return "InsertElement";
+    case NodeType::VectorConstructor:
+        return "VectorConstructor";
+    case NodeType::MatrixConstructor:
+        return "MatrixConstructor";
     }
 }
 

@@ -37,18 +37,20 @@ namespace Compiler
 {
 
 Node::Node( NodeType type, std::vector<Node_ref> children )
-    :m_Type( type )
-    ,m_Children( std::move(children) )
-{}
+    : m_Type( type ),
+      m_Children( std::move( children ) )
+{
+}
 
 Node::~Node()
-{}
+{
+}
 
 unsigned Node::GetNumChildren() const
 {
     return m_Children.size();
 }
-    
+
 const std::vector<Node_ref>& Node::GetChildren() const
 {
     return m_Children;

@@ -50,10 +50,14 @@ class SemaAnalyzer;
 class Parser;
 class PassDeclaration;
 class PassDeclarationOrIdentifier;
+class PassDefinition;
+using PassDefinition_ref = std::reference_wrapper<PassDefinition>;
 class PassStatement;
 using PassStatement_up = std::unique_ptr<PassStatement>;
 class StateAssignmentStatement;
 using StateAssignmentStatement_up = std::unique_ptr<StateAssignmentStatement>;
+class PassNode;
+class NodeManager;
 
 /**
   * \class PassDefinition
@@ -84,7 +88,7 @@ public:
       * Performs semantic analysis on all the stateassignments
       */
     bool PerformSema( SemaAnalyzer& sema );
-
+    
     const StateAssignStmtVector& GetStateAssignments() const;
 
     const CompileStatementVector& GetCompileStatements() const;
@@ -138,6 +142,8 @@ public:
     virtual
     ~PassDeclarationOrIdentifier();
 
+    PassDefinition_ref GetDefinition();
+
     /**
       * Generates the pass represented by the pass definition. This function
       * will assert if it doesn't have a definition reference.
@@ -149,6 +155,8 @@ public:
 
     virtual
     bool PerformSema( SemaAnalyzer& sema );
+    
+    const PassNode& GenerateCodeDag( NodeManager& node_manager );
 
     /** \returns if this token is an identifier for a pass **/
     bool                   IsIdentifier    () const;

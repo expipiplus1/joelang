@@ -51,6 +51,7 @@
 #include <joelang/program.hpp>
 #include <joelang/shader.hpp>
 #include <joelang/state_assignment.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
@@ -153,6 +154,11 @@ PassDeclarationOrIdentifier::~PassDeclarationOrIdentifier()
 {
 }
 
+PassDefinition_ref PassDeclarationOrIdentifier::GetDefinition()
+{
+    return **m_DefinitionRef;
+}
+
 Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 {
     assert( m_DefinitionRef && "Trying to generate a pass with no definition" );
@@ -231,6 +237,25 @@ bool PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+const PassNode& PassDeclarationOrIdentifier::GenerateCodeDag( NodeManager& node_manager )
+{
+    assert( m_DefinitionRef && "Trying to generate a pass with no definition" );
+    assert( *m_DefinitionRef && "Trying to generate an undefined pass" );
+
+    const std::string& name = IsIdentifier() ? m_Identifier
+                                             : m_Declaration->GetName();
+
+    //
+    // Create the state assignments from this pass
+    //
+    std::vector<StateAssignmentNode_ref> state_assignment_nodes;
+    
+    for( const auto& state_assignment : (*m_DefinitionRef)->GetStateAssignments() )
+        state_assignment_nodes.push_back( state_assignment->GenerateCodeDag( node_manager ) );
+    
+    return node_manager.MakePassNode( name, std::move( state_assignment_nodes ) );
+}
+    
 bool PassDeclarationOrIdentifier::IsIdentifier() const
 {
     return !m_Identifier.empty();

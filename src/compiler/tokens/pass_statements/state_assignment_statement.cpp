@@ -44,6 +44,7 @@
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/types.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
@@ -100,6 +101,12 @@ bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
     return true;
 }
 
+const StateAssignmentNode& StateAssignmentStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    const Node& expression_node = m_Expression->GenerateCodeDag( node_manager );
+    return node_manager.MakeStateAssignmentNode( *m_State, expression_node );
+}
+    
 std::unique_ptr<StateAssignmentBase>
                     StateAssignmentStatement::GenerateStateAssignment(
                                                  CodeGenerator& code_gen,

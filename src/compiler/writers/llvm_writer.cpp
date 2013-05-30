@@ -34,5 +34,15 @@ namespace JoeLang
 namespace Compiler
 {
 
+LLVMWriter::LLVMWriter( Runtime& runtime )
+    : m_Runtime( runtime )
+{
+}
+
+StateAssignmentBase_up LLVMWriter::GenerateStateAssignment( const StateAssignmentNode& state_assignment_node )
+{
+    
+}
+
 } // namespace Compiler
 } // namespace JoeLang

@@ -46,10 +46,11 @@ class FunctionNode : public Node
 {
 public:
     const Function_sp& GetFunction() const;
+
 private:
     friend class NodeManager;
     FunctionNode( Function_sp function );
-    
+
     Function_sp m_Function;
 };
 

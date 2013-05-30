@@ -31,23 +31,24 @@
 
 #include <fstream>
 #include <memory>
+#include <iostream>
 
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <joelang/context.hpp>
 #include <joelang/effect.hpp>
+#include <joelang/technique.hpp>
 #include <joelang/parameter.hpp>
-
 #include <compiler/semantic_analysis/function.hpp>
-
 #include <compiler/writers/dot_writer.hpp>
-
-#include <iostream>
-
 #include <compiler/tokens/translation_unit.hpp>
-
 #include <compiler/code_dag/node_manager.hpp>
+#include <compiler/writers/llvm_writer.hpp>
+#include <compiler/tokens/declaration.hpp>
+#include <compiler/code_dag/technique_node.hpp>
+#include <compiler/code_dag/pass_node.hpp>
+#include <compiler/code_dag/state_assignment_node.hpp>
 
 namespace JoeLang
 {
@@ -61,7 +62,41 @@ namespace Compiler
 EffectFactory::EffectFactory( const Context& context, Runtime& runtime )
     :m_Context( context )
     ,m_Runtime( runtime )
+    ,m_LLVMWriter( m_Runtime )
 {
+}
+
+Pass EffectFactory::GeneratePass( const PassNode& pass_node )
+{
+    Pass::StateAssignmentVector state_assignments;
+    for( const Node& state_assignment_node : pass_node.GetChildren() )
+    {
+        assert( state_assignment_node.GetNodeType() == NodeType::StateAssignment && 
+                "Child of pass node wasn't a state-assignment node" );
+        state_assignments.push_back( 
+            m_LLVMWriter.GenerateStateAssignment( static_cast<const StateAssignmentNode&>( state_assignment_node ) ));
+    }
+    return Pass( pass_node.GetName(), std::move( state_assignments ) );
+}
+
+Technique EffectFactory::GenerateTechnique( const TechniqueNode& technique_node )
+{
+    std::vector<Pass> passes;
+    for( const Node& pass_node : technique_node.GetChildren() )
+    {
+        assert( pass_node.GetNodeType() == NodeType::Pass && 
+                "Child of technique node wasn't a pass node" );
+        passes.push_back( GeneratePass( static_cast<const PassNode&>(pass_node) ) );
+    }
+    return Technique( technique_node.GetName(), std::move( passes ) );
+}
+
+std::vector<Technique> EffectFactory::GenerateTechniques( const std::vector<TechniqueNode_ref>& technique_nodes)
+{
+    std::vector<Technique> ret;
+    for( const TechniqueNode& t : technique_nodes )
+        ret.push_back( GenerateTechnique( t ) );
+    return ret;
 }
 
 std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
@@ -72,7 +107,8 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     Parser        parser( token_stream );
     SemaAnalyzer  sema_analyzer( m_Context, m_Runtime );
     CodeGenerator code_generator( m_Runtime.CreateCodeGenerator() );
-
+    NodeManager   node_manager;
+    
     parser.Parse();
 
     if( !parser.Good() )
@@ -99,21 +135,13 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     for( const auto& s : sema_analyzer.GetWarnings() )
         m_Context.Error( s );
     
-    DotWriter dot_writer;
-    NodeManager node_manager;
     
-    const std::vector<Function_sp>& functions = sema_analyzer.GetFunctions();
-    for( const auto& f : functions )
-    {
-        f->GenerateCodeDag( node_manager );
-        dot_writer.AddCluster( f->GetCodeDag(), f->GetIdentifier() );
-    }
-    std::cout << dot_writer.GenerateDotString();
+    //std::vector<Technique> techniques = code_generator.GenerateTechniques(
+                                     //sema_analyzer.GetTechniqueDeclarations() );
     
-    return nullptr;
-
-    std::vector<Technique> techniques = code_generator.GenerateTechniques(
-                                     sema_analyzer.GetTechniqueDeclarations() );
+    std::vector<Technique> techniques = 
+        GenerateTechniques( sema_analyzer.GetTechniqueNodes( node_manager ) );
+    
     std::vector<ParameterBase_up> parameters =
        code_generator.GenerateParameters( sema_analyzer.GetUniformVariables() );
 

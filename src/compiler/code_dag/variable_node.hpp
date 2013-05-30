@@ -46,10 +46,11 @@ class VariableNode : public Node
 {
 public:
     const Variable_sp& GetVariable() const;
+
 private:
     friend class NodeManager;
     VariableNode( Variable_sp variable );
-    
+
     Variable_sp m_Variable;
 };
 

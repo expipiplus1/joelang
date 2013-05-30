@@ -43,27 +43,28 @@ enum class NodeType;
 class ConstantNodeBase : public Node
 {
 public:
-    virtual 
+    virtual
     Type GetType() const = 0;
-    
+
 protected:
     ConstantNodeBase();
 };
 
-template<typename T>
+template <typename T>
 class ConstantNode : public ConstantNodeBase
 {
 public:
-    using value_type   = T;
-    
+    using value_type = T;
+
     const value_type& GetConstant() const;
-    
-    virtual 
+
+    virtual
     Type GetType() const override;
+
 private:
     friend class NodeManager;
     ConstantNode( value_type constant_value );
-    
+
     value_type m_Constant;
 };
 

@@ -27,7 +27,7 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "swizzle_node.hpp"
+#include "pass_node.hpp"
 
 #include <compiler/code_dag/node.hpp>
 
@@ -36,15 +36,15 @@ namespace JoeLang
 namespace Compiler
 {
 
-SwizzleNode::SwizzleNode( const Node& swizzled, Swizzle swizzle )
-    : Node( NodeType::Swizzle, { swizzled } ),
-      m_Swizzle( std::move( swizzle ) )
+PassNode::PassNode( std::string name, std::vector<Node_ref> state_assignments )
+    : Node( NodeType::Pass, std::move(state_assignments) ),
+      m_Name( std::move( name ) )
 {
 }
 
-const Swizzle& SwizzleNode::GetSwizzle() const
+const std::string& PassNode::GetName() const
 {
-    return m_Swizzle;
+    return m_Name;
 }
 
 } // namespace Compiler

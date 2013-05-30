@@ -37,11 +37,11 @@ namespace Compiler
 {
 
 FunctionNode::FunctionNode( Function_sp function )
-    : Node( NodeType::Function, {} ),
-      m_Function( std::move(function) )
+    : Node( NodeType::FunctionIdentifier, {} ),
+      m_Function( std::move( function ) )
 {
 }
-    
+
 
 const Function_sp& FunctionNode::GetFunction() const
 {

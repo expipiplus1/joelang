@@ -46,10 +46,11 @@ class SwizzleNode : public Node
 {
 public:
     const Swizzle& GetSwizzle() const;
+
 private:
     friend class NodeManager;
     SwizzleNode( const Node& swizzled, Swizzle swizzle );
-    
+
     Swizzle m_Swizzle;
 };
 
