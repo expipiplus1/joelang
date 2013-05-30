@@ -43,8 +43,8 @@ using ArrayExtents = std::vector<unsigned>;
 class ShaderWriter;
 
 class Node;
-class TypeNode;
 class NodeManager;
+class TypeNode;
 
 /**
   * \class CompleteType

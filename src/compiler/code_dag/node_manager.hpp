@@ -36,34 +36,34 @@
 namespace JoeLang
 {
 
-enum class Type;
 class StateBase;
+enum class Type;
 
 namespace Compiler
 {
 
-class Node;
-using Node_up = std::unique_ptr<Node>;
-using Node_ref = std::reference_wrapper<const Node>;
-class TypeNode;
-class PassNode;
-using PassNode_ref = std::reference_wrapper<const PassNode>;
-class TechniqueNode;
-class StateAssignmentNode;
-using StateAssignmentNode_ref = std::reference_wrapper<const StateAssignmentNode>;
+class CompleteType;
 template <typename>
 class ConstantNode;
-class ZeroNode;
-enum class NodeType;
-class CompleteType;
-class VariableNode;
-class Variable;
-using Variable_sp = std::shared_ptr<Variable>;
-class FunctionNode;
 class Function;
+class FunctionNode;
 using Function_sp = std::shared_ptr<Function>;
-class SwizzleNode;
+class Node;
+enum class NodeType;
+using Node_ref = std::reference_wrapper<const Node>;
+using Node_up = std::unique_ptr<Node>;
+class PassNode;
+using PassNode_ref = std::reference_wrapper<const PassNode>;
+class StateAssignmentNode;
+using StateAssignmentNode_ref = std::reference_wrapper<const StateAssignmentNode>;
 class Swizzle;
+class SwizzleNode;
+class TechniqueNode;
+class TypeNode;
+class Variable;
+class VariableNode;
+using Variable_sp = std::shared_ptr<Variable>;
+class ZeroNode;
 
 class NodeManager
 {

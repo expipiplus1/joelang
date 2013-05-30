@@ -40,12 +40,12 @@
 namespace JoeLang
 {
 
-class Program;
-class ParameterWatcherBase;
-using ParameterWatcherBase_up = std::unique_ptr<ParameterWatcherBase>;
-class ParameterBase;
 template<typename>
 class Parameter;
+class ParameterBase;
+class ParameterWatcherBase;
+using ParameterWatcherBase_up = std::unique_ptr<ParameterWatcherBase>;
+class Program;
 
 class ParameterWatcherBase
 {

@@ -39,9 +39,9 @@ namespace JoeLang
 namespace Compiler
 {
 
+class Parser;
 class PassStatement;
 using PassStatement_up = std::unique_ptr<PassStatement>;
-class Parser;
 
 /**
   * \class PassStatement

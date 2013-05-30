@@ -39,10 +39,10 @@
 namespace JoeLang
 {
 
-class ParameterBase;
-using ParameterBase_up = std::unique_ptr<ParameterBase>;
 template<typename>
 class Parameter;
+class ParameterBase;
+using ParameterBase_up = std::unique_ptr<ParameterBase>;
 
 class Effect
 {

@@ -48,10 +48,11 @@ class CodeGenerator;
 class CompoundStatement;
 typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class DeclarationSpecifier;
-class InitDeclarator;
-using InitDeclarator_up = std::unique_ptr<InitDeclarator>;
 class Declarator;
 using Declarator_up = std::unique_ptr<Declarator>;
+class InitDeclarator;
+using InitDeclarator_up = std::unique_ptr<InitDeclarator>;
+class NodeManager;
 class Parser;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
@@ -59,7 +60,6 @@ using PassDefinition_ref = std::reference_wrapper<PassDefinition>;
 class SemaAnalyzer;
 class TechniqueDefinition;
 class TechniqueNode;
-class NodeManager;
 
 
 /**

@@ -45,13 +45,13 @@ class DeclarationSpecifier;
 using DeclarationSpecifier_up = std::unique_ptr<DeclarationSpecifier>;
 class Parser;
 class SemaAnalyzer;
-class TypeQualifierSpecifier;
-using TypeQualifierSpecifier_up = std::unique_ptr<TypeQualifierSpecifier>;
-class TypeSpecifier;
-using TypeSpecifier_up = std::unique_ptr<TypeSpecifier>;
 class StorageClassSpecifier;
 using StorageClassSpecifier_up = std::unique_ptr<StorageClassSpecifier>;
+class TypeQualifierSpecifier;
+using TypeQualifierSpecifier_up = std::unique_ptr<TypeQualifierSpecifier>;
 enum class TypeSpec;
+class TypeSpecifier;
+using TypeSpecifier_up = std::unique_ptr<TypeSpecifier>;
 
 /**
   * \class DeclSpecs

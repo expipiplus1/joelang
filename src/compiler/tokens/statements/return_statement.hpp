@@ -41,12 +41,12 @@ class CodeGenerator;
 class CompleteType;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
-class ReturnStatement;
-using ReturnStatement_up = std::unique_ptr<ReturnStatement>;
-class Parser;
-class SemaAnalyzer;
 class Node;
 class NodeManager;
+class Parser;
+class ReturnStatement;
+using ReturnStatement_up = std::unique_ptr<ReturnStatement>;
+class SemaAnalyzer;
 
 /**
   * \class ReturnStatement

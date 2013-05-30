@@ -38,9 +38,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-enum class NodeType;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+enum class NodeType;
 
 class FunctionNode : public Node
 {

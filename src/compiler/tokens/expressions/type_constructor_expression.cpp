@@ -57,9 +57,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-class ZeroNode;
 template<typename>
 class ConstantNode;
+class ZeroNode;
 
 //------------------------------------------------------------------------------
 // TypeConstructorExpression

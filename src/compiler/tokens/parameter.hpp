@@ -67,8 +67,8 @@ using Variable_sp = std::shared_ptr<Variable>;
 class Parameter : public JoeLang::Compiler::Token
 {
 public:
-    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
     using ArraySpecifierVector = std::vector< std::unique_ptr<ArraySpecifier> >;
+    using DeclSpecsVector = std::vector<std::unique_ptr<DeclarationSpecifier> >;
 
     /** This asserts that there is at least one declaration specifier. **/
     Parameter    ( DeclSpecsVector decl_specs,

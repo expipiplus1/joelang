@@ -39,8 +39,8 @@
 
 namespace llvm
 {
-    class Value;
     class Argument;
+    class Value;
 }
 
 namespace JoeLang

@@ -40,9 +40,9 @@ namespace JoeLang
 namespace Compiler
 {
 
-class SemaAnalyzer;
 class DeclarationBase;
 class Parser;
+class SemaAnalyzer;
 
 /**
   * \class TranslationUnit

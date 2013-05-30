@@ -40,9 +40,9 @@ namespace Compiler
 class CodeGenerator;
 class CompleteType;
 class Expression;
-using Expression_up = std::unique_ptr<Expression>;
 class ExpressionStatement;
 using ExpressionStatement_up = std::unique_ptr<ExpressionStatement>;
+using Expression_up = std::unique_ptr<Expression>;
 class Parser;
 class SemaAnalyzer;
 

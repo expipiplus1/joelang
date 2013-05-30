@@ -48,8 +48,8 @@ namespace Compiler
 {
 
 using ArrayExtents = std::vector<unsigned>;
-class CompleteType;
 class CodeGenerator;
+class CompleteType;
 class ShaderWriter;
 
 class GenericValue

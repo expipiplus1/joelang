@@ -43,17 +43,17 @@ namespace JoeLang
 
 class Context;
 class Effect;
-class StateAssignmentBase;
 class Pass;
+class StateAssignmentBase;
 class Technique;
 
 namespace Compiler
 {
 
-class TechniqueNode;
-using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
 class PassNode;
 class StateAssignmentNode;
+class TechniqueNode;
+using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
 
 class EffectFactory
 {

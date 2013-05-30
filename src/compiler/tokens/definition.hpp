@@ -46,18 +46,18 @@ namespace Compiler
 class CodeGenerator;
 class CompileStatement;
 using CompileStatement_up = std::unique_ptr<CompileStatement>;
-class SemaAnalyzer;
+class NodeManager;
 class Parser;
 class PassDeclaration;
 class PassDeclarationOrIdentifier;
 class PassDefinition;
 using PassDefinition_ref = std::reference_wrapper<PassDefinition>;
+class PassNode;
 class PassStatement;
 using PassStatement_up = std::unique_ptr<PassStatement>;
+class SemaAnalyzer;
 class StateAssignmentStatement;
 using StateAssignmentStatement_up = std::unique_ptr<StateAssignmentStatement>;
-class PassNode;
-class NodeManager;
 
 /**
   * \class PassDefinition
@@ -69,9 +69,9 @@ class NodeManager;
 class PassDefinition : public JoeLang::Compiler::Token
 {
 public:
+    using CompileStatementVector = std::vector<CompileStatement_up>;
     using PassStatementVector = std::vector<PassStatement_up>;
     using StateAssignStmtVector = std::vector<StateAssignmentStatement_up>;
-    using CompileStatementVector = std::vector<CompileStatement_up>;
 
     /**
       * \param statements

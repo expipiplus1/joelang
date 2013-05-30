@@ -56,8 +56,8 @@ namespace JoeLang
 
 class ParameterBase;
 using ParameterBase_up = std::unique_ptr<ParameterBase>;
-class StateBase;
 class StateAssignmentBase;
+class StateBase;
 class Technique;
 
 enum class Type;
@@ -66,6 +66,7 @@ namespace Compiler
 {
 
 using ArrayExtents = std::vector<unsigned>;
+enum class AssignmentOperator;
 class CompleteType;
 class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
@@ -81,7 +82,6 @@ using TechniqueDeclaration_up = std::unique_ptr<TechniqueDeclaration>;
 class TranslationUnit;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
-enum class AssignmentOperator;
 
 class CodeGenerator
 {

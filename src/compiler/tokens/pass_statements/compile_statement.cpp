@@ -50,10 +50,10 @@ namespace JoeLang
 namespace Compiler
 {
 
-class Function;
-using Function_sp = std::shared_ptr<Function>;
 class CastExpression;
 using CastExpression_up = std::unique_ptr<CastExpression>;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
 
 //------------------------------------------------------------------------------
 // CompileStatement

@@ -59,15 +59,15 @@ namespace llvm
 namespace JoeLang
 {
 
-enum class Type;
 class Context;
+enum class Type;
 
 namespace Compiler
 {
 
 typedef std::vector<unsigned> ArrayExtents;
-class CompleteType;
 class CodeGenerator;
+class CompleteType;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
 

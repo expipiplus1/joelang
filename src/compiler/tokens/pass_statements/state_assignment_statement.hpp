@@ -46,10 +46,10 @@ namespace Compiler
 class CodeGenerator;
 class Expression;
 typedef std::unique_ptr<Expression> Expression_up;
+class NodeManager;
 class Parser;
 class SemaAnalyzer;
 class StateAssignmentNode;
-class NodeManager;
 
 /**
   * \class StateAssignmentStatement

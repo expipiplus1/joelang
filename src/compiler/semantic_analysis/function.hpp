@@ -54,11 +54,11 @@ class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+class Node; 
+class NodeManager;
 enum class RuntimeFunction;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
-class Node; 
-class NodeManager;
 
 /**
   * \class Function

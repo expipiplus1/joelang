@@ -42,12 +42,12 @@ enum class Type;
 
 namespace Compiler
 {
-class ArraySpecifier;
 using ArrayExtents = std::vector<unsigned>;
+class ArraySpecifier;
 class CodeGenerator;
+class DeclSpecs;
 class Declarator;
 using Declarator_up = std::unique_ptr<Declarator>;
-class DeclSpecs;
 class Expression;
 using Expression_up = std::unique_ptr<Expression>;
 class FunctionSpecifier;

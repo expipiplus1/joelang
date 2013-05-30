@@ -42,10 +42,10 @@ class CodeGenerator;
 class CompleteType;
 class CompoundStatement;
 typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
-class Parser;
-class SemaAnalyzer;
 class Node;
 class NodeManager;
+class Parser;
+class SemaAnalyzer;
 
 /**
   * \class CompoundStatement

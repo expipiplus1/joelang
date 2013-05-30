@@ -57,13 +57,13 @@ class Expression;
 using Expression_up = std::unique_ptr<Expression>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+class Node;
+class NodeManager;
 class Parser;
 class SemaAnalyzer;
 class ShaderWriter;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
-class Node;
-class NodeManager;
 
 /**
   * \defgroup PostfixOperators

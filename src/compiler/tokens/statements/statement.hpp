@@ -43,6 +43,8 @@ class CodeGenerator;
 class CompleteType;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+class Node;
+class NodeManager;
 class Parser;
 class SemaAnalyzer;
 class ShaderWriter;
@@ -50,8 +52,6 @@ class Statement;
 using Statement_up = std::unique_ptr<Statement>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
-class Node;
-class NodeManager;
 
 /**
   * \defgroup Statements

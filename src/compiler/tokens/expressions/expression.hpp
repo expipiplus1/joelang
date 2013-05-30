@@ -50,11 +50,11 @@ namespace JoeLang
         class Expression;
         using Expression_up = std::unique_ptr<Expression>;
 
+        class CodeGenerator;
+        class CompleteType;
         class Parser;
         class SemaAnalyzer;
-        class CodeGenerator;
         class ShaderWriter;
-        class CompleteType;
 
         class Variable;
         using Variable_sp = std::shared_ptr<Variable>;
