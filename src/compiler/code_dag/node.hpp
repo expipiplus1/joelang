@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,78 +29,94 @@
 
 #pragma once
 
-#include <memory>
-
-#include <compiler/tokens/statements/statement.hpp>
+#include <functional>
+#include <vector>
 
 namespace JoeLang
 {
 namespace Compiler
 {
-class CodeGenerator;
-class CompleteType;
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
-class ReturnStatement;
-using ReturnStatement_up = std::unique_ptr<ReturnStatement>;
-class Parser;
-class SemaAnalyzer;
-class Node;
-class NodeManager;
 
-/**
-  * \class ReturnStatement
-  * \ingroup Statements
-  * \brief Matches a ReturnStatement
-  *
-  * ReturnStatement = 'return' Expression ';'
-  */
-class ReturnStatement : public JoeLang::Compiler::Statement
+enum class NodeType
 {
-public:
-    explicit
-    ReturnStatement    ( Expression_up expression );
-    virtual
-    ~ReturnStatement   ();
+    Unimplemented,
     
-    virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    Type,
+    Constant,
+    Zero,
+    Variable,
+    Function,
+    Swizzle,
     
-    bool IsVoidReturn() const;
-
-    virtual
-    bool AlwaysReturns() const override;
-
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
-    static
-    bool Parse ( Parser& parser, ReturnStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const ReturnStatement* d );
-private:
-    Expression_up m_Expression;
+    Sequence,
+    Return,
+    
+    BinaryOperator_start,
+    LogicalOr = BinaryOperator_start,
+    LogicalAnd,
+    BitwiseOr,
+    BitwiseExclusiveOr,
+    BitwiseAnd,
+    CompareEqual,
+    CompareNotEqual,
+    CompareLessThan,
+    CompareGreaterThan,
+    CompareLessThanEquals,
+    CompareGreaterThanEquals,
+    LeftShift,
+    RightShift,
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+    Modulo,
+    BinaryOperator_end,
+    
+    UnaryOperator_start = BinaryOperator_end,
+    Negate = UnaryOperator_start,
+    BitwiseNot,
+    LogicalNot,
+    PreIncrement,
+    PreDecrement,
+    UnaryOperator_end,
+    
+    Select = UnaryOperator_end,
+    Cast,
+    
+    ArrayIndex,
+    
+    Call,
+    
+    ExtractElement,
+    InsertElement,
+    VectorConstructor,
+    MatrixConstructor,
 };
 
+class Node;
+using Node_ref = std::reference_wrapper<const Node>;
+
+class Node
+{
+public:
+    unsigned GetNumChildren() const;
+    
+    const std::vector<Node_ref>& GetChildren() const;
+    
+    NodeType GetNodeType() const;
+    
+    virtual
+    ~Node();
+    
+protected: 
+    friend class NodeManager;
+    Node( NodeType type, std::vector<Node_ref> children );
+    
+private:
+    
+    const NodeType          m_Type;
+    const std::vector<Node_ref> m_Children;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

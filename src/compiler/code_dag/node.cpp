@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,73 +27,37 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "node.hpp"
 
-#include <memory>
-
-#include <compiler/tokens/statements/statement.hpp>
+#include <vector>
 
 namespace JoeLang
 {
 namespace Compiler
 {
-class CodeGenerator;
-class EmptyStatement;
-using EmptyStatement_up = std::unique_ptr<EmptyStatement>;
-class Parser;
-class SemaAnalyzer;
 
-class Node;
-class NodeManager;
+Node::Node( NodeType type, std::vector<Node_ref> children )
+    :m_Type( type )
+    ,m_Children( std::move(children) )
+{}
 
-/**
-  * \class EmptyStatement
-  * \ingroup Statements
-  * \brief Matches an EmptyStatement
-  *
-  * EmptyStatement = ';'
-  */
-class EmptyStatement : public JoeLang::Compiler::Statement
+Node::~Node()
+{}
+
+unsigned Node::GetNumChildren() const
 {
-public:
-    EmptyStatement    ();
-    virtual
-    ~EmptyStatement   ();
-
-    virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    return m_Children.size();
+}
     
-    virtual
-    bool AlwaysReturns() const override;
+const std::vector<Node_ref>& Node::GetChildren() const
+{
+    return m_Children;
+}
 
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
-    static
-    bool Parse ( Parser& parser, EmptyStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const EmptyStatement* d );
-};
-
+NodeType Node::GetNodeType() const
+{
+    return m_Type;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

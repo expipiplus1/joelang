@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,78 +29,62 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
+#include <vector>
 
-#include <compiler/tokens/statements/statement.hpp>
+namespace JoeLang 
+{
 
-namespace JoeLang
+enum class Type;
+
+namespace Compiler 
 {
-namespace Compiler
-{
-class CodeGenerator;
-class CompleteType;
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
-class ReturnStatement;
-using ReturnStatement_up = std::unique_ptr<ReturnStatement>;
-class Parser;
-class SemaAnalyzer;
+
 class Node;
-class NodeManager;
+using Node_up = std::unique_ptr<Node>;
+using Node_ref = std::reference_wrapper<const Node>;
+class TypeNode;
+template<typename>
+class ConstantNode;
+class ZeroNode;
+enum class NodeType;
+class CompleteType;
+class VariableNode;
+class Variable;
+using Variable_sp = std::shared_ptr<Variable>;
+class FunctionNode;
+class Function;
+using Function_sp = std::shared_ptr<Function>;
+class SwizzleNode;
+class Swizzle;
 
-/**
-  * \class ReturnStatement
-  * \ingroup Statements
-  * \brief Matches a ReturnStatement
-  *
-  * ReturnStatement = 'return' Expression ';'
-  */
-class ReturnStatement : public JoeLang::Compiler::Statement
+class NodeManager
 {
 public:
-    explicit
-    ReturnStatement    ( Expression_up expression );
-    virtual
-    ~ReturnStatement   ();
+    NodeManager();
+    ~NodeManager();
     
-    virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const Node& MakeNode( NodeType node_type, std::vector<Node_ref> children );
     
-    bool IsVoidReturn() const;
-
-    virtual
-    bool AlwaysReturns() const override;
-
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
-    static
-    bool Parse ( Parser& parser, ReturnStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const ReturnStatement* d );
-private:
-    Expression_up m_Expression;
+    const TypeNode& MakeTypeNode( const CompleteType& type );
+    
+    template<typename T>
+    const ConstantNode<T>& MakeConstant( T constant_value );
+    
+    const ZeroNode& MakeZero( Type type );
+    
+    const VariableNode& MakeVariableNode( Variable_sp variable );
+    
+    const FunctionNode& MakeFunctionNode( Function_sp function );
+    
+    const SwizzleNode& MakeSwizzleNode(const Node& swizzled, const Swizzle& swizzle );
+    
+    // TODO make this a little better
+    std::vector<Node_up> m_Nodes;
 };
-
 
 } // namespace Compiler
 } // namespace JoeLang
+
+#include "node_manager-inl.hpp"

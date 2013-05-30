@@ -58,6 +58,9 @@ namespace JoeLang
         class GenericValue;
         class Parser;
         class SemaAnalyzer;
+        
+        class Node;
+        class NodeManager;
     } // namespace Compiler
 } // namespace JoeLang
 
@@ -124,6 +127,7 @@ public:
   *
   * IntegerLiteralExpression = integer_literal
   */
+
 class IntegerLiteralExpression : public JoeLang::Compiler::LiteralExpression
 {
 public:
@@ -155,6 +159,9 @@ public:
     virtual
     ~IntegerLiteralExpression();
 
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
@@ -221,6 +228,9 @@ public:
     ~FloatingLiteralExpression();
 
     virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+
+    virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
@@ -276,6 +286,9 @@ public:
     ~BooleanLiteralExpression();
 
     virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+
+    virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
 
     virtual
@@ -313,6 +326,9 @@ public:
     StringLiteralExpression( std::string value );
     virtual
     ~StringLiteralExpression();
+
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
@@ -366,6 +382,9 @@ public:
     CharacterLiteralExpression( char value );
     virtual
     ~CharacterLiteralExpression();
+
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;

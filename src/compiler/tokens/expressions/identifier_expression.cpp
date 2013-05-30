@@ -41,6 +41,8 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/variable_node.hpp>
 
 namespace JoeLang
 {
@@ -61,6 +63,12 @@ IdentifierExpression::IdentifierExpression( std::string identifier )
 
 IdentifierExpression::~IdentifierExpression()
 {
+}
+
+const Node& IdentifierExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    assert( m_Variable && "Trying to generate code for an inresolved identifier" );
+    return node_manager.MakeVariableNode( m_Variable );
 }
 
 bool IdentifierExpression::ResolveIdentifier( SemaAnalyzer& sema )

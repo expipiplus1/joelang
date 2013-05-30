@@ -46,6 +46,9 @@ using ExpressionStatement_up = std::unique_ptr<ExpressionStatement>;
 class Parser;
 class SemaAnalyzer;
 
+class Node;
+class NodeManager;
+
 /**
   * \class ExpressionStatement
   * \ingroup Statements
@@ -60,7 +63,10 @@ public:
     ExpressionStatement    ( Expression_up expression );
     virtual
     ~ExpressionStatement   ();
-
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    
     virtual
     bool AlwaysReturns() const override;
 

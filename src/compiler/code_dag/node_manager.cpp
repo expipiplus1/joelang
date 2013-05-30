@@ -1,5 +1,5 @@
 /*
-    Copyright 2011 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,70 +27,65 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "expression.hpp"
+#include "node_manager.hpp"
 
-#include <cassert>
-#include <memory>
-#include <set>
-
-#include <compiler/parser/parser.hpp>
-#include <compiler/tokens/expressions/assignment_expression.hpp>
-#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/zero_node.hpp>
+#include <compiler/code_dag/constant_node.hpp>
+#include <compiler/code_dag/variable_node.hpp>
+#include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/function_node.hpp>
 
-namespace JoeLang
+namespace JoeLang 
 {
-namespace Compiler
+namespace Compiler 
 {
 
-//------------------------------------------------------------------------------
-// Expression
-//------------------------------------------------------------------------------
-
-Expression::Expression( TokenTy sub_class_id )
-    :Token( sub_class_id )
-{
-}
-
-Expression::~Expression()
+NodeManager::NodeManager()
 {
 }
 
-const Node& Expression::GenerateCodeDag( NodeManager& node_manager ) const
+NodeManager::~NodeManager()
 {
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
 }
 
-bool Expression::IsLValue() const
+const Node& NodeManager::MakeNode( NodeType node_type, std::vector<Node_ref> children )
 {
-    return false;
+    m_Nodes.emplace_back( new Node( node_type, std::move(children) ) );
+    return *m_Nodes.back();
 }
 
-llvm::Value* Expression::CodeGenPointerTo( CodeGenerator& code_gen ) const
+const TypeNode& NodeManager::MakeTypeNode( const CompleteType& type )
 {
-    if( IsLValue() )
-        assert( false && "Complete me" );
-    assert( false && "Trying to write to an rvalue" );
-    return nullptr;
+    m_Nodes.emplace_back( new TypeNode( type ) );
+    return static_cast<const TypeNode&>(*m_Nodes.back());
 }
 
-bool Expression::Parse( Parser& parser, Expression_up& token )
+const ZeroNode& NodeManager::MakeZero( Type type )
 {
-    // TODO comma sep expressions
-    return parser.Expect<AssignmentExpression>( token );
+    m_Nodes.emplace_back( new ZeroNode( type ) );
+    return static_cast<const ZeroNode&>(*m_Nodes.back());
 }
 
-bool Expression::classof( const Token* t )
+const VariableNode& NodeManager::MakeVariableNode( Variable_sp variable )
 {
-    return t->GetSubClassID() >= TokenTy::Expression_Start &&
-           t->GetSubClassID() <= TokenTy::Expression_End;
+    m_Nodes.emplace_back( new VariableNode( std::move(variable) ) );
+    return static_cast<const VariableNode&>(*m_Nodes.back());
 }
 
-bool Expression::classof( const Expression* e )
+const FunctionNode& NodeManager::MakeFunctionNode( Function_sp function )
 {
-    // An Expression is always an Expression
-    return true;
+    m_Nodes.emplace_back( new FunctionNode( std::move(function) ) );
+    return static_cast<const FunctionNode&>(*m_Nodes.back());
 }
+
+const SwizzleNode& NodeManager::MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle )
+{
+    m_Nodes.emplace_back( new SwizzleNode( swizzled, swizzle ) );
+    return static_cast<const SwizzleNode&>(*m_Nodes.back());
+}
+
 
 } // namespace Compiler
 } // namespace JoeLang

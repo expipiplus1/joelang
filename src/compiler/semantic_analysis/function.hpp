@@ -47,6 +47,7 @@ namespace JoeLang
 
 namespace Compiler
 {
+// todo, write tool to sort these
 using ArrayExtents = std::vector<unsigned>;
 class CodeGenerator;
 class CompoundStatement;
@@ -56,6 +57,8 @@ using Function_sp = std::shared_ptr<Function>;
 enum class RuntimeFunction;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
+class Node; 
+class NodeManager;
 
 /**
   * \class Function
@@ -76,6 +79,10 @@ public:
               RuntimeFunction runtime_function );
 
     ~Function();
+    
+    void GenerateCodeDag( NodeManager& node_manager );
+    
+    const Node& GetCodeDag() const;
 
     const std::string& GetIdentifier() const;
 
@@ -168,6 +175,8 @@ private:
     llvm::Function*           m_LLVMFunction;
 
     RuntimeFunction           m_RuntimeFunction;
+    
+    const Node*               m_CodeDag;
 };
 
 } // namespace Compiler

@@ -44,6 +44,9 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -116,6 +119,15 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+const Node& ConditionalExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    const Node& true_node = m_TrueExpression->GenerateCodeDag( node_manager );
+    const Node& false_node = m_FalseExpression->GenerateCodeDag( node_manager );
+    const Node& condition = m_Condition->GenerateCodeDag( node_manager );
+    
+    return node_manager.MakeNode( NodeType::Select, {true_node, false_node, condition} );
+}
+    
 llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateSelect( *m_Condition,

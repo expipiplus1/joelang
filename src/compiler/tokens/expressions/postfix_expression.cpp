@@ -65,6 +65,11 @@ PostfixExpression::~PostfixExpression()
 {
 }
 
+const Node& PostfixExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return m_PostfixOperator->GenerateCodeDag( node_manager, *m_Expression );
+}
+
 PostfixOperator& PostfixExpression::GetOperator()
 {
     return *m_PostfixOperator;

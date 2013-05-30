@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,73 +27,12 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
-
-#include <memory>
-
-#include <compiler/tokens/statements/statement.hpp>
+#include "llvm_writer.hpp"
 
 namespace JoeLang
 {
 namespace Compiler
 {
-class CodeGenerator;
-class EmptyStatement;
-using EmptyStatement_up = std::unique_ptr<EmptyStatement>;
-class Parser;
-class SemaAnalyzer;
-
-class Node;
-class NodeManager;
-
-/**
-  * \class EmptyStatement
-  * \ingroup Statements
-  * \brief Matches an EmptyStatement
-  *
-  * EmptyStatement = ';'
-  */
-class EmptyStatement : public JoeLang::Compiler::Statement
-{
-public:
-    EmptyStatement    ();
-    virtual
-    ~EmptyStatement   ();
-
-    virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
-    
-    virtual
-    bool AlwaysReturns() const override;
-
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
-    static
-    bool Parse ( Parser& parser, EmptyStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const EmptyStatement* d );
-};
-
 
 } // namespace Compiler
 } // namespace JoeLang

@@ -42,6 +42,10 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -105,6 +109,19 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     if( !m_Expression->PerformSema( sema ) )
         return false;
     return PerformSemaNoRecurse( sema );
+}
+
+const Node& CastExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    //
+    // Don't generate a cast here if it wouldn't do anything
+    //
+    if( m_Expression->GetType() == m_CastType )
+        return m_Expression->GenerateCodeDag( node_manager );
+                
+    const TypeNode& type = m_CastType.GenerateCodeDag( node_manager );
+    const Node& expression = m_Expression->GenerateCodeDag( node_manager );
+    return node_manager.MakeNode( NodeType::Cast, {expression, type} );
 }
 
 bool CastExpression::CanCastFromScalar( SemaAnalyzer& sema )

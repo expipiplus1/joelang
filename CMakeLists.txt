@@ -59,6 +59,24 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/technique.cpp
                      src/engine/state.cpp
                      src/engine/inl/parameter_watcher-inl.hpp
+                     src/compiler/code_dag/constant_node.cpp
+                     src/compiler/code_dag/constant_node.hpp
+                     src/compiler/code_dag/constant_node-inl.hpp
+                     src/compiler/code_dag/function_node.cpp
+                     src/compiler/code_dag/function_node.hpp
+                     src/compiler/code_dag/node.cpp
+                     src/compiler/code_dag/node.hpp
+                     src/compiler/code_dag/node_manager.cpp
+                     src/compiler/code_dag/node_manager.hpp
+                     src/compiler/code_dag/node_manager-inl.hpp
+                     src/compiler/code_dag/swizzle_node.cpp
+                     src/compiler/code_dag/swizzle_node.hpp
+                     src/compiler/code_dag/type_node.cpp
+                     src/compiler/code_dag/type_node.hpp
+                     src/compiler/code_dag/variable_node.cpp
+                     src/compiler/code_dag/variable_node.hpp
+                     src/compiler/code_dag/zero_node.cpp
+                     src/compiler/code_dag/zero_node.hpp
                      src/compiler/effect_factory.cpp
                      src/compiler/effect_factory.hpp
                      src/compiler/lexer/lexer.cpp
@@ -152,6 +170,10 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/writers/code_generator.cpp
                      src/compiler/writers/code_generator.hpp
                      src/compiler/writers/code_generator_wrappers.cpp
+                     src/compiler/writers/dot_writer.cpp
+                     src/compiler/writers/dot_writer.hpp
+                     src/compiler/writers/llvm_writer.cpp
+                     src/compiler/writers/llvm_writer.hpp
                      src/compiler/writers/runtime.cpp
                      src/compiler/writers/runtime.hpp
                      src/compiler/writers/semantic_info.cpp

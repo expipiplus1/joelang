@@ -40,6 +40,9 @@
 #include <compiler/tokens/statements/statement.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -58,6 +61,11 @@ ExpressionStatement::ExpressionStatement( Expression_up expression )
 
 ExpressionStatement::~ExpressionStatement()
 {
+}
+
+const Node& ExpressionStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return m_Expression->GenerateCodeDag( node_manager );
 }
 
 bool ExpressionStatement::AlwaysReturns() const

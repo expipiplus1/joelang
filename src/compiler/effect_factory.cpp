@@ -39,14 +39,21 @@
 #include <joelang/effect.hpp>
 #include <joelang/parameter.hpp>
 
+#include <compiler/semantic_analysis/function.hpp>
+
+#include <compiler/writers/dot_writer.hpp>
+
+#include <iostream>
+
 #include <compiler/tokens/translation_unit.hpp>
+
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
 
 class ParameterBase;
 using ParameterBase_up = std::unique_ptr<ParameterBase>;
-
 
 namespace Compiler
 {
@@ -76,7 +83,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     }
 
     TranslationUnit& tu = *parser.GetTranslationUnit();
-
+    
     //
     // This will resolve identifiers and insert implicit casts
     // It may also codegen variables used in initializers
@@ -91,6 +98,19 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString(
     }
     for( const auto& s : sema_analyzer.GetWarnings() )
         m_Context.Error( s );
+    
+    DotWriter dot_writer;
+    NodeManager node_manager;
+    
+    const std::vector<Function_sp>& functions = sema_analyzer.GetFunctions();
+    for( const auto& f : functions )
+    {
+        f->GenerateCodeDag( node_manager );
+        dot_writer.AddCluster( f->GetCodeDag(), f->GetIdentifier() );
+    }
+    std::cout << dot_writer.GenerateDotString();
+    
+    return nullptr;
 
     std::vector<Technique> techniques = code_generator.GenerateTechniques(
                                      sema_analyzer.GetTechniqueDeclarations() );

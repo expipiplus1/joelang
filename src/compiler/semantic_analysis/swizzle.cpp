@@ -88,6 +88,15 @@ unsigned char Swizzle::GetIndex( unsigned index ) const
     return m_SwizzleIndices[index];
 }
 
+std::string Swizzle::GetString() const
+{
+    const std::array<char, 4> index_characters = {{'x', 'y', 'z', 'w'}};
+    std::string ret;
+    for( unsigned i = 0; i < GetSize(); ++i )
+        ret += index_characters[GetIndex(i)];
+    return ret;
+}
+
 bool Swizzle::HasDuplicates() const
 {
     for( unsigned i = 1; i < GetSize(); ++i )

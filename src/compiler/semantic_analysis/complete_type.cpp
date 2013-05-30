@@ -38,6 +38,10 @@
 #include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -53,6 +57,11 @@ CompleteType::CompleteType( Type base_type,
     :m_BaseType( base_type )
     ,m_ArrayExtents( std::move(array_extents) )
 {
+}
+
+const TypeNode& CompleteType::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return node_manager.MakeTypeNode( *this );
 }
 
 Type CompleteType::GetType() const

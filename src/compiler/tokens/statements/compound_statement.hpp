@@ -44,6 +44,8 @@ class CompoundStatement;
 typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
 class Parser;
 class SemaAnalyzer;
+class Node;
+class NodeManager;
 
 /**
   * \class CompoundStatement
@@ -58,6 +60,9 @@ public:
     CompoundStatement    ( std::vector<Statement_up> statements );
     virtual
     ~CompoundStatement   ();
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     bool AlwaysReturns() const override;

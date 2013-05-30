@@ -29,6 +29,7 @@
 
 #include "compound_statement.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <set>
@@ -41,6 +42,9 @@
 #include <compiler/tokens/statements/return_statement.hpp>
 #include <compiler/tokens/statements/statement.hpp>
 #include <compiler/writers/shader_writer.hpp>
+
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
@@ -59,6 +63,14 @@ CompoundStatement::CompoundStatement( std::vector<Statement_up> statements )
 
 CompoundStatement::~CompoundStatement()
 {
+}
+
+const Node& CompoundStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    std::vector<Node_ref> nodes; 
+    for( const Statement_up& s : m_Statements )
+        nodes.emplace_back( s->GenerateCodeDag( node_manager ) );
+    return node_manager.MakeNode( NodeType::Sequence, std::move( nodes ) );
 }
 
 bool CompoundStatement::AlwaysReturns() const

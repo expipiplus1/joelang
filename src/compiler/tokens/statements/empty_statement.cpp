@@ -35,6 +35,8 @@
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/tokens/statements/statement.hpp>
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
@@ -52,6 +54,12 @@ EmptyStatement::EmptyStatement()
 
 EmptyStatement::~EmptyStatement()
 {
+}
+
+const Node& EmptyStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    assert( false && "Trying to codegen an empty statement");
+    return node_manager.MakeNode( NodeType::Unimplemented, {} );
 }
 
 bool EmptyStatement::AlwaysReturns() const

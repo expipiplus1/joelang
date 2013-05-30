@@ -44,6 +44,8 @@
 #include <compiler/writers/runtime.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -78,6 +80,17 @@ Function::Function( std::string identifier,
 
 Function::~Function()
 {}
+
+void Function::GenerateCodeDag( NodeManager& node_manager )
+{
+    m_CodeDag = &m_Definition->GenerateCodeDag( node_manager );
+}
+
+const Node& Function::GetCodeDag() const
+{
+    assert( m_CodeDag && "Trying to get the code dag of a function without one" );
+    return *m_CodeDag;
+}
 
 const std::string& Function::GetIdentifier() const
 {

@@ -45,6 +45,9 @@
 #include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -113,6 +116,51 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     }
 
     return good;
+}
+
+const Node& BinaryOperatorExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    const Node& left = m_LeftSide->GenerateCodeDag( node_manager );
+    const Node& right = m_RightSide->GenerateCodeDag( node_manager );
+    switch( m_Operator )
+    {
+    case Op::LOGICAL_OR:
+        return node_manager.MakeNode( NodeType::LogicalOr, { left, right } );
+    case Op::LOGICAL_AND:
+        return node_manager.MakeNode( NodeType::LogicalAnd, { left, right } );
+    case Op::OR:
+        return node_manager.MakeNode( NodeType::BitwiseOr, { left, right } );
+    case Op::XOR:
+        return node_manager.MakeNode( NodeType::BitwiseExclusiveOr, { left, right } );
+    case Op::AND:
+        return node_manager.MakeNode( NodeType::BitwiseAnd, { left, right } );
+    case Op::EQUAL_TO:
+        return node_manager.MakeNode( NodeType::CompareEqual, { left, right } );
+    case Op::NOT_EQUAL_TO:
+        return node_manager.MakeNode( NodeType::CompareNotEqual, { left, right } );
+    case Op::LESS_THAN:
+        return node_manager.MakeNode( NodeType::CompareLessThan, { left, right } );
+    case Op::GREATER_THAN:
+        return node_manager.MakeNode( NodeType::CompareGreaterThan, { left, right } );
+    case Op::LESS_THAN_EQUALS:
+        return node_manager.MakeNode( NodeType::CompareLessThanEquals, { left, right } );
+    case Op::GREATER_THAN_EQUALS:
+        return node_manager.MakeNode( NodeType::CompareGreaterThanEquals, { left, right } );
+    case Op::LEFT_SHIFT:
+        return node_manager.MakeNode( NodeType::LeftShift, { left, right } );
+    case Op::RIGHT_SHIFT:
+        return node_manager.MakeNode( NodeType::RightShift, { left, right } );
+    case Op::PLUS:
+        return node_manager.MakeNode( NodeType::Add, { left, right } );
+    case Op::MINUS:
+        return node_manager.MakeNode( NodeType::Subtract, { left, right } );
+    case Op::MULTIPLY:
+        return node_manager.MakeNode( NodeType::Multiply, { left, right } );
+    case Op::DIVIDE:
+        return node_manager.MakeNode( NodeType::Divide, { left, right } );
+    case Op::MODULO:
+        return node_manager.MakeNode( NodeType::Modulo, { left, right } );
+    }
 }
 
 bool BinaryOperatorExpression::PerformIntOperatorSema( SemaAnalyzer& sema )

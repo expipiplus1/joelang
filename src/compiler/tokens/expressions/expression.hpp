@@ -61,6 +61,9 @@ namespace JoeLang
 
         class Function;
         using Function_sp = std::shared_ptr<Function>;
+        
+        class Node;
+        class NodeManager;
 
     } // namespace Compiler
 } // namespace JoeLang
@@ -101,6 +104,9 @@ public:
       */
     virtual
     bool PerformSema( SemaAnalyzer& sema ) = 0;
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const;
 
     /**
       * Generates an llvm value for this expression

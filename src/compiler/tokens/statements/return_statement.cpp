@@ -42,6 +42,9 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -59,6 +62,19 @@ ReturnStatement::ReturnStatement( Expression_up expression )
 
 ReturnStatement::~ReturnStatement()
 {
+}
+
+const Node& ReturnStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    if( IsVoidReturn() )
+        return node_manager.MakeNode( NodeType::Return, {} );
+    else
+        return node_manager.MakeNode( NodeType::Return, {m_Expression->GenerateCodeDag( node_manager )} );
+}
+
+bool ReturnStatement::IsVoidReturn() const
+{
+    return !static_cast<bool>(m_Expression);
 }
 
 bool ReturnStatement::AlwaysReturns() const

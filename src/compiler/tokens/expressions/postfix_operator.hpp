@@ -62,6 +62,8 @@ class SemaAnalyzer;
 class ShaderWriter;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
+class Node;
+class NodeManager;
 
 /**
   * \defgroup PostfixOperators
@@ -88,6 +90,9 @@ public:
     /** The postfix operator must performsema on the expression **/
     virtual
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) = 0;
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -165,6 +170,9 @@ public:
     virtual
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) override;
 
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    
     //TODO pass expression as reference instead of pointer
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -239,6 +247,9 @@ public:
                       Expression_up& expression ) override;
 
     virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    
+    virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression& expression ) override;
 
@@ -307,6 +318,9 @@ public:
     bool PerformSema( SemaAnalyzer& sema,
                       Expression_up& expression ) override;
 
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    
     bool IsSwizzle() const;
 
     //
@@ -390,6 +404,9 @@ public:
     bool PerformSema( SemaAnalyzer& sema,
                       Expression_up& expression ) override;
 
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
                           const Expression& expression ) override;

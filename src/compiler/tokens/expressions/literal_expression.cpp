@@ -48,6 +48,9 @@
 #include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
 
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/constant_node.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -190,6 +193,33 @@ IntegerLiteralExpression::IntegerLiteralExpression( jl_ulong value,
 
 IntegerLiteralExpression::~IntegerLiteralExpression()
 {
+}
+
+const Node& IntegerLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    // todo, store the type
+    switch( GetType().GetBaseType() )
+    {
+    case Type::CHAR:
+        return node_manager.MakeConstant<jl_char>( m_Value );
+    case Type::INT:
+        return node_manager.MakeConstant<jl_int>( m_Value );
+    case Type::SHORT:
+        return node_manager.MakeConstant<jl_short>( m_Value );
+    case Type::LONG:
+        return node_manager.MakeConstant<jl_long>( m_Value );
+    case Type::UCHAR:
+        return node_manager.MakeConstant<jl_uchar>( m_Value );
+    case Type::UINT:
+        return node_manager.MakeConstant<jl_uint>( m_Value );
+    case Type::USHORT:
+        return node_manager.MakeConstant<jl_ushort>( m_Value );
+    case Type::ULONG:
+        return node_manager.MakeConstant<jl_ulong>( m_Value );
+    default:
+        assert( false && "Trying to generate a non integer type" );
+        return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    }
 }
 
 llvm::Value* IntegerLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -402,6 +432,21 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 {
 }
 
+const Node& FloatingLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    // todo, store the type
+    switch( GetType().GetBaseType() )
+    {
+    case Type::FLOAT:
+        return node_manager.MakeConstant<jl_float>( m_Value );
+    case Type::DOUBLE:
+        return node_manager.MakeConstant<jl_double>( m_Value );
+    default:
+        assert( false && "Trying to generate a non float type" );
+        return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    }
+}
+
 llvm::Value* FloatingLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateFloating( m_Value,
@@ -513,6 +558,11 @@ BooleanLiteralExpression::BooleanLiteralExpression( bool value )
 
 BooleanLiteralExpression::~BooleanLiteralExpression()
 {
+}
+
+const Node& BooleanLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return node_manager.MakeConstant<jl_bool>( m_Value );
 }
 
 llvm::Value* BooleanLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
@@ -633,6 +683,11 @@ StringLiteralExpression::~StringLiteralExpression()
 {
 }
 
+const Node& StringLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return node_manager.MakeConstant<std::string>( m_Value );
+}
+
 llvm::Value* StringLiteralExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     return code_gen.CreateString( m_Value );
@@ -727,6 +782,11 @@ CharacterLiteralExpression::CharacterLiteralExpression( char value )
 
 CharacterLiteralExpression::~CharacterLiteralExpression()
 {
+}
+
+const Node& CharacterLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    return node_manager.MakeConstant<jl_char>( m_Value );
 }
 
 llvm::Value* CharacterLiteralExpression::CodeGen(

@@ -62,6 +62,9 @@ public:
     IdentifierExpression( std::string identifier );
     virtual
     ~IdentifierExpression();
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     const std::string& GetIdentifier() const;
 

@@ -71,6 +71,7 @@ namespace Compiler
 class Token
 {
 public:
+    // todo, make this consistent with NodeTy, in terms of start and end points
     enum class TokenTy
     {
         //

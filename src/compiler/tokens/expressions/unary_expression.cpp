@@ -41,6 +41,9 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/node.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
@@ -83,6 +86,26 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     }
 
     return good;
+}
+
+const Node& UnaryExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    const Node& expression = m_Expression->GenerateCodeDag( node_manager );
+    switch( m_Operator )
+    {       
+    case Op::PLUS:
+        return expression; // A unary plus is a no-op
+    case Op::MINUS:
+        return node_manager.MakeNode( NodeType::Negate, { expression } );
+    case Op::BITWISE_NOT:
+        return node_manager.MakeNode( NodeType::BitwiseNot, { expression } );
+    case Op::LOGICAL_NOT:
+        return node_manager.MakeNode( NodeType::LogicalNot, { expression } );
+    case Op::INCREMENT:
+        return node_manager.MakeNode( NodeType::PreIncrement, { expression } );
+    case Op::DECREMENT:
+        return node_manager.MakeNode( NodeType::PreDecrement, { expression } );
+    }
 }
 
 llvm::Value* UnaryExpression::CodeGen( CodeGenerator& code_gen ) const

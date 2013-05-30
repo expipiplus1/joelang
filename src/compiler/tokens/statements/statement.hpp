@@ -50,6 +50,8 @@ class Statement;
 using Statement_up = std::unique_ptr<Statement>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
+class Node;
+class NodeManager;
 
 /**
   * \defgroup Statements
@@ -70,6 +72,9 @@ public:
     Statement    ( TokenTy sub_class_id );
     virtual
     ~Statement   ();
+    
+    virtual
+    const Node& GenerateCodeDag( NodeManager& node_manager ) const = 0;
 
     /**
       * \returns true if this statement will always return from the function

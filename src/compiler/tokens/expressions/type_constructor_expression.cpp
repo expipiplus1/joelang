@@ -47,10 +47,19 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/zero_node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+
 namespace JoeLang
 {
 namespace Compiler
 {
+
+class ZeroNode;
+template<typename>
+class ConstantNode;
 
 //------------------------------------------------------------------------------
 // TypeConstructorExpression
@@ -77,6 +86,8 @@ TypeConstructorExpression::~TypeConstructorExpression()
 
 bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
 {
+    // todo redo this,
+    
     bool good = true;
 
     for( const auto& argument : m_Arguments )
@@ -129,8 +140,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
             unsigned rows                 = GetNumRowsInType( m_Type );
             if( ( num_elements + arg_size ) / rows != num_elements / rows &&
                 ( num_elements + arg_size ) % rows != 0 )
-                sema.Warning(
-                         "Element in constructor crosses column boundary" );
+                sema.Error( "Element in constructor crosses column boundary" );
         }
 
         num_elements += arg_size;
@@ -178,6 +188,123 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     }
 
     return good;
+}
+
+const Node& TypeConstructorExpression::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    //
+    // If this is a cast expression, return the cast which is in arguments[0] now
+    //
+    if( m_Arguments.size() == 1 )
+        return m_Arguments.front()->GenerateCodeDag( node_manager );
+    
+    //
+    // This can't be a scalar here because that would only have one argument
+    //
+    
+    std::vector<Node_ref> elements;
+    for( const Expression_up& argument : m_Arguments )
+    {
+        const Node& argument_node = argument->GenerateCodeDag( node_manager );
+        if( argument->GetType().IsScalarType() )
+            elements.emplace_back( argument_node );
+        else
+            for( unsigned i = 0; i < argument->GetType().GetNumElements(); ++i )
+            {
+                const Node& index = node_manager.MakeConstant( i );
+                elements.emplace_back( node_manager.MakeNode( NodeType::ExtractElement, 
+                                                              {argument_node, index} ) );
+            }
+    }
+        
+    if( IsVectorType( m_Type ) )
+    {
+        //
+        // Add the type to elements for the vector constructor
+        //
+        elements.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
+        return node_manager.MakeNode( NodeType::VectorConstructor, elements );
+    }
+    
+    if( IsMatrixType( m_Type ) )
+    {
+        //
+        // This could be enough parameters to fill in the diagonal,
+        // or it could be enough to fill the whole matrix
+        //
+        
+        std::vector<Node_ref> columns;
+        unsigned num_columns = GetNumColumnsInType( m_Type );
+        unsigned num_rows = GetNumRowsInType( m_Type );
+        
+        if( IsMatrixDiagonalConstructor() )
+        {
+            assert( elements.size() == JoeMath::Min(num_rows, num_columns) && 
+                    "mismatch in constructor length" );
+            
+            unsigned i = 0;
+            for( const Node& element : elements )
+            {
+                const Node& index = node_manager.MakeConstant( i++ );
+                const ZeroNode& zero = node_manager.MakeZero( GetMatrixColumnType(m_Type) );
+                columns.emplace_back( node_manager.MakeNode( NodeType::InsertElement,
+                                                             { zero, element, index }));
+            }
+        }
+        else
+        {
+            assert( elements.size() == num_rows * num_columns && "mismatch in constructor length" );
+            
+            for( unsigned c = 0; c < num_columns; ++c )
+            {
+                std::vector<Node_ref> column_elements;
+                for( unsigned r = 0; r < num_rows; ++r )
+                    column_elements.emplace_back( elements[c*num_rows+r] );
+                column_elements.emplace_back( 
+                    node_manager.MakeTypeNode( CompleteType( GetMatrixColumnType( m_Type ) ) ) );
+                columns.emplace_back( 
+                    node_manager.MakeNode( NodeType::VectorConstructor, column_elements ) );
+            }
+        }
+        
+        //
+        // Add the type to columns for the matrix constructor
+        //
+        assert( columns.size() == num_columns && "Wrong number of columns generated" );
+        columns.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
+        return node_manager.MakeNode( NodeType::MatrixConstructor, columns );
+    }
+    
+    assert( false && "Trying to codegen an unhandled type" );
+    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+}
+
+bool TypeConstructorExpression::IsMatrixDiagonalConstructor() const
+{
+    if( !IsMatrixType( m_Type ) )
+        return false; 
+    
+    unsigned num_elements = 0;
+    for( const auto& argument : m_Arguments )
+    {
+        CompleteType arg_type = argument->GetType();
+        unsigned arg_size;
+        if( arg_type.IsMatrixType() )
+        {
+            // Can't use a matrix to initialize a diagonal
+            return false;
+        }
+        else
+        {
+            assert( ( arg_type.IsScalarType() || arg_type.IsVectorType() ) &&
+                    "Using a struct or array" );
+
+            arg_size = arg_type.GetNumElements();
+        }
+        num_elements += arg_size;
+    }
+    return num_elements == JoeMath::Min( GetNumColumnsInType( m_Type ),
+                                         GetNumRowsInType( m_Type ) );
 }
 
 llvm::Value* TypeConstructorExpression::CodeGen( CodeGenerator& code_gen ) const

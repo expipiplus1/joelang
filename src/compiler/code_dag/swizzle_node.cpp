@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,80 +27,25 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "swizzle_node.hpp"
 
-#include <memory>
-
-#include <compiler/tokens/statements/statement.hpp>
+#include <compiler/code_dag/node.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
-class CodeGenerator;
-class CompleteType;
-class Expression;
-using Expression_up = std::unique_ptr<Expression>;
-class ReturnStatement;
-using ReturnStatement_up = std::unique_ptr<ReturnStatement>;
-class Parser;
-class SemaAnalyzer;
-class Node;
-class NodeManager;
 
-/**
-  * \class ReturnStatement
-  * \ingroup Statements
-  * \brief Matches a ReturnStatement
-  *
-  * ReturnStatement = 'return' Expression ';'
-  */
-class ReturnStatement : public JoeLang::Compiler::Statement
+SwizzleNode::SwizzleNode( const Node& swizzled, Swizzle swizzle )
+    : Node( NodeType::Swizzle, { swizzled } ),
+      m_Swizzle( std::move(swizzle) )
 {
-public:
-    explicit
-    ReturnStatement    ( Expression_up expression );
-    virtual
-    ~ReturnStatement   ();
+}
     
-    virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
-    
-    bool IsVoidReturn() const;
-
-    virtual
-    bool AlwaysReturns() const override;
-
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
-    static
-    bool Parse ( Parser& parser, ReturnStatement_up& token );
-
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const ReturnStatement* d );
-private:
-    Expression_up m_Expression;
-};
-
+const Swizzle& SwizzleNode::GetSwizzle() const
+{
+    return m_Swizzle;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

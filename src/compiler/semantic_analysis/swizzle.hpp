@@ -30,10 +30,10 @@
 #pragma once
 
 #include <array>
+#include <string>
 
 namespace JoeLang
 {
-
 namespace Compiler
 {
 
@@ -63,6 +63,11 @@ public:
     // Get the specified swizzle index, this asserts that index < swizzle size
     //
     unsigned char GetIndex( unsigned index ) const;
+    
+    //
+    // returns the string as an xyzw swizzle
+    //
+    std::string GetString() const;
 
     //
     //
