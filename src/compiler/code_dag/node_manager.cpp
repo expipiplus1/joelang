@@ -29,16 +29,16 @@
 
 #include "node_manager.hpp"
 
-#include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/type_node.hpp>
-#include <compiler/code_dag/zero_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
-#include <compiler/code_dag/variable_node.hpp>
-#include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/pass_node.hpp>
-#include <compiler/code_dag/technique_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
+#include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/technique_node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/variable_node.hpp>
+#include <compiler/code_dag/zero_node.hpp>
 
 namespace JoeLang
 {
@@ -89,31 +89,34 @@ const SwizzleNode& NodeManager::MakeSwizzleNode( const Node& swizzled, const Swi
     return static_cast<const SwizzleNode&>( *m_Nodes.back() );
 }
 
-const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes )
+const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name,
+                                                     std::vector<PassNode_ref> passes )
 {
     // Hopefully this will be a no-op
-    
+
     std::vector<Node_ref> ns;
     for( const PassNode& n : passes )
         ns.emplace_back( n );
-    
+
     m_Nodes.emplace_back( new TechniqueNode( name, std::move( ns ) ) );
     return static_cast<const TechniqueNode&>( *m_Nodes.back() );
 }
 
-const PassNode& NodeManager::MakePassNode( std::string name, std::vector<StateAssignmentNode_ref> state_assignments )
+const PassNode& NodeManager::MakePassNode( std::string name,
+                                           std::vector<StateAssignmentNode_ref> state_assignments )
 {
     // Hopefully this will be a no-op
-    
+
     std::vector<Node_ref> ns;
     for( const StateAssignmentNode& n : state_assignments )
         ns.emplace_back( n );
-    
+
     m_Nodes.emplace_back( new PassNode( name, std::move( ns ) ) );
     return static_cast<const PassNode&>( *m_Nodes.back() );
 }
 
-const StateAssignmentNode& NodeManager::MakeStateAssignmentNode( const StateBase& state, const Node& assigned_expression )
+const StateAssignmentNode& NodeManager::MakeStateAssignmentNode( const StateBase& state,
+                                                                 const Node& assigned_expression )
 {
     m_Nodes.emplace_back( new StateAssignmentNode( state, assigned_expression ) );
     return static_cast<const StateAssignmentNode&>( *m_Nodes.back() );

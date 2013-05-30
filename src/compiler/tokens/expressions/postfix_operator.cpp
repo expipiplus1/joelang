@@ -35,6 +35,10 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/function.hpp>
@@ -53,10 +57,6 @@
 #include <compiler/writers/runtime.hpp>
 #include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
-#include <compiler/code_dag/node_manager.hpp>
-#include <compiler/code_dag/function_node.hpp>
-#include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/swizzle_node.hpp>
 
 namespace JoeLang
 {

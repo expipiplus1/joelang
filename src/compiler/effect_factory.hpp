@@ -35,8 +35,8 @@
 
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/writers/code_generator.hpp>
-#include <compiler/writers/runtime.hpp>
 #include <compiler/writers/llvm_writer.hpp>
+#include <compiler/writers/runtime.hpp>
 
 namespace JoeLang
 {
@@ -59,21 +59,20 @@ class EffectFactory
 {
 public:
     explicit
-    EffectFactory( const Context& context,
-                   Runtime& runtime );
+    EffectFactory( const Context& context, Runtime& runtime );
 
-    std::unique_ptr<Effect> CreateEffectFromString(
-                                                 const std::string& source,
-                                                 const std::string& name = "" );
+    std::unique_ptr<Effect> CreateEffectFromString( const std::string& source,
+                                                    const std::string& name = "" );
 
 private:
-    std::vector<Technique> GenerateTechniques( const std::vector<TechniqueNode_ref>& technique_nodes );
+    std::vector<Technique> GenerateTechniques(
+        const std::vector<TechniqueNode_ref>& technique_nodes );
     Technique GenerateTechnique( const TechniqueNode& technique_node );
     Pass GeneratePass( const PassNode& pass_node );
-    
+
     const Context& m_Context;
-    Runtime&       m_Runtime;
-    LLVMWriter     m_LLVMWriter;
+    Runtime& m_Runtime;
+    LLVMWriter m_LLVMWriter;
 };
 
 } // namespace Compiler

@@ -32,16 +32,16 @@
 #include <cassert>
 #include <string>
 
-#include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
-#include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/type_node.hpp>
+#include <compiler/code_dag/variable_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
+#include <compiler/semantic_analysis/variable.hpp>
 
 namespace JoeLang
 {

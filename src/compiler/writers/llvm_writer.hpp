@@ -46,10 +46,12 @@ class LLVMWriter
 {
 public:
     LLVMWriter( Runtime& runtime );
-    
-    StateAssignmentBase_up GenerateStateAssignment( const StateAssignmentNode& state_assignment_node );
+
+    StateAssignmentBase_up GenerateStateAssignment(
+        const StateAssignmentNode& state_assignment_node );
+
 private:
-    Runtime& m_Runtime; 
+    Runtime& m_Runtime;
 };
 
 } // namespace Compiler

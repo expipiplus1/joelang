@@ -48,8 +48,8 @@
 #include <compiler/writers/shader_writer.hpp>
 #include <joelang/types.hpp>
 
-#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/constant_node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {

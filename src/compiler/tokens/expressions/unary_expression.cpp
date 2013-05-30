@@ -41,8 +41,8 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
-#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {

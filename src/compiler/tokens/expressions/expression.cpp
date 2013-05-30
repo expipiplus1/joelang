@@ -33,10 +33,10 @@
 #include <memory>
 #include <set>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
-#include <compiler/code_dag/node_manager.hpp>
-#include <compiler/code_dag/node.hpp>
 
 namespace JoeLang
 {

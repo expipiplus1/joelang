@@ -32,11 +32,11 @@
 #include <cassert>
 #include <memory>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/tokens/statements/statement.hpp>
-#include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {

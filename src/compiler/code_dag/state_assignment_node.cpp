@@ -36,9 +36,8 @@ namespace JoeLang
 namespace Compiler
 {
 
-StateAssignmentNode::StateAssignmentNode( const StateBase& state, 
-                                          const Node& assigned_expression )
-    : Node( NodeType::StateAssignment, {assigned_expression} ),
+StateAssignmentNode::StateAssignmentNode( const StateBase& state, const Node& assigned_expression )
+    : Node( NodeType::StateAssignment, { assigned_expression } ),
       m_State( std::move( state ) )
 {
 }

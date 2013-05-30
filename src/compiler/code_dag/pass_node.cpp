@@ -37,7 +37,7 @@ namespace Compiler
 {
 
 PassNode::PassNode( std::string name, std::vector<Node_ref> state_assignments )
-    : Node( NodeType::Pass, std::move(state_assignments) ),
+    : Node( NodeType::Pass, std::move( state_assignments ) ),
       m_Name( std::move( name ) )
 {
 }

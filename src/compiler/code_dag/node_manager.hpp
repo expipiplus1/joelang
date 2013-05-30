@@ -87,11 +87,13 @@ public:
     const SwizzleNode& MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle );
 
     const TechniqueNode& MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes );
-    
-    const PassNode& MakePassNode( std::string name, std::vector<StateAssignmentNode_ref> state_assignments );
-   
-    const StateAssignmentNode& MakeStateAssignmentNode( const StateBase& state, const Node& assigned_expression );
-    
+
+    const PassNode& MakePassNode( std::string name,
+                                  std::vector<StateAssignmentNode_ref> state_assignments );
+
+    const StateAssignmentNode& MakeStateAssignmentNode( const StateBase& state,
+                                                        const Node& assigned_expression );
+
     // TODO make this a little better
     std::vector<Node_up> m_Nodes;
 };

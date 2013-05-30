@@ -34,6 +34,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
@@ -44,7 +45,6 @@
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
 #include <joelang/types.hpp>
-#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {

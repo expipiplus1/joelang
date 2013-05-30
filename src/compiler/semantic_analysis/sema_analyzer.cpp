@@ -37,6 +37,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
@@ -53,7 +54,6 @@
 #include <compiler/writers/runtime.hpp>
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
-#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {

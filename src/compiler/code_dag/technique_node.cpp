@@ -38,7 +38,7 @@ namespace Compiler
 {
 
 TechniqueNode::TechniqueNode( std::string name, std::vector<Node_ref> passes )
-    : Node( NodeType::Technique, std::move(passes) ),
+    : Node( NodeType::Technique, std::move( passes ) ),
       m_Name( std::move( name ) )
 {
 }

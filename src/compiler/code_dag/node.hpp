@@ -40,27 +40,27 @@ namespace Compiler
 enum class NodeType
 {
     Unimplemented,
-    
+
     //
     // Miscellaneous
     //
     Type,
-    
+
     //
     // Structural
     //
-    
+
     Technique,
     Pass,
     StateAssignment,
-    
+
     //
     // Statements
     //
 
     Sequence,
     Return,
-    
+
     //
     // Expressions
     //

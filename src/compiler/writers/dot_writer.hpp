@@ -30,9 +30,9 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 
 namespace JoeLang
 {

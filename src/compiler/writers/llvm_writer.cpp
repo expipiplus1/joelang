@@ -39,9 +39,10 @@ LLVMWriter::LLVMWriter( Runtime& runtime )
 {
 }
 
-StateAssignmentBase_up LLVMWriter::GenerateStateAssignment( const StateAssignmentNode& state_assignment_node )
+StateAssignmentBase_up LLVMWriter::GenerateStateAssignment(
+    const StateAssignmentNode& state_assignment_node )
 {
-    
+
 }
 
 } // namespace Compiler

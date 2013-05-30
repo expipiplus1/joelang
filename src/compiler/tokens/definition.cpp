@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
@@ -51,7 +52,6 @@
 #include <joelang/program.hpp>
 #include <joelang/shader.hpp>
 #include <joelang/state_assignment.hpp>
-#include <compiler/code_dag/node_manager.hpp>
 
 namespace JoeLang
 {
