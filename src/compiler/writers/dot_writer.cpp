@@ -46,6 +46,7 @@
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
@@ -232,7 +233,7 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
     case NodeType::Type:
         return "Type: " + static_cast<const TypeNode&>( node ).GetType().GetString();
     case NodeType::Constant:
-        switch( static_cast<const ConstantNodeBase&>( node ).GetType() )
+        switch( cast<ExpressionNode>( node ).GetType().GetType() )
         {
         case Type::INT:
             return "Constant " +

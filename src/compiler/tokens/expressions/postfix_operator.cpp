@@ -156,11 +156,11 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
     return good;
 }
 
-const Node& SubscriptOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
+const ExpressionNode& SubscriptOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
 {
     const Node& array = expression.GenerateCodeDag( node_manager );
     const Node& index = m_IndexExpression->GenerateCodeDag( node_manager );
-    return node_manager.MakeNode( NodeType::ArrayIndex, {array, index} );
+    return node_manager.MakeExpressionNode( NodeType::ArrayIndex, {array, index} );
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,
@@ -351,7 +351,8 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
     return good;
 }
 
-const Node& ArgumentListOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
+const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_manager, 
+                                                             Expression& expression ) const
 {
     const FunctionNode& function = node_manager.MakeFunctionNode( m_Function );
     std::vector<Node_ref> argument_nodes;
@@ -363,7 +364,7 @@ const Node& ArgumentListOperator::GenerateCodeDag( NodeManager& node_manager, Ex
     // push the function name into arguments to pass to node_manager
     //
     argument_nodes.emplace_back( function );
-    return node_manager.MakeNode( NodeType::Call, argument_nodes );
+    return node_manager.MakeExpressionNode( NodeType::Call, argument_nodes );
 }
 
 
@@ -636,7 +637,7 @@ bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
     return true;
 }
 
-const Node& MemberAccessOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
+const ExpressionNode& MemberAccessOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
 {
     if( IsSwizzle() )
     {
@@ -645,7 +646,7 @@ const Node& MemberAccessOperator::GenerateCodeDag( NodeManager& node_manager, Ex
     }
         
     assert( false && "Complete me" );
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    return node_manager.MakeExpressionNode( NodeType::Unimplemented, {} );
 }
 
 bool MemberAccessOperator::IsSwizzle() const
@@ -822,17 +823,18 @@ bool IncrementOrDecrementOperator::PerformSema( SemaAnalyzer& sema,
     return false;
 }
 
-const Node& IncrementOrDecrementOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
+const ExpressionNode& IncrementOrDecrementOperator::GenerateCodeDag( NodeManager& node_manager, 
+                                                                     Expression& expression ) const
 {
 #if 0
-    const Node& expression_node = expression->GenerateCodeDag( node_manager );
+    const ExpressionNode& expression_node = expression->GenerateCodeDag( node_manager );
     if( IsIncrement() )
-        return node_manager.MakeNode( NodeType::PostIncrement, {expression_node} );
+        return node_manager.MakeExpressionNode( NodeType::PostIncrement, {expression_node} );
     else
-    return node_manager.MakeNode( NodeType::PostDecrement, {expression_node} );
+    return node_manager.MakeExpressionNode( NodeType::PostDecrement, {expression_node} );
 #endif
     assert( false && "Complete me" );
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    return node_manager.MakeExpressionNode( NodeType::Unimplemented, {} );
 }
 
 llvm::Value* IncrementOrDecrementOperator::CodeGen(

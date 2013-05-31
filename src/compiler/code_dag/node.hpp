@@ -65,7 +65,8 @@ enum class NodeType
     // Expressions
     //
 
-    Constant,
+    Expression_start,
+    Constant = Expression_start,
     Zero,
     VariableIdentifier,
     FunctionIdentifier,
@@ -90,17 +91,17 @@ enum class NodeType
     Multiply,
     Divide,
     Modulo,
-    BinaryOperator_end,
+    BinaryOperator_end = Modulo,
 
-    UnaryOperator_start = BinaryOperator_end,
+    UnaryOperator_start,
     Negate = UnaryOperator_start,
     BitwiseNot,
     LogicalNot,
     PreIncrement,
     PreDecrement,
-    UnaryOperator_end,
+    UnaryOperator_end = PreDecrement,
 
-    Select = UnaryOperator_end,
+    Select,
     Cast,
 
     ArrayIndex,
@@ -111,6 +112,7 @@ enum class NodeType
     InsertElement,
     VectorConstructor,
     MatrixConstructor,
+    Expression_end = MatrixConstructor,
 };
 
 class Node;
@@ -122,6 +124,8 @@ public:
     unsigned GetNumChildren() const;
 
     const std::vector<Node_ref>& GetChildren() const;
+
+    const Node& GetChild( unsigned index ) const;
 
     NodeType GetNodeType() const;
 

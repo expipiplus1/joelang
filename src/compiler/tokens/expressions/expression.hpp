@@ -47,23 +47,20 @@ namespace JoeLang
 {
     namespace Compiler
     {
-        class Expression;
-        using Expression_up = std::unique_ptr<Expression>;
-
         class CodeGenerator;
         class CompleteType;
+        class Expression;
+        class ExpressionNode;
+        using Expression_up = std::unique_ptr<Expression>;
+        class Function;
+        using Function_sp = std::shared_ptr<Function>;
+        class Node;
+        class NodeManager;
         class Parser;
         class SemaAnalyzer;
         class ShaderWriter;
-
         class Variable;
         using Variable_sp = std::shared_ptr<Variable>;
-
-        class Function;
-        using Function_sp = std::shared_ptr<Function>;
-        
-        class Node;
-        class NodeManager;
 
     } // namespace Compiler
 } // namespace JoeLang
@@ -106,7 +103,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) = 0;
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const;
 
     /**
       * Generates an llvm value for this expression

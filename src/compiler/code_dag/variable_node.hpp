@@ -31,21 +31,25 @@
 
 #include <memory>
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
+class CompleteType;
 enum class NodeType;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
-class VariableNode : public Node
+class VariableNode : public ExpressionNode
 {
 public:
     const Variable_sp& GetVariable() const;
+
+    virtual
+    CompleteType GetType() const override;
 
 private:
     friend class NodeManager;

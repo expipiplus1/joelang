@@ -195,7 +195,7 @@ IntegerLiteralExpression::~IntegerLiteralExpression()
 {
 }
 
-const Node& IntegerLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& IntegerLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     // todo, store the type
     switch( GetType().GetBaseType() )
@@ -218,7 +218,7 @@ const Node& IntegerLiteralExpression::GenerateCodeDag( NodeManager& node_manager
         return node_manager.MakeConstant<jl_ulong>( m_Value );
     default:
         assert( false && "Trying to generate a non integer type" );
-        return node_manager.MakeNode( NodeType::Unimplemented, {} );
+        return node_manager.MakeExpressionNode( NodeType::Unimplemented, {} );
     }
 }
 
@@ -432,7 +432,7 @@ FloatingLiteralExpression::~FloatingLiteralExpression()
 {
 }
 
-const Node& FloatingLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& FloatingLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     // todo, store the type
     switch( GetType().GetBaseType() )
@@ -443,7 +443,7 @@ const Node& FloatingLiteralExpression::GenerateCodeDag( NodeManager& node_manage
         return node_manager.MakeConstant<jl_double>( m_Value );
     default:
         assert( false && "Trying to generate a non float type" );
-        return node_manager.MakeNode( NodeType::Unimplemented, {} );
+        return node_manager.MakeExpressionNode( NodeType::Unimplemented );
     }
 }
 
@@ -560,7 +560,7 @@ BooleanLiteralExpression::~BooleanLiteralExpression()
 {
 }
 
-const Node& BooleanLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& BooleanLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     return node_manager.MakeConstant<jl_bool>( m_Value );
 }
@@ -683,7 +683,7 @@ StringLiteralExpression::~StringLiteralExpression()
 {
 }
 
-const Node& StringLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& StringLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     return node_manager.MakeConstant<std::string>( m_Value );
 }
@@ -784,7 +784,7 @@ CharacterLiteralExpression::~CharacterLiteralExpression()
 {
 }
 
-const Node& CharacterLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& CharacterLiteralExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     return node_manager.MakeConstant<jl_char>( m_Value );
 }

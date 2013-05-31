@@ -36,6 +36,7 @@
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/parser/parser.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/expressions/assignment_expression.hpp>
 
 namespace JoeLang
@@ -56,9 +57,9 @@ Expression::~Expression()
 {
 }
 
-const Node& Expression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& Expression::GenerateCodeDag( NodeManager& node_manager ) const
 {
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    return node_manager.MakeExpressionNode( NodeType::Unimplemented );
 }
 
 bool Expression::IsLValue() const

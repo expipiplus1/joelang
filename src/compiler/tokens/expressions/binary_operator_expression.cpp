@@ -118,48 +118,48 @@ bool BinaryOperatorExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-const Node& BinaryOperatorExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& BinaryOperatorExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     const Node& left = m_LeftSide->GenerateCodeDag( node_manager );
     const Node& right = m_RightSide->GenerateCodeDag( node_manager );
     switch( m_Operator )
     {
     case Op::LOGICAL_OR:
-        return node_manager.MakeNode( NodeType::LogicalOr, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::LogicalOr, { left, right } );
     case Op::LOGICAL_AND:
-        return node_manager.MakeNode( NodeType::LogicalAnd, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::LogicalAnd, { left, right } );
     case Op::OR:
-        return node_manager.MakeNode( NodeType::BitwiseOr, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::BitwiseOr, { left, right } );
     case Op::XOR:
-        return node_manager.MakeNode( NodeType::BitwiseExclusiveOr, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::BitwiseExclusiveOr, { left, right } );
     case Op::AND:
-        return node_manager.MakeNode( NodeType::BitwiseAnd, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::BitwiseAnd, { left, right } );
     case Op::EQUAL_TO:
-        return node_manager.MakeNode( NodeType::CompareEqual, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareEqual, { left, right } );
     case Op::NOT_EQUAL_TO:
-        return node_manager.MakeNode( NodeType::CompareNotEqual, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareNotEqual, { left, right } );
     case Op::LESS_THAN:
-        return node_manager.MakeNode( NodeType::CompareLessThan, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareLessThan, { left, right } );
     case Op::GREATER_THAN:
-        return node_manager.MakeNode( NodeType::CompareGreaterThan, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareGreaterThan, { left, right } );
     case Op::LESS_THAN_EQUALS:
-        return node_manager.MakeNode( NodeType::CompareLessThanEquals, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareLessThanEquals, { left, right } );
     case Op::GREATER_THAN_EQUALS:
-        return node_manager.MakeNode( NodeType::CompareGreaterThanEquals, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::CompareGreaterThanEquals, { left, right } );
     case Op::LEFT_SHIFT:
-        return node_manager.MakeNode( NodeType::LeftShift, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::LeftShift, { left, right } );
     case Op::RIGHT_SHIFT:
-        return node_manager.MakeNode( NodeType::RightShift, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::RightShift, { left, right } );
     case Op::PLUS:
-        return node_manager.MakeNode( NodeType::Add, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::Add, { left, right } );
     case Op::MINUS:
-        return node_manager.MakeNode( NodeType::Subtract, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::Subtract, { left, right } );
     case Op::MULTIPLY:
-        return node_manager.MakeNode( NodeType::Multiply, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::Multiply, { left, right } );
     case Op::DIVIDE:
-        return node_manager.MakeNode( NodeType::Divide, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::Divide, { left, right } );
     case Op::MODULO:
-        return node_manager.MakeNode( NodeType::Modulo, { left, right } );
+        return node_manager.MakeExpressionNode( NodeType::Modulo, { left, right } );
     }
 }
 

@@ -37,6 +37,7 @@
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/expressions/postfix_expression.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
@@ -88,23 +89,23 @@ bool UnaryExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-const Node& UnaryExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& UnaryExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
-    const Node& expression = m_Expression->GenerateCodeDag( node_manager );
+    const ExpressionNode& expression = m_Expression->GenerateCodeDag( node_manager );
     switch( m_Operator )
     {       
     case Op::PLUS:
         return expression; // A unary plus is a no-op
     case Op::MINUS:
-        return node_manager.MakeNode( NodeType::Negate, { expression } );
+        return node_manager.MakeExpressionNode( NodeType::Negate, { expression } );
     case Op::BITWISE_NOT:
-        return node_manager.MakeNode( NodeType::BitwiseNot, { expression } );
+        return node_manager.MakeExpressionNode( NodeType::BitwiseNot, { expression } );
     case Op::LOGICAL_NOT:
-        return node_manager.MakeNode( NodeType::LogicalNot, { expression } );
+        return node_manager.MakeExpressionNode( NodeType::LogicalNot, { expression } );
     case Op::INCREMENT:
-        return node_manager.MakeNode( NodeType::PreIncrement, { expression } );
+        return node_manager.MakeExpressionNode( NodeType::PreIncrement, { expression } );
     case Op::DECREMENT:
-        return node_manager.MakeNode( NodeType::PreDecrement, { expression } );
+        return node_manager.MakeExpressionNode( NodeType::PreDecrement, { expression } );
     }
 }
 

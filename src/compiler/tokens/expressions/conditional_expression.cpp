@@ -119,13 +119,13 @@ bool ConditionalExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-const Node& ConditionalExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& ConditionalExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
-    const Node& true_node = m_TrueExpression->GenerateCodeDag( node_manager );
-    const Node& false_node = m_FalseExpression->GenerateCodeDag( node_manager );
-    const Node& condition = m_Condition->GenerateCodeDag( node_manager );
+    const ExpressionNode& true_node = m_TrueExpression->GenerateCodeDag( node_manager );
+    const ExpressionNode& false_node = m_FalseExpression->GenerateCodeDag( node_manager );
+    const ExpressionNode& condition = m_Condition->GenerateCodeDag( node_manager );
     
-    return node_manager.MakeNode( NodeType::Select, {true_node, false_node, condition} );
+    return node_manager.MakeExpressionNode( NodeType::Select, {true_node, false_node, condition} );
 }
     
 llvm::Value* ConditionalExpression::CodeGen( CodeGenerator& code_gen ) const

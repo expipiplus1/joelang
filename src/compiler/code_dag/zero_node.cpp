@@ -37,15 +37,15 @@ namespace Compiler
 {
 
 ZeroNode::ZeroNode( Type type )
-    : Node( NodeType::Type, {} ),
+    : ExpressionNode( NodeType::Type, {} ),
       m_Type( std::move( type ) )
 {
 }
 
 
-const Type& ZeroNode::GetType() const
+CompleteType ZeroNode::GetType() const
 {
-    return m_Type;
+    return CompleteType( m_Type );
 }
 
 } // namespace Compiler

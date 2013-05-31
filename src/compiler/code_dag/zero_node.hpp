@@ -29,7 +29,7 @@
 
 #pragma once
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
 
 namespace JoeLang
 {
@@ -38,12 +38,13 @@ enum class Type;
 namespace Compiler
 {
 
-enum class NodeType;
+class CompleteType;
 
-class ZeroNode : public Node
+class ZeroNode : public ExpressionNode
 {
 public:
-    const Type& GetType() const;
+    virtual
+    CompleteType GetType() const override;
 
 private:
     friend class NodeManager;

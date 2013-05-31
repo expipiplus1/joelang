@@ -27,6 +27,8 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
+#pragma once
+
 #include "constant_node.hpp"
 
 #include <compiler/code_dag/node.hpp>
@@ -39,7 +41,7 @@ namespace Compiler
 
 template <typename T>
 ConstantNode<T>::ConstantNode( value_type constant )
-    : ConstantNodeBase(),
+    : ExpressionNode( NodeType::Constant ),
       m_Constant( std::move( constant ) )
 {
 }
@@ -51,9 +53,9 @@ const T& ConstantNode<T>::GetConstant() const
 }
 
 template <typename T>
-Type ConstantNode<T>::GetType() const
+CompleteType ConstantNode<T>::GetType() const
 {
-    return JoeLangType<T>::value;
+    return CompleteType( JoeLangType<T>::value );
 }
 
 

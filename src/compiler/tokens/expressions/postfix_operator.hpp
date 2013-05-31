@@ -54,10 +54,10 @@ typedef std::vector<unsigned> ArrayExtents;
 class CodeGenerator;
 class CompleteType;
 class Expression;
+class ExpressionNode;
 using Expression_up = std::unique_ptr<Expression>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
-class Node;
 class NodeManager;
 class Parser;
 class SemaAnalyzer;
@@ -92,7 +92,8 @@ public:
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) = 0;
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const = 0;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
+                                           Expression& expression ) const = 0;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -171,7 +172,8 @@ public:
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) override;
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
+                                           Expression& expression ) const override;
     
     //TODO pass expression as reference instead of pointer
     virtual
@@ -247,7 +249,8 @@ public:
                       Expression_up& expression ) override;
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
+                                           Expression& expression ) const override;
     
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,
@@ -319,7 +322,7 @@ public:
                       Expression_up& expression ) override;
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    const JoeLang::Compiler::ExpressionNode &GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
     
     bool IsSwizzle() const;
 
@@ -405,7 +408,8 @@ public:
                       Expression_up& expression ) override;
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
+                                           Expression& expression ) const override;
     
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen,

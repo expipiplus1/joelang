@@ -29,14 +29,19 @@
 
 #include "state_assignment_node.hpp"
 
+#include <cassert>
+
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-StateAssignmentNode::StateAssignmentNode( const StateBase& state, const Node& assigned_expression )
+StateAssignmentNode::StateAssignmentNode( const StateBase& state,
+                                          const ExpressionNode& assigned_expression )
     : Node( NodeType::StateAssignment, { assigned_expression } ),
       m_State( std::move( state ) )
 {
@@ -45,6 +50,13 @@ StateAssignmentNode::StateAssignmentNode( const StateBase& state, const Node& as
 const StateBase& StateAssignmentNode::GetState() const
 {
     return m_State;
+}
+
+const ExpressionNode& StateAssignmentNode::GetAssignedExpression() const
+{
+    assert( GetNumChildren() == 1 && "StateAssignmentNode with incorrect number of children" );
+    assert( isa<ExpressionNode>( GetChild( 0 ) ) && "State doesn't have an expression node" );
+    return cast<ExpressionNode>( GetChild( 0 ) );
 }
 
 } // namespace Compiler

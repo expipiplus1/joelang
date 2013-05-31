@@ -62,6 +62,8 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/code_dag/constant_node.cpp
                      src/compiler/code_dag/constant_node.hpp
                      src/compiler/code_dag/constant_node-inl.hpp
+                     src/compiler/code_dag/expression_node.cpp
+                     src/compiler/code_dag/expression_node.hpp
                      src/compiler/code_dag/function_node.cpp
                      src/compiler/code_dag/function_node.hpp
                      src/compiler/code_dag/node.cpp

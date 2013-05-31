@@ -34,10 +34,5 @@ namespace JoeLang
 namespace Compiler
 {
 
-ConstantNodeBase::ConstantNodeBase()
-    : Node( NodeType::Constant, {} )
-{
-}
-
 } // namespace Compiler
 } // namespace JoeLang

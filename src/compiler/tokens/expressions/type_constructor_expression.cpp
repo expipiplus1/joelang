@@ -190,7 +190,7 @@ bool TypeConstructorExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
-const Node& TypeConstructorExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     //
     // If this is a cast expression, return the cast which is in arguments[0] now
@@ -223,7 +223,8 @@ const Node& TypeConstructorExpression::GenerateCodeDag( NodeManager& node_manage
         // Add the type to elements for the vector constructor
         //
         elements.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
-        return node_manager.MakeNode( NodeType::VectorConstructor, elements );
+        return 
+            node_manager.MakeExpressionNode( NodeType::VectorConstructor, elements );
     }
     
     if( IsMatrixType( m_Type ) )
@@ -272,11 +273,12 @@ const Node& TypeConstructorExpression::GenerateCodeDag( NodeManager& node_manage
         //
         assert( columns.size() == num_columns && "Wrong number of columns generated" );
         columns.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
-        return node_manager.MakeNode( NodeType::MatrixConstructor, columns );
+        return 
+            node_manager.MakeExpressionNode( NodeType::MatrixConstructor, columns );
     }
     
     assert( false && "Trying to codegen an unhandled type" );
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    return node_manager.MakeExpressionNode( NodeType::Unimplemented, {} );
 }
 
 bool TypeConstructorExpression::IsMatrixDiagonalConstructor() const

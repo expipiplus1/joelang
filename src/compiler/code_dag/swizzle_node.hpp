@@ -31,7 +31,7 @@
 
 #include <memory>
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 
 namespace JoeLang
@@ -39,13 +39,19 @@ namespace JoeLang
 namespace Compiler
 {
 
+class CompleteType;
 enum class NodeType;
 class Swizzle;
 
-class SwizzleNode : public Node
+class SwizzleNode : public ExpressionNode
 {
 public:
     const Swizzle& GetSwizzle() const;
+
+    const ExpressionNode& GetSwizzled() const;
+
+    virtual
+    CompleteType GetType() const override;
 
 private:
     friend class NodeManager;

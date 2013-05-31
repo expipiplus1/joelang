@@ -103,7 +103,7 @@ bool StateAssignmentStatement::PerformSema( SemaAnalyzer& sema )
 
 const StateAssignmentNode& StateAssignmentStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
-    const Node& expression_node = m_Expression->GenerateCodeDag( node_manager );
+    const ExpressionNode& expression_node = m_Expression->GenerateCodeDag( node_manager );
     return node_manager.MakeStateAssignmentNode( *m_State, expression_node );
 }
     

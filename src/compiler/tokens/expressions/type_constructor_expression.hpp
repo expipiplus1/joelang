@@ -65,7 +65,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema ) override;
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     bool IsMatrixDiagonalConstructor() const;
     

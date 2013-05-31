@@ -41,6 +41,7 @@ class StateBase;
 namespace Compiler
 {
 
+class ExpressionNode;
 enum class NodeType;
 
 class StateAssignmentNode : public Node
@@ -48,9 +49,11 @@ class StateAssignmentNode : public Node
 public:
     const StateBase& GetState() const;
 
+    const ExpressionNode& GetAssignedExpression() const;
+
 private:
     friend class NodeManager;
-    StateAssignmentNode( const StateBase& m_State, const Node& assigned_expression );
+    StateAssignmentNode( const StateBase& m_State, const ExpressionNode& assigned_expression );
 
     const StateBase& m_State;
 };

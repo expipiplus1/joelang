@@ -65,7 +65,7 @@ IdentifierExpression::~IdentifierExpression()
 {
 }
 
-const Node& IdentifierExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& IdentifierExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     assert( m_Variable && "Trying to generate code for an inresolved identifier" );
     return node_manager.MakeVariableNode( m_Variable );

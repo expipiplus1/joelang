@@ -39,6 +39,7 @@
 #include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
@@ -57,6 +58,15 @@ const Node& NodeManager::MakeNode( NodeType node_type, std::vector<Node_ref> chi
 {
     m_Nodes.emplace_back( new Node( node_type, std::move( children ) ) );
     return *m_Nodes.back();
+}
+
+const ExpressionNode& NodeManager::MakeExpressionNode( NodeType node_type,
+                                                       std::vector<Node_ref> children )
+{
+    assert( node_type >= NodeType::Expression_start && node_type <= NodeType::Expression_end &&
+            "Trying to make an expression node with a non expression node type" );
+    m_Nodes.emplace_back( new Node( node_type, std::move( children ) ) );
+    return cast<ExpressionNode>( *m_Nodes.back() );
 }
 
 const TypeNode& NodeManager::MakeTypeNode( const CompleteType& type )
@@ -115,8 +125,9 @@ const PassNode& NodeManager::MakePassNode( std::string name,
     return static_cast<const PassNode&>( *m_Nodes.back() );
 }
 
-const StateAssignmentNode& NodeManager::MakeStateAssignmentNode( const StateBase& state,
-                                                                 const Node& assigned_expression )
+const StateAssignmentNode& NodeManager::MakeStateAssignmentNode(
+    const StateBase& state,
+    const ExpressionNode& assigned_expression )
 {
     m_Nodes.emplace_back( new StateAssignmentNode( state, assigned_expression ) );
     return static_cast<const StateAssignmentNode&>( *m_Nodes.back() );

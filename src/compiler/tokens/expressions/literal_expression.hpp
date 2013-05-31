@@ -160,7 +160,7 @@ public:
     ~IntegerLiteralExpression();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
     
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
@@ -228,7 +228,7 @@ public:
     ~FloatingLiteralExpression();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
@@ -286,7 +286,7 @@ public:
     ~BooleanLiteralExpression();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
@@ -328,7 +328,7 @@ public:
     ~StringLiteralExpression();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;
@@ -384,7 +384,7 @@ public:
     ~CharacterLiteralExpression();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const;

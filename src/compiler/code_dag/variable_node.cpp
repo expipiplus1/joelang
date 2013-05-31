@@ -29,7 +29,8 @@
 
 #include "variable_node.hpp"
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
+#include <compiler/semantic_analysis/variable.hpp>
 
 namespace JoeLang
 {
@@ -37,7 +38,7 @@ namespace Compiler
 {
 
 VariableNode::VariableNode( Variable_sp variable )
-    : Node( NodeType::VariableIdentifier, {} ),
+    : ExpressionNode( NodeType::VariableIdentifier ),
       m_Variable( std::move( variable ) )
 {
 }
@@ -46,6 +47,11 @@ VariableNode::VariableNode( Variable_sp variable )
 const Variable_sp& VariableNode::GetVariable() const
 {
     return m_Variable;
+}
+
+CompleteType VariableNode::GetType() const
+{
+    return m_Variable->GetType();
 }
 
 } // namespace Compiler

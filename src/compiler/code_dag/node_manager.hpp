@@ -45,6 +45,7 @@ namespace Compiler
 class CompleteType;
 template <typename>
 class ConstantNode;
+class ExpressionNode;
 class Function;
 class FunctionNode;
 using Function_sp = std::shared_ptr<Function>;
@@ -71,7 +72,10 @@ public:
     NodeManager();
     ~NodeManager();
 
-    const Node& MakeNode( NodeType node_type, std::vector<Node_ref> children );
+    const Node& MakeNode( NodeType node_type, std::vector<Node_ref> children = {} );
+
+    const ExpressionNode& MakeExpressionNode( NodeType node_type,
+                                              std::vector<Node_ref> children = {} );
 
     const TypeNode& MakeTypeNode( const CompleteType& type );
 
@@ -92,7 +96,7 @@ public:
                                   std::vector<StateAssignmentNode_ref> state_assignments );
 
     const StateAssignmentNode& MakeStateAssignmentNode( const StateBase& state,
-                                                        const Node& assigned_expression );
+                                                        const ExpressionNode& assigned_expression );
 
     // TODO make this a little better
     std::vector<Node_up> m_Nodes;

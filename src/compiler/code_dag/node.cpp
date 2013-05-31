@@ -29,6 +29,7 @@
 
 #include "node.hpp"
 
+#include <cassert>
 #include <vector>
 
 namespace JoeLang
@@ -54,6 +55,12 @@ unsigned Node::GetNumChildren() const
 const std::vector<Node_ref>& Node::GetChildren() const
 {
     return m_Children;
+}
+
+const Node& Node::GetChild( unsigned index ) const
+{
+    assert( index < GetNumChildren() && "Trying to get an out of bounds child" );
+    return m_Children[index];
 }
 
 NodeType Node::GetNodeType() const

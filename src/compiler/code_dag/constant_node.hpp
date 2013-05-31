@@ -29,8 +29,8 @@
 
 #pragma once
 
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node.hpp>
-#include <compiler/semantic_analysis/complete_type.hpp>
 #include <joelang/types.hpp>
 
 namespace JoeLang
@@ -38,20 +38,11 @@ namespace JoeLang
 namespace Compiler
 {
 
+class CompleteType;
 enum class NodeType;
 
-class ConstantNodeBase : public Node
-{
-public:
-    virtual
-    Type GetType() const = 0;
-
-protected:
-    ConstantNodeBase();
-};
-
 template <typename T>
-class ConstantNode : public ConstantNodeBase
+class ConstantNode : public ExpressionNode
 {
 public:
     using value_type = T;
@@ -59,7 +50,7 @@ public:
     const value_type& GetConstant() const;
 
     virtual
-    Type GetType() const override;
+    CompleteType GetType() const override;
 
 private:
     friend class NodeManager;

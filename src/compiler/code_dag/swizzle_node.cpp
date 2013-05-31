@@ -29,7 +29,13 @@
 
 #include "swizzle_node.hpp"
 
-#include <compiler/code_dag/node.hpp>
+#include <cassert>
+
+#include <compiler/support/casting.hpp>
+#include <compiler/code_dag/expression_node.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
 
 namespace JoeLang
 {
@@ -37,7 +43,7 @@ namespace Compiler
 {
 
 SwizzleNode::SwizzleNode( const Node& swizzled, Swizzle swizzle )
-    : Node( NodeType::Swizzle, { swizzled } ),
+    : ExpressionNode( NodeType::Swizzle, { swizzled } ),
       m_Swizzle( std::move( swizzle ) )
 {
 }
@@ -45,6 +51,20 @@ SwizzleNode::SwizzleNode( const Node& swizzled, Swizzle swizzle )
 const Swizzle& SwizzleNode::GetSwizzle() const
 {
     return m_Swizzle;
+}
+
+const ExpressionNode& SwizzleNode::GetSwizzled() const
+{
+    assert( GetNumChildren() == 1 && "Swizzle node with incorrect number of children" );
+    assert( isa<ExpressionNode>( GetChild( 0 ) ) &&
+            "Swizzle node doesn't have an expression node" );
+    return cast<ExpressionNode>( GetChild( 0 ) );
+}
+
+CompleteType SwizzleNode::GetType() const
+{
+    Type base_type = GetScalarType( GetSwizzled().GetType().GetElementType() );
+    return CompleteType( GetVectorType( base_type, GetSwizzle().GetSize() ) );
 }
 
 } // namespace Compiler

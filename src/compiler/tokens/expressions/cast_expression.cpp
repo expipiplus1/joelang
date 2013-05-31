@@ -34,17 +34,17 @@
 #include <set>
 #include <utility>
 
+#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/type_node.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/expressions/unary_expression.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
-
-#include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/node_manager.hpp>
-#include <compiler/code_dag/type_node.hpp>
 
 namespace JoeLang
 {
@@ -111,7 +111,7 @@ bool CastExpression::PerformSema( SemaAnalyzer& sema )
     return PerformSemaNoRecurse( sema );
 }
 
-const Node& CastExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const ExpressionNode& CastExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     //
     // Don't generate a cast here if it wouldn't do anything
@@ -120,8 +120,8 @@ const Node& CastExpression::GenerateCodeDag( NodeManager& node_manager ) const
         return m_Expression->GenerateCodeDag( node_manager );
                 
     const TypeNode& type = m_CastType.GenerateCodeDag( node_manager );
-    const Node& expression = m_Expression->GenerateCodeDag( node_manager );
-    return node_manager.MakeNode( NodeType::Cast, {expression, type} );
+    const ExpressionNode& expression = m_Expression->GenerateCodeDag( node_manager );
+    return node_manager.MakeExpressionNode( NodeType::Cast, {expression, type} );
 }
 
 bool CastExpression::CanCastFromScalar( SemaAnalyzer& sema )
