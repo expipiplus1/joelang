@@ -39,8 +39,11 @@ namespace JoeLang
 namespace Compiler
 {
 
+class Function;
 class Node;
 using Node_ref = std::reference_wrapper<const Node>;
+class TechniqueNode;
+using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
 
 ///
 /// \brief A class to dump the code dag to a dot file
@@ -49,13 +52,13 @@ class DotWriter
 {
 public:
     std::string GenerateDotString();
-    void AddCluster( const Node& node, std::string name );
+    void AddFunction( const Function& function );
+    void AddTechnique( const TechniqueNode& technique_node );
     void Clear();
 
 private:
     bool HasSeen( const Node& node ) const;
     std::string GetEdges( const Node& node );
-    std::string GetLabels() const;
     std::string GetIdentifier( const Node& node );
     std::string GetUniqueIdentifier();
     std::string GetNodeDescription( const Node& node ) const;
@@ -66,9 +69,13 @@ private:
         const std::string name;
     };
 
+    std::map<const Function*, std::string> m_FunctionClusterMap;
+    std::vector<TechniqueNode_ref> m_TechniqueClusters;
+
     std::map<const Node*, std::string> m_Identifiers;
-    std::vector<NodeCluster> m_Clusters;
     unsigned m_NumUniqueIdentifiers = 0;
+
+    std::string m_Labels;
 };
 
 } // namespace Compiler

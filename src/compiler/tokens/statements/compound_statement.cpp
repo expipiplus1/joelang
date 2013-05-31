@@ -196,10 +196,14 @@ bool CompoundStatement::Parse( Parser& parser, CompoundStatement_up& token )
 
     if( !parser.ExpectTerminal( TerminalType::CLOSE_BRACE ) )
         return false;
+    
+    statements.erase( std::remove_if(statements.begin(), statements.end(), 
+                                  [](const Statement_up& s)
+    { return s->GetSubClassID() == TokenTy::EmptyStatement;}), statements.end() );
 
     token.reset( new CompoundStatement( std::move(statements) ) );
     return true;
 }
 
-} // namespace Compiler
+} // namespace Compiler 
 } // namespace JoeLang

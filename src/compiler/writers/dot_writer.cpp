@@ -35,10 +35,14 @@
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/pass_node.hpp>
+#include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/technique_node.hpp>
 #include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
@@ -48,31 +52,54 @@ namespace JoeLang
 namespace Compiler
 {
 
-void DotWriter::AddCluster( const Node& node, std::string name )
-{
-    m_Clusters.push_back( { node, name } );
-}
-
 std::string DotWriter::GenerateDotString()
 {
-    std::string header = "digraph code_dag {\n";
+    std::string header = "digraph code_dag {\n"
+                         "graph [compound=true, clusterrank=\"local\"];\n";
     std::string footer = "}\n";
 
     std::string content;
+    std::string edges;
 
-    for( const NodeCluster& cluster : m_Clusters )
+    for( const TechniqueNode& technique_node : m_TechniqueClusters )
     {
         std::string subgraph_header = "subgraph cluster_" + GetUniqueIdentifier() + "{\n";
-        std::string subgraph_footer =
-            "label = \"" + cluster.name + "\";\nstyle = \"rounded,dashed\";\n}\n";
-        content += subgraph_header + GetEdges( cluster.node ) + subgraph_footer;
+        std::string subgraph_footer = "\nstyle = \"rounded,solid\";\n}\n";
+        content += subgraph_header + GetEdges( technique_node ) + m_Labels + subgraph_footer;
+        m_Labels.clear();
     }
 
-    std::string ret = header + GetLabels() + "\n" + content + footer;
+    for( const auto& function_cluster : m_FunctionClusterMap )
+    {
+        std::string subgraph_header = "subgraph " + function_cluster.second + "{\n";
+        std::string subgraph_footer = "style = \"rounded,dashed\";\n}\n";
+
+        std::string cluster_label =
+            function_cluster.second + "_TITLE [label = \"" +
+            function_cluster.first->GetIdentifier() + "\", style=\"round\"];\n";
+
+        const Node& function_node = function_cluster.first->GetCodeDag();
+        edges += GetEdges( function_node );
+        edges += function_cluster.second + "_TITLE -> " + GetIdentifier( function_node ) + ";\n";
+        content += subgraph_header + cluster_label + m_Labels + subgraph_footer;
+        m_Labels.clear();
+    }
+
+    std::string ret = header + content + "\n" + edges + footer;
 
     Clear();
 
     return ret;
+}
+
+void DotWriter::AddFunction( const Function& function )
+{
+    m_FunctionClusterMap[&function] = "cluster_" + GetUniqueIdentifier();
+}
+
+void DotWriter::AddTechnique( const TechniqueNode& technique_node )
+{
+    m_TechniqueClusters.push_back( technique_node );
 }
 
 void DotWriter::Clear()
@@ -87,11 +114,26 @@ bool DotWriter::HasSeen( const Node& node ) const
 
 std::string DotWriter::GetEdges( const Node& node )
 {
-    //
-    // Write a label for this node
-    //
+
     std::string identifier = GetIdentifier( node );
     std::string edges;
+
+    std::string description = GetNodeDescription( node );
+    m_Labels +=
+        identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];\n";
+
+    //
+    // If this is a function identifier, draw an edge to the cluster for this funciton if we have it
+    // hmm?
+    //
+    if( node.GetNodeType() == NodeType::FunctionIdentifier )
+    {
+        const FunctionNode& f = static_cast<const FunctionNode&>( node );
+        auto i = m_FunctionClusterMap.find( f.GetFunction().get() );
+        if( i != m_FunctionClusterMap.end() )
+            edges += identifier + " -> " + i->second + "_TITLE" + "[lhead=" + i->second + "];\n";
+    }
+
     for( const Node& s : node.GetChildren() )
     {
         bool has_seen = HasSeen( s );
@@ -101,21 +143,6 @@ std::string DotWriter::GetEdges( const Node& node )
             edges += GetEdges( s );
     }
     return edges;
-}
-
-std::string DotWriter::GetLabels() const
-{
-    std::string labels;
-    for( const auto& i : m_Identifiers )
-    {
-        const Node& node = *i.first;
-        const std::string& identifier = i.second;
-        std::string description = GetNodeDescription( node );
-        std::string label =
-            identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];";
-        labels += label + "\n";
-    }
-    return labels;
 }
 
 std::string DotWriter::GetIdentifier( const Node& node )
@@ -141,9 +168,9 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
     case NodeType::Unimplemented:
         return "Unimplemented";
     case NodeType::Technique:
-        return "Technique";
+        return "Technique: " + static_cast<const TechniqueNode&>( node ).GetName();
     case NodeType::Pass:
-        return "Pass";
+        return "Pass: " + static_cast<const PassNode&>( node ).GetName();
     case NodeType::StateAssignment:
         return "StateAssignment";
     case NodeType::Sequence:

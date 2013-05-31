@@ -135,6 +135,26 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     for( const auto& s : sema_analyzer.GetWarnings() )
         m_Context.Error( s );
 
+    for( const Function_sp& f : sema_analyzer.GetFunctions() )
+        f->GenerateCodeDag( node_manager );
+
+    //for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
+    //v->GenerateCodeDag( node_manager );
+
+    DotWriter dot_writer;
+
+    for( const Function_sp& f : sema_analyzer.GetFunctions() )
+        dot_writer.AddFunction( *f );
+
+    //for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
+    //dot_writer.AddVariable( v );
+
+    for( const TechniqueNode& t : sema_analyzer.GetTechniqueNodes( node_manager ) )
+        dot_writer.AddTechnique( t );
+
+    std::cout << dot_writer.GenerateDotString();
+
+    return nullptr;
 
     //std::vector<Technique> techniques = code_generator.GenerateTechniques(
     //sema_analyzer.GetTechniqueDeclarations() );

@@ -191,6 +191,8 @@ public:
       *   there is no variable with that name
       */
     std::shared_ptr<Variable> GetVariable( const std::string& identifier );
+    
+    std::vector<Variable_sp> GetGlobalVariables() const;
 
     /**
       * Declares a function

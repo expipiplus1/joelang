@@ -428,6 +428,12 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
     return nullptr;
 }
 
+std::vector<Variable_sp> SemaAnalyzer::GetGlobalVariables() const
+{
+    std::vector<Variable_sp> ret;
+    return ret;
+}
+
 void SemaAnalyzer::AddFunction( Function_sp function )
 {
     std::vector<Function_sp>& function_overloads =
