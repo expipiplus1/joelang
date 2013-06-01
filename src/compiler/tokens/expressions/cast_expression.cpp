@@ -37,8 +37,8 @@
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
@@ -145,13 +145,10 @@ const ExpressionNode& CastExpression::GenerateCastFromScalar( const ExpressionNo
                                                               const CompleteType &to_type, 
                                                               NodeManager &node_manager )
 {
-    const TypeNode& to_type_node = to_type.GenerateCodeDag( node_manager );
-    
     if( to_type.IsScalarType() )
     {
         // If this is already the same size
-        return node_manager.MakeExpressionNode( NodeType::Cast, 
-                                                {expression, to_type_node} );
+        return node_manager.MakeCastNode( expression, to_type );
     }
     
     if( to_type.IsVectorType() )
@@ -161,17 +158,14 @@ const ExpressionNode& CastExpression::GenerateCastFromScalar( const ExpressionNo
         //
         unsigned num_elements = to_type.GetNumElements();
         std::vector<Node_ref> arguments;
-        arguments.reserve( num_elements + 1 );
+        arguments.reserve( num_elements );
         for( unsigned i = 0; i < num_elements; ++i )
             arguments.push_back( expression );
         CompleteType uncast_type = CompleteType( GetVectorType( expression.GetType().GetType(),
                                                                 to_type.GetNumElements() ) );
-        const TypeNode& uncast_type_node = node_manager.MakeTypeNode( uncast_type );
-        arguments.push_back( uncast_type_node );
         const ExpressionNode& uncast_node =
             node_manager.MakeExpressionNode( NodeType::VectorConstructor, std::move( arguments ) );
-        return node_manager.MakeExpressionNode( NodeType::Cast, 
-                                                {uncast_node, to_type_node} );
+        return node_manager.MakeCastNode( uncast_node, to_type );
     }
     
     if( to_type.IsMatrixType() )
@@ -181,7 +175,6 @@ const ExpressionNode& CastExpression::GenerateCastFromScalar( const ExpressionNo
         CompleteType column_type = CompleteType( to_type.GetMatrixColumnType() );
         for( unsigned i = 0; i < num_columns; ++i )
             columns.push_back( GenerateCastFromScalar( expression, column_type, node_manager ) );
-        columns.push_back( to_type_node );
         return node_manager.MakeExpressionNode( NodeType::MatrixConstructor, columns );
     }
     
@@ -193,7 +186,6 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
                                                               const CompleteType& to_type,
                                                               NodeManager& node_manager )
 {
-    const TypeNode& to_type_node = to_type.GenerateCodeDag( node_manager );
     unsigned from_size = expression.GetType().GetNumElements();
     
     if( to_type.IsScalarType() )
@@ -204,7 +196,7 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
         const ExpressionNode& index = node_manager.MakeConstant( 0 );
         const ExpressionNode& first_element = node_manager.MakeExpressionNode( 
                                                   NodeType::ExtractElement, { expression, index } );
-        return node_manager.MakeExpressionNode( NodeType::Cast, { first_element, to_type_node } );
+        return node_manager.MakeCastNode( first_element, to_type );
     }
     
     if( to_type.IsVectorType() )
@@ -212,15 +204,14 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
         const unsigned to_size = to_type.GetNumElements();
         if( to_size == from_size )
             // They are already the same size, and the writer can take care of the rest
-            return node_manager.MakeExpressionNode( NodeType::Cast, { expression, to_type_node } );
+            return node_manager.MakeCastNode( expression, to_type );
         
         assert( to_size < from_size && "Trying to cast a vector to a larger one" );
         
         const Swizzle reduce_swizzle( 0, 1, to_size > 2 ? 2 : 0xff, to_size > 3 ? 3 : 0xff );
         const SwizzleNode& reduced_expression = node_manager.MakeSwizzleNode( expression, 
                                                                               reduce_swizzle );
-        return node_manager.MakeExpressionNode( NodeType::Cast, 
-                                                { reduced_expression, to_type_node } );
+        return node_manager.MakeCastNode( reduced_expression, to_type );
     }
     
     if( to_type.IsMatrixType() )
@@ -229,7 +220,6 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
         unsigned num_columns = to_type.GetNumMatrixColumns(); 
         
         const CompleteType& to_column_type = CompleteType( to_type.GetMatrixColumnType() );
-        const TypeNode& to_column_type_node = to_column_type.GenerateCodeDag( node_manager );
         
         std::vector<Node_ref> columns;
         
@@ -268,7 +258,6 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
                 std::vector<Node_ref> column_nodes;
                 for( unsigned r = 0; r < num_rows; ++r )
                     column_nodes.push_back( elements[i++] );
-                column_nodes.push_back( to_column_type_node );
                 const ExpressionNode& column = 
                     node_manager.MakeExpressionNode( NodeType::VectorConstructor, column_nodes );
                 columns.push_back( column );
@@ -277,7 +266,6 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
         
         assert( columns.size() == num_columns && "Wrong number of columns" );
         
-        columns.push_back( to_type_node );
         return node_manager.MakeExpressionNode( NodeType::MatrixConstructor, columns );
     }
     
@@ -289,7 +277,6 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
                                                               const CompleteType& to_type,
                                                               NodeManager& node_manager )
 {
-    const TypeNode& to_type_node = to_type.GenerateCodeDag( node_manager );
     const CompleteType& from_type = expression.GetType();
     unsigned from_num_rows = from_type.GetNumMatrixRows();
     unsigned from_num_columns = from_type.GetNumMatrixColumns();
@@ -304,7 +291,7 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
             node_manager.MakeExpressionNode( NodeType::ExtractColumn, { expression, index } );
         const ExpressionNode& element =
             node_manager.MakeExpressionNode( NodeType::ExtractElement, { column, index } );
-        return node_manager.MakeExpressionNode( NodeType::Cast, { element, to_type_node } );
+        return node_manager.MakeCastNode( element, to_type );
     }
     
     if( to_type.IsVectorType() )
@@ -312,7 +299,6 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
         unsigned to_size = to_type.GetNumElements();   
         const CompleteType& from_column_type = 
            CompleteType( expression.GetType().GetMatrixColumnType() );
-        const TypeNode& from_column_type_node = from_column_type.GenerateCodeDag( node_manager );
         
         //
         // The vector must be the rght size
@@ -320,7 +306,7 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
         assert( to_size == from_num_rows * from_num_columns && 
                 "Casting to a vector of the wrong type" );
         std::vector<Node_ref> elements;
-        elements.reserve( to_size + 1 );
+        elements.reserve( to_size );
         
         for( unsigned c = 0; c < from_num_columns; ++c ) 
         {
@@ -338,16 +324,15 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
             }
         }
         
-        elements.push_back( from_column_type_node );
         const ExpressionNode& uncast_vector = 
             node_manager.MakeExpressionNode( NodeType::VectorConstructor,  std::move( elements ) );
-        return node_manager.MakeExpressionNode( NodeType::Cast, { uncast_vector, to_type_node } );
+        return node_manager.MakeCastNode( uncast_vector, to_type );
     }
     
     if( to_type.IsMatrixType() )
     {
         if( to_type.GetNumElements() == from_num_columns * from_num_rows )
-            return node_manager.MakeExpressionNode( NodeType::Cast, { expression, to_type_node } );
+            return node_manager.MakeCastNode( expression, to_type );
         
         //
         // We have to take the top left part of the matrix
@@ -361,9 +346,9 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
         const CompleteType& to_column_type = CompleteType( to_type.GetMatrixColumnType() );
         
         std::vector<Node_ref> columns;
-        columns.reserve( to_num_columns + 1 );
+        columns.reserve( to_num_columns );
         
-        for( unsigned c = 0; c < from_num_columns; ++c ) 
+        for( unsigned c = 0; c < to_num_columns; ++c ) 
         {
             const ExpressionNode& column_index = node_manager.MakeConstant( c );
             const ExpressionNode& from_column = 
@@ -375,9 +360,7 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
                                                        node_manager ) );
         }
         
-        columns.push_back( to_type_node );
-        return node_manager.MakeExpressionNode( NodeType::MatrixConstructor, 
-                                                std::move( columns ) );
+        return node_manager.MakeExpressionNode( NodeType::MatrixConstructor, std::move( columns ) );
     }
     
     assert( false && "Trying to cast to an unhandled type" );

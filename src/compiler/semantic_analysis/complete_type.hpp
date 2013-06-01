@@ -42,10 +42,6 @@ namespace Compiler
 using ArrayExtents = std::vector<unsigned>;
 class ShaderWriter;
 
-class Node;
-class NodeManager;
-class TypeNode;
-
 /**
   * \class CompleteType
   * \brief A class to hold all the information a type could need
@@ -56,8 +52,6 @@ public:
     CompleteType();
     CompleteType( Type base_type, ArrayExtents array_extents = {} );
     
-    const TypeNode& GenerateCodeDag( NodeManager& node_manager ) const;
-
     /**
       * This doesn't return the base type, for example this could return
       * Type::ARRAY

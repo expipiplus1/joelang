@@ -34,11 +34,11 @@
 #include <compiler/support/casting.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 
 namespace JoeLang
@@ -94,9 +94,10 @@ CompleteType ExpressionNode::GetType() const
     case NodeType::PreDecrement:
     case NodeType::Select:
     case NodeType::InsertElement:
+    case NodeType::InsertColumn:
         return cast<ExpressionNode>( GetChild( 0 ) ).GetType();
     case NodeType::Cast:
-        return cast<TypeNode>( GetChild( 1 ) ).GetType();
+        return cast<CastNode>( *this ).GetType();
     case NodeType::ArrayIndex:
     {
         CompleteType array_type = cast<ExpressionNode>( GetChild( 0 ) ).GetType();
@@ -107,14 +108,19 @@ CompleteType ExpressionNode::GetType() const
     }
     case NodeType::ExtractElement:
         return CompleteType( cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetElementType() );
+    case NodeType::ExtractColumn:
+        return CompleteType( cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetMatrixColumnType() );
 
     // The function identifier is the last node in a call expression
     case NodeType::Call:
-        return cast<FunctionNode>( GetChild( GetNumChildren() - 1 ) ).GetReturnType();
+        return cast<FunctionNode>( GetChild( 0 ) ).GetReturnType();
     // The constructors hold the type in the last node
     case NodeType::VectorConstructor:
+        return CompleteType( GetVectorType(
+            cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetType(), GetNumChildren() ) );
     case NodeType::MatrixConstructor:
-        return cast<TypeNode>( GetChild( GetNumChildren() - 1 ) ).GetType();
+        return CompleteType( GetMatrixType(
+            cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetType(), GetNumChildren() ) );
 
     default:
         assert( false && "Trying to get the type of an unhandled node" );

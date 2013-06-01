@@ -35,6 +35,8 @@
 #include <llvm/IR/IRBuilder.h>
 
 #include <compiler/code_dag/constant_node.hpp>
+#include <compiler/support/casting.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
@@ -184,16 +186,16 @@ llvm::Value* LLVMWriter::GenerateValue( const ExpressionNode& expression, IRBuil
     switch( expression.GetNodeType() )
     {
     case NodeType::Constant:
-        return GenerateConstant( expression, builder );
+        return GenerateConstant( cast<ConstantNodeBase>( expression ), builder );
     case NodeType::Cast:
-        return GenerateCast( expression, builder );
+        return GenerateCast( cast<CastNode>( expression ), builder );
     default:
         assert( false && "Trying to generate the llvm value of an unhanded expression type" );
         return nullptr;
     }
 }
 
-llvm::Value* LLVMWriter::GenerateCast( const ExpressionNode& expression, IRBuilder& builder )
+llvm::Value* LLVMWriter::GenerateCast( const CastNode& expression, IRBuilder& builder )
 {
     assert( expression.GetNodeType() == NodeType::Cast &&
             "Trying to generate a cast from a non-cast node" );
@@ -213,11 +215,9 @@ llvm::Value* LLVMWriter::GenerateCast( const ExpressionNode& expression, IRBuild
     return nullptr;
 }
 
-llvm::Value* LLVMWriter::GenerateConstant( const ExpressionNode& expression, IRBuilder& builder )
+llvm::Value* LLVMWriter::GenerateConstant( const ConstantNodeBase& expression, IRBuilder& builder )
 {
-    assert( expression.GetNodeType() == NodeType::Constant &&
-            "Trying to generate a constant from a non-constant node" );
-    Type joelang_type = expression.GetType().GetType();
+    Type joelang_type = expression.GetType();
     llvm::Type* llvm_type = m_Runtime.GetLLVMType( joelang_type );
     switch( joelang_type )
     {

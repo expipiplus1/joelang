@@ -85,6 +85,8 @@ add_library( joelang include/joelang/context.hpp
                      src/engine/technique.cpp
                      src/engine/state.cpp
                      src/engine/inl/parameter_watcher-inl.hpp
+                     src/compiler/code_dag/cast_node.cpp
+                     src/compiler/code_dag/cast_node.hpp
                      src/compiler/code_dag/constant_node.cpp
                      src/compiler/code_dag/constant_node.hpp
                      src/compiler/code_dag/constant_node-inl.hpp
@@ -105,8 +107,6 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/code_dag/swizzle_node.hpp
                      src/compiler/code_dag/technique_node.cpp
                      src/compiler/code_dag/technique_node.hpp
-                     src/compiler/code_dag/type_node.cpp
-                     src/compiler/code_dag/type_node.hpp
                      src/compiler/code_dag/variable_node.cpp
                      src/compiler/code_dag/variable_node.hpp
                      src/compiler/code_dag/zero_node.cpp

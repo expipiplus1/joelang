@@ -36,9 +36,9 @@
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/technique_node.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/support/casting.hpp>
 
 namespace JoeLang
@@ -69,12 +69,6 @@ const ExpressionNode& NodeManager::MakeExpressionNode( NodeType node_type,
     return cast<ExpressionNode>( *m_Nodes.back() );
 }
 
-const TypeNode& NodeManager::MakeTypeNode( CompleteType type )
-{
-    m_Nodes.emplace_back( new TypeNode( std::move( type ) ) );
-    return static_cast<const TypeNode&>( *m_Nodes.back() );
-}
-
 const ZeroNode& NodeManager::MakeZero( Type type )
 {
     m_Nodes.emplace_back( new ZeroNode( type ) );
@@ -98,6 +92,14 @@ const SwizzleNode& NodeManager::MakeSwizzleNode( const ExpressionNode& swizzled,
 {
     m_Nodes.emplace_back( new SwizzleNode( swizzled, swizzle ) );
     return static_cast<const SwizzleNode&>( *m_Nodes.back() );
+}
+
+const ExpressionNode& NodeManager::MakeCastNode( const ExpressionNode& expression, CompleteType type )
+{
+    if( type == expression.GetType() )
+        return expression;
+    m_Nodes.emplace_back( new CastNode( expression, std::move( type ) ) );
+    return static_cast<const CastNode&>( *m_Nodes.back() );
 }
 
 const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name,

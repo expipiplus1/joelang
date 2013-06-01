@@ -189,6 +189,13 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
     return CompleteType();
 }
 
+Type GetMatrixType( Type column_type, unsigned columns )
+{
+    return GetMatrixType( GetScalarType( column_type ), 
+                          columns, 
+                          GetNumElementsInType( column_type ) );
+}
+
 Type GetMatrixType( Type base, unsigned columns, unsigned rows )
 {
 #define CREATE_MATRIX_MAPPING(type) \

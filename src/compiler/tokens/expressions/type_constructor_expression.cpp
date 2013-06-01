@@ -49,8 +49,8 @@
 
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
 
 namespace JoeLang
@@ -204,18 +204,11 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
     //
     
     std::vector<Node_ref> elements;
-    const TypeNode& to_element_type = 
-        CompleteType( GetScalarType( m_Type ) ).GenerateCodeDag( node_manager );
     for( const Expression_up& argument : m_Arguments )
     {
         const ExpressionNode& argument_node = argument->GenerateCodeDag( node_manager );
         if( argument->GetType().IsScalarType() )
-        {
-            const ExpressionNode& casted_element = node_manager.MakeExpressionNode( 
-                                                        NodeType::Cast, 
-                                                        { argument_node, to_element_type } );
-            elements.push_back( casted_element );
-        }
+            elements.push_back( argument_node );
         else
             for( unsigned i = 0; i < argument->GetType().GetNumElements(); ++i )
             {
@@ -223,9 +216,7 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
                 const ExpressionNode& element = 
                     node_manager.MakeExpressionNode( NodeType::ExtractElement, 
                                                      { argument_node, index } );
-                const ExpressionNode& casted_element = 
-                    node_manager.MakeExpressionNode( NodeType::Cast, { element, to_element_type } );
-                elements.push_back( casted_element );
+                elements.push_back( element );
             }
     }
         
@@ -234,9 +225,7 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
         //
         // Add the type to elements for the vector constructor
         //
-        elements.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
-        return 
-            node_manager.MakeExpressionNode( NodeType::VectorConstructor, elements );
+        return node_manager.MakeExpressionNode( NodeType::VectorConstructor, elements );
     }
     
     if( IsMatrixType( m_Type ) )
@@ -273,8 +262,6 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
                 std::vector<Node_ref> column_elements;
                 for( unsigned r = 0; r < num_rows; ++r )
                     column_elements.emplace_back( elements[c*num_rows+r] );
-                column_elements.emplace_back( 
-                    node_manager.MakeTypeNode( CompleteType( GetMatrixColumnType( m_Type ) ) ) );
                 columns.emplace_back( 
                     node_manager.MakeExpressionNode( NodeType::VectorConstructor, column_elements ) );
             }
@@ -284,7 +271,6 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
         // Add the type to columns for the matrix constructor
         //
         assert( columns.size() == num_columns && "Wrong number of columns generated" );
-        columns.emplace_back( CompleteType( m_Type ).GenerateCodeDag( node_manager ) );
         return 
             node_manager.MakeExpressionNode( NodeType::MatrixConstructor, columns );
     }

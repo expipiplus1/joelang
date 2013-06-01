@@ -355,9 +355,9 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
 const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_manager, 
                                                              Expression& expression ) const
 {
-    const FunctionNode& function = node_manager.MakeFunctionNode( m_Function );
+    const FunctionNode& function_node = node_manager.MakeFunctionNode( m_Function );
     // put the function in here, to avoid having to concatenate the arguments later
-    std::vector<Node_ref> argument_nodes = {{ function }};
+    std::vector<Node_ref> argument_nodes = {{ function_node }};
     argument_nodes.reserve( 1 + m_Arguments.size() );
     
     for( const Expression_up& argument : m_Arguments )
@@ -599,7 +599,7 @@ bool MemberAccessOperator::PerformSemaSwizzle( SemaAnalyzer& sema,
     // Check if any of the indices are out of bounds
     //
     unsigned max_index = expression->GetType().GetNumElements() - 1;
-    for( unsigned i = 0; swizzle_indices[i] != 0xff; ++i )
+    for( unsigned i = 0; swizzle_indices[i] != 0xff && i < 4; ++i )
     {
         if( swizzle_indices[i] > max_index )
         {

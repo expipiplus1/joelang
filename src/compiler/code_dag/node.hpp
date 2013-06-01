@@ -40,14 +40,7 @@ namespace Compiler
 enum class NodeType
 {
     Unimplemented,
-
-    //
-    // Miscellaneous
-    //
-
-    // Holds a CompleteType
-    Type,
-
+    
     //
     // Structural
     //
@@ -117,7 +110,7 @@ enum class NodeType
 
     // Holds two expressions to select from in [0] and [1] and a boolean expression in [2]
     Select,
-    // Holds an expression in [0] and a TypeNode in [1]
+    // Holds an expression in [0]
     Cast,
 
     // Holds an expression in [0] and an index expression in [1]
@@ -134,9 +127,9 @@ enum class NodeType
     ExtractElement,
     // Holds a vector expression in [0], a scalar expression in [1] and an index expression in [2]
     InsertElement,
-    // Holds a type expression in [0] and n scalar expressions
+    // Holds n scalar expressions
     VectorConstructor,
-    // Holds a type expression in [0] and n vector expressions
+    // Holds n vector expressions
     MatrixConstructor,
     Expression_end = MatrixConstructor
 };

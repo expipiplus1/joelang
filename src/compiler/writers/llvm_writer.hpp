@@ -55,6 +55,8 @@ namespace Compiler
 {
 
 class ExpressionNode;
+class CastNode;
+class ConstantNodeBase;
 class Runtime;
 class StateAssignmentNode;
 
@@ -82,8 +84,8 @@ private:
         llvm::IRBuilder<true, llvm::ConstantFolder, llvm::IRBuilderDefaultInserter<true>>;
 
     llvm::Value* GenerateValue( const ExpressionNode& expression, IRBuilder& builder );
-    llvm::Value* GenerateCast( const ExpressionNode& expression, IRBuilder& builder );
-    llvm::Value* GenerateConstant( const ExpressionNode& expression, IRBuilder& builder );
+    llvm::Value* GenerateCast( const CastNode& expression, IRBuilder& builder );
+    llvm::Value* GenerateConstant( const ConstantNodeBase& expression, IRBuilder& builder );
 
     // Helpers
     llvm::Value* GenerateScalarOrVectorCast( llvm::Value* from_value,

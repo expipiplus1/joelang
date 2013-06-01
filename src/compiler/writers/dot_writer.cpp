@@ -33,13 +33,13 @@
 #include <string>
 
 #include <compiler/code_dag/constant_node.hpp>
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/pass_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/technique_node.hpp>
-#include <compiler/code_dag/type_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
@@ -77,7 +77,7 @@ std::string DotWriter::GenerateDotString()
 
         std::string cluster_label =
             function_cluster.second + "_TITLE [label = \"" +
-            function_cluster.first->GetIdentifier() + "\", style=\"round\"];\n";
+            function_cluster.first->GetIdentifier() + "\", style=\"rounded\"];\n";
 
         const Node& function_node = function_cluster.first->GetCodeDag();
         edges += GetEdges( function_node );
@@ -120,8 +120,18 @@ std::string DotWriter::GetEdges( const Node& node )
     std::string edges;
 
     std::string description = GetNodeDescription( node );
-    m_Labels +=
-        identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];\n";
+    switch( node.GetNodeType() )
+    {
+    case NodeType::VariableIdentifier:
+    case NodeType::FunctionIdentifier:
+        m_Labels +=
+            identifier + " [shape=\"box\", label=\"" + description + "\"];\n";
+        break;
+    default:
+        m_Labels +=
+            identifier + " [shape=\"box\", style=\"rounded\", label=\"" + description + "\"];\n";
+        break;
+    }
 
     //
     // If this is a function identifier, draw an edge to the cluster for this funciton if we have it
@@ -227,11 +237,9 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
     case NodeType::Select:
         return "Select";
     case NodeType::Cast:
-        return "Cast";
+        return "Cast: " + cast<CastNode>( node ).GetType().GetString();
     case NodeType::ArrayIndex:
         return "ArrayIndex";
-    case NodeType::Type:
-        return "Type: " + static_cast<const TypeNode&>( node ).GetType().GetString();
     case NodeType::Constant:
         switch( cast<ExpressionNode>( node ).GetType().GetType() )
         {
@@ -240,6 +248,9 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
                    std::to_string( static_cast<const ConstantNode<jl_int>&>( node ).GetConstant() );
         case Type::UINT:
             return "Constant " + std::to_string( static_cast<const ConstantNode<jl_uint>&>( node )
+                                                     .GetConstant() );
+        case Type::DOUBLE:
+            return "Constant " + std::to_string( static_cast<const ConstantNode<jl_double>&>( node )
                                                      .GetConstant() );
         case Type::FLOAT:
             return "Constant " + std::to_string( static_cast<const ConstantNode<jl_float>&>( node )
@@ -267,9 +278,9 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
     case NodeType::InsertElement:
         return "InsertElement";
     case NodeType::VectorConstructor:
-        return "VectorConstructor";
+        return "VectorConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
     case NodeType::MatrixConstructor:
-        return "MatrixConstructor";
+        return "MatrixConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
     }
 }
 

@@ -27,32 +27,34 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "type_node.hpp"
+#pragma once
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 
 namespace JoeLang
 {
+
 namespace Compiler
 {
 
-TypeNode::TypeNode( CompleteType type )
-    : Node( NodeType::Type, {} ),
-      m_Type( std::move( type ) )
-{
-}
+class CompleteType;
 
-
-const CompleteType& TypeNode::GetType() const
+class CastNode : public ExpressionNode
 {
-    return m_Type;
-}
+public:
+    const CompleteType& GetType() const;
 
-bool TypeNode::classof( const Node* n )
-{
-    return n->GetNodeType() == NodeType::Type;
-}
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
+private:
+    friend class NodeManager;
+    CastNode( const ExpressionNode& expression, CompleteType type );
+
+    CompleteType m_Type;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

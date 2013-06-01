@@ -61,6 +61,7 @@ class Swizzle;
 class SwizzleNode;
 class TechniqueNode;
 class TypeNode;
+class CastNode;
 class Variable;
 class VariableNode;
 using Variable_sp = std::shared_ptr<Variable>;
@@ -77,8 +78,6 @@ public:
     const ExpressionNode& MakeExpressionNode( NodeType node_type,
                                               std::vector<Node_ref> children = {} );
 
-    const TypeNode& MakeTypeNode( CompleteType type );
-
     template <typename T>
     const ConstantNode<T>& MakeConstant( T constant_value );
 
@@ -89,6 +88,8 @@ public:
     const FunctionNode& MakeFunctionNode( Function_sp function );
 
     const SwizzleNode& MakeSwizzleNode( const ExpressionNode& swizzled, const Swizzle& swizzle );
+
+    const ExpressionNode& MakeCastNode( const ExpressionNode& expression, CompleteType type );
 
     const TechniqueNode& MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes );
 

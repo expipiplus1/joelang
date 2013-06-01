@@ -47,6 +47,8 @@ class CompleteType;
   */
 CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 );
 
+Type GetMatrixType( Type base, unsigned columns );
+
 Type GetMatrixType( Type base, unsigned columns, unsigned rows );
 
 Type GetVectorType( Type base, unsigned size );
