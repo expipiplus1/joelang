@@ -1,20 +1,298 @@
 /*
-int_state: 0 
-float_state: 0
-bool_state: 0
-float4_state: 0 0 0 0
-float4x4_state: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+bool_state: 1
+char_state: 1
+short_state: 1
+int_state: 1
+long_state: 1
+uchar_state: 1
+ushort_state: 1
+uint_state: 1
+ulong_state: 1
+float_state: 1
+double_state: 1
+bool2_state: 1 1
+char2_state: 1 1
+short2_state: 1 1
+int2_state: 1 1
+long2_state: 1 1
+uchar2_state: 1 1
+ushort2_state: 1 1
+uint2_state: 1 1
+ulong2_state: 1 1
+float2_state: 1 1
+double2_state: 1 1
+bool3_state: 1 1 1
+char3_state: 1 1 1
+short3_state: 1 1 1
+int3_state: 1 1 1
+long3_state: 1 1 1
+uchar3_state: 1 1 1
+ushort3_state: 1 1 1
+uint3_state: 1 1 1
+ulong3_state: 1 1 1
+float3_state: 1 1 1
+double3_state: 1 1 1
+bool4_state: 1 1 1 1
+char4_state: 1 1 1 1
+short4_state: 1 1 1 1
+int4_state: 1 1 1 1
+long4_state: 1 1 1 1
+uchar4_state: 1 1 1 1
+ushort4_state: 1 1 1 1
+uint4_state: 1 1 1 1
+ulong4_state: 1 1 1 1
+float4_state: 1 1 1 1
+double4_state: 1 1 1 1
+bool2x2_state: 1 1 1 1
+char2x2_state: 1 1 1 1 
+short2x2_state: 1 1 1 1
+int2x2_state: 1 1 1 1
+long2x2_state: 1 1 1 1
+uchar2x2_state: 1 1 1 1
+ushort2x2_state: 1 1 1 1
+uint2x2_state: 1 1 1 1
+ulong2x2_state: 1 1 1 1
+float2x2_state: 1 1 1 1
+double2x2_state: 1 1 1 1
+bool2x3_state: 1 1 1 1 1 1
+char2x3_state: 1 1 1 1 1 1
+short2x3_state: 1 1 1 1 1 1
+int2x3_state: 1 1 1 1 1 1
+long2x3_state: 1 1 1 1 1 1
+uchar2x3_state: 1 1 1 1 1 1
+ushort2x3_state: 1 1 1 1 1 1 
+uint2x3_state: 1 1 1 1 1 1
+ulong2x3_state: 1 1 1 1 1 1
+float2x3_state: 1 1 1 1 1 1
+double2x3_state: 1 1 1 1 1 1
+bool2x4_state: 1 1 1 1 1 1 1 1
+char2x4_state: 1 1 1 1 1 1 1 1
+short2x4_state: 1 1 1 1 1 1 1 1
+int2x4_state: 1 1 1 1 1 1 1 1
+long2x4_state: 1 1 1 1 1 1 1 1
+uchar2x4_state: 1 1 1 1 1 1 1 1
+ushort2x4_state: 1 1 1 1 1 1 1 1
+uint2x4_state: 1 1 1 1 1 1 1 1
+ulong2x4_state: 1 1 1 1 1 1 1 1
+float2x4_state: 1 1 1 1 1 1 1 1
+double2x4_state: 1 1 1 1 1 1 1 1
+bool3x2_state: 1 1 1 1 1 1
+char3x2_state: 1 1 1 1 1 1
+short3x2_state: 1 1 1 1 1 1
+int3x2_state: 1 1 1 1 1 1
+long3x2_state: 1 1 1 1 1 1
+uchar3x2_state: 1 1 1 1 1 1
+ushort3x2_state: 1 1 1 1 1 1
+uint3x2_state: 1 1 1 1 1 1
+ulong3x2_state: 1 1 1 1 1 1
+float3x2_state: 1 1 1 1 1 1
+double3x2_state: 1 1 1 1 1 1
+bool3x3_state: 1 1 1 1 1 1 1 1 1
+char3x3_state: 1 1 1 1 1 1 1 1 1
+short3x3_state: 1 1 1 1 1 1 1 1 1
+int3x3_state: 1 1 1 1 1 1 1 1 1
+long3x3_state: 1 1 1 1 1 1 1 1 1
+uchar3x3_state: 1 1 1 1 1 1 1 1 1
+ushort3x3_state: 1 1 1 1 1 1 1 1 1
+uint3x3_state: 1 1 1 1 1 1 1 1 1
+ulong3x3_state: 1 1 1 1 1 1 1 1 1
+float3x3_state: 1 1 1 1 1 1 1 1 1
+double3x3_state: 1 1 1 1 1 1 1 1 1
+bool3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+char3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+short3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+int3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+long3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+uchar3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+ushort3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+uint3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+ulong3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+float3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+double3x4_state: 1 1 1 1 1 1 1 1 1 1 1 1
+bool4x2_state: 1 1 1 1 1 1 1 1
+char4x2_state: 1 1 1 1 1 1 1 1 
+short4x2_state: 1 1 1 1 1 1 1 1
+int4x2_state: 1 1 1 1 1 1 1 1
+long4x2_state: 1 1 1 1 1 1 1 1
+uchar4x2_state: 1 1 1 1 1 1 1 1
+ushort4x2_state: 1 1 1 1 1 1 1 1
+uint4x2_state: 1 1 1 1 1 1 1 1
+ulong4x2_state: 1 1 1 1 1 1 1 1
+float4x2_state: 1 1 1 1 1 1 1 1
+double4x2_state: 1 1 1 1 1 1 1 1
+bool4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+char4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+short4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+int4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+long4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+uchar4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+ushort4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1 
+uint4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+ulong4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+float4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+double4x3_state: 1 1 1 1 1 1 1 1 1 1 1 1
+bool4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+char4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+short4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+int4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+long4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+uchar4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ushort4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+uint4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+ulong4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+float4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+double4x4_state: 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+
 string_state: Hello, World!
 */
+
 technique t1
 {
     pass p1
     {
-        int_state = 0;
-        float_state = 0;
-        bool_state = 0;
-        float4_state = 0;
-        float4x4_state = 0;
+        bool_state = bool( 1 );
+        char_state = char( 1 );
+        short_state = short( 1 );
+        int_state = int( 1 );
+        long_state = long( 1 );
+        uchar_state = uchar( 1 );
+        ushort_state = ushort( 1 );
+        uint_state = uint( 1 );
+        ulong_state = ulong( 1 );
+        float_state = float( 1 );
+        double_state = double( 1 );
+        bool2_state = bool2( 1, 1 );
+        char2_state = char2( 1, 1 );
+        short2_state = short2( 1, 1 );
+        int2_state = int2( 1, 1 );
+        long2_state = long2( 1, 1 );
+        uchar2_state = uchar2( 1, 1 );
+        ushort2_state = ushort2( 1, 1 );
+        uint2_state = uint2( 1, 1 );
+        ulong2_state = ulong2( 1, 1 );
+        float2_state = float2( 1, 1 );
+        double2_state = double2( 1, 1 );
+        bool3_state = bool3( 1, 1, 1 );
+        char3_state = char3( 1, 1, 1 );
+        short3_state = short3( 1, 1, 1 );
+        int3_state = int3( 1, 1, 1 );
+        long3_state = long3( 1, 1, 1 );
+        uchar3_state = uchar3( 1, 1, 1 );
+        ushort3_state = ushort3( 1, 1, 1 );
+        uint3_state = uint3( 1, 1, 1 );
+        ulong3_state = ulong3( 1, 1, 1 );
+        float3_state = float3( 1, 1, 1 );
+        double3_state = double3( 1, 1, 1 );
+        bool4_state = bool4( 1, 1, 1, 1 );
+        char4_state = char4( 1, 1, 1, 1 );
+        short4_state = short4( 1, 1, 1, 1 );
+        int4_state = int4( 1, 1, 1, 1 );
+        long4_state = long4( 1, 1, 1, 1 );
+        uchar4_state = uchar4( 1, 1, 1, 1 );
+        ushort4_state = ushort4( 1, 1, 1, 1 );
+        uint4_state = uint4( 1, 1, 1, 1 );
+        ulong4_state = ulong4( 1, 1, 1, 1 );
+        float4_state = float4( 1, 1, 1, 1 );
+        double4_state = double4( 1, 1, 1, 1 );
+        bool2x2_state = bool2x2( 1, 1, 1, 1 );
+        char2x2_state = char2x2( 1, 1, 1, 1 ); 
+        short2x2_state = short2x2( 1, 1, 1, 1 );
+        int2x2_state = int2x2( 1, 1, 1, 1 );
+        long2x2_state = long2x2( 1, 1, 1, 1 );
+        uchar2x2_state = uchar2x2( 1, 1, 1, 1 );
+        ushort2x2_state = ushort2x2( 1, 1, 1, 1 );
+        uint2x2_state = uint2x2( 1, 1, 1, 1 );
+        ulong2x2_state = ulong2x2( 1, 1, 1, 1 );
+        float2x2_state = float2x2( 1, 1, 1, 1 );
+        double2x2_state = double2x2( 1, 1, 1, 1 );
+        bool2x3_state = bool2x3( 1, 1, 1, 1, 1, 1 );
+        char2x3_state = char2x3( 1, 1, 1, 1, 1, 1 );
+        short2x3_state = short2x3( 1, 1, 1, 1, 1, 1 );
+        int2x3_state = int2x3( 1, 1, 1, 1, 1, 1 );
+        long2x3_state = long2x3( 1, 1, 1, 1, 1, 1 );
+        uchar2x3_state = uchar2x3( 1, 1, 1, 1, 1, 1 );
+        ushort2x3_state = ushort2x3( 1, 1, 1, 1, 1, 1 ); 
+        uint2x3_state = uint2x3( 1, 1, 1, 1, 1, 1 );
+        ulong2x3_state = ulong2x3( 1, 1, 1, 1, 1, 1 );
+        float2x3_state = float2x3( 1, 1, 1, 1, 1, 1 );
+        double2x3_state = double2x3( 1, 1, 1, 1, 1, 1 );
+        bool2x4_state = bool2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        char2x4_state = char2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        short2x4_state = short2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        int2x4_state = int2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        long2x4_state = long2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar2x4_state = uchar2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort2x4_state = ushort2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        uint2x4_state = uint2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong2x4_state = ulong2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        float2x4_state = float2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        double2x4_state = double2x4( 1, 1, 1, 1, 1, 1, 1, 1 );
+        bool3x2_state = bool3x2( 1, 1, 1, 1, 1, 1 );
+        char3x2_state = char3x2( 1, 1, 1, 1, 1, 1 );
+        short3x2_state = short3x2( 1, 1, 1, 1, 1, 1 );
+        int3x2_state = int3x2( 1, 1, 1, 1, 1, 1 );
+        long3x2_state = long3x2( 1, 1, 1, 1, 1, 1 );
+        uchar3x2_state = uchar3x2( 1, 1, 1, 1, 1, 1 );
+        ushort3x2_state = ushort3x2( 1, 1, 1, 1, 1, 1 );
+        uint3x2_state = uint3x2( 1, 1, 1, 1, 1, 1 );
+        ulong3x2_state = ulong3x2( 1, 1, 1, 1, 1, 1 );
+        float3x2_state = float3x2( 1, 1, 1, 1, 1, 1 );
+        double3x2_state = double3x2( 1, 1, 1, 1, 1, 1 );
+        bool3x3_state = bool3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        char3x3_state = char3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        short3x3_state = short3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        int3x3_state = int3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        long3x3_state = long3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar3x3_state = uchar3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort3x3_state = ushort3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uint3x3_state = uint3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong3x3_state = ulong3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        float3x3_state = float3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        double3x3_state = double3x3( 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        bool3x4_state = bool3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        char3x4_state = char3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        short3x4_state = short3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        int3x4_state = int3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        long3x4_state = long3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar3x4_state = uchar3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort3x4_state = ushort3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uint3x4_state = uint3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong3x4_state = ulong3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        float3x4_state = float3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        double3x4_state = double3x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        bool4x2_state = bool4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        char4x2_state = char4x2( 1, 1, 1, 1, 1, 1, 1, 1 ); 
+        short4x2_state = short4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        int4x2_state = int4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        long4x2_state = long4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar4x2_state = uchar4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort4x2_state = ushort4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        uint4x2_state = uint4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong4x2_state = ulong4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        float4x2_state = float4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        double4x2_state = double4x2( 1, 1, 1, 1, 1, 1, 1, 1 );
+        bool4x3_state = bool4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        char4x3_state = char4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        short4x3_state = short4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        int4x3_state = int4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        long4x3_state = long4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar4x3_state = uchar4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort4x3_state = ushort4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ); 
+        uint4x3_state = uint4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong4x3_state = ulong4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        float4x3_state = float4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        double4x3_state = double4x3( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        bool4x4_state = bool4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        char4x4_state = char4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        short4x4_state = short4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        int4x4_state = int4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        long4x4_state = long4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uchar4x4_state = uchar4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ushort4x4_state = ushort4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        uint4x4_state = uint4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        ulong4x4_state = ulong4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        float4x4_state = float4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
+        double4x4_state = double4x4( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 );
         string_state = "Hello, World!";
     }
 }
