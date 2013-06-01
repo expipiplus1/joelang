@@ -47,6 +47,7 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/type_node.hpp>
@@ -203,17 +204,28 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
     //
     
     std::vector<Node_ref> elements;
+    const TypeNode& to_element_type = 
+        CompleteType( GetScalarType( m_Type ) ).GenerateCodeDag( node_manager );
     for( const Expression_up& argument : m_Arguments )
     {
-        const Node& argument_node = argument->GenerateCodeDag( node_manager );
+        const ExpressionNode& argument_node = argument->GenerateCodeDag( node_manager );
         if( argument->GetType().IsScalarType() )
-            elements.emplace_back( argument_node );
+        {
+            const ExpressionNode& casted_element = node_manager.MakeExpressionNode( 
+                                                        NodeType::Cast, 
+                                                        { argument_node, to_element_type } );
+            elements.push_back( casted_element );
+        }
         else
             for( unsigned i = 0; i < argument->GetType().GetNumElements(); ++i )
             {
                 const Node& index = node_manager.MakeConstant( i );
-                elements.emplace_back( node_manager.MakeNode( NodeType::ExtractElement, 
-                                                              {argument_node, index} ) );
+                const ExpressionNode& element = 
+                    node_manager.MakeExpressionNode( NodeType::ExtractElement, 
+                                                     { argument_node, index } );
+                const ExpressionNode& casted_element = 
+                    node_manager.MakeExpressionNode( NodeType::Cast, { element, to_element_type } );
+                elements.push_back( casted_element );
             }
     }
         
@@ -248,7 +260,7 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
             {
                 const Node& index = node_manager.MakeConstant( i++ );
                 const ZeroNode& zero = node_manager.MakeZero( GetMatrixColumnType(m_Type) );
-                columns.emplace_back( node_manager.MakeNode( NodeType::InsertElement,
+                columns.emplace_back( node_manager.MakeExpressionNode( NodeType::InsertElement,
                                                              { zero, element, index }));
             }
         }
@@ -264,7 +276,7 @@ const ExpressionNode& TypeConstructorExpression::GenerateCodeDag( NodeManager& n
                 column_elements.emplace_back( 
                     node_manager.MakeTypeNode( CompleteType( GetMatrixColumnType( m_Type ) ) ) );
                 columns.emplace_back( 
-                    node_manager.MakeNode( NodeType::VectorConstructor, column_elements ) );
+                    node_manager.MakeExpressionNode( NodeType::VectorConstructor, column_elements ) );
             }
         }
         

@@ -258,6 +258,10 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "Swizzle: " + static_cast<const SwizzleNode&>( node ).GetSwizzle().GetString();
     case NodeType::Call:
         return "Call";
+    case NodeType::ExtractColumn:
+        return "ExtractColumn";
+    case NodeType::InsertColumn:
+        return "InsertColumn";
     case NodeType::ExtractElement:
         return "ExtractElement";
     case NodeType::InsertElement:

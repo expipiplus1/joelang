@@ -79,7 +79,7 @@ bool Context::AddState( StateBase* state )
     for( const auto s : m_States )
         if( s->GetName() == state->GetName() )
         {
-            Error( "State with duplicate name" );
+            Error( "State with duplicate name: " + s->GetName() );
             return false;
         }
 

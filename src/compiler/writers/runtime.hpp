@@ -186,12 +186,22 @@ public:
                                         llvm::Type* to_type,
                                         llvm::IRBuilder<>& builder );
 
-
+    //
+    // These return the type used internally
+    //
     llvm::Type*         GetLLVMType( const CompleteType& type ) const;
     llvm::Type*         GetLLVMType( Type type ) const;
 
     //
+    // This returns a type suitable for a wrapper called from c++
+    // Generally a packed version of GetLLVMType
+    //
+    llvm::Type*         GetWrapperLLVMType( const CompleteType& type ) const;
+    llvm::Type*         GetWrapperLLVMType( Type type ) const;
+    
+    //
     // The runtime often has slightly different types
+    // todo put this in private
     //
     llvm::Type*         GetRuntimeLLVMType( Type type ) const;
     

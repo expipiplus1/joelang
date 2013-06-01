@@ -49,5 +49,10 @@ const CompleteType& TypeNode::GetType() const
     return m_Type;
 }
 
+bool TypeNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::Type;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

@@ -493,6 +493,17 @@ llvm::Type* Runtime::GetLLVMType( Type type ) const
     return i->second;
 }
 
+llvm::Type* Runtime::GetWrapperLLVMType( const CompleteType& type ) const
+{
+    // todo arrays and structs here
+    return GetWrapperLLVMType( type.GetBaseType() );
+}
+
+llvm::Type* Runtime::GetWrapperLLVMType( Type type ) const
+{
+    return GetRuntimeLLVMType( type );
+}
+
 llvm::Type* Runtime::GetRuntimeLLVMType( Type type ) const
 {
     auto i = m_RuntimeTypeMap.find( type );
@@ -866,6 +877,7 @@ bool Runtime::FindInternalTypes()
     GET_TYPE_N( Type::FLOAT )
     GET_TYPE_N( Type::DOUBLE )
     GET_TYPE( Type::STRING )
+    GET_TYPE( Type::VOID )
 
     return true;
 

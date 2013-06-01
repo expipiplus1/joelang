@@ -41,7 +41,7 @@ namespace Compiler
 
 template <typename T>
 ConstantNode<T>::ConstantNode( value_type constant )
-    : ExpressionNode( NodeType::Constant ),
+    : ConstantNodeBase( JoeLangType<T>::value ),
       m_Constant( std::move( constant ) )
 {
 }
@@ -51,13 +51,6 @@ const T& ConstantNode<T>::GetConstant() const
 {
     return m_Constant;
 }
-
-template <typename T>
-CompleteType ConstantNode<T>::GetType() const
-{
-    return CompleteType( JoeLangType<T>::value );
-}
-
 
 } // namespace Compiler
 } // namespace JoeLang

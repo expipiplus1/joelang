@@ -127,6 +127,11 @@ bool CompleteType::IsScalarType() const
     return Compiler::IsScalarType( m_BaseType ) && m_ArrayExtents.empty();
 }
 
+bool CompleteType::IsString() const
+{
+    return m_BaseType == Type::STRING && m_ArrayExtents.empty();
+}
+
 bool CompleteType::IsSigned() const
 {
     return Compiler::IsSigned( m_BaseType ) && m_ArrayExtents.empty();

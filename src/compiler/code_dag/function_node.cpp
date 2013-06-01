@@ -30,6 +30,7 @@
 #include "function_node.hpp"
 
 #include <compiler/code_dag/node.hpp>
+#include <compiler/semantic_analysis/function.hpp>
 
 namespace JoeLang
 {
@@ -42,10 +43,19 @@ FunctionNode::FunctionNode( Function_sp function )
 {
 }
 
-
 const Function_sp& FunctionNode::GetFunction() const
 {
     return m_Function;
+}
+
+const CompleteType& FunctionNode::GetReturnType() const
+{
+    return GetFunction()->GetReturnType();
+}
+
+bool FunctionNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::FunctionIdentifier;
 }
 
 } // namespace Compiler

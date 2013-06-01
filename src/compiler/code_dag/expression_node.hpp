@@ -27,37 +27,33 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "variable_node.hpp"
+#pragma once
 
-#include <compiler/code_dag/expression_node.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/code_dag/node.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-VariableNode::VariableNode( Variable_sp variable )
-    : ExpressionNode( NodeType::VariableIdentifier ),
-      m_Variable( std::move( variable ) )
-{
-}
+enum class NodeType;
 
-
-const Variable_sp& VariableNode::GetVariable() const
+class ExpressionNode : public Node
 {
-    return m_Variable;
-}
+public:
+    CompleteType GetType() const;
 
-CompleteType VariableNode::GetType() const
-{
-    return m_Variable->GetType();
-}
+    const ExpressionNode& GetOperand( unsigned index ) const;
 
-bool VariableNode::classof( const Node* n )
-{
-    return n->GetNodeType() == NodeType::VariableIdentifier;
-}
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
+protected:
+    friend class NodeManager;
+    ExpressionNode( NodeType node_type, std::vector<Node_ref> children = {} );
+};
 
 } // namespace Compiler
 } // namespace JoeLang

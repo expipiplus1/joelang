@@ -38,6 +38,7 @@ namespace JoeLang
 namespace Compiler
 {
 
+class CompleteType;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
 enum class NodeType;
@@ -46,6 +47,12 @@ class FunctionNode : public Node
 {
 public:
     const Function_sp& GetFunction() const;
+
+    const CompleteType& GetReturnType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
 
 private:
     friend class NodeManager;

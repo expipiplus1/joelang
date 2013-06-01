@@ -80,6 +80,7 @@ public:
     bool IsMatrixType() const;
     bool IsVectorType() const;
     bool IsScalarType() const;
+    bool IsString() const;
 
     bool IsSigned() const;
 

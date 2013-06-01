@@ -277,9 +277,13 @@ enum class TypeSpec
     ULONG4x3,
     ULONG4x4,
 
+    UCHAR,
     CHAR,
+    USHORT,
     SHORT,
+    UINT,
     INT,
+    ULONG,
     LONG,
     SIGNED,
     UNSIGNED

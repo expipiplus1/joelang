@@ -34,5 +34,23 @@ namespace JoeLang
 namespace Compiler
 {
 
+ConstantNodeBase::ConstantNodeBase( Type type )
+    : ExpressionNode( NodeType::Constant ),
+      m_Type( type )
+
+{
+}
+
+Type ConstantNodeBase::GetType() const
+{
+    return m_Type;
+}
+
+bool ConstantNodeBase::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::Constant;
+}
+
+
 } // namespace Compiler
 } // namespace JoeLang

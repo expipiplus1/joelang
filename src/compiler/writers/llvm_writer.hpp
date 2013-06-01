@@ -29,16 +29,32 @@
 
 #pragma once
 
+#include <functional>
 #include <memory>
 #include <vector>
+
+namespace llvm
+{
+class ConstantFolder;
+class ExecutionEngine;
+template <bool, typename, typename>
+class IRBuilder;
+template <bool>
+class IRBuilderDefaultInserter;
+class Module;
+class Value;
+}
 
 namespace JoeLang
 {
 class StateAssignmentBase;
 using StateAssignmentBase_up = std::unique_ptr<StateAssignmentBase>;
+enum class Type;
+
 namespace Compiler
 {
 
+class ExpressionNode;
 class Runtime;
 class StateAssignmentNode;
 
@@ -51,7 +67,33 @@ public:
         const StateAssignmentNode& state_assignment_node );
 
 private:
+    void* WrapExpressionCommon( const ExpressionNode& expression );
+    template <typename T>
+    std::function<T()> WrapExpression( const ExpressionNode& expression );
+
     Runtime& m_Runtime;
+    llvm::Module& m_Module;
+    llvm::ExecutionEngine& m_ExecutionEngine;
+
+    //
+    // Value generation
+    //
+    using IRBuilder =
+        llvm::IRBuilder<true, llvm::ConstantFolder, llvm::IRBuilderDefaultInserter<true>>;
+
+    llvm::Value* GenerateValue( const ExpressionNode& expression, IRBuilder& builder );
+    llvm::Value* GenerateCast( const ExpressionNode& expression, IRBuilder& builder );
+    llvm::Value* GenerateConstant( const ExpressionNode& expression, IRBuilder& builder );
+
+    // Helpers
+    llvm::Value* GenerateScalarOrVectorCast( llvm::Value* from_value,
+                                             Type from_type,
+                                             Type to_type,
+                                             IRBuilder& builder );
+    llvm::Value* GenerateMatrixCast( llvm::Value* from_value,
+                                     Type from_type,
+                                     Type to_type,
+                                     IRBuilder& builder );
 };
 
 } // namespace Compiler

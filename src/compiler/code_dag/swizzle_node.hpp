@@ -50,12 +50,15 @@ public:
 
     const ExpressionNode& GetSwizzled() const;
 
-    virtual
-    CompleteType GetType() const override;
+    CompleteType GetType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
 
 private:
     friend class NodeManager;
-    SwizzleNode( const Node& swizzled, Swizzle swizzle );
+    SwizzleNode( const ExpressionNode& swizzled, Swizzle swizzle );
 
     Swizzle m_Swizzle;
 };

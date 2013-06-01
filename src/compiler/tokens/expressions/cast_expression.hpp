@@ -128,6 +128,31 @@ private:
     bool CanCastFromArray ( SemaAnalyzer& sema );
     bool CanCastFromString( SemaAnalyzer& sema );
     bool CanCastFromVoid  ( SemaAnalyzer& sema );
+    
+    static
+    const ExpressionNode& GenerateCastFromScalar( const ExpressionNode& expression,
+                                                  const CompleteType& to_type,
+                                                  NodeManager& node_manager );
+    
+    static
+    const ExpressionNode& GenerateCastFromVector( const ExpressionNode& expression,
+                                                  const CompleteType& to_type,
+                                                  NodeManager& node_manager );
+    
+    static
+    const ExpressionNode& GenerateCastFromMatrix( const ExpressionNode& expression,
+                                                  const CompleteType& to_type,
+                                                  NodeManager& node_manager );
+    
+    static
+    const ExpressionNode& GenerateCastFromStruct( const ExpressionNode& expression,
+                                                  const CompleteType& to_type,
+                                                  NodeManager& node_manager );
+    
+    static
+    const ExpressionNode& GenerateCastFromArray ( const ExpressionNode& expression,
+                                                  const CompleteType& to_type,
+                                                  NodeManager& node_manager );
 
     CompleteType m_CastType;
     Expression_up m_Expression;

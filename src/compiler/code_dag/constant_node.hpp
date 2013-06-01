@@ -41,16 +41,30 @@ namespace Compiler
 class CompleteType;
 enum class NodeType;
 
+class ConstantNodeBase : public ExpressionNode
+{
+public:
+    Type GetType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
+protected:
+    ConstantNodeBase( Type type );
+
+private:
+    Type m_Type;
+};
+
+
 template <typename T>
-class ConstantNode : public ExpressionNode
+class ConstantNode : public ConstantNodeBase
 {
 public:
     using value_type = T;
 
     const value_type& GetConstant() const;
-
-    virtual
-    CompleteType GetType() const override;
 
 private:
     friend class NodeManager;

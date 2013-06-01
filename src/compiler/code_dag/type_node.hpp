@@ -44,6 +44,10 @@ class TypeNode : public Node
 public:
     const CompleteType& GetType() const;
 
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
 private:
     friend class NodeManager;
     TypeNode( CompleteType type );

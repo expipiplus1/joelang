@@ -43,8 +43,11 @@ class CompleteType;
 class ZeroNode : public ExpressionNode
 {
 public:
-    virtual
-    CompleteType GetType() const override;
+    Type GetType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
 
 private:
     friend class NodeManager;

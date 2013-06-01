@@ -130,6 +130,7 @@ SubscriptOperator::~SubscriptOperator()
 bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
                                      Expression_up& expression )
 {
+    // todo, subscripting into vectors
     assert( expression && "PerformSema given null expression" );
 
     bool good = true;
@@ -355,15 +356,13 @@ const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_m
                                                              Expression& expression ) const
 {
     const FunctionNode& function = node_manager.MakeFunctionNode( m_Function );
-    std::vector<Node_ref> argument_nodes;
+    // put the function in here, to avoid having to concatenate the arguments later
+    std::vector<Node_ref> argument_nodes = {{ function }};
+    argument_nodes.reserve( 1 + m_Arguments.size() );
     
     for( const Expression_up& argument : m_Arguments )
         argument_nodes.emplace_back( argument->GenerateCodeDag( node_manager ) );
         
-    //
-    // push the function name into arguments to pass to node_manager
-    //
-    argument_nodes.emplace_back( function );
     return node_manager.MakeExpressionNode( NodeType::Call, argument_nodes );
 }
 
@@ -641,7 +640,7 @@ const ExpressionNode& MemberAccessOperator::GenerateCodeDag( NodeManager& node_m
 {
     if( IsSwizzle() )
     {
-        const Node& swizzled_node = expression.GenerateCodeDag( node_manager );
+        const ExpressionNode& swizzled_node = expression.GenerateCodeDag( node_manager );
         return node_manager.MakeSwizzleNode( swizzled_node, m_Swizzle );
     }
         

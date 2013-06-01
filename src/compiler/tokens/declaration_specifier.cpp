@@ -310,6 +310,13 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
         NO_COMBINE_M( UINT )
         NO_COMBINE_M( ULONG )
 
+        case TypeSpec::UCHAR:
+            if( has_type )
+                sema.Error( "Can't combine uchar with other type " +
+                            GetTypeString( type ) );
+            type = Type::UCHAR;
+            has_type = true;
+            break;
         case TypeSpec::CHAR:
             if( has_type )
                 sema.Error( "Can't combine char with other type " +
@@ -318,12 +325,26 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             type = Type::CHAR;
             has_type = true;
             break;
+        case TypeSpec::USHORT:
+            if( has_type )
+                sema.Error( "Can't combine ushort with other type " +
+                            GetTypeString( type ) );
+            type = Type::USHORT;
+            has_type = true;
+            break;
         case TypeSpec::SHORT:
             if( has_type )
                 sema.Error( "Can't combine short with other type " +
                             GetTypeString( type ) );
             // Types are signed by default
             type = Type::SHORT;
+            has_type = true;
+            break;
+        case TypeSpec::UINT:
+            if( has_type )
+                sema.Error( "Can't combine uint with other type " +
+                            GetTypeString( type ) );
+            type = Type::UINT;
             has_type = true;
             break;
         case TypeSpec::INT:
@@ -342,6 +363,13 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
                 has_type = true;
             }
             break;
+        case TypeSpec::ULONG:
+            if( has_type )
+                sema.Error( "Can't combine ulong with other type " +
+                            GetTypeString( type ) );
+            type = Type::ULONG;
+            has_type = true;
+            break;
         case TypeSpec::LONG:
             if( has_type )
             {
@@ -359,7 +387,11 @@ Type DeclSpecs::DeduceType( std::vector<TypeSpec> type_specs,
             if( has_type )
             {
                 if( !IsIntegral( type ) ||
-                    type == Type::BOOL )
+                    type == Type::BOOL  ||
+                    type == Type::UCHAR ||
+                    type == Type::USHORT ||
+                    type == Type::UINT ||
+                    type == Type::ULONG )
                     sema.Error( "Can't combine signed with other type " +
                                 GetTypeString( type ) );
                 // Types are signed by default, no need to make them signed
@@ -492,12 +524,10 @@ Type TypeSpecifier::GetType() const
         TYPE_MAP_N( SHORT )
         TYPE_MAP_N( INT )
         TYPE_MAP_N( LONG )
-
-        TYPE_MAP_V( UCHAR )
-        TYPE_MAP_V( USHORT )
-        TYPE_MAP_V( UINT )
-        TYPE_MAP_V( ULONG )
-
+        TYPE_MAP_N( UCHAR )
+        TYPE_MAP_N( USHORT )
+        TYPE_MAP_N( UINT )
+        TYPE_MAP_N( ULONG )
         TYPE_MAP_N( FLOAT )
         TYPE_MAP_N( DOUBLE )
 
@@ -548,20 +578,14 @@ bool TypeSpecifier::Parse( Parser& parser,
         { TerminalType::TYPE_VOID,     TypeSpec::VOID     },
 
         TYPE_MAP_N( BOOL )
+        TYPE_MAP_N( UCHAR )
+        TYPE_MAP_N( USHORT )
+        TYPE_MAP_N( UINT )
+        TYPE_MAP_N( ULONG )
         TYPE_MAP_N( CHAR )
         TYPE_MAP_N( SHORT )
         TYPE_MAP_N( INT )
         TYPE_MAP_N( LONG )
-
-        TYPE_MAP_V( UCHAR )
-        TYPE_MAP_V( USHORT )
-        TYPE_MAP_V( UINT )
-        TYPE_MAP_V( ULONG )
-
-        TYPE_MAP_M( UCHAR )
-        TYPE_MAP_M( USHORT )
-        TYPE_MAP_M( UINT )
-        TYPE_MAP_M( ULONG )
 
         TYPE_MAP_N( FLOAT )
         TYPE_MAP_N( DOUBLE )
@@ -581,8 +605,8 @@ bool TypeSpecifier::Parse( Parser& parser,
     return false;
 
 #undef TYPE_MAP_N
-#undef TYPE_MAP_M
 #undef TYPE_MAP_V
+#undef TYPE_MAP_M
 #undef TYPE_MAP
 }
 

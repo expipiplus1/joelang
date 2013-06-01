@@ -77,7 +77,7 @@ public:
     const ExpressionNode& MakeExpressionNode( NodeType node_type,
                                               std::vector<Node_ref> children = {} );
 
-    const TypeNode& MakeTypeNode( const CompleteType& type );
+    const TypeNode& MakeTypeNode( CompleteType type );
 
     template <typename T>
     const ConstantNode<T>& MakeConstant( T constant_value );
@@ -88,7 +88,7 @@ public:
 
     const FunctionNode& MakeFunctionNode( Function_sp function );
 
-    const SwizzleNode& MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle );
+    const SwizzleNode& MakeSwizzleNode( const ExpressionNode& swizzled, const Swizzle& swizzle );
 
     const TechniqueNode& MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes );
 

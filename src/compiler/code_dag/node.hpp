@@ -44,21 +44,28 @@ enum class NodeType
     //
     // Miscellaneous
     //
+
+    // Holds a CompleteType
     Type,
 
     //
     // Structural
     //
 
+    // Holds a list of passes
     Technique,
+    // Holds a list of StateAssignments
     Pass,
+    // Holds a State and an expression
     StateAssignment,
 
     //
     // Statements
     //
 
+    // Holds a list of statements
     Sequence,
+    // Holds an expression or is a void return
     Return,
 
     //
@@ -66,12 +73,18 @@ enum class NodeType
     //
 
     Expression_start,
+    // Holds a Constant of its template type
     Constant = Expression_start,
+    // Holds a type
     Zero,
+    // Holds a Variable_sp
     VariableIdentifier,
+    // Holds a Function_sp
     FunctionIdentifier,
+    // Holds a Swizzle and an expression
     Swizzle,
 
+    // These all hold two expressions
     BinaryOperator_start,
     LogicalOr = BinaryOperator_start,
     LogicalAnd,
@@ -93,6 +106,7 @@ enum class NodeType
     Modulo,
     BinaryOperator_end = Modulo,
 
+    // These all hold one expression
     UnaryOperator_start,
     Negate = UnaryOperator_start,
     BitwiseNot,
@@ -101,18 +115,30 @@ enum class NodeType
     PreDecrement,
     UnaryOperator_end = PreDecrement,
 
+    // Holds two expressions to select from in [0] and [1] and a boolean expression in [2]
     Select,
+    // Holds an expression in [0] and a TypeNode in [1]
     Cast,
 
+    // Holds an expression in [0] and an index expression in [1]
     ArrayIndex,
 
+    // Holds a FunctionNode in [0] and a variable number of arguments
     Call,
 
+    // Holds a matrix expression in [0] and an index expression in [1]
+    ExtractColumn,
+    // Holds a matrix expression in [0], a vector expression in [1] and an index expression in [2]
+    InsertColumn,
+    // Holds a vector expression in [0] and an index expression in [1]
     ExtractElement,
+    // Holds a vector expression in [0], a scalar expression in [1] and an index expression in [2]
     InsertElement,
+    // Holds a type expression in [0] and n scalar expressions
     VectorConstructor,
+    // Holds a type expression in [0] and n vector expressions
     MatrixConstructor,
-    Expression_end = MatrixConstructor,
+    Expression_end = MatrixConstructor
 };
 
 class Node;

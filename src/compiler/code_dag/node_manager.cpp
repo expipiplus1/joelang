@@ -65,13 +65,13 @@ const ExpressionNode& NodeManager::MakeExpressionNode( NodeType node_type,
 {
     assert( node_type >= NodeType::Expression_start && node_type <= NodeType::Expression_end &&
             "Trying to make an expression node with a non expression node type" );
-    m_Nodes.emplace_back( new Node( node_type, std::move( children ) ) );
+    m_Nodes.emplace_back( new ExpressionNode( node_type, std::move( children ) ) );
     return cast<ExpressionNode>( *m_Nodes.back() );
 }
 
-const TypeNode& NodeManager::MakeTypeNode( const CompleteType& type )
+const TypeNode& NodeManager::MakeTypeNode( CompleteType type )
 {
-    m_Nodes.emplace_back( new TypeNode( type ) );
+    m_Nodes.emplace_back( new TypeNode( std::move( type ) ) );
     return static_cast<const TypeNode&>( *m_Nodes.back() );
 }
 
@@ -93,7 +93,8 @@ const FunctionNode& NodeManager::MakeFunctionNode( Function_sp function )
     return static_cast<const FunctionNode&>( *m_Nodes.back() );
 }
 
-const SwizzleNode& NodeManager::MakeSwizzleNode( const Node& swizzled, const Swizzle& swizzle )
+const SwizzleNode& NodeManager::MakeSwizzleNode( const ExpressionNode& swizzled,
+                                                 const Swizzle& swizzle )
 {
     m_Nodes.emplace_back( new SwizzleNode( swizzled, swizzle ) );
     return static_cast<const SwizzleNode&>( *m_Nodes.back() );

@@ -31,18 +31,18 @@
 
 #include <cassert>
 
-#include <compiler/support/casting.hpp>
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-SwizzleNode::SwizzleNode( const Node& swizzled, Swizzle swizzle )
+SwizzleNode::SwizzleNode( const ExpressionNode& swizzled, Swizzle swizzle )
     : ExpressionNode( NodeType::Swizzle, { swizzled } ),
       m_Swizzle( std::move( swizzle ) )
 {
@@ -65,6 +65,11 @@ CompleteType SwizzleNode::GetType() const
 {
     Type base_type = GetScalarType( GetSwizzled().GetType().GetElementType() );
     return CompleteType( GetVectorType( base_type, GetSwizzle().GetSize() ) );
+}
+
+bool SwizzleNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::Swizzle;
 }
 
 } // namespace Compiler

@@ -48,8 +48,11 @@ class VariableNode : public ExpressionNode
 public:
     const Variable_sp& GetVariable() const;
 
-    virtual
-    CompleteType GetType() const override;
+    CompleteType GetType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
 
 private:
     friend class NodeManager;

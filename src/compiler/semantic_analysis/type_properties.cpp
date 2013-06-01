@@ -294,7 +294,6 @@ Type GetScalarType( Type t )
     case Type::STRING:
         return Type::STRING;
     default:
-        assert( false && "Trying to get the scalar type of an unknown type" );
         return Type::UNKNOWN;
     }
 
