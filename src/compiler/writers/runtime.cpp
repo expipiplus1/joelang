@@ -408,7 +408,7 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
 
 Runtime::~Runtime()
 {
-    //m_Module->dump();
+    m_Module->dump();
     llvm::llvm_shutdown();
 }
 

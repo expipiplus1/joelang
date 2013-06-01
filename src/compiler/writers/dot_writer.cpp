@@ -32,8 +32,8 @@
 #include <cassert>
 #include <string>
 
-#include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/cast_node.hpp>
+#include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/pass_node.hpp>
@@ -124,8 +124,7 @@ std::string DotWriter::GetEdges( const Node& node )
     {
     case NodeType::VariableIdentifier:
     case NodeType::FunctionIdentifier:
-        m_Labels +=
-            identifier + " [shape=\"box\", label=\"" + description + "\"];\n";
+        m_Labels += identifier + " [shape=\"box\", label=\"" + description + "\"];\n";
         break;
     default:
         m_Labels +=
@@ -135,12 +134,11 @@ std::string DotWriter::GetEdges( const Node& node )
 
     //
     // If this is a function identifier, draw an edge to the cluster for this funciton if we have it
-    // hmm?
     //
     if( node.GetNodeType() == NodeType::FunctionIdentifier )
     {
         const FunctionNode& f = static_cast<const FunctionNode&>( node );
-        auto i = m_FunctionClusterMap.find( f.GetFunction().get() );
+        auto i = m_FunctionClusterMap.find( &f.GetFunction() );
         if( i != m_FunctionClusterMap.end() )
             edges += identifier + " -> " + i->second + "_TITLE" + "[lhead=" + i->second + "];\n";
     }
@@ -264,7 +262,7 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "Variable: " + static_cast<const VariableNode&>( node ).GetVariable()->GetName();
     case NodeType::FunctionIdentifier:
         return "Function: " +
-               static_cast<const FunctionNode&>( node ).GetFunction()->GetIdentifier();
+               static_cast<const FunctionNode&>( node ).GetFunction().GetIdentifier();
     case NodeType::Swizzle:
         return "Swizzle: " + static_cast<const SwizzleNode&>( node ).GetSwizzle().GetString();
     case NodeType::Call:

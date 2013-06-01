@@ -47,9 +47,9 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node.hpp>
-#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/zero_node.hpp>
 

@@ -357,12 +357,14 @@ const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_m
 {
     const FunctionNode& function_node = node_manager.MakeFunctionNode( m_Function );
     // put the function in here, to avoid having to concatenate the arguments later
-    std::vector<Node_ref> argument_nodes = {{ function_node }};
+    std::vector<Node_ref> argument_nodes;
     argument_nodes.reserve( 1 + m_Arguments.size() );
     
+    // todo, default arguments
     for( const Expression_up& argument : m_Arguments )
-        argument_nodes.emplace_back( argument->GenerateCodeDag( node_manager ) );
+        argument_nodes.push_back( argument->GenerateCodeDag( node_manager ) );
         
+    argument_nodes.push_back( function_node );
     return node_manager.MakeExpressionNode( NodeType::Call, argument_nodes );
 }
 

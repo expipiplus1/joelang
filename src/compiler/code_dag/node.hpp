@@ -30,6 +30,7 @@
 #pragma once
 
 #include <functional>
+#include <set>
 #include <vector>
 
 namespace JoeLang
@@ -40,7 +41,7 @@ namespace Compiler
 enum class NodeType
 {
     Unimplemented,
-    
+
     //
     // Structural
     //
@@ -113,10 +114,14 @@ enum class NodeType
     // Holds an expression in [0]
     Cast,
 
+    // Holds an expression in [0], the expression must be one of, VariableIdentifier or ArrayIndex
+    // Swizzles must come above this
+    Load,
+
     // Holds an expression in [0] and an index expression in [1]
     ArrayIndex,
 
-    // Holds a FunctionNode in [0] and a variable number of arguments
+    // Holds a variable number of arguments and a functionn node last
     Call,
 
     // Holds a matrix expression in [0] and an index expression in [1]
@@ -145,6 +150,8 @@ public:
     const std::vector<Node_ref>& GetChildren() const;
 
     const Node& GetChild( unsigned index ) const;
+
+    std::set<const Node*> GetDescendantsOfNodeType( NodeType node_type ) const;
 
     NodeType GetNodeType() const;
 

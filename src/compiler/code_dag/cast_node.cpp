@@ -36,7 +36,7 @@ namespace JoeLang
 namespace Compiler
 {
 
-CastNode::CastNode( const ExpressionNode& expression , CompleteType type )
+CastNode::CastNode( const ExpressionNode& expression, CompleteType type )
     : ExpressionNode( NodeType::Cast, { expression } ),
       m_Type( std::move( type ) )
 {

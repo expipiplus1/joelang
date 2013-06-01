@@ -29,6 +29,7 @@
 
 #include "node_manager.hpp"
 
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
@@ -38,7 +39,6 @@
 #include <compiler/code_dag/technique_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
-#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/support/casting.hpp>
 
 namespace JoeLang
@@ -94,7 +94,8 @@ const SwizzleNode& NodeManager::MakeSwizzleNode( const ExpressionNode& swizzled,
     return static_cast<const SwizzleNode&>( *m_Nodes.back() );
 }
 
-const ExpressionNode& NodeManager::MakeCastNode( const ExpressionNode& expression, CompleteType type )
+const ExpressionNode& NodeManager::MakeCastNode( const ExpressionNode& expression,
+                                                 CompleteType type )
 {
     if( type == expression.GetType() )
         return expression;

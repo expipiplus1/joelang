@@ -43,14 +43,14 @@ FunctionNode::FunctionNode( Function_sp function )
 {
 }
 
-const Function_sp& FunctionNode::GetFunction() const
+const Function& FunctionNode::GetFunction() const
 {
-    return m_Function;
+    return *m_Function;
 }
 
 const CompleteType& FunctionNode::GetReturnType() const
 {
-    return GetFunction()->GetReturnType();
+    return GetFunction().GetReturnType();
 }
 
 bool FunctionNode::classof( const Node* n )

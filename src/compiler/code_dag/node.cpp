@@ -63,6 +63,24 @@ const Node& Node::GetChild( unsigned index ) const
     return m_Children[index];
 }
 
+std::set<const Node*> Node::GetDescendantsOfNodeType( NodeType node_type ) const
+{
+    std::set<const Node*> ret;
+    std::vector<Node_ref> queue = { { *this } };
+
+    while( !queue.empty() )
+    {
+        const Node& n = queue.back();
+        if( n.GetNodeType() == node_type )
+            ret.insert( &n );
+        queue.pop_back();
+        for( const Node& s : n.GetChildren() )
+            queue.push_back( s );
+    }
+
+    return ret;
+}
+
 NodeType Node::GetNodeType() const
 {
     return m_Type;

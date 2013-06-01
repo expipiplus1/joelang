@@ -138,9 +138,10 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     for( const Function_sp& f : sema_analyzer.GetFunctions() )
         f->GenerateCodeDag( node_manager );
 
-    //for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
-    //v->GenerateCodeDag( node_manager );
+//for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
+//v->GenerateCodeDag( node_manager );
 
+#if 0
     DotWriter dot_writer;
 
     for( const Function_sp& f : sema_analyzer.GetFunctions() )
@@ -155,6 +156,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     std::cout << dot_writer.GenerateDotString();
 
     return nullptr;
+#endif
 
     std::vector<Technique> techniques =
         GenerateTechniques( sema_analyzer.GetTechniqueNodes( node_manager ) );
@@ -165,7 +167,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     //
     // Todo, investigate if this is optimizing all the old effects again
     //
-    m_Runtime.OptimizeModule();
+    //m_Runtime.OptimizeModule();
 
     return std::unique_ptr<Effect>( new Effect( std::move( techniques ), {} ) );
 }

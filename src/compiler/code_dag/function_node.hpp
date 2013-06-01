@@ -46,7 +46,7 @@ enum class NodeType;
 class FunctionNode : public Node
 {
 public:
-    const Function_sp& GetFunction() const;
+    const Function& GetFunction() const;
 
     const CompleteType& GetReturnType() const;
 

@@ -42,6 +42,7 @@ enum class Type;
 namespace Compiler
 {
 
+class CastNode;
 class CompleteType;
 template <typename>
 class ConstantNode;
@@ -61,7 +62,6 @@ class Swizzle;
 class SwizzleNode;
 class TechniqueNode;
 class TypeNode;
-class CastNode;
 class Variable;
 class VariableNode;
 using Variable_sp = std::shared_ptr<Variable>;

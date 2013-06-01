@@ -34,11 +34,11 @@
 #include <set>
 #include <utility>
 
+#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
-#include <compiler/code_dag/cast_node.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>

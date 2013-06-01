@@ -109,7 +109,8 @@ CompleteType ExpressionNode::GetType() const
     case NodeType::ExtractElement:
         return CompleteType( cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetElementType() );
     case NodeType::ExtractColumn:
-        return CompleteType( cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetMatrixColumnType() );
+        return CompleteType( cast<ExpressionNode>( GetChild( 0 ) )
+                                 .GetType().GetMatrixColumnType() );
 
     // The function identifier is the last node in a call expression
     case NodeType::Call:
@@ -182,9 +183,12 @@ const ExpressionNode& ExpressionNode::GetOperand( unsigned index ) const
 
     // These all have a variable number of operands and a non-operand at the end
     case NodeType::Call:
+        assert( index < GetNumChildren() - 1 && "Trying to get an out of bounds operand" );
+        return cast<ExpressionNode>( GetChild( index ) );
+
     case NodeType::VectorConstructor:
     case NodeType::MatrixConstructor:
-        assert( index < GetNumChildren() - 1 && "Trying to get an out of bounds operand" );
+        assert( index < GetNumChildren() && "Trying to get an out of bounds operand" );
         return cast<ExpressionNode>( GetChild( index ) );
 
     default:

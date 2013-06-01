@@ -30,6 +30,7 @@
 #pragma once
 
 #include <functional>
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -37,6 +38,7 @@ namespace llvm
 {
 class ConstantFolder;
 class ExecutionEngine;
+class Function;
 template <bool, typename, typename>
 class IRBuilder;
 template <bool>
@@ -54,11 +56,14 @@ enum class Type;
 namespace Compiler
 {
 
-class ExpressionNode;
 class CastNode;
 class ConstantNodeBase;
+class ExpressionNode;
+class Function;
+class Node;
 class Runtime;
 class StateAssignmentNode;
+class Swizzle;
 
 class LLVMWriter
 {
@@ -68,34 +73,141 @@ public:
     StateAssignmentBase_up GenerateStateAssignment(
         const StateAssignmentNode& state_assignment_node );
 
+    void GenerateFunction( const Function& function );
+
 private:
     void* WrapExpressionCommon( const ExpressionNode& expression );
     template <typename T>
     std::function<T()> WrapExpression( const ExpressionNode& expression );
 
+    llvm::Function* GenerateFunctionDeclaration( const Function& function );
+
+    void GenerateNodeFunctionDependencies( const Node& node );
+
+    //
+    // The set of all the functions we've generated
+    //
+    std::map<const Function*, llvm::Function*> m_GeneratedFunctions;
+
     Runtime& m_Runtime;
     llvm::Module& m_Module;
     llvm::ExecutionEngine& m_ExecutionEngine;
 
-    //
-    // Value generation
-    //
     using IRBuilder =
         llvm::IRBuilder<true, llvm::ConstantFolder, llvm::IRBuilderDefaultInserter<true>>;
 
-    llvm::Value* GenerateValue( const ExpressionNode& expression, IRBuilder& builder );
-    llvm::Value* GenerateCast( const CastNode& expression, IRBuilder& builder );
-    llvm::Value* GenerateConstant( const ConstantNodeBase& expression, IRBuilder& builder );
+    //
+    // Statement Generation
+    //
+    void GenerateStatement( const Node& statement, IRBuilder& builder ) const;
+
+    void GenerateSequence( const Node& sequence, IRBuilder& builder ) const;
+
+    void GenerateReturn( const ExpressionNode& returned, IRBuilder& builder ) const;
+    void GenerateVoidReturn( IRBuilder& builder ) const;
+
+    //
+    // Value generation
+    //
+
+    llvm::Value* GenerateValue( const ExpressionNode& expression, IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCast( const CastNode& expression, IRBuilder& builder ) const;
+
+    llvm::Value* GenerateConstant( const ConstantNodeBase& expression, IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCall( const ExpressionNode& expression, IRBuilder& builder ) const;
+
+    llvm::Value* GenerateExtractElement( const ExpressionNode& expression,
+                                         const ExpressionNode& index,
+                                         IRBuilder& builder ) const;
+
+    llvm::Value* GenerateSwizzle( const ExpressionNode& expression,
+                                  const Swizzle& swizzle,
+                                  IRBuilder& builder ) const;
+
+    llvm::Value* GenerateVectorConstructor( const ExpressionNode& constructor,
+                                            IRBuilder& builder ) const;
+
+    llvm::Value* GenerateMatrixConstructor( const ExpressionNode& constructor,
+                                            IRBuilder& builder ) const;
+
+    //
+    // Binary Operators
+    //
+    llvm::Value* GenerateOr( const ExpressionNode& lhs,
+                             const ExpressionNode& rhs,
+                             IRBuilder& builder ) const;
+
+    llvm::Value* GenerateAnd( const ExpressionNode& lhs,
+                              const ExpressionNode& rhs,
+                              IRBuilder& builder ) const;
+
+    llvm::Value* GenerateExclusiveOr( const ExpressionNode& lhs,
+                                      const ExpressionNode& rhs,
+                                      IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareEqual( const ExpressionNode& lhs,
+                                       const ExpressionNode& rhs,
+                                       IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareNotEqual( const ExpressionNode& lhs,
+                                          const ExpressionNode& rhs,
+                                          IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareLessThan( const ExpressionNode& lhs,
+                                          const ExpressionNode& rhs,
+                                          IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareGreaterThan( const ExpressionNode& lhs,
+                                             const ExpressionNode& rhs,
+                                             IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareLessThanEquals( const ExpressionNode& lhs,
+                                                const ExpressionNode& rhs,
+                                                IRBuilder& builder ) const;
+
+    llvm::Value* GenerateCompareGreaterThanEquals( const ExpressionNode& lhs,
+                                                   const ExpressionNode& rhs,
+                                                   IRBuilder& builder ) const;
+
+    llvm::Value* GenerateLeftShift( const ExpressionNode& lhs,
+                                    const ExpressionNode& rhs,
+                                    IRBuilder& builder ) const;
+
+    llvm::Value* GenerateRightShift( const ExpressionNode& lhs,
+                                     const ExpressionNode& rhs,
+                                     IRBuilder& builder ) const;
+
+    llvm::Value* GenerateAdd( const ExpressionNode& lhs,
+                              const ExpressionNode& rhs,
+                              IRBuilder& builder ) const;
+
+    llvm::Value* GenerateSubtract( const ExpressionNode& lhs,
+                                   const ExpressionNode& rhs,
+                                   IRBuilder& builder ) const;
+
+    llvm::Value* GenerateMultiply( const ExpressionNode& lhs,
+                                   const ExpressionNode& rhs,
+                                   IRBuilder& builder ) const;
+
+    llvm::Value* GenerateDivide( const ExpressionNode& lhs,
+                                 const ExpressionNode& rhs,
+                                 IRBuilder& builder ) const;
+
+    llvm::Value* GenerateModulo( const ExpressionNode& lhs,
+                                 const ExpressionNode& rhs,
+                                 IRBuilder& builder ) const;
 
     // Helpers
     llvm::Value* GenerateScalarOrVectorCast( llvm::Value* from_value,
                                              Type from_type,
                                              Type to_type,
-                                             IRBuilder& builder );
+                                             IRBuilder& builder ) const;
     llvm::Value* GenerateMatrixCast( llvm::Value* from_value,
                                      Type from_type,
                                      Type to_type,
-                                     IRBuilder& builder );
+                                     IRBuilder& builder ) const;
 };
 
 } // namespace Compiler
