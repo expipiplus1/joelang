@@ -29,7 +29,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <regex>
 #include <sstream>
 #include <string>
 
@@ -38,6 +37,131 @@
 #include <joelang/state.hpp>
 
 #include <joemath/joemath.hpp>
+using namespace JoeMath;
+
+std::string FindExpectedValues( const std::string& contents, bool& error )
+{
+    // Regex: /\*\s*([^\*]*?)
+    enum State
+    {
+        Begin,   // Look for a '/'
+        Slash,   // Look for a '*'
+        Star,    // Read all the whitespace we can
+        Content, // Read the content until the '*'
+    };
+
+    //
+    // This will return the text inside the first block comment
+    //
+    std::string::const_iterator p = contents.begin();
+    std::string ret;
+    State state = Begin;
+    error = false;
+
+    while( p != contents.end() )
+    {
+        char c = *p++;
+        switch( state )
+        {
+        case Begin:
+            if( c == '/' )
+            {
+                state = Slash;
+                continue;
+            }
+            break;
+        case Slash:
+            if( c == '*' )
+            {
+                state = Star;
+                continue;
+            }
+            state = Begin;
+            break;
+        case Star:
+        {
+            if( std::isspace( c ) )
+                continue;
+            state = Content;
+        }
+        case Content:
+        {
+            if( c == '*' )
+                return ret;
+            ret += c;
+        }
+        }
+    }
+    error = true;
+    return "";
+}
+
+std::string ReplaceNewLines( const std::string& string )
+{
+    // regex "\s*(\n|\r)+\s*" );
+
+    enum State
+    {
+        Begin,   // Look for some whitespace otherswise append to ret
+        NewLine, // Look for any more \r or \n
+    };
+
+    std::string::const_iterator p = string.begin();
+    std::string ret;
+    std::string match;
+    State state = Begin;
+
+    while( p != string.end() )
+    {
+        char c = *p++;
+        switch( state )
+        {
+        case Begin:
+            if( c == '\n' || c == '\r' )
+            {
+                state = NewLine;
+                continue;
+            }
+            else if( std::isspace( c ) )
+            {
+                // Stay in this state but keep the spaces
+                match += c;
+                continue;
+            }
+            ret += match;
+            match.clear();
+            ret += c;
+            break;
+        case NewLine:
+            if( std::isspace( c ) )
+                continue;
+            match.clear();
+            ret += c;
+            state = Begin;
+            break;
+        }
+    }
+    return ret;
+}
+
+template <typename T>
+std::string GetMatrixString( T m )
+{
+    std::string ret;
+    for( unsigned i = 0; i < T::rows; ++i )
+        for( unsigned j = 0; j < T::columns; ++j )
+            ret += std::to_string( m.GetRow( i )[j] ) + " ";
+    return ret;
+}
+
+template <typename T>
+std::string GetVectorString( T v )
+{
+    std::string ret;
+    for( unsigned i = 0; i < T::vector_size; ++i )
+        ret += std::to_string( v[i] ) + " ";
+    return ret;
+}
 
 int main( int argc, char** argv )
 {
@@ -48,7 +172,7 @@ int main( int argc, char** argv )
     }
 
     std::string test_filename = argv[1];
-    std::ifstream in(test_filename, std::ios::in);
+    std::ifstream in( test_filename, std::ios::in );
     if( !in )
     {
         std::cout << "Couldn't open test file" << std::endl;
@@ -56,94 +180,94 @@ int main( int argc, char** argv )
     }
 
     std::string contents;
-    in.seekg(0, std::ios::end);
-    contents.resize(in.tellg());
-    in.seekg(0, std::ios::beg);
-    in.read(&contents[0], contents.size());
+    in.seekg( 0, std::ios::end );
+    contents.resize( in.tellg() );
+    in.seekg( 0, std::ios::beg );
+    in.read( &contents[0], contents.size() );
     in.close();
 
-    std::regex r( "/\\*\\s*([^]*?)\\*/" );
-    std::smatch m;
-
     std::stringstream actual;
-    std::string expected;
+    bool error;
+    std::string expected = FindExpectedValues( contents, error );
 
-    if( !std::regex_search( contents,
-                            m,
-                            r,
-                            std::regex_constants::match_continuous ) )
+    if( error )
     {
-        std::cout << "Couldn't find expected value comment" << std::endl;
+        std::cerr << "Couldn't find expected value comment" << std::endl;
         return -1;
     }
-    else
-    {
-        expected = m[1];
-        std::regex n( "\\s*(\n|\r)+" );
-        expected = std::regex_replace( expected, n, "\n" );
-    }
-    
+
+    //
+    // Replace whitespace with newlines
+    //
+    expected = ReplaceNewLines( expected );
+
     JoeLang::Context context;
 
-    context.SetErrorCallback( [](const std::string& error) -> void
-                              { std::cerr << error << std::endl; } );
+    context.SetErrorCallback( []( const std::string & error )->void {
+        std::cerr << error << std::endl;
+    } );
 
-    JoeLang::State<int> int_state( "int_state" );
-    int_state.SetCallbacks( [&actual](int v) -> void
-                            {actual << "int_state: " << v << "\n";} );
+#define STR( s ) #s
 
-    JoeLang::State<float> float_state( "float_state" );
-    float_state.SetCallbacks( [&actual](float v) -> void
-                              {actual << "float_state: " << v << "\n";} );
+#define CREATE_SCALAR_STATE( name, type )                     \
+    JoeLang::State<type> name##_state( STR( name##_state ) ); \
+    name##_state.SetCallbacks( [&actual]( type v )->void {    \
+        actual << STR( name##_state ) << ": " << v << "\n";   \
+    } );                                                      \
+    context.AddState( &name##_state )
 
-    JoeLang::State<bool> bool_state( "bool_state" );
-    bool_state.SetCallbacks( [&actual](bool v) -> void
-                             {actual << "bool_state: " << v << "\n";} );
+#define CREATE_VECTOR_STATE( name, type, rows )                                                \
+    JoeLang::State<Matrix<type, ( rows ), 1>> name##rows##_state( STR( name##rows##_state ) ); \
+    name##rows##_state.SetCallbacks( [&actual]( Matrix<type, ( rows ), 1> m )->void {          \
+        actual << STR( name##rows##_state ) << ": " << GetVectorString( m ) << "\n";           \
+    } );                                                                                       \
+    context.AddState( &name##rows##_state )
 
-    JoeLang::State<std::string> string_state( "string_state" );
-    string_state.SetCallbacks( [&actual](std::string v) -> void
-                               {actual << "string_state: " << v << "\n";} );
+#define CREATE_MATRIX_STATE( name, type, columns, rows )                                         \
+    JoeLang::State<Matrix<type, ( rows ), ( columns )>> name##columns##x##rows##_state(          \
+        STR( name##columns##x##rows##_state ) );                                                 \
+    name##columns##x##rows##_state.SetCallbacks(                                                 \
+        [&actual]( Matrix<type, ( rows ), ( columns )> m )->void {                               \
+        actual << STR( name##columns##x##rows##_state ) << ": " << GetMatrixString( m ) << "\n"; \
+    } );                                                                                         \
+    context.AddState( &name##columns##x##rows##_state )
 
-    JoeLang::State<JoeMath::float2> float2_state( "float2_state" );
-    float2_state.SetCallbacks( [&actual](JoeMath::float2 v) -> void
-                               {actual << "float2_state: "
-                                       << v.x() << " " << v.y() << "\n";} );
+#define CREATE_STATE_N( name, type )         \
+    CREATE_SCALAR_STATE( name, type );       \
+    CREATE_VECTOR_STATE( name, type, 2 );    \
+    CREATE_VECTOR_STATE( name, type, 3 );    \
+    CREATE_VECTOR_STATE( name, type, 4 );    \
+    CREATE_MATRIX_STATE( name, type, 2, 2 ); \
+    CREATE_MATRIX_STATE( name, type, 2, 3 ); \
+    CREATE_MATRIX_STATE( name, type, 2, 4 ); \
+    CREATE_MATRIX_STATE( name, type, 3, 2 ); \
+    CREATE_MATRIX_STATE( name, type, 3, 3 ); \
+    CREATE_MATRIX_STATE( name, type, 3, 4 ); \
+    CREATE_MATRIX_STATE( name, type, 4, 2 ); \
+    CREATE_MATRIX_STATE( name, type, 4, 3 ); \
+    CREATE_MATRIX_STATE( name, type, 4, 4 )
 
-    JoeLang::State<JoeMath::float3> float3_state( "float3_state" );
-    float3_state.SetCallbacks( [&actual](JoeMath::float3 v) -> void
-                               {actual << "float3_state: "
-                                       << v.x() << " " << v.y() << " "
-                                       << v.z() << "\n";} );
+    CREATE_SCALAR_STATE( string, std::string );
+    CREATE_STATE_N( bool, bool );
+    CREATE_STATE_N( char, s8 );
+    CREATE_STATE_N( short, s16 );
+    CREATE_STATE_N( int, s32 );
+    CREATE_STATE_N( long, s64 );
+    CREATE_STATE_N( uchar, u8 );
+    CREATE_STATE_N( ushort, u16 );
+    CREATE_STATE_N( uint, u32 );
+    CREATE_STATE_N( ulong, u64 );
+    CREATE_STATE_N( float, float );
+    CREATE_STATE_N( double, double );
 
-    JoeLang::State<JoeMath::float4> float4_state( "float4_state" );
-    float4_state.SetCallbacks( [&actual](JoeMath::float4 v) -> void
-                               {actual << "float4_state: "
-                                       << v.x() << " " << v.y() << " "
-                                       << v.z() << " " << v.w() << "\n";} );
-
-    JoeLang::State<JoeMath::float4x4> float4x4_state( "float4x4_state" );
-    float4x4_state.SetCallbacks( [&actual](JoeMath::float4x4 m)
-                              {actual << "float4x4_state: "
-                                      << m[0][0] << " " << m[1][0] << " "
-                                      << m[2][0] << " " << m[3][0] << " "
-                                      << m[0][1] << " " << m[1][1] << " "
-                                      << m[2][1] << " " << m[3][1] << " "
-                                      << m[0][2] << " " << m[1][2] << " "
-                                      << m[2][2] << " " << m[3][2] << " "
-                                      << m[0][3] << " " << m[1][3] << " "
-                                      << m[2][3] << " " << m[3][3] << "\n";} );
-
-    context.AddState( &int_state );
-    context.AddState( &float_state );
-    context.AddState( &bool_state );
-    context.AddState( &string_state );
-    context.AddState( &float2_state );
-    context.AddState( &float3_state );
-    context.AddState( &float4_state );
-    context.AddState( &float4x4_state );
+#undef CREATE_STATE_N
+#undef CREATE_SCALAR_STATE
+#undef CREATE_VECTOR_STATE
+#undef CREATE_MATRIX_STATE
+#undef STR
 
     // TODO make this reuse the string when we can load from string
-    JoeLang::Effect* e = context.CreateEffectFromFile( test_filename );
+    JoeLang::Effect* e = context.CreateEffectFromString( contents );
 
     if( !e )
     {
@@ -158,11 +282,12 @@ int main( int argc, char** argv )
             pass.ResetState();
         }
 
-    if( actual.str() != expected )
+    std::string actual_string = ReplaceNewLines( actual.str() );
+    if( actual_string != expected )
     {
         std::cout << "Mismatch between expected and actual result\n"
                   << "Expected: \"" << expected << "\"\n"
-                  << "Actual:   \"" << actual.str() << "\"" << std::endl;
+                  << "Actual:   \"" << actual_string << "\"" << std::endl;
         return -1;
     }
 
