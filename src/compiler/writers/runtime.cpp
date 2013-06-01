@@ -59,7 +59,7 @@
 #include <joelang/context.hpp>
 #include <joelang/types.hpp>
 
-#ifndef JOELANG_RUNTIME_FILENAME
+#ifndef JOELANG_RUNTIME_PATH
     #error Missing runtime filename
 #endif
 
@@ -349,7 +349,7 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
 
     llvm::OwningPtr<llvm::MemoryBuffer> buffer;
 
-    llvm::MemoryBuffer::getFile( JOELANG_RUNTIME_FILENAME, buffer );
+    llvm::MemoryBuffer::getFile( JOELANG_RUNTIME_PATH, buffer );
     if( !buffer )
     {
         m_JoeLangContext.Error( "Couldn't load runtime module" );

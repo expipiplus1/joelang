@@ -1,14 +1,27 @@
 enable_testing()
 
-#
-# Testing
-#
+#-------------------------------------------------------------------------------
+# Verify things are as they should be
+#-------------------------------------------------------------------------------
+if( NOT DEFINED JOELANG_INCLUDE_DIRS )
+    message( FATAL_ERROR "JoeLang include dirs not set" )
+endif()
+if( NOT DEFINED JOELANG_LIBS )
+    message( FATAL_ERROR "JoeLang libs not set" )
+endif()
+
+#-------------------------------------------------------------------------------
+# The testing program
+#-------------------------------------------------------------------------------
 add_executable( joelang_tester EXCLUDE_FROM_ALL tester.cpp )
-target_link_libraries( joelang_tester joelang )
-include_directories( ${joelang_BINARY_DIR}/include ${joelang_SOURCE_DIR}/include )
+target_link_libraries( joelang_tester ${JOELANG_LIBS} )
+include_directories( ${JOELANG_INCLUDE_DIRS} )
 
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joemath_CXX_FLAGS}" )
+add_definitions( -std=c++11 )
 
+#-------------------------------------------------------------------------------
+# The tests
+#-------------------------------------------------------------------------------
 file( GLOB test_files "*.jfx" )
 
 add_custom_target( check_joelang

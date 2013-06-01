@@ -2,30 +2,56 @@ cmake_minimum_required(VERSION 2.8)
 
 project( joelang )
 
-set( joelang_CXX_FLAGS "-fno-exceptions -Wall -std=c++11 -msse" CACHE STRING "joelang compiler options" )
-set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${joelang_CXX_FLAGS}" )
+#-------------------------------------------------------------------------------
+# Configuration
+#-------------------------------------------------------------------------------
+
+if( NOT DEFINED JOELANG_WITH_OPENGL )
+    set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable builtin OpenGL state setting" )
+endif()
+
+set( JOELANG_RUNTIME_PATH ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
+
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/include/joelang/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/joelang/config.h )
+list( APPEND JOELANG_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR}/include )
+
+#-------------------------------------------------------------------------------
+# Find all the required packages
+#-------------------------------------------------------------------------------
 
 find_package( LLVM REQUIRED )
 include_directories( ${LLVM_INCLUDE_DIRS} )
-link_directories( ${LLVM_LIBRARY_DIRS} )
-if( WIN32 )
-    set( joelang_LIBRARY_DIRS ${LLVM_LIBRARY_DIRS} CACHE STRING "LLVM library dirs for windows" )
+list( APPEND JOELANG_LIBRARY_DIRS ${LLVM_LIBRARY_DIRS} )
+list( APPEND JOELANG_INTERNAL_INCLUDE_DIRS ${LLVM_INCLUDE_DIRS} )
+
+if( ${JOELANG_WITH_OPENGL} )
+    find_package( OpenGL REQUIRED )
+    list( APPEND JOELANG_INTERNAL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} )
+
+    if( NOT DEFINED GLEE_INCLUDE_DIR )
+        message( FATAL_ERROR "glee include dir isn't set" )
+    endif()
+    if( NOT DEFINED GLEE_LIB )
+        message( FATAL_ERROR "glee lib isn't set" )
+    endif()
+
+    list( APPEND JOELANG_INTERNAL_INCLUDE_DIRS ${GLEE_INCLUDE_DIR} )
+    list( APPEND JOELANG_INTERNAL_LIBS ${OPENGL_gl_LIBRARY} ${GLEE_LIB} )
 endif()
 
-find_package(                       OpenGL      REQUIRED )
+if( NOT DEFINED JOEMATH_INCLUDE_DIR )
+    message( FATAL_ERROR "JoeMath include dir isn't set" ) 
+endif()
+get_filename_component(JOEMATH_INCLUDE_DIR ${JOEMATH_INCLUDE_DIR} REALPATH)
+list( APPEND JOELANG_INTERNAL_INCLUDE_DIRS ${JOEMATH_INCLUDE_DIR} )
 
-include_directories( ${joemath_INCLUDE_DIR} ${glee_INCLUDE_DIR} )
 
-#
-# Submdules
-#
+#-------------------------------------------------------------------------------
+# Submodules
+#-------------------------------------------------------------------------------
 set( UCPP_STAND_ALONE FALSE )
 add_subdirectory( ucpp EXCLUDE_FROM_ALL )
-
-#
-# Testing
-#
-add_subdirectory( tests EXCLUDE_FROM_ALL )
+list( APPEND JOELANG_INTERNAL_LIBS ucpp )
 
 #
 # The library
@@ -190,87 +216,52 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/writers/shader_writer.hpp
                      src/compiler/writers/shader_writer-inl.hpp )
 
+set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11 )
 
-target_link_libraries( joelang ucpp )
-
-#
-# configuration
-#
-if( NOT DEFINED JOELANG_WITH_OPENGL )
-    set( JOELANG_WITH_OPENGL OFF CACHE BOOL "Enable built in OpenGL state setting" )
-endif()
-
-set( JOELANG_RUNTIME_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/runtime.bc CACHE FILENAME "The filename for the joelang runtime" )
-configure_file( ${joelang_SOURCE_DIR}/include/joelang/config.h.in ${joelang_BINARY_DIR}/include/joelang/config.h )
-set( joelang_INCLUDE_DIR ${joelang_INCLUDE_DIR} ${joelang_BINARY_DIR}/include/ PARENT_SCOPE )
-
-#
-# Various custom commands
-#
-
-set( runtime_sources src/runtime/float.cpp
-                     src/runtime/float.hpp
-                     src/runtime/string.cpp
-                     src/runtime/string.hpp
-                     src/runtime/types.hpp )
-
-string( REPLACE " " ";" JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
-set( JOELANG_RUNTIME_CXX_FLAGS ${JOELANG_RUNTIME_CXX_FLAGS} -msse4.1 -Wno-return-type-c-linkage)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    set( JOELANG_RUNTIME_COMPILER ${CMAKE_CXX_COMPILER} )
-else()
-    set( JOELANG_RUNTIME_COMPILER clang++ )
-endif()
-
-find_program( LLVM_LINK_EXECUTABLE llvm-link )
-
-set( JOELANG_RUNTIME_LINKER ${LLVM_LINK_EXECUTABLE} )
-
-set( runtime_bitcode_files "" )
-
-foreach( runtime_source ${runtime_sources} )
-    get_filename_component( extension ${runtime_source} EXT )
-    if( ${extension} STREQUAL ".cpp" )
-        get_filename_component( bitcode_file ${runtime_source} NAME)
-        set( bitcode_file ${CMAKE_CURRENT_BINARY_DIR}/${bitcode_file}.bc )
-        add_custom_command(
-            OUTPUT ${bitcode_file}
-            COMMAND ${JOELANG_RUNTIME_COMPILER} -O4 -std=c++11 ${JOELANG_RUNTIME_CXX_FLAGS} ${CLANG_FLAGS} -I${joemath_INCLUDE_DIR} -c -emit-llvm ${CMAKE_CURRENT_SOURCE_DIR}/${runtime_source} -o ${bitcode_file}
-            DEPENDS ${runtime_sources} )
-        list( APPEND runtime_bitcode_files ${bitcode_file} )
-    endif()
-endforeach()
-
-add_custom_command(
-    OUTPUT ${JOELANG_RUNTIME_FILENAME}
-    COMMAND ${JOELANG_RUNTIME_LINKER} -o ${JOELANG_RUNTIME_FILENAME} ${runtime_bitcode_files}
-    DEPENDS ${runtime_bitcode_files} )
-
-if( ${CMAKE_GENERATOR} STREQUAL "Xcode" )
-    add_custom_target( compile_runtime DEPENDS ${JOELANG_RUNTIME_FILENAME} )
-else()
-    add_custom_target( compile_runtime DEPENDS ${JOELANG_RUNTIME_FILENAME} 
-                                       SOURCES ${runtime_sources} )
-endif()
-
-add_dependencies( joelang compile_runtime )
-
-#
+#-------------------------------------------------------------------------------
 # Linking
-#
+#-------------------------------------------------------------------------------
 
 llvm_map_components_to_libraries( REQ_LLVM_LIBRARIES core jit native bitreader ipo )
-set( joelang_LIBS ${REQ_LLVM_LIBRARIES} )
+list( APPEND JOELANG_INTERNAL_LIBS ${REQ_LLVM_LIBRARIES} )
 add_definitions( ${LLVM_DEFINITIONS} )
 
-#list( APPEND joelang_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/include ${joelang_SOURCE_DIR}/src )
-target_link_libraries( joelang ${joelang_LIBS} )
-include_directories( ${joelang_BINARY_DIR}/include ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/src ${joelang_SOURCE_DIR}/include )
+link_directories( ${JOELANG_LIBRARY_DIRS} )
 
-#
-# add a target to generate API documentation with Doxygen
-#
+target_link_libraries( joelang ${JOELANG_INTERNAL_LIBS} )
+
+list( APPEND JOELANG_LIBS joelang )
+
+#-------------------------------------------------------------------------------
+# Include dirs
+#-------------------------------------------------------------------------------
+
+list( APPEND JOELANG_INTERNAL_INCLUDE_DIRS ${joelang_SOURCE_DIR} ${joelang_SOURCE_DIR}/src )
+list( APPEND JOELANG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/include ${joelang_BINARY_DIR}/include )
+include_directories( ${JOELANG_INCLUDE_DIRS} ${JOELANG_INTERNAL_INCLUDE_DIRS} )
+
+
+#-------------------------------------------------------------------------------
+# Build the runtime
+#-------------------------------------------------------------------------------
+add_subdirectory( runtime EXCLUDE_FROM_ALL )
+add_dependencies( joelang compile_runtime )
+
+#-------------------------------------------------------------------------------
+# Testing
+#-------------------------------------------------------------------------------
+add_subdirectory( tests EXCLUDE_FROM_ALL )
+
+#--------------------------------------------------------------------------------
+# Set global properties for the rest of the build
+#--------------------------------------------------------------------------------
+set_property( GLOBAL PROPERTY JOELANG_LIBRARY_DIRS ${JOELANG_LIBRARY_DIRS} )
+set_property( GLOBAL PROPERTY JOELANG_INCLUDE_DIRS ${JOELANG_INCLUDE_DIRS} )
+set_property( GLOBAL PROPERTY JOELANG_LIBS ${JOELANG_LIBS} )
+
+#--------------------------------------------------------------------------------
+# Documentation
+#--------------------------------------------------------------------------------
 find_package( Doxygen )
 if( DOXYGEN_FOUND )
     configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in

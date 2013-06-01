@@ -30,6 +30,7 @@
 #include "float.hpp"
 
 #include <joemath/joemath.hpp>
+
 using namespace JoeMath;
 
 #include <smmintrin.h>
