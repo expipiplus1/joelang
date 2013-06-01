@@ -55,7 +55,7 @@ public:
     ~Context();
 
     Effect* CreateEffectFromString( const std::string& source,
-                                    const std::string& name );
+                                    const std::string& name = "<string>" );
     Effect* CreateEffectFromFile(   const std::string& filename );
 
 #ifdef JOELANG_WITH_OPENGL
