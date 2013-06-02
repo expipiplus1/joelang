@@ -29,6 +29,7 @@
 
 #pragma once
 
+#include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/tokens/expressions/assignment_operator.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
@@ -36,6 +37,9 @@ namespace JoeLang
 {
 namespace Compiler
 {
+
+class NodeManager;
+class PointerExpressionNode;
 
 /**
   * \class AssignmentExpression
@@ -72,6 +76,9 @@ public:
       */
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
+    
+    virtual
+    const PointerExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     llvm::Value* CodeGen( CodeGenerator& code_gen ) const override;

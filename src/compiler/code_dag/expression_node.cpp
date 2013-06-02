@@ -31,15 +31,16 @@
 
 #include <cassert>
 
-#include <compiler/support/casting.hpp>
-#include <compiler/semantic_analysis/complete_type.hpp>
-#include <compiler/semantic_analysis/type_properties.hpp>
-#include <compiler/code_dag/function_node.hpp>
-#include <compiler/code_dag/variable_node.hpp>
-#include <compiler/code_dag/swizzle_node.hpp>
-#include <compiler/code_dag/zero_node.hpp>
 #include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
+#include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/swizzle_store_node.hpp>
+#include <compiler/code_dag/variable_node.hpp>
+#include <compiler/code_dag/zero_node.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
@@ -65,6 +66,8 @@ CompleteType ExpressionNode::GetType() const
         return cast<VariableNode>( *this ).GetType();
     case NodeType::Swizzle:
         return cast<SwizzleNode>( *this ).GetType();
+    case NodeType::SwizzleStore:
+        return cast<SwizzleStoreNode>( *this ).GetType();
     case NodeType::LogicalOr:
     case NodeType::LogicalAnd:
     case NodeType::CompareEqual:
@@ -95,6 +98,7 @@ CompleteType ExpressionNode::GetType() const
     case NodeType::Select:
     case NodeType::InsertElement:
     case NodeType::InsertColumn:
+    case NodeType::Store:
         return cast<ExpressionNode>( GetChild( 0 ) ).GetType();
     case NodeType::Cast:
         return cast<CastNode>( *this ).GetType();
@@ -114,7 +118,7 @@ CompleteType ExpressionNode::GetType() const
 
     // The function identifier is the last node in a call expression
     case NodeType::Call:
-        return cast<FunctionNode>( GetChild( 0 ) ).GetReturnType();
+        return cast<FunctionNode>( GetChild( GetNumChildren() - 1 ) ).GetReturnType();
     // The constructors hold the type in the last node
     case NodeType::VectorConstructor:
         return CompleteType( GetVectorType(

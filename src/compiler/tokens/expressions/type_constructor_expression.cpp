@@ -451,36 +451,5 @@ bool TypeConstructorExpression::classof( const TypeConstructorExpression* e )
     return true;
 }
 
-//------------------------------------------------------------------------------
-// PrimaryExpression
-//------------------------------------------------------------------------------
-
-bool PrimaryExpression::Parse( Parser& parser,
-                               Expression_up& token )
-{
-    // Try and parse and identifier
-    if( parser.Expect<IdentifierExpression>( token ) )
-        return true;
-    CHECK_PARSER;
-
-    // Try and parse a literal
-    if( parser.Expect<LiteralExpression>( token ) )
-        return true;
-    CHECK_PARSER;
-
-    // Try and parse a bracketed expression
-    if( !parser.ExpectTerminal( TerminalType::OPEN_ROUND ) )
-        return false;
-    if( !parser.Expect<Expression>( token ) )
-        return false;
-    if( !parser.ExpectTerminal( TerminalType::CLOSE_ROUND ) )
-    {
-        parser.Error( "Expected closing ')' in primary expression" );
-        return false;
-    }
-
-    return true;
-}
-
 } // namespace Compiler
 } // namespace JoeLang

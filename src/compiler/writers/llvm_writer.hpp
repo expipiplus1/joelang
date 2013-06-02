@@ -34,11 +34,15 @@
 #include <memory>
 #include <vector>
 
+#include <llvm/IR/IRBuilder.h>
+
 namespace llvm
 {
+class Constant;
 class ConstantFolder;
 class ExecutionEngine;
 class Function;
+class GlobalVariable;
 template <bool, typename, typename>
 class IRBuilder;
 template <bool>
@@ -60,25 +64,36 @@ class CastNode;
 class ConstantNodeBase;
 class ExpressionNode;
 class Function;
+class GenericValue;
 class Node;
+class PointerExpressionNode;
 class Runtime;
 class StateAssignmentNode;
 class Swizzle;
+class Variable;
+class VariableNode;
 
 class LLVMWriter
 {
 public:
     LLVMWriter( Runtime& runtime );
+    ~LLVMWriter();
+
+    GenericValue EvaluateExpression( const ExpressionNode& expression );
 
     StateAssignmentBase_up GenerateStateAssignment(
         const StateAssignmentNode& state_assignment_node );
 
     void GenerateFunction( const Function& function );
 
+    void AddGlobalVariable( const Variable& variable );
+
 private:
-    void* WrapExpressionCommon( const ExpressionNode& expression );
+
+    void* WrapExpressionCommon( const ExpressionNode& expression, llvm::Function*& llvm_function );
     template <typename T>
-    std::function<T()> WrapExpression( const ExpressionNode& expression );
+    std::function<T()> WrapExpression( const ExpressionNode& expression,
+                                       llvm::Function*& llvm_function );
 
     llvm::Function* GenerateFunctionDeclaration( const Function& function );
 
@@ -89,125 +104,182 @@ private:
     //
     std::map<const Function*, llvm::Function*> m_GeneratedFunctions;
 
-    Runtime& m_Runtime;
-    llvm::Module& m_Module;
-    llvm::ExecutionEngine& m_ExecutionEngine;
+    //
+    // All the global variables
+    //
+    std::map<const Variable*, llvm::GlobalVariable*> m_GlobalVariables;
+    
 
     using IRBuilder =
         llvm::IRBuilder<true, llvm::ConstantFolder, llvm::IRBuilderDefaultInserter<true>>;
 
+    Runtime& m_Runtime;
+    llvm::Module& m_Module;
+    llvm::ExecutionEngine& m_ExecutionEngine;
+
+    //
+    // This holds the values generated for the current expression and should be cleared after every
+    // expression
+    //
+    std::map<const ExpressionNode*, llvm::Value*> m_GeneratedValues;
+    std::stack<llvm::Value*> m_StringTemporaries;
+    
+    //
+    // This should be cleared at the end of each function
+    //
+    std::map<const Variable*, llvm::Value*> m_LocalVariables;
+    
+    IRBuilder m_Builder;
+
+    //
+    // This should be called after generating every expression
+    //
+    void GenerateExpressionCleanup();
+    
+    //
+    // This should be called after every function
+    //
+    void GenerateFunctionCleanup();
+
     //
     // Statement Generation
     //
-    void GenerateStatement( const Node& statement, IRBuilder& builder ) const;
+    void GenerateStatement( const Node& statement );
 
-    void GenerateSequence( const Node& sequence, IRBuilder& builder ) const;
+    void GenerateSequence( const Node& sequence );
 
-    void GenerateReturn( const ExpressionNode& returned, IRBuilder& builder ) const;
-    void GenerateVoidReturn( IRBuilder& builder ) const;
+    void GenerateReturn( const ExpressionNode& returned );
+
+    void GenerateVoidReturn();
 
     //
     // Value generation
     //
 
-    llvm::Value* GenerateValue( const ExpressionNode& expression, IRBuilder& builder ) const;
+    llvm::Value* GenerateValue( const ExpressionNode& expression );
 
-    llvm::Value* GenerateCast( const CastNode& expression, IRBuilder& builder ) const;
+    llvm::Value* GenerateAddress( const PointerExpressionNode& expression );
 
-    llvm::Value* GenerateConstant( const ConstantNodeBase& expression, IRBuilder& builder ) const;
+    //
+    // Addresses
+    //
 
-    llvm::Value* GenerateCall( const ExpressionNode& expression, IRBuilder& builder ) const;
+    llvm::Value* GenerateStore( const PointerExpressionNode& address,
+                                const ExpressionNode& assigned );
 
-    llvm::Value* GenerateExtractElement( const ExpressionNode& expression,
-                                         const ExpressionNode& index,
-                                         IRBuilder& builder ) const;
+    llvm::Value* GenerateSwizzleStore( const PointerExpressionNode& address,
+                                       const ExpressionNode& assigned,
+                                       const Swizzle& swizzle );
 
-    llvm::Value* GenerateSwizzle( const ExpressionNode& expression,
-                                  const Swizzle& swizzle,
-                                  IRBuilder& builder ) const;
+    llvm::Value* GenerateVariableAddress( const VariableNode& variable_node );
 
-    llvm::Value* GenerateVectorConstructor( const ExpressionNode& constructor,
-                                            IRBuilder& builder ) const;
+    llvm::Value* GenerateArrayIndex( const PointerExpressionNode& address,
+                                     const ExpressionNode& index );
 
-    llvm::Value* GenerateMatrixConstructor( const ExpressionNode& constructor,
-                                            IRBuilder& builder ) const;
+    llvm::Value* GeneratePreIncrement( const PointerExpressionNode& address );
+
+    llvm::Value* GeneratePreDecrement( const PointerExpressionNode& address );
+
+    //
+    // Values
+    //
+
+    llvm::Value* GenerateCast( const CastNode& expression );
+
+    llvm::Constant* GenerateConstant( const ConstantNodeBase& expression );
+
+    llvm::Constant* GenerateZero( Type type );
+
+    llvm::Value* GenerateCall( const ExpressionNode& expression );
+
+    llvm::Value* GenerateExtractElement( const ExpressionNode& vector,
+                                         const ExpressionNode& index );
+
+    llvm::Value* GenerateInsertElement( const ExpressionNode& vector,
+                                        const ExpressionNode& element,
+                                        const ExpressionNode& index );
+
+    llvm::Value* GenerateSwizzle( const ExpressionNode& expression, const Swizzle& swizzle );
+
+    llvm::Value* GenerateSelect( const ExpressionNode& true_expression,
+                                 const ExpressionNode& false_expression,
+                                 const ExpressionNode& condition );
+
+    llvm::Value* GenerateVectorConstructor( const ExpressionNode& constructor );
+
+    llvm::Value* GenerateMatrixConstructor( const ExpressionNode& constructor );
+
+    llvm::Value* GeneratePostIncrement( const PointerExpressionNode& address );
+
+    llvm::Value* GeneratePostDecrement( const PointerExpressionNode& address );
 
     //
     // Binary Operators
     //
-    llvm::Value* GenerateOr( const ExpressionNode& lhs,
-                             const ExpressionNode& rhs,
-                             IRBuilder& builder ) const;
+    llvm::Value* GenerateOr( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateAnd( const ExpressionNode& lhs,
-                              const ExpressionNode& rhs,
-                              IRBuilder& builder ) const;
+    llvm::Value* GenerateAnd( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateExclusiveOr( const ExpressionNode& lhs,
-                                      const ExpressionNode& rhs,
-                                      IRBuilder& builder ) const;
+    llvm::Value* GenerateExclusiveOr( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateCompareEqual( const ExpressionNode& lhs,
-                                       const ExpressionNode& rhs,
-                                       IRBuilder& builder ) const;
+    llvm::Value* GenerateCompareEqual( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateCompareNotEqual( const ExpressionNode& lhs,
-                                          const ExpressionNode& rhs,
-                                          IRBuilder& builder ) const;
+    llvm::Value* GenerateCompareNotEqual( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateCompareLessThan( const ExpressionNode& lhs,
-                                          const ExpressionNode& rhs,
-                                          IRBuilder& builder ) const;
+    llvm::Value* GenerateCompareLessThan( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateCompareGreaterThan( const ExpressionNode& lhs,
-                                             const ExpressionNode& rhs,
-                                             IRBuilder& builder ) const;
+    llvm::Value* GenerateCompareGreaterThan( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
     llvm::Value* GenerateCompareLessThanEquals( const ExpressionNode& lhs,
-                                                const ExpressionNode& rhs,
-                                                IRBuilder& builder ) const;
+                                                const ExpressionNode& rhs );
 
     llvm::Value* GenerateCompareGreaterThanEquals( const ExpressionNode& lhs,
-                                                   const ExpressionNode& rhs,
-                                                   IRBuilder& builder ) const;
+                                                   const ExpressionNode& rhs );
 
-    llvm::Value* GenerateLeftShift( const ExpressionNode& lhs,
-                                    const ExpressionNode& rhs,
-                                    IRBuilder& builder ) const;
+    llvm::Value* GenerateLeftShift( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateRightShift( const ExpressionNode& lhs,
-                                     const ExpressionNode& rhs,
-                                     IRBuilder& builder ) const;
+    llvm::Value* GenerateRightShift( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateAdd( const ExpressionNode& lhs,
-                              const ExpressionNode& rhs,
-                              IRBuilder& builder ) const;
+    llvm::Value* GenerateAdd( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateSubtract( const ExpressionNode& lhs,
-                                   const ExpressionNode& rhs,
-                                   IRBuilder& builder ) const;
+    llvm::Value* GenerateSubtract( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateMultiply( const ExpressionNode& lhs,
-                                   const ExpressionNode& rhs,
-                                   IRBuilder& builder ) const;
+    llvm::Value* GenerateMultiply( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateDivide( const ExpressionNode& lhs,
-                                 const ExpressionNode& rhs,
-                                 IRBuilder& builder ) const;
+    llvm::Value* GenerateDivide( const ExpressionNode& lhs, const ExpressionNode& rhs );
 
-    llvm::Value* GenerateModulo( const ExpressionNode& lhs,
-                                 const ExpressionNode& rhs,
-                                 IRBuilder& builder ) const;
+    llvm::Value* GenerateModulo( const ExpressionNode& lhs, const ExpressionNode& rhs );
+
+
+    //
+    // Unary operators
+    //
+
+    llvm::Value* GenerateNegate( const ExpressionNode& expression );
+
+    llvm::Value* GenerateBitwiseNot( const ExpressionNode& expression );
+
+    llvm::Value* GenerateLogicalNot( const ExpressionNode& expression );
 
     // Helpers
     llvm::Value* GenerateScalarOrVectorCast( llvm::Value* from_value,
                                              Type from_type,
-                                             Type to_type,
-                                             IRBuilder& builder ) const;
-    llvm::Value* GenerateMatrixCast( llvm::Value* from_value,
-                                     Type from_type,
-                                     Type to_type,
-                                     IRBuilder& builder ) const;
+                                             Type to_type );
+    llvm::Value* GenerateMatrixCast( llvm::Value* from_value, Type from_type, Type to_type );
+
+    llvm::Constant* GenerateConstantInt( Type type, unsigned long integer_value );
+
+    llvm::Constant* GenerateConstantFloat( Type type, double float_value );
+
+    llvm::Constant* GenerateConstantIntVector( Type type, const std::vector<unsigned long>& ints );
+
+    llvm::Constant* GenerateConstantFloatVector( Type type, const std::vector<double>& floats );
+
+    llvm::Constant* GenerateConstantIntMatrix( Type type, const std::vector<unsigned long>& ints );
+
+    llvm::Constant* GenerateConstantFloatMatrix( Type type, const std::vector<double>& floats );
+
+    llvm::Constant* GenerateGenericValue( const GenericValue& generic_value );
 };
 
 } // namespace Compiler

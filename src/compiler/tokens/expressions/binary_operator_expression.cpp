@@ -160,6 +160,9 @@ const ExpressionNode& BinaryOperatorExpression::GenerateCodeDag( NodeManager& no
         return node_manager.MakeExpressionNode( NodeType::Divide, { left, right } );
     case Op::MODULO:
         return node_manager.MakeExpressionNode( NodeType::Modulo, { left, right } );
+    default:
+        assert( false && "Generating code for an unhandled operator" );
+        std::abort();
     }
 }
 

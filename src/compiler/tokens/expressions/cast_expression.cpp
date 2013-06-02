@@ -219,8 +219,6 @@ const ExpressionNode& CastExpression::GenerateCastFromVector( const ExpressionNo
         unsigned num_rows = to_type.GetNumMatrixRows();
         unsigned num_columns = to_type.GetNumMatrixColumns(); 
         
-        const CompleteType& to_column_type = CompleteType( to_type.GetMatrixColumnType() );
-        
         std::vector<Node_ref> columns;
         
         std::vector<Node_ref> elements;
@@ -297,8 +295,6 @@ const ExpressionNode& CastExpression::GenerateCastFromMatrix( const ExpressionNo
     if( to_type.IsVectorType() )
     {
         unsigned to_size = to_type.GetNumElements();   
-        const CompleteType& from_column_type = 
-           CompleteType( expression.GetType().GetMatrixColumnType() );
         
         //
         // The vector must be the rght size

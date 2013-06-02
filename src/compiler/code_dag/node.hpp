@@ -63,6 +63,12 @@ enum class NodeType
     Return,
 
     //
+    // Misc
+    //
+    // Holds a Function_sp
+    FunctionIdentifier,
+
+    //
     // Expressions
     //
 
@@ -71,16 +77,18 @@ enum class NodeType
     Constant = Expression_start,
     // Holds a type
     Zero,
-    // Holds a Variable_sp
-    VariableIdentifier,
-    // Holds a Function_sp
-    FunctionIdentifier,
     // Holds a Swizzle and an expression
     Swizzle,
 
+    // Holds one Pointer Expression
+    PostIncrement,
+    PostDecrement,
+
+    //
+    // Binary operators
     // These all hold two expressions
-    BinaryOperator_start,
-    LogicalOr = BinaryOperator_start,
+    //
+    LogicalOr,
     LogicalAnd,
     BitwiseOr,
     BitwiseExclusiveOr,
@@ -98,28 +106,19 @@ enum class NodeType
     Multiply,
     Divide,
     Modulo,
-    BinaryOperator_end = Modulo,
 
+    //
+    // Unary operators
     // These all hold one expression
-    UnaryOperator_start,
-    Negate = UnaryOperator_start,
+    //
+    Negate,
     BitwiseNot,
     LogicalNot,
-    PreIncrement,
-    PreDecrement,
-    UnaryOperator_end = PreDecrement,
 
     // Holds two expressions to select from in [0] and [1] and a boolean expression in [2]
     Select,
     // Holds an expression in [0]
     Cast,
-
-    // Holds an expression in [0], the expression must be one of, VariableIdentifier or ArrayIndex
-    // Swizzles must come above this
-    Load,
-
-    // Holds an expression in [0] and an index expression in [1]
-    ArrayIndex,
 
     // Holds a variable number of arguments and a functionn node last
     Call,
@@ -136,7 +135,32 @@ enum class NodeType
     VectorConstructor,
     // Holds n vector expressions
     MatrixConstructor,
-    Expression_end = MatrixConstructor
+
+    //
+    // PointerExpressions return a pointer, which must be accessed with Load or Store
+    //
+    PointerExpression_start,
+
+    // Holds a Variable_sp
+    VariableIdentifier = PointerExpression_start,
+    // Holds a PointerExpression in [0] and an index expression in [1]
+    ArrayIndex,
+
+    // Holds a PointerExpression in [0] and an expression in [1], this returns the pointer to the
+    // stored
+    Store,
+
+    // Holds a PointerExpression in [0] and an expression in [1], this returns the pointer to the
+    // stored
+    SwizzleStore,
+
+    // Holds one Pointer Expression
+    PreIncrement,
+    PreDecrement,
+
+    PointerExpression_end = PreDecrement,
+
+    Expression_end = PointerExpression_end,
 };
 
 class Node;
@@ -151,7 +175,7 @@ public:
 
     const Node& GetChild( unsigned index ) const;
 
-    std::set<const Node*> GetDescendantsOfNodeType( NodeType node_type ) const;
+    std::set<const Node*> GetDescendantsWithNodeType( NodeType node_type ) const;
 
     NodeType GetNodeType() const;
 
@@ -160,7 +184,7 @@ public:
 
 protected:
     friend class NodeManager;
-    Node( NodeType type, std::vector<Node_ref> children );
+    Node( NodeType type, std::vector<Node_ref> children = {} );
 
 private:
 

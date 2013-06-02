@@ -157,11 +157,11 @@ bool SubscriptOperator::PerformSema( SemaAnalyzer& sema,
     return good;
 }
 
-const ExpressionNode& SubscriptOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
+const PointerExpressionNode& SubscriptOperator::GenerateCodeDag( NodeManager& node_manager, Expression& expression ) const
 {
     const Node& array = expression.GenerateCodeDag( node_manager );
     const Node& index = m_IndexExpression->GenerateCodeDag( node_manager );
-    return node_manager.MakeExpressionNode( NodeType::ArrayIndex, {array, index} );
+    return node_manager.MakePointerExpressionNode( NodeType::ArrayIndex, {array, index} );
 }
 
 llvm::Value* SubscriptOperator::CodeGen( CodeGenerator& code_gen,

@@ -27,36 +27,51 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "variable_node.hpp"
+#include "swizzle_store_node.hpp"
+
+#include <cassert>
 
 #include <compiler/code_dag/expression_node.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/semantic_analysis/complete_type.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
+#include <compiler/semantic_analysis/type_properties.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-VariableNode::VariableNode( Variable_sp variable )
-    : PointerExpressionNode( NodeType::VariableIdentifier ),
-      m_Variable( std::move( variable ) )
+SwizzleStoreNode::SwizzleStoreNode( const PointerExpressionNode& assignee,
+                                    const ExpressionNode& assigned,
+                                    Swizzle swizzle )
+    : PointerExpressionNode( NodeType::SwizzleStore, { assignee, assigned } ),
+      m_Swizzle( std::move( swizzle ) )
 {
 }
 
-
-const Variable& VariableNode::GetVariable() const
+const Swizzle& SwizzleStoreNode::GetSwizzle() const
 {
-    return *m_Variable;
+    return m_Swizzle;
 }
 
-CompleteType VariableNode::GetType() const
+const PointerExpressionNode& SwizzleStoreNode::GetSwizzled() const
 {
-    return GetVariable().GetType();
+    assert( GetNumChildren() == 1 && "Swizzle node with incorrect number of children" );
+    assert( isa<PointerExpressionNode>( GetChild( 0 ) ) &&
+            "SwizzleStore node doesn't have an pointer expression node" );
+    return cast<PointerExpressionNode>( GetChild( 0 ) );
 }
 
-bool VariableNode::classof( const Node* n )
+CompleteType SwizzleStoreNode::GetType() const
 {
-    return n->GetNodeType() == NodeType::VariableIdentifier;
+    Type base_type = GetScalarType( GetSwizzled().GetType().GetElementType() );
+    return CompleteType( GetVectorType( base_type, GetSwizzle().GetSize() ) );
+}
+
+bool SwizzleStoreNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::SwizzleStore;
 }
 
 } // namespace Compiler

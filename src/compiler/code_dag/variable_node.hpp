@@ -31,7 +31,7 @@
 
 #include <memory>
 
-#include <compiler/code_dag/expression_node.hpp>
+#include <compiler/code_dag/pointer_expression_node.hpp>
 
 namespace JoeLang
 {
@@ -39,14 +39,13 @@ namespace Compiler
 {
 
 class CompleteType;
-enum class NodeType;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
-class VariableNode : public ExpressionNode
+class VariableNode : public PointerExpressionNode
 {
 public:
-    const Variable_sp& GetVariable() const;
+    const Variable& GetVariable() const;
 
     CompleteType GetType() const;
 

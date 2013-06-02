@@ -63,19 +63,6 @@ jl_string String_Copy( jl_string from )
     return ret;
 }
 
-/*
-void String_Move( jl_string& to, jl_string&& from )
-{
-    auto s    = to.size;
-    to.size   = from.size;
-    from.size = s;
-
-    auto d    = to.data;
-    to.data   = from.data;
-    from.data = d;
-}
-*/
-
 jl_string String_Create( jl_uint size, const jl_uchar* data )
 {
     jl_string ret;

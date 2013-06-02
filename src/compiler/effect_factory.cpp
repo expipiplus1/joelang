@@ -105,7 +105,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
 {
     Lexer token_stream( source, name );
     Parser parser( token_stream );
-    SemaAnalyzer sema_analyzer( m_Context, m_Runtime );
+    SemaAnalyzer sema_analyzer( m_Context, m_Runtime, m_LLVMWriter );
     CodeGenerator code_generator( m_Runtime.CreateCodeGenerator() );
     NodeManager node_manager;
 

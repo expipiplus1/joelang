@@ -50,7 +50,7 @@
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/translation_unit.hpp>
-#include <compiler/writers/code_generator.hpp>
+#include <compiler/writers/llvm_writer.hpp>
 #include <compiler/writers/runtime.hpp>
 #include <joelang/context.hpp>
 #include <joelang/state.hpp>
@@ -60,12 +60,11 @@ namespace JoeLang
 namespace Compiler
 {
 
-SemaAnalyzer::SemaAnalyzer( const Context& context, Runtime& runtime )
+SemaAnalyzer::SemaAnalyzer(const Context& context, const Runtime& runtime, LLVMWriter& llvm_writer)
     :m_Context( context )
-    ,m_Runtime( runtime )
-    ,m_CodeGenerator( std::move(m_Runtime.CreateCodeGenerator()) )
+    ,m_LLVMWriter( llvm_writer )
 {
-    for( Function_sp f : m_Runtime.GetRuntimeFunctions() )
+    for( Function_sp f : runtime.GetRuntimeFunctions() )
         AddFunction( std::move(f) );
 }
 
@@ -358,11 +357,15 @@ void SemaAnalyzer::DeclareVariable( const std::string& identifier,
 {
     bool inserted = m_SymbolStack.rbegin()->m_Variables.insert(
                         std::make_pair( identifier, variable ) ).second;
+    
 
     if( !inserted )
         Error( "Duplicate definition of variable: " + identifier );
     else
     {
+        if( variable->IsGlobal() )
+            m_LLVMWriter.AddGlobalVariable( *variable );
+        
         //
         // Remember this if it's a global uniform
         //
@@ -412,7 +415,7 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
                                                         false,//Isn't a param
                                                         GenericValue(s->second),
                                                         s->first );
-            variable->CodeGen( m_CodeGenerator );
+            m_LLVMWriter.AddGlobalVariable( *variable );
             return std::move(variable);
         }
     }
@@ -654,7 +657,8 @@ bool SemaAnalyzer::InGlobalScope() const
 
 GenericValue SemaAnalyzer::EvaluateExpression( const Expression& expression )
 {
-    return m_CodeGenerator.EvaluateExpression( expression );
+    NodeManager node_manager;
+    return m_LLVMWriter.EvaluateExpression( expression.GenerateCodeDag( node_manager ) );
 }
 
 GenericValue SemaAnalyzer::EvaluateInitializer( const Initializer& initializer )
@@ -698,11 +702,6 @@ const std::vector<std::string>& SemaAnalyzer::GetErrors() const
 const std::vector<std::string>& SemaAnalyzer::GetWarnings() const
 {
     return m_Warnings;
-}
-
-CodeGenerator& SemaAnalyzer::GetCodeGenerator()
-{
-    return m_CodeGenerator;
 }
 
 SemaAnalyzer::ScopeHolder::ScopeHolder( SemaAnalyzer& sema )

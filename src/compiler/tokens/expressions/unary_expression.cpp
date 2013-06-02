@@ -106,6 +106,9 @@ const ExpressionNode& UnaryExpression::GenerateCodeDag( NodeManager& node_manage
         return node_manager.MakeExpressionNode( NodeType::PreIncrement, { expression } );
     case Op::DECREMENT:
         return node_manager.MakeExpressionNode( NodeType::PreDecrement, { expression } );
+    default:
+        assert( false && "Generating code for an unhandled operator" );
+        std::abort();
     }
 }
 

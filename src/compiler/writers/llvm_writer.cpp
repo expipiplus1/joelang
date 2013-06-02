@@ -32,21 +32,26 @@
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/Function.h>
+#include <llvm/IR/GlobalVariable.h>
 #include <llvm/IR/IRBuilder.h>
 
 #include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/swizzle_store_node.hpp>
+#include <compiler/code_dag/variable_node.hpp>
+#include <compiler/code_dag/zero_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/support/casting.hpp>
-#include <compiler/support/casting.hpp>
+#include <compiler/support/generic_value.hpp>
 #include <compiler/writers/runtime.hpp>
 #include <joelang/state.hpp>
 #include <joelang/state_assignment.hpp>
@@ -60,9 +65,48 @@ namespace Compiler
 LLVMWriter::LLVMWriter( Runtime& runtime )
     : m_Runtime( runtime ),
       m_Module( m_Runtime.GetModule() ),
-      m_ExecutionEngine( m_Runtime.GetExecutionEngine() )
-    
+      m_ExecutionEngine( m_Runtime.GetExecutionEngine() ),
+      m_Builder( m_Runtime.GetLLVMContext() )
+{    
+}
+
+LLVMWriter::~LLVMWriter()
 {
+    assert( m_LocalVariables.empty() && "Leftover local variables" );
+    assert( m_GeneratedValues.empty() && "Leftover generated values" );
+}
+
+void LLVMWriter::AddGlobalVariable( const Variable& variable )
+{
+    assert( m_GlobalVariables.find( &variable ) == m_GlobalVariables.end() &&
+            "Adding a variable twice" );
+    assert( variable.IsGlobal() && "AddGlobalVariable given a non-global variable" );
+ 
+    llvm::Type* llvm_type = m_Runtime.GetLLVMType( variable.GetType() );
+    llvm::Constant* init;
+    if( !variable.GetInitializer().GetType().IsUnknown() )
+        init = GenerateGenericValue( variable.GetInitializer() );
+    else
+        init = llvm::UndefValue::get( llvm_type );
+
+    auto linkage = variable.IsUniform() ? llvm::GlobalVariable::ExternalLinkage
+                                        : llvm::GlobalVariable::PrivateLinkage;
+
+    llvm::GlobalVariable* global_variable = new llvm::GlobalVariable(
+        m_Module,
+        llvm_type,
+        variable.IsConst() &&
+            !variable.IsUniform(), //If something is uniform, it may be changed from outside
+        linkage,
+        init,
+        variable.GetName() );
+    //
+    // The address of non const variables is important because we can modify
+    // them from outside
+    //
+    global_variable->setUnnamedAddr( variable.IsConst() && variable.IsUniform() );
+    
+    m_GlobalVariables[&variable] = global_variable;
 }
 
 void LLVMWriter::GenerateFunction( const Function& function )
@@ -76,17 +120,13 @@ void LLVMWriter::GenerateFunction( const Function& function )
     {
         llvm_function = GenerateFunctionDeclaration( function );
         m_GeneratedFunctions[&function] = llvm_function;
-        
     }
     else 
     {
-        llvm_function = i->second;
-        
         //
-        // If we already have a definition, we can return
+        // Return, because we've already declared it and it will be defined later
         //
-        if( !llvm_function->empty() )
-            return;
+        return;
     }
     
     GenerateNodeFunctionDependencies( function.GetCodeDag() );
@@ -98,9 +138,9 @@ void LLVMWriter::GenerateFunction( const Function& function )
     llvm::BasicBlock* body =
         llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(), "entry", llvm_function );
 
-    IRBuilder builder( m_Runtime.GetLLVMContext() );
+    assert( !m_Builder.GetInsertBlock() && "Builder is still inserting into a block" );
     
-    builder.SetInsertPoint( body );
+    m_Builder.SetInsertPoint( body );
     
     const std::vector<Variable_sp>& parameters = function.GetParameters();
     assert( parameters.size() == llvm_function->arg_size() && "Mismatch in number of parameters" );
@@ -109,15 +149,18 @@ void LLVMWriter::GenerateFunction( const Function& function )
     for( unsigned i = 0; i < parameters.size(); ++i, ++arg_iterator )
     {
         // todo in out and inout things
-        Variable& parameter = *parameters[i];
+        const Variable& parameter = *parameters[i];
         assert( parameter.IsParameter() && "non-parameter in function parameter list" );
 
-        llvm::Value* v = builder.CreateAlloca( m_Runtime.GetLLVMType( parameter.GetType() ) );
-        builder.CreateStore( arg_iterator, v );
-        parameter.SetParameterPointer( v );
+        // Todo, if the variable is never written to, don't bother alloc
+        llvm::Value* v = m_Builder.CreateAlloca( m_Runtime.GetLLVMType( parameter.GetType() ) );
+        m_Builder.CreateStore( arg_iterator, v );
+        m_LocalVariables[&parameter] = v;
     }
 
-    GenerateStatement( function.GetCodeDag(), builder );
+    GenerateStatement( function.GetCodeDag() );
+    
+    GenerateFunctionCleanup();
 }
 
 llvm::Function* LLVMWriter::GenerateFunctionDeclaration( const Function& function )
@@ -144,13 +187,63 @@ void LLVMWriter::GenerateNodeFunctionDependencies( const Node& node )
     // Generate all the functions this depends on
     //
     std::set<const Node*> dependencies =
-        node.GetDescendantsOfNodeType( NodeType::FunctionIdentifier );
+        node.GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
     
     for( const Node* n : dependencies )
     {
         const Function& dependency = cast<FunctionNode>( *n ).GetFunction();
         GenerateFunction( dependency );
     }
+}
+
+GenericValue LLVMWriter::EvaluateExpression( const ExpressionNode& expression )
+{
+    GenerateNodeFunctionDependencies( expression );
+    
+    llvm::Function* function;
+
+#define GET_VALUE( type ) \
+    case JoeLangType<type>::value: \
+        ret = GenericValue( WrapExpression<type>( expression, function )() ); \
+        break;
+
+#define GET_VALUE_N( type )                                                          \
+    GET_VALUE( type ) GET_VALUE( type##2 ) GET_VALUE( type##3 ) GET_VALUE( type##4 ) \
+        GET_VALUE( type##2x2 ) GET_VALUE( type##2x3 ) GET_VALUE( type##2x4 )         \
+        GET_VALUE( type##3x2 ) GET_VALUE( type##3x3 ) GET_VALUE( type##3x4 )         \
+        GET_VALUE( type##4x2 ) GET_VALUE( type##4x3 ) GET_VALUE( type##4x4 )
+
+    //
+    // Extract the result
+    //
+    GenericValue ret;
+    switch( expression.GetType().GetType() )
+    {
+    GET_VALUE_N( jl_bool )
+    GET_VALUE_N( jl_char )
+    GET_VALUE_N( jl_short )
+    GET_VALUE_N( jl_int )
+    GET_VALUE_N( jl_long )
+    GET_VALUE_N( jl_uchar )
+    GET_VALUE_N( jl_ushort )
+    GET_VALUE_N( jl_uint )
+    GET_VALUE_N( jl_ulong )
+    GET_VALUE_N( jl_float )
+    GET_VALUE_N( jl_double )
+    //case Type::STRING:
+        //ret = GenericValue( WrapStringExpression( expression, function )() );
+        //break;
+    default:
+        assert( false && "Trying to run a function returning an unhandled type" );
+    }
+
+#undef GET_VALUE_N
+#undef GET_VALUE
+
+    m_ExecutionEngine.freeMachineCodeForFunction( function );
+    function->eraseFromParent();
+
+    return ret;
 }
 
 StateAssignmentBase_up LLVMWriter::GenerateStateAssignment(
@@ -167,10 +260,13 @@ StateAssignmentBase_up LLVMWriter::GenerateStateAssignment(
     //
     GenerateNodeFunctionDependencies( assigned_node );
     
+    llvm::Function* llvm_function;
+    
 #define CREATE_STATE_ASSIGNMENT( type ) \
     case JoeLangType<type>::value: \
-        return StateAssignmentBase_up( new StateAssignment<type>( \
-            static_cast<const State<type>&>( state ), WrapExpression<type>( assigned_node ) ) ); \
+        return StateAssignmentBase_up(                                           \
+            new StateAssignment<type>( static_cast<const State<type>&>( state ), \
+                                       WrapExpression<type>( assigned_node, llvm_function ) ) ); \
         break
 
 #define CREATE_STATE_ASSIGNMENT_N( type ) \
@@ -206,67 +302,66 @@ StateAssignmentBase_up LLVMWriter::GenerateStateAssignment(
         assert( false && "Trying to generate code for an unhandled state type" );
     }
     
+    llvm_function->setName( state.GetName() + "_assignment" );
+    
  #undef CREATE_STATE_ASSIGNMENT_N
  #undef CREATE_STATE_ASSIGNMENT
 }
 
-void* LLVMWriter::WrapExpressionCommon( const ExpressionNode& expression )
+void* LLVMWriter::WrapExpressionCommon( const ExpressionNode& expression,
+                                        llvm::Function*& llvm_function )
 {
     assert( !expression.GetType().IsArrayType() && "Can't wrap an array type" );
-
-    //
-    // Create a new builder for this temporary evaluation
-    //
-    IRBuilder builder( m_Runtime.GetLLVMContext() );
-
-//
-// Gather all the functions this depends on
-//
-#if 0
-    std::set<Function_ref> function_dependencies = expression.GetFunctionDependencies();
-    GenerateFunctions( function_dependencies );
-#endif
 
     llvm::Type* return_type = m_Runtime.GetWrapperLLVMType( expression.GetType() );
     llvm::FunctionType* prototype = llvm::FunctionType::get(
         m_Runtime.GetLLVMType( Type::VOID ), { return_type->getPointerTo() }, false );
-    llvm::Function* function = llvm::Function::Create(
+    llvm_function = llvm::Function::Create(
         prototype, llvm::Function::ExternalLinkage, "expression_evaluation", &m_Module );
 
     llvm::BasicBlock* body =
-        llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(), "entry", function );
+        llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(), "entry", llvm_function );
 
-    builder.SetInsertPoint( body );
+    assert( !m_Builder.GetInsertBlock() && "Builder is still inserting into a block" );
+    
+    m_Builder.SetInsertPoint( body );
     
     // The code for the expression
-    llvm::Value* v = GenerateValue( expression, builder );
+    llvm::Value* v = GenerateValue( expression );
     
-#if 0
     if( expression.GetType().IsString() )
-        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY, { v }, builder );
-    CreateDestroyTemporaryCalls( builder );
-#endif
+    {
+        m_StringTemporaries.push( v );
+        
+        //
+        // This doesn't need to be cleaned up as we're passing ownership to the host application
+        //
+        v = m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_COPY, { v }, m_Builder );
+    }
 
-    v = m_Runtime.CreateDeepCopy( v, return_type, builder );
+    v = m_Runtime.CreateDeepCopy( v, return_type, m_Builder );
+    
+    m_Builder.CreateStore( v, llvm_function->arg_begin() );
+    
+    GenerateExpressionCleanup();
+    
+    m_Builder.CreateRetVoid();
+    
+    GenerateFunctionCleanup();
 
-#if 0
-    assert( m_Temporaries.empty() && "Leftover temporaries" );
-#endif
+    assert( !llvm::verifyFunction( *llvm_function, llvm::PrintMessageAction ) &&
+            "Function not valid" );
 
-    builder.CreateStore( v, function->arg_begin() );
-    builder.CreateRetVoid();
-
-    assert( !llvm::verifyFunction( *function, llvm::PrintMessageAction ) && "Function not valid" );
-
-    void* function_ptr = m_ExecutionEngine.getPointerToFunction( function );
+    void* function_ptr = m_ExecutionEngine.getPointerToFunction( llvm_function );
     
     return function_ptr;
 }
     
 template <typename T>
-std::function<T()> LLVMWriter::WrapExpression( const ExpressionNode& expression )
+std::function<T()> LLVMWriter::WrapExpression( const ExpressionNode& expression,
+                                               llvm::Function*& llvm_function )
 {
-    void* function_ptr = WrapExpressionCommon( expression );
+    void* function_ptr = WrapExpressionCommon( expression, llvm_function );
 
     return[function_ptr]()->T{ T t[1];
         reinterpret_cast<void ( * )( T* )>( function_ptr )( t );
@@ -276,126 +371,302 @@ std::function<T()> LLVMWriter::WrapExpression( const ExpressionNode& expression 
 }
 
 //--------------------------------------------------------------------------------------------------
+// Cleanup
+//--------------------------------------------------------------------------------------------------
+
+void LLVMWriter::GenerateExpressionCleanup()
+{
+    while( !m_StringTemporaries.empty() )
+    {
+        llvm::Value* v = m_StringTemporaries.top();
+        m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_DESTROY, { v }, m_Builder );
+        m_StringTemporaries.pop();
+    }
+    
+    m_GeneratedValues.clear();
+}
+
+void LLVMWriter::GenerateFunctionCleanup()
+{
+    assert( m_StringTemporaries.empty() && "Leftover temporaries" );
+    assert( m_GeneratedValues.empty() && "Leftover values" );
+    m_LocalVariables.clear(); 
+    m_Builder.ClearInsertionPoint();
+}
+
+//--------------------------------------------------------------------------------------------------
 // All the functions dealing with generating statements
 //--------------------------------------------------------------------------------------------------
 
-void LLVMWriter::GenerateStatement( const Node& statement, IRBuilder& builder ) const
+void LLVMWriter::GenerateStatement( const Node& statement )
 {
     switch( statement.GetNodeType() )
     {
     case NodeType::Sequence:
-        return GenerateSequence( statement, builder );
+        return GenerateSequence( statement );
     case NodeType::Return:
         if( statement.GetNumChildren() == 0 )
-            return GenerateVoidReturn( builder );
-        return GenerateReturn( cast<ExpressionNode>( statement.GetChild( 0 ) ), builder );
+            return GenerateVoidReturn();
+        return GenerateReturn( cast<ExpressionNode>( statement.GetChild( 0 ) ) );
     default:
         assert( false && "Trying to generate a uhandled statement type" );
     }
 }
 
-void LLVMWriter::GenerateSequence( const Node& sequence, IRBuilder& builder ) const
+void LLVMWriter::GenerateSequence( const Node& sequence )
 {
     assert( sequence.GetNodeType() == NodeType::Sequence &&
             "GenerateSequence given a non-sequence" );
     for( const Node& node : sequence.GetChildren() )
-        GenerateStatement( node, builder );
+        GenerateStatement( node );
 }
 
-void LLVMWriter::GenerateVoidReturn( IRBuilder& builder ) const
+void LLVMWriter::GenerateVoidReturn()
 {
-    builder.CreateRetVoid();
+    assert( m_GeneratedValues.empty() && "Leftover values in GeneratedValues" );
+    m_Builder.CreateRetVoid();
 }
 
-void LLVMWriter::GenerateReturn( const ExpressionNode& returned, IRBuilder& builder ) const
+void LLVMWriter::GenerateReturn( const ExpressionNode& returned )
 {
-    builder.CreateRet( GenerateValue( returned, builder ) );
+    assert( m_GeneratedValues.empty() && "Leftover values in GeneratedValues" );
+    
+    llvm::Value* returned_value = GenerateValue( returned );
+    
+    GenerateExpressionCleanup();
+    
+    m_Builder.CreateRet( returned_value );
+    
 }
 
 //--------------------------------------------------------------------------------------------------
 // All the functions dealing with generating llvm values
 //--------------------------------------------------------------------------------------------------
 
-llvm::Value* LLVMWriter::GenerateValue( const ExpressionNode& expression, IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateValue( const ExpressionNode& expression )
 {
+    //
+    // If we've already generated this value for this expression, just returned that to not
+    // evaluate it twice
+    //
+    auto i = m_GeneratedValues.find( &expression );
+    if( i != m_GeneratedValues.end() )
+        return i->second;
+    
+    if( expression.GetNodeType() == NodeType::SwizzleStore )
+        assert( false && "complete me" );
+    
+    if( isa<PointerExpressionNode>( expression ) )
+        return m_Builder.CreateLoad( GenerateAddress( cast<PointerExpressionNode>( expression ) ) );
+    
     switch( expression.GetNodeType() )
     {
     case NodeType::Constant:
-        return GenerateConstant( cast<ConstantNodeBase>( expression ), builder );
+        return GenerateConstant( cast<ConstantNodeBase>( expression ) );
+       
+    case NodeType::Zero:
+        return GenerateZero( cast<ZeroNode>( expression ).GetType() );
+        
     case NodeType::Cast:
-        return GenerateCast( cast<CastNode>( expression ), builder );
+        return GenerateCast( cast<CastNode>( expression ) );
         
     case NodeType::Call:
-        return GenerateCall( expression, builder );
+        return GenerateCall( expression );
         
     case NodeType::ExtractElement:
-        return GenerateExtractElement(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
+        return GenerateExtractElement( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::InsertElement:
+        return GenerateInsertElement( /* vec = */ expression.GetOperand( 0 ),
+                                      /* element = */ expression.GetOperand( 1 ),
+                                      /* index = */ expression.GetOperand( 2 ) );
         
     case NodeType::Swizzle:
-        return GenerateSwizzle(
-            expression.GetOperand( 0 ), cast<SwizzleNode>( expression ).GetSwizzle(), builder );
+        return GenerateSwizzle( expression.GetOperand( 0 ),
+                                cast<SwizzleNode>( expression ).GetSwizzle() );
+        
+    case NodeType::Select:
+        return GenerateSelect( expression.GetOperand( 0 ),
+                               expression.GetOperand( 1 ),
+                               /* condition = */ expression.GetOperand( 2 ) );
     
     case NodeType::VectorConstructor:
-        return GenerateVectorConstructor( expression, builder );
+        return GenerateVectorConstructor( expression );
         
     case NodeType::MatrixConstructor:
-        return GenerateMatrixConstructor( expression, builder );
+        return GenerateMatrixConstructor( expression );
+        
+    case NodeType::PostIncrement:
+        return GeneratePostIncrement( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ) );
+        
+    case NodeType::PostDecrement:
+        return GeneratePostDecrement( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ) );
     
     //
     // Binary Operators
     //
     case NodeType::LogicalOr:
     case NodeType::BitwiseOr:
-        return GenerateOr( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
+        return GenerateOr( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
     case NodeType::LogicalAnd:
     case NodeType::BitwiseAnd:
-        return GenerateAnd( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::BitwiseExclusiveOr:
-        return GenerateExclusiveOr(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareEqual:
-        return GenerateCompareEqual(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareNotEqual:
-        return GenerateCompareNotEqual(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareLessThan:
-        return GenerateCompareLessThan(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareGreaterThan:
-        return GenerateCompareGreaterThan(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareLessThanEquals:
-        return GenerateCompareLessThanEquals(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::CompareGreaterThanEquals:
-        return GenerateCompareGreaterThanEquals(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::LeftShift:
-        return GenerateLeftShift( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::RightShift:
-        return GenerateRightShift(
-            expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::Add:
-        return GenerateAdd( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::Subtract:
-        return GenerateSubtract( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::Multiply:
-        return GenerateMultiply( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::Divide:
-        return GenerateDivide( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
-    case NodeType::Modulo:
-        return GenerateModulo( expression.GetOperand( 0 ), expression.GetOperand( 1 ), builder );
+        return GenerateAnd( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
         
+    case NodeType::BitwiseExclusiveOr:
+        return GenerateExclusiveOr( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareEqual:
+        return GenerateCompareEqual( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareNotEqual:
+        return GenerateCompareNotEqual( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareLessThan:
+        return GenerateCompareLessThan( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareGreaterThan:
+        return GenerateCompareGreaterThan( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareLessThanEquals:
+        return GenerateCompareLessThanEquals( expression.GetOperand( 0 ),
+                                              expression.GetOperand( 1 ) );
+        
+    case NodeType::CompareGreaterThanEquals:
+        return GenerateCompareGreaterThanEquals( expression.GetOperand( 0 ),
+                                                 expression.GetOperand( 1 ) );
+        
+    case NodeType::LeftShift:
+        return GenerateLeftShift( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::RightShift:
+        return GenerateRightShift( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::Add:
+        return GenerateAdd( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::Subtract:
+        return GenerateSubtract( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::Multiply:
+        return GenerateMultiply( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::Divide:
+        return GenerateDivide( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+    case NodeType::Modulo:
+        return GenerateModulo( expression.GetOperand( 0 ), expression.GetOperand( 1 ) );
+        
+        
+    //
+    // Unary operators
+    //
+    case NodeType::Negate:
+        return GenerateNegate( expression.GetOperand( 0 ) );
+        
+    case NodeType::BitwiseNot:
+        return GenerateBitwiseNot( expression.GetOperand( 0 ) );
+        
+    case NodeType::LogicalNot:
+        return GenerateLogicalNot( expression.GetOperand( 0 ) );
         
     default:
         assert( false && "Trying to generate the llvm value of an unhanded expression type" );
+        
         return nullptr;
     }
 }
 
-llvm::Value* LLVMWriter::GenerateCast( const CastNode& expression, IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateAddress( const PointerExpressionNode& expression )
+{
+    auto i = m_GeneratedValues.find( &expression );
+    if( i != m_GeneratedValues.end() )
+        return i->second;
+    
+    switch( expression.GetNodeType() )
+    {
+    case NodeType::Store:
+        return GenerateStore( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ),
+                              expression.GetOperand( 1 ) );
+    case NodeType::SwizzleStore:
+        return GenerateSwizzleStore( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ),
+                                     expression.GetOperand( 1 ),
+                                     cast<SwizzleStoreNode>( expression ).GetSwizzle() );
+    case NodeType::VariableIdentifier:
+        return GenerateVariableAddress( cast<VariableNode>( expression ) );
+    case NodeType::ArrayIndex:
+        return GenerateArrayIndex( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ),
+                                   expression.GetOperand( 1 ) );
+    case NodeType::PreIncrement:
+        return GeneratePreIncrement( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ) );
+    case NodeType::PreDecrement:
+        return GeneratePreDecrement( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ) );
+    default:
+        assert( false && "Trying to generate the llvm value of an unhanded expression type" );
+        break;
+        return nullptr;
+    }
+}
+
+//
+// Addresses
+//
+
+llvm::Value* LLVMWriter::GenerateStore( const PointerExpressionNode& address,
+                                        const ExpressionNode& assigned )
+{
+    llvm::Value* address_value = GenerateAddress( address );
+    llvm::Value* assigned_value = GenerateValue( assigned );
+    m_Builder.CreateStore( assigned_value, address_value );
+    return address_value;
+}
+
+llvm::Value* LLVMWriter::GenerateSwizzleStore( const PointerExpressionNode& address,
+                                               const ExpressionNode& assigned,
+                                               const Swizzle& swizzle )
+{
+    assert( false && "complete me" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GenerateVariableAddress( const VariableNode& variable_node )
+{
+    auto i = m_GlobalVariables.find( &variable_node.GetVariable() );
+    if( i != m_GlobalVariables.end() )
+        return i->second;
+    
+    auto j = m_LocalVariables.find( &variable_node.GetVariable() );
+    if( j != m_LocalVariables.end() )
+        return j->second;
+    
+    assert( false && "Couldn't find variable" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GenerateArrayIndex( const PointerExpressionNode& address,
+                                             const ExpressionNode& index )
+{
+    assert( false && "complete me" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GeneratePreIncrement( const PointerExpressionNode& address )
+{
+    assert( false && "complete me" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GeneratePreDecrement( const PointerExpressionNode& address )
+{
+    assert( false && "complete me" );
+    std::abort();
+}
+
+//
+// Values
+//
+
+llvm::Value* LLVMWriter::GenerateCast( const CastNode& expression )
 {
     assert( expression.GetNodeType() == NodeType::Cast &&
             "Trying to generate a cast from a non-cast node" );
@@ -403,20 +674,18 @@ llvm::Value* LLVMWriter::GenerateCast( const CastNode& expression, IRBuilder& bu
     Type from_type = cast<ExpressionNode>( expression.GetChild( 0 ) ).GetType().GetType();
     Type to_type = expression.GetType().GetType();
     
-    llvm::Value* from_value =
-        GenerateValue( cast<ExpressionNode>( expression.GetChild( 0 ) ), builder );
+    llvm::Value* from_value = GenerateValue( cast<ExpressionNode>( expression.GetChild( 0 ) ) );
     
     if( IsScalarType( from_type ) || IsVectorType( from_type ) )
-        return GenerateScalarOrVectorCast( from_value, from_type, to_type, builder );
+        return GenerateScalarOrVectorCast( from_value, from_type, to_type );
     else if( IsMatrixType( from_type ) )
-        return GenerateMatrixCast( from_value, from_type, to_type, builder );
+        return GenerateMatrixCast( from_value, from_type, to_type );
     
     assert( false && "Trying to cast an unhandled type" );
     return nullptr;
 }
 
-llvm::Value* LLVMWriter::GenerateConstant( const ConstantNodeBase& expression,
-                                           IRBuilder& builder ) const
+llvm::Constant* LLVMWriter::GenerateConstant( const ConstantNodeBase& expression )
 {
     Type joelang_type = expression.GetType();
     llvm::Type* llvm_type = m_Runtime.GetLLVMType( joelang_type );
@@ -460,7 +729,12 @@ llvm::Value* LLVMWriter::GenerateConstant( const ConstantNodeBase& expression,
     }
 }   
 
-llvm::Value* LLVMWriter::GenerateCall( const ExpressionNode& expression, IRBuilder& builder ) const
+llvm::Constant* LLVMWriter::GenerateZero( Type type )
+{
+    return llvm::Constant::getNullValue( m_Runtime.GetLLVMType( type ) );
+}
+
+llvm::Value* LLVMWriter::GenerateCall( const ExpressionNode& expression )
 {
     assert( expression.GetNodeType() == NodeType::Call && "GenerateCall given a non-call node" );
     
@@ -474,24 +748,29 @@ llvm::Value* LLVMWriter::GenerateCall( const ExpressionNode& expression, IRBuild
     llvm_arguments.reserve( expression.GetNumChildren() - 1 );
             
     for( unsigned i = 0; i < expression.GetNumChildren() - 1; ++i )
-        llvm_arguments.push_back( GenerateValue( expression.GetOperand( i ), builder ) );
+        llvm_arguments.push_back( GenerateValue( expression.GetOperand( i ) ) );
     
-    return builder.CreateCall( m_GeneratedFunctions.at( &function ), std::move( llvm_arguments ) );
+    return m_Builder.CreateCall( m_GeneratedFunctions.at( &function ),
+                                 std::move( llvm_arguments ) );
 }   
 
-llvm::Value* LLVMWriter::GenerateExtractElement( const ExpressionNode& expression,
-                                                 const ExpressionNode& index,
-                                                 IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateExtractElement( const ExpressionNode& vector,
+                                                 const ExpressionNode& index )
 {
-    return builder.CreateExtractElement( GenerateValue( expression, builder ),
-                                         GenerateValue( index, builder ) );
+    return m_Builder.CreateExtractElement( GenerateValue( vector ), GenerateValue( index ) );
 }
 
-llvm::Value* LLVMWriter::GenerateSwizzle( const ExpressionNode& expression,
-                                          const Swizzle& swizzle,
-                                          IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateInsertElement( const ExpressionNode& vector,
+                                                const ExpressionNode& element,
+                                                const ExpressionNode& index )
+{
+    return m_Builder.CreateInsertElement(
+        GenerateValue( vector ), GenerateValue( element ), GenerateValue( index ) );
+}
+
+llvm::Value* LLVMWriter::GenerateSwizzle( const ExpressionNode& expression, const Swizzle& swizzle )
 {  
-    llvm::Value* value = GenerateValue( expression, builder );
+    llvm::Value* value = GenerateValue( expression );
     
     //
     // If we only have one swizzle index we want to extract an element
@@ -511,7 +790,7 @@ llvm::Value* LLVMWriter::GenerateSwizzle( const ExpressionNode& expression,
         //
         // Otherwise extract the element
         //
-        return builder.CreateExtractElement(
+        return m_Builder.CreateExtractElement(
             value,
             llvm::ConstantInt::get( m_Runtime.GetLLVMType( Type::INT ), swizzle.GetIndex( 0 ) ) );
     }
@@ -524,121 +803,124 @@ llvm::Value* LLVMWriter::GenerateSwizzle( const ExpressionNode& expression,
     // If this isn't a vector, package it into one
     //
     if( expression.GetType().IsScalarType() )
-        value = builder.CreateInsertElement(
+        value = m_Builder.CreateInsertElement(
             llvm::UndefValue::get( llvm::VectorType::get( value->getType(), 1 ) ),
             value,
             llvm::ConstantInt::get( m_Runtime.GetLLVMType( Type::INT ), 0 ) );
 
     std::vector<unsigned> indices( swizzle.begin(), swizzle.end() );
 
-    return builder.CreateShuffleVector(
+    return m_Builder.CreateShuffleVector(
         value,
         llvm::UndefValue::get( value->getType() ),
         llvm::ConstantDataVector::get( m_Runtime.GetLLVMContext(), indices ) );
 }
 
-llvm::Value* LLVMWriter::GenerateVectorConstructor( const ExpressionNode& constructor,
-                                                    IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateSelect( const ExpressionNode& true_expression,
+                                         const ExpressionNode& false_expression,
+                                         const ExpressionNode& condition )
+{
+    return m_Builder.CreateSelect( GenerateValue( condition ),
+                                   GenerateValue( true_expression ),
+                                   GenerateValue( false_expression ) );
+}
+
+llvm::Value* LLVMWriter::GenerateVectorConstructor( const ExpressionNode& constructor )
 {
     const CompleteType& type = constructor.GetType();
     llvm::Value* ret = llvm::UndefValue::get( m_Runtime.GetLLVMType( type ) );
     for( unsigned i = 0; i < type.GetNumElements(); ++i )
-        ret = builder.CreateInsertElement(
+        ret = m_Builder.CreateInsertElement(
             ret,
-            GenerateValue( constructor.GetOperand( i ), builder ),
+            GenerateValue( constructor.GetOperand( i ) ),
             llvm::ConstantInt::get( m_Runtime.GetLLVMType( Type::INT ), i ) );
     return ret;
 }
     
-llvm::Value* LLVMWriter::GenerateMatrixConstructor( const ExpressionNode& constructor,
-                                                    IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateMatrixConstructor( const ExpressionNode& constructor )
 {
     const CompleteType& type = constructor.GetType();
     llvm::Value* ret = llvm::UndefValue::get( m_Runtime.GetLLVMType( type ) );
     for( unsigned i = 0; i < type.GetNumMatrixColumns(); ++i )
-        ret = builder.CreateInsertValue(
-            ret, GenerateValue( constructor.GetOperand( i ), builder ), { i } ); 
+        ret =
+            m_Builder.CreateInsertValue( ret, GenerateValue( constructor.GetOperand( i ) ), { i } ); 
     return ret;
+}
+
+llvm::Value* LLVMWriter::GeneratePostIncrement( const PointerExpressionNode& address )
+{
+    assert( false && "complete me" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GeneratePostDecrement( const PointerExpressionNode& address )
+{
+    assert( false && "complete me" );
+    std::abort();
 }
 
 //
 // Binary Operators
 //
 
-llvm::Value* LLVMWriter::GenerateOr( const ExpressionNode& lhs,
-                                     const ExpressionNode& rhs,
-                                     IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateOr( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    return builder.CreateOr( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+    return m_Builder.CreateOr( GenerateValue( lhs ), GenerateValue( rhs ) );
 }
 
-llvm::Value* LLVMWriter::GenerateAnd( const ExpressionNode& lhs,
-                                      const ExpressionNode& rhs,
-                                      IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateAnd( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    return builder.CreateAnd( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+    return m_Builder.CreateAnd( GenerateValue( lhs ), GenerateValue( rhs ) );
 }
 
-llvm::Value* LLVMWriter::GenerateExclusiveOr( const ExpressionNode& lhs,
-                                              const ExpressionNode& rhs,
-                                              IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateExclusiveOr( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    return builder.CreateXor( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+    return m_Builder.CreateXor( GenerateValue( lhs ), GenerateValue( rhs ) );
 }
 
 llvm::Value* LLVMWriter::GenerateCompareEqual( const ExpressionNode& lhs,
-                                               const ExpressionNode& rhs,
-                                               IRBuilder& builder ) const
+                                               const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
-        return builder.CreateICmpEQ( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateICmpEQ( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFCmpOEQ( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpOEQ( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().GetType() == Type::STRING )
-        return m_Runtime.CreateRuntimeCall(
-            RuntimeFunction::STRING_EQUAL,
-            { GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) },
-            builder );
+        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_EQUAL,
+                                            { GenerateValue( lhs ), GenerateValue( rhs ) },
+                                            m_Builder );
     assert( false && "Trying to compare an unhandled type" );
     return nullptr;
 }
 
 llvm::Value* LLVMWriter::GenerateCompareNotEqual( const ExpressionNode& lhs,
-                                                  const ExpressionNode& rhs,
-                                                  IRBuilder& builder ) const
+                                                  const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
-        return builder.CreateICmpNE( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateICmpNE( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFCmpONE( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpONE( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().GetType() == Type::STRING )
-        return m_Runtime.CreateRuntimeCall(
-            RuntimeFunction::STRING_NOTEQUAL,
-            { GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) },
-            builder );
+        return m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_NOTEQUAL,
+                                            { GenerateValue( lhs ), GenerateValue( rhs ) },
+                                            m_Builder );
     assert( false && "Trying to compare an unhandled type" );
     return nullptr;
 }
 
 llvm::Value* LLVMWriter::GenerateCompareLessThan( const ExpressionNode& lhs,
-                                                  const ExpressionNode& rhs,
-                                                  IRBuilder& builder ) const
+                                                  const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
     {
         if( lhs.GetType().IsSigned() )
-            return builder.CreateICmpSLT( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpSLT( GenerateValue( lhs ), GenerateValue( rhs ) );
         else
-            return builder.CreateICmpULT( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpULT( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     else if( lhs.GetType().IsFloatingPoint() )
     {
-        return builder.CreateFCmpOLT( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpOLT( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     
     assert( false && "Trying to compare an unhandled type" );
@@ -646,22 +928,18 @@ llvm::Value* LLVMWriter::GenerateCompareLessThan( const ExpressionNode& lhs,
 }
 
 llvm::Value* LLVMWriter::GenerateCompareGreaterThan( const ExpressionNode& lhs,
-                                                     const ExpressionNode& rhs,
-                                                     IRBuilder& builder ) const
+                                                     const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
     {
         if( lhs.GetType().IsSigned() )
-            return builder.CreateICmpSGT( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpSGT( GenerateValue( lhs ), GenerateValue( rhs ) );
         else
-            return builder.CreateICmpUGT( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpUGT( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     else if( lhs.GetType().IsFloatingPoint() )
     {
-        return builder.CreateFCmpOGT( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpOGT( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     
     assert( false && "Trying to compare an unhandled type" );
@@ -669,22 +947,18 @@ llvm::Value* LLVMWriter::GenerateCompareGreaterThan( const ExpressionNode& lhs,
 }
 
 llvm::Value* LLVMWriter::GenerateCompareLessThanEquals( const ExpressionNode& lhs,
-                                                        const ExpressionNode& rhs,
-                                                        IRBuilder& builder ) const
+                                                        const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
     {
         if( lhs.GetType().IsSigned() )
-            return builder.CreateICmpSLE( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpSLE( GenerateValue( lhs ), GenerateValue( rhs ) );
         else
-            return builder.CreateICmpULE( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpULE( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     else if( lhs.GetType().IsFloatingPoint() )
     {
-        return builder.CreateFCmpOLE( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpOLE( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     
     assert( false && "Trying to compare an unhandled type" );
@@ -692,63 +966,51 @@ llvm::Value* LLVMWriter::GenerateCompareLessThanEquals( const ExpressionNode& lh
 }
 
 llvm::Value* LLVMWriter::GenerateCompareGreaterThanEquals( const ExpressionNode& lhs,
-                                                           const ExpressionNode& rhs,
-                                                           IRBuilder& builder ) const
+                                                           const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsIntegral() )
     {
         if( lhs.GetType().IsSigned() )
-            return builder.CreateICmpSGE( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpSGE( GenerateValue( lhs ), GenerateValue( rhs ) );
         else
-            return builder.CreateICmpUGE( GenerateValue( lhs, builder ),
-                                          GenerateValue( rhs, builder ) );
+            return m_Builder.CreateICmpUGE( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     else if( lhs.GetType().IsFloatingPoint() )
     {
-        return builder.CreateFCmpOGE( GenerateValue( lhs, builder ),
-                                      GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFCmpOGE( GenerateValue( lhs ), GenerateValue( rhs ) );
     }
     
     assert( false && "Trying to compare an unhandled type" );
     return nullptr;
 }
 
-llvm::Value* LLVMWriter::GenerateLeftShift( const ExpressionNode& lhs,
-                                            const ExpressionNode& rhs,
-                                            IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateLeftShift( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    return builder.CreateShl( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+    return m_Builder.CreateShl( GenerateValue( lhs ), GenerateValue( rhs ) );
 }
 
-llvm::Value* LLVMWriter::GenerateRightShift( const ExpressionNode& lhs,
-                                             const ExpressionNode& rhs,
-                                             IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateRightShift( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsSigned() )
-        return builder.CreateAShr( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateAShr( GenerateValue( lhs ), GenerateValue( rhs ) );
     else
-        return builder.CreateLShr( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateLShr( GenerateValue( lhs ), GenerateValue( rhs ) );
 }
 
-llvm::Value* LLVMWriter::GenerateAdd( const ExpressionNode& lhs,
-                                      const ExpressionNode& rhs,
-                                      IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateAdd( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFAdd( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFAdd( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsIntegral() )
-        return builder.CreateAdd( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateAdd( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().GetType() == Type::STRING )
     {
-        //llvm::Value* ret = m_Runtime.CreateRuntimeCall(
-                                                //RuntimeFunction::STRING_CONCAT,
-                                                //{GenerateValue( lhs, builder ),
-                                                 //GenerateValue( rhs, builder )},
-                                                //builder );
-        //m_Temporaries.push( ret );
-        //return ret;
-        assert( false && "Complete me" );
+        llvm::Value* ret =
+            m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_CONCAT,
+                                         { GenerateValue( lhs ), GenerateValue( rhs ) },
+                                         m_Builder );
+        m_StringTemporaries.push( ret );
+        return ret;
     }
 
     assert( false && "Trying to Add unhandled types" );
@@ -756,27 +1018,23 @@ llvm::Value* LLVMWriter::GenerateAdd( const ExpressionNode& lhs,
 }
 
 
-llvm::Value* LLVMWriter::GenerateSubtract( const ExpressionNode& lhs,
-                                           const ExpressionNode& rhs,
-                                           IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateSubtract( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFSub( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFSub( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsIntegral() )
-        return builder.CreateSub( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateSub( GenerateValue( lhs ), GenerateValue( rhs ) );
     
     assert( false && "Trying to subtract unhandled types" );
     return nullptr;
 }
 
-llvm::Value* LLVMWriter::GenerateMultiply( const ExpressionNode& lhs,
-                                           const ExpressionNode& rhs,
-                                           IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateMultiply( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFMul( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFMul( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsIntegral() )
-        return builder.CreateMul( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateMul( GenerateValue( lhs ), GenerateValue( rhs ) );
     
     assert( false && "Trying to multiply unhandled types" );
     return nullptr;
@@ -784,41 +1042,60 @@ llvm::Value* LLVMWriter::GenerateMultiply( const ExpressionNode& lhs,
 
 
 
-llvm::Value* LLVMWriter::GenerateDivide( const ExpressionNode& lhs,
-                                         const ExpressionNode& rhs,
-                                         IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateDivide( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
     if( lhs.GetType().IsFloatingPoint() )
-        return builder.CreateFDiv( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+        return m_Builder.CreateFDiv( GenerateValue( lhs ), GenerateValue( rhs ) );
     else if( lhs.GetType().IsIntegral() )
+    {
         if( lhs.GetType().IsSigned() )
-            return builder.CreateSDiv( GenerateValue( lhs, builder ),
-                                       GenerateValue( rhs, builder ) );
+            return m_Builder.CreateSDiv( GenerateValue( lhs ), GenerateValue( rhs ) );
         else 
-            return builder.CreateUDiv( GenerateValue( lhs, builder ),
-                                       GenerateValue( rhs, builder ) );
+            return m_Builder.CreateUDiv( GenerateValue( lhs ), GenerateValue( rhs ) );
+    }
     
     assert( false && "Trying to divide unhandled types" );
     return nullptr;
 }
 
-llvm::Value* LLVMWriter::GenerateModulo( const ExpressionNode& lhs,
-                                         const ExpressionNode& rhs,
-                                         IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateModulo( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    if( lhs.GetType().IsSigned() )
-        return builder.CreateSRem( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
-    else if( lhs.GetType().IsIntegral() )
-        return builder.CreateURem( GenerateValue( lhs, builder ), GenerateValue( rhs, builder ) );
+    if( lhs.GetType().IsIntegral() )
+    {
+        if( lhs.GetType().IsSigned() )
+            return m_Builder.CreateSRem( GenerateValue( lhs ), GenerateValue( rhs ) );
+        else 
+            return m_Builder.CreateURem( GenerateValue( lhs ), GenerateValue( rhs ) );
+    }
+    assert( false && "Trying to get the modulo of an unhandled type" );
+    std::abort();
 }
 
+llvm::Value* LLVMWriter::GenerateNegate( const ExpressionNode& expression )
+{
+    if( expression.GetType().IsIntegral() )
+        return m_Builder.CreateNeg( GenerateValue( expression ) );
+    else if( expression.GetType().IsFloatingPoint() )
+        return m_Builder.CreateFNeg( GenerateValue( expression ) );
+    assert( false && "Trying to negate an unhandled type" );
+    std::abort();
+}
+
+llvm::Value* LLVMWriter::GenerateBitwiseNot( const ExpressionNode& expression )
+{
+    return m_Builder.CreateNot( GenerateValue( expression ) );
+}
+
+llvm::Value* LLVMWriter::GenerateLogicalNot( const ExpressionNode& expression )
+{
+    return m_Builder.CreateIsNull( GenerateValue( expression ) );
+}
 //
 // Helpers
 //
 llvm::Value* LLVMWriter::GenerateScalarOrVectorCast( llvm::Value* from_value,
                                                      Type from_type,
-                                                     Type to_type,
-                                                     IRBuilder& builder ) const
+                                                     Type to_type )
 {
     assert( ( IsVectorType( from_type ) || IsScalarType( from_type ) ) &&
             "Trying to create a scalar or vector cast from a non-scalar and non-vector type" );
@@ -833,43 +1110,40 @@ llvm::Value* LLVMWriter::GenerateScalarOrVectorCast( llvm::Value* from_value,
     if( GetScalarType( to_type ) == Type::BOOL )
     {
         if( IsFloatingPoint( from_type ) )
-            return builder.CreateFCmpOEQ(
+            return m_Builder.CreateFCmpOEQ(
                 from_value, llvm::ConstantFP::getNullValue( m_Runtime.GetLLVMType( from_type ) ) );
-        return builder.CreateIsNotNull( from_value );
+        return m_Builder.CreateIsNotNull( from_value );
     }
 
     if( IsFloatingPoint( to_type ) )
     {
         if( IsFloatingPoint( from_type ) )
-            return builder.CreateFPCast( from_value, m_Runtime.GetLLVMType( to_type ) );
+            return m_Builder.CreateFPCast( from_value, m_Runtime.GetLLVMType( to_type ) );
         else if( IsSigned( from_type ) )
-            return builder.CreateSIToFP( from_value, m_Runtime.GetLLVMType( to_type ) );
+            return m_Builder.CreateSIToFP( from_value, m_Runtime.GetLLVMType( to_type ) );
         else
         {
             assert( IsIntegral( from_type ) && !IsSigned( from_type ) &&
                     "we've let a bad type through" );
-            return builder.CreateUIToFP( from_value, m_Runtime.GetLLVMType( to_type ) );
+            return m_Builder.CreateUIToFP( from_value, m_Runtime.GetLLVMType( to_type ) );
         }
     }
 
     assert( IsIntegral( to_type ) && "Type should be integral" );
     if( IsIntegral( from_type ) )
     {
-        return builder.CreateIntCast(
+        return m_Builder.CreateIntCast(
             from_value, m_Runtime.GetLLVMType( to_type ), IsSigned( from_type ) );
     }
 
     assert( IsFloatingPoint( from_type ) && "from_type should be floating point" );
     if( IsSigned( to_type ) )
-        return builder.CreateFPToSI( from_value, m_Runtime.GetLLVMType( to_type ) );
+        return m_Builder.CreateFPToSI( from_value, m_Runtime.GetLLVMType( to_type ) );
     else
-        return builder.CreateFPToUI( from_value, m_Runtime.GetLLVMType( to_type ) );
+        return m_Builder.CreateFPToUI( from_value, m_Runtime.GetLLVMType( to_type ) );
 }
 
-llvm::Value* LLVMWriter::GenerateMatrixCast( llvm::Value* from_value,
-                                             Type from_type,
-                                             Type to_type,
-                                             IRBuilder& builder ) const
+llvm::Value* LLVMWriter::GenerateMatrixCast( llvm::Value* from_value, Type from_type, Type to_type )
 {
     assert( IsMatrixType( from_type ) && "Trying to create a matrix cast from a non-matrix type" );
     assert( IsMatrixType( to_type ) && "Trying to create a matrix cast to a non-matrix type" );
@@ -888,13 +1162,191 @@ llvm::Value* LLVMWriter::GenerateMatrixCast( llvm::Value* from_value,
     //
     for( unsigned i = 0; i < num_columns; ++i )
     {
-        llvm::Value* column = builder.CreateExtractValue( from_value, { i } );
+        llvm::Value* column = m_Builder.CreateExtractValue( from_value, { i } );
         llvm::Value* casted_column =
-            GenerateScalarOrVectorCast( column, from_column_type, to_column_type, builder );
-        ret = builder.CreateInsertValue( ret, casted_column, { i } );
+            GenerateScalarOrVectorCast( column, from_column_type, to_column_type );
+        ret = m_Builder.CreateInsertValue( ret, casted_column, { i } );
     }
     
     return ret;
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantInt( Type type, unsigned long integer_value )
+{
+    assert( IsIntegral( type ) && "GenerateConstantInt given a non-integral type" );
+    assert( IsScalarType( type ) && "GenerateConstantInt given a non-scalar type" );
+    return llvm::ConstantInt::get( m_Runtime.GetLLVMType( type ), integer_value );
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantFloat( Type type, double float_value )
+{
+    assert( IsFloatingPoint( type ) && "GenerateConstantFloat given a non-floating type" );
+    assert( IsScalarType( type ) && "GenerateConstantFloat given a non-scalar type" );
+    return llvm::ConstantFP::get( m_Runtime.GetLLVMType( type ), float_value );
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantIntVector( Type type,
+                                                       const std::vector<unsigned long>& ints )
+{
+    assert( IsIntegral( type ) && "GenerateConstantIntVector given a non-integral type" );
+    assert( IsVectorType( type ) && "GenerateConstantIntVector given a non-vector type" );
+    assert( ints.size() == GetNumElementsInType( type ) &&
+            "GenerateConstantIntVector given wrong number of values" );
+    std::vector<llvm::Constant*> data( GetNumElementsInType( type ) );
+    for( unsigned i = 0; i < GetNumElementsInType( type ); ++i )
+        data[i] = GenerateConstantInt( GetScalarType( type ), ints[i] );
+    return llvm::ConstantVector::get( data );
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantFloatVector( Type type,
+                                                         const std::vector<double>& floats )
+{
+    assert( IsFloatingPoint( type ) && "GenerateConstantFloatVector given a non-floating type" );
+    assert( IsVectorType( type ) && "GenerateConstantFloatVector given a non-vector type" );
+    assert( floats.size() == GetNumElementsInType( type ) &&
+            "GenerateConstantFloatVector given wrong number of values" );
+    std::vector<llvm::Constant*> data( GetNumElementsInType( type ) );
+    for( unsigned i = 0; i < GetNumElementsInType( type ); ++i )
+        data[i] = GenerateConstantFloat( GetScalarType( type ), floats[i] );
+    return llvm::ConstantVector::get( data );
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantIntMatrix( Type type,
+                                                       const std::vector<unsigned long>& ints )
+{
+    assert( IsIntegral( type ) && "GenerateConstantIntMatrix given a non-integral type" );
+    assert( IsMatrixType( type ) && "GenerateConstantIntMatrix given a non-matrix type" );
+    assert( ints.size() == GetNumElementsInType( type ) &&
+            "GenerateConstantIntMatrix given wrong number of values" );
+    std::vector<llvm::Constant*> data( GetNumColumnsInType( type ) );
+    for( unsigned i = 0; i < GetNumColumnsInType( type ); ++i )
+    {
+        std::vector<unsigned long> column_data(
+            ints.begin() + i * GetNumRowsInType( type ),
+            ints.begin() + ( i + 1 ) * GetNumRowsInType( type ) );
+        data[i] = GenerateConstantIntVector( GetMatrixColumnType( type ), column_data );
+    }
+    return llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( m_Runtime.GetLLVMType( type ) ),
+                                     data );
+}
+
+llvm::Constant* LLVMWriter::GenerateConstantFloatMatrix( Type type,
+                                                         const std::vector<double>& floats )
+{
+    assert( IsFloatingPoint( type ) && "GenerateConstantFloatMatrix given a non-floating type" );
+    assert( IsMatrixType( type ) && "GenerateConstantFloatMatrix given a non-matrix type" );
+    assert( floats.size() == GetNumElementsInType( type ) &&
+            "GenerateConstantFloatMatrix given wrong number of values" );
+    std::vector<llvm::Constant*> data( GetNumColumnsInType( type ) );
+    for( unsigned i = 0; i < GetNumColumnsInType( type ); ++i )
+    {
+        std::vector<double> column_data( floats.begin() + i * GetNumRowsInType( type ),
+                                         floats.begin() + ( i + 1 ) * GetNumRowsInType( type ) );
+        data[i] = GenerateConstantFloatVector( GetMatrixColumnType( type ), column_data );
+    }
+    return llvm::ConstantArray::get( llvm::cast<llvm::ArrayType>( m_Runtime.GetLLVMType( type ) ),
+                                     data );
+}
+
+
+llvm::Constant* LLVMWriter::GenerateGenericValue( const GenericValue& generic_value )
+{
+    Type type = generic_value.GetType().GetType();
+    
+#define CODE_INTEGER( Type, TYPE ) \
+    case TYPE: \
+        return GenerateConstantInt( TYPE, generic_value.Get##Type() );
+
+#define CODE_INTEGER_VECTOR( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        auto v = generic_value.Get##Type(); \
+        std::vector<jl_ulong> values( &v[0], &v[0] + ( n ) ); \
+        return GenerateConstantIntVector( TYPE, values ); \
+    }
+    
+#define CODE_INTEGER_MATRIX( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        auto m = generic_value.Get##Type(); \
+    std::vector<jl_ulong> values( &m[0][0], &m[0][0] + ( n ) ); \
+        return GenerateConstantIntMatrix( TYPE, values ); \
+    }
+    
+#define CODE_INTEGER_N( Type, TYPE ) \
+    CODE_INTEGER( Type, TYPE ); \
+    CODE_INTEGER_VECTOR( Type##2, TYPE##2, 2 );\
+    CODE_INTEGER_VECTOR( Type##3, TYPE##3, 3 );\
+    CODE_INTEGER_VECTOR( Type##4, TYPE##4, 4 );\
+    CODE_INTEGER_MATRIX( Type##2x2, TYPE##2x2, 2 * 2 );\
+    CODE_INTEGER_MATRIX( Type##2x3, TYPE##2x3, 2 * 3 );\
+    CODE_INTEGER_MATRIX( Type##2x4, TYPE##2x4, 2 * 4 );\
+    CODE_INTEGER_MATRIX( Type##3x2, TYPE##3x2, 3 * 2 );\
+    CODE_INTEGER_MATRIX( Type##3x3, TYPE##3x3, 3 * 3 );\
+    CODE_INTEGER_MATRIX( Type##3x4, TYPE##3x4, 3 * 4 );\
+    CODE_INTEGER_MATRIX( Type##4x2, TYPE##4x2, 4 * 2 );\
+    CODE_INTEGER_MATRIX( Type##4x3, TYPE##4x3, 4 * 3 );\
+    CODE_INTEGER_MATRIX( Type##4x4, TYPE##4x4, 4 * 4 );
+
+#define CODE_FLOATING( Type, TYPE ) \
+    case TYPE: \
+        return GenerateConstantFloat( TYPE, generic_value.Get##Type() );
+
+#define CODE_FLOATING_VECTOR( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        auto v = generic_value.Get##Type(); \
+    std::vector<jl_double> values( &v[0], &v[0] + ( n ) ); \
+        return GenerateConstantFloatVector( TYPE, values ); \
+    }
+    
+#define CODE_FLOATING_MATRIX( Type, TYPE, n ) \
+    case TYPE: \
+    { \
+        auto m = generic_value.Get##Type(); \
+    std::vector<jl_double> values( &m[0][0], &m[0][0] + ( n ) ); \
+        return GenerateConstantFloatMatrix( TYPE, values ); \
+    }    
+    
+#define CODE_FLOATING_N( Type, TYPE ) \
+    CODE_FLOATING( Type, TYPE );\
+    CODE_FLOATING_VECTOR( Type##2, TYPE##2, 2 );\
+    CODE_FLOATING_VECTOR( Type##3, TYPE##3, 3 );\
+    CODE_FLOATING_VECTOR( Type##4, TYPE##4, 4 ); \
+    CODE_FLOATING_MATRIX( Type##2x2, TYPE##2x2, 2 * 2 ); \
+    CODE_FLOATING_MATRIX( Type##2x3, TYPE##2x3, 2 * 3 ); \
+    CODE_FLOATING_MATRIX( Type##2x4, TYPE##2x4, 2 * 4 ); \
+    CODE_FLOATING_MATRIX( Type##3x2, TYPE##3x2, 3 * 2 ); \
+    CODE_FLOATING_MATRIX( Type##3x3, TYPE##3x3, 3 * 3 ); \
+    CODE_FLOATING_MATRIX( Type##3x4, TYPE##3x4, 3 * 4 ); \
+    CODE_FLOATING_MATRIX( Type##4x2, TYPE##4x2, 4 * 2 ); \
+    CODE_FLOATING_MATRIX( Type##4x3, TYPE##4x3, 4 * 3 ); \
+    CODE_FLOATING_MATRIX( Type##4x4, TYPE##4x4, 4 * 4 );
+    
+    switch( type )
+    {
+    CODE_INTEGER_N( Bool, Type::BOOL );
+    CODE_INTEGER_N( Char, Type::CHAR );
+    CODE_INTEGER_N( Short, Type::SHORT );
+    CODE_INTEGER_N( Int, Type::INT );
+    CODE_INTEGER_N( Long, Type::LONG );
+    CODE_INTEGER_N( UChar, Type::UCHAR );
+    CODE_INTEGER_N( UShort, Type::USHORT );
+    CODE_INTEGER_N( UInt, Type::UINT );
+    CODE_INTEGER_N( ULong, Type::ULONG );
+
+    CODE_FLOATING_N( Float, Type::FLOAT );
+    CODE_FLOATING_N( Double, Type::DOUBLE );
+    default:
+        assert( false && "Trying to generate a generic value of unhandled type" );
+    }
+    
+#undef CODE_FLOATING_N
+#undef CODE_FLOATING_VECTOR
+#undef CODE_FLOATING
+#undef CODE_INTEGER_N
+#undef CODE_INTEGER_VECTOR
+#undef CODE_INTEGER
 }
 
 } // namespace Compiler

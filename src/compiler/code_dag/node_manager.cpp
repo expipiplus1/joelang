@@ -31,11 +31,14 @@
 
 #include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/pass_node.hpp>
+#include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/swizzle_store_node.hpp>
 #include <compiler/code_dag/technique_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
@@ -65,8 +68,30 @@ const ExpressionNode& NodeManager::MakeExpressionNode( NodeType node_type,
 {
     assert( node_type >= NodeType::Expression_start && node_type <= NodeType::Expression_end &&
             "Trying to make an expression node with a non expression node type" );
+
     m_Nodes.emplace_back( new ExpressionNode( node_type, std::move( children ) ) );
     return cast<ExpressionNode>( *m_Nodes.back() );
+}
+
+const PointerExpressionNode& NodeManager::MakePointerExpressionNode(
+    NodeType node_type,
+    std::vector<Node_ref> children )
+{
+    assert( node_type >= NodeType::PointerExpression_start &&
+            node_type <= NodeType::PointerExpression_end &&
+            "Trying to make a pointer expression node with a non pointer expression node type" );
+
+    m_Nodes.emplace_back( new PointerExpressionNode( node_type, std::move( children ) ) );
+
+    return cast<PointerExpressionNode>( *m_Nodes.back() );
+}
+
+const SwizzleStoreNode& NodeManager::MakeSwizzleStoreNode( const PointerExpressionNode& assignee,
+                                                           const ExpressionNode& assigned,
+                                                           const Swizzle& swizzle )
+{
+    m_Nodes.emplace_back( new SwizzleStoreNode( assignee, assigned, swizzle ) );
+    return static_cast<const SwizzleStoreNode&>( *m_Nodes.back() );
 }
 
 const ZeroNode& NodeManager::MakeZero( Type type )

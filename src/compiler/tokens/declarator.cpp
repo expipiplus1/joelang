@@ -46,6 +46,7 @@
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/initializer.hpp>
 #include <compiler/tokens/token.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {
@@ -164,11 +165,6 @@ void InitDeclarator::PerformSema( SemaAnalyzer& sema,
                                                       : GenericValue(),
                                              m_Declarator->GetIdentifier() );
     sema.DeclareVariable( m_Declarator->GetIdentifier(), m_Variable );
-
-    //
-    // CodeGen the variable because sema may depend on it later on
-    //
-    m_Variable->CodeGen( sema.GetCodeGenerator() );
 }
 
 Declarator_up InitDeclarator::TakeDeclarator()

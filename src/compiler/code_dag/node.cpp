@@ -63,7 +63,7 @@ const Node& Node::GetChild( unsigned index ) const
     return m_Children[index];
 }
 
-std::set<const Node*> Node::GetDescendantsOfNodeType( NodeType node_type ) const
+std::set<const Node*> Node::GetDescendantsWithNodeType( NodeType node_type ) const
 {
     std::set<const Node*> ret;
     std::vector<Node_ref> queue = { { *this } };

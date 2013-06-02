@@ -61,7 +61,16 @@ CompleteType GetCommonType( const CompleteType& t1, const CompleteType& t2 )
         Type::CHAR,
         Type::BOOL
     };
+    
+    if( t1 == t2 )
+        return t1;
 
+    //
+    // There is no common type with void
+    //
+    if( t1.IsVoid() ^ t2.IsVoid() )
+        return CompleteType();
+    
     //
     // There is no common type between arrays of different sizes
     //
@@ -436,7 +445,7 @@ bool IsScalarType( Type t )
 unsigned GetNumElementsInType( Type t )
 {
     if( IsMatrixType( t ) )
-        return GetNumColumnsInType( t ) * GetNumColumnsInType( t );
+        return GetNumColumnsInType( t ) * GetNumRowsInType( t );
 
 #define MATCH_N(n) \
     case Type::BOOL##n: \

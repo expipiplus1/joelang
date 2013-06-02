@@ -57,7 +57,7 @@ list( APPEND JOELANG_INTERNAL_LIBS ucpp )
 # The library
 #
 
-add_library( joelang include/joelang/context.hpp
+set( joelang_sources include/joelang/context.hpp
                      include/joelang/effect.hpp
                      include/joelang/parameter.hpp
                      include/joelang/pass.hpp
@@ -101,10 +101,14 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/code_dag/node_manager-inl.hpp
                      src/compiler/code_dag/pass_node.cpp
                      src/compiler/code_dag/pass_node.hpp
+                     src/compiler/code_dag/pointer_expression_node.cpp
+                     src/compiler/code_dag/pointer_expression_node.hpp
                      src/compiler/code_dag/state_assignment_node.cpp
                      src/compiler/code_dag/state_assignment_node.hpp
                      src/compiler/code_dag/swizzle_node.cpp
                      src/compiler/code_dag/swizzle_node.hpp
+                     src/compiler/code_dag/swizzle_store_node.cpp
+                     src/compiler/code_dag/swizzle_store_node.hpp
                      src/compiler/code_dag/technique_node.cpp
                      src/compiler/code_dag/technique_node.hpp
                      src/compiler/code_dag/variable_node.cpp
@@ -216,7 +220,11 @@ add_library( joelang include/joelang/context.hpp
                      src/compiler/writers/shader_writer.hpp
                      src/compiler/writers/shader_writer-inl.hpp )
 
-set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -std=c++11 )
+#set_source_files_properties( ${joelang_sources} PROPERTIES COMPILE_FLAGS "-std=c++11 -Wall" )
+add_definitions( -std=c++11 )
+add_definitions( -Wall )
+
+add_library( joelang ${joelang_sources} )
 
 #-------------------------------------------------------------------------------
 # Linking
@@ -231,6 +239,15 @@ link_directories( ${JOELANG_LIBRARY_DIRS} )
 target_link_libraries( joelang ${JOELANG_INTERNAL_LIBS} )
 
 list( APPEND JOELANG_LIBS joelang )
+
+#-------------------------------------------------------------------------------
+# Pch and unity
+#-------------------------------------------------------------------------------
+
+include( cotire )
+cotire( joelang )
+
+target_link_libraries( joelang_unity ${JOELANG_LIBS} )
 
 #-------------------------------------------------------------------------------
 # Include dirs

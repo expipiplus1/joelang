@@ -44,6 +44,7 @@
 #include <compiler/tokens/expressions/expression.hpp>
 #include <compiler/tokens/parameter.hpp>
 #include <compiler/tokens/token.hpp>
+#include <joelang/types.hpp>
 
 namespace JoeLang
 {

@@ -39,6 +39,7 @@
 #include <compiler/code_dag/pass_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/swizzle_store_node.hpp>
 #include <compiler/code_dag/technique_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
@@ -234,6 +235,11 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "PreDecrement";
     case NodeType::Select:
         return "Select";
+    case NodeType::Store:
+        return "Store";
+    case NodeType::SwizzleStore:
+        return "Swizzle Store: " +
+               static_cast<const SwizzleStoreNode&>( node ).GetSwizzle().GetString();
     case NodeType::Cast:
         return "Cast: " + cast<CastNode>( node ).GetType().GetString();
     case NodeType::ArrayIndex:
@@ -259,7 +265,7 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
     case NodeType::Zero:
         return "Zero";
     case NodeType::VariableIdentifier:
-        return "Variable: " + static_cast<const VariableNode&>( node ).GetVariable()->GetName();
+        return "Variable: " + static_cast<const VariableNode&>( node ).GetVariable().GetName();
     case NodeType::FunctionIdentifier:
         return "Function: " +
                static_cast<const FunctionNode&>( node ).GetFunction().GetIdentifier();
@@ -279,6 +285,9 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "VectorConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
     case NodeType::MatrixConstructor:
         return "MatrixConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
+    default:
+        assert( false && "Trying to get the description of an unhandled node type" );
+        std::abort();
     }
 }
 

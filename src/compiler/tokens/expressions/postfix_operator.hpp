@@ -35,6 +35,7 @@
 #include <string>
 #include <vector>
 
+#include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -172,7 +173,7 @@ public:
     bool PerformSema( SemaAnalyzer& sema, Expression_up& expression ) override;
 
     virtual
-    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
+    const PointerExpressionNode& GenerateCodeDag( NodeManager& node_manager, 
                                            Expression& expression ) const override;
     
     //TODO pass expression as reference instead of pointer

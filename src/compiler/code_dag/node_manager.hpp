@@ -56,10 +56,12 @@ using Node_ref = std::reference_wrapper<const Node>;
 using Node_up = std::unique_ptr<Node>;
 class PassNode;
 using PassNode_ref = std::reference_wrapper<const PassNode>;
+class PointerExpressionNode;
 class StateAssignmentNode;
 using StateAssignmentNode_ref = std::reference_wrapper<const StateAssignmentNode>;
 class Swizzle;
 class SwizzleNode;
+class SwizzleStoreNode;
 class TechniqueNode;
 class TypeNode;
 class Variable;
@@ -77,6 +79,13 @@ public:
 
     const ExpressionNode& MakeExpressionNode( NodeType node_type,
                                               std::vector<Node_ref> children = {} );
+
+    const PointerExpressionNode& MakePointerExpressionNode( NodeType node_type,
+                                                            std::vector<Node_ref> children = {} );
+
+    const SwizzleStoreNode& MakeSwizzleStoreNode( const PointerExpressionNode& assignee,
+                                                  const ExpressionNode& assigned,
+                                                  const Swizzle& swizzle );
 
     template <typename T>
     const ConstantNode<T>& MakeConstant( T constant_value );

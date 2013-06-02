@@ -31,6 +31,7 @@
 
 #include <string>
 
+#include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/tokens/expressions/expression.hpp>
 
 namespace JoeLang
@@ -64,7 +65,7 @@ public:
     ~IdentifierExpression();
     
     virtual
-    const ExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const PointerExpressionNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     const std::string& GetIdentifier() const;
 

@@ -154,6 +154,10 @@ const std::map<TerminalType, LiteralTerminal> g_keywordTerminals =
     //
     { TerminalType::TYPE_VOID,     { "void",      "" } },
     { TerminalType::TYPE_BOOL,     { "bool",      "" } },
+    { TerminalType::TYPE_UCHAR,    { "uchar",     "" } },
+    { TerminalType::TYPE_USHORT,   { "ushort",    "" } },
+    { TerminalType::TYPE_UINT,     { "uint",      "" } },
+    { TerminalType::TYPE_ULONG,    { "ulong",     "" } },
     { TerminalType::TYPE_CHAR,     { "char",      "" } },
     { TerminalType::TYPE_SHORT,    { "short",     "" } },
     { TerminalType::TYPE_INT,      { "int",       "" } },
@@ -184,7 +188,16 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         TYPE_NAME(type, name), \
         TYPE_NAME(type##2, name##2), \
         TYPE_NAME(type##3, name##3), \
-        TYPE_NAME(type##4, name##4)
+        TYPE_NAME(type##4, name##4), \
+        TYPE_NAME(type##2x2, name##2x2), \
+        TYPE_NAME(type##2x3, name##2x3), \
+        TYPE_NAME(type##2x4, name##2x4), \
+        TYPE_NAME(type##3x2, name##3x2), \
+        TYPE_NAME(type##3x3, name##3x3), \
+        TYPE_NAME(type##3x4, name##3x4), \
+        TYPE_NAME(type##4x2, name##4x2), \
+        TYPE_NAME(type##4x3, name##4x3), \
+        TYPE_NAME(type##4x4, name##4x4)
 
     const static std::map<TerminalType, std::string> s_TerminalStringMap
     {  
@@ -264,6 +277,10 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         TYPE_NAME_N(SHORT, short),
         TYPE_NAME_N(INT, int),
         TYPE_NAME_N(LONG, long),
+        TYPE_NAME_N(UCHAR, uchar),
+        TYPE_NAME_N(USHORT, ushort),
+        TYPE_NAME_N(UINT, uint),
+        TYPE_NAME_N(ULONG, ulong),
         TYPE_NAME_N(FLOAT, float),
         TYPE_NAME_N(DOUBLE, double),
         { TerminalType::TYPE_VOID,            "void"                  },

@@ -80,6 +80,11 @@ Expression_up PostfixExpression::TakeExpression()
     return std::move(m_Expression);
 }
 
+const Expression& PostfixExpression::GetExpression() const
+{
+    return *m_Expression;
+}
+
 bool PostfixExpression::PerformSema( SemaAnalyzer& sema )
 {
     //

@@ -27,37 +27,42 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "variable_node.hpp"
+#pragma once
 
-#include <compiler/code_dag/expression_node.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
+#include <memory>
+
+#include <compiler/code_dag/pointer_expression_node.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-VariableNode::VariableNode( Variable_sp variable )
-    : PointerExpressionNode( NodeType::VariableIdentifier ),
-      m_Variable( std::move( variable ) )
-{
-}
+class CompleteType;
+class Swizzle;
 
-
-const Variable& VariableNode::GetVariable() const
+class SwizzleStoreNode : public PointerExpressionNode
 {
-    return *m_Variable;
-}
+public:
+    const Swizzle& GetSwizzle() const;
 
-CompleteType VariableNode::GetType() const
-{
-    return GetVariable().GetType();
-}
+    const PointerExpressionNode& GetSwizzled() const;
 
-bool VariableNode::classof( const Node* n )
-{
-    return n->GetNodeType() == NodeType::VariableIdentifier;
-}
+    CompleteType GetType() const;
+
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
+private:
+    friend class NodeManager;
+    SwizzleStoreNode( const PointerExpressionNode& assignee,
+                      const ExpressionNode& assigned,
+                      Swizzle swizzle );
+
+    Swizzle m_Swizzle;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

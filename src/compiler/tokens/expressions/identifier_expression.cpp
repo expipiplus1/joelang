@@ -41,6 +41,7 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 
@@ -65,10 +66,12 @@ IdentifierExpression::~IdentifierExpression()
 {
 }
 
-const ExpressionNode& IdentifierExpression::GenerateCodeDag( NodeManager& node_manager ) const
+const PointerExpressionNode& IdentifierExpression::GenerateCodeDag( NodeManager& node_manager ) const
 {
     assert( m_Variable && "Trying to generate code for an inresolved identifier" );
-    return node_manager.MakeVariableNode( m_Variable );
+    const VariableNode& variable_node = node_manager.MakeVariableNode( m_Variable );
+    return variable_node;
+    //return node_manager.MakePointerExpressionNode( NodeType::Load, {variable_node} );
 }
 
 bool IdentifierExpression::ResolveIdentifier( SemaAnalyzer& sema )

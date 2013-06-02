@@ -34,6 +34,11 @@
 #include <set>
 #include <utility>
 
+#include <compiler/code_dag/expression_node.hpp>
+#include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/pointer_expression_node.hpp>
+#include <compiler/code_dag/swizzle_node.hpp>
+#include <compiler/code_dag/swizzle_store_node.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
@@ -103,6 +108,54 @@ bool AssignmentExpression::PerformSema( SemaAnalyzer& sema )
     return good;
 }
 
+const PointerExpressionNode& AssignmentExpression::GenerateCodeDag(NodeManager& node_manager ) const
+{
+    const PointerExpressionNode* assignee_node;
+    const ExpressionNode* assigned_node;
+    const Expression* assignee_address_expression = m_Assignee.get();
+    
+    Swizzle swizzle;
+    bool is_swizzle_store = false;
+    if( PostfixExpression* p = dyn_cast<PostfixExpression>(m_Assignee.get()) )
+        if( MemberAccessOperator* m = dyn_cast<MemberAccessOperator>(&p->GetOperator()) )
+            if( m->IsSwizzle() )
+            {
+                is_swizzle_store = true;
+                swizzle = m->GetSwizzle();
+                assignee_address_expression = &p->GetExpression();
+            }
+    
+    assignee_node = &cast<PointerExpressionNode>( assignee_address_expression->GenerateCodeDag( node_manager ) );
+    
+    switch( m_AssignmentOperator )
+    {
+    case AssignmentOperator::EQUALS:
+        assigned_node = &m_AssignedExpression->GenerateCodeDag( node_manager );
+        break;
+    case AssignmentOperator::PLUS_EQUALS:
+    {
+        const ExpressionNode* lhs_node = assignee_node;
+        const ExpressionNode& added_node = m_AssignedExpression->GenerateCodeDag( node_manager );
+        if( is_swizzle_store )
+        {
+            lhs_node = &node_manager.MakeSwizzleNode( *assignee_node, swizzle );
+        }
+        assigned_node = &node_manager.MakeExpressionNode( NodeType::Add, { *lhs_node, added_node } );
+        break;
+    }
+    default:
+        assert( false && "Trying to codegen an unhandled assigment operator" );
+    }
+    
+    if( is_swizzle_store )
+    {
+        return node_manager.MakeSwizzleStoreNode( *assignee_node, *assigned_node, swizzle );
+    }
+    else 
+        return node_manager.MakePointerExpressionNode( NodeType::Store, { *assignee_node, 
+                                                                          *assigned_node } );
+}
+    
 llvm::Value* AssignmentExpression::CodeGen( CodeGenerator& code_gen ) const
 {
     //

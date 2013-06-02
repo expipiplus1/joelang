@@ -37,7 +37,6 @@
 
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
-#include <compiler/writers/code_generator.hpp>
 
 namespace JoeLang
 {
@@ -61,6 +60,7 @@ using FunctionDefinition_up = std::unique_ptr<FunctionDefinition>;
 using Function_sp = std::shared_ptr<Function>;
 class GenericValue;
 class Initializer;
+class LLVMWriter;
 class NodeManager;
 class PassDeclaration;
 using PassDeclaration_up = std::unique_ptr<PassDeclaration>;
@@ -87,7 +87,7 @@ class SemaAnalyzer
 public:
     using PassDefinitionRef = std::shared_ptr<std::unique_ptr<PassDefinition> >;
 
-    SemaAnalyzer( const Context& context, Runtime& runtime );
+    SemaAnalyzer( const Context& context, const Runtime& runtime, LLVMWriter& llvm_writer );
     ~SemaAnalyzer();
 
     /**
@@ -307,11 +307,6 @@ public:
     const std::vector<std::string>& GetWarnings() const;
 
     /**
-      * \returns the CodeGenerator object
-      */
-    CodeGenerator& GetCodeGenerator();
-
-    /**
       * \class ScopeHolder
       * A class to hold onto a scope and make sure it's released
       */
@@ -381,8 +376,7 @@ private:
     std::vector<std::string> m_Warnings;
 
     const Context& m_Context;
-    Runtime&       m_Runtime;
-    CodeGenerator  m_CodeGenerator;
+    LLVMWriter&    m_LLVMWriter;
 };
 
 } // namespace Compiler

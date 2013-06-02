@@ -27,36 +27,28 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#include "variable_node.hpp"
+#include "pointer_expression_node.hpp"
+
+#include <cassert>
 
 #include <compiler/code_dag/expression_node.hpp>
-#include <compiler/semantic_analysis/variable.hpp>
 
 namespace JoeLang
 {
 namespace Compiler
 {
 
-VariableNode::VariableNode( Variable_sp variable )
-    : PointerExpressionNode( NodeType::VariableIdentifier ),
-      m_Variable( std::move( variable ) )
+PointerExpressionNode::PointerExpressionNode( NodeType type, std::vector<Node_ref> children )
+    : ExpressionNode( type, std::move( children ) )
 {
+    assert( type >= NodeType::PointerExpression_start && type <= NodeType::PointerExpression_end &&
+            "PointerExpressionNode given a non-pointerexpression node type" );
 }
 
-
-const Variable& VariableNode::GetVariable() const
+bool PointerExpressionNode::classof( const Node* n )
 {
-    return *m_Variable;
-}
-
-CompleteType VariableNode::GetType() const
-{
-    return GetVariable().GetType();
-}
-
-bool VariableNode::classof( const Node* n )
-{
-    return n->GetNodeType() == NodeType::VariableIdentifier;
+    return n->GetNodeType() >= NodeType::PointerExpression_start &&
+           n->GetNodeType() <= NodeType::PointerExpression_end;
 }
 
 } // namespace Compiler

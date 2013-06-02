@@ -60,6 +60,8 @@ public:
     PostfixOperator& GetOperator();
 
     Expression_up TakeExpression();
+    
+    const Expression& GetExpression() const;
 
     virtual
     bool PerformSema( SemaAnalyzer& sema ) override;
