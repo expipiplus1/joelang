@@ -411,7 +411,7 @@ std::shared_ptr<Variable> SemaAnalyzer::GetVariable(
                                                         false, //Isn't varying
                                                         false, //Isn't in
                                                         false, //Isn't out
-                                                        true, //Is global
+                                                        true, //Is global // todo change
                                                         false,//Isn't a param
                                                         GenericValue(s->second),
                                                         s->first );
