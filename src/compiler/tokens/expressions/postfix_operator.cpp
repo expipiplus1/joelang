@@ -355,7 +355,7 @@ bool ArgumentListOperator::PerformSema( SemaAnalyzer& sema,
 const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_manager, 
                                                              Expression& expression ) const
 {
-    const FunctionNode& function_node = node_manager.MakeFunctionNode( m_Function );
+    const FunctionNode& function_node = node_manager.MakeFunctionNode( *m_Function );
     // put the function in here, to avoid having to concatenate the arguments later
     std::vector<Node_ref> argument_nodes;
     argument_nodes.reserve( 1 + m_Arguments.size() );
@@ -372,7 +372,9 @@ const ExpressionNode& ArgumentListOperator::GenerateCodeDag( NodeManager& node_m
 llvm::Value* ArgumentListOperator::CodeGen( CodeGenerator& code_gen,
                                             const Expression& expression )
 {
-    return code_gen.CreateFunctionCall( m_Function, m_Arguments );
+    assert( false && "remove me");
+    std::abort();
+    //return code_gen.CreateFunctionCall( m_Function, m_Arguments );
 }
 
 llvm::Value* ArgumentListOperator::CodeGenPointerTo( CodeGenerator& code_gen,
@@ -421,6 +423,9 @@ CompleteType ArgumentListOperator::GetType( const Expression& expression ) const
 std::set<Function_sp> ArgumentListOperator::GetCallees(
                                             const Expression& expression ) const
 {
+    assert( false && "remove me");
+    std::abort();
+    /*
     // The expression here is actually an identifier, which we don't want to dip
     // into because it thinks it's a variable
     assert( m_Function &&
@@ -433,6 +438,7 @@ std::set<Function_sp> ArgumentListOperator::GetCallees(
     }
     ret.insert( m_Function );
     return ret;
+    */
 }
 
 std::set<Variable_sp> ArgumentListOperator::GetVariables(

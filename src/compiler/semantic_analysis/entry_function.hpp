@@ -55,19 +55,18 @@ class EntryFunction
 public:
     /** This asserts that function isn't null **/
     EntryFunction( ShaderDomain domain,
-                   Function_sp function,
+                   const Function& function,
                    std::vector<Expression_up> parameters );
 
     ShaderDomain GetDomain() const;
 
     const Function&    GetFunction() const;
-    const Function_sp& GetFunctionPointer() const;
 
     const std::vector<Expression_up>& GetParameters() const;
 
 private:
     ShaderDomain               m_Domain;
-    Function_sp                m_Function;
+    const Function&            m_Function;
     std::vector<Expression_up> m_Parameters;
 };
 

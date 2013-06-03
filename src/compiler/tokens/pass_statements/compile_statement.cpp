@@ -90,7 +90,7 @@ const EntryFunction_sp& CompileStatement::GetEntryFunction() const
 }
 
 bool CompileStatement::ResolveFunctionIdentifier( SemaAnalyzer& sema,
-                                                  Function_sp& function )
+                                                  const Function*& function )
 {
     //
     // Find the function to call
@@ -134,7 +134,7 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
     //
     // Resolve the function overload
     //
-    Function_sp function;
+    const Function* function;
     if( !ResolveFunctionIdentifier( sema, function ) )
         return false;
 
@@ -160,7 +160,7 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
         return false;
 
     m_EntryFunction.reset( new EntryFunction( m_Domain,
-                                              std::move(function),
+                                              *function,
                                               std::move(m_Arguments) ) );
     return true;
 }

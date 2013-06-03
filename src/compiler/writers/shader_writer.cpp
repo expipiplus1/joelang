@@ -159,15 +159,19 @@ ShaderWriter& ShaderWriter::operator << ( const GenericValue& value )
 
 void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
 {
+    assert( false && "removeme");
+    std::abort();
+    
+    /*
     WriteGLSLVersion();
 
     //
     // Get all the functions used by this entry function
     //
     bool recursion;
-    std::set<Function_sp> functions =
-      entry_function.GetFunctionPointer()->GetFunctionDependencies( recursion );
-    functions.insert( entry_function.GetFunctionPointer() );
+    std::set<const Function*> functions =
+      entry_function.GetFunction().GetFunctionDependencies( recursion );
+    functions.insert( entry_function.GetFunction() );
 
     if( recursion )
     {
@@ -207,6 +211,7 @@ void ShaderWriter::GenerateShader( const EntryFunction& entry_function )
                        input_variables,
                        output_variables,
                        global_variables );
+                       */
 }
 
 void ShaderWriter::WriteGLSLVersion()

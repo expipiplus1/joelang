@@ -85,7 +85,7 @@ public:
 
     const EntryFunction_sp& GetEntryFunction() const;
 
-    bool ResolveFunctionIdentifier( SemaAnalyzer& sema, Function_sp& function );
+    bool ResolveFunctionIdentifier( SemaAnalyzer& sema, const Function*& function );
 
     bool PerformSema( SemaAnalyzer& sema );
 

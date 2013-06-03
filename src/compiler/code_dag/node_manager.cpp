@@ -106,9 +106,9 @@ const VariableNode& NodeManager::MakeVariableNode( Variable_sp variable )
     return static_cast<const VariableNode&>( *m_Nodes.back() );
 }
 
-const FunctionNode& NodeManager::MakeFunctionNode( Function_sp function )
+const FunctionNode& NodeManager::MakeFunctionNode( const Function& function )
 {
-    m_Nodes.emplace_back( new FunctionNode( std::move( function ) ) );
+    m_Nodes.emplace_back( new FunctionNode( function ) );
     return static_cast<const FunctionNode&>( *m_Nodes.back() );
 }
 

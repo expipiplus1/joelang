@@ -111,7 +111,7 @@ Effect* Context::CreateEffectFromString( const std::string& source,
     if( effect )
     {
         m_Effects.push_back( std::move(effect) );
-        return m_Effects.rbegin()->get();
+        return m_Effects.back().get();
     }
     return nullptr;
 }

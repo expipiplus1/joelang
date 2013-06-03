@@ -42,13 +42,12 @@ namespace Compiler
 {
 
 EntryFunction::EntryFunction( ShaderDomain domain,
-                              Function_sp function,
+                              const Function& function,
                               std::vector<Expression_up> parameters )
     :m_Domain( domain )
-    ,m_Function( std::move(function) )
+    ,m_Function( function )
     ,m_Parameters( std::move(parameters) )
 {
-    assert( m_Function && "EntryFunction given a null function" );
 }
 
 ShaderDomain EntryFunction::GetDomain() const
@@ -57,11 +56,6 @@ ShaderDomain EntryFunction::GetDomain() const
 }
 
 const Function& EntryFunction::GetFunction() const
-{
-    return *m_Function;
-}
-
-const Function_sp& EntryFunction::GetFunctionPointer() const
 {
     return m_Function;
 }

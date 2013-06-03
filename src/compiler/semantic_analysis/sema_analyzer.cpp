@@ -355,7 +355,7 @@ void SemaAnalyzer::LoadStateEnumerants( const StateBase& state )
 void SemaAnalyzer::DeclareVariable( const std::string& identifier,
                                     std::shared_ptr<Variable> variable )
 {
-    bool inserted = m_SymbolStack.rbegin()->m_Variables.insert(
+    bool inserted = m_SymbolStack.back().m_Variables.insert(
                         std::make_pair( identifier, variable ) ).second;
     
 
@@ -551,7 +551,7 @@ void KeepOnlyMatching( std::vector<Function_sp>& functions,
 }
 }
 
-Function_sp SemaAnalyzer::GetFunctionOverload(
+const Function* SemaAnalyzer::GetFunctionOverload(
                           const std::string& identifier,
                           const std::vector<CompleteType> argument_types )
 {
@@ -624,7 +624,7 @@ Function_sp SemaAnalyzer::GetFunctionOverload(
     if( potential_functions.empty() )
         return nullptr;
 
-    return potential_functions[0];
+    return potential_functions[0].get();
 }
 
 std::vector<Function_sp> SemaAnalyzer::GetFunctions() const

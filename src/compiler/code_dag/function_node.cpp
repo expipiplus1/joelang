@@ -37,15 +37,15 @@ namespace JoeLang
 namespace Compiler
 {
 
-FunctionNode::FunctionNode( Function_sp function )
+FunctionNode::FunctionNode( const Function& function )
     : Node( NodeType::FunctionIdentifier, {} ),
-      m_Function( std::move( function ) )
+      m_Function( function )
 {
 }
 
 const Function& FunctionNode::GetFunction() const
 {
-    return *m_Function;
+    return m_Function;
 }
 
 const CompleteType& FunctionNode::GetReturnType() const

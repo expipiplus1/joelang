@@ -56,9 +56,9 @@ public:
 
 private:
     friend class NodeManager;
-    FunctionNode( Function_sp function );
+    FunctionNode( const Function& function );
 
-    Function_sp m_Function;
+    const Function& m_Function;
 };
 
 } // namespace Compiler

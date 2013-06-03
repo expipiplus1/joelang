@@ -737,9 +737,9 @@ bool StringLiteralExpression::UnquoteAndUnescapeString(
 {
     if( string.size() < 2 )
         return false;
-    if( *string.begin() != '\"' )
+    if( string.front() != '\"' )
         return false;
-    if( *string.rbegin() != '\"' )
+    if( string.back() != '\"' )
         return false;
 
     // reserve space for a string with no escaped characters

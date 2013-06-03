@@ -94,7 +94,7 @@ public:
 
     const VariableNode& MakeVariableNode( Variable_sp variable );
 
-    const FunctionNode& MakeFunctionNode( Function_sp function );
+    const FunctionNode& MakeFunctionNode( const Function& function );
 
     const SwizzleNode& MakeSwizzleNode( const ExpressionNode& swizzled, const Swizzle& swizzle );
 

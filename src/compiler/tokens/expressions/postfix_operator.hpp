@@ -297,7 +297,7 @@ public:
 private:
     ArgumentExpressionVector m_Arguments;
 
-    Function_sp m_Function;
+    const Function* m_Function = nullptr;
 };
 
 /**

@@ -234,7 +234,7 @@ public:
       *   The types to try and match
       * \returns The best function overload if there is on, otherwise nullptr
       */
-    Function_sp GetFunctionOverload(
+    const Function* GetFunctionOverload(
                          const std::string& identifier,
                          const std::vector<CompleteType> argument_types );
 
