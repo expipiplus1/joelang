@@ -79,7 +79,8 @@ Function::Function( std::string identifier,
 }
 
 Function::~Function()
-{}
+{
+}
 
 void Function::GenerateCodeDag( NodeManager& node_manager )
 {

@@ -61,6 +61,8 @@ enum class NodeType
     Sequence,
     // Holds an expression or is a void return
     Return,
+    // Holds an ExpressionNode in [0] a statement in [1] and an optional else statement in [2]
+    Conditional,
 
     //
     // Misc

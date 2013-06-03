@@ -197,6 +197,8 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/tokens/statements/empty_statement.hpp
                      src/compiler/tokens/statements/expression_statement.cpp
                      src/compiler/tokens/statements/expression_statement.hpp
+                     src/compiler/tokens/statements/if_statement.cpp
+                     src/compiler/tokens/statements/if_statement.hpp
                      src/compiler/tokens/statements/return_statement.cpp
                      src/compiler/tokens/statements/return_statement.hpp
                      src/compiler/tokens/statements/statement.cpp

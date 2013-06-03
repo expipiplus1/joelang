@@ -257,6 +257,8 @@ TerminalType UCPPLexerState::Lex( std::string& string )
         { "pixel_shader",   TerminalType::PIXEL_SHADER,  },
         { "vertex_shader",  TerminalType::VERTEX_SHADER, },
         { "return",         TerminalType::RETURN,        },
+        { "if",             TerminalType::IF,            },
+        { "else",           TerminalType::ELSE,          },
      
         //
         // Storage class specifiers

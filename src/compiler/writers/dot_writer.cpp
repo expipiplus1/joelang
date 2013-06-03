@@ -185,6 +185,8 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "StateAssignment";
     case NodeType::Sequence:
         return "Sequence";
+    case NodeType::Conditional:
+        return "If";
     case NodeType::Return:
         return "Return";
     case NodeType::LogicalOr:

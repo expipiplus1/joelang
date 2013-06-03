@@ -160,7 +160,12 @@ void LLVMWriter::GenerateFunction( const Function& function )
 
     GenerateStatement( function.GetCodeDag() );
     
+    assert( !llvm::verifyFunction( *llvm_function, llvm::PrintMessageAction ) &&
+            "Function not valid" );
+    
     GenerateFunctionCleanup();
+
+    llvm_function->dump();
 }
 
 llvm::Function* LLVMWriter::GenerateFunctionDeclaration( const Function& function )
@@ -351,7 +356,7 @@ void* LLVMWriter::WrapExpressionCommon( const ExpressionNode& expression,
 
     assert( !llvm::verifyFunction( *llvm_function, llvm::PrintMessageAction ) &&
             "Function not valid" );
-
+    
     void* function_ptr = m_ExecutionEngine.getPointerToFunction( llvm_function );
     
     return function_ptr;
@@ -404,6 +409,11 @@ void LLVMWriter::GenerateStatement( const Node& statement )
     {
     case NodeType::Sequence:
         return GenerateSequence( statement );
+    case NodeType::Conditional:
+        return GenerateConditional(
+            cast<ExpressionNode>( statement.GetChild( 0 ) ),
+            statement.GetChild( 1 ),
+            statement.GetNumChildren() == 3 ? &statement.GetChild( 2 ) : nullptr );
     case NodeType::Return:
         if( statement.GetNumChildren() == 0 )
             return GenerateVoidReturn();
@@ -419,6 +429,72 @@ void LLVMWriter::GenerateSequence( const Node& sequence )
             "GenerateSequence given a non-sequence" );
     for( const Node& node : sequence.GetChildren() )
         GenerateStatement( node );
+}
+
+void LLVMWriter::GenerateConditional( const ExpressionNode& condition,
+                                      const Node& true_statement,
+                                      const Node* else_statement )
+{
+    llvm::Value* condition_value = GenerateValue( condition );
+    GenerateExpressionCleanup();
+    
+    llvm::Function* current_function = m_Builder.GetInsertBlock()->getParent();
+    llvm::BasicBlock* true_block =
+        llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(), "if_true", current_function );
+    llvm::BasicBlock* else_block =
+        else_statement
+            ? llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(), "else", current_function )
+            : nullptr;
+    llvm::BasicBlock* continue_block =
+        else_statement ? nullptr : llvm::BasicBlock::Create(
+                                       m_Runtime.GetLLVMContext(),
+                                       m_Builder.GetInsertBlock()->getName() + "_continue",
+                                       current_function ); 
+    
+    m_Builder.CreateCondBr(
+        condition_value, true_block, else_statement ? else_block : continue_block );
+    
+    m_Builder.SetInsertPoint( true_block );
+    
+    GenerateStatement( true_statement );
+    
+    bool needs_continue = false;
+    
+    if( !true_block->back().isTerminator() )
+    {
+        if( !continue_block )
+            continue_block =
+                llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(),
+                                          m_Builder.GetInsertBlock()->getName() + "_continue",
+                                          current_function );
+        m_Builder.CreateBr( continue_block );
+        needs_continue = true;
+    }
+            
+    if( else_statement )
+    {
+        m_Builder.SetInsertPoint( else_block );
+        GenerateStatement( *else_statement );
+        if( !else_block->back().isTerminator() )
+        {
+            if( !continue_block )
+                continue_block =
+                    llvm::BasicBlock::Create( m_Runtime.GetLLVMContext(),
+                                              m_Builder.GetInsertBlock()->getName() + "_continue",
+                                              current_function );
+            m_Builder.CreateBr( continue_block );
+            needs_continue = true;
+        }
+    }
+   
+    if( needs_continue )
+    {
+        m_Builder.SetInsertPoint( continue_block );
+    }
+    else
+    {
+        m_Builder.ClearInsertionPoint(); 
+    }
 }
 
 void LLVMWriter::GenerateVoidReturn()

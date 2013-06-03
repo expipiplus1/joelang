@@ -262,6 +262,8 @@ const std::string& GetTerminalString( TerminalType terminal_type )
         { TerminalType::PIXEL_SHADER,         "pixel_shader"          },
         { TerminalType::VERTEX_SHADER,        "vertex_shader"         },
         { TerminalType::RETURN,               "return"                },
+        { TerminalType::IF,                   "if"                    },
+        { TerminalType::ELSE,                 "else"                    },
         { TerminalType::STATIC,               "static"                },
         { TerminalType::EXTERN,               "extern"                },
         { TerminalType::UNIFORM,              "uniform"               },

@@ -37,6 +37,7 @@
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/tokens/statements/empty_statement.hpp>
 #include <compiler/tokens/statements/expression_statement.hpp>
+#include <compiler/tokens/statements/if_statement.hpp>
 #include <compiler/tokens/statements/return_statement.hpp>
 #include <compiler/tokens/token.hpp>
 
@@ -65,6 +66,7 @@ bool Statement::Parse( Parser& parser, Statement_up& token )
     if( !parser.ExpectAnyOf< CompoundStatement,
                              EmptyStatement,
                              ExpressionStatement,
+                             IfStatement,
                              ReturnStatement >( t ) )
         return false;
 

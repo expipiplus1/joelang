@@ -123,6 +123,7 @@ public:
         EmptyStatement,
         ExpressionStatement,
         ReturnStatement,
+        IfStatement,
         Statement_End,
 
         //

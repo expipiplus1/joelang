@@ -108,7 +108,7 @@ private:
     // All the global variables
     //
     std::map<const Variable*, llvm::GlobalVariable*> m_GlobalVariables;
-    
+
 
     using IRBuilder =
         llvm::IRBuilder<true, llvm::ConstantFolder, llvm::IRBuilderDefaultInserter<true>>;
@@ -123,19 +123,19 @@ private:
     //
     std::map<const ExpressionNode*, llvm::Value*> m_GeneratedValues;
     std::stack<llvm::Value*> m_StringTemporaries;
-    
+
     //
     // This should be cleared at the end of each function
     //
     std::map<const Variable*, llvm::Value*> m_LocalVariables;
-    
+
     IRBuilder m_Builder;
 
     //
     // This should be called after generating every expression
     //
     void GenerateExpressionCleanup();
-    
+
     //
     // This should be called after every function
     //
@@ -148,9 +148,13 @@ private:
 
     void GenerateSequence( const Node& sequence );
 
-    void GenerateReturn( const ExpressionNode& returned );
+    void GenerateConditional( const ExpressionNode& condition,
+                              const Node& true_statement,
+                              const Node* else_statement );
 
     void GenerateVoidReturn();
+
+    void GenerateReturn( const ExpressionNode& returned );
 
     //
     // Value generation

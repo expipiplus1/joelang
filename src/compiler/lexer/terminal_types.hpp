@@ -154,6 +154,8 @@ enum class TerminalType
     PIXEL_SHADER,
     VERTEX_SHADER,
     RETURN,
+    IF,
+    ELSE,
 
     // Storage class specifiers
     STATIC,

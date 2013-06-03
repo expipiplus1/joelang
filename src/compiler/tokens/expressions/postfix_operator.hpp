@@ -85,6 +85,7 @@ class PostfixOperator : public JoeLang::Compiler::Token
 {
 public:
     PostfixOperator( TokenTy sub_class_id );
+    
     virtual
     ~PostfixOperator();
 

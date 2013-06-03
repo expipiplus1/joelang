@@ -81,7 +81,7 @@ bool CompoundStatement::AlwaysReturns() const
     //
     if( m_Statements.empty() )
         return false;
-    return (*m_Statements.rbegin())->AlwaysReturns();
+    return m_Statements.back()->AlwaysReturns();
 }
 
 std::set<Function_sp> CompoundStatement::GetCallees() const
