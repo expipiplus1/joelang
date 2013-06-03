@@ -34,6 +34,7 @@
 #include <string>
 #include <utility>
 
+#include <compiler/code_dag/node_manager.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
@@ -52,7 +53,10 @@ namespace Compiler
 
 class CastExpression;
 using CastExpression_up = std::unique_ptr<CastExpression>;
+class ExpressionNode;
+using ExpressionNode_ref = std::reference_wrapper<const ExpressionNode>;
 class Function;
+class FunctionNode;
 using Function_sp = std::shared_ptr<Function>;
 
 //------------------------------------------------------------------------------
@@ -83,10 +87,10 @@ ShaderDomain CompileStatement::GetDomain() const
     return m_Domain;
 }
 
-const EntryFunction_sp& CompileStatement::GetEntryFunction() const
+const Function& CompileStatement::GetEntryFunction() const
 {
     assert( m_EntryFunction && "Trying to get a null entryfunction" );
-    return m_EntryFunction;
+    return *m_EntryFunction;
 }
 
 bool CompileStatement::ResolveFunctionIdentifier( SemaAnalyzer& sema,
@@ -134,13 +138,12 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
     //
     // Resolve the function overload
     //
-    const Function* function;
-    if( !ResolveFunctionIdentifier( sema, function ) )
+    if( !ResolveFunctionIdentifier( sema, m_EntryFunction ) )
         return false;
 
-    assert( function && "Performing Sema on a null function" );
+    assert( m_EntryFunction && "Performing Sema on a null function" );
 
-    std::vector<CompleteType> types = function->GetParameterTypes();
+    std::vector<CompleteType> types = m_EntryFunction->GetParameterTypes();
 
     assert( types.size() >= m_Arguments.size() && "Too many arguments" );
 
@@ -156,13 +159,17 @@ bool CompileStatement::PerformSema( SemaAnalyzer& sema )
         m_Arguments[i] = std::move(a);
     }
 
-    if( !good )
-        return false;
+    return good;
+}
 
-    m_EntryFunction.reset( new EntryFunction( m_Domain,
-                                              *function,
-                                              std::move(m_Arguments) ) );
-    return true;
+const CompileStatementNode& CompileStatement::GenerateCodeDag( NodeManager& node_manager ) const
+{
+    std::vector<ExpressionNode_ref> parameters;
+    parameters.reserve( m_Arguments.size() );
+    for( const Expression_up& e : m_Arguments )
+        parameters.push_back( e->GenerateCodeDag( node_manager ) );
+    const FunctionNode& function_node = node_manager.MakeFunctionNode( *m_EntryFunction );
+    return node_manager.MakeCompileStatementNode( m_Domain, function_node, std::move( parameters ));
 }
 
 bool CompileStatement::Parse( Parser& parser, CompileStatement_up& token )

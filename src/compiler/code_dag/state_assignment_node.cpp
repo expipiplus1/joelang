@@ -59,5 +59,10 @@ const ExpressionNode& StateAssignmentNode::GetAssignedExpression() const
     return cast<ExpressionNode>( GetChild( 0 ) );
 }
 
+bool StateAssignmentNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::StateAssignment;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

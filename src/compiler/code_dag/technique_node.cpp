@@ -48,5 +48,10 @@ const std::string& TechniqueNode::GetName() const
     return m_Name;
 }
 
+bool TechniqueNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::Technique;
+}
+
 } // namespace Compiler
 } // namespace JoeLang

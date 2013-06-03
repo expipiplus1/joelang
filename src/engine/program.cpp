@@ -106,7 +106,13 @@ void Program::Compile()
     //
     if( m_Object )
         return;
-
+    
+    //
+    // Don't compile if we don't have any shaders
+    //
+    if( m_Shaders.empty() )
+        return; 
+        
     for( Shader& shader : m_Shaders )
         shader.Compile();
 

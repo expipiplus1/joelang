@@ -43,7 +43,8 @@ class Context;
 
 namespace Compiler
 {
-    class EntryFunction;
+    class CompileStatementNode;
+    class EffectFactory;
 };
 
 enum class ShaderDomain
@@ -69,18 +70,18 @@ public:
 
     const std::string& GetString() const;
 
-    /// Used internally by joelang
-    /// This asserts on a null pointer
-    Shader( const Context& context,
-            std::shared_ptr<Compiler::EntryFunction> entry_function );
 
     friend class Program;
+    friend class Compiler::EffectFactory;
 private:
+    /// Used internally by joelang
+    Shader( const Context& context, const Compiler::CompileStatementNode& compile_statement_node );
+    
     /// The context that this shader belongs to
     const Context& m_Context;
 
     /// The compile statement as seen in the joelang source
-    std::shared_ptr<Compiler::EntryFunction> m_EntryFunction;
+    const Compiler::CompileStatementNode* m_CompileStatement = nullptr;
 
     /// The glsl source of the shader
     std::string m_Source;

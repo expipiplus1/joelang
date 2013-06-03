@@ -27,37 +27,41 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "glsl_writer.hpp"
 
-#include <memory>
 #include <string>
 
-#include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/compile_statement_node.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
-class Technique;
 namespace Compiler
 {
 
-class PassNode;
-using PassNode_ref = std::reference_wrapper<const PassNode>;
-
-class TechniqueNode : public Node
+std::string GLSLWriter::GenerateGLSL( const CompileStatementNode& compile_statement )
 {
-public:
-    const std::string& GetName() const;
+    switch( compile_statement.GetDomain() )
+    {
+    case ShaderDomain::FRAGMENT:
+        return "#version 150\n"
+               "void main()\n"
+               "{ gl_FragColor = vec4(1,0,0,1); }\n";
+    case ShaderDomain::VERTEX:
+        return "#version 150\n"
+               "in vec4 position;\n"
+               "void main()\n"
+               "{ gl_Position = position; }\n";
+    }
+}
 
-    /** Used for casting **/
-    static
-    bool classof( const Node* n );
+GLSLWriter::GLSLWriter()
+{
+}
 
-private:
-    friend class NodeManager;
-    TechniqueNode( std::string name, std::vector<Node_ref> state_assignments );
-
-    std::string m_Name;
-};
+GLSLWriter::~GLSLWriter()
+{
+}
 
 } // namespace Compiler
 } // namespace JoeLang

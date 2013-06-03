@@ -47,5 +47,11 @@ const std::string& PassNode::GetName() const
     return m_Name;
 }
 
+bool PassNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::Pass;
+}
+
+
 } // namespace Compiler
 } // namespace JoeLang

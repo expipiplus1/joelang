@@ -29,34 +29,24 @@
 
 #pragma once
 
-#include <memory>
 #include <string>
-
-#include <compiler/code_dag/node.hpp>
 
 namespace JoeLang
 {
-class Technique;
 namespace Compiler
 {
 
-class PassNode;
-using PassNode_ref = std::reference_wrapper<const PassNode>;
+class CompileStatementNode;
 
-class TechniqueNode : public Node
+class GLSLWriter
 {
 public:
-    const std::string& GetName() const;
-
-    /** Used for casting **/
     static
-    bool classof( const Node* n );
+    std::string GenerateGLSL( const CompileStatementNode& compile_statement );
 
 private:
-    friend class NodeManager;
-    TechniqueNode( std::string name, std::vector<Node_ref> state_assignments );
-
-    std::string m_Name;
+    GLSLWriter();
+    ~GLSLWriter();
 };
 
 } // namespace Compiler

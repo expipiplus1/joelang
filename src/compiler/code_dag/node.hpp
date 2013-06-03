@@ -52,6 +52,8 @@ enum class NodeType
     Pass,
     // Holds a State and an expression
     StateAssignment,
+    // Like a Call,
+    CompileStatement,
 
     //
     // Statements
@@ -67,7 +69,7 @@ enum class NodeType
     //
     // Misc
     //
-    // Holds a Function_sp
+    // Holds a const Function&
     FunctionIdentifier,
 
     //

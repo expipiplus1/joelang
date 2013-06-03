@@ -35,7 +35,9 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/state_assignment_node.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
@@ -161,6 +163,9 @@ PassDefinition_ref PassDeclarationOrIdentifier::GetDefinition()
 
 Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 {
+    assert( false && "removeme");
+    std::abort();
+    /*
     assert( m_DefinitionRef && "Trying to generate a pass with no definition" );
     assert( *m_DefinitionRef && "Trying to generate an undefined pass" );
 
@@ -204,6 +209,7 @@ Pass PassDeclarationOrIdentifier::GeneratePass( CodeGenerator& code_gen ) const
 #endif
 
     return Pass( name, std::move(state_assignments), std::move(program) );
+    */
 }
 
 bool PassDeclarationOrIdentifier::PerformSema( SemaAnalyzer& sema )
@@ -248,12 +254,15 @@ const PassNode& PassDeclarationOrIdentifier::GenerateCodeDag( NodeManager& node_
     //
     // Create the state assignments from this pass
     //
-    std::vector<StateAssignmentNode_ref> state_assignment_nodes;
+    std::vector<Node_ref> statements;
     
     for( const auto& state_assignment : (*m_DefinitionRef)->GetStateAssignments() )
-        state_assignment_nodes.push_back( state_assignment->GenerateCodeDag( node_manager ) );
+        statements.push_back( state_assignment->GenerateCodeDag( node_manager ) );
     
-    return node_manager.MakePassNode( name, std::move( state_assignment_nodes ) );
+    for( const auto& compile_statement : (*m_DefinitionRef)->GetCompileStatements() )
+        statements.push_back( compile_statement->GenerateCodeDag( node_manager ) );
+    
+    return node_manager.MakePassNode( name, std::move( statements ) );
 }
     
 bool PassDeclarationOrIdentifier::IsIdentifier() const

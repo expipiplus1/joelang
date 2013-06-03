@@ -30,6 +30,7 @@
 #include "node_manager.hpp"
 
 #include <compiler/code_dag/cast_node.hpp>
+#include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/expression_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
@@ -91,32 +92,32 @@ const SwizzleStoreNode& NodeManager::MakeSwizzleStoreNode( const PointerExpressi
                                                            const Swizzle& swizzle )
 {
     m_Nodes.emplace_back( new SwizzleStoreNode( assignee, assigned, swizzle ) );
-    return static_cast<const SwizzleStoreNode&>( *m_Nodes.back() );
+    return cast<SwizzleStoreNode>( *m_Nodes.back() );
 }
 
 const ZeroNode& NodeManager::MakeZero( Type type )
 {
     m_Nodes.emplace_back( new ZeroNode( type ) );
-    return static_cast<const ZeroNode&>( *m_Nodes.back() );
+    return cast<ZeroNode>( *m_Nodes.back() );
 }
 
 const VariableNode& NodeManager::MakeVariableNode( Variable_sp variable )
 {
     m_Nodes.emplace_back( new VariableNode( std::move( variable ) ) );
-    return static_cast<const VariableNode&>( *m_Nodes.back() );
+    return cast<VariableNode>( *m_Nodes.back() );
 }
 
 const FunctionNode& NodeManager::MakeFunctionNode( const Function& function )
 {
     m_Nodes.emplace_back( new FunctionNode( function ) );
-    return static_cast<const FunctionNode&>( *m_Nodes.back() );
+    return cast<FunctionNode>( *m_Nodes.back() );
 }
 
 const SwizzleNode& NodeManager::MakeSwizzleNode( const ExpressionNode& swizzled,
                                                  const Swizzle& swizzle )
 {
     m_Nodes.emplace_back( new SwizzleNode( swizzled, swizzle ) );
-    return static_cast<const SwizzleNode&>( *m_Nodes.back() );
+    return cast<SwizzleNode>( *m_Nodes.back() );
 }
 
 const ExpressionNode& NodeManager::MakeCastNode( const ExpressionNode& expression,
@@ -125,7 +126,7 @@ const ExpressionNode& NodeManager::MakeCastNode( const ExpressionNode& expressio
     if( type == expression.GetType() )
         return expression;
     m_Nodes.emplace_back( new CastNode( expression, std::move( type ) ) );
-    return static_cast<const CastNode&>( *m_Nodes.back() );
+    return cast<CastNode>( *m_Nodes.back() );
 }
 
 const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name,
@@ -138,20 +139,13 @@ const TechniqueNode& NodeManager::MakeTechniqueNode( std::string name,
         ns.emplace_back( n );
 
     m_Nodes.emplace_back( new TechniqueNode( name, std::move( ns ) ) );
-    return static_cast<const TechniqueNode&>( *m_Nodes.back() );
+    return cast<TechniqueNode>( *m_Nodes.back() );
 }
 
-const PassNode& NodeManager::MakePassNode( std::string name,
-                                           std::vector<StateAssignmentNode_ref> state_assignments )
+const PassNode& NodeManager::MakePassNode( std::string name, std::vector<Node_ref> statements )
 {
-    // Hopefully this will be a no-op
-
-    std::vector<Node_ref> ns;
-    for( const StateAssignmentNode& n : state_assignments )
-        ns.emplace_back( n );
-
-    m_Nodes.emplace_back( new PassNode( name, std::move( ns ) ) );
-    return static_cast<const PassNode&>( *m_Nodes.back() );
+    m_Nodes.emplace_back( new PassNode( name, std::move( statements ) ) );
+    return cast<PassNode>( *m_Nodes.back() );
 }
 
 const StateAssignmentNode& NodeManager::MakeStateAssignmentNode(
@@ -159,7 +153,21 @@ const StateAssignmentNode& NodeManager::MakeStateAssignmentNode(
     const ExpressionNode& assigned_expression )
 {
     m_Nodes.emplace_back( new StateAssignmentNode( state, assigned_expression ) );
-    return static_cast<const StateAssignmentNode&>( *m_Nodes.back() );
+    return cast<StateAssignmentNode>( *m_Nodes.back() );
+}
+
+const CompileStatementNode& NodeManager::MakeCompileStatementNode(
+    ShaderDomain domain,
+    const FunctionNode& entry_function,
+    const std::vector<ExpressionNode_ref>& parameters )
+{
+    std::vector<Node_ref> children;
+    children.reserve( parameters.size() + 1 );
+    for( const ExpressionNode& p : parameters )
+        children.push_back( p );
+    children.push_back( entry_function );
+    m_Nodes.emplace_back( new CompileStatementNode( domain, std::move( children ) ) );
+    return cast<CompileStatementNode>( *m_Nodes.back() );
 }
 
 } // namespace Compiler

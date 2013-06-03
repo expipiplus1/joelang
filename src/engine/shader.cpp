@@ -45,6 +45,9 @@
 #include <compiler/semantic_analysis/entry_function.hpp>
 #include <compiler/writers/shader_writer.hpp>
 
+#include <compiler/code_dag/compile_statement_node.hpp>
+#include <compiler/writers/glsl_writer.hpp>
+
 namespace JoeLang
 {
 
@@ -56,14 +59,12 @@ Shader::Shader( const Context& context, ShaderDomain domain, std::string source 
 {
 }
 
-Shader::Shader( const Context& context,
-                std::shared_ptr<Compiler::EntryFunction> entry_function )
+Shader::Shader( const Context& context, const Compiler::CompileStatementNode& compile_statement_node )
     :m_Context( context )
-    ,m_EntryFunction( std::move(entry_function) )
+    ,m_CompileStatement( &compile_statement_node )
     ,m_Object( 0 )
 {
-    assert( m_EntryFunction && "Null EntryFunction given to Shader" );
-    m_Domain = m_EntryFunction->GetDomain();
+    m_Domain = m_CompileStatement->GetDomain();
 }
 
 
@@ -91,7 +92,7 @@ void Shader::Swap( Shader& other )
 {
     if( &other == this )
         return;
-    std::swap( m_EntryFunction, other.m_EntryFunction );
+    std::swap( m_CompileStatement, other.m_CompileStatement );
     std::swap( m_Source, other.m_Source );
     std::swap( m_Domain, other.m_Domain );
     std::swap( m_Object, other.m_Object );
@@ -114,9 +115,7 @@ void Shader::Compile()
     //
     // Generate the glsl
     //
-    Compiler::ShaderWriter shader_writer( m_Context );
-    assert( m_EntryFunction && "Generating glsl for a null entryfunction" );
-    m_Source = shader_writer.GenerateGLSL( *m_EntryFunction );
+    m_Source = Compiler::GLSLWriter::GenerateGLSL( *m_CompileStatement );
 
     std::cout << m_Source << std::endl;
 

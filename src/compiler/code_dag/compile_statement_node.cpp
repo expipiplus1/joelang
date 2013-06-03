@@ -27,37 +27,48 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "compile_statement_node.hpp"
 
-#include <memory>
-#include <string>
+#include <utility>
+#include <vector>
 
+#include <compiler/code_dag/expression_node.hpp>
+#include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/support/casting.hpp>
 
 namespace JoeLang
 {
-class Technique;
 namespace Compiler
 {
 
-class PassNode;
-using PassNode_ref = std::reference_wrapper<const PassNode>;
-
-class TechniqueNode : public Node
+CompileStatementNode::CompileStatementNode( ShaderDomain domain,
+                                            const std::vector<Node_ref> children )
+    : Node( NodeType::CompileStatement, std::move( children ) ),
+      m_Domain( domain )
 {
-public:
-    const std::string& GetName() const;
+}
 
-    /** Used for casting **/
-    static
-    bool classof( const Node* n );
+ShaderDomain CompileStatementNode::GetDomain() const
+{
+    return m_Domain;
+}
 
-private:
-    friend class NodeManager;
-    TechniqueNode( std::string name, std::vector<Node_ref> state_assignments );
+const ExpressionNode& CompileStatementNode::GetParameter( unsigned index ) const
+{
+    assert( index < GetNumChildren() - 1 && "Getting an out of bounds parameter" );
+    return cast<ExpressionNode>( GetChild( index ) );
+}
 
-    std::string m_Name;
-};
+const Function& CompileStatementNode::GetEntryFunction() const
+{
+    return cast<FunctionNode>( GetChild( GetNumChildren() - 1 ) ).GetFunction();
+}
+
+bool CompileStatementNode::classof( const Node* n )
+{
+    return n->GetNodeType() == NodeType::CompileStatement;
+}
 
 } // namespace Compiler
 } // namespace JoeLang

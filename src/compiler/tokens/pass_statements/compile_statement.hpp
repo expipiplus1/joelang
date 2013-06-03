@@ -44,6 +44,7 @@ namespace Compiler
 
 class CodeGenerator;
 class CompileStatement;
+class CompileStatementNode;
 using CompileStatement_up = std::unique_ptr<CompileStatement>;
 class EntryFunction;
 using EntryFunction_sp = std::shared_ptr<EntryFunction>;
@@ -51,6 +52,7 @@ class Expression;
 using Expression_up = std::unique_ptr<Expression>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
+class NodeManager;
 class Parser;
 class SemaAnalyzer;
 
@@ -83,12 +85,14 @@ public:
 
     ShaderDomain GetDomain() const;
 
-    const EntryFunction_sp& GetEntryFunction() const;
+    const Function& GetEntryFunction() const;
 
     bool ResolveFunctionIdentifier( SemaAnalyzer& sema, const Function*& function );
 
     bool PerformSema( SemaAnalyzer& sema );
-
+    
+    const CompileStatementNode& GenerateCodeDag( NodeManager& node_manager ) const;
+    
     static
     bool Parse( Parser& parser, CompileStatement_up& token );
 
@@ -101,7 +105,7 @@ private:
     std::string m_Identifier;
     std::vector<Expression_up> m_Arguments;
 
-    EntryFunction_sp m_EntryFunction;
+    const Function* m_EntryFunction = nullptr;
 };
 
 } // namespace Compiler

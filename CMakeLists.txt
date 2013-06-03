@@ -87,6 +87,8 @@ set( joelang_sources include/joelang/context.hpp
                      src/engine/inl/parameter_watcher-inl.hpp
                      src/compiler/code_dag/cast_node.cpp
                      src/compiler/code_dag/cast_node.hpp
+                     src/compiler/code_dag/compile_statement_node.cpp
+                     src/compiler/code_dag/compile_statement_node.hpp
                      src/compiler/code_dag/constant_node.cpp
                      src/compiler/code_dag/constant_node.hpp
                      src/compiler/code_dag/constant_node-inl.hpp
@@ -212,6 +214,8 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/writers/code_generator_wrappers.cpp
                      src/compiler/writers/dot_writer.cpp
                      src/compiler/writers/dot_writer.hpp
+                     src/compiler/writers/glsl_writer.cpp
+                     src/compiler/writers/glsl_writer.hpp
                      src/compiler/writers/llvm_writer.cpp
                      src/compiler/writers/llvm_writer.hpp
                      src/compiler/writers/runtime.cpp

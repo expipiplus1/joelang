@@ -47,6 +47,10 @@ class PassNode : public Node
 public:
     const std::string& GetName() const;
 
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
 private:
     friend class NodeManager;
     PassNode( std::string name, std::vector<Node_ref> state_assignments );

@@ -408,9 +408,9 @@ Runtime::Runtime( const JoeLang::Context& joelang_context )
 
 Runtime::~Runtime()
 {
-    m_Module->dump();
+    //m_Module->dump();
     m_ExecutionEngine.reset();
-    //llvm::llvm_shutdown();
+    llvm::llvm_shutdown();
 }
 
 const JoeLang::Context& Runtime::GetJoeLangContext() const

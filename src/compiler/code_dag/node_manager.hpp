@@ -36,6 +36,7 @@
 namespace JoeLang
 {
 
+enum class ShaderDomain;
 class StateBase;
 enum class Type;
 
@@ -43,10 +44,12 @@ namespace Compiler
 {
 
 class CastNode;
+class CompileStatementNode;
 class CompleteType;
 template <typename>
 class ConstantNode;
 class ExpressionNode;
+using ExpressionNode_ref = std::reference_wrapper<const ExpressionNode>;
 class Function;
 class FunctionNode;
 using Function_sp = std::shared_ptr<Function>;
@@ -102,11 +105,15 @@ public:
 
     const TechniqueNode& MakeTechniqueNode( std::string name, std::vector<PassNode_ref> passes );
 
-    const PassNode& MakePassNode( std::string name,
-                                  std::vector<StateAssignmentNode_ref> state_assignments );
+    const PassNode& MakePassNode( std::string name, std::vector<Node_ref> state_assignments );
 
     const StateAssignmentNode& MakeStateAssignmentNode( const StateBase& state,
                                                         const ExpressionNode& assigned_expression );
+
+    const CompileStatementNode& MakeCompileStatementNode(
+        ShaderDomain domain,
+        const FunctionNode& entry_function,
+        const std::vector<ExpressionNode_ref>& parameters );
 
     // TODO make this a little better
     std::vector<Node_up> m_Nodes;

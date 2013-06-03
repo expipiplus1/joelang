@@ -33,6 +33,7 @@
 #include <iostream>
 #include <memory>
 
+#include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
 #include <compiler/code_dag/pass_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
@@ -40,15 +41,20 @@
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/declaration.hpp>
 #include <compiler/tokens/translation_unit.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/dot_writer.hpp>
 #include <compiler/writers/llvm_writer.hpp>
+#include <joelang/config.h>
 #include <joelang/context.hpp>
 #include <joelang/effect.hpp>
 #include <joelang/parameter.hpp>
 #include <joelang/technique.hpp>
+
+#include <joelang/program.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
@@ -69,14 +75,40 @@ EffectFactory::EffectFactory( const Context& context, Runtime& runtime )
 Pass EffectFactory::GeneratePass( const PassNode& pass_node )
 {
     Pass::StateAssignmentVector state_assignments;
-    for( const Node& state_assignment_node : pass_node.GetChildren() )
+    std::vector<Shader> shaders;
+
+    for( const Node& node : pass_node.GetChildren() )
     {
-        assert( state_assignment_node.GetNodeType() == NodeType::StateAssignment &&
-                "Child of pass node wasn't a state-assignment node" );
-        state_assignments.push_back( m_LLVMWriter.GenerateStateAssignment(
-            static_cast<const StateAssignmentNode&>( state_assignment_node ) ) );
+        switch( node.GetNodeType() )
+        {
+        case NodeType::StateAssignment:
+            state_assignments.push_back(
+                m_LLVMWriter.GenerateStateAssignment( cast<StateAssignmentNode>( node ) ) );
+            break;
+        case NodeType::CompileStatement:
+#ifdef JOELANG_WITH_OPENGL
+            shaders.push_back( Shader( m_Context, cast<CompileStatementNode>( node ) ) );
+#else
+            m_Context.Error( "Trying to compile a shader without opengl" );
+#endif
+            break;
+        default:
+            assert( false && "Unhandled node type in Pass node" );
+            std::abort();
+        }
     }
-    return Pass( pass_node.GetName(), std::move( state_assignments ) );
+
+#ifdef JOELANG_WITH_OPENGL
+    //
+    // Create a Program for the pass from all the shaders
+    //
+    Program program( std::move( shaders ) );
+    program.Compile();
+#else
+    Program program;
+#endif
+
+    return Pass( pass_node.GetName(), std::move( state_assignments ), std::move( program ) );
 }
 
 Technique EffectFactory::GenerateTechnique( const TechniqueNode& technique_node )
@@ -141,7 +173,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
 //for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
 //v->GenerateCodeDag( node_manager );
 
-#if 0
+//#if 0
     DotWriter dot_writer;
 
     for( const Function_sp& f : sema_analyzer.GetFunctions() )
@@ -156,7 +188,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     std::cout << dot_writer.GenerateDotString();
 
     return nullptr;
-#endif
+//#endif
 
     std::vector<Technique> techniques =
         GenerateTechniques( sema_analyzer.GetTechniqueNodes( node_manager ) );

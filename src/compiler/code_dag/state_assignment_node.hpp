@@ -51,6 +51,10 @@ public:
 
     const ExpressionNode& GetAssignedExpression() const;
 
+    /** Used for casting **/
+    static
+    bool classof( const Node* n );
+
 private:
     friend class NodeManager;
     StateAssignmentNode( const StateBase& m_State, const ExpressionNode& assigned_expression );

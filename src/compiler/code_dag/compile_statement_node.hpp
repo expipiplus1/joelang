@@ -29,24 +29,30 @@
 
 #pragma once
 
-#include <memory>
-#include <string>
+#include <functional>
+#include <vector>
 
 #include <compiler/code_dag/node.hpp>
 
 namespace JoeLang
 {
-class Technique;
+enum class ShaderDomain;
+
 namespace Compiler
 {
 
-class PassNode;
-using PassNode_ref = std::reference_wrapper<const PassNode>;
+class ExpressionNode;
+using ExpressionNode_ref = std::reference_wrapper<const ExpressionNode>;
+class Function;
 
-class TechniqueNode : public Node
+class CompileStatementNode : public Node
 {
 public:
-    const std::string& GetName() const;
+    ShaderDomain GetDomain() const;
+
+    const ExpressionNode& GetParameter( unsigned index ) const;
+
+    const Function& GetEntryFunction() const;
 
     /** Used for casting **/
     static
@@ -54,9 +60,9 @@ public:
 
 private:
     friend class NodeManager;
-    TechniqueNode( std::string name, std::vector<Node_ref> state_assignments );
+    CompileStatementNode( ShaderDomain domain, const std::vector<Node_ref> children );
 
-    std::string m_Name;
+    ShaderDomain m_Domain;
 };
 
 } // namespace Compiler
