@@ -62,6 +62,7 @@ private:
     std::string GetIdentifier( const Node& node );
     std::string GetUniqueIdentifier();
     std::string GetNodeDescription( const Node& node ) const;
+    void GenerateInvisibleEdges( const Node& node );
 
     struct NodeCluster
     {
@@ -75,6 +76,8 @@ private:
     std::map<const Node*, std::string> m_Identifiers;
     unsigned m_NumUniqueIdentifiers = 0;
 
+    std::map<const Node*, std::vector<const Function*>> m_InvisibleEdgeMap;
+    
     std::string m_Labels;
 };
 

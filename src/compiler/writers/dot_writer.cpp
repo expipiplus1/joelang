@@ -30,9 +30,11 @@
 #include "dot_writer.hpp"
 
 #include <cassert>
+#include <algorithm>
 #include <string>
 
 #include <compiler/code_dag/cast_node.hpp>
+#include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
@@ -48,6 +50,7 @@
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/support/casting.hpp>
+#include <joelang/shader.hpp>
 
 namespace JoeLang
 {
@@ -67,7 +70,8 @@ std::string DotWriter::GenerateDotString()
     {
         std::string subgraph_header = "subgraph cluster_" + GetUniqueIdentifier() + "{\n";
         std::string subgraph_footer = "\nstyle = \"rounded,solid\";\n}\n";
-        content += subgraph_header + GetEdges( technique_node ) + m_Labels + subgraph_footer;
+        edges += GetEdges( technique_node );
+        content += subgraph_header + m_Labels + subgraph_footer;
         m_Labels.clear();
     }
 
@@ -97,11 +101,47 @@ std::string DotWriter::GenerateDotString()
 void DotWriter::AddFunction( const Function& function )
 {
     m_FunctionClusterMap[&function] = "cluster_" + GetUniqueIdentifier();
+    
+    GenerateInvisibleEdges( function.GetCodeDag() );
 }
 
 void DotWriter::AddTechnique( const TechniqueNode& technique_node )
 {
     m_TechniqueClusters.push_back( technique_node );
+    
+    GenerateInvisibleEdges( technique_node );
+}
+
+void DotWriter::GenerateInvisibleEdges( const Node& node )
+{    
+    std::set<const Node*> function_dependency_nodes = node.GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
+    std::vector<const Function*> function_dependencies( function_dependency_nodes.size() );
+    std::transform( function_dependency_nodes.begin(),
+                    function_dependency_nodes.end(),
+                    function_dependencies.begin(),
+                    []( const Node* n ){ return &cast<FunctionNode>(n)->GetFunction(); });
+    
+    std::vector<Node_ref> base_leaf_nodes; 
+    std::vector<std::pair<Node_ref, unsigned>> stack = {{ std::make_pair( std::cref(node), 0 ) }};
+    unsigned max_depth = 0;
+    while (!stack.empty())
+    {
+        const Node& n = stack.back().first;
+        unsigned depth = stack.back().second;
+        
+        stack.pop_back();
+        for( const Node& s : n.GetChildren() )
+            stack.push_back( std::make_pair( std::cref(s), depth + 1) );
+        
+        if( n.GetNumChildren() == 0 )
+            if( depth > max_depth )
+            {
+                base_leaf_nodes.push_back( n );
+                max_depth = depth;
+            }
+    }
+    //for( const Node& n : base_leaf_nodes )
+    m_InvisibleEdgeMap[&(base_leaf_nodes.back().get())] = function_dependencies;
 }
 
 void DotWriter::Clear()
@@ -141,7 +181,8 @@ std::string DotWriter::GetEdges( const Node& node )
         const FunctionNode& f = static_cast<const FunctionNode&>( node );
         auto i = m_FunctionClusterMap.find( &f.GetFunction() );
         if( i != m_FunctionClusterMap.end() )
-            edges += identifier + " -> " + i->second + "_TITLE" + "[lhead=" + i->second + "];\n";
+            edges += identifier + " -> " + i->second + "_TITLE" + 
+                     "[constraint=\"false\",lhead=" + i->second + "];\n";
     }
 
     for( const Node& s : node.GetChildren() )
@@ -152,6 +193,19 @@ std::string DotWriter::GetEdges( const Node& node )
         if( !has_seen )
             edges += GetEdges( s );
     }
+    
+    auto i = m_InvisibleEdgeMap.find( &node );
+    if( i != m_InvisibleEdgeMap.end() )
+    {
+        for( const Function* f : i->second )
+        {
+            auto j = m_FunctionClusterMap.find( f );
+            if( j != m_FunctionClusterMap.end() )
+                edges += identifier + " -> " + j->second + "_TITLE" + 
+                         "[style=\"invisible\"];\n";
+        }
+    }
+    
     return edges;
 }
 
@@ -183,6 +237,11 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "Pass: " + static_cast<const PassNode&>( node ).GetName();
     case NodeType::StateAssignment:
         return "StateAssignment";
+    case NodeType::CompileStatement:
+        return "Compile: " +
+               std::string( cast<CompileStatementNode>( node ).GetDomain() == ShaderDomain::VERTEX
+                                ? "Vertex"
+                                : "Fragment" );
     case NodeType::Sequence:
         return "Sequence";
     case NodeType::Conditional:
