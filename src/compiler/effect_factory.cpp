@@ -168,16 +168,22 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
         m_Context.Error( s );
 
     for( const Function_sp& f : sema_analyzer.GetFunctions() )
+    {
         f->GenerateCodeDag( node_manager );
 
-//for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
-//v->GenerateCodeDag( node_manager );
+        //
+        // Todo, replce this with a better pass system
+        //
+        f->SetCodeDag( node_manager.InsertTemporaries( f->GetCodeDag() ) );
+    }
 
-//#if 0
+#if 0
     DotWriter dot_writer;
 
     for( const Function_sp& f : sema_analyzer.GetFunctions() )
-        dot_writer.AddFunction( *f );
+    {
+        dot_writer.AddFunction( *f, &node_manager.InsertTemporaries( f->GetCodeDag() ) );
+    }
 
     //for( const Variable_sp& v : sema_analyzer.GetGlobalVariables() )
     //dot_writer.AddVariable( v );
@@ -188,7 +194,7 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     std::cout << dot_writer.GenerateDotString();
 
     return nullptr;
-//#endif
+#endif
 
     std::vector<Technique> techniques =
         GenerateTechniques( sema_analyzer.GetTechniqueNodes( node_manager ) );

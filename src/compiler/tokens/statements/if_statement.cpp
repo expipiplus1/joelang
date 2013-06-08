@@ -34,6 +34,7 @@
 
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 #include <compiler/lexer/terminal_types.hpp>
 #include <compiler/parser/parser.hpp>
 #include <compiler/semantic_analysis/sema_analyzer.hpp>
@@ -67,7 +68,7 @@ IfStatement::~IfStatement()
 {
 }
 
-const Node& IfStatement::GenerateCodeDag( NodeManager& node_manager ) const
+const StatementNode& IfStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
     std::vector<Node_ref> nodes = { { m_Condition->GenerateCodeDag( node_manager ),
                                       m_TrueStatement->GenerateCodeDag( node_manager ) } };
@@ -75,7 +76,7 @@ const Node& IfStatement::GenerateCodeDag( NodeManager& node_manager ) const
     if( m_ElseStatement )
         nodes.push_back( m_ElseStatement->GenerateCodeDag( node_manager ) );
 
-    return node_manager.MakeNode( NodeType::Conditional, std::move( nodes ) );
+    return node_manager.MakeStatementNode( NodeType::Conditional, std::move( nodes ) );
 }
 
 bool IfStatement::AlwaysReturns() const

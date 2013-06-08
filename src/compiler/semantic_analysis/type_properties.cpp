@@ -699,7 +699,7 @@ bool HasGLSLType( Type t )
         
         Type::VOID,
     };
-
+  
     return glsl_types.find( t ) != glsl_types.end();
 }
 

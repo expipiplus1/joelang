@@ -115,7 +115,7 @@ void Shader::Compile()
     //
     // Generate the glsl
     //
-    m_Source = Compiler::GLSLWriter::GenerateGLSL( *m_CompileStatement );
+    m_Source = Compiler::GLSLWriter::GenerateGLSL( m_Context, *m_CompileStatement );
 
     std::cout << m_Source << std::endl;
 

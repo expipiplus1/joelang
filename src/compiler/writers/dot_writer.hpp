@@ -42,6 +42,7 @@ namespace Compiler
 class Function;
 class Node;
 using Node_ref = std::reference_wrapper<const Node>;
+class StatementNode;
 class TechniqueNode;
 using TechniqueNode_ref = std::reference_wrapper<const TechniqueNode>;
 
@@ -52,7 +53,8 @@ class DotWriter
 {
 public:
     std::string GenerateDotString();
-    void AddFunction( const Function& function );
+    void AddFunction( const Function& function,
+                      const JoeLang::Compiler::StatementNode* code = nullptr );
     void AddTechnique( const TechniqueNode& technique_node );
     void Clear();
 
@@ -77,8 +79,10 @@ private:
     unsigned m_NumUniqueIdentifiers = 0;
 
     std::map<const Node*, std::vector<const Function*>> m_InvisibleEdgeMap;
-    
+
     std::string m_Labels;
+
+    std::map<const Function*, const StatementNode*> m_FunctionCodeMap;
 };
 
 } // namespace Compiler

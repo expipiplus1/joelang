@@ -29,6 +29,8 @@
 
 #include "node_manager.hpp"
 
+#pragma once
+
 #include <compiler/code_dag/constant_node.hpp>
 
 namespace JoeLang

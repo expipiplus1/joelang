@@ -56,10 +56,10 @@ EmptyStatement::~EmptyStatement()
 {
 }
 
-const Node& EmptyStatement::GenerateCodeDag( NodeManager& node_manager ) const
+const StatementNode& EmptyStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
     assert( false && "Trying to codegen an empty statement");
-    return node_manager.MakeNode( NodeType::Unimplemented, {} );
+    std::abort();
 }
 
 bool EmptyStatement::AlwaysReturns() const

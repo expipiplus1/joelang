@@ -62,10 +62,14 @@ using PassNode_ref = std::reference_wrapper<const PassNode>;
 class PointerExpressionNode;
 class StateAssignmentNode;
 using StateAssignmentNode_ref = std::reference_wrapper<const StateAssignmentNode>;
+class StatementNode;
+using StatementNode_ref = std::reference_wrapper<const StatementNode>;
 class Swizzle;
 class SwizzleNode;
 class SwizzleStoreNode;
 class TechniqueNode;
+class TemporaryAssignmentNode;
+class TemporaryNode;
 class TypeNode;
 class Variable;
 class VariableNode;
@@ -78,7 +82,24 @@ public:
     NodeManager();
     ~NodeManager();
 
+    //
+    // Transformations on the tree
+    //
+
+    //
+    // This will make temporaries out of all shared nodes underneath node
+    // Node should be a statement node
+    //
+    const StatementNode& InsertTemporaries( const StatementNode& node );
+
+    //
+    // All the functions to do with creating nodes
+    //
+
     const Node& MakeNode( NodeType node_type, std::vector<Node_ref> children = {} );
+
+    const StatementNode& MakeStatementNode( NodeType node_type,
+                                            std::vector<Node_ref> children = {} );
 
     const ExpressionNode& MakeExpressionNode( NodeType node_type,
                                               std::vector<Node_ref> children = {} );
@@ -115,8 +136,22 @@ public:
         const FunctionNode& entry_function,
         const std::vector<ExpressionNode_ref>& parameters );
 
+    const TemporaryAssignmentNode& MakeTemporaryAssignmentNode( unsigned temporary_number,
+                                                                const ExpressionNode& assigned );
+
+    const TemporaryNode& MakeTemporaryNode( unsigned temporary_number, const CompleteType& type );
+
+    const PointerExpressionNode& MakeGLSLBuiltinNode( std::string builtin_name );
+
+private:
+    const ExpressionNode& InsertTemporariesIntoExpression(
+        const ExpressionNode& expression,
+        std::vector<StatementNode_ref>& temporary_assignments );
+
     // TODO make this a little better
     std::vector<Node_up> m_Nodes;
+
+    unsigned m_NumTemporaries = 0;
 };
 
 } // namespace Compiler

@@ -54,9 +54,9 @@ class CompoundStatement;
 using CompoundStatement_up = std::unique_ptr<CompoundStatement>;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
-class Node; 
 class NodeManager;
 enum class RuntimeFunction;
+class StatementNode; 
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
 
@@ -82,7 +82,9 @@ public:
     
     void GenerateCodeDag( NodeManager& node_manager );
     
-    const Node& GetCodeDag() const;
+    const StatementNode& GetCodeDag() const;
+    
+    void SetCodeDag( const StatementNode& code );
 
     const std::string& GetIdentifier() const;
 
@@ -126,7 +128,7 @@ public:
     /**
       * Returns all functions below this one in the call graph
       */
-    std::set<Function_sp> GetFunctionDependencies( bool& recursion ) const;
+    std::set<const Function*> GetFunctionDependencies( bool& recursion ) const;
 
     /**
       * Returns all the variables referenced in this function
@@ -176,7 +178,7 @@ private:
 
     RuntimeFunction           m_RuntimeFunction;
     
-    const Node*               m_CodeDag;
+    const StatementNode*      m_CodeDag;
 };
 
 } // namespace Compiler

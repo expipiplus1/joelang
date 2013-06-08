@@ -64,7 +64,7 @@ public:
     ~ReturnStatement   ();
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const StatementNode& GenerateCodeDag( NodeManager& node_manager ) const override;
     
     bool IsVoidReturn() const;
 

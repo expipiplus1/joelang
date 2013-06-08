@@ -41,6 +41,7 @@
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/pointer_expression_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/swizzle_store_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
@@ -73,7 +74,6 @@ LLVMWriter::LLVMWriter( Runtime& runtime )
 LLVMWriter::~LLVMWriter()
 {
     assert( m_LocalVariables.empty() && "Leftover local variables" );
-    assert( m_GeneratedValues.empty() && "Leftover generated values" );
 }
 
 void LLVMWriter::AddGlobalVariable( const Variable& variable )
@@ -387,14 +387,11 @@ void LLVMWriter::GenerateExpressionCleanup()
         m_Runtime.CreateRuntimeCall( RuntimeFunction::STRING_DESTROY, { v }, m_Builder );
         m_StringTemporaries.pop();
     }
-    
-    m_GeneratedValues.clear();
 }
 
 void LLVMWriter::GenerateFunctionCleanup()
 {
     assert( m_StringTemporaries.empty() && "Leftover temporaries" );
-    assert( m_GeneratedValues.empty() && "Leftover values" );
     m_LocalVariables.clear(); 
     m_Builder.ClearInsertionPoint();
 }
@@ -499,14 +496,11 @@ void LLVMWriter::GenerateConditional( const ExpressionNode& condition,
 
 void LLVMWriter::GenerateVoidReturn()
 {
-    assert( m_GeneratedValues.empty() && "Leftover values in GeneratedValues" );
     m_Builder.CreateRetVoid();
 }
 
 void LLVMWriter::GenerateReturn( const ExpressionNode& returned )
 {
-    assert( m_GeneratedValues.empty() && "Leftover values in GeneratedValues" );
-    
     llvm::Value* returned_value = GenerateValue( returned );
     
     GenerateExpressionCleanup();
@@ -521,14 +515,6 @@ void LLVMWriter::GenerateReturn( const ExpressionNode& returned )
 
 llvm::Value* LLVMWriter::GenerateValue( const ExpressionNode& expression )
 {
-    //
-    // If we've already generated this value for this expression, just returned that to not
-    // evaluate it twice
-    //
-    auto i = m_GeneratedValues.find( &expression );
-    if( i != m_GeneratedValues.end() )
-        return i->second;
-    
     if( expression.GetNodeType() == NodeType::SwizzleStore )
         assert( false && "complete me" );
     
@@ -655,10 +641,6 @@ llvm::Value* LLVMWriter::GenerateValue( const ExpressionNode& expression )
 
 llvm::Value* LLVMWriter::GenerateAddress( const PointerExpressionNode& expression )
 {
-    auto i = m_GeneratedValues.find( &expression );
-    if( i != m_GeneratedValues.end() )
-        return i->second;
-    
     switch( expression.GetNodeType() )
     {
     case NodeType::Store:

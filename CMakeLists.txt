@@ -96,6 +96,8 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/code_dag/expression_node.hpp
                      src/compiler/code_dag/function_node.cpp
                      src/compiler/code_dag/function_node.hpp
+                     src/compiler/code_dag/glsl_builtin_node.cpp
+                     src/compiler/code_dag/glsl_builtin_node.hpp
                      src/compiler/code_dag/node.cpp
                      src/compiler/code_dag/node.hpp
                      src/compiler/code_dag/node_manager.cpp
@@ -107,12 +109,18 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/code_dag/pointer_expression_node.hpp
                      src/compiler/code_dag/state_assignment_node.cpp
                      src/compiler/code_dag/state_assignment_node.hpp
+                     src/compiler/code_dag/statement_node.cpp
+                     src/compiler/code_dag/statement_node.hpp
                      src/compiler/code_dag/swizzle_node.cpp
                      src/compiler/code_dag/swizzle_node.hpp
                      src/compiler/code_dag/swizzle_store_node.cpp
                      src/compiler/code_dag/swizzle_store_node.hpp
                      src/compiler/code_dag/technique_node.cpp
                      src/compiler/code_dag/technique_node.hpp
+                     src/compiler/code_dag/temporary_assignment_node.cpp
+                     src/compiler/code_dag/temporary_assignment_node.hpp
+                     src/compiler/code_dag/temporary_node.cpp
+                     src/compiler/code_dag/temporary_node.hpp
                      src/compiler/code_dag/variable_node.cpp
                      src/compiler/code_dag/variable_node.hpp
                      src/compiler/code_dag/zero_node.cpp

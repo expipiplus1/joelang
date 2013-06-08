@@ -42,7 +42,6 @@ class CodeGenerator;
 class CompleteType;
 class CompoundStatement;
 typedef std::unique_ptr<CompoundStatement> CompoundStatement_up;
-class Node;
 class NodeManager;
 class Parser;
 class SemaAnalyzer;
@@ -62,7 +61,7 @@ public:
     ~CompoundStatement   ();
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const StatementNode& GenerateCodeDag( NodeManager& node_manager ) const override;
 
     virtual
     bool AlwaysReturns() const override;

@@ -36,6 +36,7 @@
 #include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/swizzle_store_node.hpp>
+#include <compiler/code_dag/temporary_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/code_dag/zero_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
@@ -119,13 +120,15 @@ CompleteType ExpressionNode::GetType() const
     // The function identifier is the last node in a call expression
     case NodeType::Call:
         return cast<FunctionNode>( GetChild( GetNumChildren() - 1 ) ).GetReturnType();
-    // The constructors hold the type in the last node
     case NodeType::VectorConstructor:
         return CompleteType( GetVectorType(
             cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetType(), GetNumChildren() ) );
     case NodeType::MatrixConstructor:
         return CompleteType( GetMatrixType(
             cast<ExpressionNode>( GetChild( 0 ) ).GetType().GetType(), GetNumChildren() ) );
+
+    case NodeType::Temporary:
+        return cast<TemporaryNode>( *this ).GetType();
 
     default:
         assert( false && "Trying to get the type of an unhandled node" );
@@ -175,6 +178,7 @@ const ExpressionNode& ExpressionNode::GetOperand( unsigned index ) const
     case NodeType::ArrayIndex:
     case NodeType::ExtractColumn:
     case NodeType::ExtractElement:
+    case NodeType::Store:
         assert( index < 2 && "Trying to get an out of bounds operand" );
         return cast<ExpressionNode>( GetChild( index ) );
 

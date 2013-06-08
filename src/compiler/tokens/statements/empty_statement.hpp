@@ -61,7 +61,7 @@ public:
     ~EmptyStatement   ();
 
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const override;
+    const StatementNode& GenerateCodeDag( NodeManager& node_manager ) const override;
     
     virtual
     bool AlwaysReturns() const override;

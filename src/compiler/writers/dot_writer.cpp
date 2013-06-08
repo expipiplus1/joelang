@@ -29,20 +29,24 @@
 
 #include "dot_writer.hpp"
 
-#include <cassert>
 #include <algorithm>
+#include <cassert>
 #include <string>
 
 #include <compiler/code_dag/cast_node.hpp>
 #include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/constant_node.hpp>
 #include <compiler/code_dag/function_node.hpp>
+#include <compiler/code_dag/glsl_builtin_node.hpp>
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/pass_node.hpp>
 #include <compiler/code_dag/state_assignment_node.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 #include <compiler/code_dag/swizzle_node.hpp>
 #include <compiler/code_dag/swizzle_store_node.hpp>
 #include <compiler/code_dag/technique_node.hpp>
+#include <compiler/code_dag/temporary_assignment_node.hpp>
+#include <compiler/code_dag/temporary_node.hpp>
 #include <compiler/code_dag/variable_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
@@ -84,7 +88,7 @@ std::string DotWriter::GenerateDotString()
             function_cluster.second + "_TITLE [label = \"" +
             function_cluster.first->GetIdentifier() + "\", style=\"rounded\"];\n";
 
-        const Node& function_node = function_cluster.first->GetCodeDag();
+        const StatementNode& function_node = *m_FunctionCodeMap.at( function_cluster.first );
         edges += GetEdges( function_node );
         edges += function_cluster.second + "_TITLE -> " + GetIdentifier( function_node ) + ";\n";
         content += subgraph_header + cluster_label + m_Labels + subgraph_footer;
@@ -98,41 +102,47 @@ std::string DotWriter::GenerateDotString()
     return ret;
 }
 
-void DotWriter::AddFunction( const Function& function )
+void DotWriter::AddFunction( const Function& function, const StatementNode* code )
 {
     m_FunctionClusterMap[&function] = "cluster_" + GetUniqueIdentifier();
-    
-    GenerateInvisibleEdges( function.GetCodeDag() );
+
+    m_FunctionCodeMap[&function] = code ? code : &function.GetCodeDag();
+
+    GenerateInvisibleEdges( *m_FunctionCodeMap[&function] );
 }
 
 void DotWriter::AddTechnique( const TechniqueNode& technique_node )
 {
     m_TechniqueClusters.push_back( technique_node );
-    
+
     GenerateInvisibleEdges( technique_node );
 }
 
 void DotWriter::GenerateInvisibleEdges( const Node& node )
-{    
-    std::set<const Node*> function_dependency_nodes = node.GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
+{
+    std::set<const Node*> function_dependency_nodes =
+        node.GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
     std::vector<const Function*> function_dependencies( function_dependency_nodes.size() );
     std::transform( function_dependency_nodes.begin(),
                     function_dependency_nodes.end(),
                     function_dependencies.begin(),
-                    []( const Node* n ){ return &cast<FunctionNode>(n)->GetFunction(); });
-    
-    std::vector<Node_ref> base_leaf_nodes; 
-    std::vector<std::pair<Node_ref, unsigned>> stack = {{ std::make_pair( std::cref(node), 0 ) }};
+                    []( const Node * n ) {
+        return &cast<FunctionNode>( n )->GetFunction();
+    } );
+
+    std::vector<Node_ref> base_leaf_nodes;
+    std::vector<std::pair<Node_ref, unsigned>> stack = { { std::make_pair( std::cref( node ),
+                                                                           0 ) } };
     unsigned max_depth = 0;
-    while (!stack.empty())
+    while( !stack.empty() )
     {
         const Node& n = stack.back().first;
         unsigned depth = stack.back().second;
-        
+
         stack.pop_back();
         for( const Node& s : n.GetChildren() )
-            stack.push_back( std::make_pair( std::cref(s), depth + 1) );
-        
+            stack.push_back( std::make_pair( std::cref( s ), depth + 1 ) );
+
         if( n.GetNumChildren() == 0 )
             if( depth > max_depth )
             {
@@ -141,7 +151,7 @@ void DotWriter::GenerateInvisibleEdges( const Node& node )
             }
     }
     //for( const Node& n : base_leaf_nodes )
-    m_InvisibleEdgeMap[&(base_leaf_nodes.back().get())] = function_dependencies;
+    m_InvisibleEdgeMap[&( base_leaf_nodes.back().get() )] = function_dependencies;
 }
 
 void DotWriter::Clear()
@@ -181,8 +191,8 @@ std::string DotWriter::GetEdges( const Node& node )
         const FunctionNode& f = static_cast<const FunctionNode&>( node );
         auto i = m_FunctionClusterMap.find( &f.GetFunction() );
         if( i != m_FunctionClusterMap.end() )
-            edges += identifier + " -> " + i->second + "_TITLE" + 
-                     "[constraint=\"false\",lhead=" + i->second + "];\n";
+            edges += identifier + " -> " + i->second + "_TITLE" + "[constraint=\"false\",lhead=" +
+                     i->second + "];\n";
     }
 
     for( const Node& s : node.GetChildren() )
@@ -193,7 +203,7 @@ std::string DotWriter::GetEdges( const Node& node )
         if( !has_seen )
             edges += GetEdges( s );
     }
-    
+
     auto i = m_InvisibleEdgeMap.find( &node );
     if( i != m_InvisibleEdgeMap.end() )
     {
@@ -201,11 +211,10 @@ std::string DotWriter::GetEdges( const Node& node )
         {
             auto j = m_FunctionClusterMap.find( f );
             if( j != m_FunctionClusterMap.end() )
-                edges += identifier + " -> " + j->second + "_TITLE" + 
-                         "[style=\"invisible\"];\n";
+                edges += identifier + " -> " + j->second + "_TITLE" + "[style=\"invisible\"];\n";
         }
     }
-    
+
     return edges;
 }
 
@@ -246,8 +255,15 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "Sequence";
     case NodeType::Conditional:
         return "If";
+    case NodeType::ExpressionStatement:
+        return "Expression";
     case NodeType::Return:
         return "Return";
+    case NodeType::TemporaryAssignment:
+        return "Temporary Assignment: " +
+               std::to_string( cast<TemporaryAssignmentNode>( node ).GetTemporaryNumber() );
+    case NodeType::Temporary:
+        return "Temporary: " + std::to_string( cast<TemporaryNode>( node ).GetTemporaryNumber() );
     case NodeType::LogicalOr:
         return "LogicalOr";
     case NodeType::LogicalAnd:
@@ -294,6 +310,10 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "PreIncrement";
     case NodeType::PreDecrement:
         return "PreDecrement";
+    case NodeType::PostIncrement:
+        return "PostIncrement";
+    case NodeType::PostDecrement:
+        return "PostDecrement";
     case NodeType::Select:
         return "Select";
     case NodeType::Store:
@@ -346,9 +366,8 @@ std::string DotWriter::GetNodeDescription( const Node& node ) const
         return "VectorConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
     case NodeType::MatrixConstructor:
         return "MatrixConstructor: " + cast<ExpressionNode>( node ).GetType().GetString();
-    default:
-        assert( false && "Trying to get the description of an unhandled node type" );
-        std::abort();
+    case NodeType::GLSLBuiltinVariable:
+        return "GLSL Builtin: " + cast<GLSLBuiltinNode>( node ).GetIdentifier();
     }
 }
 

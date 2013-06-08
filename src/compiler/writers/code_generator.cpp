@@ -206,6 +206,9 @@ llvm::Function* CodeGenerator::WrapExpressionCommon(
 {
     /// TODO assigning arrays
 
+    assert( false && "removeme");
+    std::abort();
+    /*
     //
     // Generate all the functions this may rely on first
     //
@@ -312,6 +315,7 @@ llvm::Function* CodeGenerator::WrapExpressionCommon(
     m_Builder.restoreIP( old_insert_point );
 
     return function;
+    */
 }
 
 std::unique_ptr<StateAssignmentBase> CodeGenerator::GenerateStateAssignment(

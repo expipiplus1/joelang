@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -29,77 +29,29 @@
 
 #pragma once
 
-#include <memory>
-
-#include <compiler/tokens/statements/statement.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 
 namespace JoeLang
 {
+
 namespace Compiler
 {
-class CodeGenerator;
-class CompleteType;
-class Expression;
-class ExpressionStatement;
-using ExpressionStatement_up = std::unique_ptr<ExpressionStatement>;
-using Expression_up = std::unique_ptr<Expression>;
-class Parser;
-class SemaAnalyzer;
 
-class Node;
-class NodeManager;
-
-/**
-  * \class ExpressionStatement
-  * \ingroup Statements
-  * \brief Matches an Expression Statement
-  *
-  * ExpressionStatement = Expression ';'
-  */
-class ExpressionStatement : public JoeLang::Compiler::Statement
+class TemporaryAssignmentNode : public StatementNode
 {
 public:
-    explicit
-    ExpressionStatement    ( Expression_up expression );
-    virtual
-    ~ExpressionStatement   ();
-    
-    virtual
-    const StatementNode& GenerateCodeDag( NodeManager& node_manager ) const override;
-    
-    virtual
-    bool AlwaysReturns() const override;
+    unsigned GetTemporaryNumber() const;
 
-    virtual
-    std::set<Function_sp> GetCallees() const override;
-
-    virtual
-    std::set<Variable_sp> GetVariables() const override;
-
-    virtual
-    std::set<Variable_sp> GetWrittenToVariables() const override;
-
-    virtual
-    void PerformSema( SemaAnalyzer& sema,
-                      const CompleteType& return_type ) override;
-
-    virtual
-    void CodeGen( CodeGenerator& code_gen ) override;
-
-    virtual
-    void Write( ShaderWriter& shader_writer ) const override;
-
+    /** Used for casting **/
     static
-    bool Parse ( Parser& parser, ExpressionStatement_up& token );
+    bool classof( const Node* n );
 
-    static
-    bool classof( const Token* t );
-    static
-    bool classof( const ExpressionStatement* d );
 private:
-    Expression_up m_Expression;
-};
+    friend class NodeManager;
+    TemporaryAssignmentNode( unsigned temporary_number, const ExpressionNode& expression );
 
+    unsigned m_TemporaryNumber;
+};
 
 } // namespace Compiler
 } // namespace JoeLang

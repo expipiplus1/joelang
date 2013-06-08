@@ -43,12 +43,12 @@ class CodeGenerator;
 class CompleteType;
 class Function;
 using Function_sp = std::shared_ptr<Function>;
-class Node;
 class NodeManager;
 class Parser;
 class SemaAnalyzer;
 class ShaderWriter;
 class Statement;
+class StatementNode;
 using Statement_up = std::unique_ptr<Statement>;
 class Variable;
 using Variable_sp = std::shared_ptr<Variable>;
@@ -74,7 +74,7 @@ public:
     ~Statement   ();
     
     virtual
-    const Node& GenerateCodeDag( NodeManager& node_manager ) const = 0;
+    const StatementNode& GenerateCodeDag( NodeManager& node_manager ) const = 0;
 
     /**
       * \returns true if this statement will always return from the function

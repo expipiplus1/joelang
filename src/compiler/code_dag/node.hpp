@@ -59,12 +59,18 @@ enum class NodeType
     // Statements
     //
 
+    Statement_start,
     // Holds a list of statements
-    Sequence,
+    Sequence = Statement_start,
     // Holds an expression or is a void return
     Return,
     // Holds an ExpressionNode in [0] a statement in [1] and an optional else statement in [2]
     Conditional,
+    // Holds an expression in [0]
+    ExpressionStatement,
+    // Holds an expression in [0], and a temporary number
+    TemporaryAssignment,
+    Statement_end = TemporaryAssignment,
 
     //
     // Misc
@@ -141,6 +147,12 @@ enum class NodeType
     MatrixConstructor,
 
     //
+    // Just holds a temporary number
+    //
+    Temporary,
+
+
+    //
     // PointerExpressions return a pointer, which must be accessed with Load or Store
     //
     PointerExpression_start,
@@ -162,7 +174,12 @@ enum class NodeType
     PreIncrement,
     PreDecrement,
 
-    PointerExpression_end = PreDecrement,
+    //
+    // These are special nodes used after transformations in the glsl writer
+    //
+    GLSLBuiltinVariable,
+
+    PointerExpression_end = GLSLBuiltinVariable,
 
     Expression_end = PointerExpression_end,
 };

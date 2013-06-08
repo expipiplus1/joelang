@@ -1,5 +1,5 @@
 /*
-    Copyright 2012 Joe Hermaszewski. All rights reserved.
+    Copyright 2013 Joe Hermaszewski. All rights reserved.
 
     Redistribution and use in source and binary forms, with or without
     modification, are permitted provided that the following conditions are met:
@@ -27,81 +27,29 @@
     policies, either expressed or implied, of Joe Hermaszewski.
 */
 
-#pragma once
+#include "statement_node.hpp"
 
-#include <joelang/config.h>
-#ifdef JOELANG_WITH_OPENGL
+#include <cassert>
 
-#include <memory>
-#include <string>
-#include <vector>
+#include <compiler/code_dag/node.hpp>
 
 namespace JoeLang
 {
-
-class Context;
-
 namespace Compiler
 {
-    class CompileStatementNode;
-    class EffectFactory;
-};
 
-enum class ShaderDomain
+StatementNode::StatementNode( NodeType type, std::vector<Node_ref> children )
+    : Node( type, std::move( children ) )
 {
-    VERTEX,
-    FRAGMENT
-};
-
-class Shader
-{
-public:
-    Shader( const Context& context, ShaderDomain domain, std::string source );
-    Shader( const Shader& ) = delete;
-    Shader( Shader&& other );
-    Shader& operator=( const Shader& ) = delete;
-    Shader& operator=( Shader&& other );
-    ~Shader();
-    void Swap( Shader& other );
-
-    void Compile();
-
-    bool IsCompiled() const;
-
-    const std::string& GetString() const;
-
-    friend class Program;
-    friend class Compiler::EffectFactory;
-    
-private:
-    /// Used internally by joelang
-    Shader( const Context& context, const Compiler::CompileStatementNode& compile_statement_node );
-    
-    /// The context that this shader belongs to
-    const Context& m_Context;
-
-    /// The compile statement as seen in the joelang source
-    const Compiler::CompileStatementNode* m_CompileStatement = nullptr;
-
-    /// The glsl source of the shader
-    std::string m_Source;
-
-    /// The OpenGL shader object
-    unsigned m_Object = 0;
-
-    /// The shader domain
-    ShaderDomain m_Domain;
-};
-
-} // namespace JoeLang
-
-#else
-namespace JoeLang
-{
-    enum class ShaderDomain
-    {
-        VERTEX,
-        FRAGMENT
-    };
+    assert( type >= NodeType::Statement_start && type <= NodeType::Statement_end &&
+            "StatementNode given a non-pointerexpression node type" );
 }
-#endif
+
+bool StatementNode::classof( const Node* n )
+{
+    return n->GetNodeType() >= NodeType::Statement_start &&
+           n->GetNodeType() <= NodeType::Statement_end;
+}
+
+} // namespace Compiler
+} // namespace JoeLang

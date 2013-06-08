@@ -37,9 +37,12 @@
 #include <utility>
 #include <vector>
 
+#include <compiler/code_dag/function_node.hpp>
 #include <compiler/code_dag/node.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
+#include <compiler/support/casting.hpp>
 #include <compiler/tokens/statements/compound_statement.hpp>
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/runtime.hpp>
@@ -86,10 +89,15 @@ void Function::GenerateCodeDag( NodeManager& node_manager )
     m_CodeDag = &m_Definition->GenerateCodeDag( node_manager );
 }
 
-const Node& Function::GetCodeDag() const
+const StatementNode& Function::GetCodeDag() const
 {
     assert( m_CodeDag && "Trying to get the code dag of a function without one" );
     return *m_CodeDag;
+}
+
+void Function::SetCodeDag( const StatementNode& code )
+{
+    m_CodeDag = &code;
 }
 
 const std::string& Function::GetIdentifier() const
@@ -170,20 +178,20 @@ std::set<Function_sp> Function::GetCallees() const
     return m_Definition->GetCallees();
 }
 
-std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const
+std::set<const Function*> Function::GetFunctionDependencies( bool& recursion ) const
 {
-    std::set<Function_sp> ret;
+    std::set<const Function*> ret;
     std::set<const Function*> stack = { this };
     recursion = false;
 
-    std::function<void(Function_sp)> visit;
-    visit = [&ret, &stack, &recursion, &visit]( Function_sp f ) -> void
+    std::function<void(const Function&)> visit;
+    visit = [&ret, &stack, &recursion, &visit]( const Function& f ) -> void
     {
         //
         // If this is in the temp list we have recursion
         // go no further
         //
-        if( stack.find( f.get() ) != stack.end() )
+        if( stack.find( &f ) != stack.end() )
         {
             recursion = true;
             return;
@@ -192,15 +200,19 @@ std::set<Function_sp> Function::GetFunctionDependencies( bool& recursion ) const
         //
         // Otherwise it's in ret or needs to go in temp
         //
-        stack.insert( f.get() );
-        for( auto c : f->GetCallees() )
-            visit( c );
-        stack.erase( f.get() );
-        ret.insert( f );
+        stack.insert( &f );
+        std::set<const Node*> function_dependency_nodes = 
+                f.GetCodeDag().GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
+        for( const Node* n : function_dependency_nodes )
+            visit( cast<FunctionNode>( n )->GetFunction() );
+        stack.erase( &f );
+        ret.insert( &f );
     };
 
-    for( auto c : GetCallees() )
-        visit( c );
+    std::set<const Node*> function_dependency_nodes = 
+            GetCodeDag().GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
+    for( const Node* n : function_dependency_nodes )
+        visit( cast<FunctionNode>( n )->GetFunction() );
 
     return ret;
 }

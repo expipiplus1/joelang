@@ -64,12 +64,12 @@ ReturnStatement::~ReturnStatement()
 {
 }
 
-const Node& ReturnStatement::GenerateCodeDag( NodeManager& node_manager ) const
+const StatementNode& ReturnStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
     if( IsVoidReturn() )
-        return node_manager.MakeNode( NodeType::Return, {} );
+        return node_manager.MakeStatementNode( NodeType::Return, {} );
     else
-        return node_manager.MakeNode( NodeType::Return, {m_Expression->GenerateCodeDag( node_manager )} );
+        return node_manager.MakeStatementNode( NodeType::Return, {m_Expression->GenerateCodeDag( node_manager )} );
 }
 
 bool ReturnStatement::IsVoidReturn() const

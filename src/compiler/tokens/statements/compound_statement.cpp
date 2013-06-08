@@ -45,6 +45,7 @@
 
 #include <compiler/code_dag/node.hpp>
 #include <compiler/code_dag/node_manager.hpp>
+#include <compiler/code_dag/statement_node.hpp>
 
 namespace JoeLang
 {
@@ -65,12 +66,12 @@ CompoundStatement::~CompoundStatement()
 {
 }
 
-const Node& CompoundStatement::GenerateCodeDag( NodeManager& node_manager ) const
+const StatementNode& CompoundStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
     std::vector<Node_ref> nodes; 
     for( const Statement_up& s : m_Statements )
         nodes.emplace_back( s->GenerateCodeDag( node_manager ) );
-    return node_manager.MakeNode( NodeType::Sequence, std::move( nodes ) );
+    return node_manager.MakeStatementNode( NodeType::Sequence, std::move( nodes ) );
 }
 
 bool CompoundStatement::AlwaysReturns() const

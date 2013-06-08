@@ -63,9 +63,10 @@ ExpressionStatement::~ExpressionStatement()
 {
 }
 
-const Node& ExpressionStatement::GenerateCodeDag( NodeManager& node_manager ) const
+const StatementNode& ExpressionStatement::GenerateCodeDag( NodeManager& node_manager ) const
 {
-    return m_Expression->GenerateCodeDag( node_manager );
+    const ExpressionNode& expression_node = m_Expression->GenerateCodeDag( node_manager );
+    return node_manager.MakeStatementNode( NodeType::ExpressionStatement, {expression_node} );
 }
 
 bool ExpressionStatement::AlwaysReturns() const

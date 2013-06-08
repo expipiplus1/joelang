@@ -118,10 +118,9 @@ private:
     llvm::ExecutionEngine& m_ExecutionEngine;
 
     //
-    // This holds the values generated for the current expression and should be cleared after every
-    // expression
+    // This holds the string values generated for the current expression and should be cleared after
+    // every expression
     //
-    std::map<const ExpressionNode*, llvm::Value*> m_GeneratedValues;
     std::stack<llvm::Value*> m_StringTemporaries;
 
     //
