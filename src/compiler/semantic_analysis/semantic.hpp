@@ -65,6 +65,11 @@ public:
     Semantic  ( std::string string, unsigned index );
 
     /**
+     * \returns true if this represents NO_SEMANTIC
+     */
+    bool IsVoid() const;
+    
+    /**
       * Returns true if this semantic represents a varying
       */
     bool IsVarying() const;

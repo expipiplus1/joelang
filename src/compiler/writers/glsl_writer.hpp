@@ -62,6 +62,17 @@ private:
     std::string Generate( const CompileStatementNode& compile_statement );
 
     //
+    // Variable Writing
+    //
+    void WriteInputVariables( std::set<const Variable*> input_variables );
+
+    void WriteOutputVariables( std::set<const Variable*> output_variables );
+
+    void WriteUniformVariables( std::set<const Variable*> uniform_variables );
+
+    unsigned GetVariableAttributeNumber( const Variable& variable );
+
+    //
     // Function writing
     //
     void WriteFunctionDeclarations( std::set<const Function*> functions );
@@ -97,6 +108,8 @@ private:
 
     const Context& m_Context;
     NodeManager m_NodeManager;
+
+    std::map<const Variable*, const std::string> m_VariableNames;
 
     const static
     std::string s_GLSLVersion;

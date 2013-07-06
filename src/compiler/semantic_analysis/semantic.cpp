@@ -70,6 +70,11 @@ Semantic::Semantic  ( std::string string, unsigned index )
     DetermineType();
 }
 
+bool Semantic::IsVoid() const
+{
+    return m_Type == SemanticType::NO_SEMANTIC;
+}
+
 bool Semantic::IsVarying() const
 {
     auto s = g_SemanticInfoMap.find( m_Type );

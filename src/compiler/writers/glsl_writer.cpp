@@ -50,6 +50,7 @@
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
+#include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/support/casting.hpp>
@@ -71,17 +72,6 @@ const std::string GLSLWriter::s_GLSLVersion = "150";
 std::string GLSLWriter::GenerateGLSL( const Context& context,
                                       const CompileStatementNode& compile_statement )
 {
-    switch( compile_statement.GetDomain() )
-    {
-    case ShaderDomain::VERTEX:
-        return "#version 150\n"
-               "in vec4 position;\n"
-               "void main()\n"
-               "{ gl_Position = position; }\n";
-    case ShaderDomain::FRAGMENT:
-        break;
-    }
-
     GLSLWriter writer( context );
     return writer.Generate( compile_statement );
 }
@@ -103,6 +93,9 @@ std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement 
 
     const Function& entry_function = compile_statement.GetEntryFunction();
 
+    //
+    // Find all the functions we need to generate
+    //
     bool recursion;
     std::set<const Function*> function_dependencies =
         entry_function.GetFunctionDependencies( recursion );
@@ -114,15 +107,111 @@ std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement 
         return "";
     }
 
+    //
+    // Declare all the input, output and global variables
+    //
+    std::set<const Variable*> input_variables;
+    std::set<const Variable*> output_variables;
+    std::set<const Variable*> uniform_variables;
+    for( const Function* function : function_dependencies )
+    {
+        const Node& function_node = function->GetCodeDag();
+        const std::set<const Node*> variable_nodes =
+            function_node.GetDescendantsWithNodeType( NodeType::VariableIdentifier );
+        for( const Node* variable_node : variable_nodes )
+        {
+            const Variable& v = cast<VariableNode>( *variable_node ).GetVariable();
+            if( v.IsGlobal() || ( function == &entry_function && v.IsParameter() ) )
+            {
+                if( v.IsIn() )
+                    input_variables.insert( &v );
+                if( v.IsOut() )
+                    output_variables.insert( &v );
+                if( v.IsUniform() )
+                    uniform_variables.insert( &v );
+            }
+        }
+    }
+
+    WriteInputVariables( input_variables );
+    NewLine();
+
+    WriteOutputVariables( output_variables );
+    NewLine();
+
+    WriteUniformVariables( uniform_variables );
+    NewLine();
+
+    //
+    // Generate all the functions this shader needs
+    //
     WriteFunctionDeclarations( function_dependencies );
     NewLine();
 
     WriteFunctionDefinitions( function_dependencies );
     NewLine();
 
+
+    //
+    // Generate the wrapper, calling the JoeLang main function
+    //
     WriteMainFunction( compile_statement );
 
     return m_Source.str();
+}
+
+//
+// Writing Variables
+//
+void GLSLWriter::WriteInputVariables( std::set<const Variable*> input_variables )
+{
+    for( const Variable* variable : input_variables )
+    {
+        assert( variable && "WriteInputVariables given null variable" );
+        assert( variable->IsIn() && "WriteInputVariables given non-in variable" );
+
+        unsigned attribute_number = GetVariableAttributeNumber( *variable );
+        m_VariableNames.insert(
+            std::make_pair( variable, "i_" + std::to_string( attribute_number ) ) );
+        m_Source << GetVariableTypeString( *variable ) << " i_" << attribute_number << ";";
+        //if( !variable->IsConst() )
+        NewLine();
+    }
+}
+
+void GLSLWriter::WriteOutputVariables( std::set<const Variable*> output_variables )
+{
+    for( const Variable* variable : output_variables )
+    {
+        assert( variable && "WriteOutputVariables given null variable" );
+        assert( variable->IsOut() && "WriteOutputVariables given non-out variable" );
+
+        unsigned attribute_number = GetVariableAttributeNumber( *variable );
+        m_VariableNames.insert(
+            std::make_pair( variable, "o_" + std::to_string( attribute_number ) ) );
+        m_Source << GetVariableTypeString( *variable ) << " o_" << attribute_number << ";";
+        //if( !variable->IsConst() )
+        NewLine();
+    }
+}
+
+void GLSLWriter::WriteUniformVariables( std::set<const Variable*> uniform_variables )
+{
+    for( const Variable* variable : uniform_variables )
+    {
+        assert( variable && "WriteUniformVariables given null variable" );
+        assert( variable->IsUniform() && "WriteUniformVariables given non-uniform variable" );
+
+        m_VariableNames.insert( std::make_pair( variable, "u_" + variable->GetName() ) );
+        m_Source << "uniform " << GetTypeString( variable->GetType() ) << " u_"
+                 << variable->GetName() << ";";
+        NewLine();
+    }
+}
+
+unsigned GLSLWriter::GetVariableAttributeNumber( const Variable& variable )
+{
+    return 0; // todo, complete me
 }
 
 //
@@ -189,16 +278,53 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
 
     const Function& main_function = compile_statement.GetEntryFunction();
 
+    //
+    // Initialize all the global input variables
+    //
+
+    //
+    // Generate the main function call
+    //
+    const ExpressionNode& main_function_call =
+        m_NodeManager.MakeExpressionNode( NodeType::Call, compile_statement.GetChildren() );
+    if( main_function.GetReturnType().IsVoid() || main_function.GetSemantic().IsVoid() )
+    {
+        // If it's void or doesn't have a semantic, no need to do anything with the return value
+        statements.push_back( m_NodeManager.MakeStatementNode( NodeType::ExpressionStatement,
+                                                               { main_function_call } ) );
+    }
+    else
+    {
+        //
+        // Get the variable we'll be assigning to
+        //
+        Semantic semantic = main_function.GetSemantic();
+        const PointerExpressionNode& assigned = m_NodeManager.MakeGLSLBuiltinNode(
+            semantic.HasBuiltin( compile_statement.GetDomain(), /* is_input = */ false )
+                ? semantic.GetBuiltin( compile_statement.GetDomain(), /* is_input = */ false )
+                : "o_" + std::to_string( semantic.GetIndex() ) );
+        const ExpressionNode& main_assignment =
+            m_NodeManager.MakeExpressionNode( NodeType::Store, { assigned, main_function_call } );
+        statements.push_back(
+            m_NodeManager.MakeStatementNode( NodeType::ExpressionStatement, { main_assignment } ) );
+    }
+
+/*
     Semantic main_semantic = main_function.GetSemantic();
 
-    assert( main_semantic.HasBuiltin( compile_statement.GetDomain(), false ) && "complete me" );
-    std::string main_semantic_builtin_name =
-        main_semantic.GetBuiltin( compile_statement.GetDomain(), false );
+    const PointerExpressionNode* main_result_variable = nullptr;
 
-    const PointerExpressionNode main_result_variable =
-        m_NodeManager.MakeGLSLBuiltinNode( main_semantic_builtin_name );
+    if( main_semantic.HasBuiltin( compile_statement.GetDomain(), false ) )
+    {
+        std::string main_semantic_builtin_name =
+            main_semantic.GetBuiltin( compile_statement.GetDomain(), false );
 
-    std::vector<Node_ref> main_call_nodes = compile_statement.GetChildren();
+        main_result_variable = m_NodeManager.MakeGLSLBuiltinNode( main_semantic_builtin_name );
+    }
+    else
+
+
+        std::vector<Node_ref> main_call_nodes = compile_statement.GetChildren();
     const ExpressionNode main_call =
         m_NodeManager.MakeExpressionNode( NodeType::Call, std::move( main_call_nodes ) );
 
@@ -208,6 +334,7 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
     statements.push_back(
         m_NodeManager.MakeStatementNode( NodeType::ExpressionStatement, { main_store_node } ) );
 
+        */
     const StatementNode& main_sequence =
         m_NodeManager.MakeStatementNode( NodeType::Sequence, std::move( statements ) );
 
@@ -398,7 +525,8 @@ void GLSLWriter::GenerateReturn( const ExpressionNode& returned )
 void GLSLWriter::GenerateTemporaryAssignment( unsigned temporary_number,
                                               const ExpressionNode& expression )
 {
-    m_Source << "const " << GetTypeString( expression.GetType() ) << " "
+    // Why can't these be const glsl?
+    m_Source << GetTypeString( expression.GetType() ) << " "
              << GetTemporaryIdentifier( temporary_number ) << " = " << GenerateValue( expression )
              << ";";
 }
@@ -566,8 +694,7 @@ std::string GLSLWriter::GenerateSwizzleStore( const PointerExpressionNode& addre
 
 std::string GLSLWriter::GenerateVariableAddress( const VariableNode& variable_node )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return m_VariableNames.at( &variable_node.GetVariable() );
 }
 
 std::string GLSLWriter::GenerateArrayIndex( const PointerExpressionNode& address,
@@ -694,8 +821,7 @@ std::string GLSLWriter::GenerateInsertElement( const ExpressionNode& vector,
 
 std::string GLSLWriter::GenerateSwizzle( const ExpressionNode& expression, const Swizzle& swizzle )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return GenerateValue( expression ) + "." + swizzle.GetString();
 }
 
 std::string GLSLWriter::GenerateSelect( const ExpressionNode& true_expression,
@@ -836,8 +962,7 @@ std::string GLSLWriter::GenerateMultiply( const ExpressionNode& lhs, const Expre
 
 std::string GLSLWriter::GenerateDivide( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue( lhs ) + " / " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateModulo( const ExpressionNode& lhs, const ExpressionNode& rhs )

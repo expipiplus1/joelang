@@ -62,7 +62,7 @@ const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
     { SemanticType::COLOR,    { Type::FLOAT4, 
                                 std::set<ShaderDomain>{},
                                 { ShaderDomain::FRAGMENT },
-                                "gl_FragColor", // remove me
+                                "",
                                 true } },    
     { SemanticType::DEPTH,    { Type::FLOAT,
                                 std::set<ShaderDomain>{},
