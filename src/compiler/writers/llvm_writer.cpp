@@ -1319,7 +1319,9 @@ llvm::Constant* LLVMWriter::GenerateGenericValue( const GenericValue& generic_va
     case TYPE: \
     { \
         auto v = generic_value.Get##Type(); \
-        std::vector<jl_ulong> values( &v[0], &v[0] + ( n ) ); \
+        std::vector<unsigned long> values( n ); \
+        for( unsigned i = 0; i < (n); ++i ) \
+            values[i] = v[i]; \
         return GenerateConstantIntVector( TYPE, values ); \
     }
     
@@ -1327,7 +1329,9 @@ llvm::Constant* LLVMWriter::GenerateGenericValue( const GenericValue& generic_va
     case TYPE: \
     { \
         auto m = generic_value.Get##Type(); \
-    std::vector<jl_ulong> values( &m[0][0], &m[0][0] + ( n ) ); \
+        std::vector<unsigned long> values( n ); \
+        for( unsigned i = 0; i < (n); ++i ) \
+            values[i] = m[0][i]; \
         return GenerateConstantIntMatrix( TYPE, values ); \
     }
     
@@ -1354,7 +1358,9 @@ llvm::Constant* LLVMWriter::GenerateGenericValue( const GenericValue& generic_va
     case TYPE: \
     { \
         auto v = generic_value.Get##Type(); \
-    std::vector<jl_double> values( &v[0], &v[0] + ( n ) ); \
+        std::vector<jl_double> values( n ); \
+        for( unsigned i = 0; i < (n); ++i ) \
+            values[i] = v[i]; \
         return GenerateConstantFloatVector( TYPE, values ); \
     }
     
@@ -1362,7 +1368,9 @@ llvm::Constant* LLVMWriter::GenerateGenericValue( const GenericValue& generic_va
     case TYPE: \
     { \
         auto m = generic_value.Get##Type(); \
-    std::vector<jl_double> values( &m[0][0], &m[0][0] + ( n ) ); \
+        std::vector<jl_double> values( n ); \
+        for( unsigned i = 0; i < (n); ++i ) \
+            values[i] = m[0][i]; \
         return GenerateConstantFloatMatrix( TYPE, values ); \
     }    
     
