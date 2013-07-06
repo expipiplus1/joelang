@@ -43,8 +43,8 @@ set( runtime_sources float.cpp
                      types.hpp )
 
 #set( JOELANG_RUNTIME_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O4 -msse4.1 -Wno-return-type-c-linkage -fno-exceptions" )
-LIST( APPEND JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
-LIST( APPEND JOELANG_RUNTIME_CXX_FLAGS -std=c++11 -O4 -msse4.1 -Wno-return-type-c-linkage )
+list( APPEND JOELANG_RUNTIME_CXX_FLAGS ${CMAKE_CXX_FLAGS} )
+list( APPEND JOELANG_RUNTIME_CXX_FLAGS -std=c++11 -O4 -msse4.1 -Wno-return-type-c-linkage )
 
 # Use the same compiler if possible
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
