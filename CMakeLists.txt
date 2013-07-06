@@ -234,6 +234,15 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/writers/shader_writer.hpp
                      src/compiler/writers/shader_writer-inl.hpp )
 
+macro( ide_source_properties sources )
+    foreach( source ${ARGV} )
+        get_filename_component( source_group_path ${source} PATH )
+        string( REPLACE "/" "\\\\" source_group_path ${source_group_path} )
+        source_group( ${source_group_path} FILES ${source} )
+    endforeach()
+endmacro()
+ide_source_properties( ${joelang_sources} )
+
 #set_source_files_properties( ${joelang_sources} PROPERTIES COMPILE_FLAGS "-std=c++11 -Wall" )
 add_definitions( -std=c++11 )
 add_definitions( -Wall )
