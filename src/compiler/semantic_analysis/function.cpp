@@ -198,18 +198,25 @@ std::set<const Function*> Function::GetFunctionDependencies( bool& recursion ) c
         }
 
         //
+        // If this is a runtime function we don't need to include it
+        //
+        if( f.GetRuntimeFunction() != RuntimeFunction::NONE )
+        {
+            return;
+        }
+
+        //
         // Otherwise it's in ret or needs to go in temp
         //
         stack.insert( &f );
-        std::set<const Node*> function_dependency_nodes = 
-                f.GetCodeDag().GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
+        std::set<const Node*> function_dependency_nodes = f.GetCodeDag().GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
         for( const Node* n : function_dependency_nodes )
             visit( cast<FunctionNode>( n )->GetFunction() );
         stack.erase( &f );
         ret.insert( &f );
     };
 
-    std::set<const Node*> function_dependency_nodes = 
+    std::set<const Node*> function_dependency_nodes =
             GetCodeDag().GetDescendantsWithNodeType( NodeType::FunctionIdentifier );
     for( const Node* n : function_dependency_nodes )
         visit( cast<FunctionNode>( n )->GetFunction() );

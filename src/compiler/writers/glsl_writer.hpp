@@ -40,6 +40,7 @@
 namespace JoeLang
 {
 class Context;
+enum class ShaderDomain;
 
 namespace Compiler
 {
@@ -48,6 +49,7 @@ class CompileStatementNode;
 class CompleteType;
 class Function;
 class Variable;
+class GenericValue;
 
 class GLSLWriter
 {
@@ -57,14 +59,23 @@ public:
                               const CompileStatementNode& compile_statement );
 
 private:
-    GLSLWriter( const Context& context );
+    GLSLWriter( const Context& context, const CompileStatementNode& compile_statement );
     ~GLSLWriter();
 
-    std::string Generate( const CompileStatementNode& compile_statement );
+    std::string Generate();
+
+    //
+    // Writes some useful information in a comment
+    //
+    void WriteHeaderComment();
+    static
+    std::string GetDomainString( ShaderDomain domain );
 
     //
     // Variable Writing
     //
+    void WriteGlobalVariables( std::set<const Variable*> global_variables );
+
     void WriteInputVariables( std::set<const Variable*> input_variables );
 
     void WriteOutputVariables( std::set<const Variable*> output_variables );
@@ -76,6 +87,8 @@ private:
     //
     // Function writing
     //
+    void InitFunctionVariableNames( std::set<const Function*> functions );
+
     void WriteFunctionDeclarations( std::set<const Function*> functions );
 
     void WriteFunctionDefinitions( std::set<const Function*> functions );
@@ -105,12 +118,26 @@ private:
 
     void Warning( const std::string& message );
 
+    //
+    // Members // TODO, why is this in the middle?
+    //
+
     std::stringstream m_Source;
 
     const Context& m_Context;
     NodeManager m_NodeManager;
 
+    const CompileStatementNode& m_CompileStatement;
+
+    //
+    // What string to read and write variables to
+    //
     std::map<const Variable*, const std::string> m_VariableNames;
+
+    //
+    // Where to write the result of main to (can be empty)
+    //
+    std::string m_EntryReturnValue;
 
     const static
     std::string s_GLSLVersion;
@@ -143,6 +170,12 @@ private:
     std::string GenerateValue( const ExpressionNode& expression );
 
     std::string GenerateAddress( const PointerExpressionNode& expression );
+
+    template<typename T>
+    std::string GenerateLiteral( T t );
+    template<typename Scalar, JoeMath::u32 Rows, JoeMath::u32 Columns>
+    std::string GenerateLiteral( const JoeMath::Matrix<Scalar, Rows, Columns>& m );
+    std::string GenerateGenericValue( const GenericValue& value );
 
     //
     // Temporaries
@@ -183,6 +216,8 @@ private:
     std::string GenerateZero( Type type );
 
     std::string GenerateCall( const ExpressionNode& expression );
+
+    std::string GenerateRuntimeCall( const ExpressionNode& expression );
 
     std::string GenerateExtractElement( const ExpressionNode& vector, const ExpressionNode& index );
 

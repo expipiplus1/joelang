@@ -51,7 +51,7 @@ class CompleteType
 public:
     CompleteType();
     CompleteType( Type base_type, ArrayExtents array_extents = {} );
-    
+
     /**
       * This doesn't return the base type, for example this could return
       * Type::ARRAY
@@ -62,14 +62,13 @@ public:
 
     Type GetBaseType() const;
 
-    bool IsArrayType() const;
-
     bool IsUnknown() const;
     bool IsVoid() const;
 
     bool IsFloatingPoint() const;
     bool IsIntegral() const;
 
+    bool IsArrayType() const;
     bool IsStructType() const;
     bool IsMatrixType() const;
     bool IsVectorType() const;

@@ -36,6 +36,7 @@ namespace JoeLang
 {
 
 enum class ShaderDomain;
+enum class Type;
 
 namespace Compiler
 {
@@ -78,7 +79,12 @@ public:
       * Returns true if this semantic has a builtin for a particular domain
       */
     bool HasBuiltin( ShaderDomain domain, bool input ) const;
-    
+
+    /**
+      * Returns the type of the glsl variable
+      */
+    Type GetType() const;
+
     /**
       * Returns the builtin string
       */

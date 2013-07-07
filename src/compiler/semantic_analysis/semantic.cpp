@@ -103,9 +103,16 @@ bool Semantic::HasBuiltin( ShaderDomain domain, bool input ) const
 
 const std::string& Semantic::GetBuiltin( ShaderDomain domain, bool input ) const
 {
-    assert( HasBuiltin( domain, input ) && 
+    assert( HasBuiltin( domain, input ) &&
             "Trying to get the builtin name of a variable without one" );
     return g_SemanticInfoMap.at( m_Type ).m_GLSLBuiltin;
+}
+
+Type Semantic::GetType() const
+{
+    auto i = g_SemanticInfoMap.find( m_Type );
+    assert( i != g_SemanticInfoMap.end() && "Trying to get an unknown semantic type" );
+    return i->second.m_VariableType;
 }
 
 bool Semantic::HasIndex() const

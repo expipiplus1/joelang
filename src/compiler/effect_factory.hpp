@@ -67,8 +67,12 @@ public:
 private:
     std::vector<Technique> GenerateTechniques(
         const std::vector<TechniqueNode_ref>& technique_nodes );
+
     Technique GenerateTechnique( const TechniqueNode& technique_node );
+
     Pass GeneratePass( const PassNode& pass_node );
+
+    std::vector<ParameterBase_up> GenerateParameters( const std::vector<Variable_sp>& uniforms );
 
     const Context& m_Context;
     Runtime& m_Runtime;

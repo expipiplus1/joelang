@@ -56,6 +56,8 @@ namespace JoeLang
 {
 class StateAssignmentBase;
 using StateAssignmentBase_up = std::unique_ptr<StateAssignmentBase>;
+class ParameterBase;
+using ParameterBase_up = std::unique_ptr<ParameterBase>;
 enum class Type;
 
 namespace Compiler
@@ -88,6 +90,8 @@ public:
     void GenerateFunction( const Function& function );
 
     void AddGlobalVariable( const Variable& variable );
+
+    ParameterBase_up GenerateParameter( const Variable& uniform );
 
 private:
 

@@ -49,6 +49,7 @@
 #include <compiler/code_dag/zero_node.hpp>
 #include <compiler/semantic_analysis/complete_type.hpp>
 #include <compiler/semantic_analysis/function.hpp>
+#include <compiler/writers/runtime.hpp>
 #include <compiler/semantic_analysis/semantic.hpp>
 #include <compiler/semantic_analysis/swizzle.hpp>
 #include <compiler/semantic_analysis/type_properties.hpp>
@@ -72,12 +73,13 @@ const std::string GLSLWriter::s_GLSLVersion = "150";
 std::string GLSLWriter::GenerateGLSL( const Context& context,
                                       const CompileStatementNode& compile_statement )
 {
-    GLSLWriter writer( context );
-    return writer.Generate( compile_statement );
+    GLSLWriter writer( context, compile_statement );
+    return writer.Generate();
 }
 
-GLSLWriter::GLSLWriter( const Context& context )
+GLSLWriter::GLSLWriter( const Context& context, const CompileStatementNode& compile_statement )
     : m_Context( context )
+    , m_CompileStatement( compile_statement )
 {
 }
 
@@ -85,13 +87,15 @@ GLSLWriter::~GLSLWriter()
 {
 }
 
-std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement )
+std::string GLSLWriter::Generate()
 {
+    WriteHeaderComment();
+
     m_Source << "#version " << s_GLSLVersion;
 
     NewLine( 2 );
 
-    const Function& entry_function = compile_statement.GetEntryFunction();
+    const Function& entry_function = m_CompileStatement.GetEntryFunction();
 
     //
     // Find all the functions we need to generate
@@ -108,11 +112,14 @@ std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement 
     }
 
     //
-    // Declare all the input, output and global variables
+    // Inputs and uniforms are immutable in glsl so if we write to them we need to create a global copy and initialize that at the
+    // start of main.
+    // TODO, don't do this for variables which are never written to
     //
     std::set<const Variable*> input_variables;
     std::set<const Variable*> output_variables;
     std::set<const Variable*> uniform_variables;
+    std::set<const Variable*> global_variables;
     for( const Function* function : function_dependencies )
     {
         const Node& function_node = function->GetCodeDag();
@@ -121,33 +128,100 @@ std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement 
         for( const Node* variable_node : variable_nodes )
         {
             const Variable& v = cast<VariableNode>( *variable_node ).GetVariable();
-            if( v.IsGlobal() || ( function == &entry_function && v.IsParameter() ) )
+            if( v.IsGlobal() )//|| ( function == &entry_function && v.IsParameter() ) )
             {
-                if( v.IsIn() )
+                assert( !(v.IsIn() && v.IsOut()) && "Global Variable is both in and out" );
+
+                // TODO: Insert some checking code to make sure we don't have 'in uniforms' or 'in out' variables in global scope
+
+                const Semantic& semantic = v.GetSemantic();
+                if( semantic.HasBuiltin( m_CompileStatement.GetDomain(), v.IsIn() ) )
+                    m_VariableNames.insert( std::make_pair( &v, semantic.GetBuiltin( m_CompileStatement.GetDomain(), v.IsIn() ) ) );
+                else if( v.IsIn() )
                     input_variables.insert( &v );
-                if( v.IsOut() )
+                else if( v.IsOut() )
                     output_variables.insert( &v );
-                if( v.IsUniform() )
+                else if( v.IsUniform() )
                     uniform_variables.insert( &v );
+                else
+                    global_variables.insert( &v );
             }
         }
     }
 
-    WriteInputVariables( input_variables );
-    NewLine();
+    //
+    // Declare all these variables
+    //
 
-    WriteOutputVariables( output_variables );
-    NewLine();
+    if( !global_variables.empty() )
+    {
+        m_Source << "// Global variables";
+        NewLine();
 
-    WriteUniformVariables( uniform_variables );
-    NewLine();
+        WriteGlobalVariables( global_variables );
+        NewLine();
+    }
+
+    if( !input_variables.empty() )
+    {
+        m_Source << "// Input variables";
+        NewLine();
+
+        WriteInputVariables( input_variables );
+        NewLine();
+    }
+
+    if( !output_variables.empty() )
+    {
+        m_Source << "// Output variables";
+        NewLine();
+
+        WriteOutputVariables( output_variables );
+        NewLine();
+    }
+
+    //
+    // Write the main return value
+    //
+    const Semantic& entry_semantic = entry_function.GetSemantic();
+    if( !entry_semantic.IsVoid() )
+    {
+        if( entry_semantic.HasBuiltin( m_CompileStatement.GetDomain(), /* input = */ false ) )
+            m_EntryReturnValue = entry_semantic.GetBuiltin( m_CompileStatement.GetDomain(), /* input = */ false );
+        else
+        {
+            // Write an output declaration
+            m_Source << "// Entry function return value";
+            NewLine();
+
+            m_Source << "out " << GetTypeString( entry_function.GetReturnType() ) << " r_EntryReturnValue;";
+            NewLine();
+            m_EntryReturnValue = "r_EntryReturnValue";
+        }
+    }
+
+    if( !uniform_variables.empty() )
+    {
+        m_Source << "// Uniform variables";
+        NewLine();
+
+        WriteUniformVariables( uniform_variables );
+        NewLine();
+    }
 
     //
     // Generate all the functions this shader needs
     //
+
+    InitFunctionVariableNames( function_dependencies );
+
+    m_Source << "// Function declarations";
+    NewLine();
     WriteFunctionDeclarations( function_dependencies );
     NewLine();
 
+    m_Source << "// Function definitions";
+    NewLine();
     WriteFunctionDefinitions( function_dependencies );
     NewLine();
 
@@ -155,14 +229,58 @@ std::string GLSLWriter::Generate( const CompileStatementNode& compile_statement 
     //
     // Generate the wrapper, calling the JoeLang main function
     //
-    WriteMainFunction( compile_statement );
+    WriteMainFunction( m_CompileStatement );
 
     return m_Source.str();
+}
+
+void GLSLWriter::WriteHeaderComment()
+{
+    m_Source << "//";
+    NewLine();
+    m_Source << "// " << GetDomainString( m_CompileStatement.GetDomain() ) << " shader generated by JoeLang";
+    NewLine();
+    m_Source << "//";
+    NewLine();
+}
+
+std::string GLSLWriter::GetDomainString( ShaderDomain domain )
+{
+    switch( domain )
+    {
+    case ShaderDomain::FRAGMENT:
+        return "fragment";
+    case ShaderDomain::VERTEX:
+        return "vertex";
+    default:
+        return "unknown";
+    }
 }
 
 //
 // Writing Variables
 //
+void GLSLWriter::WriteGlobalVariables( std::set<const Variable*> global_variables )
+{
+    for( const Variable* variable : global_variables )
+    {
+        assert( variable && "WriteGlobalVariables given null variable" );
+        assert( variable->IsGlobal() && "WriteGlobalVariables given non-global variable" );
+        assert( !variable->IsIn() && "WriteGlobalVariables given an in variable" );
+        assert( !variable->IsOut() && "WriteGlobalVariables given an out variable" );
+        assert( !variable->IsUniform() && "WriteGlobalVariables given a uniform variable" );
+
+        std::string name = "g_" + variable->GetName();
+        m_VariableNames.insert( std::make_pair( variable, name ) );
+        m_Source << GetVariableTypeString( *variable ) << " " << name;
+        const GenericValue& initializer = variable->GetInitializer();
+        if( variable->GetInitializer().GetUnderlyingType() != Type::UNKNOWN )
+            m_Source << " = " << GenerateGenericValue( initializer );
+        m_Source << ";";
+        NewLine();
+    }
+}
+
 void GLSLWriter::WriteInputVariables( std::set<const Variable*> input_variables )
 {
     for( const Variable* variable : input_variables )
@@ -174,7 +292,6 @@ void GLSLWriter::WriteInputVariables( std::set<const Variable*> input_variables 
         m_VariableNames.insert(
             std::make_pair( variable, "i_" + std::to_string( attribute_number ) ) );
         m_Source << GetVariableTypeString( *variable ) << " i_" << attribute_number << ";";
-        //if( !variable->IsConst() )
         NewLine();
     }
 }
@@ -190,7 +307,6 @@ void GLSLWriter::WriteOutputVariables( std::set<const Variable*> output_variable
         m_VariableNames.insert(
             std::make_pair( variable, "o_" + std::to_string( attribute_number ) ) );
         m_Source << GetVariableTypeString( *variable ) << " o_" << attribute_number << ";";
-        //if( !variable->IsConst() )
         NewLine();
     }
 }
@@ -217,6 +333,14 @@ unsigned GLSLWriter::GetVariableAttributeNumber( const Variable& variable )
 //
 // Writing functions
 //
+
+void GLSLWriter::InitFunctionVariableNames( std::set<const Function*> functions )
+{
+    for( const Function* function : functions )
+        for( const auto& parameter : function->GetParameters() )
+            m_VariableNames.insert( std::make_pair( parameter.get(), "p_" + parameter->GetName() ) );
+    // TODO locals
+}
 
 void GLSLWriter::WriteFunctionDeclarations( std::set<const Function*> functions )
 {
@@ -265,8 +389,7 @@ void GLSLWriter::WriteFunctionHeader( const Function& function )
         else
             first = false;
 
-        m_Source << GetVariableTypeString( *parameter ) << " "
-                 << MangleIdentifier( parameter->GetName(), IdentifierType::Variable );
+        m_Source << GetVariableTypeString( *parameter ) << " " << m_VariableNames.at( parameter.get() );
     }
 
     m_Source << ")";
@@ -299,10 +422,7 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
         // Get the variable we'll be assigning to
         //
         Semantic semantic = main_function.GetSemantic();
-        const PointerExpressionNode& assigned = m_NodeManager.MakeGLSLBuiltinNode(
-            semantic.HasBuiltin( compile_statement.GetDomain(), /* is_input = */ false )
-                ? semantic.GetBuiltin( compile_statement.GetDomain(), /* is_input = */ false )
-                : "o_" + std::to_string( semantic.GetIndex() ) );
+        const PointerExpressionNode& assigned = m_NodeManager.MakeGLSLBuiltinNode( m_EntryReturnValue );
         const ExpressionNode& main_assignment =
             m_NodeManager.MakeExpressionNode( NodeType::Store, { assigned, main_function_call } );
         statements.push_back(
@@ -335,6 +455,7 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
         m_NodeManager.MakeStatementNode( NodeType::ExpressionStatement, { main_store_node } ) );
 
         */
+
     const StatementNode& main_sequence =
         m_NodeManager.MakeStatementNode( NodeType::Sequence, std::move( statements ) );
 
@@ -348,7 +469,7 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
 }
 
 //
-// Typoes
+// Types
 //
 
 std::string GLSLWriter::GetTypeString( const CompleteType& type )
@@ -376,9 +497,9 @@ std::string GLSLWriter::GetTypeString( const CompleteType& type )
         element_type = Type::FLOAT;
     else if( IsSigned( element_type ) )
         element_type = Type::INT;
-    else if( IsIntegral( element_type ) && !( element_type == Type::BOOL ) )
+    else if( IsIntegral( element_type ) && element_type != Type::BOOL )
         element_type = Type::UINT;
-    else
+    else if( element_type != Type::BOOL )
     {
         assert( base_type == Type::VOID && "Unexpected type" );
         element_type = Type::VOID;
@@ -397,7 +518,7 @@ std::string GLSLWriter::GetTypeString( const CompleteType& type )
     std::string type_string = type_string_map.at( new_base_type );
 
     if( new_base_type != base_type )
-        Warning( "GLSL doesn't have type: " + GetTypeString( base_type ) + ". Using " +
+        Warning( "GLSL doesn't have type: " + Compiler::GetTypeString( base_type ) + ". Using " +
                  type_string );
 
 
@@ -674,6 +795,98 @@ std::string GLSLWriter::GetTemporaryIdentifier( unsigned temporary_number )
     return "t_" + std::to_string( temporary_number );
 }
 
+template<typename T>
+std::string GLSLWriter::GenerateLiteral( T t )
+{
+    //std::string suffix = GetGLSLTypeSuffix( JoeLangType<T>::value );
+    return GetTypeString( JoeLangType<T>::value ) + "(" + std::to_string( t ) + ")"; // + suffix
+}
+
+template<>
+std::string GLSLWriter::GenerateLiteral( bool b )
+{
+    //std::string suffix = GetGLSLTypeSuffix( JoeLangType<T>::value );
+    return b ? "true" : "false";
+}
+
+template<typename Scalar, JoeMath::u32 Rows, JoeMath::u32 Columns>
+std::string GLSLWriter::GenerateLiteral( const JoeMath::Matrix<Scalar, Rows, Columns>& m )
+{
+    std::string ret = GetTypeString( JoeLangType<JoeMath::Matrix<Scalar, Rows, Columns>>::value );
+    ret += "(";
+
+    bool first = true;
+    for( unsigned i = 0; i < Columns; ++i )
+        for( unsigned j = 0; j < Rows; ++j )
+        {
+            if( !first )
+                ret += ", ";
+            else
+                first = false;
+
+            ret += GenerateLiteral( m.GetColumn(i)[j] );
+        }
+    ret += ")";
+    return ret;
+}
+
+std::string GLSLWriter::GenerateGenericValue( const JoeLang::Compiler::GenericValue& value )
+{
+    #define WRITE( Type, TYPE ) \
+    case TYPE: \
+        return GenerateLiteral( value.Get##Type() );
+
+    #define WRITE_N( Type, TYPE ) \
+    WRITE( Type, TYPE ); \
+    WRITE( Type##2, TYPE##2 ); \
+    WRITE( Type##3, TYPE##3 ); \
+    WRITE( Type##4, TYPE##4 ); \
+    WRITE( Type##2x2, TYPE##2x2 ); \
+    WRITE( Type##2x3, TYPE##2x3 ); \
+    WRITE( Type##2x4, TYPE##2x4 ); \
+    WRITE( Type##3x2, TYPE##3x2 ); \
+    WRITE( Type##3x3, TYPE##3x3 ); \
+    WRITE( Type##3x4, TYPE##3x4 ); \
+    WRITE( Type##4x2, TYPE##4x2 ); \
+    WRITE( Type##4x3, TYPE##4x3 ); \
+    WRITE( Type##4x4, TYPE##4x4 );
+
+    switch( value.GetUnderlyingType() )
+    {
+        WRITE_N( Bool,   Type::BOOL )
+        WRITE_N( Char,   Type::CHAR )
+        WRITE_N( Short,  Type::SHORT )
+        WRITE_N( Int,    Type::INT )
+        WRITE_N( Long,   Type::LONG )
+        WRITE_N( UChar,  Type::UCHAR )
+        WRITE_N( UShort, Type::USHORT )
+        WRITE_N( UInt,   Type::UINT )
+        WRITE_N( ULong,  Type::ULONG )
+        WRITE_N( Float,  Type::FLOAT )
+        WRITE_N( Double, Type::DOUBLE )
+
+    case Type::ARRAY:
+    /*{
+        shader_writer << GetGLSLTypeString(GetUnderlyingType()) << "[]" << "(";
+        bool first = true;
+        for( const GenericValue& g : m_ArrayValue )
+        {
+            if( !first )
+                shader_writer << ", ";
+            else
+                first = false;
+            shader_writer << g;
+        }
+        shader_writer << ")";
+        break;
+    }*/
+    case Type::STRING:
+    default:
+        assert( false && "Trying to write an unhandled type" );
+        std::abort();
+    }
+}
+
 //
 // Addresses
 //
@@ -741,37 +954,37 @@ std::string GLSLWriter::GenerateConstant( const ConstantNodeBase& expression )
     switch( joelang_type )
     {
     case Type::BOOL:
-        return std::to_string( static_cast<const ConstantNode<jl_bool>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_bool>&>( expression )
                                    .GetConstant() );
     case Type::CHAR:
-        return std::to_string( static_cast<const ConstantNode<jl_char>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_char>&>( expression )
                                    .GetConstant() );
     case Type::SHORT:
-        return std::to_string( static_cast<const ConstantNode<jl_short>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_short>&>( expression )
                                    .GetConstant() );
     case Type::INT:
-        return std::to_string( static_cast<const ConstantNode<jl_int>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_int>&>( expression )
                                    .GetConstant() );
     case Type::LONG:
-        return std::to_string( static_cast<const ConstantNode<jl_long>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_long>&>( expression )
                                    .GetConstant() );
     case Type::UCHAR:
-        return std::to_string( static_cast<const ConstantNode<jl_uchar>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_uchar>&>( expression )
                                    .GetConstant() );
     case Type::USHORT:
-        return std::to_string( static_cast<const ConstantNode<jl_ushort>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_ushort>&>( expression )
                                    .GetConstant() );
     case Type::UINT:
-        return std::to_string( static_cast<const ConstantNode<jl_uint>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_uint>&>( expression )
                                    .GetConstant() );
     case Type::ULONG:
-        return std::to_string( static_cast<const ConstantNode<jl_ulong>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_ulong>&>( expression )
                                    .GetConstant() );
     case Type::FLOAT:
-        return std::to_string( static_cast<const ConstantNode<jl_float>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_float>&>( expression )
                                    .GetConstant() );
     case Type::DOUBLE:
-        return std::to_string( static_cast<const ConstantNode<jl_double>&>( expression )
+        return GenerateLiteral( static_cast<const ConstantNode<jl_double>&>( expression )
                                    .GetConstant() );
     default:
         assert( false && "Trying to generate a constant of unhandled type" );
@@ -789,6 +1002,9 @@ std::string GLSLWriter::GenerateCall( const ExpressionNode& expression )
     const Function& called =
         cast<FunctionNode>( expression.GetChild( expression.GetNumChildren() - 1 ) ).GetFunction();
 
+    if( called.GetRuntimeFunction() != RuntimeFunction::NONE )
+        return GenerateRuntimeCall( expression );
+
     std::string ret = MangleIdentifier( called.GetIdentifier(), IdentifierType::Function );
     ret += "(";
     for( unsigned i = 0; i < expression.GetNumChildren() - 1; ++i )
@@ -800,6 +1016,87 @@ std::string GLSLWriter::GenerateCall( const ExpressionNode& expression )
 
     ret += ")";
     return ret;
+}
+
+std::string GLSLWriter::GenerateRuntimeCall( const ExpressionNode& expression )
+{
+    const Function& called =
+        cast<FunctionNode>( expression.GetChild( expression.GetNumChildren() - 1 ) ).GetFunction();
+
+    RuntimeFunction runtime_function = called.GetRuntimeFunction();
+    assert( runtime_function != RuntimeFunction::NONE && "Trying to generate a runtime call to a non-runtime function" );
+
+    std::string glsl_func;
+
+    switch( runtime_function )
+    {
+    case RuntimeFunction::FLOAT2x2_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x2_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x3_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2x4_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x2_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x3_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3x4_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x2_FLOAT4x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x3_FLOAT4x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4x4_FLOAT4x4_MUL:
+    case RuntimeFunction::FLOAT2_FLOAT2x2_MUL:
+    case RuntimeFunction::FLOAT2_FLOAT3x2_MUL:
+    case RuntimeFunction::FLOAT2_FLOAT4x2_MUL:
+    case RuntimeFunction::FLOAT3_FLOAT2x3_MUL:
+    case RuntimeFunction::FLOAT3_FLOAT3x3_MUL:
+    case RuntimeFunction::FLOAT3_FLOAT4x3_MUL:
+    case RuntimeFunction::FLOAT4_FLOAT2x4_MUL:
+    case RuntimeFunction::FLOAT4_FLOAT3x4_MUL:
+    case RuntimeFunction::FLOAT4_FLOAT4x4_MUL:
+        // Todo, check matrix ordering
+        return "(" + GenerateValue( expression.GetOperand( 0 ) ) + " * " + GenerateValue( expression.GetOperand( 1 ) ) + ")";
+    default:
+        assert( false && "Trying to generate an unhandled runtime function" );
+    }
+
+    if( !glsl_func.empty() )
+    {
+        glsl_func += "(";
+        for( unsigned i = 0; i < expression.GetNumChildren() - 1; ++i )
+        {
+            if( i != 0 )
+                glsl_func += ", ";
+            glsl_func += GenerateValue( expression.GetOperand( i ) );
+        }
+
+        glsl_func += ")";
+        return glsl_func;
+    }
+
+    assert( false && "Trying to generate an unhandled runtime function" );
+    std::abort();
 }
 
 std::string GLSLWriter::GenerateExtractElement( const ExpressionNode& vector,
@@ -828,8 +1125,17 @@ std::string GLSLWriter::GenerateSelect( const ExpressionNode& true_expression,
                                         const ExpressionNode& false_expression,
                                         const ExpressionNode& condition )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    // GLSL only evaluates one side of the ternary operator, the joelang ternary operator evaluates both sides
+
+    if( condition.GetType().GetType() == Type::BOOL )
+    {
+        // Todo, implement dag pass to move these into temporaries which will always be evaluated
+        return "(" + GenerateValue( condition ) + " ? " + GenerateValue( true_expression ) + " : " + GenerateValue( false_expression ) + ")";
+    }
+    else
+    {
+        return "mix(" + GenerateValue( false_expression ) + ", " + GenerateValue( true_expression ) + ", " + GenerateValue( condition ) + ")";
+    }
 }
 
 std::string GLSLWriter::GenerateVectorConstructor( const ExpressionNode& constructor )
@@ -879,8 +1185,7 @@ std::string GLSLWriter::GenerateOr( const ExpressionNode& lhs, const ExpressionN
 
 std::string GLSLWriter::GenerateAnd( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue( lhs ) + " & " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateExclusiveOr( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -932,8 +1237,8 @@ std::string GLSLWriter::GenerateCompareGreaterThanEquals( const ExpressionNode& 
 
 std::string GLSLWriter::GenerateLeftShift( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    // Todo, look at this, not all glsl supports this
+    return "(" + GenerateValue( lhs ) + " << " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateRightShift( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -944,8 +1249,7 @@ std::string GLSLWriter::GenerateRightShift( const ExpressionNode& lhs, const Exp
 
 std::string GLSLWriter::GenerateAdd( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue( lhs ) + " + " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateSubtract( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -956,8 +1260,8 @@ std::string GLSLWriter::GenerateSubtract( const ExpressionNode& lhs, const Expre
 
 std::string GLSLWriter::GenerateMultiply( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    // Todo, look into this regarding matrices ( * can be a matrix multiplication in glsl )
+    return "(" + GenerateValue( lhs ) + " * " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateDivide( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -973,8 +1277,7 @@ std::string GLSLWriter::GenerateModulo( const ExpressionNode& lhs, const Express
 
 std::string GLSLWriter::GenerateNegate( const ExpressionNode& expression )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(-" + GenerateValue( expression ) + ")";
 }
 
 std::string GLSLWriter::GenerateBitwiseNot( const ExpressionNode& expression )

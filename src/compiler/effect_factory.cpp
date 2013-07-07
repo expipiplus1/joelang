@@ -133,6 +133,18 @@ std::vector<Technique> EffectFactory::GenerateTechniques(
     return ret;
 }
 
+std::vector<ParameterBase_up> EffectFactory::GenerateParameters( const std::vector<Variable_sp>& uniforms )
+{
+    std::vector<ParameterBase_up> parameters;
+
+    for( const auto& uniform : uniforms )
+    {
+        parameters.push_back( std::move( m_LLVMWriter.GenerateParameter( *uniform ) ) );
+    }
+
+    return parameters;
+}
+
 std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string& source,
                                                                const std::string& name )
 {
@@ -200,15 +212,14 @@ std::unique_ptr<Effect> EffectFactory::CreateEffectFromString( const std::string
     std::vector<Technique> techniques =
         GenerateTechniques( sema_analyzer.GetTechniqueNodes( node_manager ) );
 
-    //std::vector<ParameterBase_up> parameters =
-    //code_generator.GenerateParameters( sema_analyzer.GetUniformVariables() );
+    std::vector<ParameterBase_up> parameters = GenerateParameters( sema_analyzer.GetUniformVariables() );
 
     //
     // Todo, investigate if this is optimizing all the old effects again
     //
     //m_Runtime.OptimizeModule();
 
-    return std::unique_ptr<Effect>( new Effect( std::move( techniques ), {} ) );
+    return std::unique_ptr<Effect>( new Effect( std::move( techniques ), std::move( parameters ) ) );
 }
 
 } // namespace Compiler

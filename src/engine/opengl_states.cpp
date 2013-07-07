@@ -33,7 +33,7 @@
 
 #ifdef JOELANG_WITH_OPENGL
 
-#include <GL/GLee.h>
+//#include <GL/GLee.h>
 
 #if defined(__APPLE__)
 #include <OpenGL/gl3.h>
@@ -138,7 +138,7 @@ void RegisterOpenGLStates( Context& context )
     State<uint2> blend_equation_separate( "blend_equation_separate",
                                           blend_equation_enumerants );
     blend_equation_separate.SetCallbacks( [](uint2 v)->void
-                                          {glBlendEquationSeparate(v.x(), 
+                                          {glBlendEquationSeparate(v.x(),
                                                                    v.y());},
                                           []()->void
                                           {glBlendEquationSeparate(
@@ -156,9 +156,9 @@ void RegisterOpenGLStates( Context& context )
     State<uint4> blend_func_separate( "blend_func_separate",
                                       blend_func_enumerants );
     blend_func_separate.SetCallbacks( [](uint4 v)->void
-                                      {glBlendFuncSeparate(v.x(), 
-                                                           v.y(), 
-                                                           v.z(), 
+                                      {glBlendFuncSeparate(v.x(),
+                                                           v.y(),
+                                                           v.z(),
                                                            v.w());},
                                       []()->void
                                       {glBlendFuncSeparate(GL_ONE, GL_ZERO,
