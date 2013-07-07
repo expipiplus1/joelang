@@ -131,7 +131,6 @@ Effect* Context::CreateEffectFromFile( const std::string& filename )
     file.close();
 
     return CreateEffectFromString( source, filename );
-
 }
 
 const StateBase* Context::GetNamedState(const std::string& name) const

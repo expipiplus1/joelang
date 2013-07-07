@@ -30,6 +30,7 @@
 #include "node_manager.hpp"
 
 #include <algorithm>
+#include <map>
 #include <stack>
 #include <vector>
 

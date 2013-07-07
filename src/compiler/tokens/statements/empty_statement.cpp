@@ -30,6 +30,7 @@
 #include "empty_statement.hpp"
 
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 
 #include <compiler/code_dag/node.hpp>

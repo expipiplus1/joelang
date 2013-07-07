@@ -32,6 +32,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <vector>
 
 #include <compiler/code_dag/compile_statement_node.hpp>
 #include <compiler/code_dag/node_manager.hpp>

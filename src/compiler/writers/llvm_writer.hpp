@@ -32,6 +32,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <stack>
 #include <vector>
 
 #include <llvm/IR/IRBuilder.h>

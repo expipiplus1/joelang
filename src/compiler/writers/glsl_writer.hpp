@@ -30,6 +30,7 @@
 #pragma once
 
 #include <deque>
+#include <map>
 #include <set>
 #include <sstream>
 #include <string>
