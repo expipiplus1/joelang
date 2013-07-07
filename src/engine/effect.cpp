@@ -64,7 +64,7 @@ const Technique* Effect::GetNamedTechnique( const std::string& name ) const
 {
     const auto& technique = std::find_if( m_Techniques.begin(),
                                           m_Techniques.end(),
-                                         [&name](const Technique& t)
+                                          [&name](const Technique& t)
                                             {return t.GetName() == name;} );
     return technique == m_Techniques.end() ? nullptr :  &*technique;
 }
