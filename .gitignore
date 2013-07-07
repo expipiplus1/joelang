@@ -3,3 +3,4 @@ CMakeLists.txt.user
 *.autosave
 *.swp
 include/joelang/config.h
+.DS_Store
