@@ -85,7 +85,6 @@ namespace Compiler
   *
   * Expression = AssignmentExpression
   */
-// todo split this file up
 class Expression : public JoeLang::Compiler::Token
 {
 public:
