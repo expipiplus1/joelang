@@ -31,7 +31,7 @@
 
 #include <algorithm>
 #include <map>
-#include <stack>
+#include <queue>
 #include <vector>
 
 #include <compiler/code_dag/cast_node.hpp>
@@ -96,11 +96,13 @@ const StatementNode& NodeManager::InsertTemporaries( const StatementNode& node )
             return node;
 
         if( node.GetNodeType() == NodeType::Conditional )
+            // If this is an if without an else
             if( node.GetNumChildren() == 2 )
                 temporary_assignments.push_back( MakeStatementNode(
                     NodeType::Conditional,
                     { new_expression,
                       InsertTemporaries( cast<StatementNode>( node.GetChild( 0 ) ) ) } ) );
+            // This is an if-else
             else
                 temporary_assignments.push_back( MakeStatementNode(
                     NodeType::Conditional,
@@ -130,12 +132,12 @@ const ExpressionNode& NodeManager::InsertTemporariesIntoExpression(
     //
     // Walk over the expression tree and when we see a node more than once
     //
-    std::stack<ExpressionNode_ref> explore_stack;
-    explore_stack.push( expression );
-    while( !explore_stack.empty() )
+    std::queue<ExpressionNode_ref> explore_queue;
+    explore_queue.push( expression );
+    while( !explore_queue.empty() )
     {
-        const ExpressionNode& e = explore_stack.top();
-        explore_stack.pop();
+        const ExpressionNode& e = explore_queue.front();
+        explore_queue.pop();
 
         auto i = seen_nodes.find( &e );
         if( i != seen_nodes.end() )
@@ -154,7 +156,7 @@ const ExpressionNode& NodeManager::InsertTemporariesIntoExpression(
                 if( !s )
                     // Don't bother with non-expressions
                     continue;
-                explore_stack.push( *s );
+                explore_queue.push( *s );
             }
         }
     }
@@ -165,24 +167,14 @@ const ExpressionNode& NodeManager::InsertTemporariesIntoExpression(
     if( duplicate_nodes.empty() )
         return expression;
 
-    //
-    // There were duplicate expressions, so assign them to temporaries, and recreate the tree
-    // with references to those temporaries
-    //
     std::map<const ExpressionNode*, unsigned> temporary_map;
-    for( auto i = duplicate_nodes.rbegin(); i != duplicate_nodes.rend(); ++i )
-    {
-        unsigned temporary_number = m_NumTemporaries++;
-        temporary_map[*i] = temporary_number;
-        temporary_assignments.push_back( MakeTemporaryAssignmentNode( temporary_number, **i ) );
-    }
 
-    std::function<const ExpressionNode&( const ExpressionNode& )> get_new_expression;
-    get_new_expression = [&get_new_expression, &temporary_map, this]( const ExpressionNode & e )
+    std::function<const ExpressionNode&( const ExpressionNode&, const ExpressionNode* )> get_new_expression;
+    get_new_expression = [&get_new_expression, &temporary_map, this]( const ExpressionNode& e, const ExpressionNode* ignored_temporary )
         ->const ExpressionNode &
     {
         auto i = temporary_map.find( &e );
-        if( i != temporary_map.end() )
+        if( i != temporary_map.end() && ignored_temporary != i->first )
             return MakeTemporaryNode( i->second, e.GetType() );
 
         //
@@ -201,7 +193,7 @@ const ExpressionNode& NodeManager::InsertTemporariesIntoExpression(
             if( !isa<ExpressionNode>( child ) )
                 new_children.push_back( child );
             else
-                new_children.push_back( get_new_expression( cast<ExpressionNode>( child ) ) );
+                new_children.push_back( get_new_expression( cast<ExpressionNode>( child ), ignored_temporary ) );
         }
 
         switch( e.GetNodeType() )
@@ -227,7 +219,20 @@ const ExpressionNode& NodeManager::InsertTemporariesIntoExpression(
         }
     }
     ;
-    return get_new_expression( expression );
+
+    //
+    // There were duplicate expressions, so assign them to temporaries, and recreate the tree
+    // with references to those temporaries
+    //
+    for( auto i = duplicate_nodes.rbegin(); i != duplicate_nodes.rend(); ++i )
+    {
+        unsigned temporary_number = m_NumTemporaries++;
+        temporary_map[*i] = temporary_number;
+        temporary_assignments.push_back( MakeTemporaryAssignmentNode( temporary_number, get_new_expression( **i, *i ) ) );
+    }
+
+    
+    return get_new_expression( expression, nullptr );
 }
 
 //
