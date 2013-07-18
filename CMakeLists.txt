@@ -230,6 +230,8 @@ set( joelang_sources include/joelang/context.hpp
                      src/compiler/writers/runtime.hpp
                      src/compiler/writers/semantic_info.cpp
                      src/compiler/writers/semantic_info.hpp
+                     src/compiler/writers/shader_compilation_context.cpp
+                     src/compiler/writers/shader_compilation_context.hpp
                      src/compiler/writers/shader_writer.cpp
                      src/compiler/writers/shader_writer.hpp
                      src/compiler/writers/shader_writer-inl.hpp )
