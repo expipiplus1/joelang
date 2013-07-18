@@ -84,6 +84,7 @@ const StatementNode& NodeManager::InsertTemporaries( const StatementNode& node )
     case NodeType::Return:
     case NodeType::ExpressionStatement:
     case NodeType::Conditional:
+    case NodeType::TemporaryAssignment:
     {
         if( node.GetNumChildren() == 0 )
             return node;
