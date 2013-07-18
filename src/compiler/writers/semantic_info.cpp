@@ -44,11 +44,11 @@ namespace Compiler
 
 const std::map<SemanticType, SemanticInfo> g_SemanticInfoMap =
 {
-    { SemanticType::POSITION, { Type::FLOAT4, 
-                                std::set<ShaderDomain>{},
-                                { ShaderDomain::VERTEX   },
-                                "gl_Position",
-                                true } },    
+    { SemanticType::POSITION, { Type::FLOAT4,               // The type
+                                std::set<ShaderDomain>{},   // Input domains
+                                { ShaderDomain::VERTEX   }, // Ouput domains
+                                "gl_Position",              // Builtin name
+                                true } },                   // Is a varying
     { SemanticType::VERTEXID, { Type::INT,
                                 { ShaderDomain::VERTEX   },
                                 std::set<ShaderDomain>{},
