@@ -267,10 +267,10 @@ list( APPEND JOELANG_LIBS joelang )
 # Pch and unity
 #-------------------------------------------------------------------------------
 
-include( cotire )
-cotire( joelang )
+#include( cotire )
+#cotire( joelang )
 
-target_link_libraries( joelang_unity ${JOELANG_LIBS} )
+#target_link_libraries( joelang_unity ${JOELANG_LIBS} )
 
 #-------------------------------------------------------------------------------
 # Include dirs
