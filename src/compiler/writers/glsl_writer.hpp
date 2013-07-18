@@ -39,12 +39,12 @@
 
 namespace JoeLang
 {
-class Context;
 enum class ShaderDomain;
 
 namespace Compiler
 {
 
+class ShaderCompilationContext;
 class CompileStatementNode;
 class CompleteType;
 class Function;
@@ -55,19 +55,32 @@ class GLSLWriter
 {
 public:
     static
-    std::string GenerateGLSL( const Context& context,
+    std::string GenerateGLSL( const ShaderCompilationContext& compilation_context,
                               const CompileStatementNode& compile_statement );
 
 private:
-    GLSLWriter( const Context& context, const CompileStatementNode& compile_statement );
+    GLSLWriter( const ShaderCompilationContext& compilation_context,
+                const CompileStatementNode& compile_statement );
     ~GLSLWriter();
 
     std::string Generate();
 
     //
+    // Writes the glsl version
+    //
+    void WriteVersion();
+
+
+    //
     // Writes some useful information in a comment
     //
     void WriteHeaderComment();
+
+    //
+    // Writes out a list of opengl extensions required to compile this shader
+    //
+    void WriteRequiredExtensions();
+
     static
     std::string GetDomainString( ShaderDomain domain );
 
@@ -82,7 +95,7 @@ private:
 
     void WriteUniformVariables( std::set<const Variable*> uniform_variables );
 
-    unsigned GetVariableAttributeNumber( const Variable& variable );
+    unsigned GetVariableAttributeIndex( const Variable& variable );
 
     //
     // Function writing
@@ -114,9 +127,9 @@ private:
 
     std::string MangleIdentifier( std::string identifier, IdentifierType identifier_type );
 
-    void Error( const std::string& message );
+    void Error( const std::string& message ) const;
 
-    void Warning( const std::string& message );
+    void Warning( const std::string& message ) const;
 
     //
     // Members // TODO, why is this in the middle?
@@ -124,7 +137,9 @@ private:
 
     std::stringstream m_Source;
 
-    const Context& m_Context;
+    unsigned m_Indentation = 0;
+
+    const ShaderCompilationContext& m_CompilationContext;
     NodeManager m_NodeManager;
 
     const CompileStatementNode& m_CompileStatement;
@@ -146,22 +161,22 @@ private:
     // All the functions to do with generating statements
     //
 
-    void GenerateStatement( const StatementNode& statement_node );
+    void WriteStatement( const StatementNode& statement_node );
 
     // Note, this doesn't insert braces
-    void GenerateCompoundStatement( const StatementNode& sequence_node );
+    void WriteCompoundStatement( const StatementNode& sequence_node );
 
-    void GenerateExpressionStatement( const ExpressionNode& expression );
+    void WriteExpressionStatement( const ExpressionNode& expression );
 
-    void GenerateConditional( const ExpressionNode& condition,
+    void WriteConditional( const ExpressionNode& condition,
                               const StatementNode& true_statement,
                               const StatementNode* else_statement );
 
-    void GenerateVoidReturn();
+    void WriteVoidReturn();
 
-    void GenerateReturn( const ExpressionNode& returned );
+    void WriteReturn( const ExpressionNode& returned );
 
-    void GenerateTemporaryAssignment( unsigned temporary_number, const ExpressionNode& expression );
+    void WriteTemporaryAssignment( unsigned temporary_number, const ExpressionNode& expression );
 
     //
     // Value generation

@@ -48,12 +48,13 @@
 #include <compiler/writers/code_generator.hpp>
 #include <compiler/writers/dot_writer.hpp>
 #include <compiler/writers/llvm_writer.hpp>
+#include <compiler/writers/shader_compilation_context.hpp>
+
 #include <joelang/config.h>
 #include <joelang/context.hpp>
 #include <joelang/effect.hpp>
 #include <joelang/parameter.hpp>
 #include <joelang/technique.hpp>
-
 #include <joelang/program.hpp>
 #include <joelang/shader.hpp>
 
@@ -76,7 +77,9 @@ EffectFactory::EffectFactory( const Context& context, Runtime& runtime )
 Pass EffectFactory::GeneratePass( const PassNode& pass_node )
 {
     Pass::StateAssignmentVector state_assignments;
-    std::vector<Shader> shaders;
+#ifdef JOELANG_WITH_OPENGL
+    std::vector<CompileStatementNode_ref> compile_statements;
+#endif
 
     for( const Node& node : pass_node.GetChildren() )
     {
@@ -88,7 +91,7 @@ Pass EffectFactory::GeneratePass( const PassNode& pass_node )
             break;
         case NodeType::CompileStatement:
 #ifdef JOELANG_WITH_OPENGL
-            shaders.push_back( Shader( m_Context, cast<CompileStatementNode>( node ) ) );
+            compile_statements.push_back( cast<CompileStatementNode>( node ) );
 #else
             m_Context.Error( "Trying to compile a shader without opengl" );
 #endif
@@ -103,7 +106,15 @@ Pass EffectFactory::GeneratePass( const PassNode& pass_node )
     //
     // Create a Program for the pass from all the shaders
     //
-    Program program( std::move( shaders ) );
+    std::vector<Shader> shaders;
+
+    std::unique_ptr<ShaderCompilationContext> compilation_context(
+        new ShaderCompilationContext( m_Context, std::move( compile_statements ) ) );
+
+    for( ShaderDomain shader_domain : compilation_context->GetActiveDomains() )
+        shaders.push_back( Shader( shader_domain, *compilation_context ) );
+
+    Program program( std::move( shaders ), std::move( compilation_context ) );
     program.Compile();
 #else
     Program program;

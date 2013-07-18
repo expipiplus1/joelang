@@ -41,17 +41,16 @@ enum class Type;
 namespace Compiler
 {
 
+// todo, custom semantics
 enum class SemanticType
 {
     NO_SEMANTIC,
-
-    CUSTOM,
 
     POSITION,
     VERTEXID,
     WPOS,
     DEPTH,
-    COLOR,
+    ATTR
 };
 
 class Semantic
@@ -61,9 +60,9 @@ public:
     Semantic  ();
     /** This constructor asserts on an empty string **/
     explicit
-    Semantic  ( std::string string );
+    Semantic  ( SemanticType type );
     /** This constructor asserts on an empty string **/
-    Semantic  ( std::string string, unsigned index );
+    Semantic  ( SemanticType type, unsigned index );
 
     /**
      * \returns true if this represents NO_SEMANTIC
@@ -85,6 +84,8 @@ public:
       */
     Type GetType() const;
 
+    SemanticType GetSemanticType() const;
+
     /**
       * Returns the builtin string
       */
@@ -95,8 +96,6 @@ public:
     unsigned GetIndex() const;
 
 private:
-    void DetermineType();
-
     SemanticType  m_Type;
     std::string   m_String;
     bool          m_HasIndex;

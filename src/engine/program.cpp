@@ -39,14 +39,17 @@
 
 #include <GL/GLee.h>
 
+#include <compiler/writers/shader_compilation_context.hpp>
 #include <engine/parameter_watcher.hpp>
 #include <joelang/shader.hpp>
+
 
 namespace JoeLang
 {
 
-Program::Program( std::vector<Shader> shaders )
+Program::Program( std::vector<Shader> shaders, Compiler::ShaderCompilationContext_up compilation_context )
     :m_Shaders( std::move(shaders) )
+    ,m_CompilationContext( std::move( compilation_context ) )
     ,m_Object( 0 )
 {
 }

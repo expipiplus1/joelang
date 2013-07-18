@@ -42,42 +42,28 @@
 
 #include <GL/GLee.h>
 
-#include <compiler/semantic_analysis/entry_function.hpp>
-#include <compiler/writers/shader_writer.hpp>
-
-#include <compiler/code_dag/compile_statement_node.hpp>
-#include <compiler/writers/glsl_writer.hpp>
+#include <compiler/writers/shader_compilation_context.hpp>
 
 namespace JoeLang
 {
 
-Shader::Shader( const Context& context, ShaderDomain domain, std::string source )
-    :m_Context( context )
-    ,m_Source( std::move(source) )
-    ,m_Object( 0 )
+Shader::Shader( ShaderDomain domain, const Compiler::ShaderCompilationContext& compilation_context )
+    :m_Object( 0 )
     ,m_Domain( domain )
+    ,m_CompilationContext( compilation_context )
 {
 }
-
-Shader::Shader( const Context& context, const Compiler::CompileStatementNode& compile_statement_node )
-    :m_Context( context )
-    ,m_CompileStatement( &compile_statement_node )
-    ,m_Object( 0 )
-{
-    m_Domain = m_CompileStatement->GetDomain();
-}
-
 
 Shader::Shader( Shader&& other )
-    :m_Context( other.m_Context )
-    ,m_Object( 0 )
+    :m_Object( 0 )
+    ,m_CompilationContext( other.m_CompilationContext )
 {
     Swap( other );
 }
 
 Shader& Shader::operator=( Shader&& other )
 {
-    assert( &m_Context == &other.m_Context &&
+    assert( &m_CompilationContext.get().GetJoeLangContext() == &other.m_CompilationContext.get().GetJoeLangContext() &&
             "Trying to assign a shader across contexts" );
     Swap( other );
     return *this;
@@ -92,8 +78,7 @@ void Shader::Swap( Shader& other )
 {
     if( &other == this )
         return;
-    std::swap( m_CompileStatement, other.m_CompileStatement );
-    std::swap( m_Source, other.m_Source );
+    std::swap( m_CompilationContext, other.m_CompilationContext );
     std::swap( m_Domain, other.m_Domain );
     std::swap( m_Object, other.m_Object );
 }
@@ -115,9 +100,9 @@ void Shader::Compile()
     //
     // Generate the glsl
     //
-    m_Source = Compiler::GLSLWriter::GenerateGLSL( m_Context, *m_CompileStatement );
+    std::string source = m_CompilationContext.get().GetSource( m_Domain );
 
-    std::cout << m_Source << std::endl;
+    std::cout << source << std::endl;
 
     //
     // Compile the glsl
@@ -125,7 +110,7 @@ void Shader::Compile()
     glDeleteShader(m_Object);
     m_Object = glCreateShader( domain_map.at(m_Domain) );
     assert( m_Object && "Couldn't create shader object" );
-    const char* c = m_Source.c_str();
+    const char* c = source.c_str();
     glShaderSource( m_Object, 1, &c, NULL );
     glCompileShader( m_Object );
 
@@ -149,11 +134,6 @@ void Shader::Compile()
 bool Shader::IsCompiled() const
 {
     return m_Object;
-}
-
-const std::string& Shader::GetString() const
-{
-    return m_Source;
 }
 
 } // namespace JoeLang

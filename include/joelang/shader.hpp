@@ -32,6 +32,7 @@
 #include <joelang/config.h>
 #ifdef JOELANG_WITH_OPENGL
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,10 +44,13 @@ class Context;
 
 namespace Compiler
 {
-    class CompileStatementNode;
+    class ShaderCompilationContext;
     class EffectFactory;
 };
 
+//
+// These must be in order of execution
+//
 enum class ShaderDomain
 {
     VERTEX,
@@ -56,7 +60,6 @@ enum class ShaderDomain
 class Shader
 {
 public:
-    Shader( const Context& context, ShaderDomain domain, std::string source );
     Shader( const Shader& ) = delete;
     Shader( Shader&& other );
     Shader& operator=( const Shader& ) = delete;
@@ -68,29 +71,20 @@ public:
 
     bool IsCompiled() const;
 
-    const std::string& GetString() const;
-
     friend class Program;
     friend class Compiler::EffectFactory;
     
 private:
     /// Used internally by joelang
-    Shader( const Context& context, const Compiler::CompileStatementNode& compile_statement_node );
+    Shader( ShaderDomain domain,  const Compiler::ShaderCompilationContext& compilation_context );
     
-    /// The context that this shader belongs to
-    const Context& m_Context;
-
-    /// The compile statement as seen in the joelang source
-    const Compiler::CompileStatementNode* m_CompileStatement = nullptr;
-
-    /// The glsl source of the shader
-    std::string m_Source;
-
     /// The OpenGL shader object
     unsigned m_Object = 0;
 
     /// The shader domain
     ShaderDomain m_Domain;
+
+    std::reference_wrapper<const Compiler::ShaderCompilationContext> m_CompilationContext;
 };
 
 } // namespace JoeLang

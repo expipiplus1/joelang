@@ -100,6 +100,8 @@ Variable::Variable( CompleteType type,
             "Trying to make a parameter that's not in or out" );
     assert( (!IsIn() || (IsVarying() || IsParameter())) &&
             "Trying to make an in variable that's not a varying or parameter" );
+
+    // todo, hitting this a lot, perhaps make in/out varying by default
     assert( (!IsOut() || (IsVarying() || IsParameter())) &&
             "Trying to make an out variable that's not a varying or "
             "parameter" );

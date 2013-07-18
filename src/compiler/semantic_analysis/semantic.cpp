@@ -53,21 +53,19 @@ Semantic::Semantic  ()
 {
 }
 
-Semantic::Semantic  ( std::string string )
-    :m_String( std::move(string) )
+Semantic::Semantic  ( SemanticType type )
+    :m_Type( type )
     ,m_HasIndex( false )
 {
-    assert( !m_String.empty() && "Semantic given empty string" );
-    DetermineType();
+    assert( m_Type != SemanticType::ATTR && "ATTR must have an index" );
 }
 
-Semantic::Semantic  ( std::string string, unsigned index )
-    :m_String( std::move(string) )
+Semantic::Semantic  ( SemanticType type, unsigned index )
+    :m_Type( type )
     ,m_HasIndex( true )
     ,m_Index( index )
 {
-    assert( !m_String.empty() && "Semantic given empty string" );
-    DetermineType();
+    assert( m_Type == SemanticType::ATTR && "Only ATTR can have an index" );
 }
 
 bool Semantic::IsVoid() const
@@ -126,25 +124,9 @@ unsigned Semantic::GetIndex() const
     return m_Index;
 }
 
-void Semantic::DetermineType()
+SemanticType Semantic::GetSemanticType() const
 {
-    const static std::map<std::string, SemanticType> type_map =
-    {
-        { "POSITION", SemanticType::POSITION },
-        { "VERTEXID", SemanticType::VERTEXID },
-        { "DEPTH",    SemanticType::DEPTH    },
-        { "COLOR",    SemanticType::COLOR    },
-        { "WPOS",     SemanticType::WPOS     }
-    };
-
-    //
-    // Try and find a built in semantic
-    //
-    const auto& s = type_map.find( m_String );
-    if( s == type_map.end() )
-        m_Type = SemanticType::CUSTOM;
-    else
-        m_Type = s->second;
+    return m_Type;
 }
 
 } // namespace Compiler

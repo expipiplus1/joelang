@@ -196,6 +196,8 @@ bool FunctionSpecifier::Parse( Parser& parser,
 // SemanticSpecifier
 //------------------------------------------------------------------------------
 
+// Todo, pass to determine conflicting semantic types
+
 SemanticSpecifier::SemanticSpecifier( std::string string,
                                       Expression_up index_expression )
     :Token( TokenTy::SemanticSpecifier )
@@ -217,20 +219,51 @@ bool SemanticSpecifier::HasIndex() const
 Semantic SemanticSpecifier::GetSemantic() const
 {
     if( HasIndex() )
-        return Semantic( m_String );
+        return Semantic( m_SemanticType, m_Index );
     else
-        return Semantic( m_String, m_Index );
+        return Semantic( m_SemanticType );
 }
 
 void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
 {
+    // todo, is this really the most appropriate location for this information
+    const static
+    std::map<std::string, SemanticType> type_map =
+    {
+        { "POSITION", SemanticType::POSITION },
+        { "VERTEXID", SemanticType::VERTEXID },
+        { "DEPTH",    SemanticType::DEPTH    },
+        { "WPOS",     SemanticType::WPOS     },
+        { "ATTR",     SemanticType::ATTR     }
+    };
+
     //
-    // If we don't have an index we have no work to do here
+    // Try and find a built in semantic
+    //
+    const auto& s = type_map.find( m_String );
+    if( s == type_map.end() )
+    {
+        // Todo, spellcheck for joelang
+        sema.Error( "Unknown semantic: " + m_String );
+    }
+    else
+    {
+        m_SemanticType = s->second;
+
+        if( m_SemanticType == SemanticType::ATTR && !m_IndexExpression )
+            sema.Error( "The ATTR semantic must have an index expression" );
+        else if( m_SemanticType != SemanticType::ATTR && m_IndexExpression )
+            sema.Error( "Only the ATTR semantic can have an index" );
+    }
+
+
+    //
+    // If we don't have an index we have no more work to do here
     //
     if( !m_IndexExpression )
         return;
 
-    m_IndexExpression = CastExpression::Create( CompleteType( Type::INT ),
+    m_IndexExpression = CastExpression::Create( CompleteType( Type::LONG ),
                                                 std::move(m_IndexExpression),
                                                 false );
 
@@ -243,9 +276,10 @@ void SemanticSpecifier::PerformSema( SemaAnalyzer& sema )
         return;
     }
 
-    int index = sema.EvaluateExpression( *m_IndexExpression ).GetInt();
+    jl_long index = sema.EvaluateExpression( *m_IndexExpression ).GetLong();
     if( index < 0 )
     {
+        //Todo, warning in glsl_writer about out of bounds index
         sema.Error( "SemanticSpecifier index must be non-negative" );
         return;
     }

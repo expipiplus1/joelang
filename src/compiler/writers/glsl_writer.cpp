@@ -55,7 +55,7 @@
 #include <compiler/semantic_analysis/type_properties.hpp>
 #include <compiler/semantic_analysis/variable.hpp>
 #include <compiler/support/casting.hpp>
-#include <joelang/context.hpp>
+#include <compiler/writers/shader_compilation_context.hpp>
 #include <joelang/shader.hpp>
 #include <joelang/types.hpp>
 
@@ -68,17 +68,19 @@ namespace Compiler
 
 enum class GLSLWriter::IdentifierType{ Function, Variable, };
 
+// todo, remove this
 const std::string GLSLWriter::s_GLSLVersion = "150";
 
-std::string GLSLWriter::GenerateGLSL( const Context& context,
+std::string GLSLWriter::GenerateGLSL( const ShaderCompilationContext& compilation_context,
                                       const CompileStatementNode& compile_statement )
 {
-    GLSLWriter writer( context, compile_statement );
+    GLSLWriter writer( compilation_context, compile_statement );
     return writer.Generate();
 }
 
-GLSLWriter::GLSLWriter( const Context& context, const CompileStatementNode& compile_statement )
-    : m_Context( context )
+GLSLWriter::GLSLWriter( const ShaderCompilationContext& compilation_context,
+                        const CompileStatementNode& compile_statement )
+    : m_CompilationContext( compilation_context )
     , m_CompileStatement( compile_statement )
 {
 }
@@ -91,7 +93,9 @@ std::string GLSLWriter::Generate()
 {
     WriteHeaderComment();
 
-    m_Source << "#version " << s_GLSLVersion;
+    WriteVersion();
+
+    WriteRequiredExtensions();
 
     NewLine( 2 );
 
@@ -112,8 +116,8 @@ std::string GLSLWriter::Generate()
     }
 
     //
-    // Inputs and uniforms are immutable in glsl so if we write to them we need to create a global copy and initialize that at the
-    // start of main.
+    // Inputs and uniforms are immutable in glsl so if we write to them we need to create a global
+    // copy and initialize that at the start of main.
     // TODO, don't do this for variables which are never written to
     //
     std::set<const Variable*> input_variables;
@@ -130,13 +134,17 @@ std::string GLSLWriter::Generate()
             const Variable& v = cast<VariableNode>( *variable_node ).GetVariable();
             if( v.IsGlobal() )//|| ( function == &entry_function && v.IsParameter() ) )
             {
+                // TODO, allow this, as long as it's only used as an input in one shader and an
+                // output in another earlier in the pipeline
                 assert( !(v.IsIn() && v.IsOut()) && "Global Variable is both in and out" );
 
-                // TODO: Insert some checking code to make sure we don't have 'in uniforms' or 'in out' variables in global scope
+                // TODO: Insert some checking code to make sure we don't have 'in uniforms' or
+                // 'in out' variables in global scope
 
                 const Semantic& semantic = v.GetSemantic();
                 if( semantic.HasBuiltin( m_CompileStatement.GetDomain(), v.IsIn() ) )
-                    m_VariableNames.insert( std::make_pair( &v, semantic.GetBuiltin( m_CompileStatement.GetDomain(), v.IsIn() ) ) );
+                    m_VariableNames.insert(
+                        std::make_pair( &v, semantic.GetBuiltin( m_CompileStatement.GetDomain(), v.IsIn() ) ) );
                 else if( v.IsIn() )
                     input_variables.insert( &v );
                 else if( v.IsOut() )
@@ -244,6 +252,20 @@ void GLSLWriter::WriteHeaderComment()
     NewLine();
 }
 
+void GLSLWriter::WriteVersion()
+{
+    m_Source << "#version 150";
+    NewLine();
+
+}
+
+
+void GLSLWriter::WriteRequiredExtensions()
+{
+    m_Source << "#extension GL_ARB_explicit_attrib_location : require";
+    NewLine();
+}
+
 std::string GLSLWriter::GetDomainString( ShaderDomain domain )
 {
     switch( domain )
@@ -288,10 +310,17 @@ void GLSLWriter::WriteInputVariables( std::set<const Variable*> input_variables 
         assert( variable && "WriteInputVariables given null variable" );
         assert( variable->IsIn() && "WriteInputVariables given non-in variable" );
 
-        unsigned attribute_number = GetVariableAttributeNumber( *variable );
-        m_VariableNames.insert(
-            std::make_pair( variable, "i_" + std::to_string( attribute_number ) ) );
-        m_Source << GetVariableTypeString( *variable ) << " i_" << attribute_number << ";";
+        unsigned index = GetVariableAttributeIndex( *variable );
+        std::string input_name =
+            m_CompilationContext.GetInputPrefix( m_CompileStatement.GetDomain() ) +
+            std::to_string( index );
+        std::string mutable_name = "v_" + variable->GetName();
+
+        // Todo, make the mutable name optional if the variable is never written to
+        m_VariableNames.insert( std::make_pair( variable, mutable_name ) );
+        m_Source <<  "/* layout( location = " << index << " ) */ " <<  "in " << GetTypeString( variable->GetType() ) << " " << input_name << ";";
+        NewLine();
+        m_Source << GetTypeString( variable->GetType() ) << " " << mutable_name << " = " << input_name << ";";
         NewLine();
     }
 }
@@ -303,10 +332,13 @@ void GLSLWriter::WriteOutputVariables( std::set<const Variable*> output_variable
         assert( variable && "WriteOutputVariables given null variable" );
         assert( variable->IsOut() && "WriteOutputVariables given non-out variable" );
 
-        unsigned attribute_number = GetVariableAttributeNumber( *variable );
-        m_VariableNames.insert(
-            std::make_pair( variable, "o_" + std::to_string( attribute_number ) ) );
-        m_Source << GetVariableTypeString( *variable ) << " o_" << attribute_number << ";";
+        // todo use some kind of link_context for this
+        unsigned index = GetVariableAttributeIndex( *variable );
+        std::string output_name =
+            m_CompilationContext.GetOutputPrefix( m_CompileStatement.GetDomain() ) +
+            std::to_string( index );
+        m_VariableNames.insert( std::make_pair( variable, output_name ) );
+        m_Source << "/* layout( location = " << index << " ) */ " << GetVariableTypeString( *variable ) << " " << output_name << ";";
         NewLine();
     }
 }
@@ -318,16 +350,26 @@ void GLSLWriter::WriteUniformVariables( std::set<const Variable*> uniform_variab
         assert( variable && "WriteUniformVariables given null variable" );
         assert( variable->IsUniform() && "WriteUniformVariables given non-uniform variable" );
 
-        m_VariableNames.insert( std::make_pair( variable, "u_" + variable->GetName() ) );
-        m_Source << "uniform " << GetTypeString( variable->GetType() ) << " u_"
-                 << variable->GetName() << ";";
+        std::string uniform_name = "u_" + variable->GetName();
+        std::string mutable_name = "v_" + uniform_name;
+
+        // Todo, make the mutable name optional if the variable is never written to
+        m_VariableNames.insert( std::make_pair( variable, mutable_name ) );
+        m_Source << "uniform " << GetTypeString( variable->GetType() ) << " " << uniform_name << ";";
+        NewLine();
+        m_Source << GetTypeString( variable->GetType() ) << " " << mutable_name << " = " << uniform_name << ";";
         NewLine();
     }
+
+    // TODO, add test checking for error on 'uniform in' etc...
 }
 
-unsigned GLSLWriter::GetVariableAttributeNumber( const Variable& variable )
+unsigned GLSLWriter::GetVariableAttributeIndex( const Variable& variable )
 {
-    return 0; // todo, complete me
+    // todo, complete me, for varyings without explicit attributes etc...
+    assert( variable.GetSemantic().GetSemanticType() == SemanticType::ATTR &&
+            "Trying to get the index of a semantic without one" );
+    return variable.GetSemantic().GetIndex();
 }
 
 //
@@ -369,8 +411,11 @@ void GLSLWriter::WriteFunctionDefinitions( std::set<const Function*> functions )
         WriteFunctionHeader( *function );
         NewLine();
         m_Source << "{";
+        m_Indentation += 1;
         NewLine();
-        GenerateCompoundStatement( function->GetCodeDag() );
+        WriteCompoundStatement( function->GetCodeDag() );
+        m_Indentation -= 1;
+        NewLine();
         m_Source << "}";
         NewLine();
     }
@@ -462,8 +507,11 @@ void GLSLWriter::WriteMainFunction( const CompileStatementNode& compile_statemen
     m_Source << "void main()";
     NewLine();
     m_Source << "{";
+    m_Indentation += 1;
     NewLine();
-    GenerateCompoundStatement( main_sequence );
+    WriteCompoundStatement( main_sequence );
+    m_Indentation -= 1;
+    NewLine();
     m_Source << "}";
     NewLine();
 }
@@ -549,8 +597,11 @@ std::string GLSLWriter::GetVariableTypeString( const Variable& variable )
 
 void GLSLWriter::NewLine( unsigned n )
 {
+    assert( n != 0 && "Inserting zero newlines" );
     while( n-- )
         m_Source << "\n";
+    for( unsigned i = 0; i < m_Indentation; ++i )
+        m_Source << "    ";
 }
 
 std::string GLSLWriter::MangleIdentifier( std::string identifier, IdentifierType identifier_type )
@@ -565,45 +616,45 @@ std::string GLSLWriter::MangleIdentifier( std::string identifier, IdentifierType
 }
 
 
-void GLSLWriter::Error( const std::string& message )
+void GLSLWriter::Error( const std::string& message ) const
 {
-    m_Context.Error( "Error generating shader: " + message );
+    m_CompilationContext.Error( "Error generating shader: " + message );
 }
 
-void GLSLWriter::Warning( const std::string& message )
+void GLSLWriter::Warning( const std::string& message ) const
 {
-    m_Context.Error( "Warning generating shader: " + message );
+    m_CompilationContext.Error( "Warning generating shader: " + message );
 }
 
 //--------------------------------------------------------------------------------------------------
-// Generating statements
+// Writing statements
 //--------------------------------------------------------------------------------------------------
 
-void GLSLWriter::GenerateStatement( const StatementNode& statement_node )
+void GLSLWriter::WriteStatement( const StatementNode& statement_node )
 {
     switch( statement_node.GetNodeType() )
     {
     case NodeType::Sequence:
-        GenerateCompoundStatement( statement_node );
+        WriteCompoundStatement( statement_node );
         break;
     case NodeType::Return:
         if( statement_node.GetNumChildren() == 1 )
-            GenerateReturn( cast<ExpressionNode>( statement_node.GetChild( 0 ) ) );
+            WriteReturn( cast<ExpressionNode>( statement_node.GetChild( 0 ) ) );
         else
-            GenerateVoidReturn();
+            WriteVoidReturn();
         break;
     case NodeType::ExpressionStatement:
-        GenerateExpressionStatement( cast<ExpressionNode>( statement_node.GetChild( 0 ) ) );
+        WriteExpressionStatement( cast<ExpressionNode>( statement_node.GetChild( 0 ) ) );
         break;
     case NodeType::Conditional:
-        GenerateConditional( cast<ExpressionNode>( statement_node.GetChild( 0 ) ),
+        WriteConditional( cast<ExpressionNode>( statement_node.GetChild( 0 ) ),
                              cast<StatementNode>( statement_node.GetChild( 1 ) ),
                              statement_node.GetNumChildren() == 3
                                  ? &cast<StatementNode>( statement_node.GetChild( 2 ) )
                                  : nullptr );
         break;
     case NodeType::TemporaryAssignment:
-        GenerateTemporaryAssignment(
+        WriteTemporaryAssignment(
             cast<TemporaryAssignmentNode>( statement_node ).GetTemporaryNumber(),
             cast<ExpressionNode>( statement_node.GetChild( 0 ) ) );
         break;
@@ -613,37 +664,37 @@ void GLSLWriter::GenerateStatement( const StatementNode& statement_node )
     NewLine();
 }
 
-void GLSLWriter::GenerateCompoundStatement( const StatementNode& sequence_node )
+void GLSLWriter::WriteCompoundStatement( const StatementNode& sequence_node )
 {
     assert( sequence_node.GetNodeType() == NodeType::Sequence );
 
     for( const Node& n : sequence_node.GetChildren() )
-        GenerateStatement( cast<StatementNode>( n ) );
+        WriteStatement( cast<StatementNode>( n ) );
 }
 
-void GLSLWriter::GenerateExpressionStatement( const ExpressionNode& expression )
+void GLSLWriter::WriteExpressionStatement( const ExpressionNode& expression )
 {
     m_Source << GenerateValue( expression ) << ";";
 }
 
-void GLSLWriter::GenerateConditional( const ExpressionNode& condition,
+void GLSLWriter::WriteConditional( const ExpressionNode& condition,
                                       const StatementNode& true_statement,
                                       const StatementNode* else_statement )
 {
     assert( false && "complete me" );
 }
 
-void GLSLWriter::GenerateVoidReturn()
+void GLSLWriter::WriteVoidReturn()
 {
     m_Source << "return;";
 }
 
-void GLSLWriter::GenerateReturn( const ExpressionNode& returned )
+void GLSLWriter::WriteReturn( const ExpressionNode& returned )
 {
     m_Source << "return " << GenerateValue( returned ) << ";";
 }
 
-void GLSLWriter::GenerateTemporaryAssignment( unsigned temporary_number,
+void GLSLWriter::WriteTemporaryAssignment( unsigned temporary_number,
                                               const ExpressionNode& expression )
 {
     // Why can't these be const glsl?
@@ -1077,6 +1128,21 @@ std::string GLSLWriter::GenerateRuntimeCall( const ExpressionNode& expression )
     case RuntimeFunction::FLOAT4_FLOAT4x4_MUL:
         // Todo, check matrix ordering
         return "(" + GenerateValue( expression.GetOperand( 0 ) ) + " * " + GenerateValue( expression.GetOperand( 1 ) ) + ")";
+
+    case RuntimeFunction::FLOAT_DOT:
+    case RuntimeFunction::FLOAT2_DOT:
+    case RuntimeFunction::FLOAT3_DOT:
+    case RuntimeFunction::FLOAT4_DOT:
+        glsl_func = "dot";
+        break;
+
+    case RuntimeFunction::FLOAT_NORMALIZE:
+    case RuntimeFunction::FLOAT2_NORMALIZE:
+    case RuntimeFunction::FLOAT3_NORMALIZE:
+    case RuntimeFunction::FLOAT4_NORMALIZE:
+        glsl_func = "normalize";
+        break;
+
     default:
         assert( false && "Trying to generate an unhandled runtime function" );
     }

@@ -44,11 +44,18 @@ class ParameterBase;
 class ParameterWatcherBase;
 using ParameterWatcherBase_up = std::unique_ptr<ParameterWatcherBase>;
 
+namespace Compiler
+{
+    class ShaderCompilationContext;
+    using ShaderCompilationContext_up = std::unique_ptr<ShaderCompilationContext>;
+}
+
 class Program
 {
 public:
     explicit
-    Program( std::vector<Shader> shaders = {} );
+    Program( std::vector<Shader> shaders = {},
+             Compiler::ShaderCompilationContext_up compilation_context = nullptr );
     Program( const Program& ) = delete;
     Program( Program&& other );
     Program& operator=( const Program& ) = delete;
@@ -75,8 +82,9 @@ public:
 
     bool IsCompiled() const;
 private:
-    std::vector<Shader>                  m_Shaders;
+    std::vector<Shader> m_Shaders;
     std::vector<ParameterWatcherBase_up> m_ParameterWatchers;
+    Compiler::ShaderCompilationContext_up m_CompilationContext;
 
     unsigned m_Object;
 };
