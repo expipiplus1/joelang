@@ -164,6 +164,35 @@ void RegisterOpenGLStates( Context& context )
                                       {glBlendFuncSeparate(GL_ONE, GL_ZERO,
                                                            GL_ONE, GL_ZERO);} );
 
+    static
+    State<bool> depth_test_enable( "depth_test_enable" );
+    depth_test_enable.SetCallbacks( [](bool v)->void
+                              {if(v)
+                                  glEnable(GL_DEPTH_TEST);
+                              else
+                                  glDisable(GL_DEPTH_TEST);},
+                              []()->void
+                              {glDisable(GL_DEPTH_TEST);} );
+
+    const static std::map<std::string, int> depth_func_enumerants =
+    {
+        {"NEVER",       GL_NEVER},
+        {"LESS",        GL_LESS},
+        {"EQUAL",       GL_EQUAL},
+        {"LEQUAL",      GL_LEQUAL},
+        {"GREATER",     GL_GREATER},
+        {"NOTEQUAL",    GL_NOTEQUAL},
+        {"GEQUAL",      GL_GEQUAL},
+        {"ALWAYS",      GL_ALWAYS}
+    };
+
+    static
+    State<u32> depth_func( "depth_func", depth_func_enumerants );
+    depth_func.SetCallbacks( [](u32 v)->void
+                            {glDepthFunc(v);},
+                            []()->void
+                            {glDepthFunc(GL_LESS);} );
+
     bool good = true;
 
     good &= context.AddState( &clear_color );
@@ -176,6 +205,9 @@ void RegisterOpenGLStates( Context& context )
     good &= context.AddState( &blend_equation_separate );
     good &= context.AddState( &blend_func );
     good &= context.AddState( &blend_func_separate );
+
+    good &= context.AddState( &depth_test_enable );
+    good &= context.AddState( &depth_func );
 
     assert( good && "Error adding opengl state" );
 }
