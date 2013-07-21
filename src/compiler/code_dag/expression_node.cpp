@@ -179,6 +179,7 @@ const ExpressionNode& ExpressionNode::GetOperand( unsigned index ) const
     case NodeType::ExtractColumn:
     case NodeType::ExtractElement:
     case NodeType::Store:
+    case NodeType::SwizzleStore:
         assert( index < 2 && "Trying to get an out of bounds operand" );
         return cast<ExpressionNode>( GetChild( index ) );
 
