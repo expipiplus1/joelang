@@ -102,22 +102,24 @@ Pass EffectFactory::GeneratePass( const PassNode& pass_node )
         }
     }
 
+    std::unique_ptr<Program> program;
 #ifdef JOELANG_WITH_OPENGL
     //
-    // Create a Program for the pass from all the shaders
+    // Create a Program for the pass from all the shaders if we have any
     //
-    std::vector<Shader> shaders;
+    if( !compile_statements.empty() )
+    {
+        std::vector<Shader> shaders;
 
-    std::unique_ptr<ShaderCompilationContext> compilation_context(
-        new ShaderCompilationContext( m_Context, std::move( compile_statements ) ) );
+        std::unique_ptr<ShaderCompilationContext> compilation_context(
+            new ShaderCompilationContext( m_Context, std::move( compile_statements ) ) );
 
-    for( ShaderDomain shader_domain : compilation_context->GetActiveDomains() )
-        shaders.push_back( Shader( shader_domain, *compilation_context ) );
+        for( ShaderDomain shader_domain : compilation_context->GetActiveDomains() )
+            shaders.push_back( Shader( shader_domain, *compilation_context ) );
 
-    Program program( std::move( shaders ), std::move( compilation_context ) );
-    program.Compile();
-#else
-    Program program;
+        program.reset( new Program( std::move( shaders ), std::move( compilation_context ) ) );
+        program->Compile();
+    }
 #endif
 
     return Pass( pass_node.GetName(), std::move( state_assignments ), std::move( program ) );
