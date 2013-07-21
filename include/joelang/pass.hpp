@@ -48,20 +48,21 @@ public:
                              std::vector<std::unique_ptr<StateAssignmentBase> >;
     Pass( std::string name = "",
           StateAssignmentVector state_assignments = {},
-          Program program = Program() );
+          std::unique_ptr<Program> program = nullptr );
 
     void SetState() const;
     void ResetState() const;
     bool Validate() const;
 
     const std::string& GetName() const;
+    bool               HasProgram() const;
     const Program&     GetProgram() const;
     Program&           GetProgram();
 
 private:
-    std::string           m_Name;
-    StateAssignmentVector m_StateAssignments;
-    Program               m_Program;
+    std::string              m_Name;
+    StateAssignmentVector    m_StateAssignments;
+    std::unique_ptr<Program> m_Program;
 };
 
 } // namespace JoeLang

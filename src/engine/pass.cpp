@@ -43,7 +43,7 @@ namespace JoeLang
 
 Pass::Pass( std::string name,
             StateAssignmentVector state_assignments,
-            Program program )
+            std::unique_ptr<Program> program )
     :m_Name( std::move(name) )
     ,m_StateAssignments( std::move(state_assignments) )
     ,m_Program( std::move(program) )
@@ -59,7 +59,8 @@ void Pass::SetState() const
     for( const auto& sa : m_StateAssignments )
         sa->SetState();
 
-    m_Program.Bind();
+    if( HasProgram() )
+        m_Program->Bind();
 }
 
 void Pass::ResetState() const
@@ -67,7 +68,7 @@ void Pass::ResetState() const
     for( const auto& sa : m_StateAssignments )
         sa->ResetState();
 
-    m_Program.Unbind();
+    m_Program->Unbind();
 }
 
 bool Pass::Validate() const
@@ -84,14 +85,19 @@ const std::string& Pass::GetName() const
     return m_Name;
 }
 
+bool Pass::HasProgram() const
+{
+    return static_cast<bool>( m_Program );
+}
+
 const Program& Pass::GetProgram() const
 {
-    return m_Program;
+    return *m_Program;
 }
 
 Program& Pass::GetProgram()
 {
-    return m_Program;
+    return *m_Program;
 }
 
 } // namespace JoeLang
