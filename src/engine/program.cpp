@@ -52,6 +52,7 @@ Program::Program( std::vector<Shader> shaders, Compiler::ShaderCompilationContex
     ,m_CompilationContext( std::move( compilation_context ) )
     ,m_Object( 0 )
 {
+    assert( m_CompilationContext && "Trying to create a program with a null compilation context" );
 }
 
 Program::Program( Program&& other )
@@ -99,6 +100,7 @@ void Program::NotifyParameter( const ParameterBase& parameter )
 
 unsigned Program::GetGLUniformLocation( const std::string& uniform_name ) const
 {
+    assert( m_Object && "Trying to get the uniform location when we don't have a program" );
     return glGetUniformLocation( m_Object, uniform_name.c_str() );
 }
 
