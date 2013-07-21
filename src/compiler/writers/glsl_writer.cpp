@@ -318,7 +318,13 @@ void GLSLWriter::WriteInputVariables( std::set<const Variable*> input_variables 
 
         // Todo, make the mutable name optional if the variable is never written to
         m_VariableNames.insert( std::make_pair( variable, mutable_name ) );
-        m_Source <<  "/* layout( location = " << index << " ) */ " <<  "in " << GetTypeString( variable->GetType() ) << " " << input_name << ";";
+
+        // Todo, don't hardcode this
+        std::string layout_location_string = m_CompileStatement.GetDomain() == ShaderDomain::VERTEX ?
+        "layout( location = " + std::to_string( index ) + " )" :
+        "/* layout( location = " + std::to_string( index ) + " ) */";
+
+        m_Source << layout_location_string << " " <<  "in " << GetTypeString( variable->GetType() ) << " " << input_name << ";";
         NewLine();
         m_Source << GetTypeString( variable->GetType() ) << " " << mutable_name << " = " << input_name << ";";
         NewLine();
@@ -338,7 +344,13 @@ void GLSLWriter::WriteOutputVariables( std::set<const Variable*> output_variable
             m_CompilationContext.GetOutputPrefix( m_CompileStatement.GetDomain() ) +
             std::to_string( index );
         m_VariableNames.insert( std::make_pair( variable, output_name ) );
-        m_Source << "/* layout( location = " << index << " ) */ " << GetVariableTypeString( *variable ) << " " << output_name << ";";
+
+        // Todo, don't hardcode this
+        std::string layout_location_string = m_CompileStatement.GetDomain() == ShaderDomain::FRAGMENT ?
+        "layout( location = " + std::to_string( index ) + " )" :
+        "/* layout( location = " + std::to_string( index ) + " ) */";
+
+        m_Source << layout_location_string << " " << GetVariableTypeString( *variable ) << " " << output_name << ";";
         NewLine();
     }
 }
@@ -681,7 +693,29 @@ void GLSLWriter::WriteConditional( const ExpressionNode& condition,
                                       const StatementNode& true_statement,
                                       const StatementNode* else_statement )
 {
-    assert( false && "complete me" );
+    m_Source << "if(" << GenerateValue( condition ) << ")";
+    NewLine();
+    m_Source << "{";
+    m_Indentation += 1;
+    NewLine();
+    WriteStatement( true_statement );
+    m_Indentation -= 1;
+    NewLine();
+    m_Source << "}";
+    NewLine();
+    if( else_statement )
+    {
+        m_Source << "else";
+        NewLine();
+        m_Source << "{";
+        m_Indentation += 1;
+        NewLine();
+        WriteStatement( *else_statement );
+        m_Indentation -= 1;
+        NewLine();
+        m_Source << "}";
+        NewLine();
+    }
 }
 
 void GLSLWriter::WriteVoidReturn()
@@ -799,8 +833,6 @@ std::string GLSLWriter::GenerateValue( const ExpressionNode& expression )
             return GenerateBitwiseNot( expression.GetOperand( 0 ) );
         case NodeType::LogicalNot:
             return GenerateLogicalNot( expression.GetOperand( 0 ) );
-        case NodeType::Temporary:
-            return GenerateTemporaryRead( cast<TemporaryNode>( expression ).GetTemporaryNumber() );
 
         default:
             assert( false && "Trying to generate an unhandled expression type" );
@@ -835,6 +867,8 @@ std::string GLSLWriter::GenerateAddress( const PointerExpressionNode& expression
         return GeneratePreDecrement( cast<PointerExpressionNode>( expression.GetOperand( 0 ) ) );
     case NodeType::GLSLBuiltinVariable:
         return std::string( cast<GLSLBuiltinNode>( expression ).GetIdentifier() );
+    case NodeType::Temporary:
+        return GenerateTemporaryRead( cast<TemporaryNode>( expression ).GetTemporaryNumber() );
     default:
         assert( false && "Trying to generate the llvm value of an unhanded expression type" );
         std::abort();
@@ -952,8 +986,7 @@ std::string GLSLWriter::GenerateSwizzleStore( const PointerExpressionNode& addre
                                               const ExpressionNode& assigned,
                                               const Swizzle& swizzle )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return GenerateAddress( address ) + "." + swizzle.GetString() + " = " + GenerateValue( assigned );
 }
 
 std::string GLSLWriter::GenerateVariableAddress( const VariableNode& variable_node )
@@ -1256,8 +1289,7 @@ std::string GLSLWriter::GenerateAnd( const ExpressionNode& lhs, const Expression
 
 std::string GLSLWriter::GenerateExclusiveOr( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue( lhs ) + " ^ " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateCompareEqual( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -1276,15 +1308,13 @@ std::string GLSLWriter::GenerateCompareNotEqual( const ExpressionNode& lhs,
 std::string GLSLWriter::GenerateCompareLessThan( const ExpressionNode& lhs,
                                                  const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue(lhs) + " < " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateCompareGreaterThan( const ExpressionNode& lhs,
                                                     const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue(lhs) + " > " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateCompareLessThanEquals( const ExpressionNode& lhs,
@@ -1320,8 +1350,7 @@ std::string GLSLWriter::GenerateAdd( const ExpressionNode& lhs, const Expression
 
 std::string GLSLWriter::GenerateSubtract( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    return "(" + GenerateValue( lhs ) + " - " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateMultiply( const ExpressionNode& lhs, const ExpressionNode& rhs )
@@ -1337,8 +1366,8 @@ std::string GLSLWriter::GenerateDivide( const ExpressionNode& lhs, const Express
 
 std::string GLSLWriter::GenerateModulo( const ExpressionNode& lhs, const ExpressionNode& rhs )
 {
-    assert( false && "Complete me" );
-    std::abort();
+    // Todo, check glsl support for this
+    return "(" + GenerateValue( lhs ) + " % " + GenerateValue( rhs ) + ")";
 }
 
 std::string GLSLWriter::GenerateNegate( const ExpressionNode& expression )
