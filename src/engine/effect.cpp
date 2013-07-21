@@ -91,7 +91,8 @@ ParameterBase* Effect::GetNamedParameter( const std::string& name, Type type )
 #ifdef JOELANG_WITH_OPENGL
     for( auto& t : m_Techniques )
         for( auto& p : t.GetPasses() )
-            p.GetProgram().NotifyParameter( **it );
+            if( p.HasProgram() )
+                p.GetProgram().NotifyParameter( **it );
 #endif
 
     return (*it).get();
