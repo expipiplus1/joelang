@@ -146,11 +146,6 @@ enum class NodeType
     // Holds n vector expressions
     MatrixConstructor,
 
-    //
-    // Just holds a temporary number
-    //
-    Temporary,
-
 
     //
     // PointerExpressions return a pointer, which must be accessed with Load or Store
@@ -173,6 +168,11 @@ enum class NodeType
     // Holds one Pointer Expression
     PreIncrement,
     PreDecrement,
+
+    //
+    // Just holds a temporary index, can be dereferenced
+    //
+    Temporary,
 
     //
     // These are special nodes used after transformations in the glsl writer
